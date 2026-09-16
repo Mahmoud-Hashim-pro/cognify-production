@@ -117,8 +117,8 @@ export async function runLearningProfileContractVerification(
   console.log('\n--- 4. Concept Mastery Progress ---');
   assert(profileAfter3.conceptProfiles['pointers'] !== undefined, 'conceptProfiles contains pointers');
   const pointersSummary = profileAfter3.conceptProfiles['pointers'];
-  assert(pointersSummary.masteredConcepts !== undefined || pointersSummary.attemptsCount === 3, 'Pointers summary has 3 attempts recorded');
-  assert(pointersSummary.masteredConcepts === undefined && pointersSummary.masteryPercentage > 0, 'Pointers mastery percentage is positive');
+  assert(pointersSummary.attemptsCount === 3, 'Pointers summary has 3 attempts recorded');
+  assert(pointersSummary.masteryPercentage > 0, 'Pointers mastery percentage is positive');
   assert(pointersSummary.confidencePercentage >= 0, 'Pointers confidence percentage is valid');
   assert(profileAfter3.overallMasteryPercentage > 0, 'Overall mastery percentage increases after practice');
 
