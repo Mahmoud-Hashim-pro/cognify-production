@@ -1805,6 +1805,210 @@ Keep practicing closures with higher-order functions!
     assert(directives.includes('تفسيرات شاملة'), 'Generates tailored Arabic system prompt directives');
   }
 
+  // 44. Phase 2D - Milestone 13: Teacher Intelligence & Differentiated Instruction
+  console.log('\n[44] Phase 2D - Milestone 13: Teacher Intelligence & Differentiated Instruction');
+  {
+    const {
+      detectStruggleClusters,
+      evaluateClassInterventionEfficacy,
+      generateDifferentiatedGroups,
+      generateTeacherRecommendations,
+      compileTeacherDashboard,
+    } = await import('../src/lib/teacherIntelligence.js');
+
+    const testStudents: any[] = [];
+    for (let i = 1; i <= 6; i++) {
+      testStudents.push({
+        uid: `m13_struggler_${i}`,
+        cognitiveStage: 'foundational',
+        activePedagogy: 'worked_example',
+        conceptMastery: {
+          pointers: { conceptId: 'pointers', accuracy: 0.40, attempts: 5, correct: 2, confidence: 0.3, consecutiveCorrect: 0, consecutiveIncorrect: 3, lastTested: Date.now(), mistakeTypes: [] },
+          dynamic_memory: { conceptId: 'dynamic_memory', accuracy: 0.30, attempts: 4, correct: 1, confidence: 0.3, consecutiveCorrect: 0, consecutiveIncorrect: 2, lastTested: Date.now(), mistakeTypes: [] },
+        },
+        learningStrain: { possibleStruggle: 0.75, confidence: 0.8, signals: ['repeated_errors'] },
+        struggleSignal: 0.75,
+        cognitiveLoadScore: 0.75,
+        pedagogyEffectiveness: {
+          worked_example: { score: 0.80, helpfulCount: 4, unhelpfulCount: 1 },
+          socratic: { score: 0.30, helpfulCount: 1, unhelpfulCount: 3 },
+          scaffolded: { score: 0.60, helpfulCount: 3, unhelpfulCount: 2 },
+          analogies: { score: 0.50, helpfulCount: 2, unhelpfulCount: 2 },
+          advanced_rigor: { score: 0.20, helpfulCount: 0, unhelpfulCount: 2 },
+        },
+        retentionSchedules: {},
+        activeInterventions: {},
+        totalExercisesCompleted: 12,
+        lastActiveTimestamp: Date.now(),
+      });
+    }
+
+    for (let i = 7; i <= 10; i++) {
+      testStudents.push({
+        uid: `m13_master_${i}`,
+        cognitiveStage: 'advanced',
+        activePedagogy: 'socratic',
+        conceptMastery: {
+          pointers: { conceptId: 'pointers', accuracy: 0.95, attempts: 7, correct: 6, confidence: 0.9, consecutiveCorrect: 5, consecutiveIncorrect: 0, lastTested: Date.now(), mistakeTypes: [] },
+          dynamic_memory: { conceptId: 'dynamic_memory', accuracy: 0.90, attempts: 5, correct: 4, confidence: 0.9, consecutiveCorrect: 4, consecutiveIncorrect: 0, lastTested: Date.now(), mistakeTypes: [] },
+        },
+        learningStrain: { possibleStruggle: 0.15, confidence: 0.8, signals: [] },
+        struggleSignal: 0.15,
+        cognitiveLoadScore: 0.15,
+        pedagogyEffectiveness: {
+          worked_example: { score: 0.70, helpfulCount: 3, unhelpfulCount: 1 },
+          socratic: { score: 0.95, helpfulCount: 6, unhelpfulCount: 0 },
+          scaffolded: { score: 0.80, helpfulCount: 4, unhelpfulCount: 1 },
+          analogies: { score: 0.70, helpfulCount: 3, unhelpfulCount: 1 },
+          advanced_rigor: { score: 0.90, helpfulCount: 4, unhelpfulCount: 0 },
+        },
+        retentionSchedules: {},
+        activeInterventions: {},
+        totalExercisesCompleted: 25,
+        lastActiveTimestamp: Date.now(),
+      });
+    }
+
+    const clusters = detectStruggleClusters(testStudents, 0.25);
+    assert(clusters.length > 0, 'Detects classroom struggle clusters');
+    assert(clusters[0].strugglingStudentCount === 6, 'Identifies correct count of struggling students in cluster');
+
+    const efficacy = evaluateClassInterventionEfficacy(testStudents);
+    assert(efficacy.worked_example.efficacyRate >= 0.7, 'Calculates pedagogical intervention efficacy across cohort');
+
+    const groups = generateDifferentiatedGroups(testStudents, 'dynamic_memory');
+    assert(groups.length >= 2, 'Partitions class into differentiated instruction groups');
+
+    const recs = generateTeacherRecommendations(clusters, efficacy);
+    assert(recs.length > 0, 'Synthesizes prioritized educator action recommendations');
+
+    const dashboard = compileTeacherDashboard('CS101', 'Intro to CS', testStudents);
+    assert(dashboard.totalStudents === 10 && dashboard.struggleClusters.length > 0, 'Compiles complete teacher intelligence dashboard');
+  }
+
+  // 45. Phase 2D - Milestone 14: Parent Intelligence & Zero-Chat-Snooping Privacy Shield
+  console.log('\n[45] Phase 2D - Milestone 14: Parent Intelligence & Zero-Chat-Snooping Privacy Shield');
+  {
+    const {
+      synthesizeWeeklyGrowth,
+      detectCelebratedBreakthroughs,
+      generateHomeDiscussionCues,
+      compileParentDashboard,
+    } = await import('../src/lib/parentIntelligence.js');
+
+    const childStudent: any = {
+      uid: 'student_child_m14',
+      cognitiveStage: 'developing',
+      activePedagogy: 'worked_example',
+      conceptMastery: {
+        pointers: { conceptId: 'pointers', accuracy: 0.85, attempts: 6, correct: 5, confidence: 0.85, consecutiveCorrect: 3, consecutiveIncorrect: 2, lastTested: Date.now(), mistakeTypes: [] },
+        dynamic_memory: { conceptId: 'dynamic_memory', accuracy: 0.92, attempts: 5, correct: 5, confidence: 0.95, consecutiveCorrect: 4, consecutiveIncorrect: 0, lastTested: Date.now(), mistakeTypes: [] },
+      },
+      learningStrain: { possibleStruggle: 0.25, confidence: 0.7, signals: [] },
+      struggleSignal: 0.25,
+      cognitiveLoadScore: 0.25,
+      pedagogyEffectiveness: {
+        worked_example: { score: 0.8, helpfulCount: 4, unhelpfulCount: 1 },
+        socratic: { score: 0.6, helpfulCount: 2, unhelpfulCount: 1 },
+        scaffolded: { score: 0.7, helpfulCount: 3, unhelpfulCount: 1 },
+        analogies: { score: 0.7, helpfulCount: 3, unhelpfulCount: 1 },
+        advanced_rigor: { score: 0.3, helpfulCount: 0, unhelpfulCount: 1 },
+      },
+      retentionSchedules: {},
+      activeInterventions: {},
+      totalExercisesCompleted: 18,
+      lastActiveTimestamp: Date.now(),
+    };
+
+    const growth = synthesizeWeeklyGrowth(childStudent, 1);
+    assert(growth.conceptsMasteredCount === 2, 'Synthesizes weekly mastered concepts');
+    assert(growth.growthPercentage > 0, 'Calculates positive weekly growth momentum');
+
+    const breakthroughs = detectCelebratedBreakthroughs(childStudent);
+    assert(breakthroughs.some((b: any) => b.type === 'resilience_breakthrough'), 'Detects celebrated resilience breakthrough for overcoming struggle');
+
+    const cues = generateHomeDiscussionCues(childStudent);
+    assert(cues.length > 0 && cues[0].conversationStarterEn.length > 10, 'Generates supportive home discussion cues');
+
+    const parentDash = compileParentDashboard(childStudent, 'Alex', 1);
+    assert(parentDash.privacyShield.isZeroChatSnoopingEnforced === true, 'Enforces strict Zero-Chat-Snooping privacy shield');
+    assert(parentDash.privacyShield.rawMessagesExposed === 0, 'Guarantees 0 raw messages exposed');
+    assert(!JSON.stringify(parentDash).includes('"chatLogs"'), 'Verified zero raw chat transcript leakage');
+  }
+
+  // 46. Phase 2D - Milestone 15: Institutional Intelligence, Curricular Heatmaps & k-Anonymity Suppression
+  console.log('\n[46] Phase 2D - Milestone 15: Institutional Intelligence, Curricular Heatmaps & k-Anonymity Suppression');
+  {
+    const {
+      evaluateCurricularBottlenecks,
+      synthesizeEarlyWarningRadar,
+      generateAccreditationSummary,
+      compileInstitutionalDashboard,
+    } = await import('../src/lib/institutionalIntelligence.js');
+
+    const uniStudents: any[] = [];
+    // 3 critical students (k < 5, must be redacted)
+    for (let i = 1; i <= 3; i++) {
+      uniStudents.push({
+        uid: `u_crit_${i}`,
+        cognitiveStage: 'foundational',
+        activePedagogy: 'worked_example',
+        conceptMastery: {
+          pointers: { conceptId: 'pointers', accuracy: 0.30, attempts: 10, correct: 3, confidence: 0.3, consecutiveCorrect: 0, consecutiveIncorrect: 4, lastTested: Date.now(), mistakeTypes: [] },
+        },
+        learningStrain: { possibleStruggle: 0.85, confidence: 0.9, signals: ['repeated_errors'] },
+        struggleSignal: 0.85,
+        cognitiveLoadScore: 0.85,
+        pedagogyEffectiveness: { worked_example: { score: 0.8, helpfulCount: 4, unhelpfulCount: 1 } },
+        retentionSchedules: {},
+        activeInterventions: {},
+        totalExercisesCompleted: 6,
+        lastActiveTimestamp: Date.now(),
+      });
+    }
+    // 7 high risk students (k >= 5, not redacted)
+    for (let i = 1; i <= 7; i++) {
+      uniStudents.push({
+        uid: `u_high_${i}`,
+        cognitiveStage: 'developing',
+        activePedagogy: 'scaffolded',
+        conceptMastery: {
+          pointers: { conceptId: 'pointers', accuracy: 0.55, attempts: 6, correct: 3, confidence: 0.5, consecutiveCorrect: 1, consecutiveIncorrect: 2, lastTested: Date.now(), mistakeTypes: [] },
+        },
+        learningStrain: { possibleStruggle: 0.60, confidence: 0.7, signals: [] },
+        struggleSignal: 0.60,
+        cognitiveLoadScore: 0.60,
+        pedagogyEffectiveness: { scaffolded: { score: 0.7, helpfulCount: 3, unhelpfulCount: 1 } },
+        retentionSchedules: {},
+        activeInterventions: {},
+        totalExercisesCompleted: 14,
+        lastActiveTimestamp: Date.now(),
+      });
+    }
+
+    const bottlenecks = evaluateCurricularBottlenecks(uniStudents, 'CS101');
+    assert(bottlenecks.length > 0 && bottlenecks[0].downstreamImpactCourses.length > 0, 'Detects curricular bottlenecks and downstream course cascades');
+
+    const { radar, audit } = synthesizeEarlyWarningRadar(uniStudents, 5);
+    assert(audit.minimumCohortSize === 5, 'Enforces k=5 minimum cohort size');
+    assert(audit.suppressionApplied === true, 'Suppresses sub-threshold cohort to prevent student re-identification');
+
+    const critCohort = radar.find((r: any) => r.riskLevel === 'critical');
+    assert(critCohort?.isSuppressed === true && critCohort?.studentCountDisplay.includes('<5'), 'Critical cohort (<5) correctly masked with privacy suppression label');
+
+    const highCohort = radar.find((r: any) => r.riskLevel === 'high');
+    assert(highCohort?.isSuppressed === false && highCohort?.studentCountDisplay === '7 students', 'Eligible cohort (>=5) displays exact count');
+
+    const accreditation = generateAccreditationSummary(
+      [{ departmentId: 'cs', departmentNameEn: 'Computer Science', departmentNameAr: 'علوم الحاسب', enrolledStudentsCount: 10, averageMasteryRate: 0.8, averageStrainRate: 0.3, retentionRate: 0.95 }],
+      bottlenecks
+    );
+    assert(accreditation.outcomesAttainment.length >= 3, 'Generates ABET Student Outcomes attainment');
+
+    const instDash = compileInstitutionalDashboard('uni_cairo', 'Cairo University', { cs: uniStudents });
+    assert(instDash.departments.length === 1 && instDash.kAnonymityAudit.suppressionApplied === true, 'Compiles complete institutional intelligence dashboard');
+  }
+
   console.log(`\n========================================`);
   console.log(`Test Results: ${totalPassed} Passed, ${totalFailed} Failed`);
   console.log(`========================================\n`);
