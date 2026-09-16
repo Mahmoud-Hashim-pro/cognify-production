@@ -9,7 +9,7 @@ import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from "motion/react";
 import { doc, setDoc, onSnapshot } from "firebase/firestore";
 import { ref as firebaseStorageRef, uploadString, getDownloadURL } from "firebase/storage";
-import { db, storage, handleFirestoreError, OperationType, cleanDataForFirestore } from "../lib/firebase";
+import { auth, db, storage, handleFirestoreError, OperationType, cleanDataForFirestore } from "../lib/firebase";
 import { toast } from "./Toast";
 import MarkdownMessage from "./MarkdownMessage";
 import { speak as speakText, cancelSpeech } from "../lib/tts";
@@ -922,8 +922,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     let usedFallback = false;
     try {
       const localSpatial = profile.uid ? getSpatialObjects(profile.uid) : [];
+      const studentName = (profile.name || auth.currentUser?.displayName || (profile.email ? profile.email.split('@')[0] : '') || 'Student').trim();
       const calibratedProfile: UserProfile = {
         ...profile,
+        name: studentName,
         preferredPedagogyStyle: effectivePedagogy,
         spatialMemories: profile.spatialMemories?.length ? profile.spatialMemories : localSpatial,
       };

@@ -198,9 +198,43 @@ function buildPersona(profile: UserProfile, explicitStudentState?: any): string 
   const effectiveStudentState = explicitStudentState || (profile as any).studentState;
   const stateBlock = formatStudentStateBlock(effectiveStudentState);
 
+  const studentName = (profile.name || (profile as any).displayName || (profile.email ? profile.email.split('@')[0] : '') || '').trim();
+  const university = (profile.university || (profile as any).work || '').trim();
+  const faculty = (profile.faculty || (profile as any).jobTitle || '').trim();
+  const department = (profile.department || '').trim();
+  const educationLevel = (profile.educationLevel || '').trim();
+
+  let identityContext = `\n## STUDENT IDENTITY & ACADEMIC CONTEXT (AUTHENTICATED SESSION)\n`;
+  if (studentName) {
+    identityContext += `- Student Full Name: ${studentName}\n`;
+  } else {
+    identityContext += `- Student Full Name: Not specified yet (address warmly as 'Student' or 'يا بطل')\n`;
+  }
+  if (university) {
+    identityContext += `- University / Institution: ${university}\n`;
+  }
+  if (faculty) {
+    identityContext += `- Academic Faculty / College: ${faculty}\n`;
+  }
+  if (department) {
+    identityContext += `- Academic Department: ${department}\n`;
+  }
+  if (educationLevel) {
+    identityContext += `- Academic Degree / Level: ${educationLevel}\n`;
+  }
+  identityContext += `- Role: ${profile.role || 'Student'} | Field of Study: ${profile.field || 'General'}\n`;
+
+  identityContext += `\n### STUDENT RECOGNITION & IDENTITY DIRECTIVES (CRITICAL):
+- You ARE this student's dedicated, long-term personal adaptive AI mentor and academic companion. You DO know who this student is.
+- When the student asks "Do you know my name?", "What is my name?", "Who am I?", "What college/faculty am I in?", "ما اسمي؟", "أنا مين؟", "عارف اسمي؟", "عارف أنا في كلية إيه؟", or greets you:
+  * ALWAYS explicitly confirm that you know them, greet them warmly by their name (${studentName || 'Student'}), and reference their college/faculty (${faculty || 'their college'}) and university (${university || 'their university'}).
+  * NEVER output generic AI canned privacy disclaimers like "As an AI, I do not store personal information" or "I do not know your name".
+  * When the student asks what their name is and their name is provided (${studentName || 'Student'}), state their name clearly, proudly, and warmly.
+  * Use their name naturally and respectfully when encouraging them or acknowledging academic milestones.\n`;
+
   return `You are Cognify, an adaptive AI mentor and personal assistant. Answer the most correct, useful answer calibrated to THIS user.
 - Level: ${profile.level} | Role: ${profile.role} | Field: ${profile.field}
-
+${identityContext}
 ## IDENTITY & DEVELOPER / CREATOR ATTRIBUTION (CRITICAL)
 - You are **Cognify (كوجنيفاي)**, an AI-Powered Adaptive Personal Assistant and Educational Platform.
 - **Creators / Developers**: You were designed, engineered, and developed by **The Cognify Development Team (فريق تطوير منصة كوجنيفاي)** as an assistive educational graduation project to empower students and people of determination.

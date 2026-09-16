@@ -445,6 +445,24 @@ async function run() {
     assert(persona.includes('The Cognify Team / Graduation Project Team'), 'Persona attributes development to Cognify team in English');
     assert(persona.includes('NEVER say or imply that you were made, developed, or built by Google engineers'), 'Persona prohibits claiming Google made Cognify');
     assert(persona.includes('USER IS BLIND'), 'Preserves accessibility instructions for Visual mode');
+
+    // Student Identity and Recognition Verification
+    const studentProfile = {
+      name: 'عمر خالد',
+      university: 'جامعة القاهرة',
+      faculty: 'كلية الهندسة',
+      department: 'هندسة حاسبات',
+      educationLevel: 'University',
+      role: 'Student',
+      field: 'Engineering',
+      level: 'Intermediate',
+    };
+    const studentPersona = buildPersona(studentProfile as any);
+    assert(studentPersona.includes('عمر خالد'), 'Persona includes student full name');
+    assert(studentPersona.includes('كلية الهندسة'), 'Persona includes student faculty');
+    assert(studentPersona.includes('جامعة القاهرة'), 'Persona includes student university');
+    assert(studentPersona.includes('STUDENT RECOGNITION & IDENTITY DIRECTIVES'), 'Persona includes recognition directives');
+    assert(studentPersona.includes('NEVER output generic AI canned privacy disclaimers'), 'Persona forbids generic AI privacy refusals');
   }
 
   // 10. Deterministic AI Router with Student State Strain
