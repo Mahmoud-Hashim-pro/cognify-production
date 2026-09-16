@@ -4,6 +4,7 @@ import { auth } from "../lib/firebase";
 import { secureLoadKeySync } from "../lib/cryptoShield";
 import { isArabicLocale } from "../lib/translations";
 import { formatStudentStateBlock } from "../../api/_lib/ai";
+import { ensureImageInResponse } from "../lib/imageSynthesis";
 
 // SECURITY: provider keys are NEVER read in the browser any more.
 //
@@ -244,6 +245,7 @@ ${identityContext}
 - If the user asks about traveling in France or French phrases, provide practical French phrasing, cultural etiquette (always start with 'Bonjour Madame/Monsieur'), and phonetic pronunciation guides in Arabic letters and English.
 - Basic: simple, analogies, no jargon. Intermediate: normal, brief reasoning. Advanced: rigorous, direct.
 - Answer first, no filler openers. Be honest if unsure; never invent facts.
+- When the user asks for an image, drawing, diagram, or photo (e.g. "give me an image of X", "صورة لـ X", "ارسم X"), ALWAYS provide a Markdown image: \`![description](https://image.pollinations.ai/prompt/<URL_ENCODED_ENGLISH_PROMPT>?width=1024&height=1024&nologo=true)\`. NEVER promise an image without including the markdown syntax!
 - When explaining conceptual topics, conclude with a 1-click micro-check block (:::micro-check\n{"question": "...", "conceptId": "...", "options": [...], "correctIndex": 0, "explanation": "..."}\n:::).${memoryBlock}${cognitiveBlock}${stateBlock}`;
 }
 
@@ -333,7 +335,12 @@ async function* generateGroqStream(
     // stops streaming/generating instead of running on after the user hit Stop.
     reader.cancel().catch(() => {});
   }
-  yield { text: fullText, done: true };
+  const imgRes = ensureImageInResponse(message, fullText, history);
+  yield {
+    text: imgRes.text,
+    done: true,
+    ...(imgRes.attachment ? { attachments: [imgRes.attachment] } : {}),
+  };
 }
 
 // Retry transient Gemini errors (503 overloaded / 429 rate-limited) with
@@ -906,7 +913,12 @@ ${otherThreadsSummary}
     reader.cancel().catch(() => {});
   }
 
-  yield { text: fullText, done: true };
+  const imgRes = ensureImageInResponse(message, fullText, history);
+  yield {
+    text: imgRes.text,
+    done: true,
+    ...(imgRes.attachment ? { attachments: [imgRes.attachment] } : {}),
+  };
 }
 
 export async function* generateAdaptiveResponseStream(

@@ -1822,12 +1822,12 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                ) : null}
                                <div className="text-center w-full px-2 py-1">
                                  <p className="text-[11px] font-bold text-slate-200 truncate w-full">{file.name}</p>
-                                 <p className={`text-[9px] font-black uppercase tracking-widest mt-0.5 ${file.data ? 'text-slate-500' : 'text-orange-400'}`}>
-                                   {file.data ? 'Click to Enlarge' : 'Media Removed (Size Limit)'}
+                                 <p className={`text-[9px] font-black uppercase tracking-widest mt-0.5 ${attSrc(file) ? 'text-slate-500' : 'text-orange-400'}`}>
+                                   {attSrc(file) ? 'Click to Enlarge' : 'Media Removed (Size Limit)'}
                                  </p>
                                </div>
                             </button>
-                            {file.data && (
+                            {attSrc(file) && (
                               <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
                                 <button 
                                   onClick={(e) => {

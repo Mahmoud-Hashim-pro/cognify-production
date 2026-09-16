@@ -15,7 +15,8 @@ export interface Message {
   attachments?: {
     name: string;
     type: string;
-    data: string; // Base64
+    data?: string; // Base64
+    url?: string;  // Direct or remote URL
   }[];
   comparisons?: {
     modelName: string;

@@ -1618,6 +1618,17 @@ Keep practicing closures with higher-order functions!
     await runProactiveInsightsVerification(assert);
   }
 
+  // 39. Image Synthesis & Visual Fulfillment Guard
+  console.log('\n[39] Image Synthesis & Visual Fulfillment Guard');
+  {
+    const { isImageGenerationRequest, extractImageSubject, ensureImageInResponse } = await import('../api/_lib/imageSynthesis.js');
+    assert(isImageGenerationRequest('yes naruto uzumaki just give me an image of it'), 'Request detection matches user Naruto prompt');
+    assert(extractImageSubject('yes naruto uzumaki just give me an image of it').includes('naruto uzumaki'), 'Subject extraction captures Naruto Uzumaki');
+    const res = ensureImageInResponse('yes naruto uzumaki just give me an image of it', 'Okay, Mahmoud! Here is an image of Naruto Uzumaki for you:', []);
+    assert(res.text.includes('![naruto uzumaki]('), 'Markdown image injected into promised output');
+    assert(res.attachment !== undefined && res.attachment.type === 'image/jpeg', 'Image attachment generated cleanly');
+  }
+
   console.log(`\n========================================`);
   console.log(`Test Results: ${totalPassed} Passed, ${totalFailed} Failed`);
   console.log(`========================================\n`);

@@ -20,6 +20,7 @@ import {
 } from '../_lib/ai.js';
 import { classifyRequest, type TaskCategory } from '../_lib/router.js';
 import { logTelemetry } from '../_lib/telemetry.js';
+import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
 
 /** Streams from the OpenAI-compatible fallback chain. Returns the final text ("" if all failed). */
 async function streamFallback(
@@ -217,7 +218,15 @@ export default async function handler(req: any, res: any) {
         ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني بعد لحظات 🙏'
         : '⚠️ The AI is busy right now. Please try again in a moment 🙏';
     }
-    send({ text: full, done: true });
+    // Phase 1 / Chat Enhancement: Fulfill image generation if requested by user or promised by model
+    const imageResult = ensureImageInResponse(message, full, safeHistory);
+    full = imageResult.text;
+
+    send({
+      text: full,
+      done: true,
+      ...(imageResult.attachment ? { attachments: [imageResult.attachment] } : {}),
+    });
   } catch (err) {
     console.error('[api] stream handler error:', err);
     if (!res.headersSent) {

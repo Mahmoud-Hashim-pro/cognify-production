@@ -2,6 +2,7 @@
 import { guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat } from '../_lib/ai.js';
 import { classifyRequest } from '../_lib/router.js';
 import { validateAndSanitizeResponse } from '../_lib/qualityGuard.js';
+import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
 
 export default async function handler(req: any, res: any) {
   if (!(await guard(req, res))) return;
@@ -66,8 +67,11 @@ export default async function handler(req: any, res: any) {
       proactiveDirectivesCount: (plm.proactiveRemediationDirectives || []).length,
     } : undefined;
 
+    const imageResult = ensureImageInResponse(message, validated.text, safeHistory);
+
     res.status(200).json({
-      result: validated.text,
+      result: imageResult.text,
+      attachments: imageResult.attachment ? [imageResult.attachment] : undefined,
       warnings: validated.warnings,
       category,
       activePedagogy: effectiveState?.activePedagogy || 'scaffolded',

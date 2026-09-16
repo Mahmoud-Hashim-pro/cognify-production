@@ -1,10 +1,70 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Sparkles, ExternalLink } from 'lucide-react';
 import MicroCheckWidget, { MicroCheckData } from './chat/MicroCheckWidget';
 
 const SIGNS_RE = /^\[Signs:\s*.*\]$/i;
 const MICRO_CHECK_RE = /:::micro-check\s*([\s\S]*?):::/g;
+
+function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [key: string]: any }) {
+  const [loaded, setLoaded] = React.useState(false);
+  const [error, setError] = React.useState(false);
+
+  if (!src) return null;
+
+  return (
+    <div className="my-5 max-w-2xl rounded-3xl overflow-hidden border border-slate-800/80 bg-[#0A0C14] shadow-2xl backdrop-blur-xl group transition-all hover:border-cyan-500/40">
+      <div className="relative min-h-[220px] flex items-center justify-center bg-[#07090F] overflow-hidden">
+        {!loaded && !error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-cyan-400 bg-[#0A0C14]/90 backdrop-blur-md">
+            <Sparkles className="w-6 h-6 animate-spin text-cyan-400" />
+            <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+              Generating & Rendering Visual…
+            </span>
+          </div>
+        )}
+        {error ? (
+          <div className="p-8 text-center text-xs text-rose-400 flex flex-col items-center gap-2">
+            <span>Unable to render image preview directly.</span>
+            <a
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 underline hover:text-cyan-300 font-bold text-xs"
+            >
+              Open direct image link ↗
+            </a>
+          </div>
+        ) : (
+          <img
+            src={src}
+            alt={alt || 'Visual'}
+            loading="lazy"
+            onLoad={() => setLoaded(true)}
+            onError={() => setError(true)}
+            className={`w-full h-auto max-h-[520px] object-cover rounded-3xl transition-all duration-300 group-hover:scale-[1.01] ${loaded ? 'opacity-100' : 'opacity-0'}`}
+            {...props}
+          />
+        )}
+      </div>
+      {alt && (
+        <div className="px-4 py-2.5 bg-[#121524]/90 border-t border-slate-800/80 flex items-center justify-between text-xs">
+          <span className="font-semibold text-slate-200 truncate pr-2">{alt}</span>
+          <a
+            href={src}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-cyan-400 hover:text-cyan-300 hover:underline shrink-0"
+          >
+            <span>Full Size</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /**
  * Renders an AI message as proper Markdown (GitHub-flavored: bold, lists,
@@ -108,6 +168,7 @@ export default function MarkdownMessage({
               table: ({ node, ...p }: any) => <div className="overflow-x-auto my-5 rounded-2xl border border-slate-800 bg-[#0A0C14]/60"><table className="w-full text-xs text-slate-200 border-collapse" {...p} /></div>,
               th: ({ node, ...p }: any) => <th className="border-b border-slate-800 bg-[#0E111D] px-4 py-3 text-start font-black text-cyan-300 uppercase tracking-wider" {...p} />,
               td: ({ node, ...p }: any) => <td className="border-b border-slate-800/50 px-4 py-2.5" {...p} />,
+              img: ({ node, ...p }: any) => <MarkdownImage {...p} />,
             }}
           >
             {part.content}

@@ -167,8 +167,15 @@ ${studentMemoryBlock}${cognitiveBlock}
 Summaries of the user's other threads are below. Use them ONLY if the user explicitly asks about past conversations. Otherwise ignore them completely — never volunteer them, especially not on greetings.
 ${otherThreadsSummary}
 
-## TOOLS
-Call generateImage only when the user asks for an image.
+## IMAGE GENERATION & VISUAL ILLUSTRATION (CRITICAL)
+- You HAVE real-time capability to generate and render high-quality visual illustrations, photos, artwork, and educational diagrams.
+- Whenever the user asks for an image, drawing, diagram, or photo (e.g. "give me an image of X", "show me a picture of X", "generate an image of X", "صورة لـ X", "ارسم X"):
+  1) Warmly provide a concise, natural caption/introduction.
+  2) ALWAYS embed the real image using Markdown image syntax:
+     \`![Image Description](https://image.pollinations.ai/prompt/<URL_ENCODED_ENGLISH_PROMPT>?width=1024&height=1024&nologo=true)\`
+  3) URL-encode spaces in the prompt as \`%20\` (e.g. \`naruto%20uzumaki%20anime%20masterpiece%20vibrant%20sharp%20focus\`).
+  4) CRITICAL RULE: NEVER say "Here is an image:" or "إليك الصورة:" without immediately appending the markdown image syntax \`![alt](url)\` directly below!
+  5) If the user previously asked for an image and says "where", "where is it", or "فين الصورة", apologize briefly and output the markdown image syntax immediately.
 `;
 };
 
