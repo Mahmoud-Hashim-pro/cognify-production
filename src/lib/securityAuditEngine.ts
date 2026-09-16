@@ -61,7 +61,7 @@ export function auditOWASPWebSecurity(): ThreatAuditFinding[] {
       boundary: 'auth_guard',
       description: 'Enforces strict BOLA/IDOR prevention across endpoints and user data stores.',
       mitigation: 'Endpoint token binding, user-partitioned local and cloud stores, 403 rejection on UID mismatch.',
-      evidence: 'api/student/learningProfile.ts, api/gemini/*.ts, src/lib/spatialMemoryEngine.ts',
+      evidence: 'api/student/learningProfile.ts, api/gemini/generateAdaptiveResponse.ts, src/lib/spatialMemoryEngine.ts',
     },
     {
       id: 'WEB-A02',
@@ -94,7 +94,7 @@ export function auditOWASPWebSecurity(): ThreatAuditFinding[] {
       boundary: 'intelligence_engine',
       description: 'Guards against ethical misconceptions, pseudo-IQ rankings, and unfair pedagogical labelling.',
       mitigation: 'Strict Ethical Non-IQ Disclaimers in EN and AR, k=5 cohort anonymity, sample size N>=3 guards.',
-      evidence: 'src/lib/learningProfileService.ts, src/lib/institutionCohortEngine.ts',
+      evidence: 'src/lib/learningProfileService.ts, src/lib/institutionalIntelligence.ts',
     },
     {
       id: 'WEB-A05',
@@ -138,7 +138,7 @@ export function auditOWASPWebSecurity(): ThreatAuditFinding[] {
       boundary: 'api_gateway',
       description: 'Ensures code and artifact integrity without unauthorized tampering.',
       mitigation: 'Subresource integrity, cryptographic webhook signing (RFC 2104 HMAC-SHA256).',
-      evidence: 'src/lib/webhookEngine.ts',
+      evidence: 'src/lib/developerApiEngine.ts',
     },
     {
       id: 'WEB-A09',
@@ -234,7 +234,7 @@ export function auditOWASPAPISecurity(): ThreatAuditFinding[] {
       boundary: 'intelligence_engine',
       description: 'Prevents seat over-allocation and unbounded token consumption.',
       mitigation: 'Tenant seat caps, monthly token ceilings, overage prevention guards.',
-      evidence: 'src/lib/tenantRosterEngine.ts',
+      evidence: 'src/lib/businessTenancyEngine.ts',
     },
     {
       id: 'API-07',
@@ -245,7 +245,7 @@ export function auditOWASPAPISecurity(): ThreatAuditFinding[] {
       boundary: 'ai_provider_boundary',
       description: 'Server-Side Request Forgery protection on webhook dispatches and AI fetch calls.',
       mitigation: 'Strict URL scheme validation (https:// only), private IP rejection, whitelisted destinations.',
-      evidence: 'src/lib/webhookEngine.ts, api/_lib/ai.ts',
+      evidence: 'src/lib/developerApiEngine.ts, api/_lib/ai.ts',
     },
     {
       id: 'API-08',
@@ -267,7 +267,7 @@ export function auditOWASPAPISecurity(): ThreatAuditFinding[] {
       boundary: 'api_gateway',
       description: 'Complete documentation and inventory of all exposed API routes and contracts.',
       mitigation: 'Standard OpenAPI 3.1.0 specification with complete schemas and security definitions.',
-      evidence: 'src/lib/openApiSchema.ts',
+      evidence: 'src/lib/developerApiEngine.ts',
     },
     {
       id: 'API-10',
@@ -278,7 +278,7 @@ export function auditOWASPAPISecurity(): ThreatAuditFinding[] {
       boundary: 'ai_provider_boundary',
       description: 'Safe handling of third-party AI provider failures and responses.',
       mitigation: 'Circuit breaker pattern, fallback provider chains (Gemini -> Groq -> NVIDIA -> xAI).',
-      evidence: 'src/lib/circuitBreaker.ts, api/_lib/ai.ts',
+      evidence: 'src/lib/resilienceEngine.ts, api/_lib/ai.ts',
     },
   ];
 }
@@ -426,7 +426,7 @@ export function auditPrivacyAndTenantBoundaries(): ThreatAuditFinding[] {
       boundary: 'intelligence_engine',
       description: 'Prevents re-identification of struggling students in institutional analytics.',
       mitigation: 'Enforces minimum cohort size (k=5); masks sub-threshold cohorts with <5 display.',
-      evidence: 'src/lib/institutionCohortEngine.ts',
+      evidence: 'src/lib/institutionalIntelligence.ts',
     },
     {
       id: 'PRIV-03',

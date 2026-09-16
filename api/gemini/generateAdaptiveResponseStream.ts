@@ -21,6 +21,7 @@ import {
 import { classifyRequest, type TaskCategory } from '../_lib/router.js';
 import { logTelemetry } from '../_lib/telemetry.js';
 import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
+import { applyCorsHeaders } from '../_lib/cors.js';
 
 /** Streams from the OpenAI-compatible fallback chain. Returns the final text ("" if all failed). */
 async function streamFallback(
@@ -162,12 +163,23 @@ async function streamGemini(
 }
 
 export default async function handler(req: any, res: any) {
+  if (!applyCorsHeaders(req, res)) return;
   if (!(await guard(req, res))) return;
 
   try {
     const { message, profile = {}, history = [], attachments = [], studentState } = await readBody(req);
     if (!message || typeof message !== 'string') {
       res.status(400).json({ error: 'message is required' });
+      return;
+    }
+
+    if (message.length > 32000) {
+      res.status(400).json({ error: 'Payload too large: message exceeds 32,000 characters limit' });
+      return;
+    }
+
+    if (Array.isArray(attachments) && attachments.length > 5) {
+      res.status(400).json({ error: 'Payload too large: attachments exceed 5 items limit' });
       return;
     }
 

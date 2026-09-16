@@ -46,9 +46,15 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.email.lower() == "modyhashim2006@gmail.com";
     }
 
+    // Super admin = Custom Claims role check (primary: request.auth.token.role == 'superadmin')
+    // OR hardcoded founder email (bootstrap fallback)
+    // OR runtime isSuperAdmin:true flag on the /users doc.
     function isSuperAdmin() {
-      return isFounderSuperAdmin() ||
-             (isAuthenticated() && request.auth.token.get('role', '') == 'superadmin') ||
+      return (isAuthenticated() && (
+               ('role' in request.auth.token && request.auth.token.role == 'superadmin') ||
+               request.auth.token.get('role', '') == 'superadmin'
+             )) ||
+             isFounderSuperAdmin() ||
              (isAuthenticated() &&
               exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isSuperAdmin', false) == true);
@@ -67,7 +73,7 @@ service cloud.firestore {
       return request.resource.data.get('isSuperAdmin', false) == resource.data.get('isSuperAdmin', false);
     }
 
-    // Permanent email-based admins (below super admins).
+    // Permanent email-based admins (below super admins, bootstrap fallback).
     function isPermanentAdmin() {
       return isAuthenticated() && request.auth.token.email.lower() in [
         "its.alkhateeb@gmail.com",
@@ -76,11 +82,16 @@ service cloud.firestore {
       ];
     }
 
-    // Admin = super admin OR permanent admin OR custom claim role OR a user whose own /users doc has
-    // isAdmin:true (granted via the Admin Dashboard).
+    // Admin = Custom Claims role check (primary: request.auth.token.role in ['admin', 'superadmin'])
+    // OR super admin OR permanent admin (bootstrap fallback)
+    // OR a user whose own /users doc has isAdmin:true (granted via Admin Dashboard).
     function isAdmin() {
-      return isSuperAdmin() || isPermanentAdmin() ||
-             (isAuthenticated() && request.auth.token.get('role', '') in ['admin', 'superadmin']) ||
+      return (isAuthenticated() && (
+               ('role' in request.auth.token && request.auth.token.role in ['admin', 'superadmin']) ||
+               request.auth.token.get('role', '') in ['admin', 'superadmin']
+             )) ||
+             isSuperAdmin() ||
+             isPermanentAdmin() ||
              (isAuthenticated() &&
               exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true);
@@ -217,32 +228,43 @@ service cloud.firestore {
       allow delete: if (isOwner(userId) && !isProtectedTarget()) ||
                        (isSuperAdmin() && !isProtectedTarget());
       
-      // Explicit Learning Events Store rule for audit trails, event replay, and state projection
+      // Academic subcollections: explicitly matched, accessible by student owner or administrator
       match /learningEvents/{eventId} {
-        allow read: if isOwner(userId) || isAdmin();
-        allow write, delete: if isOwner(userId) || isAdmin();
+        allow read, write, delete: if isOwner(userId) || isAdmin();
       }
 
-      // Private student chat threads are strictly private to the student owner.
-      // Administrators and organization managers CANNOT read a student's private AI conversations.
+      match /studentState/{docId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /goals/{goalId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /courses/{courseId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /attendance/{attendanceId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /planner/{plannerId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Private student chat threads and spatial memory: strictly OWNER-ONLY (zero admin read/write)
       match /threads/{threadId} {
         allow read, write, delete: if isOwner(userId);
       }
 
-      // Subcollections (sandbox, goals, courses, attendance, planner,
-      // notes, ...): the owner has full access; admins can read academic progress but
-      // may only WRITE to a non-protected user's data — a permanent member's
-      // data can only be modified by themselves or a super admin.
-      match /{sub}/{document=**} {
-        allow read: if isOwner(userId) || isAdmin();
-        allow write, delete: if isOwner(userId)
-                     || (isAdmin() && (isSuperAdmin() || !isProtectedUser(userId)));
+      match /spatialObjects/{objectId} {
+        allow read, write, delete: if isOwner(userId);
       }
     }
 
     match /securityAudits/{auditId} {
-      // Anyone (including anonymous guests/attackers probing the DOM) can have their inspect event logged
-      allow create: if true;
+      allow create: if isAuthenticated() && request.resource.data.keys().hasAll(['eventType', 'timestamp']);
       allow read: if isSecurityAuditsOwner();
       allow delete: if isSecurityAuditsOwner();
       allow update: if false;

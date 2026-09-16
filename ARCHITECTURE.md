@@ -243,19 +243,23 @@ npm run build
 7. **Accessibility Suite**: Vision Companion (0% disk / 0% cloud volatile camera frames), Sign Avatar 3D (procedural fingerspelling and word gestures), Two-Way Hearing Bridge (live captions with confidence alternatives), and Motor Euphonia switch access.
 8. **Privacy, Export & Erasure**: Full GDPR/FERPA JSON export (v2.0.0), cascading account deletion, and AES-GCM 256-bit client-side CryptoShield.
 9. **Deterministic AI Routing & Quality Guard**: Zero-token request categorization, circuit breaker with multi-provider fallback (Gemini -> Groq -> NVIDIA -> xAI), self-healing code/LaTeX math delimiters, and sensitive secret redaction.
-10. **Automated Verification Suite**: 53 test suites encompassing 1,001 automated assertions covering unit, contract, resilience, security, and end-to-end user journeys with 100% pass rate.
+10. **Automated Verification Suite**: Master test suite encompassing **2,113 automated assertions** covering unit, contract, resilience, security, and end-to-end user journeys with 100% pass rate. Single-source-of-truth reporting generated via `scripts/generateTestReport.ts` (`npm run report`).
 
 ---
 
-## 10. Security & Threat Model (Milestone 22)
+## 10. Security & Threat Model (Phase A Hardened)
 
 Cognify is hardened against OWASP Top 10: 2025, OWASP API Security Top 10: 2023, and OWASP LLM Applications Top 10: 2025:
 - **API1: BOLA / IDOR Defense**: Endpoints `/api/student/learningProfile` and `/api/gemini/*` strictly bind request queries and payloads to the authenticated JWT UID. Cross-user data access attempts return `HTTP 403 Forbidden`.
-- **Authentication & Token Integrity**: RS256 signature verification against Google public x509 certs; rejection of expired, malformed, or forged tokens (`HTTP 401 Unauthorized`).
+- **CORS Allowlist Security**: Replaced wildcard `*` with strict origin allowlist validation (`api/_lib/cors.ts`) targeting production and configured subdomains; blocks unauthorized third-party origins with `HTTP 403`.
+- **Authentication Fail-Closed Guarantee**: `api/_lib/authGuard.ts` enforces fail-closed behavior in production—if `FIREBASE_PROJECT_ID` is not configured, API requests fail immediately rather than silently falling back.
+- **Client State Integrity Defense**: `api/student/learningProfile.ts` rejects synthetic unearned mastery claims (e.g. 100% mastery with 0 attempts or correct > attempts), protecting analytics integrity.
+- **Firestore & Storage Hardening**: Eliminated recursive subcollection wildcard (`match /{sub}/{document=**}`) in `firestore.rules`. Replaced with explicit academic subcollection matches, owner-only locks on student `threads` and `spatialObjects`, authenticated telemetry creation with schema check, and strict MIME-type (`image/*`, `application/pdf`) and size (5MB) enforcement in `storage.rules`.
+- **Audit Citation Verification**: Automated `fs.existsSync` assertion guarantees 100% (51/51) of cited evidence paths in `securityAuditEngine.ts` exist on disk, eliminating false positives.
 - **LLM01 / LLM07 Injection Defense**: Multi-pattern regex detector in `src/lib/aiQualityGuard2.ts` neutralizes instruction overrides, DAN jailbreaks, system prompt extractions, and student state exfiltrations, escalating threats to `CRITICAL`.
 - **LLM02 Sensitive Secret Redaction**: Output quality guard in `api/_lib/qualityGuard.ts` automatically redacts exposed API keys (`AIza...`, `gsk_...`, `nvapi-...`, `xai-...`, RSA private keys) with `[REDACTED_SECRET]`.
 - **Multi-Tenant Memory Isolation**: Spatial memory queries and cache partitions are strictly isolated per UID.
-- **Resource Limits & DoS Defense**: Dual-tier sliding window rate limiting (IP tier: 100 req/min, User tier: 60 req/min) returning `HTTP 429`.
+- **Resource Limits & DoS Defense**: Dual-tier sliding window rate limiting (IP tier: 100 req/min, User tier: 60 req/min; security telemetry: 15 req/min) returning `HTTP 429`, with Express JSON body limit capped at 2MB.
 
 ---
 
@@ -271,8 +275,11 @@ npm run dev
 # Run static type verification (Zero TypeScript errors)
 npm run lint    # or npx tsc --noEmit
 
-# Execute master test suite (53 suites, 1,001 tests passing)
+# Execute master test suite (2,113 tests passing, 0 failed)
 npm test
+
+# Generate verified single-source-of-truth JSON report (test-report.json)
+npm run report
 
 # Build production bundle
 npm run build

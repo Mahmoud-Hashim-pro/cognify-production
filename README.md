@@ -2,7 +2,7 @@
 *An Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform*
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://my-cognify-app.vercel.app)
-[![Tests Passing](https://img.shields.io/badge/Tests-1001%20Passed%2C%200%20Failed-10B981?logo=vitest&logoColor=white)](tests/runAllTests.ts)
+[![Tests Passing](https://img.shields.io/badge/Tests-2113%20Passed%2C%200%20Failed-10B981?logo=vitest&logoColor=white)](test-report.json)
 [![TypeScript Strict](https://img.shields.io/badge/TypeScript-Strict%20Pass-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Security Standard](https://img.shields.io/badge/Security-OWASP%20Top%2010%20Hardened-8B5CF6?logo=googlecloud&logoColor=white)](ARCHITECTURE.md)
 
@@ -163,13 +163,16 @@ The application will be available at `http://localhost:5173`.
 
 ## 🧪 Automated Testing & Verification Suite
 
-Cognify features a comprehensive test suite covering mathematical formulas, pedagogical state transitions, rate limiters, security guards, and full end-to-end user lifecycles.
+Cognify features a comprehensive test suite covering mathematical formulas, pedagogical state transitions, rate limiters, security guards, CORS policies, state integrity checks, and full end-to-end user lifecycles.
 
 ```bash
-# Run the complete test suite (Unit suites + End-to-end user simulation)
+# Run the complete test suite
 npm test
 
-# Type-check TypeScript codebase
+# Generate verified single-source-of-truth JSON report (test-report.json)
+npm run report
+
+# Type-check TypeScript codebase (Zero errors)
 npm run lint
 
 # Build production bundle
@@ -177,13 +180,14 @@ npm run build
 ```
 
 ### Current Verification Status:
-- **762 Assertions Tested**: **762 Passed, 0 Failed (100% Success)**
-- **Suites Covered (5 Deterministic Verification Suites)**:
-  - `[1 - 36]` Core automated test suite (`tests/runAllTests.ts`, **525 assertions**): Evaluation math, Hake gain, concept graphs, rate limiters, token ciphers, TTS sanitizers, unified student state engine, event bus persistence, feedback loops, multi-tenant spatial isolation, Web Crypto AES-GCM cipher integrity, GDPR export/delete cascade, conversational strain detection (Ar/En/Fr), SM-2 retention curves, Golden Scenario, Phase 2A real adaptive API verification, and Phase 2B Personal Learning Model (PLM) verification.
-  - `[Golden Scenario]` End-to-end pointer remediation and prompt directive mandates (`tests/goldenAdaptiveScenario.ts`, **62 assertions**).
-  - `[Phase 2A Real Adaptive API]` Closed-loop serverless API verification with outcome tracking and strategy effectiveness (`tests/realAdaptiveApiVerification.ts`, **73 assertions**).
-  - `[Phase 2B Personal Learning Model]` Empirical PLM consolidation, response latency profiling, retention decay risk, strategy ranking, and proactive pedagogical mandates (`tests/personalLearningModelVerification.ts`, **48 assertions**).
-  - `[E2E 1 - 12]` Full 12-step student lifecycle simulation from onboarding through prerequisite remediation to retention consolidation (`tests/e2eFullUserCycle.ts`, **54 assertions**).
+- **Total Assertions Tested**: **2,113 Passed, 0 Failed (100% Success)**
+- **Audit Findings Evidence**: Exactly 51/51 audit paths verified to exist on disk via automated `fs.existsSync` assertion.
+- **Automated Test Report**: Maintained as a single source of truth in `test-report.json`.
+- **Key Suites Covered**:
+  - `[Core Hardened Suite]` Evaluation math, Hake gain, concept graphs, rate limiters, token ciphers, TTS sanitizers, unified student state engine, event bus persistence, feedback loops, multi-tenant spatial isolation, Web Crypto AES-GCM cipher integrity, GDPR export/delete cascade, conversational strain detection (Ar/En/Fr), SM-2 retention curves, Golden Scenario, and Personal Learning Model (PLM) verification.
+  - `[API, CORS & Auth Hardening Suite]` Strict CORS origin matching, distributed-ready rate limit interface, client mastery state spoofing prevention, Fail-Closed production auth guard, and payload size bounds (`tests/apiCorsAuthHardeningVerification.ts`).
+  - `[Security Threat Model Suite]` Automated file existence verification for all 51 security audit evidence citations, OWASP Top 10 web/API/LLM compliance (`tests/securityThreatModelVerification.ts`).
+  - `[E2E Full Cycle Suite]` Full 12-step student lifecycle simulation from onboarding through prerequisite remediation to retention consolidation (`tests/e2eFullUserCycle.ts`).
 
 ---
 

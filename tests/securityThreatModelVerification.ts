@@ -10,6 +10,9 @@
  * 6. Rate Limiting & DoS Defense (OWASP API4)
  */
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import {
   evaluateBOLAAccess,
   generateCognifySecurityThreatReport,
@@ -20,6 +23,10 @@ import { verifyRequestAuth } from '../api/_lib/authGuard.js';
 import { saveSpatialObject, getSpatialObjects } from '../src/lib/spatialMemoryEngine.js';
 import learningProfileHandler from '../api/student/learningProfile.js';
 import { checkRateLimit } from '../api/_lib/rateLimiter.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const repoRoot = path.resolve(__dirname, '..');
 
 export async function runSecurityThreatModelVerification(): Promise<{ passed: number; failed: number }> {
   console.log('\n--- Running Suite 53: Milestone 22 (Cognify Security & Threat Model) ---');
@@ -52,6 +59,28 @@ export async function runSecurityThreatModelVerification(): Promise<{ passed: nu
     assert(report.findings.some(f => f.category === 'API1_BOLA'), 'Includes OWASP API1:2023 BOLA protection audit');
     assert(report.findings.some(f => f.category === 'LLM01_PromptInjection'), 'Includes OWASP LLM01 prompt injection audit');
     assert(report.findings.some(f => f.category === 'LLM02_SensitiveInformationDisclosure'), 'Includes OWASP LLM02 sensitive disclosure audit');
+
+    // Automated verification: verify with fs.existsSync that every single cited file path in evidence exists
+    const missingEvidenceFiles: string[] = [];
+    let verifiedEvidenceFilesCount = 0;
+    for (const finding of report.findings) {
+      if (finding.evidence) {
+        const paths = finding.evidence.split(',').map((p) => p.trim()).filter(Boolean);
+        for (const relPath of paths) {
+          verifiedEvidenceFilesCount++;
+          const candidatePath1 = path.resolve(repoRoot, relPath);
+          const candidatePath2 = path.resolve(process.cwd(), relPath);
+          const exists = fs.existsSync(candidatePath1) || fs.existsSync(candidatePath2);
+          if (!exists) {
+            missingEvidenceFiles.push(`${relPath} (in finding ${finding.id})`);
+          }
+        }
+      }
+    }
+    assert(
+      missingEvidenceFiles.length === 0 && verifiedEvidenceFilesCount > 0,
+      `All audit evidence citations point to existing files (${verifiedEvidenceFilesCount} verified, missing: ${missingEvidenceFiles.join(', ') || 'none'})`
+    );
   }
 
   // ==========================================================================

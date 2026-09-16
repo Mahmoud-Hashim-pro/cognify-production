@@ -13,6 +13,7 @@ import { generatePersonalLearningProfile } from '../../src/lib/learningProfileSe
 import { createInitialStudentState } from '../../src/lib/studentStateEngine';
 import type { PersonalLearningProfile, StudentState } from '../../src/types/studentState';
 import { verifyRequestAuth, extractBearerToken } from '../_lib/authGuard.js';
+import { applyCorsHeaders } from '../_lib/cors.js';
 
 async function parseBody(req: any): Promise<any> {
   if (req.body && typeof req.body === 'object') return req.body;
@@ -43,12 +44,8 @@ async function parseBody(req: any): Promise<any> {
 
 export default async function handler(req: any, res: any) {
   res.setHeader?.('Cache-Control', 'no-store, max-age=0');
-  res.setHeader?.('Access-Control-Allow-Origin', '*');
-  res.setHeader?.('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader?.('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
+  if (!applyCorsHeaders(req, res)) {
+    return;
   }
 
   try {
@@ -95,9 +92,49 @@ export default async function handler(req: any, res: any) {
       });
     }
 
+    // Integrity Validation: Validate incoming providedState to prevent client spoofing of arbitrary unearned 100% mastery without history
+    if (providedState?.conceptMastery && typeof providedState.conceptMastery === 'object') {
+      for (const [conceptId, record] of Object.entries(providedState.conceptMastery as Record<string, any>)) {
+        if (!record || typeof record !== 'object') continue;
+        const attempts = Number(record.attempts) || 0;
+        const correct = Number(record.correct) || 0;
+        const accuracy = Number(record.accuracy) || 0;
+
+        // Prevent client spoofing of arbitrary unearned 100% mastery without history
+        const claimsFullMastery = accuracy >= 1.0 || accuracy >= 100;
+        if (claimsFullMastery && (attempts <= 0 || correct <= 0)) {
+          return res.status(400).json({
+            success: false,
+            error: `Integrity validation failed: arbitrary unearned 100% mastery without history detected for concept '${conceptId}'.`,
+          });
+        }
+        if (correct > attempts) {
+          return res.status(400).json({
+            success: false,
+            error: `Integrity validation failed: invalid mastery history (correct > attempts) for concept '${conceptId}'.`,
+          });
+        }
+      }
+    }
+
+    if (providedState?.personalLearningModel?.conceptProfiles && typeof providedState.personalLearningModel.conceptProfiles === 'object') {
+      for (const [conceptId, profile] of Object.entries(providedState.personalLearningModel.conceptProfiles as Record<string, any>)) {
+        if (!profile || typeof profile !== 'object') continue;
+        const totalAttempts = Number(profile.totalAttempts) || 0;
+        const mastery = Number(profile.mastery) || 0;
+        if ((mastery >= 1.0 || mastery >= 100) && totalAttempts <= 0) {
+          return res.status(400).json({
+            success: false,
+            error: `Integrity validation failed: arbitrary unearned 100% mastery in PLM without history detected for concept '${conceptId}'.`,
+          });
+        }
+      }
+    }
+
     let state: StudentState;
     if (providedState && typeof providedState === 'object' && providedState.conceptMastery) {
-      state = { ...providedState, uid };
+      const initial = createInitialStudentState(uid);
+      state = { ...initial, ...providedState, uid };
     } else {
       state = createInitialStudentState(uid);
     }
