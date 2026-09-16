@@ -7,6 +7,7 @@ dotenv.config();
 
 import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";
+import learningProfileHandler from "./api/student/learningProfile";
 
 async function startServer() {
   const app = express();
@@ -28,6 +29,11 @@ async function startServer() {
   // Telemetry: Security Audit IP extraction
   app.all("/api/telemetry/securityAudit", (req, res) => {
     return securityAuditHandler(req, res);
+  });
+
+  // Phase 2C - Personal Learning Profile
+  app.all("/api/student/learningProfile", (req, res) => {
+    return learningProfileHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);

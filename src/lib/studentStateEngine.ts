@@ -24,6 +24,7 @@ import {
   getLearningEventHistory,
 } from './learningEvents';
 import { buildPersonalLearningModel } from './personalLearningModel';
+import { generatePersonalLearningProfile } from './learningProfileService';
 import type {
   PedagogyStrategy,
   StrategyOutcomeMetrics,
@@ -36,6 +37,7 @@ import type {
   RetentionRiskLevel,
   ConceptLearningProfile,
   PersonalLearningModel,
+  PersonalLearningProfile,
   StudentState,
 } from '../types/studentState';
 
@@ -43,6 +45,7 @@ export { isGuestUser };
 export type {
   RetentionSchedule,
   PersonalLearningModel,
+  PersonalLearningProfile,
   ConceptLearningProfile,
   ResponseLatencyProfile,
   RetentionRiskLevel,
@@ -238,6 +241,13 @@ export class StudentStateManager {
       this.state.personalLearningModel = buildPersonalLearningModel(this.state);
     }
     return { ...this.state.personalLearningModel };
+  }
+
+  /**
+   * Phase 2C - Sprint 1: Generates the canonical PersonalLearningProfile contract.
+   */
+  public getPersonalLearningProfile(displayName?: string): PersonalLearningProfile {
+    return generatePersonalLearningProfile(this.state, displayName);
   }
 
   /** True once authoritative state has loaded (instant for guests, post-hydration for auth users) */

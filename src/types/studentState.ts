@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Canonical Student State & Learning Intelligence Types
  * Single source of truth for student state, cognitive stage,
  * concept mastery, pedagogy strategy, and personal learning models.
@@ -114,3 +114,5 @@ export type {
   RetentionSchedule,
   InterventionDirective,
 };
+
+export * from './learningProfile';

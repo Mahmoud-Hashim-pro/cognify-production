@@ -14,8 +14,9 @@
     "test:golden": "npx tsx tests/goldenAdaptiveScenario.ts",
     "test:api-adaptive": "npx tsx tests/realAdaptiveApiVerification.ts",
     "test:plm": "npx tsx tests/personalLearningModelVerification.ts",
+    "test:contract": "npx tsx tests/learningProfileContractVerification.ts",
     "test:e2e": "npx tsx tests/e2eFullUserCycle.ts",
-    "test": "npx tsx tests/runAllTests.ts && npx tsx tests/goldenAdaptiveScenario.ts && npx tsx tests/realAdaptiveApiVerification.ts && npx tsx tests/personalLearningModelVerification.ts && npx tsx tests/e2eFullUserCycle.ts"
+    "test": "npx tsx tests/runAllTests.ts && npx tsx tests/goldenAdaptiveScenario.ts && npx tsx tests/realAdaptiveApiVerification.ts && npx tsx tests/personalLearningModelVerification.ts && npx tsx tests/learningProfileContractVerification.ts && npx tsx tests/e2eFullUserCycle.ts"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",

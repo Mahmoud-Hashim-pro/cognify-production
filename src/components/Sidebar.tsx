@@ -51,6 +51,7 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
 
   const primaryItems = [
     { id: 'chat', label: getTranslation(profile.language, 'chatSession'), icon: MessageSquare },
+    { id: 'intelligence', label: localize(profile.language, 'Learning Profile', 'الملف المعرفي الذكي'), icon: Brain },
     { id: 'learning', label: localize(profile.language, 'Learning Hub', 'مركز التعلّم الذكي'), icon: Sparkles },
   ] as const;
 
