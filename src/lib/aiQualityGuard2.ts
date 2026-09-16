@@ -113,16 +113,16 @@ export function repairLatexFormulas(text: string): { repaired: string; repairs: 
 // ============================================================================
 
 const INJECTION_PATTERNS = [
-  { regex: /ignore\s+(all\s+)?previous\s+instructions/i, name: 'instruction_override' },
+  { regex: /ignore\s+(all\s+)?(previous\s+|your\s+)?instructions/i, name: 'instruction_override' },
   { regex: /disregard\s+(the\s+)?system\s+prompt/i, name: 'system_prompt_disregard' },
   { regex: /reveal\s+(the\s+)?(hidden\s+)?system\s+prompt/i, name: 'system_prompt_extraction' },
   { regex: /bypass\s+(all\s+)?(safety|security)\s+filters/i, name: 'safety_bypass' },
   { regex: /act\s+as\s+(dan|an\s+unrestricted\s+ai|developer\s+mode)/i, name: 'dan_jailbreak' },
   { regex: /hypothetical\s+unrestricted\s+scenario/i, name: 'hypothetical_jailbreak' },
   { regex: /execute\s+as\s+root\s+user/i, name: 'privilege_escalation' },
-  { regex: /reveal\s+(all\s+)?(the\s+)?(api[_-]?keys?|secrets?|firebase|gemini_key|service[_-]?account|credentials)/i, name: 'secret_extraction' },
+  { regex: /reveal\s+(all\s+)?(the\s+)?(api[_-]?keys?|secrets?|firebase(\s+credentials)?|gemini_key|service[_-]?account|credentials)/i, name: 'secret_extraction' },
   { regex: /(print|reveal|output)\s+(the\s+)?(raw\s+)?(student[_-]?state|internal[_-]?state|memory[_-]?store)/i, name: 'student_state_exfiltration' },
-  { regex: /(access|reveal|fetch|show)\s+(another\s+|other\s+)?(users?|students?)\s+(data|memory|profile)/i, name: 'cross_user_exfiltration' }
+  { regex: /(access|reveal|fetch|show|give)\s+(me\s+)?(another\s+|other\s+|the\s+user['’]?s\s+)?(users?['’]?s?|students?['’]?s?|private)?\s*(data|memory|memories|profile|credentials)/i, name: 'cross_user_exfiltration' }
 ];
 
 export function detectAndNeutralizeAdversarialInjection(text: string): AdversarialThreatAssessment {

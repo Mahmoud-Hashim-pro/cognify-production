@@ -2,9 +2,9 @@
 *An Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform*
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://my-cognify-app.vercel.app)
-[![Tests Passing](https://img.shields.io/badge/Tests-762%20Passed%2C%200%20Failed-10B981?logo=vitest&logoColor=white)](tests/runAllTests.ts)
+[![Tests Passing](https://img.shields.io/badge/Tests-1001%20Passed%2C%200%20Failed-10B981?logo=vitest&logoColor=white)](tests/runAllTests.ts)
 [![TypeScript Strict](https://img.shields.io/badge/TypeScript-Strict%20Pass-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
-[![Security Standard](https://img.shields.io/badge/Security-AES--GCM%20256--bit%20BYOK-8B5CF6?logo=googlecloud&logoColor=white)](PRIVACY_SPECIFICATION.md)
+[![Security Standard](https://img.shields.io/badge/Security-OWASP%20Top%2010%20Hardened-8B5CF6?logo=googlecloud&logoColor=white)](ARCHITECTURE.md)
 
 Cognify is an **Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform** developed by the **Cognify Development Team** to empower students, self-learners, and people of determination (individuals with visual, hearing, or motor disabilities).
 

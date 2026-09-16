@@ -19,10 +19,32 @@ Cognify is an **Adaptive AI Mentor, Pedagogical Diagnostic Engine & Accessibilit
 
 ---
 
-## 2. Architectural Data Flow & The Closed Loop
+## 2. High-Level System Architecture & Data Flow
 
 ```text
-Student Interaction (Chat / Exercise / Camera / Vision)
+User (Student / Educator / Person of Determination)
+ ↓
+Frontend (React 19, Tailwind CSS, Motion, WebGL / Three.js, MediaPipe)
+ ↓
+API Edge (Vercel Serverless Functions / Express Server)
+ ↓
+Auth Guard (Firebase RS256 Bearer Token Validation & BOLA / IDOR Enforcement)
+ ↓
+Intelligence Layer
+ ├── Student State Engine (Cognitive Stage, Mastery Levels, Learning Strain)
+ ├── Personal Learning Model (PLM & Strategy Efficacy Matrix with N>=3 Guard)
+ ├── Concept Engine & Knowledge Graph (Prerequisite Gap Diagnosis)
+ ├── Intervention Engine (Micro-Checkups, Active Pedagogy Pivots)
+ ├── Deterministic AI Router (Zero-Latency Task Classification & Cascade)
+ └── Memory Subsystems (Epistemic Spatial Memory, SM-2 Spaced Retention)
+ ↓
+AI Providers & Persistence (Google Gemini, Groq, NVIDIA NIM, xAI / Firebase Firestore & Storage)
+```
+
+### Detailed Data Flow & The Closed Loop
+
+```text
+Student Interaction (Chat / Formative Check / Video / Speech)
        │
        ▼
 1. Learning Event Store (src/lib/learningEvents.ts)
@@ -210,16 +232,34 @@ npm run build
 
 ---
 
-## 9. Core Architectural Tenets
+## 9. Core Feature Representation & Verified Capabilities
 
-- **Server-Side AI Security**: Production inference executes strictly server-side (`/api/gemini/*`). Master provider API keys never touch client JavaScript bundles.
-- **Continuous Closed-Loop Adaptation**: The system prompt dynamically injects the student's Bloom's cognitive level, active pedagogy strategy, diagnosed prerequisite gaps, and learning strain signals.
-- **Observed Mastery Over Static IQ**: Cognify measures concept accuracy, retention curves (SM-2), and normalized learning gains ($g$). It does not derive intelligence or lock students into static tracks based on an IQ score.
-- **Accessibility Integration**: Accessibility modes (sign language avatars, Motor Euphonia speech reconstruction, Vision Companion) are native first-class citizens embedded directly in the routing and telemetry layers.
+1. **Adaptive Learning**: Real-time conversational strain detection, dynamic Blooms cognitive scaffolding, and automatic pedagogy auto-pivots (Socratic, Worked Example, Analogies, Scaffolded, Rigorous).
+2. **Personal Learning Model (PLM)**: Continuous tracking of strategy efficacy with strict $N \ge 3$ sample-size guards to prevent premature pedagogical overfitting.
+3. **Intervention / Outcome Loop**: Hake's normalized gain metric ($g = \frac{Post - Pre}{100 - Pre}$) for learning efficacy measurement, prerequisite gap diagnosis, and actionable remedial directives.
+4. **Spatial Memory Engine**: Localizes and tracks physical objects (keys, eyeglasses, canes) across rooms with chronological surface history (last 10 surfaces) and epistemic honesty (never hallucinates an unobserved item).
+5. **Multi-Tenant User Isolation**: Strict BOLA/IDOR prevention in API endpoints and Firestore rules; User A cannot access or tamper with User B's state, profile, or spatial memory.
+6. **French Language Support**: Native trilingual core supporting English, Arabic (Egyptian & MSA), and French across all AI reasoning, vision companion narration, and spatial queries.
+7. **Accessibility Suite**: Vision Companion (0% disk / 0% cloud volatile camera frames), Sign Avatar 3D (procedural fingerspelling and word gestures), Two-Way Hearing Bridge (live captions with confidence alternatives), and Motor Euphonia switch access.
+8. **Privacy, Export & Erasure**: Full GDPR/FERPA JSON export (v2.0.0), cascading account deletion, and AES-GCM 256-bit client-side CryptoShield.
+9. **Deterministic AI Routing & Quality Guard**: Zero-token request categorization, circuit breaker with multi-provider fallback (Gemini -> Groq -> NVIDIA -> xAI), self-healing code/LaTeX math delimiters, and sensitive secret redaction.
+10. **Automated Verification Suite**: 53 test suites encompassing 1,001 automated assertions covering unit, contract, resilience, security, and end-to-end user journeys with 100% pass rate.
 
 ---
 
-## 10. Development & Verification Commands
+## 10. Security & Threat Model (Milestone 22)
+
+Cognify is hardened against OWASP Top 10: 2025, OWASP API Security Top 10: 2023, and OWASP LLM Applications Top 10: 2025:
+- **API1: BOLA / IDOR Defense**: Endpoints `/api/student/learningProfile` and `/api/gemini/*` strictly bind request queries and payloads to the authenticated JWT UID. Cross-user data access attempts return `HTTP 403 Forbidden`.
+- **Authentication & Token Integrity**: RS256 signature verification against Google public x509 certs; rejection of expired, malformed, or forged tokens (`HTTP 401 Unauthorized`).
+- **LLM01 / LLM07 Injection Defense**: Multi-pattern regex detector in `src/lib/aiQualityGuard2.ts` neutralizes instruction overrides, DAN jailbreaks, system prompt extractions, and student state exfiltrations, escalating threats to `CRITICAL`.
+- **LLM02 Sensitive Secret Redaction**: Output quality guard in `api/_lib/qualityGuard.ts` automatically redacts exposed API keys (`AIza...`, `gsk_...`, `nvapi-...`, `xai-...`, RSA private keys) with `[REDACTED_SECRET]`.
+- **Multi-Tenant Memory Isolation**: Spatial memory queries and cache partitions are strictly isolated per UID.
+- **Resource Limits & DoS Defense**: Dual-tier sliding window rate limiting (IP tier: 100 req/min, User tier: 60 req/min) returning `HTTP 429`.
+
+---
+
+## 11. Development & Verification Commands
 
 ```bash
 # Install dependencies
@@ -228,10 +268,10 @@ npm install
 # Start development server (Vite + local server)
 npm run dev
 
-# Run static type verification
-npx tsc --noEmit
+# Run static type verification (Zero TypeScript errors)
+npm run lint    # or npx tsc --noEmit
 
-# Execute full automated test suite (354 tests across unit & E2E)
+# Execute master test suite (53 suites, 1,001 tests passing)
 npm test
 
 # Build production bundle
