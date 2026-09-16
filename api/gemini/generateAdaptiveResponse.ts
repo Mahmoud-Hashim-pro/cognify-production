@@ -19,6 +19,19 @@ export default async function handler(req: any, res: any) {
 
     // Phase 1.1 — deterministic router with student state awareness.
     const effectiveState = studentState || profile?.studentState;
+
+    // OWASP API1:2023 BOLA Defense: Ensure studentState / profile matches authenticated identity
+    if (req.authenticatedUid) {
+      if (effectiveState?.uid && effectiveState.uid !== req.authenticatedUid && effectiveState.uid !== 'guest') {
+        res.status(403).json({ error: 'BOLA violation: State identity does not match authenticated user identity' });
+        return;
+      }
+      if (profile?.uid && profile.uid !== req.authenticatedUid && profile.uid !== 'guest') {
+        res.status(403).json({ error: 'BOLA violation: Profile identity does not match authenticated user identity' });
+        return;
+      }
+    }
+
     const category = classifyRequest(message, safeAttachments, effectiveState);
     const system = buildPersona(profile, threadsSummary(profile), effectiveState, message);
 

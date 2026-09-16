@@ -12,6 +12,7 @@
 import { generatePersonalLearningProfile } from '../../src/lib/learningProfileService';
 import { createInitialStudentState } from '../../src/lib/studentStateEngine';
 import type { PersonalLearningProfile, StudentState } from '../../src/types/studentState';
+import { verifyRequestAuth, extractBearerToken } from '../_lib/authGuard.js';
 
 async function parseBody(req: any): Promise<any> {
   if (req.body && typeof req.body === 'object') return req.body;
@@ -61,9 +62,42 @@ export default async function handler(req: any, res: any) {
     const displayName = body.displayName || query.displayName;
     const providedState: StudentState | undefined = body.studentState;
 
+    // OWASP API Security API1:2023 (BOLA / IDOR Defense) & API2:2023 (Authentication)
+    const token = extractBearerToken(req);
+    if (token) {
+      const auth = await verifyRequestAuth(req);
+      if (!auth.authenticated || !auth.uid) {
+        return res.status(401).json({
+          success: false,
+          error: auth.error || 'Authentication required: Invalid or expired token.',
+        });
+      }
+
+      // Check for Cross-User IDOR / BOLA Attempt
+      if (uid !== 'guest' && uid !== auth.uid) {
+        return res.status(403).json({
+          success: false,
+          error: `BOLA/IDOR Forbidden: Authenticated user (${auth.uid}) cannot access or modify student profile of (${uid}).`,
+        });
+      }
+
+      // Check for Student State Spoofing
+      if (providedState?.uid && providedState.uid !== auth.uid) {
+        return res.status(403).json({
+          success: false,
+          error: `BOLA/IDOR Forbidden: State identity (${providedState.uid}) does not match authenticated identity (${auth.uid}).`,
+        });
+      }
+    } else if (process.env.NODE_ENV === 'production' && uid !== 'guest') {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentication required. Missing Authorization Bearer token.',
+      });
+    }
+
     let state: StudentState;
     if (providedState && typeof providedState === 'object' && providedState.conceptMastery) {
-      state = providedState;
+      state = { ...providedState, uid };
     } else {
       state = createInitialStudentState(uid);
     }

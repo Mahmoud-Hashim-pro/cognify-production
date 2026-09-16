@@ -171,6 +171,21 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
+    // Phase 1.1 — deterministic router with student state awareness.
+    const effectiveState = studentState || profile?.studentState;
+
+    // OWASP API1:2023 BOLA Defense: Ensure studentState / profile matches authenticated identity
+    if (req.authenticatedUid) {
+      if (effectiveState?.uid && effectiveState.uid !== req.authenticatedUid && effectiveState.uid !== 'guest') {
+        res.status(403).json({ error: 'BOLA violation: State identity does not match authenticated user identity' });
+        return;
+      }
+      if (profile?.uid && profile.uid !== req.authenticatedUid && profile.uid !== 'guest') {
+        res.status(403).json({ error: 'BOLA violation: Profile identity does not match authenticated user identity' });
+        return;
+      }
+    }
+
     res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
     res.setHeader('Connection', 'keep-alive');
@@ -185,8 +200,6 @@ export default async function handler(req: any, res: any) {
     const safeHistory = Array.isArray(history) ? history : [];
     const safeAttachments = Array.isArray(attachments) ? attachments : [];
 
-    // Phase 1.1 — deterministic router with student state awareness.
-    const effectiveState = studentState || profile?.studentState;
     const category = classifyRequest(message, safeAttachments, effectiveState);
     const system = buildPersona(profile, threadsSummary(profile), effectiveState, message);
     let full = '';

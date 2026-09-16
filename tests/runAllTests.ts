@@ -72,6 +72,7 @@ import { runAiQualityVerification } from './aiQualityVerification.js';
 import { runResilienceVerification } from './resilienceVerification.js';
 import { runBusinessTenancyVerification } from './businessTenancyVerification.js';
 import { runDeveloperApiVerification } from './developerApiVerification.js';
+import { runSecurityThreatModelVerification } from './securityThreatModelVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2055,6 +2056,13 @@ Keep practicing closures with higher-order functions!
     const m21Res = await runDeveloperApiVerification();
     totalPassed += m21Res.passed;
     totalFailed += m21Res.failed;
+  }
+
+  // 53. Milestone 22: Cognify Security & Threat Model
+  {
+    const m22Res = await runSecurityThreatModelVerification();
+    totalPassed += m22Res.passed;
+    totalFailed += m22Res.failed;
   }
 
   console.log(`\n========================================`);

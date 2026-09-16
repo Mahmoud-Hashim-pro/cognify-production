@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AI Output Quality Guard (Point 10)
  * Validates, repairs, and sanitizes model output before delivery to the student.
  * Ensures accessibility compliance, repairs broken markdown/LaTeX, and guards against empty/refusal loops.
@@ -73,6 +73,22 @@ export function validateAndSanitizeResponse(
     if (sig.test(sanitized)) {
       warnings.push('REFUSAL_SIGNATURE_DETECTED');
       break;
+    }
+  }
+
+  // 5. Sensitive Secret / Key Leakage Redaction (OWASP LLM02: Sensitive Information Disclosure)
+  const secretPatterns = [
+    { regex: /AIza[0-9A-Za-z-_]{35}/g, name: 'GOOGLE_API_KEY_LEAK' },
+    { regex: /gsk_[0-9A-Za-z]{40,}/g, name: 'GROQ_API_KEY_LEAK' },
+    { regex: /nvapi-[0-9A-Za-z-_]{30,}/g, name: 'NVIDIA_API_KEY_LEAK' },
+    { regex: /xai-[0-9A-Za-z-_]{30,}/g, name: 'XAI_API_KEY_LEAK' },
+    { regex: /-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----[\s\S]*?-----END\s+(?:RSA\s+)?PRIVATE\s+KEY-----/g, name: 'PRIVATE_KEY_LEAK' },
+  ];
+
+  for (const sp of secretPatterns) {
+    if (sp.regex.test(sanitized)) {
+      warnings.push(`LEAKED_SECRET_REDACTED:${sp.name}`);
+      sanitized = sanitized.replace(sp.regex, '[REDACTED_SECRET]');
     }
   }
 

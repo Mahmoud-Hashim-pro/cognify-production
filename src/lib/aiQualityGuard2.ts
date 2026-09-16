@@ -119,7 +119,10 @@ const INJECTION_PATTERNS = [
   { regex: /bypass\s+(all\s+)?(safety|security)\s+filters/i, name: 'safety_bypass' },
   { regex: /act\s+as\s+(dan|an\s+unrestricted\s+ai|developer\s+mode)/i, name: 'dan_jailbreak' },
   { regex: /hypothetical\s+unrestricted\s+scenario/i, name: 'hypothetical_jailbreak' },
-  { regex: /execute\s+as\s+root\s+user/i, name: 'privilege_escalation' }
+  { regex: /execute\s+as\s+root\s+user/i, name: 'privilege_escalation' },
+  { regex: /reveal\s+(all\s+)?(the\s+)?(api[_-]?keys?|secrets?|firebase|gemini_key|service[_-]?account|credentials)/i, name: 'secret_extraction' },
+  { regex: /(print|reveal|output)\s+(the\s+)?(raw\s+)?(student[_-]?state|internal[_-]?state|memory[_-]?store)/i, name: 'student_state_exfiltration' },
+  { regex: /(access|reveal|fetch|show)\s+(another\s+|other\s+)?(users?|students?)\s+(data|memory|profile)/i, name: 'cross_user_exfiltration' }
 ];
 
 export function detectAndNeutralizeAdversarialInjection(text: string): AdversarialThreatAssessment {
@@ -134,7 +137,14 @@ export function detectAndNeutralizeAdversarialInjection(text: string): Adversari
   }
 
   let threatLevel: AdversarialThreatAssessment['threatLevel'] = 'none';
-  if (matchedSignatures.length >= 2 || matchedSignatures.includes('system_prompt_extraction') || matchedSignatures.includes('safety_bypass')) {
+  if (
+    matchedSignatures.length >= 2 ||
+    matchedSignatures.includes('system_prompt_extraction') ||
+    matchedSignatures.includes('safety_bypass') ||
+    matchedSignatures.includes('secret_extraction') ||
+    matchedSignatures.includes('student_state_exfiltration') ||
+    matchedSignatures.includes('cross_user_exfiltration')
+  ) {
     threatLevel = 'critical';
   } else if (matchedSignatures.length === 1) {
     threatLevel = 'medium';
