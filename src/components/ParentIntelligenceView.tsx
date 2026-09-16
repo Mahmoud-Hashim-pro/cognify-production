@@ -396,3 +396,5 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
     </div>
   );
 };
+
+export default ParentIntelligenceView;

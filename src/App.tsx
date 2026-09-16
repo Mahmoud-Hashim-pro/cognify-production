@@ -79,6 +79,14 @@ const IqAssessmentModal = lazyWithRetry(() => import("./components/IqAssessmentM
 const FrenchTravelVoiceAssistant = lazyWithRetry(() => import("./components/FrenchTravelVoiceAssistant"));
 const ChatInterface = lazyWithRetry(() => import("./components/ChatInterface"));
 const StudentIntelligenceProfileView = lazyWithRetry(() => import("./components/StudentIntelligenceProfileView"));
+const TeacherIntelligenceView = lazyWithRetry(() => import("./components/TeacherIntelligenceView"));
+const ParentIntelligenceView = lazyWithRetry(() => import("./components/ParentIntelligenceView"));
+const PrivacySecurityCenter = lazyWithRetry(() => import("./components/PrivacySecurityCenter"));
+const PedagogicalEvaluationView = lazyWithRetry(() => import("./components/PedagogicalEvaluationView"));
+const AiQualityGuardMonitor = lazyWithRetry(() => import("./components/AiQualityGuardMonitor"));
+const SystemResilienceDashboard = lazyWithRetry(() => import("./components/SystemResilienceDashboard"));
+const BusinessTenancyView = lazyWithRetry(() => import("./components/BusinessTenancyView"));
+const DeveloperApiConsole = lazyWithRetry(() => import("./components/DeveloperApiConsole"));
 
 /** Every hash route the app answers to — the single source of truth for both the
  *  initial read on mount and the popstate handler, so they can't drift apart. */
@@ -86,6 +94,8 @@ const VALID_VIEWS = [
   'chat', 'learning', 'profile', 'settings', 'video', 'disability',
   'admin', 'goals', 'gpa', 'analytics', 'planner', 'support', 'memory',
   'institution', 'gym', 'iq', 'france', 'privacy', 'intelligence',
+  'teacher', 'parent', 'privacy_security', 'evaluation', 'ai_quality',
+  'resilience', 'tenancy', 'developer_api',
 ] as const;
 
 export default function App() {
@@ -797,6 +807,22 @@ export default function App() {
         return <AcademicPlanner profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
       case 'institution':
         return <InstitutionCohortHub profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
+      case 'teacher':
+        return <TeacherIntelligenceView lang={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya' ? 'ar' : 'en'} />;
+      case 'parent':
+        return <ParentIntelligenceView lang={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya' ? 'ar' : 'en'} />;
+      case 'privacy_security':
+        return <PrivacySecurityCenter isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
+      case 'evaluation':
+        return <PedagogicalEvaluationView isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
+      case 'ai_quality':
+        return <AiQualityGuardMonitor isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
+      case 'resilience':
+        return <SystemResilienceDashboard isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
+      case 'tenancy':
+        return <BusinessTenancyView isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
+      case 'developer_api':
+        return <DeveloperApiConsole isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
 
       case 'gym':
       case 'iq':

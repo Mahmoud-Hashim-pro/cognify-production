@@ -389,10 +389,13 @@ export async function runProactiveInsightsVerification(
 }
 
 // Standalone CLI execution
-runProactiveInsightsVerification().then((res) => {
-  if (res.failed > 0) {
-    process.exit(1);
-  } else {
-    process.exit(0);
-  }
-});
+const isDirectRun = process.argv[1]?.replace(/\\/g, '/').includes('proactiveInsightsVerification');
+if (isDirectRun) {
+  runProactiveInsightsVerification().then((res) => {
+    if (res.failed > 0) {
+      process.exit(1);
+    } else {
+      process.exit(0);
+    }
+  });
+}

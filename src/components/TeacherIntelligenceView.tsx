@@ -552,3 +552,5 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
     </div>
   );
 };
+
+export default TeacherIntelligenceView;

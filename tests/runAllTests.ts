@@ -66,6 +66,12 @@ import { runRealAdaptiveApiVerification } from './realAdaptiveApiVerification.js
 import { runPersonalLearningModelVerification } from './personalLearningModelVerification.js';
 import { runExplainabilityEngineVerification } from './explainabilityEngineVerification.js';
 import { runProactiveInsightsVerification } from './proactiveInsightsVerification.js';
+import { runPrivacySecurityVerification } from './privacySecurityVerification.js';
+import { runPedagogicalEvaluationVerification } from './pedagogicalEvaluationVerification.js';
+import { runAiQualityVerification } from './aiQualityVerification.js';
+import { runResilienceVerification } from './resilienceVerification.js';
+import { runBusinessTenancyVerification } from './businessTenancyVerification.js';
+import { runDeveloperApiVerification } from './developerApiVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2007,6 +2013,48 @@ Keep practicing closures with higher-order functions!
 
     const instDash = compileInstitutionalDashboard('uni_cairo', 'Cairo University', { cs: uniStudents });
     assert(instDash.departments.length === 1 && instDash.kAnonymityAudit.suppressionApplied === true, 'Compiles complete institutional intelligence dashboard');
+  }
+
+  // 47. Milestone 16: Privacy & Security Intelligence
+  {
+    const m16Res = await runPrivacySecurityVerification();
+    totalPassed += m16Res.passed;
+    totalFailed += m16Res.failed;
+  }
+
+  // 48. Milestone 17: Automated Pedagogical Evaluation Engine
+  {
+    const m17Res = await runPedagogicalEvaluationVerification();
+    totalPassed += m17Res.passed;
+    totalFailed += m17Res.failed;
+  }
+
+  // 49. Milestone 18: AI Output Quality & Hallucination Guard 2.0
+  {
+    const m18Res = await runAiQualityVerification();
+    totalPassed += m18Res.passed;
+    totalFailed += m18Res.failed;
+  }
+
+  // 50. Milestone 19: Production Hardening, Observability & Resilience
+  {
+    const m19Res = await runResilienceVerification();
+    totalPassed += m19Res.passed;
+    totalFailed += m19Res.failed;
+  }
+
+  // 51. Milestone 20: Business & Multi-Tenant Management
+  {
+    const m20Res = await runBusinessTenancyVerification();
+    totalPassed += m20Res.passed;
+    totalFailed += m20Res.failed;
+  }
+
+  // 52. Milestone 21: Open Developer API & Webhooks Ecosystem
+  {
+    const m21Res = await runDeveloperApiVerification();
+    totalPassed += m21Res.passed;
+    totalFailed += m21Res.failed;
   }
 
   console.log(`\n========================================`);
