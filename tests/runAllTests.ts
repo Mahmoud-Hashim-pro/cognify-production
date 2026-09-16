@@ -1629,6 +1629,182 @@ Keep practicing closures with higher-order functions!
     assert(res.attachment !== undefined && res.attachment.type === 'image/jpeg', 'Image attachment generated cleanly');
   }
 
+  // 40. Phase 2C - Milestone 9: Retention & Spaced Learning Product Engine
+  console.log('\n[40] Phase 2C - Milestone 9: Retention & Spaced Learning Product Engine');
+  {
+    const {
+      computeRetentionDecayRisk,
+      categorizeRetentionState,
+      generateMicroReview,
+      evaluateMicroReviewSubmission,
+    } = await import('../src/lib/retentionProductEngine.js');
+
+    const now = Date.now();
+    const freshRisk = computeRetentionDecayRisk({
+      conceptId: 'pointers',
+      repetitions: 1,
+      intervalDays: 3,
+      easeFactor: 2.5,
+      lastReviewDate: now,
+      nextReviewDate: now + 86400000 * 3,
+      status: 'learning',
+    }, now);
+    assert(freshRisk < 0.1, 'Fresh schedule has low decay risk');
+
+    const categorized = categorizeRetentionState({
+      item_due: {
+        conceptId: 'recursion',
+        repetitions: 1,
+        intervalDays: 1,
+        easeFactor: 2.5,
+        lastReviewDate: now - 86400000,
+        nextReviewDate: now - 1000,
+        status: 'learning',
+      },
+    }, undefined, now);
+    assert(categorized.dueToday.length === 1, 'Correctly identifies due today retention concepts');
+
+    const q = generateMicroReview('pointers', 'ar');
+    assert(q.options.length >= 3 && q.promptAr.length > 5, 'Generates rich localized micro-review question');
+
+    const evalRes = evaluateMicroReviewSubmission({
+      conceptId: 'pointers',
+      selectedIndex: q.correctIndex,
+      responseTimeMs: 9000,
+    }, {
+      conceptId: 'pointers',
+      repetitions: 1,
+      intervalDays: 1,
+      easeFactor: 2.5,
+      lastReviewDate: now - 86400000,
+      nextReviewDate: now,
+      status: 'learning',
+    });
+    assert(evalRes.isCorrect === true && evalRes.newIntervalDays === 3, 'Fast correct micro-review advances interval to 3 days');
+  }
+
+  // 41. Phase 2C - Milestone 10: Spatial Memory 2.0 (Identity, Trajectory & Disambiguation)
+  console.log('\n[41] Phase 2C - Milestone 10: Spatial Memory 2.0 (Identity, Trajectory & Disambiguation)');
+  {
+    const {
+      recordSpatialObservationV2,
+      resolveSpatialQueryV2,
+      applySpatialCorrection,
+      getObjectMovementHistory,
+      clearSpatialMemoryV2ForUser,
+    } = await import('../src/lib/spatialMemoryEngine.js');
+
+    const testUid = 'student_m10_master';
+    clearSpatialMemoryV2ForUser(testUid);
+
+    const tvRemote = recordSpatialObservationV2(testUid, {
+      category: 'remote',
+      identityLabel: 'TV Remote',
+      roomEn: 'Living Room',
+      roomAr: 'الصالة',
+      surfaceEn: 'Coffee Table',
+      surfaceAr: 'ترابيزة الصالة',
+      features: { subType: 'tv' },
+      confidence: 0.95,
+    });
+
+    const acRemote = recordSpatialObservationV2(testUid, {
+      category: 'remote',
+      identityLabel: 'AC Remote',
+      roomEn: 'Bedroom',
+      roomAr: 'غرفة النوم',
+      surfaceEn: 'Nightstand',
+      surfaceAr: 'الكومودينو',
+      features: { subType: 'ac' },
+      confidence: 0.90,
+    });
+
+    assert(tvRemote.id !== acRemote.id, 'Distinct object IDs assigned to multi-instance objects of same category');
+
+    const ambig = resolveSpatialQueryV2('where is my remote?', testUid, 'en');
+    assert(ambig.isAmbiguous === true && ambig.candidateMatches.length === 2, 'Detects ambiguous generic query and provides candidates');
+
+    const corrected = applySpatialCorrection(testUid, {
+      userId: testUid,
+      targetObjectId: tvRemote.id,
+      category: 'remote',
+      correctedRoomEn: 'Kitchen',
+      correctedRoomAr: 'المطبخ',
+      correctedSurfaceEn: 'Counter',
+      correctedSurfaceAr: 'الرخامة',
+    });
+    assert(corrected.surfaceEn === 'Counter' && corrected.correctionsCount === 1, 'User correction feedback updates location and increments count');
+
+    const traj = getObjectMovementHistory(testUid, tvRemote.id);
+    assert(traj.length >= 2, 'Tracks chronological movement trajectory history');
+  }
+
+  // 42. Phase 2C - Milestone 11: Multimodal Intelligence Pipeline
+  console.log('\n[42] Phase 2C - Milestone 11: Multimodal Intelligence Pipeline');
+  {
+    const {
+      fuseMultimodalInput,
+      synthesizeModalityAwareResponse,
+      handleGracefulDegradation,
+    } = await import('../src/lib/multimodalIntelligenceEngine.js');
+
+    const fused = fuseMultimodalInput({
+      uid: 'student_m11_master',
+      speechTranscript: 'What is this?',
+      visionFrame: { description: 'Binary Search Tree root node' },
+      context: { currentView: 'chat', language: 'en' },
+    });
+    assert(fused.primaryIntent.includes('Binary Search Tree'), 'Cross-modal semantic fusion combines speech deictic with vision scene');
+    assert(fused.requiresVisualAid === true && fused.requiresAudioNarration === true, 'Multimodal requirements flags set');
+
+    const resp = synthesizeModalityAwareResponse('Here is the tree node architecture:\n```typescript\nconst root = 10;\n```', fused);
+    assert(resp.textResponse.length > 0, 'Text response synthesized');
+    assert(resp.speechNarration !== undefined, 'Speech narration generated for audio input');
+    assert(resp.visualCards !== undefined && resp.visualCards.length > 0, 'Visual cards generated for visual request');
+
+    const deg = handleGracefulDegradation({ camera: false, mic: true });
+    assert(deg.fallbackModality === 'voice_and_text' && deg.degraded === true, 'Graceful degradation fallback when camera is offline');
+  }
+
+  // 43. Phase 2C - Milestone 12: Accessibility Intelligence & Adaptive Communication
+  console.log('\n[43] Phase 2C - Milestone 12: Accessibility Intelligence & Adaptive Communication');
+  {
+    const {
+      createInitialA11yProfile,
+      recordA11yObservation,
+      deriveAdaptiveCommunicationPreferences,
+      setUserManualPreference,
+      validateNonDiagnosticInvariant,
+      buildA11ySystemDirectives,
+    } = await import('../src/lib/accessibilityIntelligenceEngine.js');
+
+    let a11yProf = createInitialA11yProfile('student_m12_master');
+    assert(a11yProf.preferences.preferredResponseLength === 'balanced', 'Default response length is balanced');
+
+    const invarCheck = validateNonDiagnosticInvariant({ diagnosed_deficit: 'adhd' });
+    assert(invarCheck.valid === false && invarCheck.violations.length > 0, 'Ethical invariant rejects clinical deficit tags');
+
+    for (let i = 0; i < 5; i++) {
+      a11yProf = recordA11yObservation(a11yProf, {
+        timestamp: Date.now() + i * 1000,
+        promptLength: 2,
+        usedVoiceInput: false,
+        listenedToAudio: false,
+        dwellTimeMs: 1500,
+      });
+    }
+
+    const adapted = deriveAdaptiveCommunicationPreferences(a11yProf);
+    assert(adapted.preferredResponseLength === 'concise', 'Auto-adapts to concise based on short prompt observations');
+
+    a11yProf = setUserManualPreference(a11yProf, 'preferredResponseLength', 'detailed', true);
+    const lockedAdapted = deriveAdaptiveCommunicationPreferences(a11yProf);
+    assert(lockedAdapted.preferredResponseLength === 'detailed', '100% Student agency preserves locked preference');
+
+    const directives = buildA11ySystemDirectives(lockedAdapted, 'ar');
+    assert(directives.includes('تفسيرات شاملة'), 'Generates tailored Arabic system prompt directives');
+  }
+
   console.log(`\n========================================`);
   console.log(`Test Results: ${totalPassed} Passed, ${totalFailed} Failed`);
   console.log(`========================================\n`);

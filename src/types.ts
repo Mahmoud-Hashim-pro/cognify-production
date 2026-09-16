@@ -356,3 +356,10 @@ export interface AACCardItem {
   isAiAction?: boolean;
 }
 
+export * from './types/spatialMemory2';
+
+export * from './types/multimodal.js';
+
+export * from './types/accessibilityIntelligence.js';
+
+

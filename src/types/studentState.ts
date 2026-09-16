@@ -116,3 +116,4 @@ export type {
 };
 
 export * from './learningProfile';
+export * from './retention';

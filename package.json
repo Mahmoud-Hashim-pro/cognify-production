@@ -18,8 +18,12 @@
     "test:explainability": "npx tsx tests/explainabilityEngineVerification.ts",
     "test:proactive": "npx tsx tests/proactiveInsightsVerification.ts",
     "test:image": "npx tsx tests/imageSynthesisVerification.ts",
+    "test:retention": "npx tsx tests/retentionProductVerification.ts",
+    "test:spatial2": "npx tsx tests/spatialMemory2Verification.ts",
+    "test:multimodal": "npx tsx tests/multimodalIntelligenceVerification.ts",
+    "test:a11y-intel": "npx tsx tests/accessibilityIntelligenceVerification.ts",
     "test:e2e": "npx tsx tests/e2eFullUserCycle.ts",
-    "test": "npx tsx tests/runAllTests.ts && npx tsx tests/goldenAdaptiveScenario.ts && npx tsx tests/realAdaptiveApiVerification.ts && npx tsx tests/personalLearningModelVerification.ts && npx tsx tests/learningProfileContractVerification.ts && npx tsx tests/explainabilityEngineVerification.ts && npx tsx tests/proactiveInsightsVerification.ts && npx tsx tests/imageSynthesisVerification.ts && npx tsx tests/e2eFullUserCycle.ts"
+    "test": "npx tsx tests/runAllTests.ts && npx tsx tests/retentionProductVerification.ts && npx tsx tests/spatialMemory2Verification.ts && npx tsx tests/multimodalIntelligenceVerification.ts && npx tsx tests/accessibilityIntelligenceVerification.ts && npx tsx tests/goldenAdaptiveScenario.ts && npx tsx tests/realAdaptiveApiVerification.ts && npx tsx tests/personalLearningModelVerification.ts && npx tsx tests/learningProfileContractVerification.ts && npx tsx tests/explainabilityEngineVerification.ts && npx tsx tests/proactiveInsightsVerification.ts && npx tsx tests/imageSynthesisVerification.ts && npx tsx tests/e2eFullUserCycle.ts"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",

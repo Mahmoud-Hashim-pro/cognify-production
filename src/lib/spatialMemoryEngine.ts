@@ -6,8 +6,21 @@
  */
 
 import { SpatialObjectRecord } from '../types';
+import {
+  SpatialObjectIdentity,
+  SpatialLocationObservation,
+  SpatialDisambiguationResult,
+  SpatialCorrection,
+} from '../types/spatialMemory2';
 import { db, cleanDataForFirestore } from './firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+
+export type {
+  SpatialObjectIdentity,
+  SpatialLocationObservation,
+  SpatialDisambiguationResult,
+  SpatialCorrection,
+};
 
 const STORAGE_PREFIX = 'cognify_spatial_memory_';
 
@@ -584,4 +597,641 @@ export function formatSpatialMemoryForAI(uid: string, lang: 'en' | 'ar' | 'fr' =
 
   block += '- INSTRUCTION: If the user asks where an object is located, reference these last-known positions accurately and state when it was observed.\n';
   return block;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SPATIAL MEMORY 2.0 ENGINE
+// Multi-instance Object Identity, Disambiguation, Movement Trajectory & Correction
+// ══════════════════════════════════════════════════════════════════════════════
+
+const STORAGE_PREFIX_V2 = 'cognify_spatial_memory_v2_';
+
+// In-memory user-isolated cache for Spatial Memory 2.0
+const userSpatialV2Cache: Map<string, SpatialObjectIdentity[]> = new Map();
+
+const CATEGORY_PROMPT_NAMES: Record<string, { en: string; ar: string; fr: string }> = {
+  remote: { en: 'remote', ar: 'جهاز تحكم', fr: 'télécommande' },
+  keys: { en: 'keys', ar: 'مفاتيح', fr: 'clés' },
+  glasses: { en: 'glasses', ar: 'نظارة', fr: 'lunettes' },
+  medication: { en: 'medication', ar: 'دواء', fr: 'médicament' },
+  phone: { en: 'phone', ar: 'هاتف', fr: 'téléphone' },
+  cup: { en: 'cup', ar: 'كوب', fr: 'tasse' },
+  bag: { en: 'bag', ar: 'حقيبة', fr: 'sac' },
+  document: { en: 'document', ar: 'مستند', fr: 'document' },
+};
+
+function inferSubType(category: string, label?: string): string | undefined {
+  if (!label) return undefined;
+  const l = label.toLowerCase();
+  if (l.includes('tv') || l.includes('television') || label.includes('تلفزيون')) return 'tv';
+  if (l.includes('ac') || l.includes('air conditioner') || label.includes('تكييف')) return 'ac';
+  if (l.includes('car') || label.includes('سيارة') || label.includes('عربية')) return 'car';
+  if (l.includes('house') || l.includes('home') || label.includes('منزل') || label.includes('بيت')) return 'house';
+  return undefined;
+}
+
+function deriveLabels(
+  category: string,
+  identityLabel?: string
+): { labelEn: string; labelAr: string; labelFr: string } {
+  if (!identityLabel || !identityLabel.trim()) {
+    const dict = OBJECT_DICTIONARY.find((d) => d.category === category);
+    return {
+      labelEn: dict?.nameEn || category,
+      labelAr: dict?.nameAr || category,
+      labelFr: dict?.nameFr || category,
+    };
+  }
+
+  const raw = identityLabel.trim();
+  const lower = raw.toLowerCase();
+
+  if (category === 'remote' || lower.includes('remote') || lower.includes('ريموت') || lower.includes('télécommande')) {
+    if (lower.includes('tv') || lower.includes('television') || raw.includes('تلفزيون') || lower.includes('télé')) {
+      return {
+        labelEn: 'TV Remote',
+        labelAr: 'ريموت التلفزيون',
+        labelFr: 'Télécommande TV',
+      };
+    }
+    if (lower.includes('ac') || lower.includes('air conditioner') || lower.includes('climat') || raw.includes('تكييف')) {
+      return {
+        labelEn: 'AC Remote',
+        labelAr: 'ريموت التكييف',
+        labelFr: 'Télécommande Climatiseur',
+      };
+    }
+    return {
+      labelEn: raw,
+      labelAr: raw.includes('ريموت') ? raw : `ريموت (${raw})`,
+      labelFr: `Télécommande (${raw})`,
+    };
+  }
+
+  if (category === 'keys' || lower.includes('key') || lower.includes('مفتاح') || lower.includes('مفاتيح') || lower.includes('clé')) {
+    if (lower.includes('car') || raw.includes('سيارة') || raw.includes('عربية') || lower.includes('voiture')) {
+      return {
+        labelEn: 'Car Keys',
+        labelAr: 'مفاتيح السيارة',
+        labelFr: 'Clés de voiture',
+      };
+    }
+    if (lower.includes('house') || lower.includes('home') || raw.includes('منزل') || raw.includes('بيت') || lower.includes('maison')) {
+      return {
+        labelEn: 'House Keys',
+        labelAr: 'مفاتيح المنزل',
+        labelFr: 'Clés de maison',
+      };
+    }
+    return {
+      labelEn: raw,
+      labelAr: raw.includes('مفاتيح') ? raw : `مفاتيح (${raw})`,
+      labelFr: `Clés (${raw})`,
+    };
+  }
+
+  const isArabicText = /[\u0600-\u06FF]/.test(raw);
+  const dict = OBJECT_DICTIONARY.find((d) => d.category === category);
+  return {
+    labelEn: isArabicText ? (dict?.nameEn || raw) : raw,
+    labelAr: isArabicText ? raw : (dict?.nameAr || raw),
+    labelFr: dict?.nameFr || raw,
+  };
+}
+
+/**
+ * Retrieves all Spatial Memory 2.0 object identities for a specific user ID.
+ * Strictly enforces user isolation.
+ */
+export function getSpatialObjectIdentities(uid: string): SpatialObjectIdentity[] {
+  if (!uid) return [];
+
+  // Check in-memory cache
+  if (userSpatialV2Cache.has(uid)) {
+    return userSpatialV2Cache.get(uid)!;
+  }
+
+  // Check localStorage
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(`${STORAGE_PREFIX_V2}${uid}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const isolated = parsed.filter((rec: SpatialObjectIdentity) => !rec.uid || rec.uid === uid);
+          isolated.forEach((rec) => {
+            rec.uid = uid;
+          });
+          userSpatialV2Cache.set(uid, isolated);
+          return isolated;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Persists the user's Spatial Memory 2.0 objects to memory cache and storage.
+ */
+function persistSpatialObjectIdentities(uid: string, records: SpatialObjectIdentity[]): void {
+  if (!uid) return;
+  records.forEach((r) => {
+    r.uid = uid;
+  });
+  userSpatialV2Cache.set(uid, records);
+
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(`${STORAGE_PREFIX_V2}${uid}`, JSON.stringify(records));
+    } catch {
+      // ignore
+    }
+  }
+
+  try {
+    if (typeof window !== 'undefined' && db) {
+      const userRef = doc(db, `users/${uid}`);
+      setDoc(
+        userRef,
+        { spatialMemoriesV2: cleanDataForFirestore(records) },
+        { merge: true }
+      ).catch(() => {});
+    }
+  } catch {
+    // Non-blocking offline support
+  }
+}
+
+/**
+ * Resets/clears Spatial Memory 2.0 for a user (useful for tests and cleanup).
+ */
+export function clearSpatialMemoryV2ForUser(uid: string): void {
+  userSpatialV2Cache.delete(uid);
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    try {
+      localStorage.removeItem(`${STORAGE_PREFIX_V2}${uid}`);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/**
+ * Records a spatial observation under Spatial Memory 2.0:
+ * - Distinguishes between multiple distinct objects of the same category (e.g. TV Remote vs AC Remote).
+ * - Appends an immutable location observation to movementHistory tracking previous locations over time.
+ * - Enforces strict user isolation.
+ */
+export function recordSpatialObservationV2(
+  uid: string,
+  object: {
+    category: string;
+    identityLabel?: string;
+    roomEn: string;
+    roomAr: string;
+    roomFr?: string;
+    surfaceEn: string;
+    surfaceAr: string;
+    surfaceFr?: string;
+    features?: {
+      color?: string;
+      roomAffiliation?: string;
+      nickname?: string;
+      subType?: string;
+    } | any;
+    confidence?: number;
+    visualNote?: string;
+    id?: string;
+    direction?: string;
+  }
+): SpatialObjectIdentity {
+  if (!uid || !object) {
+    throw new Error('User ID and object details are required for spatial memory observation.');
+  }
+
+  const existingObjects = getSpatialObjectIdentities(uid);
+  const now = Date.now();
+
+  // 1. Check if matching existing instance
+  let targetIndex = -1;
+
+  if (object.id) {
+    targetIndex = existingObjects.findIndex((o) => o.id === object.id);
+  }
+
+  if (targetIndex === -1 && object.identityLabel) {
+    const norm = object.identityLabel.toLowerCase().trim();
+    targetIndex = existingObjects.findIndex((o) => {
+      if (o.category !== object.category) return false;
+      if (o.labelEn.toLowerCase() === norm) return true;
+      if (o.labelAr === object.identityLabel) return true;
+      if (o.distinguishingFeatures?.nickname?.toLowerCase() === norm) return true;
+      if (o.distinguishingFeatures?.subType && norm.includes(o.distinguishingFeatures.subType.toLowerCase())) return true;
+      return false;
+    });
+  }
+
+  if (targetIndex === -1 && object.features) {
+    if (object.features.nickname) {
+      const nick = object.features.nickname.toLowerCase().trim();
+      targetIndex = existingObjects.findIndex(
+        (o) => o.category === object.category && o.distinguishingFeatures?.nickname?.toLowerCase() === nick
+      );
+    } else if (object.features.subType) {
+      const sub = object.features.subType.toLowerCase().trim();
+      targetIndex = existingObjects.findIndex(
+        (o) => o.category === object.category && o.distinguishingFeatures?.subType?.toLowerCase() === sub
+      );
+    }
+  }
+
+  const observation: SpatialLocationObservation = {
+    timestamp: now,
+    roomEn: object.roomEn,
+    roomAr: object.roomAr,
+    roomFr: object.roomFr || object.roomEn,
+    surfaceEn: object.surfaceEn,
+    surfaceAr: object.surfaceAr,
+    surfaceFr: object.surfaceFr || object.surfaceEn,
+    direction: object.direction,
+    confidence: object.confidence !== undefined ? object.confidence : 0.9,
+    visualNote: object.visualNote,
+  };
+
+  let target: SpatialObjectIdentity;
+
+  if (targetIndex >= 0) {
+    // Existing object: update location & append movement observation
+    target = { ...existingObjects[targetIndex] };
+    target.roomEn = object.roomEn;
+    target.roomAr = object.roomAr;
+    if (object.roomFr) target.roomFr = object.roomFr;
+    target.surfaceEn = object.surfaceEn;
+    target.surfaceAr = object.surfaceAr;
+    if (object.surfaceFr) target.surfaceFr = object.surfaceFr;
+    target.lastSeen = now;
+    if (object.confidence !== undefined) target.confidence = object.confidence;
+
+    if (object.features) {
+      target.distinguishingFeatures = {
+        ...target.distinguishingFeatures,
+        ...object.features,
+      };
+    }
+
+    target.movementHistory = [...(target.movementHistory || []), observation];
+    existingObjects[targetIndex] = target;
+  } else {
+    // New object instance
+    const labels = deriveLabels(object.category, object.identityLabel);
+    const subType = object.features?.subType || inferSubType(object.category, object.identityLabel);
+    const id =
+      object.id ||
+      `sp2_${object.category}_${subType || 'obj'}_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+
+    target = {
+      id,
+      uid,
+      category: object.category,
+      labelEn: labels.labelEn,
+      labelAr: labels.labelAr,
+      labelFr: labels.labelFr,
+      roomEn: object.roomEn,
+      roomAr: object.roomAr,
+      roomFr: object.roomFr || object.roomEn,
+      surfaceEn: object.surfaceEn,
+      surfaceAr: object.surfaceAr,
+      surfaceFr: object.surfaceFr || object.surfaceEn,
+      distinguishingFeatures: {
+        color: object.features?.color,
+        roomAffiliation: object.features?.roomAffiliation || object.roomEn,
+        nickname: object.features?.nickname || object.identityLabel || labels.labelEn,
+        subType,
+      },
+      confidence: object.confidence !== undefined ? object.confidence : 0.9,
+      lastSeen: now,
+      movementHistory: [observation],
+      correctionsCount: 0,
+    };
+
+    existingObjects.push(target);
+  }
+
+  persistSpatialObjectIdentities(uid, existingObjects);
+  return target;
+}
+
+/**
+ * Resolves spatial queries under Spatial Memory 2.0:
+ * - If multiple candidates match a generic query, returns isAmbiguous: true with candidate list and localized clarification prompts.
+ * - If exactly 1 match (or query is specific), returns isAmbiguous: false, primaryMatch, confidence, and lastSeen.
+ * - Strictly enforces user isolation.
+ */
+export function resolveSpatialQueryV2(
+  query: string,
+  uid: string,
+  lang: 'en' | 'ar' | 'fr' = 'en'
+): SpatialDisambiguationResult {
+  if (!uid || !query || !query.trim()) {
+    return {
+      isAmbiguous: false,
+      candidateMatches: [],
+    };
+  }
+
+  const objects = getSpatialObjectIdentities(uid);
+  if (objects.length === 0) {
+    return {
+      isAmbiguous: false,
+      candidateMatches: [],
+    };
+  }
+
+  const lower = query.toLowerCase().trim();
+
+  // 1. Initial matching across categories, labels, and distinguishing features
+  const initialMatches: SpatialObjectIdentity[] = [];
+
+  for (const obj of objects) {
+    let matched = false;
+
+    // Label match
+    if (
+      lower.includes(obj.labelEn.toLowerCase()) ||
+      lower.includes(obj.labelAr.toLowerCase()) ||
+      lower.includes(obj.labelFr.toLowerCase())
+    ) {
+      matched = true;
+    }
+
+    // Category match
+    if (!matched) {
+      if (lower.includes(obj.category.toLowerCase())) {
+        matched = true;
+      } else {
+        const dict = OBJECT_DICTIONARY.find((d) => d.category === obj.category);
+        if (dict && dict.keywords.some((kw) => lower.includes(kw.toLowerCase()))) {
+          matched = true;
+        }
+      }
+    }
+
+    // Features match
+    if (!matched && obj.distinguishingFeatures) {
+      const { nickname, subType, color } = obj.distinguishingFeatures;
+      if (nickname && lower.includes(nickname.toLowerCase())) {
+        matched = true;
+      } else if (subType && lower.includes(subType.toLowerCase())) {
+        matched = true;
+      } else if (color && lower.includes(color.toLowerCase())) {
+        matched = true;
+      }
+    }
+
+    if (matched) {
+      initialMatches.push(obj);
+    }
+  }
+
+  if (initialMatches.length === 0) {
+    return {
+      isAmbiguous: false,
+      candidateMatches: [],
+    };
+  }
+
+  // 2. Specificity Disambiguation:
+  // If multiple candidates match, check if query contains distinguishing qualifiers
+  let candidateMatches = initialMatches;
+
+  if (initialMatches.length > 1) {
+    // Check room qualifier
+    const roomMatches = initialMatches.filter((obj) => {
+      return (
+        (obj.roomEn && lower.includes(obj.roomEn.toLowerCase())) ||
+        (obj.roomAr && lower.includes(obj.roomAr.toLowerCase())) ||
+        (obj.roomFr && lower.includes(obj.roomFr.toLowerCase()))
+      );
+    });
+
+    if (roomMatches.length > 0 && roomMatches.length < initialMatches.length) {
+      candidateMatches = roomMatches;
+    }
+
+    // Check specific subType or distinctive tokens (e.g. TV vs AC, Car vs House)
+    if (candidateMatches.length > 1) {
+      const specificMatches = candidateMatches.filter((obj) => {
+        const sub = obj.distinguishingFeatures?.subType?.toLowerCase();
+        const nick = obj.distinguishingFeatures?.nickname?.toLowerCase();
+        const enLabel = obj.labelEn.toLowerCase();
+        const arLabel = obj.labelAr;
+
+        const isTv = sub === 'tv' || enLabel.includes('tv') || arLabel.includes('تلفزيون');
+        const isAc = sub === 'ac' || enLabel.includes('ac') || arLabel.includes('تكييف');
+        const isCar = sub === 'car' || enLabel.includes('car') || arLabel.includes('سيارة') || arLabel.includes('عربية');
+        const isHouse = sub === 'house' || enLabel.includes('house') || arLabel.includes('منزل') || arLabel.includes('بيت');
+
+        if (isTv && (lower.includes('tv') || lower.includes('television') || lower.includes('تلفزيون') || lower.includes('télé'))) {
+          return true;
+        }
+        if (isAc && (lower.includes('ac') || lower.includes('air conditioner') || lower.includes('تكييف') || lower.includes('climatiseur'))) {
+          return true;
+        }
+        if (isCar && (lower.includes('car') || lower.includes('سيارة') || lower.includes('عربية') || lower.includes('voiture'))) {
+          return true;
+        }
+        if (isHouse && (lower.includes('house') || lower.includes('home') || lower.includes('منزل') || lower.includes('بيت') || lower.includes('maison'))) {
+          return true;
+        }
+
+        if (sub && lower.includes(sub)) return true;
+        if (nick && lower.includes(nick) && nick !== obj.category.toLowerCase()) return true;
+
+        return false;
+      });
+
+      if (specificMatches.length > 0 && specificMatches.length < candidateMatches.length) {
+        candidateMatches = specificMatches;
+      }
+    }
+  }
+
+  // Exactly 1 match
+  if (candidateMatches.length === 1) {
+    const primary = candidateMatches[0];
+    return {
+      isAmbiguous: false,
+      candidateMatches,
+      primaryMatch: primary,
+      confidence: primary.confidence,
+      lastSeen: primary.lastSeen,
+    };
+  }
+
+  // Multiple ambiguous matches
+  const categoryKey = candidateMatches[0]?.category || 'object';
+  const catNames = CATEGORY_PROMPT_NAMES[categoryKey] || {
+    en: categoryKey,
+    ar: categoryKey,
+    fr: categoryKey,
+  };
+
+  const enList = candidateMatches.map((c, i) => `${i + 1}) ${c.labelEn} in ${c.roomEn}`).join(', ');
+  const clarificationPromptEn = `You have more than one ${catNames.en} tracked: ${enList}. Which one are you looking for?`;
+
+  const arList = candidateMatches.map((c, i) => `${i + 1}) ${c.labelAr} في ${c.roomAr}`).join(' ');
+  const clarificationPromptAr = `يوجد أكثر من ${catNames.ar} مسجل لديك: ${arList}. أيهما تبحث عنه؟`;
+
+  const frList = candidateMatches.map((c, i) => `${i + 1}) ${c.labelFr} dans ${c.roomFr}`).join(', ');
+  const clarificationPromptFr = `Vous avez plus d'une ${catNames.fr} enregistrée : ${frList}. Laquelle recherchez-vous ?`;
+
+  return {
+    isAmbiguous: true,
+    candidateMatches,
+    primaryMatch: undefined,
+    clarificationPromptEn,
+    clarificationPromptAr,
+    clarificationPromptFr,
+  };
+}
+
+/**
+ * Applies a user correction to a spatial memory object:
+ * - Updates location to user ground-truth.
+ * - Increments correctionsCount.
+ * - Sets confidence to 1.0 (human verified).
+ * - Appends correction observation to movementHistory.
+ * - Enforces strict user isolation.
+ */
+export function applySpatialCorrection(uid: string, correction: SpatialCorrection): SpatialObjectIdentity {
+  if (!uid || !correction) {
+    throw new Error('User ID and correction details are required.');
+  }
+  if (correction.userId && correction.userId !== uid) {
+    throw new Error('Multi-tenant isolation violation: cannot apply correction across users.');
+  }
+
+  const objects = getSpatialObjectIdentities(uid);
+  let targetIndex = -1;
+
+  if (correction.targetObjectId) {
+    targetIndex = objects.findIndex((o) => o.id === correction.targetObjectId);
+  }
+
+  if (targetIndex === -1 && correction.distinguishingLabel) {
+    const norm = correction.distinguishingLabel.toLowerCase().trim();
+    targetIndex = objects.findIndex(
+      (o) =>
+        o.category === correction.category &&
+        (o.labelEn.toLowerCase().includes(norm) ||
+          o.distinguishingFeatures?.nickname?.toLowerCase().includes(norm))
+    );
+  }
+
+  if (targetIndex === -1) {
+    const sameCat = objects.filter((o) => o.category === correction.category);
+    if (sameCat.length === 1) {
+      targetIndex = objects.findIndex((o) => o.id === sameCat[0].id);
+    }
+  }
+
+  const now = Date.now();
+  let target: SpatialObjectIdentity;
+
+  if (targetIndex >= 0) {
+    target = { ...objects[targetIndex] };
+    target.roomEn = correction.correctedRoomEn;
+    target.roomAr = correction.correctedRoomAr;
+    if (correction.correctedRoomFr) target.roomFr = correction.correctedRoomFr;
+    target.surfaceEn = correction.correctedSurfaceEn;
+    target.surfaceAr = correction.correctedSurfaceAr;
+    if (correction.correctedSurfaceFr) target.surfaceFr = correction.correctedSurfaceFr;
+
+    if (correction.distinguishingLabel) {
+      target.labelEn = correction.distinguishingLabel;
+      target.distinguishingFeatures = {
+        ...target.distinguishingFeatures,
+        nickname: correction.distinguishingLabel,
+      };
+      if (/[\u0600-\u06FF]/.test(correction.distinguishingLabel)) {
+        target.labelAr = correction.distinguishingLabel;
+      }
+    }
+
+    target.correctionsCount = (target.correctionsCount || 0) + 1;
+    target.confidence = 1.0;
+    target.lastSeen = now;
+
+    const observation: SpatialLocationObservation = {
+      timestamp: now,
+      roomEn: target.roomEn,
+      roomAr: target.roomAr,
+      roomFr: target.roomFr,
+      surfaceEn: target.surfaceEn,
+      surfaceAr: target.surfaceAr,
+      surfaceFr: target.surfaceFr,
+      confidence: 1.0,
+      visualNote: `User manual correction #${target.correctionsCount}`,
+    };
+
+    target.movementHistory = [...(target.movementHistory || []), observation];
+    objects[targetIndex] = target;
+  } else {
+    const id = correction.targetObjectId || `sp2_${correction.category}_corr_${Date.now().toString(36)}`;
+    const labels = deriveLabels(correction.category, correction.distinguishingLabel);
+    const observation: SpatialLocationObservation = {
+      timestamp: now,
+      roomEn: correction.correctedRoomEn,
+      roomAr: correction.correctedRoomAr,
+      roomFr: correction.correctedRoomFr || correction.correctedRoomEn,
+      surfaceEn: correction.correctedSurfaceEn,
+      surfaceAr: correction.correctedSurfaceAr,
+      surfaceFr: correction.correctedSurfaceFr || correction.correctedSurfaceEn,
+      confidence: 1.0,
+      visualNote: 'User manual creation/correction',
+    };
+
+    target = {
+      id,
+      uid,
+      category: correction.category,
+      labelEn: correction.distinguishingLabel || labels.labelEn,
+      labelAr: labels.labelAr,
+      labelFr: labels.labelFr,
+      roomEn: correction.correctedRoomEn,
+      roomAr: correction.correctedRoomAr,
+      roomFr: correction.correctedRoomFr || correction.correctedRoomEn,
+      surfaceEn: correction.correctedSurfaceEn,
+      surfaceAr: correction.correctedSurfaceAr,
+      surfaceFr: correction.correctedSurfaceFr || correction.correctedSurfaceEn,
+      distinguishingFeatures: {
+        nickname: correction.distinguishingLabel,
+        roomAffiliation: correction.correctedRoomEn,
+      },
+      confidence: 1.0,
+      lastSeen: now,
+      movementHistory: [observation],
+      correctionsCount: 1,
+    };
+    objects.push(target);
+  }
+
+  persistSpatialObjectIdentities(uid, objects);
+  return target;
+}
+
+/**
+ * Returns the chronological trajectory of an object's movements.
+ * Strictly enforces user isolation: returns empty if objectId does not belong to user.
+ */
+export function getObjectMovementHistory(uid: string, objectId: string): SpatialLocationObservation[] {
+  if (!uid || !objectId) return [];
+  const objects = getSpatialObjectIdentities(uid);
+  const target = objects.find((o) => o.id === objectId);
+  if (!target) return [];
+  return [...(target.movementHistory || [])].sort((a, b) => a.timestamp - b.timestamp);
 }
