@@ -243,7 +243,7 @@ npm run build
 7. **Accessibility Suite**: Vision Companion (0% disk / 0% cloud volatile camera frames), Sign Avatar 3D (procedural fingerspelling and word gestures), Two-Way Hearing Bridge (live captions with confidence alternatives), and Motor Euphonia switch access.
 8. **Privacy, Export & Erasure**: Full GDPR/FERPA JSON export (v2.0.0), cascading account deletion, and AES-GCM 256-bit client-side CryptoShield.
 9. **Deterministic AI Routing & Quality Guard**: Zero-token request categorization, circuit breaker with multi-provider fallback (Gemini -> Groq -> NVIDIA -> xAI), self-healing code/LaTeX math delimiters, and sensitive secret redaction.
-10. **Automated Verification Suite**: Master test suite encompassing **2,113 automated assertions** covering unit, contract, resilience, security, and end-to-end user journeys with 100% pass rate. Single-source-of-truth reporting generated via `scripts/generateTestReport.ts` (`npm run report`).
+10. **Automated Verification Suite**: Master test suite encompassing **3,475 automated assertions** covering unit, contract, resilience, security, multi-provider benchmarks, production observability, and end-to-end user journeys with 100% pass rate. Single-source-of-truth reporting generated via `scripts/generateTestReport.ts` (`npm run report`).
 
 ---
 
@@ -256,14 +256,40 @@ Cognify is hardened against OWASP Top 10: 2025, OWASP API Security Top 10: 2023,
 - **Client State Integrity Defense**: `api/student/learningProfile.ts` rejects synthetic unearned mastery claims (e.g. 100% mastery with 0 attempts or correct > attempts), protecting analytics integrity.
 - **Firestore & Storage Hardening**: Eliminated recursive subcollection wildcard (`match /{sub}/{document=**}`) in `firestore.rules`. Replaced with explicit academic subcollection matches, owner-only locks on student `threads` and `spatialObjects`, authenticated telemetry creation with schema check, and strict MIME-type (`image/*`, `application/pdf`) and size (5MB) enforcement in `storage.rules`.
 - **Audit Citation Verification**: Automated `fs.existsSync` assertion guarantees 100% (51/51) of cited evidence paths in `securityAuditEngine.ts` exist on disk, eliminating false positives.
-- **LLM01 / LLM07 Injection Defense**: Multi-pattern regex detector in `src/lib/aiQualityGuard2.ts` neutralizes instruction overrides, DAN jailbreaks, system prompt extractions, and student state exfiltrations, escalating threats to `CRITICAL`.
+- **LLM01 / LLM07 Injection Defense**: Multi-pattern regex detector in `src/lib/aiQualityGuard2.ts` neutralizes instruction overrides, DAN jailbreaks, system prompt extractions, and student state exfiltrations, escalating threats to `CRITICAL`. Verified with a 42-exploit adversarial battery (`tests/benchmarks/promptInjectionBenchmark.ts`).
 - **LLM02 Sensitive Secret Redaction**: Output quality guard in `api/_lib/qualityGuard.ts` automatically redacts exposed API keys (`AIza...`, `gsk_...`, `nvapi-...`, `xai-...`, RSA private keys) with `[REDACTED_SECRET]`.
 - **Multi-Tenant Memory Isolation**: Spatial memory queries and cache partitions are strictly isolated per UID.
 - **Resource Limits & DoS Defense**: Dual-tier sliding window rate limiting (IP tier: 100 req/min, User tier: 60 req/min; security telemetry: 15 req/min) returning `HTTP 429`, with Express JSON body limit capped at 2MB.
 
 ---
 
-## 11. Development & Verification Commands
+## 11. Production Observability & Evaluation Ecosystem (Phases B, C & D)
+
+- **Phase B: Real Evaluation Benchmarks**:
+  - `tests/benchmarks/adaptiveLearningBenchmark.ts`: Cross-domain trilingual dataset (`src/data/evaluationDataset.ts`), Bloom scaffolding progression, prerequisite chain diagnosis.
+  - `tests/benchmarks/interventionEffectivenessBenchmark.ts`: 500-trial simulation runner (`src/lib/pedagogicalBenchmarkRunner.ts`), longitudinal Hake $g > 0.60$, Welch $t$-test ($p < 0.05$), Cohen's $d$, 30-day retention decay mitigation.
+  - `tests/benchmarks/aiProviderBenchmark.ts` & `costBenchmark.ts`: Multi-provider performance & economic models (`src/lib/aiProviderBenchmark.ts`), circuit breaker fast-bypass, LaTeX/markdown preservation, token and monthly cost modeling (< $0.06/student/mo on Flash), 80%/100% quota alerts.
+  - `tests/benchmarks/frenchLanguageBenchmark.ts`: Trilingual dataset (`src/lib/multilingualBenchmarkData.ts`), zero English/robotic leak, France travel rules, emergency hotkeys (15, 17, 18, 112, 114), French spatial queries.
+  - `tests/benchmarks/accessibilityBenchmark.ts`: Vision 0% storage volatile memory invariant, 3D sign avatar 24 letters & word gestures, hearing bridge live captions & phoneme alternatives, motor switch 350ms debounce & dwell thresholds.
+  - `tests/benchmarks/promptInjectionBenchmark.ts`: 42 adversarial attacks across OWASP LLM Top 10 with 100% defense rate.
+- **Phase C: Production Observability & Tracing**:
+  - `api/_lib/tracing.ts`: Distributed correlation tracing via `x-cognify-trace-id` (UUIDv4/nano-timestamp) and hierarchical span lifecycles.
+  - `api/_lib/aiTelemetry.ts`: Structured AI telemetry capturing tokens, model name, provider, latency ms, and fallback events.
+  - `api/_lib/costTelemetry.ts`: Per-request estimated USD cost calculation and organization quota alerts.
+  - `src/lib/privacySafeLogger.ts`: Zero-knowledge privacy logger redacting PII, student names, camera frames, and bearer tokens.
+  - `src/lib/securityAlertsEngine.ts`: Real-time anomaly detector emitting alerts on brute-force, injection spikes, and cross-tenant probes.
+  - `api/system/health.ts`: Production edge health check returning uptime, memory RSS/heap, circuit breaker statuses, and provider health.
+- **Phase D: Real-World Persona Simulation & Pilot Testbed**:
+  - `tests/validation/studentSimulation.ts`: Longitudinal 30-day cohort simulation across Fast Learner, Struggling Learner, and Inconsistent Student personas.
+  - `tests/validation/accessibilityPersonas.ts`: Blind, Deaf, and Motor-impaired end-to-end task completion validation.
+  - `tests/validation/frenchNativeValidation.ts`: Native French immersion, curriculum navigation, and travel assistant validation.
+  - `tests/validation/teacherWorkflowValidation.ts`: Cohort mastery heatmap, automated prerequisite alerts, and curriculum pacing advisor.
+  - `tests/validation/parentCompanionValidation.ts`: Weekly digest synthesis, psychological safety privacy shield, screen-time balance analysis.
+  - `tests/validation/institutionPilotValidation.ts`: Multi-tenant seat allocation limits, department rosters, FERPA-compliant audit logs, and bulk export verification receipts.
+
+---
+
+## 12. Development & Verification Commands
 
 ```bash
 # Install dependencies
@@ -275,8 +301,13 @@ npm run dev
 # Run static type verification (Zero TypeScript errors)
 npm run lint    # or npx tsc --noEmit
 
-# Execute master test suite (2,113 tests passing, 0 failed)
+# Execute master test suite (3,475 tests passing, 0 failed)
 npm test
+
+# Run individual benchmarks or validation suites
+npm run test:benchmarks
+npm run test:validation
+npm run test:observability
 
 # Generate verified single-source-of-truth JSON report (test-report.json)
 npm run report

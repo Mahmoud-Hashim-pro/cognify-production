@@ -113,16 +113,33 @@ export function repairLatexFormulas(text: string): { repaired: string; repairs: 
 // ============================================================================
 
 const INJECTION_PATTERNS = [
-  { regex: /ignore\s+(all\s+)?(previous\s+|your\s+)?instructions/i, name: 'instruction_override' },
+  // Category 1: Instruction Overrides & Jailbreaks
+  { regex: /(?:ignore|disregard|forget|override)\s+(all\s+)?(previous\s+|your\s+|prior\s+)?(instructions|directives|rules|constraints|prompts?)/i, name: 'instruction_override' },
   { regex: /disregard\s+(the\s+)?system\s+prompt/i, name: 'system_prompt_disregard' },
-  { regex: /reveal\s+(the\s+)?(hidden\s+)?system\s+prompt/i, name: 'system_prompt_extraction' },
-  { regex: /bypass\s+(all\s+)?(safety|security)\s+filters/i, name: 'safety_bypass' },
-  { regex: /act\s+as\s+(dan|an\s+unrestricted\s+ai|developer\s+mode)/i, name: 'dan_jailbreak' },
-  { regex: /hypothetical\s+unrestricted\s+scenario/i, name: 'hypothetical_jailbreak' },
-  { regex: /execute\s+as\s+root\s+user/i, name: 'privilege_escalation' },
-  { regex: /reveal\s+(all\s+)?(the\s+)?(api[_-]?keys?|secrets?|firebase(\s+credentials)?|gemini_key|service[_-]?account|credentials)/i, name: 'secret_extraction' },
-  { regex: /(print|reveal|output)\s+(the\s+)?(raw\s+)?(student[_-]?state|internal[_-]?state|memory[_-]?store)/i, name: 'student_state_exfiltration' },
-  { regex: /(access|reveal|fetch|show|give)\s+(me\s+)?(another\s+|other\s+|the\s+user['’]?s\s+)?(users?['’]?s?|students?['’]?s?|private)?\s*(data|memory|memories|profile|credentials)/i, name: 'cross_user_exfiltration' }
+  { regex: /(?:act\s+as\s+|from\s+now\s+on\s+you\s+are\s+)?(?:dan\b|do\s+anything\s+now)/i, name: 'dan_jailbreak' },
+  { regex: /(?:you\s+are\s+now\s+|act\s+as\s+(?:an\s+)?|enter\s+|switch\s+to\s+)(?:unrestricted(\s+ai)?|developer\s+mode|god\s+mode|jailbreak|no\s+limits|unfiltered)/i, name: 'unrestricted_jailbreak' },
+  { regex: /(?:bypass|disable|turn\s+off|circumvent|remove)\s+(all\s+)?(safety|security|content)\s*(filters?|guards?|protocols?|restrictions?|measures?|constraints?)/i, name: 'safety_bypass' },
+  { regex: /(?:hypothetical\s+(?:unrestricted\s+)?scenario|roleplay\s+as\s+(?:a|an)\s+(?:unrestricted|evil|hacker|rule-free)|in\s+a\s+fictional\s+(?:screenplay|world|scene)\s+where.*(?:ignore|bypass|unrestricted|disable))/i, name: 'hypothetical_jailbreak' },
+  { regex: /execute\s+as\s+root(\s+user)?|sudo\s+mode|escalate\s+privileges/i, name: 'privilege_escalation' },
+
+  // Category 2: System Prompt Extraction & Confidentiality
+  { regex: /(?:reveal|show|display|leak|unhide|extract)\s+(?:the\s+)?(?:hidden\s+|secret\s+|internal\s+)?(?:system\s+prompt|developer\s+rules|system\s+instructions|system\s+directives|meta\s+prompt)/i, name: 'system_prompt_extraction' },
+  { regex: /(?:print|output|display|repeat|echo)\s+(?:everything|all\s+text)\s+before\s+(?:line\s+1|this\s+line|the\s+start|the\s+prompt)/i, name: 'system_prompt_extraction' },
+  { regex: /what\s+(?:were|are)\s+your\s+(?:initial\s+|original\s+|core\s+|system\s+)?(?:directives|instructions|prompts?|rules)/i, name: 'system_prompt_extraction' },
+  { regex: /(?:repeat|output|show)\s+(?:your\s+)?(?:entire\s+|full\s+)?system\s+prompt\s+verbatim/i, name: 'system_prompt_extraction' },
+  { regex: /(?:output|show)\s+(?:the\s+)?(?:exact\s+)?(?:prompt\s+template|system\s+directives\s+starting)/i, name: 'system_prompt_extraction' },
+
+  // Category 3: Cross-Tenant & Student Data Exfiltration
+  { regex: /(print|reveal|output|dump)\s+(the\s+)?(raw\s+)?(student[_-]?state|internal[_-]?state|memory[_-]?store)/i, name: 'student_state_exfiltration' },
+  { regex: /(?:access|reveal|fetch|show|give|display|export|dump)\s+(?:me\s+)?(?:another\s+|other\s+|different\s+|all\s+|the\s+)?(?:users?['’]?s?|students?['’]?s?|admin['’]?s?|user\s+[a-z0-9_]+['’]?s\s+)?\s*(?:private\s+)?(?:data|memory|memories|profile|credentials|grades|records|scores|passwords?|spatial\s+objects?)/i, name: 'cross_user_exfiltration' },
+  { regex: /(?:export|dump|leak|fetch|list)\s+all\s+(?:students?['’]?s?\s+)?(?:spatial\s+(?:objects?|memories|records)|data|profiles|grades)/i, name: 'cross_user_exfiltration' },
+  { regex: /(?:give|show|reveal|display|fetch|tell)\s+(?:me\s+)?(?:the\s+)?admin['’]?s?\s+passwords?/i, name: 'cross_user_exfiltration' },
+  { regex: /show\s+me\s+bob['’]?s\s+(?:concept\s+mastery|scores|data|profile)/i, name: 'cross_user_exfiltration' },
+
+  // Category 4: Fake Credential & Secret Elicitation
+  { regex: /(?:what\s+(?:is|are)\s+(?:all\s+)?your\s+(?:secret\s+|hidden\s+)?|reveal|generate|provide|create|simulate|fake|test|output|leak|dump)\s*(?:all\s+)?(?:the\s+)?(?:a\s+|an\s+)?(?:valid\s+|sample\s+)?(?:api[_-]?keys?|secrets?|firebase(?:\s+credentials|\s+keys?|\s*apikey)?|gemini_key|service[_-]?account(?:\s+keys?)?|credentials|auth\s+tokens?|private\s+keys?|backend\s+tokens?)/i, name: 'secret_extraction' },
+  { regex: /(?:simulate|create|output)\s+(?:an?\s+)?(?:admin\s+config|server\s+response).*(?:apikey|secret|token)/i, name: 'secret_extraction' },
+  { regex: /(?:echo|print|show|read|dump|extract)\s+(?:the\s+)?(?:environment\s+variable|process\.env|env\s+vars?|dotenv)/i, name: 'secret_extraction' },
 ];
 
 export function detectAndNeutralizeAdversarialInjection(text: string): AdversarialThreatAssessment {
@@ -143,7 +160,11 @@ export function detectAndNeutralizeAdversarialInjection(text: string): Adversari
     matchedSignatures.includes('safety_bypass') ||
     matchedSignatures.includes('secret_extraction') ||
     matchedSignatures.includes('student_state_exfiltration') ||
-    matchedSignatures.includes('cross_user_exfiltration')
+    matchedSignatures.includes('cross_user_exfiltration') ||
+    matchedSignatures.includes('dan_jailbreak') ||
+    matchedSignatures.includes('unrestricted_jailbreak') ||
+    matchedSignatures.includes('hypothetical_jailbreak') ||
+    matchedSignatures.includes('privilege_escalation')
   ) {
     threatLevel = 'critical';
   } else if (matchedSignatures.length === 1) {
@@ -155,6 +176,21 @@ export function detectAndNeutralizeAdversarialInjection(text: string): Adversari
     attackSignaturesMatched: matchedSignatures,
     sanitized: matchedSignatures.length > 0,
     neutralizedText: sanitizedText
+  };
+}
+
+export function evaluatePromptSafety(prompt: string) {
+  const assessment = detectAndNeutralizeAdversarialInjection(prompt);
+  const isCritical = assessment.threatLevel === 'critical';
+  const isSuspicious = assessment.threatLevel === 'medium' || assessment.threatLevel === 'low';
+  const isThreat = isCritical || isSuspicious;
+
+  return {
+    ...assessment,
+    sanitizedText: assessment.neutralizedText,
+    threatClassification: (isCritical ? 'CRITICAL' : isSuspicious ? 'SUSPICIOUS' : 'CLEAN') as 'CRITICAL' | 'SUSPICIOUS' | 'CLEAN',
+    isThreat,
+    blocked: assessment.sanitized,
   };
 }
 
