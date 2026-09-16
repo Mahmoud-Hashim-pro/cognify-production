@@ -11,43 +11,25 @@
  */
 
 import { getConcept } from './conceptGraph.js';
-import {
+import type {
   PedagogyStrategy,
   StrategyOutcomeMetrics,
   InterventionOutcomeRecord,
   ConceptMasteryRecord,
   RetentionSchedule,
   StudentState,
-} from './studentStateEngine.js';
+  ResponseLatencyProfile,
+  RetentionRiskLevel,
+  ConceptLearningProfile,
+  PersonalLearningModel,
+} from '../types/studentState.js';
 
-export type ResponseLatencyProfile = 'low' | 'medium' | 'high';
-export type RetentionRiskLevel = 'low' | 'medium' | 'high';
-
-export interface ConceptLearningProfile {
-  conceptId: string;
-  conceptNameEn: string;
-  conceptNameAr: string;
-  mastery: number; // 0.0 to 1.0
-  confidence: number; // 0.0 to 1.0
-  commonError?: string; // Top repeated mistake (e.g. 'dereference_null')
-  latencyProfile: ResponseLatencyProfile; // low (<8s), medium (8-15s), high (>15s)
-  avgResponseTimeMs: number;
-  bestStrategy: PedagogyStrategy; // Highest win-rate strategy
-  secondBestStrategy?: PedagogyStrategy; // Second-highest win-rate strategy
-  retentionRisk: RetentionRiskLevel; // Derived from SM-2 repetitions and review delta
-  lastEvaluated: number;
-  totalAttempts: number;
-  successfulRemediations: number;
-}
-
-export interface PersonalLearningModel {
-  uid: string;
-  updatedAt: number;
-  primaryPreferredStrategy: PedagogyStrategy;
-  secondaryPreferredStrategy?: PedagogyStrategy;
-  conceptProfiles: Record<string, ConceptLearningProfile>;
-  proactiveRemediationDirectives: string[];
-}
+export type {
+  ResponseLatencyProfile,
+  RetentionRiskLevel,
+  ConceptLearningProfile,
+  PersonalLearningModel,
+};
 
 /**
  * Derives a categorical latency profile from average response time in milliseconds.

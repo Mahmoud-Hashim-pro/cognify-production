@@ -23,13 +23,21 @@ import {
   isGuestUser,
   getLearningEventHistory,
 } from './learningEvents';
-import {
-  PersonalLearningModel,
-  ConceptLearningProfile,
+import { buildPersonalLearningModel } from './personalLearningModel';
+import type {
+  PedagogyStrategy,
+  StrategyOutcomeMetrics,
+  InterventionOutcomeRecord,
+  ConceptMasteryRecord,
+  StruggleSignalType,
+  LearningStrain,
+  PedagogyMetrics,
   ResponseLatencyProfile,
   RetentionRiskLevel,
-  buildPersonalLearningModel,
-} from './personalLearningModel';
+  ConceptLearningProfile,
+  PersonalLearningModel,
+  StudentState,
+} from '../types/studentState';
 
 export { isGuestUser };
 export type {
@@ -38,6 +46,14 @@ export type {
   ConceptLearningProfile,
   ResponseLatencyProfile,
   RetentionRiskLevel,
+  PedagogyStrategy,
+  StrategyOutcomeMetrics,
+  InterventionOutcomeRecord,
+  ConceptMasteryRecord,
+  StruggleSignalType,
+  LearningStrain,
+  PedagogyMetrics,
+  StudentState,
 };
 
 /**
@@ -46,76 +62,108 @@ export type {
  */
 export const studentStateDoc = (uid: string) => doc(db, 'users', uid, 'studentState', 'current');
 
-export interface StrategyOutcomeMetrics {
-  attempts: number;
-  successes: number;
-  rate: number; // successes / attempts (0.0 to 1.0)
-  lastUsed: number;
-}
+/**
+ * Pure helper function to compute concept mastery update and intervention outcome record.
+ * Consolidates the single source of truth for answer outcomes across both live sessions
+ * and event-sourced historical replays (DRY).
+ */
+export function computeConceptAnswerUpdate(
+  existingRecord: ConceptMasteryRecord | undefined,
+  cleanConcept: string,
+  isCorrect: boolean,
+  timestamp: number,
+  responseTimeMs: number,
+  mistakeType?: string,
+  activeInt?: InterventionDirective
+): {
+  updatedRecord: ConceptMasteryRecord;
+  outcomeRecord?: InterventionOutcomeRecord;
+} {
+  const record: ConceptMasteryRecord = existingRecord ? { ...existingRecord } : {
+    conceptId: cleanConcept,
+    attempts: 0,
+    correct: 0,
+    accuracy: 0,
+    confidence: 0.5,
+    consecutiveCorrect: 0,
+    consecutiveIncorrect: 0,
+    lastTested: timestamp,
+    mistakeTypes: [],
+    strategyOutcomes: {},
+  };
 
-export interface InterventionOutcomeRecord {
-  id: string;
-  interventionId: string;
-  conceptId: string;
-  strategy: PedagogyStrategy;
-  outcome: 'success' | 'struggle' | 'in_progress';
-  preInterventionAccuracy: number;
-  postInterventionAccuracy: number;
-  attemptsUnderIntervention: number;
-  triggeredTimestamp: number;
-  resolvedTimestamp?: number;
-}
+  const previousAccuracy = record.attempts > 0 ? record.accuracy : 0;
+  record.attempts += 1;
+  record.lastTested = timestamp;
 
-export interface ConceptMasteryRecord {
-  conceptId: string;
-  attempts: number;
-  correct: number;
-  accuracy: number;
-  confidence: number;
-  consecutiveCorrect: number;
-  consecutiveIncorrect: number;
-  lastTested: number;
-  mistakeTypes: string[];
-  strategyOutcomes?: Partial<Record<PedagogyStrategy, StrategyOutcomeMetrics>>;
-  bestObservedStrategy?: PedagogyStrategy;
-  avgResponseTimeMs?: number;
-}
+  if (isCorrect) {
+    record.correct += 1;
+    record.consecutiveCorrect += 1;
+    record.consecutiveIncorrect = 0;
+    const streakBonus = Math.min(0.15, record.consecutiveCorrect * 0.05);
+    record.confidence = Math.min(1.0, Math.round((record.confidence + 0.12 + streakBonus) * 100) / 100);
+  } else {
+    record.consecutiveIncorrect += 1;
+    record.consecutiveCorrect = 0;
+    record.confidence = Math.max(0.1, Math.round((record.confidence - 0.15) * 100) / 100);
+    record.mistakeTypes = record.mistakeTypes ? [...record.mistakeTypes] : [];
+    if (mistakeType && !record.mistakeTypes.includes(mistakeType)) {
+      record.mistakeTypes.push(mistakeType);
+    }
+  }
 
-export type StruggleSignalType = 'high_response_latency' | 'repeated_errors' | 'prerequisite_gap' | 'frequent_hints';
+  record.accuracy = Math.round((record.correct / record.attempts) * 100) / 100;
 
-export interface LearningStrain {
-  possibleStruggle: number; // 0.0 (smooth/fluent) to 1.0 (high strain)
-  confidence: number;       // 0.0 to 1.0 (statistical confidence in struggle detection)
-  signals: StruggleSignalType[];
-}
+  if (typeof responseTimeMs === 'number' && responseTimeMs > 0) {
+    const prevTotal = (record.avgResponseTimeMs || responseTimeMs) * (record.attempts - 1);
+    record.avgResponseTimeMs = Math.round((prevTotal + responseTimeMs) / record.attempts);
+  }
 
-export type PedagogyStrategy = 'analogies' | 'scaffolded' | 'worked_example' | 'socratic' | 'advanced_rigor';
+  let outcomeRecord: InterventionOutcomeRecord | undefined;
 
-export interface PedagogyMetrics {
-  helpfulCount: number;
-  unhelpfulCount: number;
-  score: number; // 0.1 to 1.0 dynamic weighting
-}
+  // Outcome tracking: evaluate effectiveness of any active intervention on this concept
+  if (activeInt && activeInt.strategy) {
+    const strat = activeInt.strategy as PedagogyStrategy;
+    record.strategyOutcomes = record.strategyOutcomes ? { ...record.strategyOutcomes } : {};
+    const currentMetric: StrategyOutcomeMetrics = record.strategyOutcomes[strat]
+      ? { ...record.strategyOutcomes[strat]! }
+      : {
+          attempts: 0,
+          successes: 0,
+          rate: 0,
+          lastUsed: timestamp,
+        };
 
-export interface StudentState {
-  uid: string;
-  /**
-   * Temporary initial onboarding pedagogical baseline (NOT a measurement of mental capacity or IQ).
-   * Used strictly to adapt initial explanation tone and scaffolding.
-   */
-  cognitiveStage: CognitiveStage;
-  activePedagogy: PedagogyStrategy;
-  pedagogyEffectiveness: Record<PedagogyStrategy, PedagogyMetrics>;
-  learningStrain: LearningStrain;
-  struggleSignal: number;     // 0.0 to 1.0 (convenience scalar matching learningStrain.possibleStruggle)
-  cognitiveLoadScore: number; // Deprecated alias maintained for backward compatibility
-  conceptMastery: Record<string, ConceptMasteryRecord>;
-  retentionSchedules: Record<string, RetentionSchedule>;
-  activeInterventions: Record<string, InterventionDirective>;
-  interventionHistory?: InterventionOutcomeRecord[];
-  personalLearningModel?: PersonalLearningModel;
-  totalExercisesCompleted: number;
-  lastActiveTimestamp: number;
+    currentMetric.attempts += 1;
+    if (isCorrect) {
+      currentMetric.successes += 1;
+    }
+    currentMetric.rate = Math.round((currentMetric.successes / currentMetric.attempts) * 100) / 100;
+    currentMetric.lastUsed = timestamp;
+    record.strategyOutcomes[strat] = currentMetric;
+
+    // Update best observed strategy if success rate is solid (>= 0.6 with at least 1 attempt)
+    if (currentMetric.attempts >= 1 && currentMetric.rate >= 0.6) {
+      record.bestObservedStrategy = strat;
+    }
+
+    outcomeRecord = {
+      id: `out_${timestamp}_${Math.random().toString(36).substring(2, 6)}`,
+      interventionId: activeInt.id,
+      conceptId: cleanConcept,
+      strategy: strat,
+      outcome: isCorrect ? 'success' : 'struggle',
+      preInterventionAccuracy: previousAccuracy,
+      postInterventionAccuracy: record.accuracy,
+      attemptsUnderIntervention: currentMetric.attempts,
+      triggeredTimestamp: activeInt.id.startsWith('int_')
+        ? parseInt(activeInt.id.split('_')[1], 10) || timestamp
+        : timestamp,
+      resolvedTimestamp: isCorrect ? timestamp : undefined,
+    };
+  }
+
+  return { updatedRecord: record, outcomeRecord };
 }
 
 const STORAGE_PREFIX = 'cognify_student_state_';
@@ -379,90 +427,19 @@ export class StudentStateManager {
     const now = Date.now();
     const cleanConcept = conceptId.toLowerCase().trim().replace(/[\s-]+/g, '_');
 
-    let record = this.state.conceptMastery[cleanConcept];
-    if (!record) {
-      record = {
-        conceptId: cleanConcept,
-        attempts: 0,
-        correct: 0,
-        accuracy: 0,
-        confidence: 0.5,
-        consecutiveCorrect: 0,
-        consecutiveIncorrect: 0,
-        lastTested: now,
-        mistakeTypes: [],
-        strategyOutcomes: {},
-      };
-    }
-
     const activeInt = this.state.activeInterventions[cleanConcept];
-    const previousAccuracy = record.attempts > 0 ? record.accuracy : 0;
-
-    record.attempts += 1;
-    record.lastTested = now;
-
-    if (isCorrect) {
-      record.correct += 1;
-      record.consecutiveCorrect += 1;
-      record.consecutiveIncorrect = 0;
-      const streakBonus = Math.min(0.15, record.consecutiveCorrect * 0.05);
-      record.confidence = Math.min(1.0, Math.round((record.confidence + 0.12 + streakBonus) * 100) / 100);
-    } else {
-      record.consecutiveIncorrect += 1;
-      record.consecutiveCorrect = 0;
-      record.confidence = Math.max(0.1, Math.round((record.confidence - 0.15) * 100) / 100);
-      if (mistakeType && !record.mistakeTypes.includes(mistakeType)) {
-        record.mistakeTypes.push(mistakeType);
-      }
-    }
-
-    record.accuracy = Math.round((record.correct / record.attempts) * 100) / 100;
-
-    if (typeof responseTimeMs === 'number' && responseTimeMs > 0) {
-      const prevTotal = (record.avgResponseTimeMs || responseTimeMs) * (record.attempts - 1);
-      record.avgResponseTimeMs = Math.round((prevTotal + responseTimeMs) / record.attempts);
-    }
-
-    // Outcome tracking: evaluate effectiveness of any active intervention on this concept
-    if (activeInt && activeInt.strategy) {
-      const strat = activeInt.strategy as PedagogyStrategy;
-      record.strategyOutcomes = record.strategyOutcomes || {};
-      const currentMetric: StrategyOutcomeMetrics = record.strategyOutcomes[strat] || {
-        attempts: 0,
-        successes: 0,
-        rate: 0,
-        lastUsed: now,
-      };
-
-      currentMetric.attempts += 1;
-      if (isCorrect) {
-        currentMetric.successes += 1;
-      }
-      currentMetric.rate = Math.round((currentMetric.successes / currentMetric.attempts) * 100) / 100;
-      currentMetric.lastUsed = now;
-      record.strategyOutcomes[strat] = currentMetric;
-
-      // Update best observed strategy if success rate is solid (>= 0.6 with at least 1 attempt)
-      if (currentMetric.attempts >= 1 && currentMetric.rate >= 0.6) {
-        record.bestObservedStrategy = strat;
-      }
-
-      // Record intervention outcome entry
+    const { updatedRecord, outcomeRecord } = computeConceptAnswerUpdate(
+      this.state.conceptMastery[cleanConcept],
+      cleanConcept,
+      isCorrect,
+      now,
+      responseTimeMs,
+      mistakeType,
+      activeInt
+    );
+    const record = updatedRecord;
+    if (outcomeRecord) {
       this.state.interventionHistory = this.state.interventionHistory || [];
-      const outcomeRecord: InterventionOutcomeRecord = {
-        id: `out_${now}_${Math.random().toString(36).substring(2, 6)}`,
-        interventionId: activeInt.id,
-        conceptId: cleanConcept,
-        strategy: strat,
-        outcome: isCorrect ? 'success' : 'struggle',
-        preInterventionAccuracy: previousAccuracy,
-        postInterventionAccuracy: record.accuracy,
-        attemptsUnderIntervention: currentMetric.attempts,
-        triggeredTimestamp: activeInt.id.startsWith('int_')
-          ? parseInt(activeInt.id.split('_')[1], 10) || now
-          : now,
-        resolvedTimestamp: isCorrect ? now : undefined,
-      };
       this.state.interventionHistory.push(outcomeRecord);
     }
 
@@ -749,83 +726,19 @@ export function projectEventsToState(
         .trim()
         .replace(/[\s-]+/g, '_');
 
-      let record = state.conceptMastery[cleanConcept];
-      if (!record) {
-        record = {
-          conceptId: cleanConcept,
-          attempts: 0,
-          correct: 0,
-          accuracy: 0,
-          confidence: 0.5,
-          consecutiveCorrect: 0,
-          consecutiveIncorrect: 0,
-          lastTested: event.timestamp,
-          mistakeTypes: [],
-          strategyOutcomes: {},
-        };
-      }
-
       const activeInt = state.activeInterventions[cleanConcept];
-      const previousAccuracy = record.attempts > 0 ? record.accuracy : 0;
-
-      record.attempts += 1;
-      record.lastTested = event.timestamp;
-
-      if (isCorrect) {
-        record.correct += 1;
-        record.consecutiveCorrect += 1;
-        record.consecutiveIncorrect = 0;
-        const streakBonus = Math.min(0.15, record.consecutiveCorrect * 0.05);
-        record.confidence = Math.min(1.0, Math.round((record.confidence + 0.12 + streakBonus) * 100) / 100);
-      } else {
-        record.consecutiveIncorrect += 1;
-        record.consecutiveCorrect = 0;
-        record.confidence = Math.max(0.1, Math.round((record.confidence - 0.15) * 100) / 100);
-        if (mistakeType && !record.mistakeTypes.includes(mistakeType)) {
-          record.mistakeTypes.push(mistakeType);
-        }
-      }
-
-      record.accuracy = Math.round((record.correct / record.attempts) * 100) / 100;
-
-      // Outcome tracking: evaluate effectiveness of any active intervention on this concept
-      if (activeInt && activeInt.strategy) {
-        const strat = activeInt.strategy as PedagogyStrategy;
-        record.strategyOutcomes = record.strategyOutcomes || {};
-        const currentMetric: StrategyOutcomeMetrics = record.strategyOutcomes[strat] || {
-          attempts: 0,
-          successes: 0,
-          rate: 0,
-          lastUsed: event.timestamp,
-        };
-
-        currentMetric.attempts += 1;
-        if (isCorrect) {
-          currentMetric.successes += 1;
-        }
-        currentMetric.rate = Math.round((currentMetric.successes / currentMetric.attempts) * 100) / 100;
-        currentMetric.lastUsed = event.timestamp;
-        record.strategyOutcomes[strat] = currentMetric;
-
-        if (currentMetric.attempts >= 1 && currentMetric.rate >= 0.6) {
-          record.bestObservedStrategy = strat;
-        }
-
+      const { updatedRecord, outcomeRecord } = computeConceptAnswerUpdate(
+        state.conceptMastery[cleanConcept],
+        cleanConcept,
+        isCorrect,
+        event.timestamp,
+        responseTimeMs,
+        mistakeType,
+        activeInt
+      );
+      const record = updatedRecord;
+      if (outcomeRecord) {
         state.interventionHistory = state.interventionHistory || [];
-        const outcomeRecord: InterventionOutcomeRecord = {
-          id: `out_${event.timestamp}_${Math.random().toString(36).substring(2, 6)}`,
-          interventionId: activeInt.id,
-          conceptId: cleanConcept,
-          strategy: strat,
-          outcome: isCorrect ? 'success' : 'struggle',
-          preInterventionAccuracy: previousAccuracy,
-          postInterventionAccuracy: record.accuracy,
-          attemptsUnderIntervention: currentMetric.attempts,
-          triggeredTimestamp: activeInt.id.startsWith('int_')
-            ? parseInt(activeInt.id.split('_')[1], 10) || event.timestamp
-            : event.timestamp,
-          resolvedTimestamp: isCorrect ? event.timestamp : undefined,
-        };
         state.interventionHistory.push(outcomeRecord);
       }
 
