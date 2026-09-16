@@ -12,10 +12,12 @@ import { localize, isArabicLocale } from '../../lib/translations';
 import { useStudentState } from '../../lib/useStudentState';
 import { getConcept } from '../../lib/conceptGraph';
 import { RetentionSchedule } from '../../lib/spacedRetention';
+import type { PersonalLearningModel } from '../../types/studentState';
 
 interface RetentionWarmupBannerProps {
   uid?: string;
   retentionSchedules?: Record<string, RetentionSchedule>;
+  personalLearningModel?: PersonalLearningModel;
   language?: string;
   onStartRefresher: (conceptId: string, conceptName?: string) => void;
 }
@@ -23,6 +25,7 @@ interface RetentionWarmupBannerProps {
 export default function RetentionWarmupBanner({
   uid,
   retentionSchedules,
+  personalLearningModel,
   language = 'English',
   onStartRefresher,
 }: RetentionWarmupBannerProps) {
@@ -33,29 +36,66 @@ export default function RetentionWarmupBanner({
   const { studentState } = useStudentState(uid);
 
   const dueConcepts = useMemo(() => {
-    const schedules = retentionSchedules || studentState?.retentionSchedules;
-    if (!schedules) return [];
+    const schedules = retentionSchedules || studentState?.retentionSchedules || {};
+    const plm = personalLearningModel || studentState?.personalLearningModel;
     const now = Date.now();
-    const list: { conceptId: string; conceptName: string; intervalDays: number; dueDaysAgo: number }[] = [];
+    const list: {
+      conceptId: string;
+      conceptName: string;
+      intervalDays: number;
+      dueDaysAgo: number;
+      riskLevel: 'high' | 'medium';
+    }[] = [];
+    const seen = new Set<string>();
 
+    // 1. Process SM-2 schedules
     for (const [cid, sched] of Object.entries(schedules)) {
       if (sched.nextReviewDate <= now) {
+        seen.add(cid);
         const node = getConcept(cid);
         const name = node
           ? (isAr ? node.nameAr : isFr ? node.nameEn : node.nameEn)
           : cid.replace(/_/g, ' ');
         const dueDaysAgo = Math.max(0, Math.floor((now - sched.nextReviewDate) / 86400000));
+        const prof = plm?.conceptProfiles?.[cid];
         list.push({
           conceptId: cid,
           conceptName: name,
           intervalDays: sched.intervalDays,
           dueDaysAgo,
+          riskLevel: prof?.retentionRisk === 'medium' ? 'medium' : 'high',
         });
       }
     }
 
-    return list;
-  }, [retentionSchedules, studentState?.retentionSchedules, isAr, isFr]);
+    // 2. Incorporate PLM high/medium retention risk concepts
+    if (plm?.conceptProfiles) {
+      for (const [cid, prof] of Object.entries(plm.conceptProfiles)) {
+        if (!seen.has(cid) && (prof.retentionRisk === 'high' || prof.retentionRisk === 'medium')) {
+          seen.add(cid);
+          const node = getConcept(cid);
+          const name = node
+            ? (isAr ? node.nameAr : isFr ? node.nameEn : node.nameEn)
+            : cid.replace(/_/g, ' ');
+          list.push({
+            conceptId: cid,
+            conceptName: name,
+            intervalDays: schedules[cid]?.intervalDays || 1,
+            dueDaysAgo: 0,
+            riskLevel: prof.retentionRisk,
+          });
+        }
+      }
+    }
+
+    // Sort high risk first, then by days due
+    return list.sort((a, b) => {
+      if (a.riskLevel !== b.riskLevel) {
+        return a.riskLevel === 'high' ? -1 : 1;
+      }
+      return b.dueDaysAgo - a.dueDaysAgo;
+    });
+  }, [retentionSchedules, personalLearningModel, studentState?.retentionSchedules, studentState?.personalLearningModel, isAr, isFr]);
 
   if (isDismissed || dueConcepts.length === 0) {
     return null;
@@ -77,8 +117,14 @@ export default function RetentionWarmupBanner({
             <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
               {isAr ? 'إنعاش الذاكرة التباعدية (SM-2)' : isFr ? 'Rappel Espacé Actif (SM-2)' : 'Spaced Retention Due (SM-2)'}
             </span>
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300">
-              {isAr ? `${dueConcepts.length} مفاهيم جاهزة للمراجعة` : isFr ? `${dueConcepts.length} à réviser` : `${dueConcepts.length} due`}
+            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
+              primeConcept.riskLevel === 'high'
+                ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 animate-pulse'
+                : 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+            }`}>
+              {primeConcept.riskLevel === 'high'
+                ? (isAr ? 'خطر نسيان مرتفع' : isFr ? 'Risque élevé' : 'High decay risk')
+                : (isAr ? 'مراجعة قريبة (٤٨ س)' : isFr ? 'À réviser sous 48h' : 'Due in 48h')}
             </span>
           </div>
           <p className="text-xs font-semibold text-white truncate mt-0.5">

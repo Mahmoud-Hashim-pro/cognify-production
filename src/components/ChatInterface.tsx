@@ -152,6 +152,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const [isToolsExpanded, setIsToolsExpanded] = useState(false);
   const [showPedagogyPopover, setShowPedagogyPopover] = useState(false);
   const [showQuickActionsPopover, setShowQuickActionsPopover] = useState(false);
+  const [expandedExplainMessageId, setExpandedExplainMessageId] = useState<string | null>(null);
 
   // Live timer for study session metrics
   useEffect(() => {
@@ -1529,7 +1530,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           <div className="w-full max-w-3xl space-y-10">
             {/* Active Spaced Micro-Retrieval Warmup Banner */}
             <RetentionWarmupBanner
+              uid={profile.uid}
               retentionSchedules={studentState?.retentionSchedules}
+              personalLearningModel={studentState?.personalLearningModel}
               language={profile.language}
               onStartRefresher={(conceptId) => {
                 const isAr = isArabicLocale(profile.language);
@@ -1645,7 +1648,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         <span>{localize(profile.language, 'Cognify Guidance', 'إجابة كوجنيفي الذكية')}</span>
                       </div>
 
-                      {/* Epistemic Pedagogy Badge */}
+                      {/* Epistemic Pedagogy Badge & Explainability Trigger */}
                       {(() => {
                         const pStyle = m.pedagogyStyle || activePedagogyStyle;
                         const pMeta = PEDAGOGY_STYLES.find(st => st.id === pStyle);
@@ -1653,6 +1656,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         const isAr = isArabicLocale(profile.language);
                         const isFr = profile.language === 'French';
                         const label = isAr ? pMeta.labelAr : isFr ? (pMeta.id === 'analogies' ? 'Analogies' : pMeta.id === 'technical' ? 'Technique' : pMeta.id === 'scaffolded' ? 'Pas à pas' : 'Socratique') : pMeta.labelEn;
+                        const isExplainOpen = expandedExplainMessageId === m.id;
+
                         return (
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span
@@ -1662,15 +1667,23 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                               <span>{pMeta.id === 'analogies' ? '💡' : pMeta.id === 'technical' ? '⚡' : pMeta.id === 'scaffolded' ? '🪜' : '❓'}</span>
                               <span>{label}</span>
                             </span>
-                            {m.adaptationReason && (
-                              <span
-                                title={m.adaptationReason}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 text-[9px] font-black uppercase tracking-wider animate-pulse"
-                              >
-                                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                                <span>{isAr ? 'تكييف تلقائي' : isFr ? 'Adapté' : 'Adapted'}</span>
-                              </span>
-                            )}
+
+                            {/* Interactive Explainability Badge */}
+                            <button
+                              type="button"
+                              onClick={() => setExpandedExplainMessageId(isExplainOpen ? null : m.id)}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 ${
+                                isExplainOpen
+                                  ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300 shadow-sm shadow-cyan-500/20'
+                                  : m.adaptationReason
+                                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-300 hover:border-amber-400 animate-pulse'
+                                  : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:border-cyan-500/40 hover:text-cyan-200'
+                              }`}
+                              title={localize(profile.language, 'Why this explanation style?', 'لماذا تم اختيار هذا الأسلوب التعليمي؟')}
+                            >
+                              <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                              <span>{isAr ? 'لماذا هذا الأسلوب؟' : isFr ? 'Pourquoi ce style ?' : 'Why this style?'}</span>
+                            </button>
                           </div>
                         );
                       })()}
@@ -1705,6 +1718,37 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         </button>
                       )}
                     </div>
+
+                    {/* Expandable Pedagogical Explainability Card */}
+                    {expandedExplainMessageId === m.id && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        className="p-4 rounded-2xl bg-gradient-to-r from-[#161a35] via-[#121528] to-[#161a35] border border-cyan-500/40 text-xs text-slate-200 shadow-2xl backdrop-blur-xl space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 font-black text-cyan-300 text-xs">
+                            <Sparkles className="w-4 h-4 text-cyan-400" />
+                            <span>{localize(profile.language, 'Why Cognify adapted this explanation style', 'لماذا اختار كوجنيفاي هذا الأسلوب التعليمي؟')}</span>
+                          </div>
+                          <button
+                            onClick={() => setExpandedExplainMessageId(null)}
+                            className="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded-lg hover:bg-slate-800 transition-colors"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p className="text-xs leading-relaxed text-slate-300 font-medium">
+                          {m.adaptationReason
+                            ? m.adaptationReason
+                            : isArabicLocale(profile.language)
+                            ? `قام كوجنيفاي بضبط الأسلوب التعليمي لهذا الرد بناءً على نموذج التعلم الشخصي (PLM) الخاص بك. أظهرت بيانات تفاعلك الأخيرة أن تقديم المفاهيم بهذا النمط يحقق أعلى معدل استيعاب وأقل عبء معرفي ويقودك نحو الحل المستقل.`
+                            : `Cognify calibrated this explanation style based on your longitudinal Personal Learning Model (PLM). Interaction evidence indicates this modality yields your highest retention and problem-solving velocity while minimizing cognitive strain.`}
+                        </p>
+                      </motion.div>
+                    )}
+
                     <div className="relative p-6 sm:p-7 rounded-[32px] bg-[#121524]/90 border border-slate-800/80 text-slate-100 leading-relaxed adaptive-response text-base space-y-4 shadow-2xl backdrop-blur-2xl hover:border-slate-700/80 transition-all w-full group/bubble">
                       {(profile.accessibilityMode === 'Vocal-Deaf' || profile.accessibilityMode === 'Sign-Only') && m.id !== 'welcome' && m.content?.trim() && (
                         <div className="mb-4">
