@@ -2273,9 +2273,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         </AnimatePresence>
       </div>
 
-      {/* Input Area — shrink-0 so the composer is never squeezed and always pinned */}
-      <div className="shrink-0 p-2 sm:p-2.5 md:p-3 border-t border-slate-800/80 bg-[#0E111D]/95 backdrop-blur-2xl relative shadow-[0_-15px_30px_-10px_rgba(0,0,0,0.6)] z-20">
-        <div className="max-w-3xl mx-auto space-y-1.5">
+      {/* Input Area — compact and pinned */}
+      <div className="shrink-0 py-1.5 px-2 sm:px-4 border-t border-slate-800/80 bg-[#0E111D]/95 backdrop-blur-2xl relative shadow-[0_-10px_20px_-8px_rgba(0,0,0,0.5)] z-20">
+        <div className="max-w-2xl mx-auto space-y-1">
 
           {/* Mouse Minimize / Expand Handle */}
           <div className="flex items-center justify-center -mt-1 pb-0.5">
@@ -2460,7 +2460,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.webp,.txt"
             />
             
-            <div className={`relative w-full rounded-[26px] bg-[#121524]/90 border border-slate-800/90 shadow-2xl backdrop-blur-2xl focus-within:border-cyan-500/60 focus-within:ring-2 focus-within:ring-cyan-500/20 transition-all p-1.5 sm:p-2 flex flex-col justify-between ${isListening ? 'border-cyan-400 ring-4 ring-cyan-500/20' : ''}`}>
+            <div className={`relative w-full rounded-2xl bg-[#121524]/90 border border-slate-800/90 shadow-xl backdrop-blur-2xl focus-within:border-cyan-500/60 focus-within:ring-2 focus-within:ring-cyan-500/20 transition-all p-1 sm:p-1.5 flex flex-col justify-between ${isListening ? 'border-cyan-400 ring-4 ring-cyan-500/20' : ''}`}>
               
               {/* Upper Section: Textarea Input */}
               <div className="relative w-full flex items-center">
@@ -2474,7 +2474,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                   onInput={(e) => {
                     const el = e.currentTarget;
                     el.style.height = 'auto';
-                    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+                    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
                   }}
                   onKeyDown={(e) => {
                     // Enter sends, Shift+Enter inserts a newline
@@ -2485,7 +2485,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                   }}
                   disabled={isLoading}
                   placeholder={isListening ? (localize(profile.language, "Listening...", 'جاري الاستماع...')) : (localize(profile.language, "Ask Cognify or type a message...", "اسأل كوجنيفاي أو اكتب رسالتك..."))}
-                  className="w-full bg-transparent text-white border-0 px-3 pt-1.5 pb-1 outline-none placeholder:text-slate-500 disabled:opacity-50 relative z-0 resize-none min-h-[36px] max-h-36 leading-relaxed text-sm sm:text-base font-normal custom-scrollbar"
+                  className="w-full bg-transparent text-white border-0 px-2.5 pt-1 pb-0.5 outline-none placeholder:text-slate-500 disabled:opacity-50 relative z-0 resize-none min-h-[30px] max-h-28 leading-snug text-xs sm:text-sm font-normal custom-scrollbar"
                 />
 
                 {interimTranscript && (
@@ -2499,22 +2499,22 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               </div>
 
               {/* Lower Section: Action Bar inside the Single Rectangle */}
-              <div className="flex items-center justify-between gap-1.5 pt-1 px-1 border-t border-slate-800/40 mt-1">
+              <div className="flex items-center justify-between gap-1 pt-0.5 px-0.5 border-t border-slate-800/40 mt-0.5">
                 
                 {/* Left Side: + File Attach, Pedagogy Pill, Tools Pill */}
-                <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex items-center gap-1">
                   {/* + Attach File Button */}
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Attach images or PDF files"
                     title={localize(profile.language, 'Attach images or PDF documents', 'إرفاق صور أو مستندات PDF')}
-                    className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 transition-all border border-transparent hover:border-slate-700/60"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 transition-all border border-transparent hover:border-slate-700/60"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3.5 h-3.5" />
                   </button>
 
-                  {/* Active Pedagogy Dropdown Pill (Like Gemini Model Pill in Image 2) */}
+                  {/* Active Pedagogy Dropdown Pill */}
                   <div className="relative">
                     <button
                       type="button"
@@ -2522,13 +2522,13 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         setShowPedagogyPopover(!showPedagogyPopover);
                         setShowQuickActionsPopover(false);
                       }}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-cyan-300 border border-slate-700/60 text-[11px] font-bold transition-all shadow-sm active:scale-95"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-cyan-300 border border-slate-700/60 text-[10px] font-bold transition-all shadow-sm active:scale-95"
                       title={localize(profile.language, "Change teaching style", "تغيير أسلوب الشرح")}
                     >
-                      <span className="truncate max-w-[100px] sm:max-w-[130px]">
+                      <span className="truncate max-w-[85px] sm:max-w-[115px]">
                         ⚡ {localize(profile.language, activePedagogyMeta.labelEn, activePedagogyMeta.labelAr)}
                       </span>
-                      <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showPedagogyPopover ? 'rotate-180 text-cyan-300' : ''}`} />
+                      <ChevronDown className={`w-2.5 h-2.5 text-slate-400 transition-transform ${showPedagogyPopover ? 'rotate-180 text-cyan-300' : ''}`} />
                     </button>
 
                     {/* Floating Pedagogy Popover Menu */}
@@ -2583,12 +2583,12 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         setShowQuickActionsPopover(!showQuickActionsPopover);
                         setShowPedagogyPopover(false);
                       }}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 text-[11px] font-bold transition-all shadow-sm active:scale-95"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 text-[10px] font-bold transition-all shadow-sm active:scale-95"
                       title={localize(profile.language, "Quick study tools", "أدوات دراسية سريعة")}
                     >
-                      <Sparkles className="w-3 h-3 text-amber-400 shrink-0" />
+                      <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />
                       <span className="hidden xs:inline sm:inline">{localize(profile.language, 'Tools', 'الأدوات')}</span>
-                      <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showQuickActionsPopover ? 'rotate-180 text-amber-300' : ''}`} />
+                      <ChevronDown className={`w-2.5 h-2.5 text-slate-400 transition-transform ${showQuickActionsPopover ? 'rotate-180 text-amber-300' : ''}`} />
                     </button>
 
                     {/* Floating Quick Tools Popover Menu */}
@@ -2666,16 +2666,16 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 </div>
 
                 {/* Right Side: France Guide, Language Cycle, Mic, Send / Stop */}
-                <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex items-center gap-1">
                   {/* France Guide Button */}
                   <button
                     type="button"
                     onClick={() => setShowFrenchTravelAssistant(true)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-black bg-gradient-to-r from-amber-500/15 to-orange-500/15 text-amber-300 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/25 active:scale-95 transition-all shadow-sm shrink-0"
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-black bg-gradient-to-r from-amber-500/15 to-orange-500/15 text-amber-300 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/25 active:scale-95 transition-all shadow-sm shrink-0"
                     title={localize(profile.language, 'Open France Travel Assistant', 'دليل ومترجم فرنسا')}
                   >
                     <span>🇫🇷</span>
-                    <span className="hidden md:inline text-[10px]">{localize(profile.language, 'Guide', 'دليل')}</span>
+                    <span className="hidden md:inline text-[9px]">{localize(profile.language, 'Guide', 'دليل')}</span>
                   </button>
 
                   {/* Dictation Language Cycle Pill */}
@@ -2690,7 +2690,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         try { recognitionRef.current.lang = next; } catch {}
                       }
                     }}
-                    className="text-[10px] font-black px-2 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all shrink-0"
+                    className="text-[9px] font-black px-1.5 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all shrink-0"
                     title={localize(profile.language, 'Click to switch speech language (FR/EN/AR)', 'اضغط لتبديل لغة الاستماع (فرنسي/إنجليزي/عربي)')}
                   >
                     {dictationLang === 'fr-FR' ? '🇫🇷 FR' : dictationLang === 'ar-EG' ? '🇪🇬 AR' : '🇬🇧 EN'}
@@ -2701,15 +2701,15 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     type="button"
                     onClick={toggleListening}
                     aria-label={isListening ? localize(profile.language, "Stop voice input", "إيقاف الإدخال الصوتي") : localize(profile.language, "Start voice input", "بدء الإدخال الصوتي")}
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 ${
-                      isListening ? 'text-rose-400 bg-rose-500/20 border border-rose-500/40 animate-pulse shadow-lg shadow-rose-500/20' : 'text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80'
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all shrink-0 ${
+                      isListening ? 'text-rose-400 bg-rose-500/20 border border-rose-500/40 animate-pulse shadow-md shadow-rose-500/20' : 'text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80'
                     }`}
                     title={isListening ? "Listening... (Tap to stop)" : "Tap to Speak (Voice Input)"}
                   >
                     {isListening ? (
-                      <MicOff className="w-4 h-4" />
+                      <MicOff className="w-3.5 h-3.5" />
                     ) : (
-                      <Mic className="w-4 h-4" />
+                      <Mic className="w-3.5 h-3.5" />
                     )}
                   </button>
 
@@ -2720,18 +2720,18 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                       onClick={() => { stopRef.current = true; abortRef.current?.abort(); }}
                       title={localize(profile.language, "Stop generating", "إيقاف التوليد")}
                       aria-label={localize(profile.language, "Stop generating", "إيقاف التوليد")}
-                      className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-900 border border-slate-700 text-white rounded-xl flex items-center justify-center hover:bg-slate-800 transition-all shadow-md active:scale-95 shrink-0"
+                      className="w-7 h-7 sm:w-7.5 sm:h-7.5 bg-slate-900 border border-slate-700 text-white rounded-lg flex items-center justify-center hover:bg-slate-800 transition-all shadow-sm active:scale-95 shrink-0"
                     >
-                      <Square className="w-3.5 h-3.5 fill-current" />
+                      <Square className="w-3 h-3 fill-current" />
                     </button>
                   ) : (
                     <button
                       type="submit"
                       disabled={!input.trim() && selectedFiles.length === 0}
                       aria-label={localize(profile.language, "Send message", "إرسال")}
-                      className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl flex items-center justify-center hover:from-cyan-400 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 disabled:border disabled:border-slate-800 disabled:shadow-none transition-all shadow-md shadow-cyan-500/25 active:scale-95 shrink-0"
+                      className="w-7 h-7 sm:w-7.5 sm:h-7.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg flex items-center justify-center hover:from-cyan-400 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 disabled:border disabled:border-slate-800 disabled:shadow-none transition-all shadow-sm shadow-cyan-500/20 active:scale-95 shrink-0"
                     >
-                      <Send className="w-4 h-4" />
+                      <Send className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>

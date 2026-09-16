@@ -720,9 +720,9 @@ export default function AccessibilityOverlay({
       <button
         onClick={() => toggleControlsHidden(false)}
         title="Show accessibility controls"
-        className="fixed bottom-32 start-4 md:start-8 z-50 w-12 h-12 rounded-full bg-slate-900 text-white shadow-xl border-2 border-slate-700 flex items-center justify-center hover:bg-slate-800 active:scale-95 pointer-events-auto"
+        className="fixed bottom-24 start-3 md:start-6 z-50 w-8 h-8 rounded-full bg-[#121524]/90 text-purple-300 shadow-md border border-purple-500/40 backdrop-blur-md flex items-center justify-center hover:bg-purple-600/30 hover:text-white active:scale-95 pointer-events-auto transition-all"
       >
-        <Eye className="w-5 h-5" />
+        <Eye className="w-4 h-4" />
       </button>
     );
   }
