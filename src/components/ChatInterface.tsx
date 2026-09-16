@@ -22,6 +22,10 @@ import ChatContextPanel, { ContextSource } from './chat/ChatContextPanel';
 import ChatQuickActions from './chat/ChatQuickActions';
 import { detectConversationalStrain } from '../lib/conversationalStrain';
 import RetentionWarmupBanner from './chat/RetentionWarmupBanner';
+import ProactiveSuggestionCard from './ProactiveSuggestionCard';
+import { detectProactiveOpportunities } from '../lib/proactiveAssistantEngine';
+import { generateLearningInsights } from '../lib/learningInsightsEngine';
+import { explainPedagogyChoice, type PedagogyStrategy } from '../lib/explainabilityEngine';
 
 // Three.js is heavy — only load the sign avatar when a deaf-mode user opens it.
 const SignAvatar3D = React.lazy(() => import("./SignAvatar3D"));
@@ -183,6 +187,20 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       setActivePedagogyStyle(studentState.activePedagogy as any);
     }
   }, [studentState?.activePedagogy]);
+
+  // Proactive learning assistant opportunities & grounded insights
+  const proactiveOpportunities = React.useMemo(() => {
+    if (!studentState) return [];
+    return detectProactiveOpportunities(studentState, Date.now(), { maxOpportunities: 2 });
+  }, [studentState]);
+
+  const learningInsights = React.useMemo(() => {
+    if (!studentState) return [];
+    return generateLearningInsights(studentState, Date.now());
+  }, [studentState]);
+
+  const activeProactiveOpportunity = proactiveOpportunities[0] || null;
+  const activeGroundedInsight = !activeProactiveOpportunity && learningInsights.length > 0 ? learningInsights[0] : null;
 
   const handleSelectPedagogy = (style: PedagogyStyle) => {
     setActivePedagogyStyle(style);
@@ -1545,6 +1563,26 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 handleSubmit(undefined, refresherPrompt);
               }}
             />
+
+            {/* Proactive Assistant Opportunity or Grounded Insight Card */}
+            {activeProactiveOpportunity && (
+              <ProactiveSuggestionCard
+                opportunity={activeProactiveOpportunity}
+                language={profile.language}
+                onAccept={(prompt) => {
+                  handleSubmit(undefined, prompt);
+                }}
+              />
+            )}
+            {!activeProactiveOpportunity && activeGroundedInsight && (
+              <ProactiveSuggestionCard
+                insight={activeGroundedInsight}
+                language={profile.language}
+                onAccept={(prompt) => {
+                  handleSubmit(undefined, prompt);
+                }}
+              />
+            )}
           <AnimatePresence mode="popLayout">
             {messages.map((m) => (
               <motion.div
@@ -1719,36 +1757,6 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                       )}
                     </div>
 
-                    {/* Expandable Pedagogical Explainability Card */}
-                    {expandedExplainMessageId === m.id && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        className="p-4 rounded-2xl bg-gradient-to-r from-[#161a35] via-[#121528] to-[#161a35] border border-cyan-500/40 text-xs text-slate-200 shadow-2xl backdrop-blur-xl space-y-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 font-black text-cyan-300 text-xs">
-                            <Sparkles className="w-4 h-4 text-cyan-400" />
-                            <span>{localize(profile.language, 'Why Cognify adapted this explanation style', 'لماذا اختار كوجنيفاي هذا الأسلوب التعليمي؟')}</span>
-                          </div>
-                          <button
-                            onClick={() => setExpandedExplainMessageId(null)}
-                            className="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded-lg hover:bg-slate-800 transition-colors"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                        <p className="text-xs leading-relaxed text-slate-300 font-medium">
-                          {m.adaptationReason
-                            ? m.adaptationReason
-                            : isArabicLocale(profile.language)
-                            ? `قام كوجنيفاي بضبط الأسلوب التعليمي لهذا الرد بناءً على نموذج التعلم الشخصي (PLM) الخاص بك. أظهرت بيانات تفاعلك الأخيرة أن تقديم المفاهيم بهذا النمط يحقق أعلى معدل استيعاب وأقل عبء معرفي ويقودك نحو الحل المستقل.`
-                            : `Cognify calibrated this explanation style based on your longitudinal Personal Learning Model (PLM). Interaction evidence indicates this modality yields your highest retention and problem-solving velocity while minimizing cognitive strain.`}
-                        </p>
-                      </motion.div>
-                    )}
-
                     <div className="relative p-6 sm:p-7 rounded-[32px] bg-[#121524]/90 border border-slate-800/80 text-slate-100 leading-relaxed adaptive-response text-base space-y-4 shadow-2xl backdrop-blur-2xl hover:border-slate-700/80 transition-all w-full group/bubble">
                       {(profile.accessibilityMode === 'Vocal-Deaf' || profile.accessibilityMode === 'Sign-Only') && m.id !== 'welcome' && m.content?.trim() && (
                         <div className="mb-4">
@@ -1918,7 +1926,140 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         )}
                       </button>
                     </div>
-                  </div>
+
+                    {/* Subtle, elegant obsidian "Why this approach? / لماذا هذا الأسلوب؟" collapsible panel below tutor responses */}
+                  {(() => {
+                    const pStyle = (m.pedagogyStyle || activePedagogyStyle) as PedagogyStrategy;
+                    const isAr = isArabicLocale(profile.language);
+                    const isExplainOpen = expandedExplainMessageId === m.id;
+                    const detectedConcept = detectConceptFromText(m.content)?.id;
+                    const rationale = explainPedagogyChoice(pStyle, studentState, detectedConcept);
+                    const pMeta = PEDAGOGY_STYLES.find((st) => st.id === pStyle);
+
+                    return (
+                      <div className="space-y-2 pt-1">
+                        {/* Toggle Bar */}
+                        <div className="flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedExplainMessageId(isExplainOpen ? null : m.id)}
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all active:scale-95 ${
+                              isExplainOpen
+                                ? 'bg-cyan-500/15 border-cyan-500/50 text-cyan-200 shadow-md shadow-cyan-500/10'
+                                : m.adaptationReason
+                                ? 'bg-[#121524] border-amber-500/40 text-amber-300 hover:border-amber-400'
+                                : 'bg-[#121524]/80 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                            }`}
+                            title={localize(profile.language, 'Why Cognify used this pedagogical approach', 'التعليل التربوي لاختيار هذا الأسلوب التعليمي')}
+                          >
+                            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span>{localize(profile.language, 'Why this approach?', 'لماذا هذا الأسلوب؟')}</span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isExplainOpen ? 'rotate-180 text-cyan-300' : 'text-slate-400'}`} />
+                          </button>
+
+                          {isExplainOpen && (
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                              rationale.confidenceLevel === 'high'
+                                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                                : rationale.confidenceLevel === 'calibrating'
+                                ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
+                                : 'bg-slate-800 border-slate-700 text-slate-400'
+                            }`}>
+                              {rationale.confidenceLevel === 'high'
+                                ? localize(profile.language, 'Empirically Validated (N >= 3)', 'معايرة إحصائية مثبتة')
+                                : rationale.confidenceLevel === 'calibrating'
+                                ? localize(profile.language, 'Calibrating Modality', 'جاري معايرة النمط')
+                                : localize(profile.language, 'Provisional Heuristic', 'توجيه تكيفي أولي')}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Collapsible Panel */}
+                        <AnimatePresence>
+                          {isExplainOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -6, height: 0 }}
+                              animate={{ opacity: 1, y: 0, height: 'auto' }}
+                              exit={{ opacity: 0, y: -6, height: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#101426] via-[#12162a] to-[#0d1020] border border-cyan-500/30 text-xs text-slate-200 shadow-2xl backdrop-blur-xl space-y-3.5">
+                                {/* Header */}
+                                <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                                      <Sparkles className="w-4 h-4 text-amber-400" />
+                                    </div>
+                                    <div>
+                                      <div className="font-bold text-white text-xs">
+                                        {localize(profile.language, 'Adaptive Pedagogy Rationale', 'التعليل التربوي للاستراتيجية المتبعة')}
+                                      </div>
+                                      <div className="text-[10px] text-slate-400">
+                                        {isAr ? pMeta?.labelAr || pStyle : pMeta?.labelEn || pStyle}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedExplainMessageId(null)}
+                                    className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors"
+                                    title="Close"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+
+                                {/* Diagnostic Trigger */}
+                                <div className="space-y-1">
+                                  <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400">
+                                    {localize(profile.language, 'Diagnostic Trigger', 'المحفز التشخيصي')}
+                                  </div>
+                                  <div className="text-xs text-slate-200 font-medium">
+                                    {rationale.trigger}
+                                  </div>
+                                </div>
+
+                                {/* Pedagogical Rationale */}
+                                <div className="space-y-1">
+                                  <div className="text-[10px] uppercase font-bold tracking-wider text-indigo-400">
+                                    {localize(profile.language, 'Why This Strategy Was Selected', 'لماذا تم اختيار هذا الأسلوب؟')}
+                                  </div>
+                                  <p className="text-xs leading-relaxed text-slate-300">
+                                    {m.adaptationReason
+                                      ? m.adaptationReason
+                                      : isAr
+                                      ? rationale.rationaleAr
+                                      : rationale.rationaleEn}
+                                  </p>
+                                </div>
+
+                                {/* Empirical Evidence */}
+                                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-1">
+                                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                                    {localize(profile.language, 'Empirical Evidence', 'الأدلة التفاعلية')}
+                                  </div>
+                                  <p className="text-[11px] text-slate-300 font-mono">
+                                    {rationale.evidence}
+                                  </p>
+                                </div>
+
+                                {/* Pedagogical Goal */}
+                                <div className="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1 border-t border-slate-800/60">
+                                  <span className="font-semibold text-slate-300">
+                                    {localize(profile.language, 'Goal:', 'الهدف التعليمي:')}
+                                  </span>
+                                  <span>
+                                    {isAr ? rationale.pedagogicalGoalAr : rationale.pedagogicalGoalEn}
+                                  </span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })()}
+                </div>
                 )}
               </motion.div>
             ))}

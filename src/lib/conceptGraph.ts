@@ -20,6 +20,7 @@ export interface PrerequisiteDiagnosis {
   hasPrerequisiteGap: boolean;
   targetConceptId: string;
   rootGapConcept?: ConceptNode;
+  missingPrerequisites: string[];
   explanationEn: string;
   explanationAr: string;
 }
@@ -208,6 +209,7 @@ export function diagnosePrerequisiteGap(
     return {
       hasPrerequisiteGap: false,
       targetConceptId,
+      missingPrerequisites: [],
       explanationEn: 'Concept not found in registry.',
       explanationAr: 'المفهوم غير مسجل في شبكة المعرفة.',
     };
@@ -249,6 +251,7 @@ export function diagnosePrerequisiteGap(
       hasPrerequisiteGap: true,
       targetConceptId,
       rootGapConcept: rootGap,
+      missingPrerequisites: [rootGap.id],
       explanationEn: `Your difficulty in "${target.nameEn}" appears to stem from an unsolid foundation in "${rootGap.nameEn}". We recommend reviewing it first.`,
       explanationAr: `صعوبتك في فهم "${target.nameAr}" سببها الأساسي عدم التمكن التام من المتطلب السابق "${rootGap.nameAr}". ننصح بمراجعته أولاً.`,
     };
@@ -257,6 +260,7 @@ export function diagnosePrerequisiteGap(
   return {
     hasPrerequisiteGap: false,
     targetConceptId,
+    missingPrerequisites: [],
     explanationEn: `Prerequisites for "${target.nameEn}" are satisfied. Difficulty is localized to the concept itself.`,
     explanationAr: `المتطلبات السابقة لـ "${target.nameAr}" مكتملة بشكل جيد. الصعوبة مرتبطة مباشرة بالمفهوم الحالي.`,
   };

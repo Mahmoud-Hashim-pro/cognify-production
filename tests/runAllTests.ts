@@ -64,6 +64,8 @@ import {
 import { runGoldenAdaptiveScenario } from './goldenAdaptiveScenario.js';
 import { runRealAdaptiveApiVerification } from './realAdaptiveApiVerification.js';
 import { runPersonalLearningModelVerification } from './personalLearningModelVerification.js';
+import { runExplainabilityEngineVerification } from './explainabilityEngineVerification.js';
+import { runProactiveInsightsVerification } from './proactiveInsightsVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -1602,6 +1604,18 @@ Keep practicing closures with higher-order functions!
   console.log('\n[36] Phase 2B: Personal Learning Model (PLM) & Proactive Personalization');
   {
     await runPersonalLearningModelVerification(assert);
+  }
+
+  // 37. Phase 2C - Milestone 5: Explainable Intelligence Engine
+  console.log('\n[37] Phase 2C - Milestone 5: Explainable Intelligence Engine');
+  {
+    await runExplainabilityEngineVerification(assert);
+  }
+
+  // 38. Phase 2C - Milestones 6, 7 & 8: Proactive Assistant, Strategy Intelligence & Grounded Insights
+  console.log('\n[38] Phase 2C - Milestones 6, 7 & 8: Proactive Assistant, Strategy Intelligence & Grounded Insights');
+  {
+    await runProactiveInsightsVerification(assert);
   }
 
   console.log(`\n========================================`);

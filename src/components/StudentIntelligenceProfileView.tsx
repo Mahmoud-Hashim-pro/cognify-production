@@ -36,8 +36,25 @@ import {
   ArrowLeft,
   ArrowRight,
   Zap,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
+  Info,
 } from 'lucide-react';
 import type { PedagogyStrategy } from '../types/studentState';
+import ProactiveSuggestionCard from './ProactiveSuggestionCard';
+import { useStudentState } from '../lib/useStudentState';
+import { detectProactiveOpportunities } from '../lib/proactiveAssistantEngine';
+import { generateLearningInsights } from '../lib/learningInsightsEngine';
+import {
+  explainRecommendation,
+  synthesizeCommonMistakes,
+} from '../lib/explainabilityEngine';
+import {
+  rankStrategiesEmpirically,
+  ANTI_OVERCLAIMING_DISCLAIMER_EN,
+  ANTI_OVERCLAIMING_DISCLAIMER_AR,
+} from '../lib/strategyIntelligence';
 
 interface StudentIntelligenceProfileViewProps {
   profile: UserProfile;
@@ -96,10 +113,51 @@ export default function StudentIntelligenceProfileView({
     profile.uid,
     profile.name
   );
+  const { studentState } = useStudentState(profile.uid, profile.level);
+
+  const proactiveOpportunities = React.useMemo(() => {
+    if (!studentState) return [];
+    return detectProactiveOpportunities(studentState, Date.now(), { maxOpportunities: 2 });
+  }, [studentState]);
+
+  const learningInsights = React.useMemo(() => {
+    if (!studentState) return [];
+    return generateLearningInsights(studentState, Date.now()).slice(0, 2);
+  }, [studentState]);
+
+  const calibratedStrategiesMap = React.useMemo(() => {
+    if (!studentState) return {};
+    const map: Partial<Record<PedagogyStrategy, { attempts: number; successes: number }>> = {};
+    if (studentState.pedagogyEffectiveness) {
+      for (const [k, v] of Object.entries(studentState.pedagogyEffectiveness)) {
+        map[k as PedagogyStrategy] = {
+          attempts: (v.helpfulCount || 0) + (v.unhelpfulCount || 0),
+          successes: v.helpfulCount || 0,
+        };
+      }
+    }
+    const ranked = rankStrategiesEmpirically(map);
+    const lookup: Record<string, (typeof ranked)[0]> = {};
+    for (const r of ranked) {
+      lookup[r.strategy] = r;
+    }
+    return lookup;
+  }, [studentState]);
 
   const ArrowIcon = isAr ? ArrowRight : ArrowLeft;
   const allConceptSummaries = Object.values(learningProfile.conceptProfiles || {});
   const dueRetentionCount = (learningProfile.retentionAlerts || []).filter((a) => a.isDue).length;
+
+  const [showFocusExplain, setShowFocusExplain] = React.useState(false);
+
+  const focusRationale = React.useMemo(() => {
+    if (!learningProfile.currentFocus) return null;
+    return explainRecommendation(learningProfile.currentFocus.conceptId, studentState);
+  }, [learningProfile.currentFocus, studentState]);
+
+  const commonMistakes = React.useMemo(() => {
+    return synthesizeCommonMistakes(studentState);
+  }, [studentState]);
 
   return (
     <div
@@ -219,15 +277,79 @@ export default function StudentIntelligenceProfileView({
           </div>
         </div>
 
+        {/* Proactive Assistant Opportunities & Grounded Insights Section */}
+        {(proactiveOpportunities.length > 0 || learningInsights.length > 0) && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                <h2 className="text-lg font-bold text-white">
+                  {localize(
+                    profile.language,
+                    'Proactive Learning Opportunities & Insights',
+                    'فرص التعلم الاستباقية والرؤى الإدراكية'
+                  )}
+                </h2>
+              </div>
+              <span className="text-xs text-slate-400">
+                {proactiveOpportunities.length + learningInsights.length}{' '}
+                {localize(profile.language, 'signals active', 'إشارات نشطة')}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {proactiveOpportunities.map((opp) => (
+                <ProactiveSuggestionCard
+                  key={opp.id}
+                  opportunity={opp}
+                  language={profile.language}
+                  onAccept={() => {
+                    if (onNavigateBack) onNavigateBack();
+                  }}
+                />
+              ))}
+              {learningInsights.map((insight) => (
+                <ProactiveSuggestionCard
+                  key={insight.id}
+                  insight={insight}
+                  language={profile.language}
+                  onAccept={() => {
+                    if (onNavigateBack) onNavigateBack();
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Section 1: Current Focus & Prerequisite Diagnosis */}
         {learningProfile.currentFocus && (
           <section className="p-6 rounded-3xl bg-gradient-to-br from-[#13192f]/95 to-[#121524]/90 border border-slate-800/90 backdrop-blur-xl shadow-2xl relative overflow-hidden">
             <div className="absolute -top-12 -right-12 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
-                  <Target className="w-3.5 h-3.5" />
-                  <span>{localize(profile.language, 'Current Focus', 'محور التركيز الحالي')}</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+                    <Target className="w-3.5 h-3.5" />
+                    <span>{localize(profile.language, 'Current Focus', 'محور التركيز الحالي')}</span>
+                  </div>
+
+                  {focusRationale && (
+                    <button
+                      type="button"
+                      onClick={() => setShowFocusExplain(!showFocusExplain)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 border ${
+                        showFocusExplain
+                          ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-sm shadow-cyan-500/20'
+                          : 'bg-slate-900/80 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                      }`}
+                      title={localize(profile.language, 'Pedagogical reasoning behind this recommendation', 'التعليل التربوي لاختيار هذا المفهوم')}
+                    >
+                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      <span>{localize(profile.language, 'Why this focus?', 'لماذا هذا التركيز؟')}</span>
+                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showFocusExplain ? 'rotate-180 text-cyan-300' : 'text-slate-400'}`} />
+                    </button>
+                  )}
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white">
                   {isAr
@@ -258,6 +380,71 @@ export default function StudentIntelligenceProfileView({
               </div>
             </div>
 
+            {/* Explainable Intelligence Rationale Panel */}
+            {showFocusExplain && focusRationale && (
+              <div className="mt-4 p-5 rounded-2xl bg-[#0d111f]/95 border border-cyan-500/40 backdrop-blur-xl shadow-xl space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                      <Sparkles className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
+                      {localize(profile.language, 'Explainable Intelligence Rationale', 'التعليل التربوي لاختيار هذا التركيز')}
+                    </span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                    focusRationale.isPrerequisiteGap
+                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                      : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300'
+                  }`}>
+                    {focusRationale.isPrerequisiteGap
+                      ? localize(profile.language, 'Prerequisite Root Gap', 'فجوة متطلب تأسيسي')
+                      : localize(profile.language, 'Direct Concept Mastery', 'تثبيت مباشر للمفهوم')}
+                  </span>
+                </div>
+
+                {/* Prerequisite Chain visualization if gap exists */}
+                {focusRationale.isPrerequisiteGap && focusRationale.prerequisiteChain && (
+                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-2 text-xs flex-wrap">
+                    <span className="text-slate-400 font-medium">
+                      {localize(profile.language, 'Dependency Chain:', 'مسار التبعية:')}
+                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {focusRationale.prerequisiteChain.map((cid, cidx) => {
+                        const isLast = cidx === focusRationale.prerequisiteChain!.length - 1;
+                        const isRoot = cidx === 0;
+                        return (
+                          <React.Fragment key={cid}>
+                            <span className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border ${
+                              isRoot
+                                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                                : isLast
+                                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                                : 'bg-slate-800 border-slate-700 text-slate-300'
+                            }`}>
+                              {cid}
+                            </span>
+                            {!isLast && <span className="text-slate-500 text-xs">➔</span>}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                  {isAr ? focusRationale.rationaleAr : focusRationale.rationaleEn}
+                </p>
+
+                <div className="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1 border-t border-slate-800/60">
+                  <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  <span>
+                    {isAr ? focusRationale.diagnosisSummaryAr : focusRationale.diagnosisSummaryEn}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Prerequisite Alert Callout */}
             {learningProfile.currentFocus.prerequisiteToReview && (
               <div className="mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
@@ -282,6 +469,287 @@ export default function StudentIntelligenceProfileView({
             )}
           </section>
         )}
+
+        {/* Section: Strengths (مكامن القوة) & Current Difficulties (الصعوبات الحالية) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Card A: Strengths (مكامن القوة ونقاط التميز) */}
+          <section className="p-6 rounded-3xl bg-[#121524]/90 border border-slate-800/80 backdrop-blur-xl shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800/70 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white">
+                    {localize(profile.language, 'Strengths & Mastered Concepts', 'مكامن القوة والمفاهيم المتقنة')}
+                  </h2>
+                  <p className="text-[11px] text-slate-400">
+                    {localize(profile.language, 'High accuracy, fluent velocity, and low cognitive strain', 'دقة عالية، سرعة استجابة وعبء إدراكي منخفض')}
+                  </p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                {learningProfile.masteredConcepts?.length || 0} {localize(profile.language, 'mastered', 'متقن')}
+              </span>
+            </div>
+
+            {(learningProfile.masteredConcepts || []).length === 0 ? (
+              <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60 text-center space-y-2">
+                <Brain className="w-8 h-8 text-slate-600 mx-auto" />
+                <div className="text-xs font-semibold text-slate-300">
+                  {localize(profile.language, 'Calibrating Strengths', 'جاري تحديد مكامن القوة')}
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  {localize(
+                    profile.language,
+                    'Concepts with >= 75% accuracy and consistent streaks will appear here as your verified strengths.',
+                    'المفاهيم التي تحقق فيها دقة ٧٥٪ فأعلى مع إجابات متتالية صحيحة ستظهر هنا كنقاط قوة مثبتة.'
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {learningProfile.masteredConcepts.map((item) => (
+                  <div
+                    key={item.conceptId}
+                    className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/30 transition-all space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-xs font-bold text-white">
+                          {isAr ? item.conceptNameAr : item.conceptNameEn}
+                        </div>
+                        <div className="text-[10px] text-slate-400 capitalize">
+                          {item.conceptId}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                          <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                          <span>{localize(profile.language, 'Low Strain', 'استيعاب سلس')}</span>
+                        </span>
+                        <span className="text-xs font-bold text-emerald-400">
+                          {item.masteryPercentage}%
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Mini Progress Bar */}
+                    <div className="w-full h-1.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                        style={{ width: `${item.masteryPercentage}%` }}
+                      />
+                    </div>
+
+                    <div className="pt-1 flex items-center justify-between text-[10px] text-slate-400">
+                      <span>
+                        {localize(profile.language, 'Confidence', 'مستوى الثقة')}: <strong className="text-slate-200">{item.confidencePercentage}%</strong>
+                      </span>
+                      <span>
+                        {item.attemptsCount} {localize(profile.language, 'attempts logged', 'محاولات مرصودة')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Card B: Current Difficulties (الصعوبات الحالية ومؤشرات الإجهاد) */}
+          <section className="p-6 rounded-3xl bg-[#121524]/90 border border-slate-800/80 backdrop-blur-xl shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800/70 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white">
+                    {localize(profile.language, 'Current Difficulties & Focus Areas', 'الصعوبات الحالية وإشارات الإجهاد')}
+                  </h2>
+                  <p className="text-[11px] text-slate-400">
+                    {localize(profile.language, 'Active struggle signals, latency strain, and remediation targets', 'مؤشرات العبء المعرفي والتعثر وأهداف التدخل التكيفي')}
+                  </p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                {learningProfile.strugglingConcepts?.length || 0} {localize(profile.language, 'focus areas', 'محاور تركيز')}
+              </span>
+            </div>
+
+            {(learningProfile.strugglingConcepts || []).length === 0 ? (
+              <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60 text-center space-y-2">
+                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
+                <div className="text-xs font-semibold text-slate-200">
+                  {localize(profile.language, 'No Active Struggle Detected', 'لا توجد صعوبات معرفية نشطة')}
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  {localize(
+                    profile.language,
+                    'All actively practiced concepts have satisfied fluency thresholds. Great momentum!',
+                    'جميع المفاهيم قيد الممارسة مستقرة وضمن معدلات الاستيعاب السلسة. أداء ممتاز!'
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {learningProfile.strugglingConcepts.map((item) => (
+                  <div
+                    key={item.conceptId}
+                    className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/30 transition-all space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-xs font-bold text-white">
+                          {isAr ? item.conceptNameAr : item.conceptNameEn}
+                        </div>
+                        <div className="text-[10px] text-slate-400 capitalize">
+                          {item.conceptId}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {item.commonError && (
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300 font-mono">
+                            {item.commonError}
+                          </span>
+                        )}
+                        <span className="text-xs font-bold text-amber-400">
+                          {item.masteryPercentage}%
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Mini Progress Bar */}
+                    <div className="w-full h-1.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-rose-500"
+                        style={{ width: `${Math.max(10, item.masteryPercentage)}%` }}
+                      />
+                    </div>
+
+                    <div className="pt-1 flex items-center justify-between text-[10px] text-slate-400">
+                      <span className="flex items-center gap-1 text-amber-300/90">
+                        <AlertTriangle className="w-3 h-3 text-amber-400" />
+                        {localize(
+                          profile.language,
+                          `Latency: ${item.latencyProfile}`,
+                          `زمن الاستجابة: ${item.latencyProfile === 'high' ? 'مرتفع (>15ث)' : 'متوسط'}`
+                        )}
+                      </span>
+                      {item.bestStrategy && (
+                        <span className="text-cyan-300 font-medium">
+                          {localize(profile.language, 'Remedy:', 'العلاج:')} {STRATEGY_METADATA[item.bestStrategy]?.nameEn || item.bestStrategy}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Section: Common Mistakes & Actionable Remediation Tips (الأخطاء الشائعة المتكررة) */}
+        <section className="p-6 rounded-3xl bg-[#121524]/90 border border-slate-800/80 backdrop-blur-xl shadow-xl space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800/70 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <Lightbulb className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-white">
+                  {localize(
+                    profile.language,
+                    'Synthesized Common Mistakes & Remediation Tips',
+                    'الأخطاء الشائعة المتكررة وطرق علاجها'
+                  )}
+                </h2>
+                <p className="text-[11px] text-slate-400">
+                  {localize(
+                    profile.language,
+                    'Observed cognitive error patterns with actionable guidance to prevent recurring friction',
+                    'أنماط الأخطاء المتكررة المرصودة في جلساتك مع إرشادات دقيقة لتفاديها'
+                  )}
+                </p>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">
+              {commonMistakes.length} {localize(profile.language, 'patterns diagnosed', 'أنماط مشخصة')}
+            </span>
+          </div>
+
+          {commonMistakes.length === 0 ? (
+            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60 text-center space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
+              <div className="text-xs font-semibold text-slate-200">
+                {localize(profile.language, 'Clean Execution History', 'سجل أخطاء نظيف ومثالي')}
+              </div>
+              <p className="text-[11px] text-slate-400 max-w-md mx-auto">
+                {localize(
+                  profile.language,
+                  'No recurring mistake patterns (like null dereferencing or boundary errors) have been recorded yet. As you solve exercises, Cognify will automatically synthesize patterns here.',
+                  'لم يتم رصد أي أنماط أخطاء متكررة (مثل فك إشارة مؤشر فارغ أو أخطاء حدود التكرار) حتى الآن. مع حل التمارين سيقوم كوجنيفاي بتحليل الأخطاء تلقائيًا.'
+                )}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {commonMistakes.map((mistake) => (
+                <div
+                  key={mistake.id}
+                  className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition-all space-y-3 flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-sm font-bold text-white">
+                          {isAr ? mistake.nameAr : mistake.nameEn}
+                        </div>
+                        <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-rose-500/10 border border-rose-500/30 text-rose-300">
+                          {mistake.id}
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0">
+                        {mistake.count} {localize(profile.language, 'times', 'مرات')}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {isAr ? mistake.descriptionAr : mistake.descriptionEn}
+                    </p>
+
+                    {mistake.conceptsInvolved.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          {localize(profile.language, 'Seen in:', 'ظهر في:')}
+                        </span>
+                        {mistake.conceptsInvolved.map((cid) => (
+                          <span
+                            key={cid}
+                            className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300"
+                          >
+                            {cid}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actionable Remediation Tip Callout */}
+                  <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/40 via-indigo-950/30 to-slate-900/60 border border-cyan-500/30 space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-cyan-300">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>{localize(profile.language, 'Actionable Remediation Tip', 'نصيحة العلاج والوقاية')}</span>
+                    </div>
+                    <p className="text-xs text-slate-200 leading-relaxed font-mono text-[11px]">
+                      {isAr ? mistake.remediationTipAr : mistake.remediationTipEn}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Section 2: Concept Mastery Progress */}
         <section className="space-y-4">
@@ -471,13 +939,35 @@ export default function StudentIntelligenceProfileView({
                         style={{ width: `${Math.min(100, Math.max(0, item.scorePercentage))}%` }}
                       />
                     </div>
-                    <div className="text-[10px] text-slate-400 mt-1">
-                      {isAr ? item.sampleSizeNoteAr : item.sampleSizeNoteEn}
+                    <div className="text-[10px] text-slate-400 mt-1 flex justify-between items-center">
+                      <span>{isAr ? item.sampleSizeNoteAr : item.sampleSizeNoteEn}</span>
+                      {calibratedStrategiesMap[item.strategy]?.calibrationStage === 'calibrated' && (
+                        <span className="text-cyan-400 font-medium text-[10px]">
+                          Wilson: {Math.round((calibratedStrategiesMap[item.strategy]?.wilsonLowerBound || 0) * 100)}%
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
               );
             })}
+          </div>
+
+          {/* Anti-Overclaiming Situational Efficacy Disclaimer */}
+          <div className="p-4 rounded-2xl bg-[#0e1222] border border-cyan-500/20 text-xs text-slate-300 flex items-start gap-3">
+            <Brain className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <div className="font-bold text-cyan-300 text-xs">
+                {localize(
+                  profile.language,
+                  'Scientific Anti-Overclaiming Principle (Situational Strategy Efficacy)',
+                  'مبدأ الموضوعية العلمية (فاعلية الأساليب السياقية)'
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                {isAr ? ANTI_OVERCLAIMING_DISCLAIMER_AR : ANTI_OVERCLAIMING_DISCLAIMER_EN}
+              </p>
+            </div>
           </div>
         </section>
 
