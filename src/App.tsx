@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Message, UserProfile, AccessibilityMode, CognitiveLevel } from "./types";
 import { auth, db, handleFirestoreError, OperationType, cleanDataForFirestore, clearPreLoginState, logout } from "./lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, setDoc, onSnapshot, getDocFromServer } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, getDocFromServer, deleteField } from "firebase/firestore";
 import { Loader2, Settings, Layers, Menu, Moon, Sun, AlertCircle, RefreshCw, Mail, ArrowLeft, Globe, Check, Key, Shield } from "lucide-react";
 import { toast, ToastContainer } from "./components/Toast";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
@@ -354,7 +354,17 @@ export default function App() {
       // only because that wipes the auth session and forces a fresh login).
       if (snapshot.metadata.hasPendingWrites && profileAppliedRef.current) return;
       if (snapshot.exists()) {
-        const data = snapshot.data() as UserProfile;
+        const rawData = snapshot.data() as UserProfile & { chatHistory?: any };
+
+        // Purge legacy chatHistory from Firestore if it still exists on the doc.
+        // chatHistory was migrated to users/{uid}/threads subcollection — any
+        // residual top-level array wastes Firestore quota and leaks message data.
+        if (rawData.chatHistory !== undefined) {
+          delete rawData.chatHistory;
+          setDoc(doc(db, path), { chatHistory: deleteField() }, { merge: true }).catch(() => {});
+        }
+
+        const data = rawData as UserProfile;
         setProfile(data);
         // The profile is established, so the login-screen hints have served their
         // purpose. Drop them now so they can never be re-applied to a different

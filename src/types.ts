@@ -131,7 +131,8 @@ export interface UserProfile {
   onboardingComplete: boolean;
   photoURL?: string;
   questionHistory: { score: number; date: string }[];
-  chatHistory: Message[]; // Legacy/Global history (to be deprecated or kept small)
+  /** @deprecated chatHistory has been migrated to users/{uid}/threads subcollection. Kept as optional for legacy read-path migration only. */
+  chatHistory?: Message[];
   chatThreads?: ChatThread[];
   activeThreadId?: string;
   tasks?: Task[];
