@@ -373,11 +373,21 @@ export default function App() {
         // below — Onboarding still reads them to pre-fill the user's choices.)
         clearPreLoginState();
 
-        // Redirect special needs users to the disability view by default
+        // Smart Entry Routing:
+        // If the user has special needs / accessibility mode -> land on #disability
+        // If the user is a normal student/learner -> ALWAYS land directly on #chat, never disability
         const hash = window.location.hash.replace('#', '');
-        if (data.accountPath === 'Special Needs' && (!hash || hash === 'chat' || hash === '')) {
-          setCurrentView('disability');
-          window.history.replaceState(null, '', '#disability');
+        const isA11y = isAccessibilityUser(data);
+        if (isA11y) {
+          if (!hash || hash === 'chat' || hash === '') {
+            setCurrentView('disability');
+            window.history.replaceState(null, '', '#disability');
+          }
+        } else {
+          if (!hash || hash === 'disability' || hash === '') {
+            setCurrentView('chat');
+            window.history.replaceState(null, '', '#chat');
+          }
         }
 
         // Record login telemetry (session history, device, country, city)
@@ -587,9 +597,12 @@ export default function App() {
       await setDoc(doc(db, path), cleanedProfile, { merge: true });
       // Cleanly and immediately update local state to navigate the user away from Onboarding to the dashboard.
       setProfile(cleanedProfile);
-      if (cleanedProfile.accountPath === 'Special Needs') {
+      if (isAccessibilityUser(cleanedProfile)) {
         setCurrentView('disability');
         window.history.replaceState(null, '', '#disability');
+      } else {
+        setCurrentView('chat');
+        window.history.replaceState(null, '', '#chat');
       }
     } catch (err) {
       console.error("Failed to save onboarding profile:", err);

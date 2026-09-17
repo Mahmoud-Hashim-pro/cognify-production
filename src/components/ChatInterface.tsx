@@ -150,9 +150,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const [insights, setInsights] = useState<string | null>(null);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
 
-  // Rich 3-Column AI Study Center states
-  const [showWorkspace, setShowWorkspace] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1280);
-  const [showContext, setShowContext] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1280);
+  // Streamlined, focused Chat Experience: side panels closed by default for maximum clarity
+  const [showWorkspace, setShowWorkspace] = useState(false);
+  const [showContext, setShowContext] = useState(false);
   const [activeSubjectId, setActiveSubjectId] = useState('sub-1');
   const [studyMinutes, setStudyMinutes] = useState(0);
 
@@ -1671,31 +1671,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
         {/* Center Column: Interactive Chat & Input Composer */}
         <div className="flex flex-col flex-1 min-w-0 h-full relative overflow-hidden">
-          {/* Floating Arrow to Open Workspace when collapsed */}
-          {!showWorkspace && (
-            <button
-              type="button"
-              onClick={() => setShowWorkspace(true)}
-              aria-label="Open Workspace"
-              title={localize(profile.language, 'Open Workspace', 'فتح مساحة العمل')}
-              className="absolute start-0 top-1/2 -translate-y-1/2 z-30 w-7 h-14 bg-[#121524]/95 border-y border-e border-slate-700/80 hover:border-cyan-500/50 rounded-e-xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 shadow-2xl backdrop-blur-xl transition-all active:scale-95 group cursor-pointer"
-            >
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          )}
-
-          {/* Floating Arrow to Open Context when collapsed */}
-          {!showContext && (
-            <button
-              type="button"
-              onClick={() => setShowContext(true)}
-              aria-label="Open Context & Citations"
-              title={localize(profile.language, 'Open Context & Citations', 'فتح لوحة المصادر والمراجع')}
-              className="absolute end-0 top-1/2 -translate-y-1/2 z-30 w-7 h-14 bg-[#121524]/95 border-y border-s border-slate-700/80 hover:border-indigo-500/50 rounded-s-xl flex flex-col items-center justify-center text-slate-400 hover:text-indigo-300 shadow-2xl backdrop-blur-xl transition-all active:scale-95 group cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            </button>
-          )}
+          {/* Side panels can be opened cleanly and easily via the top toolbar icons */}
 
           {/* Messages */}
           <div className={`flex flex-col flex-1 min-h-0 overflow-hidden relative transition-colors duration-300 ${
@@ -1754,42 +1730,102 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           </div>
         ) : (
           <div className="w-full max-w-3xl space-y-10">
-            {/* Active Spaced Micro-Retrieval Warmup Banner */}
-            <RetentionWarmupBanner
-              uid={profile.uid}
-              retentionSchedules={studentState?.retentionSchedules}
-              personalLearningModel={studentState?.personalLearningModel}
-              language={profile.language}
-              onStartRefresher={(conceptId) => {
-                const isAr = isArabicLocale(profile.language);
-                const isFr = profile.language === 'French';
-                const refresherPrompt = isAr
-                  ? `أريد اختبار استرجاع سريع مدته 30 ثانية لتثبيت مفهوم (${conceptId}). اختبرني بسؤال مباشر.`
-                  : isFr
-                  ? `Je souhaite faire une réactivation rapide de 30 secondes pour consolider le concept (${conceptId}). Pose-moi une question.`
-                  : `I'd like a 30-second quick retrieval refresher to consolidate the concept (${conceptId}). Give me a quick question.`;
-                handleSubmit(undefined, refresherPrompt);
-              }}
-            />
+            {messages.filter((m) => m.role === 'user').length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center py-8 sm:py-14 space-y-6 w-full animate-fadeIn">
+                <div className="relative">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-cyan-500/20 via-blue-600/20 to-purple-600/20 border border-cyan-500/30 flex items-center justify-center shadow-2xl shadow-cyan-500/10">
+                    <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400 animate-pulse" />
+                  </div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-3xl blur-xl opacity-20 -z-10" />
+                </div>
 
-            {/* Proactive Assistant Opportunity or Grounded Insight Card */}
-            {activeProactiveOpportunity && (
-              <ProactiveSuggestionCard
-                opportunity={activeProactiveOpportunity}
-                language={profile.language}
-                onAccept={(prompt) => {
-                  handleSubmit(undefined, prompt);
-                }}
-              />
-            )}
-            {!activeProactiveOpportunity && activeGroundedInsight && (
-              <ProactiveSuggestionCard
-                insight={activeGroundedInsight}
-                language={profile.language}
-                onAccept={(prompt) => {
-                  handleSubmit(undefined, prompt);
-                }}
-              />
+                <div className="space-y-2 max-w-lg">
+                  <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                    {localize(profile.language, 'How can I help you today?', 'كيف يمكنني مساعدتك اليوم؟')}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-medium">
+                    {localize(
+                      profile.language,
+                      'Your adaptive AI academic & learning copilot. Ask questions, analyze slides, or practice key concepts.',
+                      'رفيقك الأكاديمي والتعليمي الذكي. اسأل أي سؤال، حلل ملفاتك وسلايداتك، أو تدرب على المفاهيم المعقدة.'
+                    )}
+                  </p>
+                </div>
+
+                {/* Starter Prompts Grid */}
+                {(() => {
+                  const ar = isArabicLocale(profile.language);
+                  const f = profile.field || (ar ? 'مجالك' : 'your field');
+                  const chips = ar
+                    ? [
+                        { text: `اشرح لي مفهوم مهم في ${f} ببساطة`, icon: '💡' },
+                        { text: `اعمللي خطة مذاكرة لأسبوع`, icon: '📅' },
+                        { text: `لخّص لي موضوع أو ملف PDF`, icon: '📄' },
+                        { text: `اسألني أسئلة عشان أراجع`, icon: '🎯' },
+                      ]
+                    : [
+                        { text: `Explain a key ${f} concept simply`, icon: '💡' },
+                        { text: `Make me a 1-week study plan`, icon: '📅' },
+                        { text: `Summarize an article or PDF`, icon: '📄' },
+                        { text: `Quiz me to review`, icon: '🎯' },
+                      ];
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 w-full max-w-2xl">
+                      {chips.map((p) => (
+                        <button
+                          key={p.text}
+                          type="button"
+                          onClick={() => handleSubmit(undefined, p.text)}
+                          className="text-start text-xs sm:text-sm p-4 rounded-2xl border border-slate-800/80 bg-[#121524]/60 hover:border-cyan-500/50 hover:bg-[#161a2e] text-slate-300 hover:text-white transition-all shadow-lg backdrop-blur-xl active:scale-[0.98] flex items-center gap-3 group cursor-pointer"
+                        >
+                          <span className="text-xl p-2 rounded-xl bg-[#0A0C14] border border-slate-800 group-hover:border-cyan-500/40 transition-colors shrink-0">{p.icon}</span>
+                          <span className="font-semibold leading-snug">{p.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <>
+                {/* Active Spaced Micro-Retrieval Warmup Banner */}
+                <RetentionWarmupBanner
+                  uid={profile.uid}
+                  retentionSchedules={studentState?.retentionSchedules}
+                  personalLearningModel={studentState?.personalLearningModel}
+                  language={profile.language}
+                  onStartRefresher={(conceptId) => {
+                    const isAr = isArabicLocale(profile.language);
+                    const isFr = profile.language === 'French';
+                    const refresherPrompt = isAr
+                      ? `أريد اختبار استرجاع سريع مدته 30 ثانية لتثبيت مفهوم (${conceptId}). اختبرني بسؤال مباشر.`
+                      : isFr
+                      ? `Je souhaite faire une réactivation rapide de 30 secondes pour consolider le concept (${conceptId}). Pose-moi une question.`
+                      : `I'd like a 30-second quick retrieval refresher to consolidate the concept (${conceptId}). Give me a quick question.`;
+                    handleSubmit(undefined, refresherPrompt);
+                  }}
+                />
+
+                {/* Proactive Assistant Opportunity or Grounded Insight Card */}
+                {activeProactiveOpportunity && (
+                  <ProactiveSuggestionCard
+                    opportunity={activeProactiveOpportunity}
+                    language={profile.language}
+                    onAccept={(prompt) => {
+                      handleSubmit(undefined, prompt);
+                    }}
+                  />
+                )}
+                {!activeProactiveOpportunity && activeGroundedInsight && (
+                  <ProactiveSuggestionCard
+                    insight={activeGroundedInsight}
+                    language={profile.language}
+                    onAccept={(prompt) => {
+                      handleSubmit(undefined, prompt);
+                    }}
+                  />
+                )}
+              </>
             )}
           <AnimatePresence mode="popLayout">
             {messages.map((m) => (
@@ -2318,39 +2354,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             );
           })()}
 
-          {/* Starter prompts — shown on a fresh chat to beat the blank-page problem. */}
-          {!isLoading && messages.filter((m) => m.role === 'user').length === 0 && (() => {
-            const ar = isArabicLocale(profile.language);
-            const f = profile.field || (ar ? 'مجالك' : 'your field');
-            const chips = ar
-              ? [
-                  { text: `اشرح لي مفهوم مهم في ${f} ببساطة`, icon: '💡' },
-                  { text: `اعمللي خطة مذاكرة لأسبوع`, icon: '📅' },
-                  { text: `لخّص لي المقال أو ملف PDF`, icon: '📄' },
-                  { text: `اسألني أسئلة عشان أراجع`, icon: '🎯' },
-                ]
-              : [
-                  { text: `Explain a key ${f} concept simply`, icon: '💡' },
-                  { text: `Make me a 1-week study plan`, icon: '📅' },
-                  { text: `Summarize an article or PDF`, icon: '📄' },
-                  { text: `Quiz me to review`, icon: '🎯' },
-                ];
-            return (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-6 w-full">
-                {chips.map((p) => (
-                  <button
-                    key={p.text}
-                    type="button"
-                    onClick={() => handleSubmit(undefined, p.text)}
-                    className="text-start text-xs sm:text-sm p-4 rounded-2xl border border-slate-800/80 bg-[#121524]/80 hover:border-cyan-500/60 hover:bg-[#161a2e] text-slate-300 hover:text-white transition-all shadow-xl backdrop-blur-xl active:scale-[0.98] flex items-center gap-3 group"
-                  >
-                    <span className="text-xl p-2 rounded-xl bg-[#0A0C14] border border-slate-800 group-hover:border-cyan-500/40 transition-colors shrink-0">{p.icon}</span>
-                    <span className="font-semibold leading-snug">{p.text}</span>
-                  </button>
-                ))}
-              </div>
-            );
-          })()}
+
 
           {isLoading && (
             <motion.div
