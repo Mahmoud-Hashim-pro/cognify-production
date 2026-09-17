@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield,
@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { EmergencyContact } from '../lib/contacts';
-import { loadContacts, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
+import { loadContacts, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import { isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
@@ -38,7 +38,11 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   const isAr = isArabicLocale(lang);
   const isFr = lang === 'French';
 
-  const [contacts] = useState<EmergencyContact[]>(loadContacts);
+  const [contacts, setContacts] = useState<EmergencyContact[]>(loadContacts);
+  useEffect(() => {
+    if (!profile.uid) return;
+    restoreContactsFromCloud(profile.uid).then(setContacts);
+  }, [profile.uid]);
   const [testSent, setTestSent] = useState(false);
 
   const t = (en: string, ar: string, fr?: string) => {
