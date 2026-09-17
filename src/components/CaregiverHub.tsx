@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { EmergencyContact } from '../lib/contacts';
-import { loadContacts, sendWhatsAppMessage } from '../lib/contacts';
+import { loadContacts, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import { isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
@@ -77,7 +77,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   const handleTestSOS = () => {
     triggerHapticAlert('warning');
     const primary = contacts.find((c) => c.isPrimaryEmergency) || contacts[0];
-    if (primary && primary.phone) {
+    if (primary && isValidContactPhone(primary.phone)) {
       const testMsg = isAr
         ? '🔔 تجربة نظام الطوارئ من Cognify: نداء الاستغاثة يعمل بنجاح!'
         : '🔔 Cognify Emergency SOS Test: Alert system is functioning correctly!';
