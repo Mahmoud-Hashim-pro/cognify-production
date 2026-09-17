@@ -406,10 +406,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       : readMode
       ? activeReadAction === 'summarize'
         ? targetLang === 'ar'
-          ? 'بلخص المحاضرة والنقاط المهمة...'
+          ? 'بستخرج المفيد وخلاصة الكلام...'
           : targetLang === 'fr'
-          ? 'Résumé du cours et des points clés en cours...'
-          : 'Summarizing lecture and key points...'
+          ? 'Extraction de l\'essentiel et de la conclusion...'
+          : 'Extracting key takeaways and bottom line...'
         : targetLang === 'ar'
         ? 'بقرا النص اللي قدامك...'
         : targetLang === 'fr'
@@ -453,31 +453,28 @@ Speak directly, concisely, and naturally without any headings, robotic labels, o
       }
     } else if (readMode) {
       if (activeReadAction === 'summarize') {
-        // Summarize Mode: summarize lectures, presentations, book chapters, slides, or documents
+        // Summarize Mode: focus 100% on the core takeaway, bottom line, and vital substance (المفيد والزبدة الصافية)
         if (targetLang === 'ar') {
-          prompt = `أنت رفيق ومعلم ذكي يساعد شخص كفيف في متابعة محاضرة دراسية أو قراءة كتاب أو مستند عبر الكاميرا (ممكن تكون شريحة بروجكتور أو عرض بوربوينت، سبورة بيضاء، صفحة كتاب، ملخص، ورقة أسئلة، أو مقال).
-انظر فوراً إلى ما هو معروض أو مكتوب ولخصه بذكاء كالتالي:
-1. اذكر باختصار موضوع المحاضرة أو النص المعروض (مثلاً: "هذه شريحة تتكلم عن..." أو "هذه صفحة في كتاب تشرح...").
-2. لخّص بدقة الأفكار الرئيسية، المفاهيم الأساسية، وأهم النقاط والنتائج بأسلوب صوتي مباشر وواضح كأنك زميل دراسة ذكي يشرح له أهم ما في المحاضرة.
-3. إذا كان هناك مصطلحات مهمة، تعريفات، قوانين أو خطوات، اذكرها وركز عليها بوضوح.
-4. إذا لم يكن المعروض محاضرة (مثلاً إيصال، فاتورة، خطاب، تقرير)، لخص له المفيد وخلاصة المطلوب فوراً.
-5. تحدث بطريقة صوتية مريحة ومفهومة بدون أي نجوم ماركداون أو شرطات أو عناوين روبوتية معقدة لكي ينطقها الصوت بسلاسة. لو مفيش نص أو محاضرة واضحة، قول له "قرب الكاميرا شوية من الشاشة أو الورقة".${knownContext}`;
+          prompt = `أنت مساعد ومعلم ذكي يتحدث بصوته لشخص كفيف ليعطيه "المفيد والزبدة الصافية" من أي نص أو محاضرة أو شريحة أو ورقة أمامه بالكاميرا.
+قاعدتك الذهبية: ادخل في المفيد فوراً بدون مقدمات ولا لف ودوران:
+1. المفيد أولاً: استخرج الفكرة الجوهرية والزبدة الصافية في جملة أو جملتين مباشرتين ومركزتين (إيه أهم حاجة لازم يعرفها من هذا الكلام؟).
+2. التفاصيل والنتائج المهمة فقط: لو فيه قانون، تعريف أساسي، نتيجة حاسمة، تاريخ أو مبلغ مهم، أو خطوات عملية مطلوبة، قلها بوضوح واختصار.
+3. ممنوع الحشو أو الكلام الإنشائي: لا تضيع وقته في جمل مثل "هذا النص يتحدث عن..." أو قراءة التفاصيل الثانوية، بل ابدأ بالمعلومة المفيدة نفسها فوراً.
+4. تحدث بأسلوب صوتي ودود ومريح ومباشر بدون أي نجوم ماركداون (**) أو شرطات أو عناوين روبوتية لكي يُنطق الصوت بسلاسة وسرعة. لو مفيش نص واضح، قول له باختصار "قرب الكاميرا شوية من الورقة أو الشاشة".${knownContext}`;
         } else if (targetLang === 'fr') {
-          prompt = `Vous êtes un tuteur intelligent et compagnon vocal qui aide un étudiant malvoyant à suivre un cours, une présentation, un manuel ou un document avec sa caméra (diapositive, tableau, page de livre, polycopié).
-Regardez immédiatement le texte ou la présentation et résumez-le à voix haute :
-1. Indiquez brièvement le sujet du cours ou du document (ex. "Cette diapositive traite de...").
-2. Résumez avec précision les idées maîtresses, concepts clés et points essentiels, comme un camarade d'étude bienveillant.
-3. Mettez en avant les définitions, formules ou étapes clés.
-4. S'il s'agit d'un autre document, donnez l'essentiel et la conclusion directement.
-5. Parlez naturellement sans astérisques markdown ni titres robotiques pour une lecture vocale fluide. Si c'est flou, suggérez d'approcher la caméra.${knownContext}`;
+          prompt = `Vous êtes un compagnon vocal intelligent qui donne à une personne malvoyante "l'essentiel et la conclusion utile" de tout cours, diapositive ou document devant sa caméra.
+Règle d'or : Allez directement à l'essentiel sans préambule ni verbiage :
+1. L'essentiel d'abord : Donnez l'idée maîtresse et la conclusion clé en 1 ou 2 phrases percutantes et claires.
+2. Résultats et points cruciaux uniquement : S'il y a une formule, une définition importante, une décision ou une action concrète, énoncez-la directement.
+3. Zéro superflu : Ne commencez jamais par "Ce document parle de...", commencez immédiatement par l'information utile.
+4. Parlez de façon fluide et naturelle sans astérisques markdown ni titres pour une lecture vocale optimale. Si c'est flou, dites simplement d'approcher la caméra.${knownContext}`;
         } else {
-          prompt = `You are a smart tutor and voice companion helping a visually impaired student follow a lecture, presentation, textbook, or document through their camera (a lecture slide, presentation, whiteboard, textbook page, handout, or article).
-Instantly look at the text or slide and provide a spoken summary:
-1. Briefly state the lecture topic or document subject (e.g. "This slide covers..." or "This page explains...").
-2. Accurately summarize the core concepts, main ideas, and critical takeaways in clear, engaging spoken prose like a helpful study partner.
-3. Highlight key definitions, formulas, or procedural steps.
-4. If it is not a lecture (e.g. a report, letter, receipt), summarize the bottom line and essential information directly.
-5. Speak naturally without markdown asterisks, bullet dashes, or robotic headings so text-to-speech speaks smoothly. If blurry, gently ask them to hold the camera closer.${knownContext}`;
+          prompt = `You are a smart voice tutor giving a visually impaired user the distilled bottom line and core takeaways of any lecture, slide, book, or document in front of the camera.
+Golden rule: Cut straight to the bottom line and essential takeaways with zero filler:
+1. The Core Takeaway First: Deliver the distilled essence and primary message in 1-2 sharp, clear, conversational sentences (what is the single most important thing they need to know?).
+2. Vital Results and Key Facts: If there is a crucial formula, definition, bottom-line total, decision, or actionable step, state it directly and concisely.
+3. Zero Fluff: Never waste words on preamble like "This slide is about..." or minor background details. Start right with the useful takeaway itself.
+4. Speak in natural conversational prose without any markdown asterisks (**), bullet dashes, or robotic headings so speech is smooth and human. If unreadable, say "Bring the camera a bit closer to the text or screen."${knownContext}`;
         }
       } else {
         // Read Mode (Verbatim): read out all visible text word for word
@@ -877,13 +874,13 @@ Instantly look at the text or slide and provide a spoken summary:
                     : 'text-amber-200/80 hover:text-white'
                 }`}
                 title={t(
-                  'Summarize lecture, slide, or document',
-                  'تلخيص محاضرة، شريحة عرض، أو مستند',
-                  'Résumer cours, diapositive ou document'
+                  'Summarize the core takeaways and bottom line',
+                  'المفيد وخلاصة الكلام من المحاضرة أو النص',
+                  'L\'essentiel et conclusion clé'
                 )}
               >
                 <GraduationCap className="w-3.5 h-3.5" />
-                <span>{t('Summarize Lecture / Text', 'تلخيص محاضرة / نص', 'Résumer cours / texte')}</span>
+                <span>{t('Core Takeaway', 'المفيد والخلاصة', 'L\'essentiel')}</span>
               </button>
               <button
                 onClick={() => setReadAction('read')}
@@ -940,7 +937,7 @@ Instantly look at the text or slide and provide a spoken summary:
                   <span className="font-bold flex items-center gap-1.5 text-primary">
                     <Sparkles className="w-4 h-4" />
                     {readMode && readAction === 'summarize'
-                      ? (companionLang === 'ar' ? 'تلخيص المحاضرة والنقاط المهمة' : companionLang === 'fr' ? 'Résumé du cours' : 'Lecture Summary')
+                      ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
                       : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -953,14 +950,14 @@ Instantly look at the text or slide and provide a spoken summary:
                         className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition-colors"
                         title={
                           readAction === 'read'
-                            ? t('Summarize this lecture/text', 'تلخيص هذه المحاضرة / النص', 'Résumer ce cours / texte')
+                            ? t('Get core takeaways and bottom line', 'المفيد وخلاصة هذا الكلام', 'L\'essentiel de ce texte')
                             : t('Read full text word for word', 'قراءة النص كاملاً كلمة بكلمة', 'Lire le texte intégral')
                         }
                       >
                         {readAction === 'read' ? (
                           <>
                             <GraduationCap className="w-3.5 h-3.5" />
-                            <span>{t('Summarize', 'لخّص ده', 'Résumer')}</span>
+                            <span>{t('Core Takeaways', 'هات المفيد', 'L\'essentiel')}</span>
                           </>
                         ) : (
                           <>
@@ -1032,7 +1029,7 @@ Instantly look at the text or slide and provide a spoken summary:
                       ? '🇪🇬 فحص المنتج والتسوق'
                       : readMode
                       ? readAction === 'summarize'
-                        ? '🇪🇬 تلخيص المحاضرة أو النص'
+                        ? '🇪🇬 المفيد وخلاصة الكلام'
                         : '🇪🇬 اقرأ اللي قدامي'
                       : '🇪🇬 ماذا أمامي؟'}
                   </span>
@@ -1041,7 +1038,7 @@ Instantly look at the text or slide and provide a spoken summary:
                       ? 'مساعد التسوق والأسعار'
                       : readMode
                       ? readAction === 'summarize'
-                        ? 'تلخيص الأفكار والمفاهيم بالصوت'
+                        ? 'الزبدة وأهم نقطة بالصوت'
                         : 'قراءة نص بالصوت كلمة بكلمة'
                       : 'وصف فوري بالصوت'}
                   </span>
@@ -1078,7 +1075,7 @@ Instantly look at the text or slide and provide a spoken summary:
                       ? '🇬🇧 Scan product & price'
                       : readMode
                       ? readAction === 'summarize'
-                        ? '🇬🇧 Summarize lecture or text'
+                        ? '🇬🇧 Core takeaways & bottom line'
                         : '🇬🇧 Read this for me'
                       : '🇬🇧 What is here?'}
                   </span>
@@ -1087,7 +1084,7 @@ Instantly look at the text or slide and provide a spoken summary:
                       ? 'Shopping assistant'
                       : readMode
                       ? readAction === 'summarize'
-                        ? 'Key points & spoken concepts'
+                        ? 'Distilled essence & spoken facts'
                         : 'Spoken text reading'
                       : 'Spoken English'}
                   </span>
@@ -1124,7 +1121,7 @@ Instantly look at the text or slide and provide a spoken summary:
                       ? '🇫🇷 Scanner produit & prix'
                       : readMode
                       ? readAction === 'summarize'
-                        ? '🇫🇷 Résumer cours ou texte'
+                        ? '🇫🇷 L\'essentiel & conclusion'
                         : '🇫🇷 Lisez ceci'
                       : '🇫🇷 Que vois-je ?'}
                   </span>
@@ -1133,7 +1130,7 @@ Instantly look at the text or slide and provide a spoken summary:
                       ? 'Assistant achat'
                       : readMode
                       ? readAction === 'summarize'
-                        ? 'Points clés & résumé vocal'
+                        ? 'Synthèse utile & conclusion vocale'
                         : 'Lecture du texte'
                       : 'Vocal en français'}
                   </span>
