@@ -749,54 +749,6 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     }
   };
 
-  const [isBulkUpdatingCountries, setIsBulkUpdatingCountries] = useState(false);
-
-  const handleBulkAssignDefaultCountry = async (countryCode = 'EG') => {
-    const unassignedUsers = users.filter(
-      (u) => !u.country || u.country === 'Unknown' || u.country === 'N/A'
-    );
-    if (unassignedUsers.length === 0) {
-      toast.info('All registered users already have a country stamped!', 'No unassigned users');
-      return;
-    }
-
-    const countryLabel = formatCountryName(countryCode);
-    const confirmed = window.confirm(
-      `Found ${unassignedUsers.length} users with missing country (e.g. 7up.youssef).\n\nDo you want to batch-assign "${countryLabel}" to all ${unassignedUsers.length} users in Firestore?`
-    );
-    if (!confirmed) return;
-
-    setIsBulkUpdatingCountries(true);
-    let updatedCount = 0;
-    try {
-      for (const u of unassignedUsers) {
-        try {
-          await updateDoc(doc(db, "users", u.uid), {
-            country: countryCode,
-            lastLoginCountry: countryCode,
-          });
-          updatedCount++;
-        } catch (err) {
-          console.warn(`Failed to set country for user ${u.uid}:`, err);
-        }
-      }
-      toast.success(
-        `Successfully stamped ${countryLabel} for ${updatedCount} users!`,
-        'Batch Update Complete'
-      );
-      if (
-        selectedUserForModal &&
-        (!selectedUserForModal.country ||
-          selectedUserForModal.country === 'Unknown' ||
-          selectedUserForModal.country === 'N/A')
-      ) {
-        setSelectedUserForModal({ ...selectedUserForModal, country: countryCode });
-      }
-    } finally {
-      if (isMountedRef.current) setIsBulkUpdatingCountries(false);
-    }
-  };
-
   if (!isAdmin) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-slate-950 text-slate-100 p-6">
@@ -1610,19 +1562,6 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   >
                     <FileJson className="w-3.5 h-3.5" /> JSON Backup
                   </button>
-                  <button
-                    onClick={() => handleBulkAssignDefaultCountry('EG')}
-                    disabled={isBulkUpdatingCountries}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
-                    title="Assign Egypt (EG) to all users who currently show Country: N/A"
-                  >
-                    {isBulkUpdatingCountries ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Globe className="w-3.5 h-3.5" />
-                    )}
-                    Fill Missing Countries (🇪🇬 EG)
-                  </button>
                 </div>
               </div>
 
@@ -1641,7 +1580,6 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                           <th className="p-4">User & Profile Photo</th>
                           <th className="p-4">Section & Disability</th>
                           <th className="p-4">System Role</th>
-                          <th className="p-4">Country</th>
                           <th className="p-4">Points</th>
                           <th className="p-4">Score</th>
                           <th className="p-4">Live Presence & Active</th>
@@ -1755,31 +1693,6 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                     </>
                                   )}
                                 </div>
-                              </div>
-                            </td>
-                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex items-center gap-1.5">
-                                {u.country && u.country !== 'Unknown' && u.country !== 'N/A' ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-                                    <Globe className="w-3 h-3 text-emerald-400" />
-                                    {formatCountryName(u.country)}
-                                  </span>
-                                ) : (
-                                  <select
-                                    value=""
-                                    onChange={(e) => handleUpdateCountry(u, e.target.value)}
-                                    disabled={busyUid === u.uid}
-                                    className="bg-slate-900 border border-slate-700 hover:border-cyan-500/50 text-slate-400 hover:text-cyan-300 text-[11px] font-bold rounded-lg px-2 py-1 outline-none cursor-pointer transition-colors"
-                                    title="Set user country"
-                                  >
-                                    <option value="" disabled>Set Country...</option>
-                                    {COMMON_COUNTRIES.map((c) => (
-                                      <option key={c.code} value={c.code}>
-                                        {c.name} ({c.code})
-                                      </option>
-                                    ))}
-                                  </select>
-                                )}
                               </div>
                             </td>
                             <td className="p-4 font-black text-white">{u.points || 0}</td>
@@ -4089,25 +4002,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                         )}
                       </div>
                       <div><span className="text-slate-400">Language:</span> <span className="font-bold text-white">{selectedUserForModal.language || 'English'}</span></div>
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div>
                         <span className="text-slate-400">Country:</span>{' '}
-                        <span className={`font-bold ${selectedUserForModal.country && selectedUserForModal.country !== 'Unknown' && selectedUserForModal.country !== 'N/A' ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        <span className="font-bold text-emerald-400">
                           {formatCountryName(selectedUserForModal.country)}
                         </span>
-                        <select
-                          value={selectedUserForModal.country && selectedUserForModal.country !== 'Unknown' && selectedUserForModal.country !== 'N/A' ? selectedUserForModal.country : ''}
-                          onChange={(e) => handleUpdateCountry(selectedUserForModal, e.target.value)}
-                          disabled={busyUid === selectedUserForModal.uid}
-                          className="bg-slate-900 border border-slate-700 hover:border-cyan-500/50 text-cyan-300 text-[11px] font-bold rounded-lg px-2 py-0.5 outline-none cursor-pointer transition-colors"
-                          title="Set or update user's country"
-                        >
-                          <option value="" disabled>Set Country...</option>
-                          {COMMON_COUNTRIES.map((c) => (
-                            <option key={c.code} value={c.code}>
-                              {c.name} ({c.code})
-                            </option>
-                          ))}
-                        </select>
                       </div>
                       {selectedUserForModal.city && (
                         <div>
