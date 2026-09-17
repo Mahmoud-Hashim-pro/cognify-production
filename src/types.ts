@@ -15,8 +15,7 @@ export interface Message {
   attachments?: {
     name: string;
     type: string;
-    data?: string; // Base64
-    url?: string;  // Direct or remote URL
+    data: string; // Base64
   }[];
   comparisons?: {
     modelName: string;
@@ -132,19 +131,13 @@ export interface UserProfile {
   onboardingComplete: boolean;
   photoURL?: string;
   questionHistory: { score: number; date: string }[];
-  /**
-   * Metadata index for student chat threads (titles, dates, snippets).
-   * Actual message contents are stored strictly in private owner-only subcollections:
-   * `/users/{userId}/threads/{threadId}`
-   */
+  chatHistory: Message[]; // Legacy/Global history (to be deprecated or kept small)
   chatThreads?: ChatThread[];
   activeThreadId?: string;
   tasks?: Task[];
   lastActiveDate?: string;
-  /** Linked student UID for parent companion */
-  linkedChildUid?: string;
-  /** Active student learning state */
-  studentState?: any;
+  /** ISO 3166-1 alpha-2 country code, stamped from Vercel's edge geo header. */
+  country?: string;
   /**
    * Phase 2: Cognify Memory (Transparent Student Memory).
    * Stored under users/{userId}/memory/config in Firestore.
@@ -363,11 +356,3 @@ export interface AACCardItem {
   actionPayload?: string;
   isAiAction?: boolean;
 }
-
-export * from './types/spatialMemory2';
-
-export * from './types/multimodal.js';
-
-export * from './types/accessibilityIntelligence.js';
-
-
