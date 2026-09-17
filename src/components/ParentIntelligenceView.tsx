@@ -59,6 +59,20 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
           const uDoc = await getDoc(doc(db, `users/${childId}`));
           if (uDoc.exists() && isMounted) {
             const u = uDoc.data();
+            
+            // Strictly verify that current authenticated user is an authorized parent/guardian
+            const isAuthorizedParent = Boolean(
+              (profile?.uid && u.linkedParentUid === profile.uid) ||
+              (profile?.email && u.parentEmail && u.parentEmail.toLowerCase() === profile.email.toLowerCase()) ||
+              (profile?.uid && Array.isArray(u.authorizedParentUids) && u.authorizedParentUids.includes(profile.uid))
+            );
+
+            if (!isAuthorizedParent) {
+              console.warn(`[ParentIntelligenceView] Access denied: User ${profile?.uid} is not an authorized guardian for child ${childId}`);
+              setIsDemoMode(true);
+              return;
+            }
+
             setLinkedChildName(u.name || u.email?.split('@')[0] || 'Child');
             try {
               const sDoc = await getDoc(doc(db, `users/${childId}/studentState/current`));

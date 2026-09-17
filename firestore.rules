@@ -158,6 +158,19 @@ service cloud.firestore {
           && request.resource.data.get('email', '') == resource.data.get('email', '');
     }
 
+    // A verified parent/guardian is explicitly authorized on the target student's profile
+    // via linkedParentUid, parentEmail, or authorizedParentUids.
+    // This strictly blocks parents from accessing unlinked children's private learning state.
+    function isVerifiedParent(userId) {
+      return isAuthenticated()
+          && exists(/databases/$(database)/documents/users/$(userId))
+          && (
+            get(/databases/$(database)/documents/users/$(userId)).data.get('linkedParentUid', '') == request.auth.uid ||
+            (request.auth.token.email != '' && get(/databases/$(database)/documents/users/$(userId)).data.get('parentEmail', '').lower() == request.auth.token.email.lower()) ||
+            request.auth.uid in get(/databases/$(database)/documents/users/$(userId)).data.get('authorizedParentUids', [])
+          );
+    }
+
     function isValidEmail(email) {
       return email is string && email.size() >= 3 && email.size() <= 256 && email.matches("^[^@]+@[^@]+\\.[^@]+$");
     }
@@ -191,8 +204,8 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      // Owner + admins as before, PLUS org managers for their own org's users.
-      allow read: if isOwner(userId) || isAdmin() || isOrgManagerOfTarget();
+      // Owner + admins as before, PLUS org managers for their own org's users, PLUS verified parents.
+      allow read: if isOwner(userId) || isAdmin() || isOrgManagerOfTarget() || isVerifiedParent(userId);
       // A new user can create only their own doc and may NOT self-assign admin
       // or org-manager (the organization CODE itself may be set at sign-up).
       allow create: if isOwner(userId) && isValidUser(request.resource.data) &&
@@ -236,7 +249,8 @@ service cloud.firestore {
       }
 
       match /studentState/{docId} {
-        allow read, write, delete: if isOwner(userId) || isAdmin();
+        allow read: if isOwner(userId) || isAdmin() || isVerifiedParent(userId);
+        allow write, delete: if isOwner(userId) || isAdmin();
       }
 
       match /goals/{goalId} {

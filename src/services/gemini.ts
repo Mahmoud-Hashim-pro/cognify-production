@@ -34,18 +34,22 @@ export async function getAuthHeaders(forceRefresh = false): Promise<Record<strin
 }
 
 export function getGeminiKeys(): string[] {
-  // Provider keys live server-side in /api/gemini/*. For in-browser direct fallback
-  // (e.g. static hosting without API routes), honour encrypted user-pasted key first, then
-  // optional VITE_GEMINI_API_KEY environment variable.
+  // Provider keys live server-side in /api/gemini/*. For in-browser direct fallback,
+  // honour encrypted user-pasted BYOK key first. In production, VITE_* fallback is strictly
+  // disabled to prevent exposing provider keys in public JS bundles.
   const localKey = secureLoadKeySync('gemini');
-  const envKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY) || '';
-  return splitKeys(localKey || envKey);
+  if (localKey) return splitKeys(localKey);
+  const isDev = typeof import.meta !== 'undefined' && Boolean((import.meta as any).env?.DEV);
+  const envKey = isDev ? ((import.meta as any).env?.VITE_GEMINI_API_KEY || '') : '';
+  return splitKeys(envKey);
 }
 
 export function getGroqKeys(): string[] {
   const localKey = secureLoadKeySync('groq');
-  const envKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GROQ_API_KEY) || '';
-  return splitKeys(localKey || envKey);
+  if (localKey) return splitKeys(localKey);
+  const isDev = typeof import.meta !== 'undefined' && Boolean((import.meta as any).env?.DEV);
+  const envKey = isDev ? ((import.meta as any).env?.VITE_GROQ_API_KEY || '') : '';
+  return splitKeys(envKey);
 }
 
 export function getNvidiaKeys(): string[] {

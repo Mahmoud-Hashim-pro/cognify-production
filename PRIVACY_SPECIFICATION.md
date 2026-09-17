@@ -8,8 +8,8 @@
 
 ## 1. Core Privacy Architecture Principles
 
-1. **Zero-Knowledge Media Processing & Edge-First Privacy**:
-   - **Microphone Audio Streams & MediaPipe Models**: Audio streams and real-time hand/face landmarks are processed **purely on the client device** in volatile browser memory (Web Audio API, MediaPipe). **NO raw audio samples or landmark data are ever written to disk, sent across the network, or saved to any database — NEVER PERSISTED (0% Disk / 0% Cloud).**
+1. **Ephemeral Media Processing & Edge-First Privacy**:
+   - **Microphone Audio Streams & MediaPipe Models (Zero-Knowledge Media Processing)**: Audio streams and real-time hand/face landmarks are processed **purely on the client device** in volatile browser memory (Web Audio API, MediaPipe). **NO raw audio samples or landmark data are ever written to disk, sent across the network, or saved to any database — NEVER PERSISTED (0% Disk / 0% Cloud).**
    - **Vision Companion (Ephemeral Cloud Multimodal Inference)**: Camera snapshots captured for scene understanding and obstacle recognition are transmitted securely over TLS as transient in-memory base64 payloads directly to the official inference endpoint (`/api/gemini/generateAdaptiveResponse`).
    - **Zero-Persistence Invariant for Visual Data**: **0% Disk / 0% Database Persistence**. Vision frames are never saved to cloud storage buckets, never written to server disks, never logged in audit trails, and never stored in any database. The visual payload exists purely in volatile server memory during the inference turn (~500ms) and is immediately garbage-collected upon response completion.
 

@@ -392,7 +392,24 @@ export async function runProductionObservabilityVerification(): Promise<{ passed
   console.log('\nGroup 6: Production Health & Uptime Check Endpoint (Requirement 25-26)');
   resetCircuitBreakerHealth();
 
-  // 1. Direct Payload Inspection
+  // 1. Verify genuine availability detection (proving || true hardcoding is removed)
+  const prevGemini = process.env.GEMINI_API_KEY;
+  const prevGroq = process.env.GROQ_API_KEY;
+  const prevNvidia = process.env.NVIDIA_API_KEY;
+  const prevXai = process.env.XAI_API_KEY;
+
+  delete process.env.GEMINI_API_KEY;
+  delete process.env.VITE_GEMINI_API_KEY;
+  const unconfiguredReport = getSystemHealthReport();
+  assert(unconfiguredReport.activeProviderHealth.gemini.available === false, 'Health check accurately detects missing keys (available=false without fake || true)');
+  assert(unconfiguredReport.activeProviderHealth.gemini.status === 'unavailable', 'Missing key sets provider status to "unavailable"');
+
+  // Set mock keys to verify active healthy provider rotation
+  process.env.GEMINI_API_KEY = 'test-gemini-key';
+  process.env.GROQ_API_KEY = 'test-groq-key';
+  process.env.NVIDIA_API_KEY = 'test-nvidia-key';
+  process.env.XAI_API_KEY = 'test-xai-key';
+
   const healthReport = getSystemHealthReport();
   assert(healthReport.status === 'healthy', 'Health report status is "healthy"');
   assert(typeof healthReport.uptimeSeconds === 'number' && healthReport.uptimeSeconds >= 0, 'Health report contains numeric uptimeSeconds');
@@ -447,6 +464,10 @@ export async function runProductionObservabilityVerification(): Promise<{ passed
   assert(degradedHealthReport.circuitBreakerStatus === 'OPEN', 'Overall circuit breaker state trips to OPEN');
   assert(degradedHealthReport.status === 'degraded', 'Overall system health report reflects degraded state on OPEN circuit');
   resetCircuitBreakerHealth();
+  if (prevGemini) process.env.GEMINI_API_KEY = prevGemini; else delete process.env.GEMINI_API_KEY;
+  if (prevGroq) process.env.GROQ_API_KEY = prevGroq; else delete process.env.GROQ_API_KEY;
+  if (prevNvidia) process.env.NVIDIA_API_KEY = prevNvidia; else delete process.env.NVIDIA_API_KEY;
+  if (prevXai) process.env.XAI_API_KEY = prevXai; else delete process.env.XAI_API_KEY;
 
   console.log('\n================================================================================');
   console.log(`Production Observability Verification Complete: ${passed} PASSED, ${failed} FAILED.`);

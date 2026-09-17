@@ -198,12 +198,22 @@ export function getDeviceVaultSecret(userId: string): Uint8Array {
 }
 
 /**
- * Generates a stable, device-bound user salt combining the device vault secret and UID.
+ * Generates a stable salt for key derivation.
+ * - In passphrase mode (KEK), generates a deterministic salt derived from userId and domain seed,
+ *   enabling identical key derivation across different devices (Device A and Device B).
+ * - In device-bound mode (no passphrase), binds salt to the device random secret and userId.
  */
-async function getUserSalt(userId: string): Promise<Uint8Array> {
-  const deviceSecret = getDeviceVaultSecret(userId);
+async function getUserSalt(userId: string, isPassphraseMode: boolean = false): Promise<Uint8Array> {
   const subtle = getSubtle();
   const encoder = new TextEncoder();
+
+  if (isPassphraseMode) {
+    const seed = encoder.encode(`cognify_kek_salt_v11_${userId}_portable`);
+    const hashBuffer = await subtle.digest('SHA-256', seed);
+    return new Uint8Array(hashBuffer).slice(0, 16);
+  }
+
+  const deviceSecret = getDeviceVaultSecret(userId);
   const uidBytes = encoder.encode(`cognify_device_salt_v11_${userId}`);
   const combined = new Uint8Array(deviceSecret.length + uidBytes.length);
   combined.set(deviceSecret, 0);
@@ -211,6 +221,49 @@ async function getUserSalt(userId: string): Promise<Uint8Array> {
 
   const hashBuffer = await subtle.digest('SHA-256', combined);
   return new Uint8Array(hashBuffer).slice(0, 16);
+}
+
+/**
+ * Exports the device-bound vault secret as a portable recovery string (Base64).
+ * Allows a user to back up their device key or sync it to a secondary device.
+ */
+export function exportDeviceVaultRecoveryKey(userId: string): string {
+  if (!userId) {
+    throw new Error('[userCryptoEngine] Cannot export vault key without userId');
+  }
+  const secret = getDeviceVaultSecret(userId);
+  return bufferToBase64(secret);
+}
+
+/**
+ * Imports a portable recovery key into the local device vault.
+ * Overwrites the local device secret for this user and invalidates any cached keys.
+ */
+export function importDeviceVaultRecoveryKey(userId: string, recoveryKey: string): void {
+  if (!userId || !recoveryKey) {
+    throw new Error('[userCryptoEngine] Invalid userId or recoveryKey');
+  }
+  const trimmed = recoveryKey.trim();
+  const secretBytes = base64ToBuffer(trimmed);
+  if (secretBytes.length !== 32) {
+    throw new Error('[userCryptoEngine] Invalid recovery key length. Expected 32 bytes (256-bit).');
+  }
+
+  const storageKey = `cognify_device_vault_${userId}`;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(storageKey, trimmed);
+    } catch {}
+  } else {
+    nodeVaultStore.set(storageKey, trimmed);
+  }
+
+  // Invalidate any cached CryptoKeys for this user
+  for (const key of userKeyCache.keys()) {
+    if (key.startsWith(`${userId}:`)) {
+      userKeyCache.delete(key);
+    }
+  }
 }
 
 /**
@@ -226,12 +279,13 @@ export async function deriveUserEncryptionKey(
   }
 
   const effectivePassphrase = customPassphrase || getUserCustomPassphrase(userId);
+  const isPassphraseMode = Boolean(effectivePassphrase);
   const cacheKey = `${userId}:${effectivePassphrase || 'device_bound'}`;
   const cachedKey = userKeyCache.get(cacheKey);
   if (cachedKey) return cachedKey;
 
   const subtle = getSubtle();
-  const salt = await getUserSalt(userId);
+  const salt = await getUserSalt(userId, isPassphraseMode);
   const encoder = new TextEncoder();
 
   let rawKeyMaterial: Uint8Array;

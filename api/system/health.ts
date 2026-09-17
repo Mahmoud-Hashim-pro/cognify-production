@@ -118,28 +118,33 @@ export function getSystemHealthReport(traceId?: string): SystemHealthPayload {
   }
 
   // Active providers health check
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  const nvidiaKey = process.env.NVIDIA_API_KEY || process.env.VITE_NVIDIA_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
+  const xaiKey = process.env.XAI_API_KEY || process.env.VITE_XAI_API_KEY;
+
   const activeProviderHealth: Record<string, ProviderHealth> = {
     gemini: {
-      status: 'healthy',
-      available: Boolean(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || true),
+      status: geminiKey ? 'healthy' : 'unavailable',
+      available: Boolean(geminiKey),
       modelInRotation: 'gemini-2.5-flash',
       latencyEstimateMs: 120,
     },
     nvidia: {
-      status: 'healthy',
-      available: Boolean(process.env.NVIDIA_API_KEY || process.env.VITE_NVIDIA_API_KEY || true),
+      status: nvidiaKey ? 'healthy' : 'unavailable',
+      available: Boolean(nvidiaKey),
       modelInRotation: 'z-ai/glm-5.2',
       latencyEstimateMs: 340,
     },
     groq: {
-      status: 'healthy',
-      available: Boolean(process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY || true),
+      status: groqKey ? 'healthy' : 'unavailable',
+      available: Boolean(groqKey),
       modelInRotation: 'llama-3.3-70b-versatile',
       latencyEstimateMs: 95,
     },
     xai: {
-      status: 'healthy',
-      available: Boolean(process.env.XAI_API_KEY || process.env.VITE_XAI_API_KEY || true),
+      status: xaiKey ? 'healthy' : 'unavailable',
+      available: Boolean(xaiKey),
       modelInRotation: 'grok-2-latest',
       latencyEstimateMs: 280,
     },
