@@ -8,10 +8,10 @@
 
 ## 1. Core Privacy Architecture Principles
 
-1. **Zero-Knowledge Media Processing (Edge-First Privacy)**:
-   - Camera video frames and microphone audio streams are processed **purely on the client device** in volatile browser memory (WebGL, Web Audio, MediaPipe).
-   - **NO raw video frames or raw audio samples are ever written to disk, sent across the network, or saved to any database (0% Disk / 0% Cloud).**
-   - Once a frame is analyzed for accessibility or spatial objects, its image bitmap is immediately garbage collected.
+1. **Zero-Knowledge Media Processing & Edge-First Privacy**:
+   - **Microphone Audio Streams & MediaPipe Models**: Audio streams and real-time hand/face landmarks are processed **purely on the client device** in volatile browser memory (Web Audio API, MediaPipe). **NO raw audio samples or landmark data are ever written to disk, sent across the network, or saved to any database — NEVER PERSISTED (0% Disk / 0% Cloud).**
+   - **Vision Companion (Ephemeral Cloud Multimodal Inference)**: Camera snapshots captured for scene understanding and obstacle recognition are transmitted securely over TLS as transient in-memory base64 payloads directly to the official inference endpoint (`/api/gemini/generateAdaptiveResponse`).
+   - **Zero-Persistence Invariant for Visual Data**: **0% Disk / 0% Database Persistence**. Vision frames are never saved to cloud storage buckets, never written to server disks, never logged in audit trails, and never stored in any database. The visual payload exists purely in volatile server memory during the inference turn (~500ms) and is immediately garbage-collected upon response completion.
 
 2. **Strict Multi-Tenant Isolation**:
    - Every piece of personal learning data is strictly partitioned by the user's authenticated UID (`users/{uid}`).
@@ -29,9 +29,9 @@
 | **User Profile & Onboarding** | Account identity, academic level, points, accessibility settings. | Firestore + Local Device Cache | `/users/{uid}` | Retained while account active. Permanently deleted upon account erasure. |
 | **Student State Engine** | Concept masteries, learning strain, active interventions, SM-2 retention. | Firestore + Local Device Cache | `/users/{uid}/studentState/current` | Retained to maintain adaptive continuity. Can be reset or erased anytime. |
 | **Learning Event Stream** | Audit trail of practice answers, time-stamped learning milestones, feedback. | Firestore (5s debounce) + Local Cache | `/users/{uid}/learningEvents/{eventId}` | Persisted for longitudinal learning analytics. Purged completely upon account erasure. |
-| **Conversational Threads** | Chat history with AI assistant, explanations, and practice transcripts. | Firestore (capped at 300 turns) | `/users/{uid}/threads/{threadId}` | Deletable per thread or full wipe via Privacy Center. |
-| **Spatial Object Locations** | Observed physical item names, rooms, surfaces, and 10-item movement history. | Firestore + Local Device Cache | `/users/{uid}.spatialMemories` | Strictly isolated per UID. Can be cleared directly in Vision Companion or Privacy Center. |
-| **Camera Video Frames** | Real-time object and hazard detection for visually impaired students. | **NEVER PERSISTED (0% Disk / 0% Cloud)** | In-Memory WebGL Canvas Only | **Ephemeral**: Discarded immediately after inference (within ~30ms). |
+| **Conversational Threads** | Chat history with AI assistant, explanations, and practice transcripts. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}/threads/{threadId}` | Encrypted at rest. Deletable per thread or full wipe via Privacy Center. |
+| **Spatial Object Locations** | Observed physical item names, rooms, surfaces, and 10-item movement history. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}/spatialObjects/{id}` | Encrypted at rest. Strictly isolated per UID. Can be cleared directly in Vision Companion or Privacy Center. |
+| **Camera Video Frames** | Real-time object and hazard detection for visually impaired students. | **Ephemeral Cloud Multimodal Inference (0% Disk / 0% Database Persistence)** | In-Memory WebGL Canvas -> Transient TLS API Payload | **Ephemeral**: Discarded immediately after inference. Zero disk, database, or bucket persistence. |
 | **Microphone Audio Streams** | Voice input and Speech-to-Text translation. | **NEVER PERSISTED (0% Disk / 0% Cloud)** | In-Memory AudioBuffer Only | **Ephemeral**: Audio stream tracks are closed immediately upon speech termination. |
 | **DevTools Security Probes** | Detection of DOM tampering and unauthorized console inspection. | Firestore (Founder Only) | `/securityAudits/{auditId}` | Retained for system security integrity. Read-only strictly by primary founder. |
 

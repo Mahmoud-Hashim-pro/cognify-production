@@ -1,18 +1,25 @@
 /**
- * Zero-Knowledge Client-Side AES-256-GCM Encryption Engine for Cognify 2.0
+ * Client-Side AES-256-GCM Encryption at Rest with Device-Bound Key Storage for Cognify 2.0
  * 
- * Provides end-to-end client-side confidentiality for sensitive student data:
+ * Provides robust client-side confidentiality for sensitive student data:
  *  - Chat Threads (/users/{uid}/threads/{threadId})
  *  - Spatial Memory Objects (/users/{uid}/spatialObjects/{objectId})
  *  - Vision Memories and Sensitive Notes
  * 
- * Architecture:
+ * Architecture & Key Derivation (Device-Bound Random Vault + KEK/DEK):
  *  1. Native Web Crypto API (crypto.subtle) - Zero npm dependencies, hardware-accelerated.
- *  2. Key Derivation: PBKDF2-HMAC-SHA256 with 100,000 iterations over user UID + local salt,
- *     with optional support for user-held custom passphrases.
- *  3. Cipher: AES-256-GCM with unique 96-bit (12-byte) initialization vector per encryption
+ *  2. Device-Bound Random Vault Secret:
+ *     Instead of predictable key derivation from UID alone, each device generates
+ *     a cryptographically secure 256-bit random vault secret (`crypto.getRandomValues`)
+ *     persisted in device storage (`cognify_device_vault_${userId}`).
+ *  3. Key Derivation:
+ *     PBKDF2-HMAC-SHA256 with 100,000 iterations combines the device-bound secret with
+ *     the user UID, or an optional user-held passphrase (KEK -> DEK pattern).
+ *     Without access to the client device vault or the user's secret passphrase, an attacker
+ *     who only knows the user's UID and the open-source code cannot derive the encryption key.
+ *  4. Cipher: AES-256-GCM with unique 96-bit (12-byte) initialization vector per encryption
  *     and built-in 128-bit authentication tag verification.
- *  4. Storage at rest in Firestore:
+ *  5. Storage at rest in Firestore:
  *     {
  *       "encrypted": true,
  *       "version": 1,
@@ -20,7 +27,7 @@
  *       "ciphertext": "<base64>",
  *       "updatedAt": "<iso>"
  *     }
- *  5. Backward Compatibility: Transparently detects and parses legacy unencrypted
+ *  6. Backward Compatibility: Transparently detects and parses legacy unencrypted
  *     records, automatically re-encrypting them on next persistence.
  */
 
@@ -46,6 +53,58 @@ export interface EncryptedSpatialDoc extends EncryptedPayload {
 
 // In-memory key cache to prevent redundant PBKDF2 executions during a session
 const userKeyCache = new Map<string, CryptoKey>();
+
+// User-held custom passphrases (optional KEK)
+const userPassphraseCache = new Map<string, string>();
+
+/**
+ * Sets an optional user-held passphrase for client-side encryption.
+ * When set, the encryption key is derived from the user's passphrase (KEK -> DEK),
+ * providing end-to-end user-sovereign protection across devices.
+ */
+export function setUserCustomPassphrase(userId: string, passphrase: string): void {
+  if (!userId) return;
+  userPassphraseCache.set(userId, passphrase);
+  for (const key of userKeyCache.keys()) {
+    if (key.startsWith(`${userId}:`)) {
+      userKeyCache.delete(key);
+    }
+  }
+}
+
+/**
+ * Clears the user's custom passphrase from memory.
+ */
+export function clearUserCustomPassphrase(userId?: string): void {
+  if (userId) {
+    userPassphraseCache.delete(userId);
+    for (const key of userKeyCache.keys()) {
+      if (key.startsWith(`${userId}:`)) {
+        userKeyCache.delete(key);
+      }
+    }
+  } else {
+    userPassphraseCache.clear();
+    userKeyCache.clear();
+  }
+}
+
+/**
+ * Checks whether an active custom passphrase is set for this user.
+ */
+export function hasUserCustomPassphrase(userId: string): boolean {
+  return !!userPassphraseCache.get(userId);
+}
+
+/**
+ * Gets the active custom passphrase for this user, if set.
+ */
+export function getUserCustomPassphrase(userId: string): string | undefined {
+  return userPassphraseCache.get(userId);
+}
+
+// In-memory fallback for environments without localStorage (e.g., Node test runner)
+const nodeVaultStore = new Map<string, string>();
 
 /**
  * Helper to get the active SubtleCrypto interface safely across
@@ -93,43 +152,70 @@ function base64ToBuffer(base64: string): Uint8Array {
 }
 
 /**
- * Generates a stable, user-specific salt.
- * Uses localStorage when available, or a deterministic hash of user UID + domain seed.
+ * Retrieves or initializes a 256-bit cryptographically secure device-bound vault secret.
+ * Stored locally in device storage (`cognify_device_vault_${userId}`).
  */
-async function getUserSalt(userId: string): Promise<Uint8Array> {
-  const saltKey = `cognify_salt_${userId}`;
-  if (typeof window !== 'undefined' && window.localStorage) {
-    const cached = localStorage.getItem(saltKey);
-    if (cached) {
-      try {
-        return base64ToBuffer(cached);
-      } catch {
-        // regenerate below if corrupt
-      }
-    }
-  }
-
-  // Deterministic seed fallback: SHA-256 of (userId + domain salt seed)
-  // Ensures cross-session stability if storage is wiped
-  const subtle = getSubtle();
-  const encoder = new TextEncoder();
-  const rawSeed = encoder.encode(`cognify_zero_knowledge_v10_${userId}_spatial_chat_salt`);
-  const hashBuffer = await subtle.digest('SHA-256', rawSeed);
-  const saltBytes = new Uint8Array(hashBuffer).slice(0, 16);
+export function getDeviceVaultSecret(userId: string): Uint8Array {
+  const storageKey = `cognify_device_vault_${userId}`;
+  let storedBase64: string | null = null;
 
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
-      localStorage.setItem(saltKey, bufferToBase64(saltBytes));
+      storedBase64 = window.localStorage.getItem(storageKey);
+    } catch {}
+  } else {
+    storedBase64 = nodeVaultStore.get(storageKey) || null;
+  }
+
+  if (storedBase64) {
+    try {
+      return base64ToBuffer(storedBase64);
     } catch {
-      // ignore quota / incognito
+      // Regenerate if corrupted
     }
   }
 
-  return saltBytes;
+  // Generate 256-bit (32-byte) cryptographically secure random secret
+  const secretBytes = new Uint8Array(32);
+  if (typeof window !== 'undefined' && window.crypto) {
+    window.crypto.getRandomValues(secretBytes);
+  } else if (typeof globalThis !== 'undefined' && globalThis.crypto) {
+    globalThis.crypto.getRandomValues(secretBytes);
+  } else {
+    throw new Error('[userCryptoEngine] Secure random source unavailable.');
+  }
+
+  const encoded = bufferToBase64(secretBytes);
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(storageKey, encoded);
+    } catch {}
+  } else {
+    nodeVaultStore.set(storageKey, encoded);
+  }
+
+  return secretBytes;
+}
+
+/**
+ * Generates a stable, device-bound user salt combining the device vault secret and UID.
+ */
+async function getUserSalt(userId: string): Promise<Uint8Array> {
+  const deviceSecret = getDeviceVaultSecret(userId);
+  const subtle = getSubtle();
+  const encoder = new TextEncoder();
+  const uidBytes = encoder.encode(`cognify_device_salt_v11_${userId}`);
+  const combined = new Uint8Array(deviceSecret.length + uidBytes.length);
+  combined.set(deviceSecret, 0);
+  combined.set(uidBytes, deviceSecret.length);
+
+  const hashBuffer = await subtle.digest('SHA-256', combined);
+  return new Uint8Array(hashBuffer).slice(0, 16);
 }
 
 /**
  * Derives a 256-bit AES-GCM CryptoKey using PBKDF2 with 100,000 iterations.
+ * Combines UID with device-bound random secret or optional user-held passphrase.
  */
 export async function deriveUserEncryptionKey(
   userId: string,
@@ -139,7 +225,8 @@ export async function deriveUserEncryptionKey(
     throw new Error('[userCryptoEngine] Cannot derive encryption key without userId');
   }
 
-  const cacheKey = `${userId}:${customPassphrase || 'default'}`;
+  const effectivePassphrase = customPassphrase || getUserCustomPassphrase(userId);
+  const cacheKey = `${userId}:${effectivePassphrase || 'device_bound'}`;
   const cachedKey = userKeyCache.get(cacheKey);
   if (cachedKey) return cachedKey;
 
@@ -147,11 +234,16 @@ export async function deriveUserEncryptionKey(
   const salt = await getUserSalt(userId);
   const encoder = new TextEncoder();
 
-  const secretString = customPassphrase
-    ? `${userId}:${customPassphrase}:cognify_e2e_v10`
-    : `cognify_identity_vault:${userId}:device_held_secret_token_v1`;
-
-  const rawKeyMaterial = encoder.encode(secretString);
+  let rawKeyMaterial: Uint8Array;
+  if (effectivePassphrase) {
+    rawKeyMaterial = encoder.encode(`${userId}:${effectivePassphrase}:cognify_kek_v11`);
+  } else {
+    const deviceSecret = getDeviceVaultSecret(userId);
+    const prefix = encoder.encode(`cognify_device_bound_key:${userId}:`);
+    rawKeyMaterial = new Uint8Array(prefix.length + deviceSecret.length);
+    rawKeyMaterial.set(prefix, 0);
+    rawKeyMaterial.set(deviceSecret, prefix.length);
+  }
 
   const baseKey = await subtle.importKey(
     'raw',

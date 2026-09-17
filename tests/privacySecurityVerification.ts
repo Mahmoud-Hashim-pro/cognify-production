@@ -24,6 +24,10 @@ import {
   encryptSpatialRecord,
   decryptSpatialRecord,
   isEncryptedPayload,
+  getDeviceVaultSecret,
+  setUserCustomPassphrase,
+  clearUserCustomPassphrase,
+  hasUserCustomPassphrase,
 } from '../src/lib/userCryptoEngine';
 import type { StudentState } from '../src/types/studentState';
 import type { AuditLogEntry } from '../src/types/privacySecurity';
@@ -354,7 +358,7 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
   ];
 
   // 1. Encrypt thread messages
-  const encryptedDoc = await encryptThreadMessages(plainMessages, testUid, 'thread_123');
+  const encryptedDoc = await encryptThreadMessages(plainMessages, testUid);
   assert(encryptedDoc.encrypted === true, 'Encrypted document has encrypted: true flag');
   assert(encryptedDoc.version === 1, 'Encrypted document has version 1');
   assert(typeof encryptedDoc.iv === 'string' && encryptedDoc.iv.length > 0, 'Encrypted document has Base64 IV');
@@ -383,7 +387,9 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
     surface: 'wooden desk',
     room: 'study room',
     lastSeenTimestamp: Date.now(),
+    lastSeenIso: new Date().toISOString(),
     confidence: 0.98,
+    source: 'camera_auto' as const,
   };
 
   const encryptedSpatial = await encryptSpatialRecord(testSpatialObj, testUid);
@@ -395,7 +401,20 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
   assert(decryptedSpatial.category === 'keys', 'Decrypted spatial record preserves category');
   assert(decryptedSpatial.surface === 'wooden desk', 'Decrypted spatial record preserves surface');
 
-  // 5. Verify firestore.rules blocks spatialMemories on root user document
+  // 5. Device-Bound Random Vault Secret & User Passphrase (KEK) Verification
+  const vaultSecret = getDeviceVaultSecret(testUid);
+  assert(vaultSecret instanceof Uint8Array && vaultSecret.length === 32, 'getDeviceVaultSecret generates 256-bit cryptographically random vault secret');
+
+  setUserCustomPassphrase(testUid, 'SuperStrongUserPassphrase#2026');
+  assert(hasUserCustomPassphrase(testUid) === true, 'hasUserCustomPassphrase recognizes configured user passphrase');
+  const customEncrypted = await encryptThreadMessages(plainMessages, testUid);
+  assert(customEncrypted.encrypted === true, 'Encrypts thread successfully with custom KEK passphrase');
+  const customDecrypted = await decryptThreadMessages(customEncrypted, testUid);
+  assert(customDecrypted[0].content === plainMessages[0].content, 'Decrypted thread with custom KEK passphrase matches original');
+  clearUserCustomPassphrase(testUid);
+  assert(hasUserCustomPassphrase(testUid) === false, 'clearUserCustomPassphrase cleanly removes passphrase from memory');
+
+  // 6. Verify firestore.rules blocks spatialMemories on root user document
   assert(
     rulesContent.includes('!("spatialMemories" in data)') && rulesContent.includes('!("spatialMemoriesV2" in data)'),
     'firestore.rules explicitly rejects spatialMemories and spatialMemoriesV2 on /users/{userId}'
@@ -404,6 +423,11 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
     rulesContent.includes('match /spatialObjects/{objectId}') &&
     rulesContent.includes('allow read, write, delete: if isOwner(userId);'),
     'firestore.rules enforces Owner-Only rule on /users/{userId}/spatialObjects/{objectId}'
+  );
+  assert(
+    rulesContent.includes('match /securityAudits/{auditId}') &&
+    rulesContent.includes('request.resource.data.uid == request.auth.uid'),
+    'firestore.rules enforces server-authoritative audit logging (preventing UID spoofing)'
   );
 
   console.log(`\nMilestone 16 Verification Finished: ${passed} passed, ${failed} failed.`);

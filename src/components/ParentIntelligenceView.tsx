@@ -222,9 +222,13 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
               <span>{linkedChildName ? (isAr ? `مرتبط: ${linkedChildName}` : `Linked: ${linkedChildName}`) : (isAr ? 'ربط حساب الابن' : 'Link Child')}</span>
             </button>
 
-            {isDemoMode && (
+            {isDemoMode ? (
               <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                {isAr ? '⚡ عينة توضيحية' : '⚡ Demo Preview'}
+                {isAr ? '⚡ عينة معيارية [Benchmark Baseline Dataset]' : '⚡ [Benchmark Baseline Dataset]'}
+              </span>
+            ) : (
+              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                {isAr ? '🟢 بيانات حية متصلة [Live Connected Data]' : '🟢 [Live Connected Data]'}
               </span>
             )}
 

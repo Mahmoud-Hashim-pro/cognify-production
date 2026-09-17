@@ -266,7 +266,9 @@ service cloud.firestore {
     }
 
     match /securityAudits/{auditId} {
-      allow create: if isAuthenticated() && request.resource.data.keys().hasAll(['eventType', 'timestamp']);
+      allow create: if isAuthenticated() &&
+                       request.resource.data.keys().hasAll(['eventType', 'timestamp']) &&
+                       (!('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid);
       allow read: if isSecurityAuditsOwner();
       allow delete: if isSecurityAuditsOwner();
       allow update: if false;

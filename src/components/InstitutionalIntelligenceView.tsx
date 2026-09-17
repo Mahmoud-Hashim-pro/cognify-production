@@ -196,6 +196,8 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
     return compileInstitutionalDashboard(institutionId, institutionName, cohorts);
   }, [institutionId, institutionName, cohorts]);
 
+  const isBenchmarkDataset = !studentCohortsByDept || Object.keys(studentCohortsByDept).length === 0;
+
   return (
     <div className="min-h-screen bg-[#0A0C14] text-slate-100 p-4 sm:p-8" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Ambient Glows */}
@@ -235,7 +237,18 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {isBenchmarkDataset ? (
+              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                {isAr ? 'عينة معيارية [Benchmark Baseline Dataset]' : '[Benchmark Baseline Dataset]'}
+              </span>
+            ) : (
+              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                {isAr ? 'بيانات حية متصلة [Live Connected Data]' : '[Live Connected Data]'}
+              </span>
+            )}
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-800">
               <Users className="w-4 h-4 text-cyan-400" />
               <span className="text-sm font-semibold text-white">

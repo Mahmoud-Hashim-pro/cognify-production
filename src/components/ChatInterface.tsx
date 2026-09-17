@@ -938,7 +938,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     const newHistory = [...messages, userMessage];
     setMessages(newHistory);
     
-    // Save locally to appropriate Firestore document with Zero-Knowledge encryption
+    // Save locally to appropriate Firestore document with Client-Side AES-256-GCM encryption
     if (profile.uid && currentThreadId) {
       const threadPath = `users/${profile.uid}/threads/${currentThreadId}`;
       const historyToSave = cleanMessagesForFirestore(newHistory);
@@ -947,8 +947,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           handleFirestoreError(err, OperationType.UPDATE, threadPath);
         });
       }).catch((err) => {
-        console.warn('[ChatInterface] Fallback to plaintext save on encryption failure:', err);
-        setDoc(doc(db, threadPath), { messages: historyToSave }, { merge: true }).catch(() => {});
+        console.error('[ChatInterface] Security Alert: Encryption failed, refusing plaintext persistence (Fail-Closed):', err);
+        toast.error('Encryption failed. Message kept in local session only and not saved to cloud.');
       });
     }
     
@@ -1047,7 +1047,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         setTimeout(() => onStreamingUpdate(lastText), 50);
       }
 
-      // Final persistence with Zero-Knowledge encryption
+      // Final persistence with Client-Side AES-256-GCM encryption
       if (profile.uid && currentThreadId) {
         const threadPath = `users/${profile.uid}/threads/${currentThreadId}`;
         const historyToSave = cleanMessagesForFirestore(updatedHistory);
@@ -1056,8 +1056,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             handleFirestoreError(err, OperationType.UPDATE, threadPath);
           });
         }).catch((err) => {
-          console.warn('[ChatInterface] Fallback to plaintext save on encryption failure:', err);
-          setDoc(doc(db, threadPath), { messages: historyToSave }, { merge: true }).catch(() => {});
+          console.error('[ChatInterface] Security Alert: Encryption failed, refusing plaintext persistence (Fail-Closed):', err);
+          toast.error('Encryption failed. Final response kept in local session only and not saved to cloud.');
         });
       }
 

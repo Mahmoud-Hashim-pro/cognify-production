@@ -282,7 +282,7 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${liveStudents.length > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-                {isAr ? `الدفعة الحية (${liveStudents.length})` : `Live Roster (${liveStudents.length})`}
+                {isAr ? `الدفعة الحية [Live Connected Data] (${liveStudents.length})` : `[Live Connected Data] (${liveStudents.length})`}
               </button>
               <button
                 onClick={() => setViewMode('benchmark')}
@@ -293,7 +293,7 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                 }`}
               >
                 <Sparkles className="w-3 h-3 text-indigo-400" />
-                {isAr ? 'عينة قياسية (20)' : 'Benchmark (20)'}
+                {isAr ? 'عينة معيارية [Benchmark Baseline Dataset] (20)' : '[Benchmark Baseline Dataset] (20)'}
               </button>
             </div>
 
