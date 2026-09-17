@@ -19,7 +19,8 @@ import {
   FileJson,
   Check
 } from 'lucide-react';
-import { UserProfile, EmergencyContact } from '../types';
+import { UserProfile } from '../types';
+import { EmergencyContact } from '../lib/contacts';
 import { loadContacts, sendWhatsAppMessage } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import { isArabicLocale } from '../lib/translations';
@@ -75,7 +76,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   // Test Emergency SOS Dispatch
   const handleTestSOS = () => {
     triggerHapticAlert('warning');
-    const primary = contacts.find((c) => c.isPrimary) || contacts[0];
+    const primary = contacts.find((c) => c.isPrimaryEmergency) || contacts[0];
     if (primary && primary.phone) {
       const testMsg = isAr
         ? '🔔 تجربة نظام الطوارئ من Cognify: نداء الاستغاثة يعمل بنجاح!'
@@ -210,8 +211,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <div key={c.id} className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
                 <div>
                   <div className="font-bold text-xs text-white flex items-center gap-1.5">
-                    <span>{isAr ? c.nameAr || c.name : c.name}</span>
-                    {c.isPrimary && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-rose-900 text-rose-300 font-bold">{t('Primary', 'أساسي')}</span>}
+                    <span>{isAr ? (c.nameAr || c.nameEn) : c.nameEn}</span>
+                    {c.isPrimaryEmergency && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-rose-900 text-rose-300 font-bold">{t('Primary', 'أساسي')}</span>}
                   </div>
                   <div className="text-[11px] text-slate-400 font-mono mt-0.5">{c.phone || t('No number', 'بدون رقم')}</div>
                 </div>
