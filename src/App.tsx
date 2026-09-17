@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Message, UserProfile, AccessibilityMode, CognitiveLevel } from "./types";
 import { auth, db, handleFirestoreError, OperationType, cleanDataForFirestore, clearPreLoginState, logout } from "./lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, setDoc, onSnapshot, getDocFromServer, deleteField } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, getDocFromServer } from "firebase/firestore";
 import { Loader2, Settings, Layers, Menu, Moon, Sun, AlertCircle, RefreshCw, Mail, ArrowLeft, Globe, Check, Key, Shield } from "lucide-react";
 import { toast, ToastContainer } from "./components/Toast";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
@@ -25,8 +25,8 @@ import { isAdminUser } from "./lib/roles";
 import { subscribeToStudentMemory, clearStudentMemory } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
 import { initSecurityTracker } from "./lib/securityTracker";
+import { getVisitorCountryCode } from "./lib/geo";
 import { secureLoadKeySync, secureSaveKey, secureRemoveKey, autoMigrateStorageKeys } from "./lib/cryptoShield";
-import { encryptThreadMessages } from "./lib/userCryptoEngine";
 
 function lazyWithRetry<T extends React.ComponentType<any>>(
   factory: () => Promise<{ default: T }>
@@ -79,24 +79,13 @@ const CognitiveGym = lazyWithRetry(() => import("./components/CognitiveGym"));
 const IqAssessmentModal = lazyWithRetry(() => import("./components/IqAssessmentModal"));
 const FrenchTravelVoiceAssistant = lazyWithRetry(() => import("./components/FrenchTravelVoiceAssistant"));
 const ChatInterface = lazyWithRetry(() => import("./components/ChatInterface"));
-const StudentIntelligenceProfileView = lazyWithRetry(() => import("./components/StudentIntelligenceProfileView"));
-const TeacherIntelligenceView = lazyWithRetry(() => import("./components/TeacherIntelligenceView"));
-const ParentIntelligenceView = lazyWithRetry(() => import("./components/ParentIntelligenceView"));
-const PrivacySecurityCenter = lazyWithRetry(() => import("./components/PrivacySecurityCenter"));
-const PedagogicalEvaluationView = lazyWithRetry(() => import("./components/PedagogicalEvaluationView"));
-const AiQualityGuardMonitor = lazyWithRetry(() => import("./components/AiQualityGuardMonitor"));
-const SystemResilienceDashboard = lazyWithRetry(() => import("./components/SystemResilienceDashboard"));
-const BusinessTenancyView = lazyWithRetry(() => import("./components/BusinessTenancyView"));
-const DeveloperApiConsole = lazyWithRetry(() => import("./components/DeveloperApiConsole"));
 
 /** Every hash route the app answers to — the single source of truth for both the
  *  initial read on mount and the popstate handler, so they can't drift apart. */
 const VALID_VIEWS = [
   'chat', 'learning', 'profile', 'settings', 'video', 'disability',
   'admin', 'goals', 'gpa', 'analytics', 'planner', 'support', 'memory',
-  'institution', 'gym', 'iq', 'france', 'privacy', 'intelligence',
-  'teacher', 'parent', 'privacy_security', 'evaluation', 'ai_quality',
-  'resilience', 'tenancy', 'developer_api',
+  'institution', 'gym', 'iq', 'france', 'privacy',
 ] as const;
 
 export default function App() {
@@ -365,19 +354,7 @@ export default function App() {
       // only because that wipes the auth session and forces a fresh login).
       if (snapshot.metadata.hasPendingWrites && profileAppliedRef.current) return;
       if (snapshot.exists()) {
-        const rawData = snapshot.data() as any;
-        // Automatic Zero-Knowledge Privacy migration: purge legacy chatHistory from user doc
-        if (rawData && 'chatHistory' in rawData) {
-          delete rawData.chatHistory;
-          setDoc(doc(db, path), { chatHistory: deleteField() }, { merge: true }).catch(() => {});
-        }
-        // Automatic Zero-Knowledge Privacy migration: purge legacy spatialMemories from root user doc
-        if (rawData && ('spatialMemories' in rawData || 'spatialMemoriesV2' in rawData)) {
-          delete rawData.spatialMemories;
-          delete rawData.spatialMemoriesV2;
-          setDoc(doc(db, path), { spatialMemories: deleteField(), spatialMemoriesV2: deleteField() }, { merge: true }).catch(() => {});
-        }
-        const data = rawData as UserProfile;
+        const data = snapshot.data() as UserProfile;
         setProfile(data);
         // The profile is established, so the login-screen hints have served their
         // purpose. Drop them now so they can never be re-applied to a different
@@ -392,15 +369,18 @@ export default function App() {
           window.history.replaceState(null, '', '#disability');
         }
         
-        // Update lastActiveDate if it's more than an hour old or missing
+        // Update lastActiveDate (and country, from Vercel's edge geo header) if
+        // it's more than an hour old or missing
         const now = new Date().toISOString();
         if (!data.lastActiveDate || (new Date(now).getTime() - new Date(data.lastActiveDate).getTime() > 3600000)) {
            // We are doing a setDoc merge so we don't trigger an infinite loop locally.
            // However, since we update the doc, onSnapshot will fire again.
            // Setting the condition (e.g. 1 hr) prevents infinite loop.
-           setDoc(doc(db, path), { lastActiveDate: now }, { merge: true }).catch(err => {
-             console.error("Failed to update last active date:", err);
-           });
+           getVisitorCountryCode()
+             .then((country) => setDoc(doc(db, path), { lastActiveDate: now, country }, { merge: true }))
+             .catch((err) => {
+               console.error("Failed to update last active date:", err);
+             });
         }
       } else {
         // If the user selected 'Special Needs' at login but has no profile, auto-create it immediately to bypass onboarding!
@@ -433,6 +413,7 @@ export default function App() {
             name: user.displayName || user.email?.split('@')[0] || "User",
             points: 100,
             questionHistory: [],
+            chatHistory: [],
             level: 'Basic',
             role: 'Student',
             educationLevel: 'University',
@@ -539,6 +520,7 @@ export default function App() {
       name: user.displayName || user.email?.split('@')[0] || "User",
       points: 100,
       questionHistory: [],
+      chatHistory: [],
       level: 'Intermediate',
       role: 'Student',
       educationLevel: 'University',
@@ -632,9 +614,7 @@ export default function App() {
         }
         return item;
       });
-      // Zero-Knowledge Client-Side AES-256-GCM encryption before persistence
-      const encryptedDoc = await encryptThreadMessages(cleanHistory, user.uid);
-      await setDoc(doc(db, threadPath), cleanDataForFirestore(encryptedDoc), { merge: true });
+      await setDoc(doc(db, threadPath), { messages: cleanHistory }, { merge: true });
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, threadPath);
     }
@@ -739,14 +719,6 @@ export default function App() {
             />
           </>
         );
-      case 'intelligence':
-        return (
-          <StudentIntelligenceProfileView
-            profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo(homeViewFor(profile))}
-          />
-        );
       case 'learning':
         return <LearningHub profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
       case 'video':
@@ -820,22 +792,6 @@ export default function App() {
         return <AcademicPlanner profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
       case 'institution':
         return <InstitutionCohortHub profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
-      case 'teacher':
-        return <TeacherIntelligenceView lang={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya' ? 'ar' : 'en'} />;
-      case 'parent':
-        return <ParentIntelligenceView lang={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya' ? 'ar' : 'en'} profile={activeProfile} />;
-      case 'privacy_security':
-        return <PrivacySecurityCenter isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
-      case 'evaluation':
-        return <PedagogicalEvaluationView isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
-      case 'ai_quality':
-        return <AiQualityGuardMonitor isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
-      case 'resilience':
-        return <SystemResilienceDashboard isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
-      case 'tenancy':
-        return <BusinessTenancyView isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
-      case 'developer_api':
-        return <DeveloperApiConsole isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
 
       case 'gym':
       case 'iq':
@@ -1181,13 +1137,7 @@ export default function App() {
                       lastMessageSnippet: t.lastMessageSnippet || ""
                     }));
                   }
-                  // Zero-Knowledge Privacy: Ensure chatHistory and spatialMemories are never stored on root user doc
-                  delete cleanProfile.chatHistory;
-                  cleanProfile.chatHistory = deleteField();
-                  delete cleanProfile.spatialMemories;
-                  delete cleanProfile.spatialMemoriesV2;
-                  cleanProfile.spatialMemories = deleteField();
-                  cleanProfile.spatialMemoriesV2 = deleteField();
+                  cleanProfile.chatHistory = [];
 
                   const finalProfileToSave = cleanDataForFirestore(cleanProfile);
                   await setDoc(doc(db, path), finalProfileToSave, { merge: true });
