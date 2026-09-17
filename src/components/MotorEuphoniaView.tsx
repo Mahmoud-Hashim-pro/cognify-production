@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   UserProfile, VocalSoundTriggerConfig, AACCardItem, HeadTrackingConfig, VocalTriggerAction,
 } from '../types';
@@ -612,6 +612,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const trackerRef = useRef<FacialHeadTracker | null>(null);
   const voiceContactRecRef = useRef<any>(null);
+  const [isListeningForContactName, setIsListeningForContactName] = useState(false);
   const teacherRecRef = useRef<any>(null);
 
   // Keep the magnetic-snap cache in sync with the visible tab
@@ -682,7 +683,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
         : `🚨 Emergency SOS from Cognify user: I need immediate medical assistance! ${mapUrl ? `Location: ${mapUrl}` : ''}`;
 
       if (currentContacts.length > 0) {
-        const primary = currentContacts.find((c) => c.isPrimary) || currentContacts[0];
+        const primary = currentContacts.find((c) => c.isPrimaryEmergency) || currentContacts[0];
         if (primary.phone) {
           sendWhatsAppMessage(primary.phone, sosText);
         }
@@ -4782,7 +4783,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   contacts.map((c) => (
                     <div key={c.id} className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
                       <div>
-                        <div className="font-bold text-xs text-white">{isArabic ? c.nameAr || c.name : c.name}</div>
+                        <div className="font-bold text-xs text-white">{isArabic ? (c.nameAr || c.nameEn) : c.nameEn}</div>
                         <div className="text-[10px] text-slate-400 font-mono">{c.phone || 'No phone'}</div>
                       </div>
                       <div className="flex gap-1.5">
