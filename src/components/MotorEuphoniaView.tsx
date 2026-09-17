@@ -17,6 +17,8 @@ import {
   EmergencyContact,
   loadContacts,
   saveContacts,
+  restoreContactsFromCloud,
+  syncContactsToCloud,
   makePhoneCall,
   isValidContactPhone,
   sendWhatsAppMessage,
@@ -555,6 +557,10 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
   // Mobile Contacts & WhatsApp Modals
   const [contacts, setContacts] = useState<EmergencyContact[]>(loadContacts);
+  useEffect(() => {
+    if (!profile.uid) return;
+    restoreContactsFromCloud(profile.uid).then(setContacts);
+  }, [profile.uid]);
   const [showContactPickerModal, setShowContactPickerModal] = useState(false);
   // Editable phone-number setup — a real number was previously impossible to
   // enter anywhere in the app (see contacts.ts). A caregiver/parent typically
@@ -4218,6 +4224,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                           saveContacts(updated);
                           return updated;
                         });
+                      }}
+                      onBlur={() => {
+                        if (profile.uid) syncContactsToCloud(profile.uid, contacts);
                       }}
                       placeholder={isArabic ? 'مثال: 01012345678+' : 'e.g. +201012345678'}
                       className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-emerald-500 focus:outline-none"
