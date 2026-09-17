@@ -1,10 +1,11 @@
 import { localize } from '../lib/translations';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
   ArrowLeft, ArrowRight, MessageSquare, Activity, Globe, Check, 
-  LayoutGrid, Building2, Zap, Radio, Shield
+  LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
+  SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
@@ -36,6 +37,8 @@ export type DisabilityTab =
   | 'neurodiversity'
   | 'caregiver';
 
+export type ModuleCategory = 'all' | 'vision' | 'hearing' | 'motor' | 'neuro' | 'caregiver';
+
 interface DisabilityModeViewProps {
   profile: UserProfile;
   onMenuClick: () => void;
@@ -61,14 +64,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   onTabChange,
   setProfile
 }, ref) {
-  // Start on 'hub' launcher by default so user can cleanly pick their desired module without visual clutter
   const [activeTab, setActiveTab] = useState<DisabilityTab>('hub');
   const [showPassportModal, setShowPassportModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<ModuleCategory>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  // Organization staff (e.g. Care Center / NGO) get an extra module scoped to THEIR users.
   const isOrgStaff = !!profile?.isOrgManager && !!(profile?.organization || '').trim();
 
-  // Tell parent which tab is active (hides floating overlay while camera tools are active)
+  // Tell parent which tab is active
   useEffect(() => { 
     onTabChange?.(activeTab); 
   }, [activeTab, onTabChange]);
@@ -99,20 +102,20 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     try {
       await setDoc(doc(db, path), cleanDataForFirestore({ language: newLang }), { merge: true });
       toast.success(
-        localize(newLang, 'Language updated successfully', 'تم تحديث اللغة بنجاح'),
-        localize(newLang, 'Language', 'اللغة')
+        localize(newLang, `Language set to: ${newLang}`, `تم تغيير اللغة إلى: ${newLang}`),
+        localize(newLang, 'Language Updated', 'تم تحديث اللغة')
       );
     } catch (err) {
       console.error('Failed to update language:', err);
       if (setProfile) setProfile({ ...profile, language: previousLang });
       toast.error(
-        localize(profile?.language, 'Failed to update language. Please check your connection.', 'فشل تحديث اللغة. تحقق من اتصالك.'),
-        localize(profile?.language, 'Update Error', 'خطأ في التحديث')
+        localize(profile.language, 'Failed to update language.', 'فشل تحديث اللغة.'),
+        localize(profile.language, 'Update Error', 'خطأ في التحديث')
       );
     }
   };
 
-  const updateAccessibilityMode = async (mode: AccessibilityMode) => {
+  const updateMode = async (mode: AccessibilityMode) => {
     if (!profile?.uid) return;
     const previousMode = profile.accessibilityMode;
     if (setProfile) setProfile({ ...profile, accessibilityMode: mode });
@@ -133,59 +136,92 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     }
   };
 
-  const getModeIcon = (mode: AccessibilityMode) => {
-    switch (mode) {
-      case 'None': return <User className="w-5 h-5" />;
-      case 'Speech': return <Mic className="w-5 h-5" />;
-      case 'Visual': return <Eye className="w-5 h-5" />;
-      case 'Vocal-Deaf': return <Ear className="w-5 h-5" />;
-      case 'Sign-Only': return <Accessibility className="w-5 h-5" />;
-      case 'Motor-Euphonia': return <Activity className="w-5 h-5 text-amber-500" />;
-      default: return <Settings className="w-5 h-5" />;
-    }
-  };
-
-  const getModeDescription = (mode: AccessibilityMode) => {
-    switch (mode) {
-      case 'None': return localize(profile.language, 'Standard cognitive interface without accessibility overlays.', 'واجهة إدراكية قياسية بدون طبقات إمكانية وصول.');
-      case 'Speech': return localize(profile.language, 'Activates voice transcription, synthetic speech synthesis, and text-to-speech feedback.', 'يفعل النسخ الصوتي، والتخليق الصوتي، وملاحظات تحويل النص إلى كلام.');
-      case 'Visual': return localize(profile.language, 'Enables vision analysis, high contrast, text zooming, and spatial layout modifications.', 'يفعل تحليل الرؤية، والتباين العالي، وتكبير النص، وتعديلات التخطيط المكاني.');
-      case 'Vocal-Deaf': return localize(profile.language, 'Enables sign language avatar alongside speech recognition for users who are deaf but can speak.', 'يفعل الصورة الرمزية للغة الإشارة جنباً إلى جنب مع التعرف على الكلام للمستخدمين الصم الذين يمكنهم التحدث.');
-      case 'Sign-Only': return localize(profile.language, 'Full sign language interface powered by the avatar and vision-based gesture recognition.', 'واجهة كاملة للغة الإشارة مدعومة بالصورة الرمزية والتعرف على الإيماءات المعتمد على الرؤية.');
-      case 'Motor-Euphonia': return localize(profile.language, 'Hands-free control for quadriplegia/motor disability using head pointer, facial expressions, and vocal sound triggers.', 'تحكم كامل بدون لمس لمصابي الشلل الرباعي والتصلب الجانبي عبر حركة الرأس، تعابير الوجه، وهمهمات إيفونيا الصوتية.');
-      default: return '';
-    }
-  };
-
-  // Modules metadata definition
-  const MODULES = [
+  // Grouped Categories Definition
+  const CATEGORIES = [
     {
-      id: 'motor' as const,
-      titleEn: 'Motor & Euphonia Control',
-      titleAr: 'التحكم الحركي وإيفونيا',
-      shortEn: 'Motor',
-      shortAr: 'حركي',
-      badgeEn: 'Hands-Free & Speech Impairment',
-      badgeAr: 'تحكم بدون لمس وتأكيدات الصوت',
-      descEn: 'Full hands-free interaction for quadriplegia, ALS & motor impairments. Head-pointer cursor, eye-blink virtual keyboard, facial triggers, and vocal sound confirmations (Euphonia).',
-      descAr: 'تحكم متكامل بدون لمس لمصابي الشلل الرباعي والتصلب الجانبي (ALS). مؤشر بحركة الرأس، لوحة العين والرمش، إشارات الوجه، وهمهمات إيفونيا الصوتية.',
-      Icon: Activity,
-      accentColor: 'text-amber-400',
-      borderGlow: 'hover:border-amber-500/60 border-slate-800',
-      bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-      buttonCls: 'bg-gradient-to-r from-amber-400 via-amber-500 to-rose-400 text-slate-950 shadow-amber-500/20',
-      matchingMode: 'Motor-Euphonia',
+      id: 'all' as const,
+      titleEn: 'All Suites',
+      titleAr: 'جميع الأدوات',
+      emoji: '🌟',
+      icon: Sparkles,
+      color: 'text-cyan-400',
+      activeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50',
+      descAr: 'عرض شامل لجميع أدوات ومنظومات إمكانية الوصول والتكيف',
+      descEn: 'Full view of all assistive and adaptation suites',
     },
     {
       id: 'vision' as const,
+      titleEn: 'Visual & Blind',
+      titleAr: 'المكفوفين وضعاف البصر',
+      emoji: '👁️',
+      icon: Eye,
+      color: 'text-emerald-400',
+      activeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
+      descAr: 'الرفيق البصري الذكي، قارئ العملات والملابس، حفظ الوجوه، والملاحة بالاهتزاز اللمسي',
+      descEn: 'Conversational audio eyes, currency reader, face recall, clothes matching & haptic cane',
+    },
+    {
+      id: 'hearing' as const,
+      titleEn: 'Deaf & Hard of Hearing',
+      titleAr: 'الصم وضعاف السمع',
+      emoji: '👂',
+      icon: Ear,
+      color: 'text-indigo-400',
+      activeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50',
+      descAr: 'استوديو الإشارة ثلاثي الأبعاد، رادار الأصوات والمخاطر، وجسر التخاطب المباشر',
+      descEn: '3D sign language avatar, ambient sound & hazard radar, and live human communication bridge',
+    },
+    {
+      id: 'motor' as const,
+      titleEn: 'Motor, ALS & Mobility',
+      titleAr: 'الحركة والشلل والتصلب',
+      emoji: '🦾',
+      icon: Activity,
+      color: 'text-amber-400',
+      activeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
+      descAr: 'حركة الرأس، لوحة العين والرمش، عبارات AAC السريعة، واستغاثة الطوارئ SOS بالعين 4 ثوانٍ',
+      descEn: 'Head pointer, eye-gaze virtual keyboard, contextual AAC, and 4-second eye-closure SOS',
+    },
+    {
+      id: 'neuro' as const,
+      titleEn: 'Neurodiversity & Autism',
+      titleAr: 'التوحد وصعوبات التعلم',
+      emoji: '🧩',
+      icon: Brain,
+      color: 'text-purple-400',
+      activeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/50',
+      descAr: 'بطاقات PECS المصورة المنطوقة، الجدول اليومي، فقاعة التنفس المهدئة، ومسطرة القراءة',
+      descEn: 'Interactive PECS cards, visual routine, calming breathing bubble, and dyslexia reading tools',
+    },
+    {
+      id: 'caregiver' as const,
+      titleEn: 'Caregiver & Universal',
+      titleAr: 'المرافق والتيسيرات',
+      emoji: '🛡️',
+      icon: Shield,
+      color: 'text-rose-400',
+      activeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/50',
+      descAr: 'لوحة المرافق والمختص، اختبار نداء الاستغاثة، وجواز السفر الميسر الموحد',
+      descEn: 'Family & clinical dashboard, live SOS test dispatch, and universal accommodation passport',
+    },
+  ];
+
+  // Modules metadata definition with Category grouping
+  const MODULES = [
+    // 1. VISUAL
+    {
+      id: 'vision' as const,
+      category: 'vision' as const,
       titleEn: 'Visual Companion (AI Eyes)',
       titleAr: 'الرفيق البصري الذكي',
-      shortEn: 'Visual',
-      shortAr: 'بصري',
+      shortEn: 'Visual Eyes',
+      shortAr: 'الرفيق البصري',
       badgeEn: 'Blind & Low Vision',
       badgeAr: 'المكفوفين وضعاف البصر',
-      descEn: 'Friendly conversational audio description. Straight-to-the-point spoken feedback without robotic noise or asterisks, real-time hazard alerts, and spatial memory ("Where is my stuff?").',
-      descAr: 'وصف فوري بالصوت البشري كصديق فوري يقف بجانبك. يبدأ مباشرة بدون أي نجوم أو كلام آلي، مع كشف المخاطر والذاكرة المكانية لتحديد أماكن الأشياء.',
+      descEn: 'Friendly conversational audio companion. Reads Egyptian pounds & currencies, matches clothes colors, recognizes people, and guides with tactile haptic vibration.',
+      descAr: 'وصف صوتي بشري فوري، قارئ العملات الورقية (الجنيه المصري والعملات)، تنسيق الملابس، التعرف على الأشخاص والوجوه، والملاحة اللمسية بالاهتزاز.',
+      quickFeaturesAr: ['قارئ العملات الفوري', 'التعرف على الأشخاص والوجوه', 'تنسيق ألوان الملابس', 'ملاحة واهتزازات لمسية', 'الذاكرة المكانية للأشياء'],
+      quickFeaturesEn: ['Currency Reader', 'Face & Person Memory', 'Color Matching', 'Haptic White Cane', 'Spatial Memory'],
       Icon: Eye,
       accentColor: 'text-emerald-400',
       borderGlow: 'hover:border-emerald-500/60 border-slate-800',
@@ -193,16 +229,20 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 shadow-teal-500/20',
       matchingMode: 'Visual',
     },
+    // 2. HEARING (Deaf Ecosystem)
     {
       id: 'video' as const,
-      titleEn: 'AI 3D Sign Studio',
+      category: 'hearing' as const,
+      titleEn: 'AI 3D Sign Language Studio',
       titleAr: 'استوديو لغة الإشارة ثلاثي الأبعاد',
       shortEn: '3D Sign',
-      shortAr: 'إشارة',
+      shortAr: 'لغة الإشارة',
       badgeEn: 'Deaf & Hard of Hearing',
       badgeAr: 'الصم وضعاف السمع',
-      descEn: 'Interactive real-time 3D signing avatar with fingerspelling (A-Z, 0-9, Arabic mapping), dictionary gestures, script input, and real-time speech translation into sign language.',
-      descAr: 'أفاتار ثلاثي الأبعاد تفاعلي للغة الإشارة، أبجدية الأصابع، قواميس إشارية عربية وعالمية، وتحويل أي نص أو كلام منطوق إلى لغة إشارة حية.',
+      descEn: '3D signing avatar with reverse sign-to-speech, finger spelling, Arabic and global sign dictionaries, and live speech translation into sign language.',
+      descAr: 'أفاتار ثلاثي الأبعاد للغة الإشارة، نطق الإشارة لصوت مسموع فورياً، قواميس إشارية عربية وعالمية، وتحويل الكلام المنطوق لإشارة حية.',
+      quickFeaturesAr: ['أفاتار إشارة تفاعلي 3D', 'نطق الإشارة لصوت مسموع', 'أبجدية الأصابع وقواميس', 'تحويل الكلام الصوتي لإشارة'],
+      quickFeaturesEn: ['Interactive 3D Avatar', 'Sign to Speech Voice', 'Fingerspelling & Lexicon', 'Live Audio to Sign'],
       Icon: Accessibility,
       accentColor: 'text-indigo-400',
       borderGlow: 'hover:border-indigo-500/60 border-slate-800',
@@ -211,49 +251,18 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       matchingMode: 'Sign-Only',
     },
     {
-      id: 'bridge' as const,
-      titleEn: 'Two-Way Human Bridge',
-      titleAr: 'جسر التواصل البشري المزدوج',
-      shortEn: 'Bridge',
-      shortAr: 'جسر',
-      badgeEn: 'Live Deaf-Hearing Conversation',
-      badgeAr: 'تواصل مباشر وجهاً لوجه',
-      descEn: 'Instant face-to-face communication bridge between deaf and hearing people with high-contrast live speech captions and synthetic audio playback.',
-      descAr: 'محادثة فورية مباشرة بين الصم والسامعين بنصوص كبيرة وواضحة لقراءة الشفاه، مع زر للنطق الصوتي الفوري باللهجة المصرية والإنجليزية.',
-      Icon: Ear,
-      accentColor: 'text-cyan-400',
-      borderGlow: 'hover:border-cyan-500/60 border-slate-800',
-      bgGlow: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-      buttonCls: 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-cyan-500/20',
-      matchingMode: 'Vocal-Deaf',
-    },
-    {
-      id: 'chat' as const,
-      titleEn: 'Adaptive Cognitive Chat',
-      titleAr: 'محادثة كوجنيفاي الذكية المهيأة',
-      shortEn: 'Chat',
-      shortAr: 'محادثة',
-      badgeEn: 'Cognitive & All Learners',
-      badgeAr: 'دعم إدراكي ومساعد تعليمي',
-      descEn: 'Pedagogical tutoring assistant tailored to cognitive stage, featuring worked examples, spaced retention reviews, and screen-reader plain text.',
-      descAr: 'مساعد تعليمي ذكي يتكيف مع مستواك المعرفي، يقدم أمثلة عملية مبسطة، جداول تثبيت الذاكرة، ومتوافق بالكامل مع تقنيات الوصول المساعدة.',
-      Icon: MessageSquare,
-      accentColor: 'text-rose-400',
-      borderGlow: 'hover:border-rose-500/60 border-slate-800',
-      bgGlow: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-      buttonCls: 'bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white shadow-rose-500/25',
-      matchingMode: 'None',
-    },
-    {
       id: 'radar' as const,
+      category: 'hearing' as const,
       titleEn: 'Ambient Sound & Hazard Radar',
-      titleAr: 'رادار الأصوات والمخاطر للصم',
-      shortEn: 'Radar',
-      shortAr: 'رادار',
-      badgeEn: 'Deaf Acoustic Awareness',
-      badgeAr: 'وعي صوتي فوري للصم',
-      descEn: 'Real-time acoustic AI hazard radar detecting sirens, fire alarms, car horns, and doorbells with screen flash strobe and tactile vibrations.',
+      titleAr: 'رادار الأصوات والمخاطر البيئية',
+      shortEn: 'Sound Radar',
+      shortAr: 'رادار الأصوات',
+      badgeEn: 'Acoustic Hazard Alert',
+      badgeAr: 'وعي صوتي مباشر',
+      descEn: 'Real-time acoustic AI radar detecting sirens, fire alarms, car horns, and doorbells with screen flash strobe and tactile vibrations for deaf users.',
       descAr: 'كشف صوتي بيئي مباشر لصفارات الإنذار، أجهزة كشف الدخان، كلاكس السيارات، وأجراس الأبواب مع وميض بصري واهتزازات لمسية.',
+      quickFeaturesAr: ['كشف سارينات الإسعاف والحريق', 'كشف كلاكس السيارات', 'تنبيه جرس الباب والرضع', 'وميض بصري واهتزاز لمسي'],
+      quickFeaturesEn: ['Sirens & Smoke Alarms', 'Car Horn Detection', 'Doorbell & Baby Cry', 'Visual Flash Strobe & Haptics'],
       Icon: Radio,
       accentColor: 'text-cyan-400',
       borderGlow: 'hover:border-cyan-500/60 border-slate-800',
@@ -262,15 +271,60 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       matchingMode: 'Deaf',
     },
     {
+      id: 'bridge' as const,
+      category: 'hearing' as const,
+      titleEn: 'Two-Way Human Bridge',
+      titleAr: 'جسر التواصل البشري الحي',
+      shortEn: 'Human Bridge',
+      shortAr: 'جسر التواصل',
+      badgeEn: 'Live Conversation',
+      badgeAr: 'تواصل مباشر وجهاً لوجه',
+      descEn: 'Instant face-to-face communication bridge between deaf and hearing people with high-contrast live speech captions and synthetic audio playback.',
+      descAr: 'محادثة فورية مباشرة بين الصم والسامعين بنصوص كبيرة وواضحة لقراءة الشفاه، مع زر للنطق الصوتي الفوري باللهجة المصرية والإنجليزية.',
+      quickFeaturesAr: ['نصوص كبيرة عالية التباين', 'نطق صوتي فوري بلهجات متعددة', 'تواصل ثنائي الاتجاه بدون وسيط'],
+      quickFeaturesEn: ['Large High-Contrast Text', 'Instant Multilingual TTS', 'Direct 2-Way Flow'],
+      Icon: Ear,
+      accentColor: 'text-cyan-400',
+      borderGlow: 'hover:border-cyan-500/60 border-slate-800',
+      bgGlow: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+      buttonCls: 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-cyan-500/20',
+      matchingMode: 'Vocal-Deaf',
+    },
+    // 3. MOTOR & ALS
+    {
+      id: 'motor' as const,
+      category: 'motor' as const,
+      titleEn: 'Motor & Euphonia Control',
+      titleAr: 'التحكم الحركي وإيفونيا',
+      shortEn: 'Motor Control',
+      shortAr: 'التحكم الحركي',
+      badgeEn: 'Quadriplegia & ALS',
+      badgeAr: 'الشلل والتصلب الجانبي',
+      descEn: 'Full hands-free interaction. Head-pointer cursor, eye-blink virtual keyboard, contextual predictive AAC quick bar, and 4-second continuous eye-closure SOS dispatch.',
+      descAr: 'تحكم متكامل بدون لمس عبر حركة الرأس، لوحة العين والرمش، شريط العبارات السريعة التنبؤية، ونداء استغاثة الطوارئ SOS بالعين 4 ثوانٍ مع GPS.',
+      quickFeaturesAr: ['قيادة المؤشر بحركة الرأس', 'لوحة افتراضية بالعين والرمش', 'شريط عبارات تنبؤية حسب الوقت', 'استغاثة SOS بالعين 4 ثوانٍ و GPS', 'تأكيدات همهمات إيفونيا'],
+      quickFeaturesEn: ['Head-Tracking Pointer', 'Eye-Gaze Keyboard', 'Predictive AAC Quick Bar', '4-sec Eye Closure GPS SOS', 'Euphonia Vocal Triggers'],
+      Icon: Activity,
+      accentColor: 'text-amber-400',
+      borderGlow: 'hover:border-amber-500/60 border-slate-800',
+      bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+      buttonCls: 'bg-gradient-to-r from-amber-400 via-amber-500 to-rose-400 text-slate-950 shadow-amber-500/20',
+      matchingMode: 'Motor-Euphonia',
+    },
+    // 4. NEURODIVERSITY & AUTISM
+    {
       id: 'neurodiversity' as const,
+      category: 'neuro' as const,
       titleEn: 'Neurodiversity & Autism Hub',
-      titleAr: 'واحة التوحد والاضطرابات النمائية',
-      shortEn: 'Autism',
-      shortAr: 'توحد',
-      badgeEn: 'Autism, Dyslexia & ADHD',
-      badgeAr: 'التوحد، عسر القراءة وتشتت الانتباه',
-      descEn: 'Visual PECS communication cards with speech output, daily visual routine schedules, emotion & sensory regulation meter with breathing bubble, and dyslexia reading tools.',
-      descAr: 'بطاقات بيكس (PECS) للتواصل البصري المنطوق، جدول الروتين اليومي، مقياس المشاعر وفقاعة التنفس الهادئ، ومسطرة القراءة لعسر القراءة.',
+      titleAr: 'واحة التوحد وصعوبات التعلم',
+      shortEn: 'Autism & Dyslexia',
+      shortAr: 'التوحد والتعلم',
+      badgeEn: 'Autism, ADHD & Dyslexia',
+      badgeAr: 'التوحد وعسر القراءة',
+      descEn: 'Visual PECS communication cards with speech output, daily visual routine schedules, emotion & sensory regulation meter with 4-7-8 breathing bubble, and dyslexia reading tools.',
+      descAr: 'بطاقات بيكس (PECS) للتواصل البصري المنطوق، جدول الروتين اليومي المنظم، مقياس المشاعر وفقاعة التنفس المهدئة، ومسطرة القراءة لعسر القراءة.',
+      quickFeaturesAr: ['بطاقات PECS ناطقة بنقرة واحدة', 'جدول روتين يومي بصري', 'مقياس المشاعر وفقاعة التنفس 4-7-8', 'مسطرة القراءة لعسر القراءة'],
+      quickFeaturesEn: ['1-Tap Spoken PECS Cards', 'Daily Visual Routine', '4-7-8 Calming Breathing Bubble', 'Dyslexia Reading Ruler'],
       Icon: Brain,
       accentColor: 'text-purple-400',
       borderGlow: 'hover:border-purple-500/60 border-slate-800',
@@ -278,16 +332,20 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white shadow-purple-500/20',
       matchingMode: 'Neurodiversity',
     },
+    // 5. CAREGIVER & UNIVERSAL
     {
       id: 'caregiver' as const,
+      category: 'caregiver' as const,
       titleEn: 'Caregiver & Specialist Hub',
       titleAr: 'لوحة المرافق والمختص الطبي',
-      shortEn: 'Caregiver',
-      shortAr: 'مرافق',
-      badgeEn: 'Clinical & Family Controls',
-      badgeAr: 'إشراف الأسرة والأخصائيين',
-      descEn: 'Unified monitoring dashboard, live emergency SOS test, telemetry metrics, and one-click JSON backup & clinical profile migration.',
-      descAr: 'لوحة تحكم للمرافق والأخصائي، اختبار نداء الاستغاثة، إحصائيات الذاكرة البصرية والنطق، والنسخ الاحتياطي ونقل الملف الطبي.',
+      shortEn: 'Caregiver Hub',
+      shortAr: 'لوحة المرافق',
+      badgeEn: 'Clinical & Family Oversight',
+      badgeAr: 'إشراف الأسرة والمختصين',
+      descEn: 'Unified monitoring dashboard for parents and clinical specialists, live emergency SOS test dispatch, telemetry metrics, and one-click JSON backup.',
+      descAr: 'لوحة تحكم للأهل والمختصين لمتابعة الأنشطة، اختبار نداء الاستغاثة التجريبي، إحصائيات الذاكرة البصرية والنطق، والنسخ الاحتياطي السحابي.',
+      quickFeaturesAr: ['مؤشرات قياس عن بُعد', 'اختبار نداء استغاثة مباشر', 'سجل الذاكرة البصرية والنطق', 'تصدير نسخة احتياطية مشفرة'],
+      quickFeaturesEn: ['Live Telemetry Metrics', 'SOS Test Dispatch', 'Vision & Vocal History', 'Encrypted JSON Backup'],
       Icon: Shield,
       accentColor: 'text-rose-400',
       borderGlow: 'hover:border-rose-500/60 border-slate-800',
@@ -296,15 +354,38 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       matchingMode: 'Multiple',
     },
     {
+      id: 'chat' as const,
+      category: 'caregiver' as const,
+      titleEn: 'Adaptive Cognitive Tutor',
+      titleAr: 'المساعد التعليمي الذكي المهيأ',
+      shortEn: 'Adaptive Tutor',
+      shortAr: 'المساعد المهيأ',
+      badgeEn: 'All Learners',
+      badgeAr: 'دعم إدراكي متكيف',
+      descEn: 'Pedagogical tutoring assistant tailored to individual cognitive speed, worked examples, and screen-reader accessible plain text.',
+      descAr: 'مساعد تعليمي ذكي يتكيف مع وتيرتك واستيعابك، يقدم شرحاً خطوة بخطوة ومتوافق مع قارئات الشاشة والأجهزة المساعدة.',
+      quickFeaturesAr: ['تكيف مع سرعة الاستيعاب', 'شرح خطوة بخطوة', 'دعم قارئات الشاشة بالكامل'],
+      quickFeaturesEn: ['Adaptive Pace', 'Step-by-Step Guidance', 'Full Screen Reader Support'],
+      Icon: MessageSquare,
+      accentColor: 'text-cyan-400',
+      borderGlow: 'hover:border-cyan-500/60 border-slate-800',
+      bgGlow: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+      buttonCls: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-cyan-500/20',
+      matchingMode: 'None',
+    },
+    {
       id: 'settings' as const,
-      titleEn: 'Preferences & System Dialects',
-      titleAr: 'التفضيلات وتخصيص النظام',
+      category: 'caregiver' as const,
+      titleEn: 'Preferences & Dialects',
+      titleAr: 'التفضيلات واللغات',
       shortEn: 'Settings',
-      shortAr: 'إعدادات',
-      badgeEn: 'Languages & Accessibility Profiles',
+      shortAr: 'الإعدادات',
+      badgeEn: '11 Dialects & Options',
       badgeAr: 'اللغات وأنماط الوصول',
-      descEn: 'Choose from 11 supported languages including Egyptian Ammiya, customize accessibility profiles, and adjust high-contrast modes.',
+      descEn: 'Customize system languages (including Egyptian Ammiya), choose active accessibility profiles, and adjust display settings.',
       descAr: 'اختيار لغة النظام واللهجة المصرية المحكية، تفعيل ملفات إمكانية الوصول الخاصة، وضبط التباين العالي بما يلائم احتياجاتك.',
+      quickFeaturesAr: ['11 لغة ولهجة محكية', 'تفعيل الأنماط المخصصة', 'التحكم في التباين'],
+      quickFeaturesEn: ['11 Languages & Dialects', 'Custom Profile Activation', 'Contrast Options'],
       Icon: Settings,
       accentColor: 'text-slate-300',
       borderGlow: 'hover:border-slate-600 border-slate-800',
@@ -314,6 +395,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     },
     ...(isOrgStaff ? [{
       id: 'org' as const,
+      category: 'caregiver' as const,
       titleEn: 'My Organization Hub',
       titleAr: 'لوحة تحكم الجمعية / المؤسسة',
       shortEn: 'Org Hub',
@@ -322,6 +404,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       badgeAr: 'خاص بمشرفي الجمعيات والمؤسسات',
       descEn: 'Cohort analytics, enrolled special-needs learners, cognitive distributions, and accessibility adoption reports for your registered organization.',
       descAr: 'متابعة وإدارة طلاب الجمعية المسجلين، إحصائيات مستويات الاستيعاب المعرفي، ومعدلات تفعيل تقنيات إمكانية الوصول.',
+      quickFeaturesAr: ['إحصائيات طلاب المؤسسة', 'تقارير تبني أدوات الوصول'],
+      quickFeaturesEn: ['Cohort Analytics', 'Adoption Reports'],
       Icon: Building2,
       accentColor: 'text-teal-400',
       borderGlow: 'hover:border-teal-500/60 border-slate-800',
@@ -331,11 +415,26 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     }] : []),
   ];
 
+  // Filter modules based on selectedCategory
+  const filteredModules = useMemo(() => {
+    if (selectedCategory === 'all') return MODULES;
+    return MODULES.filter((m) => m.category === selectedCategory);
+  }, [selectedCategory, MODULES]);
+
+  // Current active module metadata for sibling bar
+  const currentModule = MODULES.find((m) => m.id === activeTab);
+  const siblingModules = useMemo(() => {
+    if (!currentModule || currentModule.category === 'caregiver') return [];
+    return MODULES.filter((m) => m.category === currentModule.category);
+  }, [currentModule, MODULES]);
+
+  const isAr = profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya';
+
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0d101d] text-slate-100 overflow-hidden relative select-none">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="flex-1 flex flex-col h-full bg-[#0d101d] text-slate-100 overflow-hidden relative select-none">
       
       {/* ── TOP NAVIGATION BAR ── */}
-      <header className="relative z-[9995] px-4 py-2.5 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-slate-800 bg-[#121524]/90 backdrop-blur-xl shadow-lg">
+      <header className="relative z-[9995] px-4 py-2.5 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-slate-800 bg-[#121524]/95 backdrop-blur-xl shadow-lg">
         <div className="flex items-center gap-2.5 sm:gap-3.5">
           {/* Main App Menu Drawer Button */}
           <button
@@ -350,7 +449,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           >
             {isAccessibilityUser(profile)
               ? <Menu className="w-4 h-4" />
-              : <ArrowLeft className={`w-4 h-4 ${localize(profile.language, '', 'rotate-180')}`} />}
+              : <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />}
             <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
               {isAccessibilityUser(profile)
                 ? localize(profile.language, 'Menu', 'القائمة')
@@ -372,19 +471,19 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               <div className="p-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
                 <Accessibility className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="font-black text-sm sm:text-base tracking-tight hidden sm:inline">
-                {localize(profile.language, 'Accessibility Command Hub', 'مركز إمكانية الوصول وذوي الهمم')}
+              <span className="font-black text-sm sm:text-base tracking-tight">
+                {localize(profile.language, 'Special Needs & Accessibility OS', 'مركز منظومات ذوي الهمم والتيسير')}
               </span>
             </div>
           )}
         </div>
 
-        {/* Right Header Status / Active Switcher */}
+        {/* Right Header Status / Sibling Switcher */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* If inside a module, show compact module switcher pills */}
-          {activeTab !== 'hub' ? (
+          {/* Sibling module pills when inside a suite */}
+          {activeTab !== 'hub' && siblingModules.length > 1 ? (
             <div className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar">
-              {MODULES.map((m) => (
+              {siblingModules.map((m) => (
                 <button
                   key={m.id}
                   onClick={() => setActiveTab(m.id)}
@@ -396,33 +495,25 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   }`}
                 >
                   <m.Icon className="w-3 h-3" />
-                  <span className="hidden sm:inline">{localize(profile.language, m.shortEn, m.shortAr)}</span>
+                  <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
                 </button>
               ))}
             </div>
           ) : (
-            /* On Hub: show active profile status badge */
+            /* On Hub: show passport button & settings */
             <div className="flex items-center gap-2">
-              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900 border border-slate-800 text-slate-300">
-                <span className="text-slate-400">{localize(profile.language, 'Current Mode:', 'الوضع المفعل:')}</span>
-                <strong className="text-cyan-400">
-                  {profile.accessibilityMode && profile.accessibilityMode !== 'None'
-                    ? profile.accessibilityMode
-                    : localize(profile.language, 'Standard', 'قياسي')}
-                </strong>
-              </div>
               <button
                 onClick={() => setShowPassportModal(true)}
                 title={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
-                className="px-3 py-1.5 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95"
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 text-indigo-200 hover:text-white hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95"
               >
                 <span>🛂</span>
-                <span className="hidden sm:inline">{localize(profile.language, 'Passport', 'جواز السفر')}</span>
+                <span>{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
               </button>
               <button
                 onClick={() => setActiveTab('settings')}
                 title={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
-                className="p-2 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
+                className="p-2.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -448,110 +539,267 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             >
               <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 pb-16">
                 
-                {/* Hero Introduction Banner */}
-                <section className="bg-[#181C2E]/90 border border-slate-800 rounded-[28px] p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-                  <div className="absolute -right-16 -top-16 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full pointer-events-none" />
-                  <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-amber-500/10 blur-3xl rounded-full pointer-events-none" />
-
-                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <div className="space-y-2 max-w-2xl text-start">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-800/80 border border-slate-700 text-cyan-400">
-                        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>{localize(profile.language, 'AI Assistive Learning Suites', 'بيئات الذكاء الاصطناعي التكيفية لذوي الهمم')}</span>
+                {/* 1. Quick Launch Personalized Card (if user has active mode) */}
+                {profile.accessibilityMode && profile.accessibilityMode !== 'None' && (() => {
+                  const matched = MODULES.find(m => m.matchingMode === profile.accessibilityMode);
+                  if (!matched) return null;
+                  return (
+                    <section className="bg-gradient-to-r from-cyan-500/15 via-indigo-500/10 to-transparent border border-cyan-500/40 rounded-[28px] p-6 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-4 text-start">
+                        <div className="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 shrink-0">
+                          <matched.Icon className="w-7 h-7" />
+                        </div>
+                        <div>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 mb-1">
+                            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                            <span>{localize(profile.language, 'Your Configured Active Environment', 'بيئتك المفعلة المباشرة')}</span>
+                          </div>
+                          <h3 className="text-xl font-black text-white">
+                            {localize(profile.language, matched.titleEn, matched.titleAr)}
+                          </h3>
+                        </div>
                       </div>
-                      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                        {localize(profile.language, 'Choose Your Assistive Environment', 'اختر وحدة المساعدة التي تناسبك')}
-                      </h2>
-                      <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
-                        {localize(
-                          profile.language,
-                          'Dedicated, distraction-free assistive environments designed for seamless accessibility. Each module operates independently with zero clutter.',
-                          'أدوات مخصصة ومريحة مصممة بعناية لتوفير تجربة تعليمية وتواصلية بدون أي تشتت أو تعقيد. اختر الوحدة المناسبة للانطلاق فوراً.'
-                        )}
+
+                      <button
+                        onClick={() => setActiveTab(matched.id)}
+                        className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/20 active:scale-95 transition-all shrink-0"
+                      >
+                        <Zap className="w-5 h-5" />
+                        <span>{localize(profile.language, 'Launch Direct Access', 'دخول مباشر بلمسة واحدة')}</span>
+                        <ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+                      </button>
+                    </section>
+                  );
+                })()}
+
+                {/* 2. Accessible Category Pills Filter (Grouped by Needs) */}
+                <section className="space-y-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="text-start">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <ListFilter className="w-4 h-4 text-cyan-400" />
+                        <span>{localize(profile.language, 'Filter by Assistive Need', 'تصفية حسب نوع الاحتياج والتيسير')}</span>
+                      </h3>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {localize(profile.language, 'All tools are grouped by category for quick, effortless navigation.', 'تم جمع الأدوات المترابطة معاً لسهولة الوصول وعدم التشتت.')}
                       </p>
                     </div>
 
-                    {/* Quick Open User's Recommended Active Mode */}
-                    {profile.accessibilityMode && profile.accessibilityMode !== 'None' && (
-                      <div className="shrink-0 w-full md:w-auto">
-                        {(() => {
-                          const matched = MODULES.find(m => m.matchingMode === profile.accessibilityMode);
-                          if (!matched) return null;
-                          return (
-                            <button
-                              onClick={() => setActiveTab(matched.id)}
-                              className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/10 active:scale-95 transition-all"
-                            >
-                              <Zap className="w-4 h-4" />
-                              <span>{localize(profile.language, `Launch ${matched.titleEn.split(' ')[0]}`, `تشغيل ${matched.titleAr.split(' ')[0]}`)}</span>
-                              <ArrowRight className={`w-4 h-4 ${localize(profile.language, '', 'rotate-180')}`} />
-                            </button>
-                          );
-                        })()}
-                      </div>
-                    )}
+                    {/* View Mode Switcher (Grid vs Large Accessible List) */}
+                    <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setViewMode('grid')}
+                        className={`p-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          viewMode === 'grid'
+                            ? 'bg-cyan-500 text-slate-950 shadow-sm font-black'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                        title={localize(profile.language, 'Grid Cards View', 'عرض البطاقات')}
+                      >
+                        <Grid className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{localize(profile.language, 'Cards', 'بطاقات')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setViewMode('list')}
+                        className={`p-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          viewMode === 'list'
+                            ? 'bg-cyan-500 text-slate-950 shadow-sm font-black'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                        title={localize(profile.language, 'High-Accessibility List (Large Touch Targets)', 'قائمة عريضة سهلة النقر')}
+                      >
+                        <List className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{localize(profile.language, 'Accessible List', 'قائمة ميسرة')}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Horizontal Category Selector Bar with Large Tap Targets */}
+                  <div className="flex items-center gap-2.5 overflow-x-auto custom-scrollbar pb-2 pt-1 -mx-2 px-2">
+                    {CATEGORIES.map((cat) => {
+                      const isSelected = selectedCategory === cat.id;
+                      const count = cat.id === 'all' ? MODULES.length : MODULES.filter((m) => m.category === cat.id).length;
+                      if (count === 0 && cat.id !== 'all') return null;
+
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`min-h-[48px] px-4 py-2.5 rounded-2xl border text-xs font-black whitespace-nowrap flex items-center gap-2.5 transition-all shadow-sm active:scale-95 ${
+                            isSelected
+                              ? `${cat.activeBg} shadow-md`
+                              : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                          }`}
+                        >
+                          <span className="text-base leading-none">{cat.emoji}</span>
+                          <span>{localize(profile.language, cat.titleEn, cat.titleAr)}</span>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                            isSelected ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
+                          }`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </section>
 
-                {/* Module Cards Grid */}
-                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {MODULES.map((m) => {
-                    const isMyCurrentMode =
-                      (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
-                      (m.id === 'chat' && profile.accessibilityMode === 'Speech');
-                    return (
-                      <div
-                        key={m.id}
-                        className={`bg-[#181C2E]/90 border rounded-[26px] p-6 shadow-xl backdrop-blur-xl flex flex-col justify-between transition-all duration-300 relative group overflow-hidden ${
-                          isMyCurrentMode
-                            ? 'border-cyan-500/60 shadow-cyan-500/10 ring-2 ring-cyan-500/20'
-                            : m.borderGlow
-                        }`}
-                      >
-                        {/* Current Active Mode Ribbon */}
-                        {isMyCurrentMode && (
-                          <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                            <span>{localize(profile.language, 'Active Mode', 'وضعك المفعل')}</span>
-                          </div>
-                        )}
-
-                        <div className="space-y-4 text-start">
-                          {/* Icon and Category Badge */}
-                          <div className="flex items-center gap-3">
-                            <div className={`p-3 rounded-2xl border ${m.bgGlow}`}>
-                              <m.Icon className="w-6 h-6" />
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                              {localize(profile.language, m.badgeEn, m.badgeAr)}
-                            </span>
-                          </div>
-
-                          {/* Titles */}
-                          <div className="space-y-1">
-                            <h3 className="text-lg font-black text-white group-hover:text-cyan-400 transition-colors tracking-tight">
-                              {localize(profile.language, m.titleEn, m.titleAr)}
-                            </h3>
-                            <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                              {localize(profile.language, m.descEn, m.descAr)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Action Launch Button */}
-                        <div className="pt-6 mt-2 border-t border-slate-800/80">
-                          <button
-                            onClick={() => setActiveTab(m.id)}
-                            className={`w-full py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 ${m.buttonCls}`}
-                          >
-                            <span>{localize(profile.language, 'Open Module', 'فتح الوحدة')}</span>
-                            <ArrowRight className={`w-3.5 h-3.5 ${localize(profile.language, '', 'rotate-180')}`} />
-                          </button>
+                {/* 3. Category Banner info if specific category is selected */}
+                {selectedCategory !== 'all' && (() => {
+                  const cat = CATEGORIES.find((c) => c.id === selectedCategory);
+                  if (!cat) return null;
+                  return (
+                    <div className="p-4 rounded-2xl bg-[#121524]/80 border border-slate-800 text-start flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{cat.emoji}</span>
+                        <div>
+                          <h4 className="text-sm font-black text-white">
+                            {localize(profile.language, cat.titleEn, cat.titleAr)}
+                          </h4>
+                          <p className="text-xs text-slate-400">
+                            {localize(profile.language, cat.descEn, cat.descAr)}
+                          </p>
                         </div>
                       </div>
-                    );
-                  })}
-                </section>
+                      <button
+                        onClick={() => setSelectedCategory('all')}
+                        className="text-xs font-bold text-cyan-400 hover:underline shrink-0"
+                      >
+                        {localize(profile.language, 'Show All', 'عرض الكل')}
+                      </button>
+                    </div>
+                  );
+                })()}
+
+                {/* 4. MODULES DISPLAY: GRID MODE VS HIGH-ACCESSIBILITY LIST MODE */}
+                {viewMode === 'grid' ? (
+                  <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {filteredModules.map((m) => {
+                      const isMyCurrentMode =
+                        (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
+                        (m.id === 'chat' && profile.accessibilityMode === 'Speech');
+
+                      return (
+                        <div
+                          key={m.id}
+                          className={`bg-[#181C2E]/90 border rounded-[26px] p-6 shadow-xl backdrop-blur-xl flex flex-col justify-between transition-all duration-300 relative group overflow-hidden ${
+                            isMyCurrentMode
+                              ? 'border-cyan-500/60 shadow-cyan-500/10 ring-2 ring-cyan-500/20'
+                              : m.borderGlow
+                          }`}
+                        >
+                          {/* Current Active Mode Ribbon */}
+                          {isMyCurrentMode && (
+                            <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                              <span>{localize(profile.language, 'Active Mode', 'وضعك المفعل')}</span>
+                            </div>
+                          )}
+
+                          <div className="space-y-4 text-start">
+                            {/* Icon and Category Badge */}
+                            <div className="flex items-center gap-3">
+                              <div className={`p-3 rounded-2xl border ${m.bgGlow}`}>
+                                <m.Icon className="w-6 h-6" />
+                              </div>
+                              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                                {localize(profile.language, m.badgeEn, m.badgeAr)}
+                              </span>
+                            </div>
+
+                            {/* Titles */}
+                            <div className="space-y-1">
+                              <h3 className="text-lg font-black text-white group-hover:text-cyan-400 transition-colors tracking-tight">
+                                {localize(profile.language, m.titleEn, m.titleAr)}
+                              </h3>
+                              <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                                {localize(profile.language, m.descEn, m.descAr)}
+                              </p>
+                            </div>
+
+                            {/* Quick Feature Pills */}
+                            {m.quickFeaturesAr && m.quickFeaturesAr.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 pt-1">
+                                {(isAr ? m.quickFeaturesAr : m.quickFeaturesEn).map((feat, fIdx) => (
+                                  <span
+                                    key={fIdx}
+                                    className="text-[10px] font-bold text-slate-300 bg-slate-900/90 border border-slate-800 px-2 py-0.5 rounded-lg"
+                                  >
+                                    {feat}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Action Launch Button */}
+                          <div className="pt-5 mt-3 border-t border-slate-800/80">
+                            <button
+                              onClick={() => setActiveTab(m.id)}
+                              className={`w-full py-3.5 px-4 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 ${m.buttonCls}`}
+                            >
+                              <span>{localize(profile.language, 'Open Suite', 'فتح الوحدة')}</span>
+                              <ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </section>
+                ) : (
+                  /* HIGH-ACCESSIBILITY LIST MODE (LARGE TOUCH TARGETS - MIN 64px) */
+                  <section className="space-y-3">
+                    {filteredModules.map((m) => {
+                      const isMyCurrentMode =
+                        (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
+                        (m.id === 'chat' && profile.accessibilityMode === 'Speech');
+
+                      return (
+                        <div
+                          key={m.id}
+                          className={`p-4 sm:p-5 rounded-2xl border bg-[#181C2E]/90 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-slate-700 ${
+                            isMyCurrentMode ? 'border-cyan-500/60 ring-1 ring-cyan-500/30' : 'border-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-start sm:items-center gap-4 text-start flex-1 min-w-0">
+                            <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 ${m.bgGlow}`}>
+                              <m.Icon className="w-7 h-7" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <h4 className="text-base font-black text-white truncate">
+                                  {localize(profile.language, m.titleEn, m.titleAr)}
+                                </h4>
+                                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                                  {localize(profile.language, m.badgeEn, m.badgeAr)}
+                                </span>
+                                {isMyCurrentMode && (
+                                  <span className="text-[10px] font-black text-cyan-400 bg-cyan-500/15 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+                                    {localize(profile.language, 'Active', 'مفعل')}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-400 truncate font-medium">
+                                {localize(profile.language, m.descEn, m.descAr)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => setActiveTab(m.id)}
+                            className={`min-h-[52px] px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shrink-0 active:scale-95 transition-all ${m.buttonCls}`}
+                          >
+                            <span>{localize(profile.language, 'Launch Tool', 'تشغيل الأداة')}</span>
+                            <ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </section>
+                )}
               </div>
             </motion.div>
           )}
@@ -720,73 +968,76 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               <p className="text-[10px] text-slate-400 mt-0.5 truncate">{lang.label}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="w-4 h-4 text-cyan-400 shrink-0 ml-1" />}
+                          {isSelected && <Check className="w-4 h-4 text-cyan-400 shrink-0" />}
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Accessibility Profiles Card */}
+                {/* Accessibility Mode Selector */}
                 <div className="bg-[#181C2E]/90 border border-slate-800 p-6 sm:p-8 rounded-[28px] shadow-2xl backdrop-blur-xl">
-                  <div className="mb-8 text-start">
-                    <h2 className="text-xl font-black text-white tracking-tight mb-1">{getTranslation(profile.language, 'accessibilityProfiles')}</h2>
-                    <p className="text-xs sm:text-sm text-slate-400">{getTranslation(profile.language, 'accessibilityModeDescription')}</p>
+                  <div className="mb-6 text-start">
+                    <div className="flex items-center gap-2 text-cyan-400 mb-1">
+                      <Accessibility className="w-5 h-5" />
+                      <h2 className="text-xl font-black text-white tracking-tight">
+                        {localize(profile.language, 'Accessibility Accommodations', 'تسهيلات إمكانية الوصول')}
+                      </h2>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-400">
+                      {localize(
+                        profile.language,
+                        'Select the accessibility profile that best fits your interaction needs.',
+                        'اختر ملف التسهيلات الذي يناسب احتياجاتك التفاعلية على النحو الأمثل.'
+                      )}
+                    </p>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(['None', 'Motor-Euphonia', 'Sign-Only', 'Speech', 'Visual', 'Vocal-Deaf'] as AccessibilityMode[]).map((mode) => (
-                      <button
-                        key={mode}
-                        onClick={() => updateAccessibilityMode(mode)}
-                        className={`text-start p-5 rounded-2xl border transition-all relative ${
-                          profile.accessibilityMode === mode 
-                            ? 'border-cyan-400 bg-cyan-500/10 shadow-lg' 
-                            : 'border-slate-800 bg-slate-900/80 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-start gap-4 relative z-10">
-                          <div className={`mt-0.5 p-2 rounded-xl ${
-                            profile.accessibilityMode === mode 
-                              ? 'bg-cyan-500 text-slate-950 font-black' 
-                              : 'bg-slate-800 text-slate-400'
-                          }`}>
-                            {getModeIcon(mode)}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { mode: 'None' as const, labelEn: 'Standard', labelAr: 'الوضع القياسي', icon: User },
+                      { mode: 'Speech' as const, labelEn: 'Speech & Audio', labelAr: 'الصوت والنسخ الصوتي', icon: Mic },
+                      { mode: 'Visual' as const, labelEn: 'Visual & Screen Adaptation', labelAr: 'التكيف البصري وضعاف البصر', icon: Eye },
+                      { mode: 'Vocal-Deaf' as const, labelEn: 'Vocal-Deaf Bridge', labelAr: 'الصم المتحدثين وجسر السمع', icon: Ear },
+                      { mode: 'Sign-Only' as const, labelEn: 'Sign Language', labelAr: 'لغة الإشارة التفاعلية', icon: Accessibility },
+                      { mode: 'Motor-Euphonia' as const, labelEn: 'Motor & Hands-Free', labelAr: 'التحكم الحركي وبدون لمس', icon: Activity },
+                      { mode: 'Neurodiversity' as const, labelEn: 'Neurodiversity & Autism', labelAr: 'التنوع العصبي والتوحد', icon: Brain },
+                    ].map(({ mode, labelEn, labelAr, icon: ModeIcon }) => {
+                      const isSelected = profile.accessibilityMode === mode;
+                      return (
+                        <button
+                          key={mode}
+                          onClick={() => updateMode(mode)}
+                          className={`p-4 rounded-2xl border text-start flex items-start gap-3 transition-all active:scale-95 ${
+                            isSelected
+                              ? 'border-cyan-400 bg-cyan-500/15 shadow-sm ring-1 ring-cyan-400'
+                              : 'border-slate-800 bg-slate-900 hover:border-slate-700 text-slate-300'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-xl shrink-0 ${isSelected ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-800 text-slate-400'}`}>
+                            <ModeIcon className="w-5 h-5" />
                           </div>
-                          <div>
-                            <h3 className={`text-sm font-bold mb-1 ${
-                              profile.accessibilityMode === mode ? 'text-cyan-400' : 'text-white'
-                            }`}>
-                              {mode === 'None' ? getTranslation(profile.language, 'standardProtocol')
-                                : mode === 'Motor-Euphonia' ? localize(profile.language, 'Motor & Euphonia', 'تحكم حركي وإيفونيا')
-                                : mode === 'Speech' ? localize(profile.language, 'Speech', 'النطق')
-                                : mode === 'Visual' ? localize(profile.language, 'Visual', 'بصري')
-                                : mode === 'Vocal-Deaf' ? localize(profile.language, 'Vocal-Deaf', 'أصمّ ناطق')
-                                : mode === 'Sign-Only' ? localize(profile.language, 'Sign-Only', 'إشارة فقط')
-                                : mode}
-                            </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed font-medium">
-                              {getModeDescription(mode)}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-bold text-sm text-white">{localize(profile.language, labelEn, labelAr)}</span>
+                              {isSelected && <Check className="w-4 h-4 text-cyan-400 shrink-0" />}
+                            </div>
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                              {mode === 'None' && localize(profile.language, 'Standard cognitive experience without overlays.', 'واجهة قياسية طبيعية.')}
+                              {mode === 'Speech' && localize(profile.language, 'Voice synthesis, continuous STT, and spoken narration.', 'نطق صوتي، وتفريغ صوتي مستمر.')}
+                              {mode === 'Visual' && localize(profile.language, 'Spoken scene description, currency reader, and haptic white cane.', 'وصف بصري فوري، قارئ عملات، ونبضات لمسية.')}
+                              {mode === 'Vocal-Deaf' && localize(profile.language, 'High-contrast text captions and direct two-way bridge.', 'نصوص متباينة وتواصل مباشر.')}
+                              {mode === 'Sign-Only' && localize(profile.language, '3D sign avatar, reverse sign-to-speech, and sign lexicons.', 'أفاتار إشارة ونطق الإشارة لصوت.')}
+                              {mode === 'Motor-Euphonia' && localize(profile.language, 'Hands-free head tracking, eye-blink keyboard, and 4s eye SOS.', 'حركة الرأس، لوحة العين، واستغاثة 4 ثوانٍ.')}
+                              {mode === 'Neurodiversity' && localize(profile.language, 'PECS visual cards, visual daily schedule, and calming bubble.', 'بطاقات PECS، جدول بصري، وفقاعة تنفس.')}
                             </p>
                           </div>
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
-
-          {activeTab === 'org' && (
-            <motion.div
-              key="org-view"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="w-full h-full"
-            >
-              <OrgDashboard profile={profile} />
             </motion.div>
           )}
 
@@ -795,9 +1046,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
       {/* Universal Accessibility Passport Modal */}
       <AccessibilityPassportModal
-        profile={profile}
         isOpen={showPassportModal}
         onClose={() => setShowPassportModal(false)}
+        profile={profile}
         setProfile={setProfile}
       />
     </div>
