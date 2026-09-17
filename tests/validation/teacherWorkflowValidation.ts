@@ -24,12 +24,22 @@ import {
   generateDifferentiatedGroups,
   generateTeacherRecommendations,
   compileTeacherDashboard,
+  generateCohortMasteryHeatmap,
+  evaluateCurriculumPacing,
+  dispatchTeacherAlert,
 } from '../../src/lib/teacherIntelligence.js';
 import type { StudentState } from '../../src/types/studentState.js';
-import type { TeacherDashboardData } from '../../src/types/teacher.js';
+import type {
+  TeacherDashboardData,
+  HeatmapCell,
+  ConceptHeatmapSummary,
+  PrerequisiteAlertMessage,
+  CurriculumPacingRecommendation,
+} from '../../src/types/teacher.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
+
 
 function assert(condition: boolean, testName: string) {
   if (condition) {
@@ -164,77 +174,14 @@ export async function runTeacherWorkflowValidationSuite(): Promise<{ passed: num
   console.log('🗺️ 1. Cohort Mastery Heatmap Matrix Generation');
   console.log('----------------------------------------------------------------');
 
-  interface HeatmapCell {
-    studentUid: string;
-    conceptId: string;
-    accuracy: number;
-    confidence: number;
-    colorTier: 'green' | 'yellow' | 'red';
-  }
-
-  interface ConceptHeatmapSummary {
-    conceptId: string;
-    averageAccuracy: number;
-    colorTier: 'green' | 'yellow' | 'red';
-    strugglingCount: number;
-  }
-
-  const heatmapMatrix: HeatmapCell[] = [];
-  const conceptSummaries: Record<string, { totalAcc: number; count: number; strugglingCount: number }> = {};
-
-  for (const c of trackedConcepts) {
-    conceptSummaries[c] = { totalAcc: 0, count: 0, strugglingCount: 0 };
-  }
-
-  for (const student of cohort) {
-    for (const conceptId of trackedConcepts) {
-      const mastery = student.conceptMastery[conceptId];
-      const acc = mastery ? mastery.accuracy : 0.5;
-      const conf = mastery ? mastery.confidence : 0.5;
-
-      let colorTier: 'green' | 'yellow' | 'red';
-      if (acc >= 0.80) {
-        colorTier = 'green';
-      } else if (acc >= 0.60) {
-        colorTier = 'yellow';
-      } else {
-        colorTier = 'red';
-      }
-
-      heatmapMatrix.push({
-        studentUid: student.uid,
-        conceptId,
-        accuracy: acc,
-        confidence: conf,
-        colorTier,
-      });
-
-      conceptSummaries[conceptId].totalAcc += acc;
-      conceptSummaries[conceptId].count += 1;
-      if (colorTier === 'red') {
-        conceptSummaries[conceptId].strugglingCount += 1;
-      }
-    }
-  }
+  const heatmap = generateCohortMasteryHeatmap(cohort, trackedConcepts);
+  const heatmapMatrix = heatmap.cells;
+  const processedConceptSummaries = heatmap.conceptSummaries;
 
   // Validate Heatmap Dimensions
   const expectedTotalCells = 24 * 6; // 144 cells
   assert(heatmapMatrix.length === expectedTotalCells, `Heatmap generated all ${expectedTotalCells} individual student x concept cells`);
   assert(heatmapMatrix.every(cell => cell.accuracy >= 0 && cell.accuracy <= 1), 'All cell accuracies bounded between 0 and 1');
-
-  // Evaluate concept aggregate summaries
-  const processedConceptSummaries: ConceptHeatmapSummary[] = Object.entries(conceptSummaries).map(([conceptId, data]) => {
-    const avg = Math.round((data.totalAcc / data.count) * 100) / 100;
-    let colorTier: 'green' | 'yellow' | 'red' = 'yellow';
-    if (avg >= 0.80) colorTier = 'green';
-    else if (avg < 0.60) colorTier = 'red';
-    return {
-      conceptId,
-      averageAccuracy: avg,
-      colorTier,
-      strugglingCount: data.strugglingCount,
-    };
-  });
 
   const varSummary = processedConceptSummaries.find(s => s.conceptId === 'variables_types');
   assert(varSummary !== undefined, 'Found summary for variables_types');
@@ -262,36 +209,9 @@ export async function runTeacherWorkflowValidationSuite(): Promise<{ passed: num
   assert(primaryCluster!.diagnosedPrerequisiteGap !== undefined, 'Diagnosed missing prerequisite gap');
   assert(primaryCluster!.diagnosedPrerequisiteGap?.prerequisiteId === 'pointers', 'Diagnosed "pointers" as root stumbling block');
 
-  // Synthesize and dispatch alert
-  interface PrerequisiteAlertMessage {
-    alertId: string;
-    severity: 'urgent' | 'warning' | 'info';
-    targetConceptId: string;
-    rootPrerequisiteId: string;
-    affectedStudentCount: number;
-    recipientTeacherUid: string;
-    dispatchedTimestamp: number;
-    messageEn: string;
-    messageAr: string;
-    suggestedClassAction: string;
-  }
-
-  const alertPayload: PrerequisiteAlertMessage = {
-    alertId: `alert_prereq_${Date.now()}`,
-    severity: 'urgent',
-    targetConceptId: primaryCluster!.conceptId,
-    rootPrerequisiteId: primaryCluster!.diagnosedPrerequisiteGap!.prerequisiteId,
-    affectedStudentCount: primaryCluster!.strugglingStudentCount,
-    recipientTeacherUid: 'teacher_prof_alan_turing',
-    dispatchedTimestamp: Date.now(),
-    messageEn: `URGENT ALERT: 14 students (${primaryCluster!.struggleRatePercentage}%) are failing dynamic_memory due to an unmastered prerequisite: "pointers".`,
-    messageAr: `تنبيه عاجل: 14 طالباً يعانون من صعوبة في تخصيص الذاكرة الديناميكية بسبب عدم إتقان المتطلب الأساسي: "المؤشرات".`,
-    suggestedClassAction: 'Allocate 20 minutes in next lecture for worked-example review of pointer dereferencing before continuing dynamic memory.',
-  };
-
-  // Dispatch into teacher alert feed
-  const teacherAlertFeed: PrerequisiteAlertMessage[] = [];
-  teacherAlertFeed.push(alertPayload);
+  // Dispatch alert using canonical teacher intelligence engine
+  const alertPayload = dispatchTeacherAlert('teacher_prof_alan_turing', primaryCluster!);
+  const teacherAlertFeed: PrerequisiteAlertMessage[] = [alertPayload];
 
   assert(teacherAlertFeed.length === 1, 'Alert successfully dispatched to teacher alert feed');
   assert(teacherAlertFeed[0].severity === 'urgent', 'Alert severity tagged as "urgent"');
@@ -304,56 +224,6 @@ export async function runTeacherWorkflowValidationSuite(): Promise<{ passed: num
   console.log('\n----------------------------------------------------------------');
   console.log('⏱️ 3. Curriculum Pacing Recommendations & Differentiated Grouping');
   console.log('----------------------------------------------------------------');
-
-  interface CurriculumPacingRecommendation {
-    classId: string;
-    pacingDecision: 'decelerate_review' | 'maintain_pace' | 'accelerate_enrich';
-    pacingRationaleEn: string;
-    pacingRationaleAr: string;
-    recommendedReviewHours: number;
-    nextPlannedModule: string;
-  }
-
-  // Pacing evaluation engine logic
-  function evaluateCurriculumPacing(
-    classId: string,
-    clusterList: typeof clusters,
-    conceptSumm: typeof processedConceptSummaries
-  ): CurriculumPacingRecommendation {
-    const criticalStruggle = clusterList.some(c => c.struggleRatePercentage >= 35 && c.diagnosedPrerequisiteGap);
-    
-    if (criticalStruggle) {
-      return {
-        classId,
-        pacingDecision: 'decelerate_review',
-        pacingRationaleEn: 'Critical prerequisite gap detected in over 35% of the class. Decelerate planned curriculum to review foundational pointers.',
-        pacingRationaleAr: 'تم اكتشاف فجوة حرجة في المتطلبات السابقة لدى أكثر من 35% من الطلاب. يوصى بتهدئة وتيرة المنهج لمراجعة المؤشرات.',
-        recommendedReviewHours: 2,
-        nextPlannedModule: 'Foundational Pointer Remediation & Step-by-Step Worked Examples',
-      };
-    }
-
-    const classAverage = conceptSumm.reduce((acc, c) => acc + c.averageAccuracy, 0) / conceptSumm.length;
-    if (classAverage >= 0.85) {
-      return {
-        classId,
-        pacingDecision: 'accelerate_enrich',
-        pacingRationaleEn: 'Cohort demonstrates comprehensive mastery. Accelerate to advanced distributed systems modules.',
-        pacingRationaleAr: 'يُظهر الطلاب إتقاناً شاملاً. يمكن تسريع وتيرة المنهج والانتقال لمفاهيم متقدمة.',
-        recommendedReviewHours: 0,
-        nextPlannedModule: 'Advanced Distributed Data Structures',
-      };
-    }
-
-    return {
-      classId,
-      pacingDecision: 'maintain_pace',
-      pacingRationaleEn: 'Cohort performance is within expected baseline. Maintain standard pacing.',
-      pacingRationaleAr: 'أداء الطلاب ضمن المعدل الطبيعي. تابع بالوتيرة المعتادة.',
-      recommendedReviewHours: 0,
-      nextPlannedModule: 'Standard Curriculum Module',
-    };
-  }
 
   const pacingRec = evaluateCurriculumPacing('cs101_sec_b', clusters, processedConceptSummaries);
   assert(pacingRec.pacingDecision === 'decelerate_review', 'Pacing engine advises "decelerate_review" due to high struggle rate');

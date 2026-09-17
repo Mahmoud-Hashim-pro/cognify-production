@@ -16,6 +16,11 @@ import {
   Clock,
   BookOpen,
   RefreshCw,
+  Grid,
+  Download,
+  Send,
+  Search,
+  FileSpreadsheet,
 } from 'lucide-react';
 import type { StudentState } from '../types/studentState';
 import type {
@@ -24,9 +29,12 @@ import type {
   ClassInterventionEfficacy,
   TeacherActionRecommendation,
   TeacherDashboardData,
+  PrerequisiteAlertMessage,
 } from '../types/teacher';
-import { compileTeacherDashboard } from '../lib/teacherIntelligence';
+import { compileTeacherDashboard, dispatchTeacherAlert } from '../lib/teacherIntelligence';
 import { createInitialStudentState } from '../lib/studentStateEngine';
+import { toast } from './Toast';
+
 
 interface TeacherIntelligenceViewProps {
   students?: StudentState[];
@@ -44,10 +52,13 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
   onBack,
 }) => {
   const isAr = lang === 'ar';
-  const [activeTab, setActiveTab] = useState<'clusters' | 'groups' | 'efficacy' | 'actions'>('clusters');
+  const [activeTab, setActiveTab] = useState<'clusters' | 'groups' | 'efficacy' | 'actions' | 'heatmap'>('clusters');
   const [liveStudents, setLiveStudents] = useState<StudentState[]>([]);
   const [loadingLive, setLoadingLive] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'live' | 'benchmark'>('live');
+  const [dispatchedAlerts, setDispatchedAlerts] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
 
   // Hydrate real enrolled students from Firestore if students prop is not supplied
   useEffect(() => {
@@ -330,6 +341,51 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
           </div>
         )}
 
+        {/* Curriculum Pacing Banner */}
+        {dashboardData.curriculumPacing && (
+          <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-5 backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3.5">
+              <div className={`p-3 rounded-2xl ${
+                dashboardData.curriculumPacing.pacingDecision === 'decelerate_review'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  : dashboardData.curriculumPacing.pacingDecision === 'accelerate_enrich'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+              }`}>
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    {isAr ? 'وتيرة المنهج المقترحة' : 'Curriculum Pacing'}
+                  </span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                    dashboardData.curriculumPacing.pacingDecision === 'decelerate_review'
+                      ? 'bg-amber-500/20 text-amber-300'
+                      : dashboardData.curriculumPacing.pacingDecision === 'accelerate_enrich'
+                      ? 'bg-emerald-500/20 text-emerald-300'
+                      : 'bg-cyan-500/20 text-cyan-300'
+                  }`}>
+                    {dashboardData.curriculumPacing.pacingDecision.replace('_', ' ').toUpperCase()}
+                  </span>
+                  {dashboardData.curriculumPacing.recommendedReviewHours > 0 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                      +{dashboardData.curriculumPacing.recommendedReviewHours}h {isAr ? 'ساعات مراجعة' : 'review'}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-slate-300 mt-1">
+                  {isAr ? dashboardData.curriculumPacing.pacingRationaleAr : dashboardData.curriculumPacing.pacingRationaleEn}
+                </p>
+              </div>
+            </div>
+            <div className="text-xs px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 shrink-0">
+              <span className="text-slate-400 block">{isAr ? 'الوحدة القادمة الموصى بها:' : 'Next Suggested Module:'}</span>
+              <span className="font-semibold text-white">{dashboardData.curriculumPacing.nextPlannedModule}</span>
+            </div>
+          </div>
+        )}
+
         {/* Tab Switcher */}
         <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#121524] border border-slate-800/80 w-full sm:w-fit overflow-x-auto">
           <button
@@ -344,6 +400,21 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
             <span>{isAr ? 'بؤر التعثر المعرفي' : 'Struggle Clusters'}</span>
             <span className="ml-1 text-xs px-1.5 py-0.5 rounded-md bg-white/20">
               {dashboardData.struggleClusters.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('heatmap')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+              activeTab === 'heatmap'
+                ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <Grid className="w-4 h-4" />
+            <span>{isAr ? 'مصفوفة الإتقان (Heatmap)' : 'Cohort Heatmap'}</span>
+            <span className="ml-1 text-xs px-1.5 py-0.5 rounded-md bg-white/20">
+              {dashboardData.heatmap?.cells.length || 0}
             </span>
           </button>
 
@@ -467,9 +538,201 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                         {Math.round(cluster.averageAccuracy * 100)}%
                       </span>
                     </div>
+
+                    <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2 mt-3">
+                      <span className="text-xs text-slate-400">
+                        {isAr ? 'إرسال تنبيه علاجي:' : 'Remediation:'}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const alert = dispatchTeacherAlert('teacher_prof_alan_turing', cluster);
+                          setDispatchedAlerts(prev => [...prev, cluster.conceptId]);
+                          toast.success(
+                            isAr
+                              ? `تم إرسال تنبيه علاجي لـ ${cluster.strugglingStudentCount} طلاب لمراجعة المتطلب: ${cluster.diagnosedPrerequisiteGap?.prerequisiteTitleAr || cluster.conceptTitleAr}`
+                              : `Dispatched remediation alert to ${cluster.strugglingStudentCount} students for: ${cluster.diagnosedPrerequisiteGap?.prerequisiteTitleEn || cluster.conceptTitleEn}`
+                          );
+                        }}
+                        disabled={dispatchedAlerts.includes(cluster.conceptId)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
+                          dispatchedAlerts.includes(cluster.conceptId)
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-default'
+                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+                        }`}
+                      >
+                        {dispatchedAlerts.includes(cluster.conceptId) ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            {isAr ? 'تم الإرسال' : 'Dispatched'}
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3.5 h-3.5" />
+                            {isAr ? 'إرسال للطلاب' : 'Dispatch Alert'}
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: Cohort Mastery Heatmap */}
+        {activeTab === 'heatmap' && dashboardData.heatmap && (
+          <div className="space-y-4">
+            {/* Heatmap Controls Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-4 backdrop-blur-xl shadow-xl">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={isAr ? 'بحث عن طالب في المصفوفة...' : 'Search student in heatmap...'}
+                  className="w-full pl-10 pr-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 transition"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Legend */}
+                <div className="hidden lg:flex items-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span className="text-slate-300">&ge; 80% ({isAr ? 'إتقان تام' : 'Mastered'})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span className="text-slate-300">60-79% ({isAr ? 'تطور' : 'Developing'})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                    <span className="text-slate-300">&lt; 60% ({isAr ? 'تعثر' : 'Struggling'})</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const csvRows: string[] = [];
+                    const concepts = dashboardData.heatmap!.concepts;
+                    csvRows.push(['Student UID', 'Student Name', ...concepts, 'Average'].join(','));
+                    
+                    for (const s of dashboardData.heatmap!.studentSummaries) {
+                      const row = [s.studentUid, s.studentName];
+                      for (const c of concepts) {
+                        const cell = dashboardData.heatmap!.cells.find(
+                          cell => cell.studentUid === s.studentUid && cell.conceptId === c
+                        );
+                        row.push(cell ? `${Math.round(cell.accuracy * 100)}%` : 'N/A');
+                      }
+                      row.push(`${Math.round(s.averageAccuracy * 100)}%`);
+                      csvRows.push(row.join(','));
+                    }
+
+                    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `cohort_mastery_${classId}_${Date.now()}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success(isAr ? 'تم تصدير المصفوفة كملف CSV بنجاح' : 'Exported heatmap matrix to CSV');
+                  }}
+                  className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg transition"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>{isAr ? 'تصدير CSV' : 'Export CSV'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Matrix Table */}
+            <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-300 border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-800 bg-slate-950/60">
+                      <th className="p-4 font-bold text-slate-300 sticky left-0 bg-slate-950/90 z-10 min-w-[160px]">
+                        {isAr ? 'الطالب' : 'Student'}
+                      </th>
+                      {dashboardData.heatmap.concepts.map((cId) => {
+                        const summ = dashboardData.heatmap!.conceptSummaries.find(cs => cs.conceptId === cId);
+                        return (
+                          <th key={cId} className="p-4 font-bold text-slate-300 text-center min-w-[130px]">
+                            <div className="truncate font-semibold">{summ?.conceptTitleEn || cId}</div>
+                            <div className="text-[10px] font-normal text-slate-400 mt-0.5 flex items-center justify-center gap-1.5">
+                              <span className={`px-1.5 py-0.5 rounded-md font-bold ${
+                                summ?.colorTier === 'green' ? 'bg-emerald-500/20 text-emerald-300' :
+                                summ?.colorTier === 'yellow' ? 'bg-amber-500/20 text-amber-300' :
+                                'bg-rose-500/20 text-rose-300'
+                              }`}>
+                                {summ ? `${Math.round(summ.averageAccuracy * 100)}%` : '-'}
+                              </span>
+                              {summ && summ.strugglingCount > 0 && (
+                                <span className="text-rose-400">({summ.strugglingCount} ⚠️)</span>
+                              )}
+                            </div>
+                          </th>
+                        );
+                      })}
+                      <th className="p-4 font-bold text-slate-300 text-center min-w-[100px]">
+                        {isAr ? 'المتوسط' : 'Avg'}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {dashboardData.heatmap.studentSummaries
+                      .filter(s => !searchQuery || s.studentName.toLowerCase().includes(searchQuery.toLowerCase()) || s.studentUid.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((student) => {
+                        return (
+                          <tr key={student.studentUid} className="hover:bg-slate-800/30 transition">
+                            <td className="p-4 font-medium text-slate-200 sticky left-0 bg-[#121524]/95 z-10">
+                              <div className="font-semibold text-white">{student.studentName}</div>
+                              <div className="text-[10px] text-slate-500 font-mono">{student.studentUid}</div>
+                            </td>
+                            {dashboardData.heatmap!.concepts.map((cId) => {
+                              const cell = dashboardData.heatmap!.cells.find(
+                                cl => cl.studentUid === student.studentUid && cl.conceptId === cId
+                              );
+                              const acc = cell ? Math.round(cell.accuracy * 100) : 50;
+                              const tier = cell?.colorTier || 'yellow';
+
+                              return (
+                                <td key={cId} className="p-3 text-center">
+                                  <div
+                                    className={`mx-auto px-2.5 py-1.5 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center ${
+                                      tier === 'green'
+                                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                        : tier === 'yellow'
+                                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                    }`}
+                                    title={`Accuracy: ${acc}%, Confidence: ${cell ? Math.round(cell.confidence * 100) : 50}%`}
+                                  >
+                                    <span>{acc}%</span>
+                                  </div>
+                                </td>
+                              );
+                            })}
+                            <td className="p-3 text-center">
+                              <span className={`px-2.5 py-1 rounded-xl text-xs font-extrabold ${
+                                student.colorTier === 'green'
+                                  ? 'bg-emerald-500/20 text-emerald-300'
+                                  : student.colorTier === 'yellow'
+                                  ? 'bg-amber-500/20 text-amber-300'
+                                  : 'bg-rose-500/20 text-rose-300'
+                              }`}>
+                                {Math.round(student.averageAccuracy * 100)}%
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

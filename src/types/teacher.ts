@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Milestone 13: Teacher Intelligence Type Definitions
  * Classroom concept mastery aggregation, struggle clustering,
  * intervention effectiveness, and differentiated instruction.
@@ -64,6 +64,61 @@ export interface TeacherActionRecommendation {
   targetedConceptId?: string;
 }
 
+export interface HeatmapCell {
+  studentUid: string;
+  studentName?: string;
+  conceptId: string;
+  accuracy: number;
+  confidence: number;
+  colorTier: 'green' | 'yellow' | 'red';
+}
+
+export interface ConceptHeatmapSummary {
+  conceptId: string;
+  conceptTitleEn?: string;
+  conceptTitleAr?: string;
+  averageAccuracy: number;
+  colorTier: 'green' | 'yellow' | 'red';
+  strugglingCount: number;
+}
+
+export interface StudentHeatmapSummary {
+  studentUid: string;
+  studentName: string;
+  averageAccuracy: number;
+  colorTier: 'green' | 'yellow' | 'red';
+  strugglingConceptsCount: number;
+}
+
+export interface CohortMasteryHeatmapData {
+  concepts: string[];
+  cells: HeatmapCell[];
+  conceptSummaries: ConceptHeatmapSummary[];
+  studentSummaries: StudentHeatmapSummary[];
+}
+
+export interface PrerequisiteAlertMessage {
+  alertId: string;
+  severity: 'urgent' | 'warning' | 'info';
+  targetConceptId: string;
+  rootPrerequisiteId: string;
+  affectedStudentCount: number;
+  recipientTeacherUid: string;
+  dispatchedTimestamp: number;
+  messageEn: string;
+  messageAr: string;
+  suggestedClassAction: string;
+}
+
+export interface CurriculumPacingRecommendation {
+  classId: string;
+  pacingDecision: 'decelerate_review' | 'maintain_pace' | 'accelerate_enrich';
+  pacingRationaleEn: string;
+  pacingRationaleAr: string;
+  recommendedReviewHours: number;
+  nextPlannedModule: string;
+}
+
 export interface TeacherDashboardData {
   classId: string;
   className: string;
@@ -74,4 +129,7 @@ export interface TeacherDashboardData {
   interventionEfficacy: Record<string, ClassInterventionEfficacy>;
   differentiatedGroups: DifferentiatedInstructionGroup[];
   actionRecommendations: TeacherActionRecommendation[];
+  curriculumPacing?: CurriculumPacingRecommendation;
+  heatmap?: CohortMasteryHeatmapData;
 }
+

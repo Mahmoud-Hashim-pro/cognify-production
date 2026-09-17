@@ -14,6 +14,12 @@ import type {
   TeacherActionRecommendation,
   TeacherDashboardData,
   StudentMasterySnippet,
+  HeatmapCell,
+  ConceptHeatmapSummary,
+  StudentHeatmapSummary,
+  CohortMasteryHeatmapData,
+  PrerequisiteAlertMessage,
+  CurriculumPacingRecommendation,
 } from '../types/teacher';
 
 /**
@@ -313,6 +319,201 @@ export function generateTeacherRecommendations(
 }
 
 /**
+ * Generates a full Cohort Mastery Heatmap across all students and tracked concepts.
+ */
+export function generateCohortMasteryHeatmap(
+  students: StudentState[],
+  concepts?: string[]
+): CohortMasteryHeatmapData {
+  if (!students || students.length === 0) {
+    return { concepts: [], cells: [], conceptSummaries: [], studentSummaries: [] };
+  }
+
+  // Determine tracked concepts from union of students' mastery if not specified
+  let conceptList = concepts;
+  if (!conceptList || conceptList.length === 0) {
+    const conceptSet = new Set<string>();
+    for (const s of students) {
+      for (const k of Object.keys(s.conceptMastery || {})) {
+        conceptSet.add(k);
+      }
+    }
+    conceptList = Array.from(conceptSet);
+  }
+
+  const cells: HeatmapCell[] = [];
+  const conceptAcc: Record<string, { totalAcc: number; count: number; strugglingCount: number }> = {};
+  for (const c of conceptList) {
+    conceptAcc[c] = { totalAcc: 0, count: 0, strugglingCount: 0 };
+  }
+
+  const studentSummaries: StudentHeatmapSummary[] = [];
+
+  for (const student of students) {
+    let sTotalAcc = 0;
+    let sCount = 0;
+    let sStruggling = 0;
+
+    for (const cId of conceptList) {
+      const mastery = student.conceptMastery?.[cId];
+      const acc = mastery ? mastery.accuracy : 0.5;
+      const conf = mastery ? mastery.confidence : 0.5;
+
+      let colorTier: 'green' | 'yellow' | 'red';
+      if (acc >= 0.80) {
+        colorTier = 'green';
+      } else if (acc >= 0.60) {
+        colorTier = 'yellow';
+      } else {
+        colorTier = 'red';
+      }
+
+      cells.push({
+        studentUid: student.uid,
+        studentName: student.uid.replace('std_', 'Student ').replace('student_', 'Student '),
+        conceptId: cId,
+        accuracy: acc,
+        confidence: conf,
+        colorTier,
+      });
+
+      if (conceptAcc[cId]) {
+        conceptAcc[cId].totalAcc += acc;
+        conceptAcc[cId].count += 1;
+        if (colorTier === 'red') {
+          conceptAcc[cId].strugglingCount += 1;
+        }
+      }
+
+      sTotalAcc += acc;
+      sCount += 1;
+      if (colorTier === 'red') {
+        sStruggling += 1;
+      }
+    }
+
+    const sAvg = sCount > 0 ? Math.round((sTotalAcc / sCount) * 100) / 100 : 0.5;
+    let sTier: 'green' | 'yellow' | 'red' = 'yellow';
+    if (sAvg >= 0.80) sTier = 'green';
+    else if (sAvg < 0.60) sTier = 'red';
+
+    studentSummaries.push({
+      studentUid: student.uid,
+      studentName: student.uid.replace('std_', 'Student ').replace('student_', 'Student '),
+      averageAccuracy: sAvg,
+      colorTier: sTier,
+      strugglingConceptsCount: sStruggling,
+    });
+  }
+
+  const conceptSummaries: ConceptHeatmapSummary[] = conceptList.map((cId) => {
+    const data = conceptAcc[cId] || { totalAcc: 0, count: 0, strugglingCount: 0 };
+    const avg = data.count > 0 ? Math.round((data.totalAcc / data.count) * 100) / 100 : 0.5;
+    let tier: 'green' | 'yellow' | 'red' = 'yellow';
+    if (avg >= 0.80) tier = 'green';
+    else if (avg < 0.60) tier = 'red';
+
+    const node = getConcept(cId);
+    return {
+      conceptId: cId,
+      conceptTitleEn: node?.nameEn || cId,
+      conceptTitleAr: node?.nameAr || cId,
+      averageAccuracy: avg,
+      colorTier: tier,
+      strugglingCount: data.strugglingCount,
+    };
+  });
+
+  return {
+    concepts: conceptList,
+    cells,
+    conceptSummaries,
+    studentSummaries,
+  };
+}
+
+/**
+ * Evaluates curriculum pacing based on struggle rates, prerequisite gaps, and aggregate class accuracy.
+ */
+export function evaluateCurriculumPacing(
+  classId: string,
+  clusters: ConceptStruggleCluster[],
+  summaries: ConceptHeatmapSummary[]
+): CurriculumPacingRecommendation {
+  const criticalStruggle = clusters.some(
+    (c) => c.struggleRatePercentage >= 35 && c.diagnosedPrerequisiteGap
+  );
+
+  if (criticalStruggle) {
+    return {
+      classId,
+      pacingDecision: 'decelerate_review',
+      pacingRationaleEn:
+        'Critical prerequisite gap detected in over 35% of the class. Decelerate planned curriculum to review foundational pointers.',
+      pacingRationaleAr:
+        'تم اكتشاف فجوة حرجة في المتطلبات السابقة لدى أكثر من 35% من الطلاب. يوصى بتهدئة وتيرة المنهج لمراجعة المتطلبات السابقة.',
+      recommendedReviewHours: 2,
+      nextPlannedModule:
+        'Foundational Pointer Remediation & Step-by-Step Worked Examples',
+    };
+  }
+
+  const classAverage =
+    summaries.length > 0
+      ? summaries.reduce((acc, c) => acc + c.averageAccuracy, 0) / summaries.length
+      : 0.75;
+
+  if (classAverage >= 0.85) {
+    return {
+      classId,
+      pacingDecision: 'accelerate_enrich',
+      pacingRationaleEn:
+        'Cohort demonstrates comprehensive mastery. Accelerate to advanced distributed systems modules.',
+      pacingRationaleAr:
+        'يُظهر الطلاب إتقاناً شاملاً. يمكن تسريع وتيرة المنهج والانتقال لمفاهيم متقدمة.',
+      recommendedReviewHours: 0,
+      nextPlannedModule: 'Advanced Distributed Data Structures',
+    };
+  }
+
+  return {
+    classId,
+    pacingDecision: 'maintain_pace',
+    pacingRationaleEn:
+      'Class pacing is steady. Maintain current syllabus schedule.',
+    pacingRationaleAr:
+      'وتيرة الفصل متوازنة ومستقرة. استمر في الجدول الدراسي المعتاد.',
+    recommendedReviewHours: 0,
+    nextPlannedModule: 'Standard Syllabus Progression',
+  };
+}
+
+/**
+ * Dispatches an automated remediation alert for a high-struggle concept into the teacher alert feed.
+ */
+export function dispatchTeacherAlert(
+  teacherUid: string,
+  cluster: ConceptStruggleCluster
+): PrerequisiteAlertMessage {
+  const prereqId = cluster.diagnosedPrerequisiteGap?.prerequisiteId || cluster.conceptId;
+  const prereqTitle = cluster.diagnosedPrerequisiteGap?.prerequisiteTitleEn || prereqId;
+  const prereqTitleAr = cluster.diagnosedPrerequisiteGap?.prerequisiteTitleAr || prereqId;
+
+  return {
+    alertId: `alert_prereq_${Date.now()}_${cluster.conceptId}`,
+    severity: cluster.struggleRatePercentage >= 50 ? 'urgent' : 'warning',
+    targetConceptId: cluster.conceptId,
+    rootPrerequisiteId: prereqId,
+    affectedStudentCount: cluster.strugglingStudentCount,
+    recipientTeacherUid: teacherUid,
+    dispatchedTimestamp: Date.now(),
+    messageEn: `URGENT ALERT: ${cluster.strugglingStudentCount} students (${cluster.struggleRatePercentage}%) are failing ${cluster.conceptTitleEn} due to an unmastered prerequisite: "${prereqTitle}".`,
+    messageAr: `تنبيه عاجل: ${cluster.strugglingStudentCount} طالباً (${cluster.struggleRatePercentage}%) يعانون من صعوبة في ${cluster.conceptTitleAr} بسبب عدم إتقان المتطلب الأساسي: "${prereqTitleAr}".`,
+    suggestedClassAction: `Allocate 20 minutes in next lecture for worked-example review of ${prereqTitle} before continuing ${cluster.conceptTitleEn}.`,
+  };
+}
+
+/**
  * Compiles a full, structured Teacher Dashboard view dataset.
  */
 export function compileTeacherDashboard(
@@ -339,6 +540,9 @@ export function compileTeacherDashboard(
   const classAverageMastery =
     masteryCount > 0 ? Math.round((totalMasterySum / masteryCount) * 100) : 75;
 
+  const heatmap = generateCohortMasteryHeatmap(students);
+  const curriculumPacing = evaluateCurriculumPacing(classId, struggleClusters, heatmap.conceptSummaries);
+
   return {
     classId,
     className,
@@ -349,5 +553,8 @@ export function compileTeacherDashboard(
     interventionEfficacy,
     differentiatedGroups,
     actionRecommendations,
+    curriculumPacing,
+    heatmap,
   };
 }
+
