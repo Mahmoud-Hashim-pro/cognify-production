@@ -4024,6 +4024,14 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                           <span className="font-bold text-slate-300">{selectedUserForModal.lastLoginDevice}</span>
                         </div>
                       )}
+                      {selectedUserForModal.lastIp && (
+                        <div>
+                          <span className="text-slate-400">Last IP:</span>{' '}
+                          <span className="font-mono text-cyan-300 font-bold text-[11px] bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                            {selectedUserForModal.lastIp}
+                          </span>
+                        </div>
+                      )}
                       {selectedUserForModal.passwordResetRequestedAt && (
                         <div>
                           <span className="text-slate-400">Last Pass Reset:</span>{' '}

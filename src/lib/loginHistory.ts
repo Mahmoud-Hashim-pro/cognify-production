@@ -1,4 +1,4 @@
-﻿import { doc, setDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from './firebase';
 import { getVisitorGeo, formatCountryName, getDeviceSummary } from './geo';
 import { LoginHistoryRecord } from '../types';
@@ -50,6 +50,9 @@ export async function recordUserLoginSession(uid: string): Promise<void> {
     }
     if (geo.region) {
       profileUpdate.region = geo.region;
+    }
+    if (geo.ip) {
+      profileUpdate.lastIp = geo.ip;
     }
 
     await setDoc(doc(db, 'users', uid), profileUpdate, { merge: true });

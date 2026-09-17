@@ -145,6 +145,7 @@ export interface UserProfile {
   lastLoginCountry?: string;
   lastLoginCity?: string | null;
   lastLoginDevice?: string;
+  lastIp?: string | null;
   /**
    * Phase 2: Cognify Memory (Transparent Student Memory).
    * Stored under users/{userId}/memory/config in Firestore.

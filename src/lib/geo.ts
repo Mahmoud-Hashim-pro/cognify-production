@@ -147,6 +147,7 @@ export async function getVisitorGeo(): Promise<VisitorGeo> {
           countryCode: data.country.toUpperCase(),
           region: null,
           city: null,
+          ip: data.ip || null,
         };
         if (typeof window !== 'undefined') {
           window.sessionStorage.setItem(CACHE_KEY, JSON.stringify(result));

@@ -33,6 +33,22 @@ export default async function handler(req: any, res: any) {
     }
   }
 
+  const forwarded = req.headers?.['x-forwarded-for'];
+  let clientIp: string | null = null;
+  if (typeof forwarded === 'string') {
+    clientIp = forwarded.split(',')[0].trim();
+  } else if (Array.isArray(forwarded) && forwarded.length > 0) {
+    clientIp = forwarded[0].trim();
+  } else if (typeof req.headers?.['x-real-ip'] === 'string') {
+    clientIp = req.headers['x-real-ip'].trim();
+  } else if (req.socket?.remoteAddress) {
+    clientIp = req.socket.remoteAddress.trim();
+  }
+
+  if (clientIp && clientIp.startsWith('::ffff:')) {
+    clientIp = clientIp.replace('::ffff:', '');
+  }
+
   res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({ countryCode: countryCode || 'Unknown', region, city });
+  res.status(200).json({ countryCode: countryCode || 'Unknown', region, city, ip: clientIp });
 }
