@@ -80,10 +80,14 @@ export default function AccessibilityPassportModal({
 
   const handleSave = async () => {
     setIsSaving(true);
+    const resolvedMode: AccessibilityMode =
+      passport.primaryMode ||
+      (passport.primaryCategory !== 'Multiple' ? passport.primaryCategory : undefined) ||
+      profile.accessibilityMode;
     const updatedProfile: UserProfile = {
       ...profile,
       accessibilityPassport: passport,
-      accessibilityMode: passport.primaryMode || (passport.primaryCategory !== 'Multiple' ? passport.primaryCategory : undefined) || profile.accessibilityMode,
+      accessibilityMode: resolvedMode,
     };
 
     if (setProfile) setProfile(updatedProfile);
@@ -94,7 +98,7 @@ export default function AccessibilityPassportModal({
           doc(db, `users/${profile.uid}`),
           cleanDataForFirestore({
             accessibilityPassport: passport,
-            accessibilityMode: passport.primaryCategory,
+            accessibilityMode: resolvedMode,
           }),
           { merge: true }
         );
