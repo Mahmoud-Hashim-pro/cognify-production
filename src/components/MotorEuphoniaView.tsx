@@ -25,6 +25,11 @@ import {
   WHATSAPP_QUICK_MESSAGES,
 } from '../lib/contacts';
 import {
+  loadStoredAccessibilityState,
+  setManualPreference,
+  persistAccessibilityState,
+} from '../accessibility';
+import {
   EuphoniaPhraseDef,
   loadEuphoniaPhraseBank,
   getCategoryIcon,
@@ -499,6 +504,11 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
    *  before writing — cannot save a list captured before that wait. */
   const triggersRef = useRef<VocalSoundTriggerConfig[]>([]);
 
+  // Unified Accessibility 2.0 state — a ref, not React state: this only
+  // records manual locks and persists to localStorage, it must never trigger
+  // a re-render of this performance-sensitive, camera-driven component.
+  const a11yStateRef = useRef(loadStoredAccessibilityState(profile.uid || 'anonymous'));
+
   // Settings
   const [headConfig, setHeadConfig] = useState<HeadTrackingConfig>(() => {
     // Order matters: the synced profile wins, then the local cache, then the
@@ -910,6 +920,15 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
     const updated = { ...headConfig, ...newCfg };
     setHeadConfig(updated);
     trackerRef.current?.updateConfig(updated);
+
+    // Record the user's explicit choice as a locked preference in the shared
+    // Accessibility 2.0 state, so the adaptive engine (elsewhere in the app)
+    // never silently overrides a value this student deliberately set.
+    if (newCfg.dwellTimeMs !== undefined) {
+      a11yStateRef.current = setManualPreference(a11yStateRef.current, 'motor.dwellTimeMs', newCfg.dwellTimeMs, true);
+      persistAccessibilityState(a11yStateRef.current);
+    }
+
     // Local first: it is instant, and it keeps the tuning working offline and
     // through a failed network write.
     try {
