@@ -39,7 +39,14 @@ export default function AccessibilityPassportModal({
   const isFr = lang === 'French';
 
   const initialPassport: AccessibilityPassport = profile.accessibilityPassport || {
+    primaryMode: profile.accessibilityMode || 'None',
     primaryCategory: profile.accessibilityMode || 'Multiple',
+    highContrast: false,
+    dyslexiaFont: false,
+    hapticFeedback: true,
+    autoSpeak: true,
+    audioSpeed: 1,
+    allowCameraTriggers: true,
     visualSupport: {
       highContrast: false,
       autoSpeechReadout: true,
@@ -76,7 +83,7 @@ export default function AccessibilityPassportModal({
     const updatedProfile: UserProfile = {
       ...profile,
       accessibilityPassport: passport,
-      accessibilityMode: passport.primaryCategory || profile.accessibilityMode,
+      accessibilityMode: passport.primaryMode || (passport.primaryCategory !== 'Multiple' ? passport.primaryCategory : undefined) || profile.accessibilityMode,
     };
 
     if (setProfile) setProfile(updatedProfile);
