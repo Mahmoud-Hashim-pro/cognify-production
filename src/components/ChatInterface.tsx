@@ -4,7 +4,10 @@ import { Message, UserProfile, Task, PedagogyStyle } from "../types";
 import { generateAdaptiveResponseStream, generateBenchmarkComparison, generateProactiveInsights, generateChatTitle } from "../services/gemini";
 import { geminiService } from "../services/geminiService";
 import { PEDAGOGY_STYLES } from "../lib/adaptiveLearning";
-import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, RotateCcw } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, RotateCcw, Zap, Bookmark, Search, Eye } from "lucide-react";
+import SmartFollowUpChips from "./chat/SmartFollowUpChips";
+import ChatBookmarksDrawer, { BookmarkedInsight } from "./chat/ChatBookmarksDrawer";
+import ChatErgonomicsBar, { FontScale } from "./chat/ChatErgonomicsBar";
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from "motion/react";
 import { doc, setDoc, onSnapshot } from "firebase/firestore";
@@ -174,6 +177,110 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     return 'en-US';
   });
   const [showFrenchTravelAssistant, setShowFrenchTravelAssistant] = useState(false);
+
+  // Dynamic visual ergonomics & accessibility states
+  const [fontScale, setFontScale] = useState<FontScale>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('cognify_chat_font_scale') as FontScale) || 'base';
+    }
+    return 'base';
+  });
+
+  const [isEyeComfort, setIsEyeComfort] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('cognify_chat_eye_comfort') === 'true';
+    }
+    return false;
+  });
+
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+  const [bookmarkedInsights, setBookmarkedInsights] = useState<BookmarkedInsight[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`);
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleChangeFontScale = (scale: FontScale) => {
+    setFontScale(scale);
+    try {
+      localStorage.setItem('cognify_chat_font_scale', scale);
+    } catch {}
+  };
+
+  const handleToggleEyeComfort = () => {
+    setIsEyeComfort((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('cognify_chat_eye_comfort', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const handleToggleBookmark = (msg: Message) => {
+    setBookmarkedInsights((prev) => {
+      const existing = prev.find((b) => b.messageId === msg.id);
+      let updated: BookmarkedInsight[];
+      if (existing) {
+        updated = prev.filter((b) => b.messageId !== msg.id);
+        toast.info(
+          localize(profile.language, 'Removed from saved insights', 'تمت الإزالة من بنك الأفكار المحفوظة')
+        );
+      } else {
+        const newInsight: BookmarkedInsight = {
+          id: `bm-${Date.now()}`,
+          messageId: msg.id,
+          content: msg.content,
+          timestamp: new Date().toISOString(),
+          pedagogyStyle: msg.pedagogyStyle || activePedagogyStyle,
+        };
+        updated = [newInsight, ...prev];
+        toast.success(
+          localize(profile.language, 'Pinned to saved insights 📌', 'تم تثبيت الفكرة في بنك الأفكار 📌')
+        );
+      }
+      try {
+        localStorage.setItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleRemoveBookmark = (bookmarkId: string) => {
+    setBookmarkedInsights((prev) => {
+      const updated = prev.filter((b) => b.id !== bookmarkId);
+      try {
+        localStorage.setItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleJumpToMessage = (messageId: string) => {
+    const el = document.getElementById(`msg-${messageId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2', 'ring-amber-400');
+      setTimeout(() => el.classList.remove('ring-2', 'ring-amber-400'), 2000);
+    }
+  };
+
+  const handleSimplify = (msg: Message) => {
+    const isAr = isArabicLocale(profile.language);
+    const simplifyPrompt = isAr
+      ? `من فضلك اشرح الرد السابق بأسلوب مبسط جداً وبخطوات واضحة بدون أي تعقيد (ELI5) مع تشبيه من الحياة اليومية.`
+      : `Please simplify the previous explanation in very clear, straightforward steps (ELI5) with an intuitive real-world analogy.`;
+    handleSubmit(undefined, simplifyPrompt);
+  };
 
   const { studentState, recordAnswer, recordPedagogyFeedback } = useStudentState(profile?.uid, profile?.level);
   const [activePedagogyStyle, setActivePedagogyStyle] = useState<PedagogyStyle>(
@@ -953,6 +1060,16 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     }
     
     // If the user only attached files with no text, give the model a clear instruction.
+    const isArSubmit = isArabicLocale(profile.language);
+    const strainKeywords = ['مش فاهم', 'مش فاهمه', 'اتلخبطت', 'مش واضحة', 'مش واضح', 'مش مستوعب', 'lost', 'confused', 'dont understand', "don't understand", 'explain simpler'];
+    const hasStrain = strainKeywords.some(kw => (finalInput || '').toLowerCase().includes(kw));
+    if (hasStrain) {
+      toast.info(
+        isArSubmit ? 'تم استشعار الحيرة: سأقوم بتبسيط الشرح واستخدام تشبيه ملموس 🌿' : 'Cognitive strain detected: simplifying with a tangible analogy 🌿',
+        isArSubmit ? 'تكييف الشرح' : 'Adaptive Explanation'
+      );
+    }
+
     const submittedMessage = finalInput.trim()
       || (finalAttachments.length
         ? "Please analyze the attached file(s) and describe or extract their key content."
@@ -1464,6 +1581,18 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               <span className="hidden md:inline">{localize(profile.language, 'Workspace', 'مساحة العمل')}</span>
             </button>
 
+            {/* Ergonomics & Comfort Controls */}
+            <ChatErgonomicsBar
+              fontScale={fontScale}
+              onChangeFontScale={handleChangeFontScale}
+              isEyeComfort={isEyeComfort}
+              onToggleEyeComfort={handleToggleEyeComfort}
+              onOpenSearch={() => setIsSearchOpen(prev => !prev)}
+              bookmarksCount={bookmarkedInsights.length}
+              onOpenBookmarks={() => setIsBookmarksOpen(true)}
+              language={profile.language}
+            />
+
             {/* Context & Citations Toggle Button */}
             <button 
               onClick={() => setShowContext(!showContext)}
@@ -1569,7 +1698,48 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           )}
 
           {/* Messages */}
-          <div className="flex flex-1 min-h-0 overflow-hidden relative">
+          <div className={`flex flex-col flex-1 min-h-0 overflow-hidden relative transition-colors duration-300 ${
+            isEyeComfort ? 'bg-[#0E111D] ring-1 ring-amber-500/10' : ''
+          }`}>
+            {/* In-Session Search Bar */}
+            <AnimatePresence>
+              {isSearchOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="px-4 py-2.5 bg-[#12162B] border-b border-slate-800 flex items-center justify-between gap-3 shadow-md z-20"
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <Search className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={localize(profile.language, 'Search within this conversation...', 'بحث داخل هذه المحادثة...')}
+                      className="bg-transparent text-white text-xs sm:text-sm w-full outline-none placeholder:text-slate-500 font-medium"
+                      autoFocus
+                    />
+                  </div>
+                  {searchQuery.trim() && (
+                    <span className="text-[11px] font-mono text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 px-2 py-0.5 rounded-lg shrink-0">
+                      {messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase())).length}{' '}
+                      {localize(profile.language, 'results', 'نتيجة')}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setSearchQuery('');
+                    }}
+                    className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
         {/* Screen-reader announcer for blind users: speaks the "thinking" status
             and the FINAL AI reply (not every streamed token, to avoid spam). */}
         <div className="sr-only" role="status" aria-live="assertive" aria-atomic="true">
@@ -1625,10 +1795,13 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             {messages.map((m) => (
               <motion.div
                 key={m.id}
+                id={`msg-${m.id}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98 }}
-                className={`flex flex-col w-full group ${
+                className={`flex flex-col w-full group transition-all ${
+                  searchQuery.trim() && m.content?.toLowerCase().includes(searchQuery.toLowerCase()) ? 'ring-2 ring-cyan-500/50 rounded-3xl p-1 bg-cyan-500/5' : ''
+                } ${
                   isArabicLocale(profile.language)
                     ? (m.role === 'user' ? 'items-start text-start' : 'items-end text-end')
                     : (m.role === 'user' ? 'items-end text-end' : 'items-start text-start')
@@ -1819,6 +1992,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                       )}
                       <MarkdownMessage 
                         content={m.content} 
+                        fontScale={fontScale}
+                        language={profile.language}
                         onPrerequisiteClick={(prereqId) => {
                           const isAr = isArabicLocale(profile.language);
                           const isFr = profile.language === 'French';
@@ -1944,11 +2119,37 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                               () => {},
                             );
                           }}
-                          className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 text-slate-400 bg-[#0A0C14] border-slate-800 hover:text-cyan-400 hover:border-cyan-500/30"
+                          className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 text-slate-400 bg-[#0A0C14] border-slate-800 hover:text-cyan-400 hover:border-cyan-500/30"
                           title={localize(profile.language, "Copy answer", "نسخ الإجابة")}
                         >
                           <Copy className="w-3.5 h-3.5" />
                           <span>{localize(profile.language, 'Copy', 'نسخ')}</span>
+                        </button>
+
+                        {/* 1-Click Transform: Simplify (ELI5) */}
+                        <button
+                          type="button"
+                          onClick={() => handleSimplify(m)}
+                          className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 text-slate-400 bg-[#0A0C14] border-slate-800 hover:text-purple-300 hover:border-purple-500/30 active:scale-95 cursor-pointer"
+                          title={localize(profile.language, 'Explain this in simpler terms (ELI5)', 'شرح مبسط بدون أي تعقيد')}
+                        >
+                          <Zap className="w-3.5 h-3.5 text-purple-400" />
+                          <span>{localize(profile.language, 'Simplify', 'بسّط')}</span>
+                        </button>
+
+                        {/* 1-Click Bookmark / Save key insight */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleBookmark(m)}
+                          className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
+                            bookmarkedInsights.some((b) => b.messageId === m.id)
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-500/20'
+                              : 'text-slate-400 bg-[#0A0C14] border-slate-800 hover:text-amber-300 hover:border-amber-500/30'
+                          }`}
+                          title={localize(profile.language, 'Pin to saved insights', 'تثبيت في بنك الأفكار')}
+                        >
+                          <Bookmark className={`w-3.5 h-3.5 ${bookmarkedInsights.some((b) => b.messageId === m.id) ? 'fill-amber-400 text-amber-400' : 'text-slate-400'}`} />
+                          <span>{localize(profile.language, 'Pin', 'تثبيت')}</span>
                         </button>
                       </div>
 
@@ -2102,6 +2303,20 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               </motion.div>
             ))}
           </AnimatePresence>
+
+          {/* Smart Follow-Up Action Chips under the latest assistant response */}
+          {!isLoading && (() => {
+            const lastAssistantMsg = [...messages].reverse().find(m => m.role !== 'user' && m.id !== 'welcome');
+            if (!lastAssistantMsg) return null;
+            return (
+              <SmartFollowUpChips
+                lastMessageContent={lastAssistantMsg.content}
+                language={profile.language}
+                onSelectChip={(prompt) => handleSubmit(undefined, prompt)}
+                isLoading={isLoading}
+              />
+            );
+          })()}
 
           {/* Starter prompts — shown on a fresh chat to beat the blank-page problem. */}
           {!isLoading && messages.filter((m) => m.role === 'user').length === 0 && (() => {
@@ -2807,6 +3022,16 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       </div>
     </div>
     {/* End 3-Column AI Study Center Layout */}
+
+      {/* Bookmarks & Saved Insights Drawer */}
+      <ChatBookmarksDrawer
+        isOpen={isBookmarksOpen}
+        onClose={() => setIsBookmarksOpen(false)}
+        bookmarks={bookmarkedInsights}
+        onRemoveBookmark={handleRemoveBookmark}
+        onJumpToMessage={handleJumpToMessage}
+        language={profile.language}
+      />
 
       {/* French Travel & Voice Assistant Modal */}
       {showFrenchTravelAssistant && (

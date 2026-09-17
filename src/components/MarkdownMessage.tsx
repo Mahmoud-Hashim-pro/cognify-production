@@ -117,11 +117,15 @@ export default function MarkdownMessage({
   language = 'English',
   uid,
   onPrerequisiteClick,
+  fontScale = 'base',
+  className = '',
 }: {
   content: string;
   language?: string;
   uid?: string;
   onPrerequisiteClick?: (conceptId: string, conceptName: string) => void;
+  fontScale?: 'sm' | 'base' | 'lg' | 'xl';
+  className?: string;
 }) {
   const cleanContent = content
     .split('\n')
@@ -155,8 +159,15 @@ export default function MarkdownMessage({
     parts.push({ type: 'text', content: cleanContent.slice(lastIdx) });
   }
 
+  const fontScaleClasses = {
+    sm: 'text-[13px] leading-normal',
+    base: 'text-[15px] leading-relaxed',
+    lg: 'text-[17px] leading-relaxed',
+    xl: 'text-[19px] leading-loose',
+  }[fontScale] || 'text-[15px] leading-relaxed';
+
   return (
-    <div className="adaptive-response text-slate-100">
+    <div className={`adaptive-response text-slate-100 ${fontScaleClasses} ${className}`}>
       {parts.map((part, i) => {
         if (part.type === 'micro-check' && part.data) {
           return (
