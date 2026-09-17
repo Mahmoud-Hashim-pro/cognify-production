@@ -168,7 +168,8 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
   const [isCleaningCache, setIsCleaningCache] = useState(false);
   const [dbSearchTerm, setDbSearchTerm] = useState('');
   const [inspectedDoc, setInspectedDoc] = useState<any | null>(null);
-  const [inspectedDocTab, setInspectedDocTab] = useState<'intelligence' | 'json'>('intelligence');
+  const [inspectedDocTab, setInspectedDocTab] = useState<'chats' | 'json'>('chats');
+  const [activeChatThreadId, setActiveChatThreadId] = useState<string | null>(null);
 
   // Close Cluster Tier dropdown on click outside or Escape key
   useEffect(() => {
@@ -1053,26 +1054,15 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     ).slice(0, 30);
   }, [users, dbSearchTerm]);
 
-  // Sensitive data scrubber for live Document Inspector (enforces Zero-Knowledge chat privacy)
+  // Sensitive data scrubber for live Document Inspector
   const sanitizeDocumentForInspector = (doc: any): any => {
     if (!doc || typeof doc !== 'object') return doc;
     const sanitized: any = Array.isArray(doc) ? [...doc] : { ...doc };
-
-    // Zero-Knowledge Privacy: student chat history and messages are strictly scrubbed
-    delete sanitized.chatHistory;
-    if (Array.isArray(sanitized.chatThreads)) {
-      sanitized.chatThreads = sanitized.chatThreads.map((t: any) => ({
-        id: t.id,
-        title: t.title,
-        updatedAt: t.updatedAt,
-      }));
-    }
-
-    const sensitiveKeys = ['apikey', 'token', 'idtoken', 'refreshtoken', 'secret', 'password', 'privatekey', 'authkey', 'messages', 'content'];
+    const sensitiveKeys = ['apikey', 'token', 'idtoken', 'refreshtoken', 'secret', 'password', 'privatekey', 'authkey'];
     for (const key of Object.keys(sanitized)) {
       const lowerKey = key.toLowerCase();
       if (sensitiveKeys.some(sk => lowerKey.includes(sk))) {
-        sanitized[key] = '[PROTECTED_PRIVATE_DATA]';
+        sanitized[key] = '[PROTECTED_SENSITIVE_DATA]';
       } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
         sanitized[key] = sanitizeDocumentForInspector(sanitized[key]);
       }
@@ -1090,7 +1080,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     a.download = `cognify-user-${userDoc.uid || 'record'}-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
-    toast.success(`Exported student profile & academic record (${userDoc.email || userDoc.uid}) to JSON.`, 'JSON Downloaded');
+    toast.success(`Exported user record & chat data (${userDoc.email || userDoc.uid}) to JSON.`, 'JSON Downloaded');
   };
 
   return (
@@ -3066,19 +3056,19 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   </div>
                 </section>
 
-                {/* 10. Student Intelligence & Document Inspector */}
+                {/* 10. Firestore Document & Chat Inspector */}
                 <section className="backdrop-blur-xl bg-slate-900/60 border border-slate-800/80 shadow-2xl rounded-3xl p-6 md:p-8 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-2xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
-                        <Sparkles className="w-5 h-5" />
+                        <Search className="w-5 h-5" />
                       </div>
                       <div>
                         <h4 className="text-base font-black uppercase tracking-tight text-white flex items-center gap-2">
-                          Student Intelligence &amp; Academic Inspector
+                          Firestore Document &amp; Chat Inspector
                         </h4>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          Inspect student mastery analytics, learning velocity, pedagogical strategies, and session activity with Zero-Knowledge chat privacy.
+                          Preview live document JSON structures, conversation threads, and account records across active users.
                         </p>
                       </div>
                     </div>
@@ -3112,13 +3102,14 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                       </div>
                       {inspectedUsersList.map((u) => {
                         const isSelected = inspectedDoc?.uid === u.uid;
-                        const sessionsCount = u.chatThreads?.length || 0;
+                        const chatsCount = (u.chatThreads?.length || 0) + (u.chatHistory?.length ? 1 : 0);
                         return (
                           <button
                             key={u.uid}
                             type="button"
                             onClick={() => {
                               setInspectedDoc(u);
+                              setActiveChatThreadId(u.chatThreads?.[0]?.id || null);
                             }}
                             className={`w-full text-left p-3 rounded-xl text-xs transition-all flex items-center justify-between gap-2 cursor-pointer ${
                               isSelected
@@ -3137,10 +3128,10 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800 uppercase font-bold">
                                 {u.role || 'Student'}
                               </span>
-                              {sessionsCount > 0 && (
+                              {chatsCount > 0 && (
                                 <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded-full">
-                                  <Sparkles className="w-2.5 h-2.5" />
-                                  {sessionsCount} {sessionsCount === 1 ? 'session' : 'sessions'}
+                                  <MessageSquare className="w-2.5 h-2.5" />
+                                  {chatsCount} {chatsCount === 1 ? 'chat' : 'chats'}
                                 </span>
                               )}
                             </div>
@@ -3174,15 +3165,15 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                               <div className="flex items-center p-0.5 bg-slate-900 border border-slate-800 rounded-xl text-xs">
                                 <button
                                   type="button"
-                                  onClick={() => setInspectedDocTab('intelligence')}
+                                  onClick={() => setInspectedDocTab('chats')}
                                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
-                                    inspectedDocTab === 'intelligence'
+                                    inspectedDocTab === 'chats'
                                       ? 'bg-cyan-500 text-slate-950 shadow-sm'
                                       : 'text-slate-400 hover:text-white'
                                   }`}
                                 >
-                                  <Sparkles className="w-3 h-3 text-cyan-400" />
-                                  Intelligence ({inspectedDoc.chatThreads?.length || 0})
+                                  <MessageSquare className="w-3 h-3" />
+                                  Chats ({(inspectedDoc.chatThreads?.length || 0) + (inspectedDoc.chatHistory?.length ? 1 : 0)})
                                 </button>
                                 <button
                                   type="button"
@@ -3219,104 +3210,151 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                             </div>
                           </div>
 
-                          {/* Tab Content 1: Student Intelligence & Activity View */}
-                          {inspectedDocTab === 'intelligence' && (
-                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-4">
-                              {/* Zero-Knowledge Privacy Architecture Shield */}
-                              <div className="p-3.5 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-indigo-950/30 border border-cyan-500/30 rounded-2xl flex items-start gap-3">
-                                <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0 mt-0.5">
-                                  <Shield className="w-4 h-4" />
-                                </div>
-                                <div className="text-xs space-y-0.5">
-                                  <div className="font-bold text-cyan-200 flex items-center gap-1.5">
-                                    <span>Zero-Knowledge Student Conversation Privacy</span>
-                                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                                      Owner-Only
+                          {/* Tab Content 1: Chats View */}
+                          {inspectedDocTab === 'chats' && (
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-3">
+                              {/* Case A: User has structured chatThreads */}
+                              {inspectedDoc.chatThreads && inspectedDoc.chatThreads.length > 0 ? (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between text-xs text-slate-400">
+                                    <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                                      {inspectedDoc.chatThreads.length} Saved Chat Session{inspectedDoc.chatThreads.length > 1 ? 's' : ''}
                                     </span>
+                                    <span className="text-[11px] font-mono">Click thread to inspect message history</span>
                                   </div>
-                                  <p className="text-slate-400 leading-relaxed text-[11px]">
-                                    Cognify strictly isolates student conversations into private subcollections (<code className="text-cyan-300 font-mono">/threads</code>). Conversation transcripts and message contents are cryptographically unreadable by administrators.
+
+                                  <div className="grid grid-cols-1 gap-2.5">
+                                    {inspectedDoc.chatThreads.map((thread: any, tIdx: number) => {
+                                      const isThreadOpen = activeChatThreadId === thread.id;
+                                      return (
+                                        <div
+                                          key={thread.id || tIdx}
+                                          className={`rounded-2xl border transition-all overflow-hidden ${
+                                            isThreadOpen
+                                              ? 'bg-slate-900/90 border-cyan-500/40'
+                                              : 'bg-slate-900/40 hover:bg-slate-900/70 border-slate-800/80'
+                                          }`}
+                                        >
+                                          <button
+                                            type="button"
+                                            onClick={() => setActiveChatThreadId(isThreadOpen ? null : thread.id)}
+                                            className="w-full p-3.5 text-left flex items-start justify-between gap-3 cursor-pointer"
+                                          >
+                                            <div className="min-w-0 flex-1">
+                                              <div className="font-bold text-white text-xs flex items-center gap-2">
+                                                <MessageSquare className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                                <span className="truncate">{thread.title || `Session #${tIdx + 1}`}</span>
+                                              </div>
+                                              {thread.lastMessageSnippet && (
+                                                <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                                                  &quot;{thread.lastMessageSnippet}&quot;
+                                                </p>
+                                              )}
+                                              <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono mt-2">
+                                                <span>Updated: {thread.updatedAt ? new Date(thread.updatedAt).toLocaleDateString() : 'Recent'}</span>
+                                                {thread.messages && (
+                                                  <span className="text-cyan-400">{thread.messages.length} messages</span>
+                                                )}
+                                              </div>
+                                            </div>
+                                            <div className="p-1 rounded-lg bg-slate-800 text-slate-400">
+                                              {isThreadOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                            </div>
+                                          </button>
+
+                                          {/* Message History Accordion */}
+                                          {isThreadOpen && (
+                                            <div className="p-3 pt-0 border-t border-slate-800/60 mt-1 space-y-2.5">
+                                              {thread.messages && thread.messages.length > 0 ? (
+                                                <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar p-1">
+                                                  {thread.messages.map((msg: any, mIdx: number) => {
+                                                    const isUserMsg = msg.role === 'user';
+                                                    return (
+                                                      <div
+                                                        key={mIdx}
+                                                        className={`p-3 rounded-xl text-xs leading-relaxed ${
+                                                          isUserMsg
+                                                            ? 'bg-slate-950 border border-slate-800 text-slate-200 ml-4'
+                                                            : 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-100 mr-4'
+                                                        }`}
+                                                      >
+                                                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1 font-mono">
+                                                          <span>{isUserMsg ? 'Student User' : 'Cognify AI Mentor'}</span>
+                                                          {msg.timestamp && (
+                                                            <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                                                          )}
+                                                        </div>
+                                                        <div className="whitespace-pre-wrap font-sans">
+                                                          {msg.content || msg.text || '(empty message)'}
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  })}
+                                                </div>
+                                              ) : (
+                                                <div className="p-3 bg-slate-950 rounded-xl text-slate-400 text-xs font-mono">
+                                                  Thread ID: {thread.id} · Messages synced under active conversation context.
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ) : inspectedDoc.chatHistory && inspectedDoc.chatHistory.length > 0 ? (
+                                /* Case B: User has legacy/global chatHistory array */
+                                <div className="space-y-3">
+                                  <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                                    <span>Global Chat History ({inspectedDoc.chatHistory.length} messages)</span>
+                                    <span className="text-cyan-400 font-mono">Active Thread</span>
+                                  </div>
+                                  <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar p-1">
+                                    {inspectedDoc.chatHistory.map((msg: any, mIdx: number) => {
+                                      const isUserMsg = msg.role === 'user';
+                                      return (
+                                        <div
+                                          key={mIdx}
+                                          className={`p-3 rounded-xl text-xs leading-relaxed ${
+                                            isUserMsg
+                                              ? 'bg-slate-950 border border-slate-800 text-slate-200 ml-4'
+                                              : 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-100 mr-4'
+                                          }`}
+                                        >
+                                          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1 font-mono">
+                                            <span>{isUserMsg ? 'Student User' : 'Cognify AI Mentor'}</span>
+                                            {msg.timestamp && (
+                                              <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                                            )}
+                                          </div>
+                                          <div className="whitespace-pre-wrap font-sans">
+                                            {msg.content || msg.text || '(empty message)'}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ) : (
+                                /* Case C: No chats yet */
+                                <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-3 text-slate-500 my-auto">
+                                  <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
+                                    <MessageSquare className="w-6 h-6" />
+                                  </div>
+                                  <div className="font-bold text-white text-xs">No Chat Threads Saved</div>
+                                  <p className="text-[11px] max-w-sm text-slate-400">
+                                    This user has not initiated any AI study mentoring chat sessions yet. You can inspect the complete Firestore document structure in Raw JSON mode.
                                   </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => setInspectedDocTab('json')}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-bold rounded-xl border border-slate-700 transition-colors cursor-pointer"
+                                  >
+                                    <FileJson className="w-3.5 h-3.5" /> View Raw Document JSON
+                                  </button>
                                 </div>
-                              </div>
-
-                              {/* Student Intelligence Metric Cards */}
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                <div className="p-3 bg-slate-950/80 border border-slate-800/80 rounded-2xl">
-                                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Learning Sessions</div>
-                                  <div className="text-lg font-black text-white mt-1">
-                                    {inspectedDoc.chatThreads?.length || 0}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 mt-0.5">Active thread count</div>
-                                </div>
-
-                                <div className="p-3 bg-slate-950/80 border border-slate-800/80 rounded-2xl">
-                                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Mastery Score</div>
-                                  <div className="text-lg font-black text-cyan-400 mt-1">
-                                    {inspectedDoc.questionScore !== undefined ? `${inspectedDoc.questionScore}%` : '85%'}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 mt-0.5">{inspectedDoc.points || 0} academic pts</div>
-                                </div>
-
-                                <div className="p-3 bg-slate-950/80 border border-slate-800/80 rounded-2xl">
-                                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Cognitive Stage</div>
-                                  <div className="text-sm font-black text-indigo-300 mt-1 truncate">
-                                    {inspectedDoc.cognitiveLevel || 'Understand'}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 mt-0.5">{inspectedDoc.preferredPedagogyStyle || 'Socratic'}</div>
-                                </div>
-
-                                <div className="p-3 bg-slate-950/80 border border-slate-800/80 rounded-2xl">
-                                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Accessibility</div>
-                                  <div className="text-sm font-black text-emerald-400 mt-1 truncate">
-                                    {inspectedDoc.accessibilityMode || 'Standard'}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 mt-0.5">{inspectedDoc.disabilityType || 'None'}</div>
-                                </div>
-                              </div>
-
-                              {/* Learning Sessions & Topic Metadata (Zero Content Leaked) */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between text-xs text-slate-400">
-                                  <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500 flex items-center gap-1.5">
-                                    <Sparkles className="w-3 h-3 text-cyan-400" />
-                                    Active Learning Curriculum &amp; Topics
-                                  </span>
-                                  <span className="text-[10px] font-mono text-slate-500">
-                                    Last Active: {inspectedDoc.lastActiveDate ? new Date(inspectedDoc.lastActiveDate).toLocaleDateString() : 'Recent'}
-                                  </span>
-                                </div>
-
-                                {inspectedDoc.chatThreads && inspectedDoc.chatThreads.length > 0 ? (
-                                  <div className="grid grid-cols-1 gap-2">
-                                    {inspectedDoc.chatThreads.map((thread: any, tIdx: number) => (
-                                      <div
-                                        key={thread.id || tIdx}
-                                        className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-2xl flex items-center justify-between gap-3"
-                                      >
-                                        <div className="min-w-0 flex-1">
-                                          <div className="font-bold text-white text-xs flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-cyan-400" />
-                                            <span className="truncate">{thread.title || `Learning Session #${tIdx + 1}`}</span>
-                                          </div>
-                                          <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono mt-1">
-                                            <span>Updated: {thread.updatedAt ? new Date(thread.updatedAt).toLocaleDateString() : 'Recent'}</span>
-                                            <span>Session ID: {thread.id?.slice(0, 12)}…</span>
-                                          </div>
-                                        </div>
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 shrink-0">
-                                          <Shield className="w-3 h-3 text-cyan-400" />
-                                          <span>Private Student Session</span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div className="p-6 text-center text-xs text-slate-500 bg-slate-950/40 rounded-2xl border border-slate-800/60">
-                                    No active learning sessions initiated yet.
-                                  </div>
-                                )}
-                              </div>
+                              )}
                             </div>
                           )}
 
@@ -3817,7 +3855,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
             <div className="flex border-b border-slate-800 bg-slate-900/90 px-6 gap-2">
               {[
                 { id: 'profile', label: 'Overview & Details', icon: UserIcon },
-                { id: 'chats', label: `Intelligence (${selectedUserForModal.chatThreads?.length || 0})`, icon: Sparkles },
+                { id: 'chats', label: `Chats (${selectedUserForModal.chatThreads?.length || 0})`, icon: MessageSquare },
                 { id: 'tasks', label: `Tasks (${selectedUserForModal.tasks?.length || 0})`, icon: ListTodo },
                 { id: 'raw', label: 'Raw JSON', icon: FileJson },
               ].map(({ id, label, icon: Icon }) => (
@@ -3915,6 +3953,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                         )}
                       </div>
                       <div><span className="text-slate-400">Language:</span> <span className="font-bold text-white">{selectedUserForModal.language || 'English'}</span></div>
+                      <div><span className="text-slate-400">Country:</span> <span className="font-bold text-white">{selectedUserForModal.country && selectedUserForModal.country !== 'Unknown' ? selectedUserForModal.country : 'N/A'}</span></div>
                       <div><span className="text-slate-400">Last Active:</span> <span className="font-bold text-white">{formatDate(newestActiveIso(selectedUserForModal))}</span></div>
                       {selectedUserForModal.passwordResetRequestedAt && (
                         <div>
@@ -4009,47 +4048,24 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               })()}
 
               {modalTab === 'chats' && (
-                <div className="space-y-4">
-                  <div className="p-3.5 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-indigo-950/30 border border-cyan-500/30 rounded-2xl flex items-start gap-3">
-                    <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0 mt-0.5">
-                      <Shield className="w-4 h-4" />
-                    </div>
-                    <div className="text-xs space-y-0.5">
-                      <div className="font-bold text-cyan-200 flex items-center gap-1.5">
-                        <span>Zero-Knowledge Student Privacy</span>
-                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                          Owner-Only
-                        </span>
-                      </div>
-                      <p className="text-slate-400 leading-relaxed text-[11px]">
-                        Student conversations are end-to-end private to the student. Administrative oversight tracks session frequency, topics, and academic progress without exposing message content.
-                      </p>
-                    </div>
-                  </div>
-
-                  <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Learning Sessions &amp; Topics</h4>
+                <div className="space-y-3">
+                  <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Saved Chat Sessions</h4>
                   {selectedUserForModal.chatThreads && selectedUserForModal.chatThreads.length > 0 ? (
                     <div className="space-y-2">
                       {selectedUserForModal.chatThreads.map((thread) => (
-                        <div key={thread.id} className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 text-xs">
-                              <div className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
-                              <span className="font-bold text-white truncate">{thread.title || 'Untitled Learning Session'}</span>
-                            </div>
-                            <div className="text-[10px] text-slate-500 font-mono mt-1">
-                              Last active: {formatDate(thread.updatedAt)}
-                            </div>
+                        <div key={thread.id} className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-white">{thread.title || 'Untitled Chat'}</span>
+                            <span className="text-[10px] text-slate-400">{formatDate(thread.updatedAt)}</span>
                           </div>
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 shrink-0">
-                            <Shield className="w-3 h-3 text-cyan-400" />
-                            <span>Private Session</span>
-                          </div>
+                          {thread.lastMessageSnippet && (
+                            <p className="text-xs text-slate-400 line-clamp-2">{thread.lastMessageSnippet}</p>
+                          )}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="p-8 text-center text-slate-500 text-xs">No saved learning sessions for this user.</div>
+                    <div className="p-8 text-center text-slate-500 text-xs">No saved chat sessions for this user.</div>
                   )}
                 </div>
               )}
