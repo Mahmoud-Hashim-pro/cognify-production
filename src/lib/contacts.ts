@@ -2,6 +2,9 @@
  * Mobile Contacts & WhatsApp Assistive Service for Quadriplegia / Motor Accessibility.
  */
 
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db, cleanDataForFirestore } from './firebase';
+
 export interface EmergencyContact {
   id: string;
   nameEn: string;
@@ -84,6 +87,56 @@ export function saveContacts(contacts: EmergencyContact[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
   } catch {
     /* ignore */
+  }
+}
+
+/**
+ * Cloud backup for emergency contacts, so a student doesn't lose their
+ * caregiver/doctor numbers if they switch device or clear browser data.
+ * localStorage stays the source of truth for instant reads (SOS must never
+ * wait on a network call); Firestore is a best-effort backup/restore layer.
+ */
+
+/** Push the current contact list to Firestore under the user's own profile. */
+export async function syncContactsToCloud(uid: string, contacts: EmergencyContact[]): Promise<void> {
+  if (!uid) return;
+  try {
+    await setDoc(
+      doc(db, `users/${uid}`),
+      cleanDataForFirestore({ emergencyContacts: contacts }),
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn('Failed to sync emergency contacts to Firestore:', err);
+  }
+}
+
+/**
+ * Pull contacts from Firestore and merge them into the local cache — called
+ * once when a screen that needs contacts mounts. If the cloud copy has real
+ * (non-empty) numbers, and the local copy doesn't, prefer the cloud numbers.
+ */
+export async function restoreContactsFromCloud(uid: string): Promise<EmergencyContact[]> {
+  const local = loadContacts();
+  if (!uid) return local;
+  try {
+    const snap = await getDoc(doc(db, `users/${uid}`));
+    const cloud = snap.exists() ? (snap.data()?.emergencyContacts as EmergencyContact[] | undefined) : undefined;
+    if (!Array.isArray(cloud) || cloud.length === 0) return local;
+
+    const merged = local.map((localContact) => {
+      const cloudMatch = cloud.find((c) => c.id === localContact.id);
+      // Local wins if it already has a real number set; otherwise take the cloud one.
+      if (cloudMatch && !isValidContactPhone(localContact.phone) && isValidContactPhone(cloudMatch.phone)) {
+        return { ...localContact, phone: cloudMatch.phone };
+      }
+      return localContact;
+    });
+    saveContacts(merged);
+    return merged;
+  } catch (err) {
+    console.warn('Failed to restore emergency contacts from Firestore:', err);
+    return local;
   }
 }
 
