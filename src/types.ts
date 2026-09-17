@@ -2,6 +2,7 @@ export type CognitiveLevel = 'Basic' | 'Intermediate' | 'Advanced';
 export type UserRole = 'Student' | 'Professional';
 export type EducationLevel = 'Primary' | 'Secondary' | 'University' | 'Professional';
 export type Field = 'Medicine' | 'Engineering' | 'Business' | 'General' | 'Other';
+import type { StudentState } from './types/studentState';
 export type AccessibilityMode = 'None' | 'Speech' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Motor-Euphonia' | 'Neurodiversity';
 export type LanguagePreference = 'English' | 'Arabic' | 'Egyptian Ammiya' | 'French' | 'Spanish' | 'German' | 'Italian' | 'Portuguese' | 'Russian' | 'Chinese' | 'Japanese';
 export type AccountPath = 'Graduation Project' | 'Special Needs' | 'Normal';
@@ -139,6 +140,10 @@ export interface UserProfile {
   lastActiveDate?: string;
   /** ISO 3166-1 alpha-2 country code, stamped from edge geo header or fallback. */
   country?: string;
+  /** Canonical learning/cognitive state snapshot, used by institution & parent dashboards. */
+  studentState?: StudentState;
+  /** UID of the student this parent/guardian account is linked to. */
+  linkedChildUid?: string;
   city?: string | null;
   region?: string | null;
   lastLoginAt?: string;
@@ -230,10 +235,15 @@ export interface PECSCard {
   id: string;
   labelEn: string;
   labelAr: string;
-  category: 'needs' | 'emotions' | 'food' | 'activities' | 'places';
-  iconName: string;
-  audioPhraseAr: string;
-  audioPhraseEn: string;
+  labelFr?: string;
+  category: 'needs' | 'emotions' | 'food' | 'activities' | 'places' | 'routine' | 'feelings' | 'play' | 'medical';
+  iconName?: string;
+  icon?: string;
+  audioPhraseAr?: string;
+  audioPhraseEn?: string;
+  phraseAr?: string;
+  phraseEn?: string;
+  phraseFr?: string;
   color: string;
 }
 
@@ -248,6 +258,8 @@ export interface SensoryEmotionLog {
 
 export interface AccessibilityPassport {
   primaryMode: AccessibilityMode;
+  /** Display alias for primaryMode, used by CaregiverHub's summary card. */
+  primaryCategory?: AccessibilityMode | 'Multiple';
   highContrast: boolean;
   dyslexiaFont: boolean;
   hapticFeedback: boolean;
@@ -256,6 +268,26 @@ export interface AccessibilityPassport {
   emergencyPhone?: string;
   emergencyName?: string;
   allowCameraTriggers: boolean;
+  visualSupport?: {
+    highContrast?: boolean;
+    autoSpeechReadout?: boolean;
+    hapticAssistance?: boolean;
+  };
+  hearingSupport?: {
+    visualAcousticRadar?: boolean;
+    reverseSignToSpeech?: boolean;
+    flashingAlerts?: boolean;
+  };
+  motorSupport?: {
+    trackingMode?: string;
+    dwellDurationMs?: number;
+    emergencySosEnabled?: boolean;
+  };
+  neurodiversitySupport?: {
+    dyslexiaFont?: boolean;
+    readingRuler?: boolean;
+    sensoryRegulation?: boolean;
+  };
 }
 
 export interface SpatialObjectRecord {
