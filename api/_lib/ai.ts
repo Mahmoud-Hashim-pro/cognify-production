@@ -138,9 +138,11 @@ export interface StudentStatePayload {
     confidence: number;
   }>;
   personalLearningModel?: any;
+  accessibilityState?: any;
 }
 
 export interface Profile {
+  id?: string;
   uid?: string;
   name?: string;
   displayName?: string;
@@ -440,6 +442,37 @@ export function formatPersonalLearningModelBlock(plm?: any, userMessage = ''): s
   return block;
 }
 
+export function formatAccessibilityStateBlock(
+  a11yState?: any
+): string {
+  if (!a11yState) return '';
+
+  const directives: string[] = [];
+
+  // Modality & Spoken audio phrasing
+  if (a11yState.communication?.primaryModality === 'audio' || a11yState.vision?.ttsAutoNarration) {
+    directives.push('- Spoken Audio Cadence: Format response for natural speech delivery. Keep sentences short and clear; eliminate markdown asterisks (**), ASCII diagrams, and raw markdown tables that disrupt TTS listening.');
+  } else if (a11yState.communication?.primaryModality === 'visual' || a11yState.hearing?.captionsEnabled) {
+    directives.push('- Visual Anchors & Scaffolding: Organize explanations with distinct visual bullet points, bold key technical terms, and provide clear step headings.');
+  }
+
+  // Response Length
+  if (a11yState.communication?.responseLength === 'concise') {
+    directives.push('- Brevity: Keep the response extremely concise and strictly focused on the core concept without conversational padding.');
+  } else if (a11yState.communication?.responseLength === 'detailed') {
+    directives.push('- Detailed Depth: Provide comprehensive, multi-layered explanations with thorough foundational reasoning.');
+  }
+
+  // Motor & Interaction Pacing
+  if (a11yState.motor?.largeTargetMode || a11yState.motor?.inputMethod === 'switch_access') {
+    directives.push('- Micro-Steps & Choices: Deconstruct complex steps into distinct single-action milestones with clearly numbered choices.');
+  }
+
+  if (directives.length === 0) return '';
+
+  return `\n## OPERATIONAL ACCESSIBILITY CAPABILITIES (EVIDENCE-BASED ADAPTATION)\n${directives.join('\n')}\n`;
+}
+
 /** The adaptive system prompt. Kept in step with the client's previous inline version. */
 export function buildPersona(
   profile: Profile,
@@ -453,6 +486,7 @@ export function buildPersona(
   const effectiveState = explicitStudentState || profile.studentState;
   const stateBlock = formatStudentStateBlock(effectiveState);
   const plmBlock = formatPersonalLearningModelBlock(effectiveState?.personalLearningModel, userMessage);
+  const a11yBlock = formatAccessibilityStateBlock(effectiveState?.accessibilityState);
   const effectivePedagogy = effectiveState?.activePedagogy || profile.preferredPedagogyStyle;
   const cognitiveBlock = formatCognitiveCalibration(effectivePedagogy, profile.level);
 
@@ -552,7 +586,7 @@ ${identityContext}
 }
 :::
 - Ensure valid JSON inside :::micro-check. Do not include micro-checks for quick small-talk, greeting, or minor follow-ups.
-${a11y === 'Visual' ? '\n## ACCESSIBILITY\n- USER IS BLIND. Describing an image/photo is a practical task, not a creative one:\n  1) Say FIRST if anything looks like a hazard (traffic, stairs, obstacles, fire, spills, sharp/hot objects) — one short sentence, before anything else.\n  2) Read any visible text VERBATIM (labels, signs, medicine dosage, prices, dates) — do not paraphrase or summarize numbers/instructions.\n  3) Then describe what matters practically: what/who is there, roughly where (left/right/near/far, or clock position like "at 2 o\'clock"), not colors or aesthetics unless asked.\n  4) Be concise — a few short sentences, not a paragraph. No flowery/"vivid" language, no markdown, no tables — this is read aloud by TTS. CRITICAL: Never output markdown asterisks (**), bullet points, or section headings (do NOT write "**Hazards:** None" or "**Visible Text:** None" or "**Scene Description:**"). Speak directly in natural conversational prose.' : ''}${a11y === 'Vocal-Deaf' || a11y === 'Sign-Only' ? '\n## ACCESSIBILITY\n- User is deaf. Short, visual sentences.' : ''}${a11y === 'Speech' ? '\n## ACCESSIBILITY\n- Output is read aloud by TTS: smooth speakable prose, no tables, no markdown noise.' : ''}${memoryBlock}${spatialBlock}${stateBlock}${plmBlock}${cognitiveBlock}
+${a11y === 'Visual' ? '\n## ACCESSIBILITY\n- USER IS BLIND. Describing an image/photo is a practical task, not a creative one:\n  1) Say FIRST if anything looks like a hazard (traffic, stairs, obstacles, fire, spills, sharp/hot objects) — one short sentence, before anything else.\n  2) Read any visible text VERBATIM (labels, signs, medicine dosage, prices, dates) — do not paraphrase or summarize numbers/instructions.\n  3) Then describe what matters practically: what/who is there, roughly where (left/right/near/far, or clock position like "at 2 o\'clock"), not colors or aesthetics unless asked.\n  4) Be concise — a few short sentences, not a paragraph. No flowery/"vivid" language, no markdown, no tables — this is read aloud by TTS. CRITICAL: Never output markdown asterisks (**), bullet points, or section headings (do NOT write "**Hazards:** None" or "**Visible Text:** None" or "**Scene Description:**"). Speak directly in natural conversational prose.' : ''}${a11y === 'Vocal-Deaf' || a11y === 'Sign-Only' ? '\n## ACCESSIBILITY\n- User is deaf. Short, visual sentences.' : ''}${a11y === 'Speech' ? '\n## ACCESSIBILITY\n- Output is read aloud by TTS: smooth speakable prose, no tables, no markdown noise.' : ''}${memoryBlock}${spatialBlock}${stateBlock}${plmBlock}${cognitiveBlock}${a11yBlock}
 ${otherThreads ? `\n## THREAD MEMORY\nSummaries of the user's other threads. Use them ONLY if explicitly asked about past conversations.\n${otherThreads}\n` : ''}`;
 }
 

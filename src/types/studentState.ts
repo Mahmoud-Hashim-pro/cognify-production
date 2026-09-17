@@ -7,6 +7,7 @@
 import type { CognitiveStage } from '../../api/_lib/ai';
 import type { RetentionSchedule } from '../lib/spacedRetention';
 import type { InterventionDirective } from '../lib/interventionEngine';
+import type { AccessibilityState } from './accessibilityState';
 
 export type PedagogyStrategy = 'analogies' | 'scaffolded' | 'worked_example' | 'socratic' | 'advanced_rigor';
 
@@ -105,6 +106,7 @@ export interface StudentState {
   activeInterventions: Record<string, InterventionDirective>;
   interventionHistory?: InterventionOutcomeRecord[];
   personalLearningModel?: PersonalLearningModel;
+  accessibilityState?: AccessibilityState;
   totalExercisesCompleted: number;
   lastActiveTimestamp: number;
 }
@@ -113,6 +115,7 @@ export type {
   CognitiveStage,
   RetentionSchedule,
   InterventionDirective,
+  AccessibilityState,
 };
 
 export * from './learningProfile';

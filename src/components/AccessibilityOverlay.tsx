@@ -38,6 +38,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Hands, Results, HAND_CONNECTIONS } from "@mediapipe/hands";
 import { Camera as MediaPipeCamera } from "@mediapipe/camera_utils";
 import { geminiService } from "../services/geminiService";
+import { setManualAccessibilityPreference, recordAccessibilityFeedback } from "../lib/accessibilityStateEngine";
 // Type-only import keeps TensorFlow.js out of this chunk; the implementation is
 // dynamically imported in startVision so tfjs only loads when the camera is used.
 import type { SignClassifier } from "../lib/signClassifier";
@@ -108,12 +109,42 @@ export default function AccessibilityOverlay({
   const [isSpeaking, setIsSpeaking] = useState(false);
   // Default to SILENT. The only exception is Visual (blind) mode, where reading
   // aloud is the whole point and the user can't see the toggle. Everyone else
-  // turns the voice ON explicitly — and turning it off truly stops it (effect below).
-  const [autoSpeak, setAutoSpeak] = useState(mode === "Visual");
+  const [autoSpeak, setAutoSpeak] = useState(() => {
+    if (profile?.studentState?.accessibilityState?.vision?.ttsAutoNarration !== undefined) {
+      return profile.studentState.accessibilityState.vision.ttsAutoNarration;
+    }
+    try {
+      const stored = localStorage.getItem(`cognify_a11y_tts_${profile?.uid || 'anon'}`);
+      if (stored !== null) return stored === '1';
+    } catch { /* ignore */ }
+    return mode === "Visual";
+  });
   const [avatarImage, setAvatarImage] = useState(
     "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400&h=600",
   );
   const [signHistory, setSignHistory] = useState<string[]>([]);
+
+  const handleToggleAutoSpeak = () => {
+    const nextVal = !autoSpeak;
+    setAutoSpeak(nextVal);
+    if (!nextVal && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+    try {
+      if (profile?.studentState?.accessibilityState) {
+        setManualAccessibilityPreference(
+          profile.studentState.accessibilityState,
+          'vision.ttsAutoNarration',
+          nextVal,
+          true
+        );
+      }
+      localStorage.setItem(`cognify_a11y_tts_${profile?.uid || 'anon'}`, nextVal ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+  };
 
   // The moment the voice is muted, stop any speech that's already playing —
   // fixes "I muted it but it kept talking".
@@ -769,13 +800,7 @@ export default function AccessibilityOverlay({
                 mode === "Sign-Only" ||
                 mode === "Visual") && (
                 <button
-                  onClick={() => {
-                    setAutoSpeak(!autoSpeak);
-                    if (autoSpeak && "speechSynthesis" in window) {
-                      window.speechSynthesis.cancel();
-                      setIsSpeaking(false);
-                    }
-                  }}
+                  onClick={handleToggleAutoSpeak}
                   className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl transition-all active:scale-95 border-2 ${
                     autoSpeak
                       ? "bg-primary-soft border-border text-primary"

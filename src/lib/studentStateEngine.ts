@@ -25,6 +25,7 @@ import {
 } from './learningEvents';
 import { buildPersonalLearningModel } from './personalLearningModel';
 import { generatePersonalLearningProfile } from './learningProfileService';
+import { createDefaultAccessibilityState } from './accessibilityStateEngine';
 import type {
   PedagogyStrategy,
   StrategyOutcomeMetrics,
@@ -195,6 +196,7 @@ export function createInitialStudentState(uid: string, level?: string): StudentS
     activeInterventions: {},
     interventionHistory: [],
     totalExercisesCompleted: 0,
+    accessibilityState: createDefaultAccessibilityState(uid),
     lastActiveTimestamp: Date.now(),
   };
   initial.personalLearningModel = buildPersonalLearningModel(initial);
