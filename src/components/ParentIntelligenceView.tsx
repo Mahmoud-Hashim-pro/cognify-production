@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import type { StudentState } from '../types/studentState';
 import type { ParentDashboardData } from '../types/parent';
-import { compileParentDashboard } from '../lib/parentIntelligence';
+import { compileParentDashboard, verifyParentChildRelationship } from '../lib/parentIntelligence';
 import { createInitialStudentState } from '../lib/studentStateEngine';
 
 interface ParentIntelligenceViewProps {
@@ -61,14 +61,9 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
             const u = uDoc.data();
             
             // Strictly verify that current authenticated user is an authorized parent/guardian
-            const isAuthorizedParent = Boolean(
-              (profile?.uid && u.linkedParentUid === profile.uid) ||
-              (profile?.email && u.parentEmail && u.parentEmail.toLowerCase() === profile.email.toLowerCase()) ||
-              (profile?.uid && Array.isArray(u.authorizedParentUids) && u.authorizedParentUids.includes(profile.uid))
-            );
-
-            if (!isAuthorizedParent) {
-              console.warn(`[ParentIntelligenceView] Access denied: User ${profile?.uid} is not an authorized guardian for child ${childId}`);
+            const authResult = verifyParentChildRelationship(profile, u);
+            if (!authResult.authorized) {
+              console.warn(`[ParentIntelligenceView] Access denied: ${authResult.reason}`);
               setIsDemoMode(true);
               return;
             }

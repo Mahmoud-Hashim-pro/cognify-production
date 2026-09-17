@@ -117,11 +117,11 @@ export function getSystemHealthReport(traceId?: string): SystemHealthPayload {
     }
   }
 
-  // Active providers health check
-  const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-  const nvidiaKey = process.env.NVIDIA_API_KEY || process.env.VITE_NVIDIA_API_KEY;
-  const groqKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
-  const xaiKey = process.env.XAI_API_KEY || process.env.VITE_XAI_API_KEY;
+  // Active providers health check - strictly server-side keys
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const nvidiaKey = process.env.NVIDIA_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+  const xaiKey = process.env.XAI_API_KEY;
 
   const activeProviderHealth: Record<string, ProviderHealth> = {
     gemini: {

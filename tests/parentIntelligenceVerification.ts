@@ -9,6 +9,7 @@ import {
   detectCelebratedBreakthroughs,
   generateHomeDiscussionCues,
   compileParentDashboard,
+  verifyParentChildRelationship,
 } from '../src/lib/parentIntelligence';
 import type { StudentState } from '../src/types/studentState';
 
@@ -174,6 +175,41 @@ async function runSuite() {
   assert(dashboard.growthSummary.conceptsMasteredCount === 3, 'Embeds weekly growth summary');
   assert(dashboard.breakthroughs.length >= 2, 'Embeds celebrated breakthroughs');
   assert(dashboard.homeDiscussionCues.length >= 2, 'Embeds home discussion cues');
+
+  // -------------------------------------------------------------------------
+  // 6. Adversarial Parent-Child Authorization Attack Verification
+  // -------------------------------------------------------------------------
+  console.log('\n--- 6. Adversarial Parent-Child Authorization Attack Verification ---');
+  const leg1 = verifyParentChildRelationship({ uid: 'parent_alice' }, { linkedParentUid: 'parent_alice' });
+  assert(leg1.authorized === true, 'Legitimate parent verified via linkedParentUid');
+
+  const leg2 = verifyParentChildRelationship(
+    { uid: 'parent_bob', email: 'Bob.Parent@example.com' },
+    { parentEmail: 'bob.parent@example.com' }
+  );
+  assert(leg2.authorized === true, 'Legitimate parent verified via case-insensitive parentEmail');
+
+  const leg3 = verifyParentChildRelationship(
+    { uid: 'parent_guardian_77' },
+    { authorizedParentUids: ['parent_guardian_77', 'other_parent'] }
+  );
+  assert(leg3.authorized === true, 'Legitimate guardian verified via authorizedParentUids list');
+
+  // Attack Case 1: Parent A tries Child B UID
+  const attack1 = verifyParentChildRelationship(
+    { uid: 'parent_a' },
+    { linkedParentUid: 'parent_b', parentEmail: 'parent_b@example.com' }
+  );
+  assert(attack1.authorized === false, 'Attack Case 1: Parent A trying Child B is rejected with 403 authorization failure');
+  assert(Boolean(attack1.reason?.includes('BOLA/IDOR Forbidden')), 'Attack Case 1 returns explicit BOLA/IDOR Forbidden diagnostic reason');
+
+  // Attack Case 2: Unauthenticated / Missing Parent UID
+  const attack2 = verifyParentChildRelationship(null, { linkedParentUid: 'parent_a' });
+  assert(attack2.authorized === false, 'Attack Case 2: Unauthenticated parent rejected');
+
+  // Attack Case 3: Missing or Null Target Student Profile
+  const attack3 = verifyParentChildRelationship({ uid: 'parent_a' }, null);
+  assert(attack3.authorized === false, 'Attack Case 3: Missing student profile rejected');
 
   // Summary
   console.log('\n============================================================');

@@ -241,3 +241,43 @@ export function compileParentDashboard(
 
   return dashboard;
 }
+
+/**
+ * Canonical Parent-Child Relationship Authorization Verifier
+ * Enforces server-authoritative parent-child verification.
+ * A parent is ONLY authorized if the student's profile explicitly links to them
+ * via linkedParentUid, parentEmail, or authorizedParentUids.
+ *
+ * Attack Case: Parent A providing Child B's UID without child-side link returns false (HTTP 403).
+ */
+export function verifyParentChildRelationship(
+  parent: { uid?: string; email?: string } | null | undefined,
+  studentProfile: { linkedParentUid?: string; parentEmail?: string; authorizedParentUids?: string[] } | null | undefined
+): { authorized: boolean; reason?: string } {
+  if (!parent?.uid) {
+    return { authorized: false, reason: 'Parent unauthenticated: Missing UID' };
+  }
+  if (!studentProfile) {
+    return { authorized: false, reason: 'Target student profile not found' };
+  }
+
+  const matchesUid = Boolean(studentProfile.linkedParentUid && studentProfile.linkedParentUid === parent.uid);
+  const matchesEmail = Boolean(
+    parent.email &&
+    studentProfile.parentEmail &&
+    studentProfile.parentEmail.trim().toLowerCase() === parent.email.trim().toLowerCase()
+  );
+  const matchesAuthorizedList = Boolean(
+    Array.isArray(studentProfile.authorizedParentUids) &&
+    studentProfile.authorizedParentUids.includes(parent.uid)
+  );
+
+  if (matchesUid || matchesEmail || matchesAuthorizedList) {
+    return { authorized: true };
+  }
+
+  return {
+    authorized: false,
+    reason: `BOLA/IDOR Forbidden: Parent (${parent.uid}) is not an authorized guardian for target student.`,
+  };
+}
