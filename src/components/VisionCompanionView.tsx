@@ -27,6 +27,7 @@ import {
   Search,
   BookOpen,
   ShoppingBag,
+  GraduationCap,
 } from 'lucide-react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
@@ -74,6 +75,8 @@ export function cleanVisionDescription(raw: string, lang: 'ar' | 'en' | 'fr' = '
     .replace(/Visible Text:\s*(None[^\n.]*|N\/A[^\n.]*)[.]?/gi, '')
     .replace(/\*\*(Scene Description|Description):\*\*/gi, '')
     .replace(/(Scene Description|Description):/gi, '')
+    .replace(/\*\*(Lecture Summary|Summary|Key Points):\*\*/gi, '')
+    .replace(/(Lecture Summary|Summary|Key Points):/gi, '')
     // Arabic robotic boilerplate
     .replace(/\*\*المخاطر:\*\*\s*(لا توجد[^\n.]*|لا يوجد[^\n.]*)[.]?/gi, 'مفيش أخطار حواليك.')
     .replace(/المخاطر:\s*(لا توجد[^\n.]*|لا يوجد[^\n.]*)[.]?/gi, 'مفيش أخطار حواليك.')
@@ -81,6 +84,8 @@ export function cleanVisionDescription(raw: string, lang: 'ar' | 'en' | 'fr' = '
     .replace(/النصوص( المكتوبة)?:\s*(لا توجد[^\n.]*|لا يوجد[^\n.]*)[.]?/gi, '')
     .replace(/\*\*(وصف المشهد|الوصف):\*\*/gi, '')
     .replace(/(وصف المشهد|الوصف):/gi, '')
+    .replace(/\*\*(ملخص المحاضرة|الملخص|النقاط الرئيسية):\*\*/gi, '')
+    .replace(/(ملخص المحاضرة|الملخص|النقاط الرئيسية):/gi, '')
     // French robotic boilerplate
     .replace(/\*\*Dangers?:\*\*\s*(Aucun[^\n.]*)[.]?/gi, 'Aucun danger autour de vous.')
     .replace(/Dangers?:\s*(Aucun[^\n.]*)[.]?/gi, 'Aucun danger autour de vous.')
@@ -88,6 +93,8 @@ export function cleanVisionDescription(raw: string, lang: 'ar' | 'en' | 'fr' = '
     .replace(/Textes?( visibles?)?:\s*(Aucun[^\n.]*)[.]?/gi, '')
     .replace(/\*\*(Description de la scène|Description):\*\*/gi, '')
     .replace(/(Description de la scène|Description):/gi, '')
+    .replace(/\*\*(Résumé du cours|Résumé|Points clés):\*\*/gi, '')
+    .replace(/(Résumé du cours|Résumé|Points clés):/gi, '')
     // Spoken symbol artifacts
     .replace(/(?:^|\s+)(asterisk|استريك|نجمة|بوليت)(?=\s+|$)/giu, ' ')
     // Markdown formatting (*, #, _, `, ~, [], (), <>)
@@ -115,9 +122,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Read Mode: focuses the AI purely on reading visible text aloud
-  // (prescriptions, bills, labels, price tags) instead of describing the scene.
+  // Read Mode: focuses the AI on reading visible text or summarizing lectures/documents.
   const [readMode, setReadMode] = useState(false);
+  // Read Action: 'summarize' for lecture & document summaries, 'read' for verbatim word-for-word reading.
+  const [readAction, setReadAction] = useState<'summarize' | 'read'>('summarize');
 
   // Shopping Assistant Mode: focuses the AI on identifying products, brand,
   // prices, currency, weight/size/flavor, and expiration dates for visually impaired shoppers.
@@ -341,9 +349,15 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     return canvas.toDataURL('image/jpeg', 0.85);
   };
 
-  const describeScene = async (choiceLang?: 'ar' | 'en' | 'fr') => {
+  const describeScene = async (
+    choiceLang?: 'ar' | 'en' | 'fr',
+    forcedFrame?: string,
+    forcedAction?: 'summarize' | 'read'
+  ) => {
     const targetLang = choiceLang || companionLang;
     setCompanionLang(targetLang);
+    const activeReadAction = forcedAction || readAction;
+    if (forcedAction) setReadAction(forcedAction);
 
     // 1. PRIME SPEECH SYNTHESIS IMMEDIATELY ON REAL USER CLICK
     unlockSpeechSynthesis();
@@ -358,7 +372,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       }
     }
 
-    if (status !== 'ready' && status !== 'analyzing') {
+    if (!forcedFrame && status !== 'ready' && status !== 'analyzing') {
       const errNoCam =
         targetLang === 'ar'
           ? 'الكاميرا غير متاحة حالياً، يرجى السماح بالوصول للكاميرا.'
@@ -369,7 +383,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       return;
     }
 
-    const frame = captureFrame();
+    const frame = forcedFrame || captureFrame();
     if (!frame) {
       const errNoFrame =
         targetLang === 'ar'
@@ -390,7 +404,13 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         ? 'Identification du produit et des prix...'
         : 'Identifying product and pricing in front of you...'
       : readMode
-      ? targetLang === 'ar'
+      ? activeReadAction === 'summarize'
+        ? targetLang === 'ar'
+          ? 'بلخص المحاضرة والنقاط المهمة...'
+          : targetLang === 'fr'
+          ? 'Résumé du cours et des points clés en cours...'
+          : 'Summarizing lecture and key points...'
+        : targetLang === 'ar'
         ? 'بقرا النص اللي قدامك...'
         : targetLang === 'fr'
         ? 'Je lis le texte devant vous...'
@@ -432,14 +452,42 @@ Parlez de façon directe, concise et naturelle sans titres de section ni astéri
 Speak directly, concisely, and naturally without any headings, robotic labels, or markdown asterisks. If the item is blurry or far, advise them to bring the camera closer.${knownContext}`;
       }
     } else if (readMode) {
-      // Read Mode: ignore the scene entirely, just read out any visible text
-      // verbatim and in order (prescriptions, bills, labels, price tags, receipts).
-      if (targetLang === 'ar') {
-        prompt = `أنت تساعد شخص كفيف بقراءة نص مكتوب أمامه بالكاميرا (ممكن يكون روشتة، فاتورة كهربا أو غاز، ملصق منتج، سعر، إيصال، أو أي ورقة). اقرأ كل النص المكتوب في الصورة بالترتيب وبوضوح، كلمة بكلمة كما هو، من غير أي وصف للمشهد أو الأشياء حواليه. لو النص فيه أرقام أو تواريخ أو مبالغ، اقرأها بوضوح وبالترتيب الصحيح. لو مفيش نص واضح في الصورة، قول له بلطف "مفيش نص واضح قدامك دلوقتي، حاول تقرب الكاميرا أكتر." لا تستخدم أي عناوين أو ماركداون أو كلمة "النص المكتوب:" كعنوان.${knownContext}`;
-      } else if (targetLang === 'fr') {
-        prompt = `Vous aidez une personne aveugle à lire un texte visible par sa caméra (ordonnance, facture, étiquette, prix, reçu, ou tout document). Lisez tout le texte visible dans l'image, dans l'ordre, mot pour mot, sans décrire la scène ni les objets environnants. Lisez clairement les chiffres, dates et montants dans leur ordre exact. S'il n'y a pas de texte clair, dites poliment "Aucun texte clair détecté, essayez de rapprocher la caméra." N'utilisez aucun titre, markdown, ou libellé robotique.${knownContext}`;
+      if (activeReadAction === 'summarize') {
+        // Summarize Mode: summarize lectures, presentations, book chapters, slides, or documents
+        if (targetLang === 'ar') {
+          prompt = `أنت رفيق ومعلم ذكي يساعد شخص كفيف في متابعة محاضرة دراسية أو قراءة كتاب أو مستند عبر الكاميرا (ممكن تكون شريحة بروجكتور أو عرض بوربوينت، سبورة بيضاء، صفحة كتاب، ملخص، ورقة أسئلة، أو مقال).
+انظر فوراً إلى ما هو معروض أو مكتوب ولخصه بذكاء كالتالي:
+1. اذكر باختصار موضوع المحاضرة أو النص المعروض (مثلاً: "هذه شريحة تتكلم عن..." أو "هذه صفحة في كتاب تشرح...").
+2. لخّص بدقة الأفكار الرئيسية، المفاهيم الأساسية، وأهم النقاط والنتائج بأسلوب صوتي مباشر وواضح كأنك زميل دراسة ذكي يشرح له أهم ما في المحاضرة.
+3. إذا كان هناك مصطلحات مهمة، تعريفات، قوانين أو خطوات، اذكرها وركز عليها بوضوح.
+4. إذا لم يكن المعروض محاضرة (مثلاً إيصال، فاتورة، خطاب، تقرير)، لخص له المفيد وخلاصة المطلوب فوراً.
+5. تحدث بطريقة صوتية مريحة ومفهومة بدون أي نجوم ماركداون أو شرطات أو عناوين روبوتية معقدة لكي ينطقها الصوت بسلاسة. لو مفيش نص أو محاضرة واضحة، قول له "قرب الكاميرا شوية من الشاشة أو الورقة".${knownContext}`;
+        } else if (targetLang === 'fr') {
+          prompt = `Vous êtes un tuteur intelligent et compagnon vocal qui aide un étudiant malvoyant à suivre un cours, une présentation, un manuel ou un document avec sa caméra (diapositive, tableau, page de livre, polycopié).
+Regardez immédiatement le texte ou la présentation et résumez-le à voix haute :
+1. Indiquez brièvement le sujet du cours ou du document (ex. "Cette diapositive traite de...").
+2. Résumez avec précision les idées maîtresses, concepts clés et points essentiels, comme un camarade d'étude bienveillant.
+3. Mettez en avant les définitions, formules ou étapes clés.
+4. S'il s'agit d'un autre document, donnez l'essentiel et la conclusion directement.
+5. Parlez naturellement sans astérisques markdown ni titres robotiques pour une lecture vocale fluide. Si c'est flou, suggérez d'approcher la caméra.${knownContext}`;
+        } else {
+          prompt = `You are a smart tutor and voice companion helping a visually impaired student follow a lecture, presentation, textbook, or document through their camera (a lecture slide, presentation, whiteboard, textbook page, handout, or article).
+Instantly look at the text or slide and provide a spoken summary:
+1. Briefly state the lecture topic or document subject (e.g. "This slide covers..." or "This page explains...").
+2. Accurately summarize the core concepts, main ideas, and critical takeaways in clear, engaging spoken prose like a helpful study partner.
+3. Highlight key definitions, formulas, or procedural steps.
+4. If it is not a lecture (e.g. a report, letter, receipt), summarize the bottom line and essential information directly.
+5. Speak naturally without markdown asterisks, bullet dashes, or robotic headings so text-to-speech speaks smoothly. If blurry, gently ask them to hold the camera closer.${knownContext}`;
+        }
       } else {
-        prompt = `You are helping a blind person read text visible through their camera (a prescription, a utility bill, a product label, a price tag, a receipt, or any document). Read out ALL the visible text in the image, in order, word for word, without describing the scene or surrounding objects. Read any numbers, dates, or amounts clearly and in their correct order. If there is no clear text visible, gently say "No clear text detected right now, try moving the camera closer." Do NOT use any headings, markdown, or robotic labels like "Text:".${knownContext}`;
+        // Read Mode (Verbatim): read out all visible text word for word
+        if (targetLang === 'ar') {
+          prompt = `أنت تساعد شخص كفيف بقراءة نص مكتوب أمامه بالكاميرا (ممكن يكون روشتة، فاتورة كهربا أو غاز، ملصق منتج، سعر، إيصال، أو أي ورقة). اقرأ كل النص المكتوب في الصورة بالترتيب وبوضوح، كلمة بكلمة كما هو، من غير أي وصف للمشهد أو الأشياء حواليه. لو النص فيه أرقام أو تواريخ أو مبالغ، اقرأها بوضوح وبالترتيب الصحيح. لو مفيش نص واضح في الصورة، قول له بلطف "مفيش نص واضح قدامك دلوقتي، حاول تقرب الكاميرا أكتر." لا تستخدم أي عناوين أو ماركداون أو كلمة "النص المكتوب:" كعنوان.${knownContext}`;
+        } else if (targetLang === 'fr') {
+          prompt = `Vous aidez une personne aveugle à lire un texte visible par sa caméra (ordonnance, facture, étiquette, prix, reçu, ou tout document). Lisez tout le texte visible dans l'image, dans l'ordre, mot pour mot, sans décrire la scène ni les objets environnants. Lisez clairement les chiffres, dates et montants dans leur ordre exact. S'il n'y a pas de texte clair, dites poliment "Aucun texte clair détecté, essayez de rapprocher la caméra." N'utilisez aucun titre, markdown, ou libellé robotique.${knownContext}`;
+        } else {
+          prompt = `You are helping a blind person read text visible through their camera (a prescription, a utility bill, a product label, a price tag, a receipt, or any document). Read out ALL the visible text in the image, in order, word for word, without describing the scene or surrounding objects. Read any numbers, dates, or amounts clearly and in their correct order. If there is no clear text visible, gently say "No clear text detected right now, try moving the camera closer." Do NOT use any headings, markdown, or robotic labels like "Text:".${knownContext}`;
+        }
       }
     } else if (targetLang === 'ar') {
       prompt = `أنت رفيق بشري يتحدث بصوته لشخص كفيف عبر الكاميرا. تحدث فوراً بلغة عربية عامية سهلة ومباشرة كأنك صديق يقف بجانبه وينظر أمامه: ادخل في الموضوع فوراً بدون أي مقدمات أو عناوين أو ماركداون. ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر، مثلاً: "مفيش أخطار حواليك، قدامك..." ثم صف الأشخاص والأشياء والأسطح والنصوص المكتوبة بشكل طبيعي وتلقائي جداً. لا تذكر كلمات مثل "المخاطر" أو "النصوص المكتوبة" أو "وصف المشهد" كعناوين، ولا تستخدم نجوم الماركداون أو الشرطات نهائياً.${knownContext}`;
@@ -812,6 +860,51 @@ Speak directly, concisely, and naturally without any headings, robotic labels, o
           </div>
         </div>
 
+        {/* Sub-selector for Read Mode: Lecture/Text Summary vs Full Reading */}
+        <AnimatePresence>
+          {readMode && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              className="pointer-events-auto flex items-center justify-center gap-1.5 mt-2 bg-black/85 backdrop-blur-2xl border border-amber-500/50 p-1 rounded-2xl w-fit mx-auto shadow-2xl z-30"
+            >
+              <button
+                onClick={() => setReadAction('summarize')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  readAction === 'summarize'
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'text-amber-200/80 hover:text-white'
+                }`}
+                title={t(
+                  'Summarize lecture, slide, or document',
+                  'تلخيص محاضرة، شريحة عرض، أو مستند',
+                  'Résumer cours, diapositive ou document'
+                )}
+              >
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>{t('Summarize Lecture / Text', 'تلخيص محاضرة / نص', 'Résumer cours / texte')}</span>
+              </button>
+              <button
+                onClick={() => setReadAction('read')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  readAction === 'read'
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'text-amber-200/80 hover:text-white'
+                }`}
+                title={t(
+                  'Read full text word for word',
+                  'قراءة النص كاملاً كلمة بكلمة',
+                  'Lire le texte intégral mot à mot'
+                )}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>{t('Full Reading', 'قراءة كاملة', 'Lecture intégrale')}</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Center Region: Analysis Indicator or Live Description Card */}
         <div className="my-auto flex flex-col items-center justify-center px-2 py-3 w-full">
           {status === 'analyzing' && (
@@ -843,28 +936,58 @@ Speak directly, concisely, and naturally without any headings, robotic labels, o
               </button>
 
               <div className="bg-black/80 backdrop-blur-2xl border border-white/20 text-white rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar">
-                <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2 pr-2">
+                <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2 pr-2 gap-2 flex-wrap">
                   <span className="font-bold flex items-center gap-1.5 text-primary">
                     <Sparkles className="w-4 h-4" />
-                    {companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description'}
+                    {readMode && readAction === 'summarize'
+                      ? (companionLang === 'ar' ? 'تلخيص المحاضرة والنقاط المهمة' : companionLang === 'fr' ? 'Résumé du cours' : 'Lecture Summary')
+                      : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
                   </span>
-                  <button
-                    onClick={toggleSpeech}
-                    className={`flex items-center gap-1.5 font-bold text-xs px-3 py-1.5 rounded-xl transition-colors ${
-                      isSpeaking
-                        ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300'
-                        : 'bg-white/10 hover:bg-white/20 text-white hover:text-emerald-400'
-                    }`}
-                  >
-                    {isSpeaking ? (
-                      <VolumeX className="w-4 h-4 text-red-400" />
-                    ) : (
-                      <Volume2 className="w-4 h-4 text-emerald-400" />
+                  <div className="flex items-center gap-1.5">
+                    {readMode && lastSnapshot && (
+                      <button
+                        onClick={() => {
+                          const nextAction = readAction === 'read' ? 'summarize' : 'read';
+                          describeScene(companionLang, lastSnapshot, nextAction);
+                        }}
+                        className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition-colors"
+                        title={
+                          readAction === 'read'
+                            ? t('Summarize this lecture/text', 'تلخيص هذه المحاضرة / النص', 'Résumer ce cours / texte')
+                            : t('Read full text word for word', 'قراءة النص كاملاً كلمة بكلمة', 'Lire le texte intégral')
+                        }
+                      >
+                        {readAction === 'read' ? (
+                          <>
+                            <GraduationCap className="w-3.5 h-3.5" />
+                            <span>{t('Summarize', 'لخّص ده', 'Résumer')}</span>
+                          </>
+                        ) : (
+                          <>
+                            <BookOpen className="w-3.5 h-3.5" />
+                            <span>{t('Full Text', 'قراءة كاملة', 'Texte complet')}</span>
+                          </>
+                        )}
+                      </button>
                     )}
-                    {isSpeaking
-                      ? (companionLang === 'ar' ? 'وقف الصوت' : companionLang === 'fr' ? 'Muet' : 'Stop')
-                      : (companionLang === 'ar' ? 'إعادة النطق الصوتي' : companionLang === 'fr' ? 'Répéter' : 'Repeat Aloud')}
-                  </button>
+                    <button
+                      onClick={toggleSpeech}
+                      className={`flex items-center gap-1.5 font-bold text-xs px-3 py-1.5 rounded-xl transition-colors ${
+                        isSpeaking
+                          ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300'
+                          : 'bg-white/10 hover:bg-white/20 text-white hover:text-emerald-400'
+                      }`}
+                    >
+                      {isSpeaking ? (
+                        <VolumeX className="w-4 h-4 text-red-400" />
+                      ) : (
+                        <Volume2 className="w-4 h-4 text-emerald-400" />
+                      )}
+                      {isSpeaking
+                        ? (companionLang === 'ar' ? 'وقف الصوت' : companionLang === 'fr' ? 'Muet' : 'Stop')
+                        : (companionLang === 'ar' ? 'إعادة النطق الصوتي' : companionLang === 'fr' ? 'Répéter' : 'Repeat Aloud')}
+                    </button>
+                  </div>
                 </div>
                 <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
                   {lastDescription}
@@ -887,22 +1010,40 @@ Speak directly, concisely, and naturally without any headings, robotic labels, o
                 className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
                   shoppingMode
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
+                    : readMode
+                    ? 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60'
                     : 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 border border-emerald-400/40 shadow-emerald-950/60'
                 }`}
               >
                 {shoppingMode ? (
                   <ShoppingBag className="w-5 h-5 shrink-0" />
                 ) : readMode ? (
-                  <BookOpen className="w-5 h-5 shrink-0" />
+                  readAction === 'summarize' ? (
+                    <GraduationCap className="w-5 h-5 shrink-0" />
+                  ) : (
+                    <BookOpen className="w-5 h-5 shrink-0" />
+                  )
                 ) : (
                   <Camera className="w-5 h-5 shrink-0" />
                 )}
                 <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                   <span>
-                    {shoppingMode ? '🇪🇬 فحص المنتج والتسوق' : readMode ? '🇪🇬 اقرأ اللي قدامي' : '🇪🇬 ماذا أمامي؟'}
+                    {shoppingMode
+                      ? '🇪🇬 فحص المنتج والتسوق'
+                      : readMode
+                      ? readAction === 'summarize'
+                        ? '🇪🇬 تلخيص المحاضرة أو النص'
+                        : '🇪🇬 اقرأ اللي قدامي'
+                      : '🇪🇬 ماذا أمامي؟'}
                   </span>
                   <span className="text-[10px] font-normal opacity-90">
-                    {shoppingMode ? 'مساعد التسوق والأسعار' : readMode ? 'قراءة نص بالصوت' : 'وصف فوري بالصوت'}
+                    {shoppingMode
+                      ? 'مساعد التسوق والأسعار'
+                      : readMode
+                      ? readAction === 'summarize'
+                        ? 'تلخيص الأفكار والمفاهيم بالصوت'
+                        : 'قراءة نص بالصوت كلمة بكلمة'
+                      : 'وصف فوري بالصوت'}
                   </span>
                 </div>
               </button>
@@ -915,22 +1056,40 @@ Speak directly, concisely, and naturally without any headings, robotic labels, o
                 className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
                   shoppingMode
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
+                    : readMode
+                    ? 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60'
                     : 'bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 border border-primary/40 shadow-indigo-950/60'
                 }`}
               >
                 {shoppingMode ? (
                   <ShoppingBag className="w-5 h-5 shrink-0" />
                 ) : readMode ? (
-                  <BookOpen className="w-5 h-5 shrink-0" />
+                  readAction === 'summarize' ? (
+                    <GraduationCap className="w-5 h-5 shrink-0" />
+                  ) : (
+                    <BookOpen className="w-5 h-5 shrink-0" />
+                  )
                 ) : (
                   <Camera className="w-5 h-5 shrink-0" />
                 )}
                 <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                   <span>
-                    {shoppingMode ? '🇬🇧 Scan product & price' : readMode ? '🇬🇧 Read this for me' : '🇬🇧 What is here?'}
+                    {shoppingMode
+                      ? '🇬🇧 Scan product & price'
+                      : readMode
+                      ? readAction === 'summarize'
+                        ? '🇬🇧 Summarize lecture or text'
+                        : '🇬🇧 Read this for me'
+                      : '🇬🇧 What is here?'}
                   </span>
                   <span className="text-[10px] font-normal opacity-90">
-                    {shoppingMode ? 'Shopping assistant' : readMode ? 'Spoken text reading' : 'Spoken English'}
+                    {shoppingMode
+                      ? 'Shopping assistant'
+                      : readMode
+                      ? readAction === 'summarize'
+                        ? 'Key points & spoken concepts'
+                        : 'Spoken text reading'
+                      : 'Spoken English'}
                   </span>
                 </div>
               </button>
@@ -943,22 +1102,40 @@ Speak directly, concisely, and naturally without any headings, robotic labels, o
                 className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
                   shoppingMode
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
+                    : readMode
+                    ? 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60'
                     : 'bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-500 hover:to-cyan-600 border border-blue-400/40 shadow-blue-950/60'
                 }`}
               >
                 {shoppingMode ? (
                   <ShoppingBag className="w-5 h-5 shrink-0" />
                 ) : readMode ? (
-                  <BookOpen className="w-5 h-5 shrink-0" />
+                  readAction === 'summarize' ? (
+                    <GraduationCap className="w-5 h-5 shrink-0" />
+                  ) : (
+                    <BookOpen className="w-5 h-5 shrink-0" />
+                  )
                 ) : (
                   <Camera className="w-5 h-5 shrink-0" />
                 )}
                 <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                   <span>
-                    {shoppingMode ? '🇫🇷 Scanner produit & prix' : readMode ? '🇫🇷 Lisez ceci' : '🇫🇷 Que vois-je ?'}
+                    {shoppingMode
+                      ? '🇫🇷 Scanner produit & prix'
+                      : readMode
+                      ? readAction === 'summarize'
+                        ? '🇫🇷 Résumer cours ou texte'
+                        : '🇫🇷 Lisez ceci'
+                      : '🇫🇷 Que vois-je ?'}
                   </span>
                   <span className="text-[10px] font-normal opacity-90">
-                    {shoppingMode ? 'Assistant achat' : readMode ? 'Lecture du texte' : 'Vocal en français'}
+                    {shoppingMode
+                      ? 'Assistant achat'
+                      : readMode
+                      ? readAction === 'summarize'
+                        ? 'Points clés & résumé vocal'
+                        : 'Lecture du texte'
+                      : 'Vocal en français'}
                   </span>
                 </div>
               </button>
