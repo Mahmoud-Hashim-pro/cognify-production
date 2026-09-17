@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { db } from '../lib/firebase';
+import { collection, query, where, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import {
   Users,
   AlertTriangle,
@@ -13,6 +15,7 @@ import {
   CheckCircle2,
   Clock,
   BookOpen,
+  RefreshCw,
 } from 'lucide-react';
 import type { StudentState } from '../types/studentState';
 import type {
@@ -23,6 +26,7 @@ import type {
   TeacherDashboardData,
 } from '../types/teacher';
 import { compileTeacherDashboard } from '../lib/teacherIntelligence';
+import { createInitialStudentState } from '../lib/studentStateEngine';
 
 interface TeacherIntelligenceViewProps {
   students?: StudentState[];
@@ -41,10 +45,61 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
 }) => {
   const isAr = lang === 'ar';
   const [activeTab, setActiveTab] = useState<'clusters' | 'groups' | 'efficacy' | 'actions'>('clusters');
+  const [liveStudents, setLiveStudents] = useState<StudentState[]>([]);
+  const [loadingLive, setLoadingLive] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'live' | 'benchmark'>('live');
+
+  // Hydrate real enrolled students from Firestore if students prop is not supplied
+  useEffect(() => {
+    if (students && students.length > 0) return;
+    let isSubscribed = true;
+    setLoadingLive(true);
+
+    const fetchCohort = async () => {
+      try {
+        if (typeof window !== 'undefined' && db) {
+          const usersRef = collection(db, 'users');
+          const q = query(usersRef, where('role', '==', 'Student'), limit(50));
+          const snap = await getDocs(q);
+          if (!snap.empty && isSubscribed) {
+            const loaded: StudentState[] = [];
+            for (const docSnap of snap.docs) {
+              const u = docSnap.data();
+              try {
+                const sDoc = await getDoc(doc(db, `users/${docSnap.id}/studentState/current`));
+                if (sDoc.exists()) {
+                  loaded.push(sDoc.data() as StudentState);
+                  continue;
+                }
+              } catch {}
+              // Synthesize live learning state from user profile
+              const base = createInitialStudentState(docSnap.id, u.level);
+              loaded.push({
+                ...base,
+                conceptMastery: u.mastery || {},
+                totalExercisesCompleted: u.questionHistory?.length || 0,
+                lastActiveTimestamp: u.lastActiveDate ? new Date(u.lastActiveDate).getTime() : Date.now(),
+              });
+            }
+            if (isSubscribed && loaded.length > 0) {
+              setLiveStudents(loaded);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[TeacherIntelligenceView] Failed to fetch real students:', err);
+      } finally {
+        if (isSubscribed) setLoadingLive(false);
+      }
+    };
+    fetchCohort();
+    return () => { isSubscribed = false; };
+  }, [students]);
 
   // Generate mock cohort if not provided to guarantee seamless educator preview
   const studentCohort = useMemo(() => {
     if (students && students.length > 0) return students;
+    if (viewMode === 'live' && liveStudents.length > 0) return liveStudents;
 
     const mock: StudentState[] = [];
     // 12 struggling students
@@ -170,7 +225,7 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
       });
     }
     return mock;
-  }, [students]);
+  }, [students, viewMode, liveStudents]);
 
   const dashboardData: TeacherDashboardData = useMemo(() => {
     return compileTeacherDashboard(classId, className, studentCohort);
@@ -215,19 +270,65 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Live Data vs Benchmark Toggle */}
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/80 border border-slate-800">
+              <button
+                onClick={() => setViewMode('live')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  viewMode === 'live'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${liveStudents.length > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                {isAr ? `الدفعة الحية (${liveStudents.length})` : `Live Roster (${liveStudents.length})`}
+              </button>
+              <button
+                onClick={() => setViewMode('benchmark')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  viewMode === 'benchmark'
+                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                {isAr ? 'عينة قياسية (20)' : 'Benchmark (20)'}
+              </button>
+            </div>
+
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-800">
               <Users className="w-4 h-4 text-cyan-400" />
               <span className="text-sm font-semibold text-white">{dashboardData.totalStudents}</span>
-              <span className="text-xs text-slate-400">{isAr ? 'طالباً مسجلاً' : 'Students'}</span>
+              <span className="text-xs text-slate-400">{isAr ? 'طالباً' : 'Students'}</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-800">
               <AlertTriangle className="w-4 h-4 text-amber-400" />
               <span className="text-sm font-semibold text-amber-300">{dashboardData.struggleClusters.length}</span>
-              <span className="text-xs text-slate-400">{isAr ? 'بؤر تعثر' : 'Struggle Clusters'}</span>
+              <span className="text-xs text-slate-400">{isAr ? 'بؤر تعثر' : 'Clusters'}</span>
             </div>
           </div>
         </div>
+
+        {/* Live empty state warning banner if in live mode with 0 students */}
+        {viewMode === 'live' && liveStudents.length === 0 && !loadingLive && (!students || students.length === 0) && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>
+                {isAr
+                  ? `لا يوجد طلاب مسجلون حالياً في هذه الدفعة (${classId}). شارك كود الدفعة مع طلابك للبدء، أو اضغط "عينة قياسية" لمعاينة خوارزميات التدخل البيداغوجي.`
+                  : `No students enrolled yet in section (${classId}). Share your section code to onboard students, or click "Benchmark" to preview struggle clusters.`}
+              </span>
+            </div>
+            <button
+              onClick={() => setViewMode('benchmark')}
+              className="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 font-bold shrink-0 transition"
+            >
+              {isAr ? 'معاينة العينة' : 'Preview Benchmark'}
+            </button>
+          </div>
+        )}
 
         {/* Tab Switcher */}
         <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#121524] border border-slate-800/80 w-full sm:w-fit overflow-x-auto">

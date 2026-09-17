@@ -26,6 +26,7 @@ import ProactiveSuggestionCard from './ProactiveSuggestionCard';
 import { detectProactiveOpportunities } from '../lib/proactiveAssistantEngine';
 import { generateLearningInsights } from '../lib/learningInsightsEngine';
 import { explainPedagogyChoice, type PedagogyStrategy } from '../lib/explainabilityEngine';
+import { encryptThreadMessages, decryptThreadMessages } from '../lib/userCryptoEngine';
 
 // Three.js is heavy — only load the sign avatar when a deaf-mode user opens it.
 const SignAvatar3D = React.lazy(() => import("./SignAvatar3D"));
@@ -645,12 +646,39 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       const incomingLen = snapshot.exists() ? (snapshot.data().messages?.length || 0) : 0;
       if (incomingLen < messagesLenRef.current && Date.now() - lastLocalWriteRef.current < 8000) return;
 
-      if (snapshot.exists() && snapshot.data().messages?.length > 0) {
+      if (snapshot.exists()) {
         const data = snapshot.data();
-        const incomingMessages = data.messages as Message[] || [];
-        setMessages(incomingMessages);
+        decryptThreadMessages(data, profile.uid).then((incomingMessages) => {
+          const incomingLen = incomingMessages.length;
+          if (incomingLen < messagesLenRef.current && Date.now() - lastLocalWriteRef.current < 8000) {
+            setMessagesLoading(false);
+            return;
+          }
+
+          if (incomingMessages.length > 0) {
+            setMessages(incomingMessages);
+          } else {
+            // If thread exists in metadata but no messages
+            const isArabic = isArabicLocale(profile.language);
+            const welcomeMsg = isArabic 
+              ? `كوجنيفي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
+              : `Cognify Ready. How can I assist your ${profile.field} studies today?`;
+            setMessages([
+              {
+                id: 'welcome',
+                role: 'assistant',
+                content: welcomeMsg,
+                timestamp: new Date().toISOString()
+              }
+            ]);
+          }
+          setMessagesLoading(false);
+        }).catch((err) => {
+          console.error('[ChatInterface] Failed to decrypt snapshot messages:', err);
+          setMessagesLoading(false);
+        });
       } else {
-        // If thread exists in metadata but no document, or no messages
+        // If thread document does not exist yet
         const isArabic = isArabicLocale(profile.language);
         const welcomeMsg = isArabic 
           ? `كوجنيفي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
@@ -663,8 +691,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             timestamp: new Date().toISOString()
           }
         ]);
+        setMessagesLoading(false);
       }
-      setMessagesLoading(false);
     }, (err) => {
       console.error("Error fetching messages:", err);
       setMessagesLoading(false);
@@ -910,12 +938,17 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     const newHistory = [...messages, userMessage];
     setMessages(newHistory);
     
-    // Save locally to appropriate Firestore document
+    // Save locally to appropriate Firestore document with Zero-Knowledge encryption
     if (profile.uid && currentThreadId) {
       const threadPath = `users/${profile.uid}/threads/${currentThreadId}`;
       const historyToSave = cleanMessagesForFirestore(newHistory);
-      setDoc(doc(db, threadPath), { messages: historyToSave }, { merge: true }).catch(err => {
-         handleFirestoreError(err, OperationType.UPDATE, threadPath);
+      encryptThreadMessages(historyToSave, profile.uid).then((encryptedDoc) => {
+        setDoc(doc(db, threadPath), cleanDataForFirestore(encryptedDoc), { merge: true }).catch(err => {
+          handleFirestoreError(err, OperationType.UPDATE, threadPath);
+        });
+      }).catch((err) => {
+        console.warn('[ChatInterface] Fallback to plaintext save on encryption failure:', err);
+        setDoc(doc(db, threadPath), { messages: historyToSave }, { merge: true }).catch(() => {});
       });
     }
     
@@ -1014,12 +1047,17 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         setTimeout(() => onStreamingUpdate(lastText), 50);
       }
 
-      // Final persistence
+      // Final persistence with Zero-Knowledge encryption
       if (profile.uid && currentThreadId) {
         const threadPath = `users/${profile.uid}/threads/${currentThreadId}`;
         const historyToSave = cleanMessagesForFirestore(updatedHistory);
-        setDoc(doc(db, threadPath), { messages: historyToSave }, { merge: true }).catch(err => {
-           handleFirestoreError(err, OperationType.UPDATE, threadPath);
+        encryptThreadMessages(historyToSave, profile.uid).then((encryptedDoc) => {
+          setDoc(doc(db, threadPath), cleanDataForFirestore(encryptedDoc), { merge: true }).catch(err => {
+            handleFirestoreError(err, OperationType.UPDATE, threadPath);
+          });
+        }).catch((err) => {
+          console.warn('[ChatInterface] Fallback to plaintext save on encryption failure:', err);
+          setDoc(doc(db, threadPath), { messages: historyToSave }, { merge: true }).catch(() => {});
         });
       }
 

@@ -141,6 +141,10 @@ export interface UserProfile {
   activeThreadId?: string;
   tasks?: Task[];
   lastActiveDate?: string;
+  /** Linked student UID for parent companion */
+  linkedChildUid?: string;
+  /** Active student learning state */
+  studentState?: any;
   /**
    * Phase 2: Cognify Memory (Transparent Student Memory).
    * Stored under users/{userId}/memory/config in Firestore.

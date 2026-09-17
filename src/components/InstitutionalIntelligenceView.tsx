@@ -619,3 +619,5 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
     </div>
   );
 };
+
+export default InstitutionalIntelligenceView;

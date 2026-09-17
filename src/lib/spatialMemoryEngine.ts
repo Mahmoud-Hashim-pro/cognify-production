@@ -13,7 +13,8 @@ import {
   SpatialCorrection,
 } from '../types/spatialMemory2';
 import { db, cleanDataForFirestore } from './firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, deleteField } from 'firebase/firestore';
+import { encryptSpatialRecord, decryptSpatialRecord, encryptData, decryptData } from './userCryptoEngine';
 
 export type {
   SpatialObjectIdentity,
@@ -294,6 +295,40 @@ export function getSpatialObjects(uid: string): SpatialObjectRecord[] {
 }
 
 /**
+ * Asynchronously hydrates spatial memory from owner-only Firestore subcollection,
+ * transparently decrypting with user-derived AES-256-GCM keys.
+ */
+export async function loadSpatialObjectsFromFirestore(uid: string): Promise<SpatialObjectRecord[]> {
+  if (!uid || typeof window === 'undefined' || !db) return getSpatialObjects(uid);
+  try {
+    const colRef = collection(db, `users/${uid}/spatialObjects`);
+    const snap = await getDocs(colRef);
+    if (snap.empty) return getSpatialObjects(uid);
+
+    const decryptedList: SpatialObjectRecord[] = [];
+    for (const docSnap of snap.docs) {
+      const raw = docSnap.data();
+      const rec = await decryptSpatialRecord(raw, uid);
+      if (rec) {
+        rec.uid = uid;
+        decryptedList.push(rec);
+      }
+    }
+
+    if (decryptedList.length > 0) {
+      userSpatialCache.set(uid, decryptedList);
+      try {
+        localStorage.setItem(`${STORAGE_PREFIX}${uid}`, JSON.stringify(decryptedList));
+      } catch {}
+      return decryptedList;
+    }
+  } catch (err) {
+    console.warn('[spatialMemoryEngine] Error loading remote spatial objects:', err);
+  }
+  return getSpatialObjects(uid);
+}
+
+/**
  * Saves or updates a spatial object record for a specific user.
  * Automatically records location history when an object moves.
  */
@@ -377,15 +412,16 @@ export async function saveSpatialObject(uid: string, record: SpatialObjectRecord
     }
   }
 
-  // Persist to Firestore under user document (if online)
+  // Persist to Firestore under owner-only subcollection with Zero-Knowledge encryption
   try {
-    if (typeof window !== 'undefined' && db) {
+    if (typeof window !== 'undefined' && db && record.id) {
+      const objRef = doc(db, `users/${uid}/spatialObjects/${record.id}`);
+      const encryptedDoc = await encryptSpatialRecord(record, uid);
+      await setDoc(objRef, cleanDataForFirestore(encryptedDoc), { merge: true });
+
+      // Clean up legacy arrays on root doc if they ever existed
       const userRef = doc(db, `users/${uid}`);
-      await setDoc(
-        userRef,
-        { spatialMemories: cleanDataForFirestore(updated) },
-        { merge: true }
-      );
+      setDoc(userRef, { spatialMemories: deleteField(), spatialMemoriesV2: deleteField() }, { merge: true }).catch(() => {});
     }
   } catch (err) {
     // Non-blocking offline support
@@ -754,12 +790,14 @@ function persistSpatialObjectIdentities(uid: string, records: SpatialObjectIdent
 
   try {
     if (typeof window !== 'undefined' && db) {
+      records.forEach(async (ident) => {
+        const objRef = doc(db, `users/${uid}/spatialObjects/${ident.id}`);
+        const enc = await encryptData(ident, uid);
+        setDoc(objRef, cleanDataForFirestore({ id: ident.id, category: ident.category, ...enc }), { merge: true }).catch(() => {});
+      });
+      // Purge legacy field from root doc
       const userRef = doc(db, `users/${uid}`);
-      setDoc(
-        userRef,
-        { spatialMemoriesV2: cleanDataForFirestore(records) },
-        { merge: true }
-      ).catch(() => {});
+      setDoc(userRef, { spatialMemoriesV2: deleteField(), spatialMemories: deleteField() }, { merge: true }).catch(() => {});
     }
   } catch {
     // Non-blocking offline support

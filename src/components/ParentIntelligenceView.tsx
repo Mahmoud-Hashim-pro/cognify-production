@@ -1,4 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { db } from '../lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import type { UserProfile } from '../types';
 import {
   Heart,
   ShieldCheck,
@@ -13,15 +16,19 @@ import {
   CheckCircle2,
   Lock,
   Compass,
+  Link2,
+  X,
 } from 'lucide-react';
 import type { StudentState } from '../types/studentState';
 import type { ParentDashboardData } from '../types/parent';
 import { compileParentDashboard } from '../lib/parentIntelligence';
+import { createInitialStudentState } from '../lib/studentStateEngine';
 
 interface ParentIntelligenceViewProps {
   student?: StudentState;
   studentDisplayName?: string;
   lang?: 'en' | 'ar' | 'fr';
+  profile?: UserProfile | null;
   onBack?: () => void;
 }
 
@@ -29,14 +36,63 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
   student,
   studentDisplayName = 'Alex',
   lang = 'ar',
+  profile,
   onBack,
 }) => {
   const isAr = lang === 'ar';
   const [activeTab, setActiveTab] = useState<'growth' | 'breakthroughs' | 'discussion_cues'>('growth');
+  const [isLinkingModalOpen, setIsLinkingModalOpen] = useState(false);
+  const [childIdInput, setChildIdInput] = useState('');
+  const [linkedChildState, setLinkedChildState] = useState<StudentState | null>(null);
+  const [linkedChildName, setLinkedChildName] = useState<string>('');
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(!student);
+
+  // Hydrate linked child academic state from Firestore
+  useEffect(() => {
+    const childId = profile?.linkedChildUid || (typeof window !== 'undefined' ? localStorage.getItem('cognify_linked_child_uid') : null);
+    if (!childId || student) return;
+
+    let isMounted = true;
+    const loadChild = async () => {
+      try {
+        if (typeof window !== 'undefined' && db) {
+          const uDoc = await getDoc(doc(db, `users/${childId}`));
+          if (uDoc.exists() && isMounted) {
+            const u = uDoc.data();
+            setLinkedChildName(u.name || u.email?.split('@')[0] || 'Child');
+            try {
+              const sDoc = await getDoc(doc(db, `users/${childId}/studentState/current`));
+              if (sDoc.exists() && isMounted) {
+                setLinkedChildState(sDoc.data() as StudentState);
+                setIsDemoMode(false);
+                return;
+              }
+            } catch {}
+            // Synthesize from profile
+            if (isMounted) {
+              const base = createInitialStudentState(childId, u.level);
+              setLinkedChildState({
+                ...base,
+                conceptMastery: u.mastery || {},
+                totalExercisesCompleted: u.questionHistory?.length || 0,
+                lastActiveTimestamp: u.lastActiveDate ? new Date(u.lastActiveDate).getTime() : Date.now(),
+              });
+              setIsDemoMode(false);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[ParentIntelligenceView] Failed to load linked child state:', err);
+      }
+    };
+    loadChild();
+    return () => { isMounted = false; };
+  }, [profile?.linkedChildUid, student]);
 
   // Provide realistic demo student if not passed from session
   const activeStudent: StudentState = useMemo(() => {
     if (student) return student;
+    if (linkedChildState && !isDemoMode) return linkedChildState;
 
     return {
       uid: 'demo_child_01',
@@ -96,11 +152,26 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
       totalExercisesCompleted: 24,
       lastActiveTimestamp: Date.now(),
     };
-  }, [student]);
+  }, [student, linkedChildState, isDemoMode]);
+
+  const effectiveDisplayName = linkedChildName || studentDisplayName;
 
   const dashboardData: ParentDashboardData = useMemo(() => {
-    return compileParentDashboard(activeStudent, studentDisplayName, 2);
-  }, [activeStudent, studentDisplayName]);
+    return compileParentDashboard(activeStudent, effectiveDisplayName, 2);
+  }, [activeStudent, effectiveDisplayName]);
+
+  const handleLinkChild = async () => {
+    if (!childIdInput.trim()) return;
+    const cleanId = childIdInput.trim();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cognify_linked_child_uid', cleanId);
+    }
+    if (profile?.uid && db) {
+      setDoc(doc(db, `users/${profile.uid}`), { linkedChildUid: cleanId }, { merge: true }).catch(() => {});
+    }
+    setIsLinkingModalOpen(false);
+    setIsDemoMode(false);
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0C14] text-slate-100 p-4 sm:p-8" dir={isAr ? 'rtl' : 'ltr'}>
@@ -141,18 +212,32 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
             </div>
           </div>
 
-          {/* Key Metrics Badges */}
-          <div className="flex items-center gap-3">
+          {/* Key Metrics & Child Linking Badges */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setIsLinkingModalOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold transition active:scale-95 shadow-lg"
+            >
+              <Link2 className="w-3.5 h-3.5" />
+              <span>{linkedChildName ? (isAr ? `مرتبط: ${linkedChildName}` : `Linked: ${linkedChildName}`) : (isAr ? 'ربط حساب الابن' : 'Link Child')}</span>
+            </button>
+
+            {isDemoMode && (
+              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                {isAr ? '⚡ عينة توضيحية' : '⚡ Demo Preview'}
+              </span>
+            )}
+
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-800">
               <Calendar className="w-4 h-4 text-emerald-400" />
               <span className="text-sm font-semibold text-white">
-                {dashboardData.growthSummary.activeDaysCount} {isAr ? 'أيام نشطة' : 'Active Days'}
+                {dashboardData.growthSummary.activeDaysCount} {isAr ? 'أيام' : 'Days'}
               </span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-800">
               <Clock className="w-4 h-4 text-cyan-400" />
               <span className="text-sm font-semibold text-white">
-                {dashboardData.growthSummary.practiceTimeMinutes} {isAr ? 'دقيقة تدريب' : 'Mins'}
+                {dashboardData.growthSummary.practiceTimeMinutes} {isAr ? 'دقيقة' : 'Mins'}
               </span>
             </div>
           </div>
@@ -389,6 +474,67 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Child Account Linking Modal */}
+        {isLinkingModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+            <div className="relative w-full max-w-md rounded-3xl bg-[#121524] border border-slate-800 text-slate-100 p-6 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-2xl bg-purple-500/20 border border-purple-500/30 text-purple-300">
+                    <Link2 className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-white text-base">
+                    {isAr ? 'ربط حساب الابن / الطالب' : 'Link Child / Student Account'}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsLinkingModalOpen(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs text-slate-300">
+                <p>
+                  {isAr
+                    ? 'أدخل المعرف التعريفي للطالب (Student UID) أو كود الطالب لجلب تقارير التعلم الفعلية ونسب الإتقان في المقررات الدراسية.'
+                    : 'Enter the Student UID or enrollment code to sync live learning milestones, active pedagogy, and concept mastery.'}
+                </p>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    {isAr ? 'معرف الطالب (Student UID / Code)' : 'Student UID / Code'}
+                  </label>
+                  <input
+                    type="text"
+                    value={childIdInput}
+                    onChange={(e) => setChildIdInput(e.target.value)}
+                    placeholder="e.g. std_usr_998124 or student email"
+                    className="w-full px-4 py-3 rounded-2xl bg-[#0A0C14] border border-slate-800 text-white placeholder-slate-600 text-xs focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-2">
+                <button
+                  onClick={() => setIsLinkingModalOpen(false)}
+                  className="px-5 py-2.5 rounded-2xl border border-slate-800 bg-[#0A0C14] text-slate-300 text-xs font-bold hover:bg-slate-800/40 transition"
+                >
+                  {isAr ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  onClick={handleLinkChild}
+                  disabled={!childIdInput.trim()}
+                  className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-bold disabled:opacity-40 transition shadow-lg shadow-purple-500/20 active:scale-95"
+                >
+                  {isAr ? 'ربط الحساب الآن' : 'Link Account'}
+                </button>
+              </div>
             </div>
           </div>
         )}

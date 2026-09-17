@@ -148,7 +148,10 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" title="Pre-calibrated 500-trial longitudinal benchmark dataset">
+                <FlaskConical className="w-3.5 h-3.5" /> {isArabic ? 'بيانات معيارية تجريبية (N=500)' : 'Empirical Benchmark Baseline (N=500)'}
+              </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Award className="w-3.5 h-3.5" /> Empirical Rigor
               </span>

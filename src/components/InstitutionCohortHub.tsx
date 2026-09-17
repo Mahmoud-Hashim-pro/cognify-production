@@ -39,6 +39,8 @@ import {
   HelpCircle,
   CheckCircle2,
 } from 'lucide-react';
+import { InstitutionalIntelligenceView } from './InstitutionalIntelligenceView';
+import type { StudentState } from '../types/studentState';
 
 interface InstitutionCohortHubProps {
   profile: UserProfile;
@@ -50,6 +52,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [activeSection, setActiveSection] = useState<'roster' | 'intelligence'>('roster');
 
   const isAdmin = isAdminUser(profile) || profile.isAdmin === true;
   const isOrgManager = profile.isOrgManager === true;
@@ -111,6 +114,21 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
     const orgFilter = isAdmin ? selectedOrg : userOrg;
     return computeCohortAnalytics(users, orgFilter || undefined);
   }, [users, isAdmin, selectedOrg, userOrg]);
+
+  // Derive department-grouped student cohorts for Deep Intelligence & ABET attainment
+  const studentCohortsByDept = useMemo(() => {
+    const deptMap: Record<string, StudentState[]> = {};
+    users.forEach((u) => {
+      if (u.role === 'Student' || !u.role) {
+        const dept = u.department || u.field || 'General';
+        if (!deptMap[dept]) deptMap[dept] = [];
+        if (u.studentState) {
+          deptMap[dept].push(u.studentState);
+        }
+      }
+    });
+    return deptMap;
+  }, [users]);
 
   // Trigger CSV download
   const handleExportCsv = () => {
@@ -247,6 +265,43 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
           </div>
         </div>
 
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-2 p-1.5 bg-[#121524]/90 border border-slate-800/80 rounded-2xl backdrop-blur-xl w-fit">
+          <button
+            onClick={() => setActiveSection('roster')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+              activeSection === 'roster'
+                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>{L('Cohort Analytics & Roster', 'تحليلات الدفعة وقوائم الطلاب')}</span>
+          </button>
+          <button
+            onClick={() => setActiveSection('intelligence')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+              activeSection === 'intelligence'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>{L('Deep Academic & ABET Intelligence', 'الذكاء الأكاديمي والاعتماد البرامجي')}</span>
+          </button>
+        </div>
+
+        {activeSection === 'intelligence' ? (
+          <div className="mt-2">
+            <InstitutionalIntelligenceView
+              institutionId={stats.orgCode || 'institution'}
+              institutionName={activeOrgDisplay}
+              studentCohortsByDept={studentCohortsByDept}
+              lang={profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya' ? 'ar' : profile.language === 'French' ? 'fr' : 'en'}
+            />
+          </div>
+        ) : (
+          <>
         {/* k-Anonymity Privacy Notice Banner */}
         {stats.kAnonymitySuppressed ? (
           <div
@@ -804,6 +859,8 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               )}
             </div>
           </>
+        )}
+        </>
         )}
       </div>
     </div>

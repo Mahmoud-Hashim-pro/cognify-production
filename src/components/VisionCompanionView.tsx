@@ -39,6 +39,7 @@ import {
   recordObservedSpatialObjects,
   getSpatialObjects,
   querySpatialMemory,
+  loadSpatialObjectsFromFirestore,
 } from '../lib/spatialMemoryEngine';
 
 interface VisionCompanionViewProps {
@@ -157,6 +158,17 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   );
   const [spatialQueryInput, setSpatialQueryInput] = useState('');
   const [spatialQueryResult, setSpatialQueryResult] = useState<string | null>(null);
+
+  // Hydrate spatial objects from owner-only encrypted Firestore subcollection
+  useEffect(() => {
+    if (profile?.uid) {
+      loadSpatialObjectsFromFirestore(profile.uid).then((records) => {
+        if (isMountedRef.current && records && records.length > 0) {
+          setSpatialRecords(records);
+        }
+      });
+    }
+  }, [profile?.uid]);
 
   const memories = profile?.visionMemories || [];
 

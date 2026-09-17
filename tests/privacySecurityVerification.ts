@@ -18,6 +18,13 @@ import {
   verifyAuditChain,
   GENESIS_PREV_HASH
 } from '../src/lib/privacySecurityEngine';
+import {
+  encryptThreadMessages,
+  decryptThreadMessages,
+  encryptSpatialRecord,
+  decryptSpatialRecord,
+  isEncryptedPayload,
+} from '../src/lib/userCryptoEngine';
 import type { StudentState } from '../src/types/studentState';
 import type { AuditLogEntry } from '../src/types/privacySecurity';
 
@@ -323,6 +330,82 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
     'isSafeImageUrl permits public HTTPS CDN images'
   );
 
+  // ==========================================================================
+  // Test Group 7: Client-Side AES-256-GCM Zero-Knowledge Encryption & Isolation
+  // ==========================================================================
+  console.log('Group 7: Client-Side AES-256-GCM Zero-Knowledge Encryption & Spatial Isolation');
+
+  const testUid = 'student_zk_alice_99';
+  const otherUid = 'attacker_bob_66';
+
+  const plainMessages = [
+    {
+      id: 'm1',
+      role: 'user' as const,
+      content: 'Can you help me solve this sensitive calculus exam problem?',
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: 'm2',
+      role: 'assistant' as const,
+      content: 'Let us break down the integral into parts step by step.',
+      timestamp: new Date().toISOString(),
+    },
+  ];
+
+  // 1. Encrypt thread messages
+  const encryptedDoc = await encryptThreadMessages(plainMessages, testUid, 'thread_123');
+  assert(encryptedDoc.encrypted === true, 'Encrypted document has encrypted: true flag');
+  assert(encryptedDoc.version === 1, 'Encrypted document has version 1');
+  assert(typeof encryptedDoc.iv === 'string' && encryptedDoc.iv.length > 0, 'Encrypted document has Base64 IV');
+  assert(typeof encryptedDoc.ciphertext === 'string' && encryptedDoc.ciphertext.length > 0, 'Encrypted document has Base64 ciphertext');
+  assert(!JSON.stringify(encryptedDoc).includes('calculus exam'), 'Ciphertext document does NOT leak plaintext tokens');
+
+  // 2. Decrypt with correct UID
+  const decrypted = await decryptThreadMessages(encryptedDoc, testUid);
+  assert(decrypted.length === 2, 'Decrypted messages array matches original length');
+  assert(decrypted[0].content === plainMessages[0].content, 'Decrypted user message content exactly matches original');
+  assert(decrypted[1].content === plainMessages[1].content, 'Decrypted assistant message content exactly matches original');
+
+  // 3. Decrypt with wrong UID (zero-knowledge isolation)
+  const failedDecrypt = await decryptThreadMessages(encryptedDoc, otherUid);
+  assert(
+    failedDecrypt.length === 1 && failedDecrypt[0].id === 'decrypt_error',
+    'Decrypting with unauthorized UID fails and returns decrypt_error fallback (Zero-Knowledge)'
+  );
+
+  // 4. Spatial object encryption roundtrip
+  const testSpatialObj = {
+    id: 'obj_keys_44',
+    uid: testUid,
+    objectName: 'Car Keys',
+    category: 'keys' as const,
+    surface: 'wooden desk',
+    room: 'study room',
+    lastSeenTimestamp: Date.now(),
+    confidence: 0.98,
+  };
+
+  const encryptedSpatial = await encryptSpatialRecord(testSpatialObj, testUid);
+  assert(encryptedSpatial.encrypted === true, 'Encrypted spatial object has encrypted: true flag');
+  assert(isEncryptedPayload(encryptedSpatial) === true, 'isEncryptedPayload validates encrypted spatial record');
+  assert(!JSON.stringify(encryptedSpatial).includes('wooden desk'), 'Encrypted spatial record does NOT leak surface in plaintext');
+
+  const decryptedSpatial = await decryptSpatialRecord(encryptedSpatial, testUid);
+  assert(decryptedSpatial.category === 'keys', 'Decrypted spatial record preserves category');
+  assert(decryptedSpatial.surface === 'wooden desk', 'Decrypted spatial record preserves surface');
+
+  // 5. Verify firestore.rules blocks spatialMemories on root user document
+  assert(
+    rulesContent.includes('!("spatialMemories" in data)') && rulesContent.includes('!("spatialMemoriesV2" in data)'),
+    'firestore.rules explicitly rejects spatialMemories and spatialMemoriesV2 on /users/{userId}'
+  );
+  assert(
+    rulesContent.includes('match /spatialObjects/{objectId}') &&
+    rulesContent.includes('allow read, write, delete: if isOwner(userId);'),
+    'firestore.rules enforces Owner-Only rule on /users/{userId}/spatialObjects/{objectId}'
+  );
+
   console.log(`\nMilestone 16 Verification Finished: ${passed} passed, ${failed} failed.`);
   return { passed, failed };
 }
@@ -330,5 +413,6 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
 if (process.argv[1]?.includes('privacySecurityVerification')) {
   runPrivacySecurityVerification().then(res => {
     if (res.failed > 0) process.exit(1);
+    else process.exit(0);
   });
 }

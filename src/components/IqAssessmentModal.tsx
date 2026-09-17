@@ -168,6 +168,9 @@ export default function IqAssessmentModal({
         const computedLevel: CognitiveLevel =
           recommendedPersona === 'Socratic' ? 'Advanced' : (recommendedPersona === 'Foundational' ? 'Basic' : 'Intermediate');
 
+        // Decoupled: Academic level is governed exclusively by curriculum progress and
+        // StudentStateManager concept mastery, NOT by optional cognitive assessments.
+        // cognitiveLevel calibrates AI persona explanation tone without mutating academic level.
         const updates = {
           iqScore,
           cognitiveDomains: domainScores,
@@ -175,7 +178,6 @@ export default function IqAssessmentModal({
           nextEligibleIqDate: nextDate.toISOString(),
           iqAssessmentHistory: arrayUnion(cleanDataForFirestore(newRecord)),
           cognitiveLevel: computedLevel,
-          level: computedLevel,
         };
 
         await updateDoc(doc(db, 'users', profile.uid), cleanDataForFirestore(updates));

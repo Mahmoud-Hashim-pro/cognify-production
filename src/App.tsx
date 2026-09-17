@@ -26,6 +26,7 @@ import { subscribeToStudentMemory, clearStudentMemory } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
 import { initSecurityTracker } from "./lib/securityTracker";
 import { secureLoadKeySync, secureSaveKey, secureRemoveKey, autoMigrateStorageKeys } from "./lib/cryptoShield";
+import { encryptThreadMessages } from "./lib/userCryptoEngine";
 
 function lazyWithRetry<T extends React.ComponentType<any>>(
   factory: () => Promise<{ default: T }>
@@ -370,6 +371,12 @@ export default function App() {
           delete rawData.chatHistory;
           setDoc(doc(db, path), { chatHistory: deleteField() }, { merge: true }).catch(() => {});
         }
+        // Automatic Zero-Knowledge Privacy migration: purge legacy spatialMemories from root user doc
+        if (rawData && ('spatialMemories' in rawData || 'spatialMemoriesV2' in rawData)) {
+          delete rawData.spatialMemories;
+          delete rawData.spatialMemoriesV2;
+          setDoc(doc(db, path), { spatialMemories: deleteField(), spatialMemoriesV2: deleteField() }, { merge: true }).catch(() => {});
+        }
         const data = rawData as UserProfile;
         setProfile(data);
         // The profile is established, so the login-screen hints have served their
@@ -625,7 +632,9 @@ export default function App() {
         }
         return item;
       });
-      await setDoc(doc(db, threadPath), { messages: cleanHistory }, { merge: true });
+      // Zero-Knowledge Client-Side AES-256-GCM encryption before persistence
+      const encryptedDoc = await encryptThreadMessages(cleanHistory, user.uid);
+      await setDoc(doc(db, threadPath), cleanDataForFirestore(encryptedDoc), { merge: true });
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, threadPath);
     }
@@ -814,7 +823,7 @@ export default function App() {
       case 'teacher':
         return <TeacherIntelligenceView lang={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya' ? 'ar' : 'en'} />;
       case 'parent':
-        return <ParentIntelligenceView lang={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya' ? 'ar' : 'en'} />;
+        return <ParentIntelligenceView lang={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya' ? 'ar' : 'en'} profile={activeProfile} />;
       case 'privacy_security':
         return <PrivacySecurityCenter isArabic={profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya'} />;
       case 'evaluation':
@@ -1172,9 +1181,13 @@ export default function App() {
                       lastMessageSnippet: t.lastMessageSnippet || ""
                     }));
                   }
-                  // Zero-Knowledge Privacy: Ensure chatHistory is never stored on the user document
+                  // Zero-Knowledge Privacy: Ensure chatHistory and spatialMemories are never stored on root user doc
                   delete cleanProfile.chatHistory;
                   cleanProfile.chatHistory = deleteField();
+                  delete cleanProfile.spatialMemories;
+                  delete cleanProfile.spatialMemoriesV2;
+                  cleanProfile.spatialMemories = deleteField();
+                  cleanProfile.spatialMemoriesV2 = deleteField();
 
                   const finalProfileToSave = cleanDataForFirestore(cleanProfile);
                   await setDoc(doc(db, path), finalProfileToSave, { merge: true });

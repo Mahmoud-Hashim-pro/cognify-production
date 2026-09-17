@@ -182,6 +182,8 @@ service cloud.firestore {
              data.points is number &&
              data.onboardingComplete is bool &&
              !("chatHistory" in data) &&
+             !("spatialMemories" in data) &&
+             !("spatialMemoriesV2" in data) &&
              (!("chatThreads" in data) || data.chatThreads is list) &&
              (!("questionHistory" in data) || data.questionHistory is list) &&
              (!("tasks" in data) || data.tasks is list) &&
