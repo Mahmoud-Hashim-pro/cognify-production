@@ -1,8 +1,16 @@
 import { localize, isArabicLocale } from '../lib/translations';
 import { useEffect, useMemo, useState } from 'react';
 import { UserProfile, PlannerTask, PlannerTaskType } from '../types';
-import { Menu, Plus, Trash2, CalendarDays, CheckCircle2, Circle, ArrowLeft } from 'lucide-react';
+import { 
+  Menu, Plus, Trash2, CalendarDays, CheckCircle2, Circle, ArrowLeft,
+  RotateCcw, Award, Layers, Mic, BookMarked
+} from 'lucide-react';
 import { daysUntilDue, isOverdue, subscribeToTasks, saveTask, deleteTask, parseLocalDate } from '../lib/planner';
+import MockExamSimulator from './academic/MockExamSimulator';
+import DynamicScheduleView from './academic/DynamicScheduleView';
+import LectureDigester from './academic/LectureDigester';
+import SocraticStudyBuddy from './academic/SocraticStudyBuddy';
+import ResearchCitationCopilot from './academic/ResearchCitationCopilot';
 
 interface AcademicPlannerProps {
   profile: UserProfile;
@@ -23,9 +31,21 @@ const TYPE_META: Record<PlannerTaskType, { en: string; ar: string; color: string
 // crashing the planner with `undefined.color`.
 const metaOf = (type?: string) => TYPE_META[(type as PlannerTaskType)] || TYPE_META.other;
 
+export type AcademicTab = 'tasks' | 'schedule' | 'mock-exam' | 'digester' | 'socratic' | 'research';
+
+const ACADEMIC_TABS: { id: AcademicTab; en: string; ar: string; icon: any }[] = [
+  { id: 'tasks', en: 'Tasks & Deadlines', ar: 'المهام والمواعيد', icon: CalendarDays },
+  { id: 'schedule', en: 'Smart Schedule & Rebalance', ar: 'جدول المذاكرة وإعادة الموازنة', icon: RotateCcw },
+  { id: 'mock-exam', en: 'AI Mock Exams', ar: 'محاكي الامتحانات وتصحيح المقالي', icon: Award },
+  { id: 'digester', en: 'Lecture Digester', ar: 'كبسولة ومحلل المحاضرات', icon: Layers },
+  { id: 'socratic', en: 'Socratic Oral Buddy', ar: 'رفيق "سمّعلي" الصوتي', icon: Mic },
+  { id: 'research', en: 'Research & Citations', ar: 'مساعد الأبحاث والمراجع', icon: BookMarked },
+];
+
 export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }: AcademicPlannerProps) {
   const isAr = isArabicLocale(profile.language);
   const t = (en: string, ar: string) => localize(profile.language, en, ar);
+  const [activeTab, setActiveTab] = useState<AcademicTab>('tasks');
   const [tasks, setTasks] = useState<PlannerTask[]>([]);
 
   const [title, setTitle] = useState('');
@@ -150,73 +170,140 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
             <span className="p-2 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
               <CalendarDays className="w-7 h-7" />
             </span>
-            {t('Academic Planner', 'المخطّط الأكاديمي')}
+            {t('Academic Planner & OS', 'المخطّط ومنظومة التعلّم الأكاديمية')}
           </h1>
           <p className="text-xs md:text-sm text-slate-400 font-medium italic mt-1.5">
-            {t('Plan assignments, quizzes and exams — never miss a deadline.', 'نظّم التكاليف والكويزات والامتحانات — مايفوتكش أي موعد.')}
+            {t('Smart schedules, AI mock exams, lecture capsules, Feynman voice coach & citations.', 'جداول ذكية، محاكي امتحانات، كبسولة المحاضرات، رفيق المذاكرة الصوتي وتوثيق المراجع.')}
           </p>
         </div>
       </header>
 
-      {/* Add task */}
-      <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 md:p-7 backdrop-blur-xl shadow-2xl max-w-4xl w-full">
-        <h2 className="text-xs font-black uppercase tracking-widest text-slate-300 mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-cyan-400" />
-          {t('Add a task', 'إضافة مهمة')}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={t('Title (e.g. ML Assignment 2)', 'العنوان (مثلاً تكليف ML 2)')}
-            onKeyDown={(e) => e.key === 'Enter' && addTask()}
-            className="bg-[#0A0C14] border border-slate-800 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all"
-          />
-          <input
-            value={course}
-            onChange={(e) => setCourse(e.target.value)}
-            placeholder={t('Course (optional)', 'المادة (اختياري)')}
-            className="bg-[#0A0C14] border border-slate-800 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all"
-          />
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as PlannerTaskType)}
-            className="bg-[#0A0C14] border border-slate-800 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer"
-          >
-            {(Object.keys(TYPE_META) as PlannerTaskType[]).map((k) => (
-              <option key={k} value={k} className="bg-slate-900 text-white">
-                {t(TYPE_META[k].en, TYPE_META[k].ar)}
-              </option>
-            ))}
-          </select>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="bg-[#0A0C14] border border-slate-800 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all [color-scheme:dark]"
-          />
-        </div>
-        <button
-          onClick={addTask}
-          disabled={!title.trim() || !dueDate}
-          className="mt-4 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 active:scale-95 disabled:opacity-40 transition-all flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> {t('Add task', 'إضافة')}
-        </button>
+      {/* Next-Gen Academic Tabs Bar */}
+      <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-[#121524]/90 border border-slate-800/80 backdrop-blur-xl max-w-5xl w-full shadow-lg">
+        {ACADEMIC_TABS.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                isActive
+                  ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+              }`}
+            >
+              <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
+              <span>{isAr ? tab.ar : tab.en}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Lists */}
-      <div className="max-w-4xl w-full space-y-6 pb-12">
-        {tasks.length === 0 && (
-          <div className="text-center text-slate-500 py-16 flex flex-col items-center gap-3 bg-[#121524]/40 border border-slate-800/40 rounded-3xl">
-            <CalendarDays className="w-12 h-12 text-slate-600" />
-            <p className="font-medium text-sm text-slate-400">{t('No tasks yet — add your first deadline above.', 'لسه مفيش مهام — ضيف أول موعد من فوق.')}</p>
+      {/* TAB CONTENT: TASKS & DEADLINES */}
+      {activeTab === 'tasks' && (
+        <>
+          {/* Add task */}
+          <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 md:p-7 backdrop-blur-xl shadow-2xl max-w-4xl w-full">
+            <h2 className="text-xs font-black uppercase tracking-widest text-slate-300 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400" />
+              {t('Add a task', 'إضافة مهمة')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={t('Title (e.g. ML Assignment 2)', 'العنوان (مثلاً تكليف ML 2)')}
+                onKeyDown={(e) => e.key === 'Enter' && addTask()}
+                className="bg-[#0A0C14] border border-slate-800 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all"
+              />
+              <input
+                value={course}
+                onChange={(e) => setCourse(e.target.value)}
+                placeholder={t('Course (optional)', 'المادة (اختياري)')}
+                className="bg-[#0A0C14] border border-slate-800 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all"
+              />
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value as PlannerTaskType)}
+                className="bg-[#0A0C14] border border-slate-800 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer"
+              >
+                {(Object.keys(TYPE_META) as PlannerTaskType[]).map((k) => (
+                  <option key={k} value={k} className="bg-slate-900 text-white">
+                    {t(TYPE_META[k].en, TYPE_META[k].ar)}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="bg-[#0A0C14] border border-slate-800 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/10 transition-all [color-scheme:dark]"
+              />
+            </div>
+            <button
+              onClick={addTask}
+              disabled={!title.trim() || !dueDate}
+              className="mt-4 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 active:scale-95 disabled:opacity-40 transition-all flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> {t('Add task', 'إضافة')}
+            </button>
           </div>
-        )}
-        <Section title={t('Overdue', 'متأخرة')} items={overdue} />
-        <Section title={t('Upcoming', 'قادمة')} items={upcoming} />
-        <Section title={t('Completed', 'مكتملة')} items={done} />
-      </div>
+
+          {/* Lists */}
+          <div className="max-w-4xl w-full space-y-6 pb-12">
+            {tasks.length === 0 && (
+              <div className="text-center text-slate-500 py-16 flex flex-col items-center gap-3 bg-[#121524]/40 border border-slate-800/40 rounded-3xl">
+                <CalendarDays className="w-12 h-12 text-slate-600" />
+                <p className="font-medium text-sm text-slate-400">{t('No tasks yet — add your first deadline above.', 'لسه مفيش مهام — ضيف أول موعد من فوق.')}</p>
+              </div>
+            )}
+            <Section title={t('Overdue', 'متأخرة')} items={overdue} />
+            <Section title={t('Upcoming', 'قادمة')} items={upcoming} />
+            <Section title={t('Completed', 'مكتملة')} items={done} />
+          </div>
+        </>
+      )}
+
+      {/* TAB CONTENT: DYNAMIC STUDY SCHEDULE & AUTO-REBALANCE */}
+      {activeTab === 'schedule' && (
+        <div className="max-w-5xl w-full">
+          <DynamicScheduleView profile={profile} isAr={isAr} />
+        </div>
+      )}
+
+      {/* TAB CONTENT: AI MOCK EXAM & ESSAY GRADER */}
+      {activeTab === 'mock-exam' && (
+        <div className="max-w-5xl w-full">
+          <MockExamSimulator profile={profile} isAr={isAr} />
+        </div>
+      )}
+
+      {/* TAB CONTENT: LECTURE & SLIDE DIGESTER */}
+      {activeTab === 'digester' && (
+        <div className="max-w-5xl w-full">
+          <LectureDigester 
+            profile={profile} 
+            isAr={isAr} 
+            onSendToExam={() => setActiveTab('mock-exam')} 
+          />
+        </div>
+      )}
+
+      {/* TAB CONTENT: SOCRATIC VOICE BUDDY (FEYNMAN) */}
+      {activeTab === 'socratic' && (
+        <div className="max-w-5xl w-full">
+          <SocraticStudyBuddy profile={profile} isAr={isAr} />
+        </div>
+      )}
+
+      {/* TAB CONTENT: RESEARCH & CITATION COPILOT */}
+      {activeTab === 'research' && (
+        <div className="max-w-5xl w-full">
+          <ResearchCitationCopilot profile={profile} isAr={isAr} />
+        </div>
+      )}
     </div>
   );
 }

@@ -19,7 +19,7 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType, cleanDataForFirestore } from './firebase';
-import { Course } from '../types';
+import { Course, ReverseGpaPlan, GradeRescueCourse } from '../types';
 
 /** Letter grade → quality points (matches the university's official 4.0 scale). */
 export const GRADE_POINTS: Record<string, number> = {
@@ -135,3 +135,143 @@ export async function deleteCourse(uid: string, id: string): Promise<void> {
     handleFirestoreError(err, OperationType.DELETE, path);
   }
 }
+
+// ─── Reverse GPA Target Solver & Grade Rescue ────────────────────────────────
+
+export function solveReverseGpaTarget(
+  currentCgpa: number,
+  completedCredits: number,
+  targetCgpa: number,
+  plannedCredits: number = 15
+): ReverseGpaPlan {
+  const safeCredits = Math.max(1, plannedCredits);
+  const currentPoints = (completedCredits || 0) * (currentCgpa || 0);
+  const totalFutureCredits = (completedCredits || 0) + safeCredits;
+  const targetTotalPoints = totalFutureCredits * targetCgpa;
+  const neededPoints = targetTotalPoints - currentPoints;
+  const neededSemesterGpa = Math.round((neededPoints / safeCredits) * 100) / 100;
+
+  const maxAchievablePoints = currentPoints + (safeCredits * 4.0);
+  const maxAchievableCgpa = Math.round((maxAchievablePoints / totalFutureCredits) * 100) / 100;
+  const isPossible = neededSemesterGpa <= 4.0;
+
+  // Compute recommended grade distribution (assuming 3-credit courses)
+  const numCourses = Math.max(1, Math.round(safeCredits / 3));
+  const distributions: { grade: string; credits: number; courseCount: number; description: string }[] = [];
+
+  if (isPossible) {
+    if (neededSemesterGpa >= 3.7) {
+      distributions.push({
+        grade: 'A / A+',
+        credits: safeCredits,
+        courseCount: numCourses,
+        description: 'تحقيق امتياز (A) في جميع مواد الفصل القادم بدون أي تعثر.',
+      });
+    } else if (neededSemesterGpa >= 3.3) {
+      const highCount = Math.ceil(numCourses * 0.65);
+      const midCount = numCourses - highCount;
+      distributions.push({
+        grade: 'A',
+        credits: highCount * 3,
+        courseCount: highCount,
+        description: `${highCount} مواد بتقدير A (ممتاز)`,
+      });
+      distributions.push({
+        grade: 'B+',
+        credits: midCount * 3,
+        courseCount: midCount,
+        description: `${midCount} مواد بتقدير B+ (جيد جداً مرتفع)`,
+      });
+    } else if (neededSemesterGpa >= 3.0) {
+      const bPlusCount = Math.ceil(numCourses * 0.5);
+      const bCount = numCourses - bPlusCount;
+      distributions.push({
+        grade: 'B+',
+        credits: bPlusCount * 3,
+        courseCount: bPlusCount,
+        description: `${bPlusCount} مواد بتقدير B+`,
+      });
+      distributions.push({
+        grade: 'B',
+        credits: bCount * 3,
+        courseCount: bCount,
+        description: `${bCount} مواد بتقدير B`,
+      });
+    } else {
+      distributions.push({
+        grade: 'B / C+',
+        credits: safeCredits,
+        courseCount: numCourses,
+        description: 'الحفاظ على تقدير جيد (B أو C+) في جميع المواد كافٍ تماماً لتحقيق هدفك.',
+      });
+    }
+  }
+
+  let strategicAdvice = '';
+  if (!isPossible) {
+    strategicAdvice = `المعدل المستهدف (${targetCgpa.toFixed(2)}) يتجاوز الحد الأقصى الرياضي الممكن خلال (${safeCredits}) ساعة فقط. أقصى معدل يمكنك الوصول إليه هذا الفصل هو (${maxAchievableCgpa.toFixed(2)}). يمكنك تجزئة الهدف على فصلين إضافيين لتسهيل الوصول إليه!`;
+  } else if (neededSemesterGpa >= 3.7) {
+    strategicAdvice = `للوصول لهدفك تحتاج معدل فصلي مرتفع جداً (${neededSemesterGpa.toFixed(2)}). ننصحك بالتركيز الشديد في أعمال السنة والكويزات من الأسبوع الأول وتجنب أي تسويف.`;
+  } else if (neededSemesterGpa >= 3.0) {
+    strategicAdvice = `هدفك واقعي وقابل للتحقيق بدرجة عالية بمعدل فصلي مطلوب (${neededSemesterGpa.toFixed(2)}). توزيع الجهد بين المواد ومتابعة محاكي الامتحانات يضمن لك الوصول بأمان.`;
+  } else {
+    strategicAdvice = `أنت في وضع ممتاز! تحتاج فقط إلى الحفاظ على وتيرة دراسية منتظمة بمعدل فصلي (${neededSemesterGpa.toFixed(2)}) لتحقيق هدفك وتجاوزه.`;
+  }
+
+  return {
+    targetCgpa,
+    neededSemesterGpa: Math.max(0, neededSemesterGpa),
+    plannedCredits: safeCredits,
+    isPossible,
+    maxAchievableCgpa,
+    recommendedGradeDistribution: distributions,
+    strategicAdvice,
+  };
+}
+
+export const GRADE_THRESHOLDS: Record<string, number> = {
+  'A+': 95,
+  'A': 90,
+  'B+': 85,
+  'B': 80,
+  'C+': 75,
+  'C': 70,
+  'D': 60,
+};
+
+export function calculateGradeRescue(
+  courseName: string,
+  currentWorkGrade: number,
+  maxWorkGrade: number,
+  finalExamMax: number,
+  targetLetter: string = 'A'
+): GradeRescueCourse {
+  const targetThreshold = GRADE_THRESHOLDS[targetLetter] || 90;
+  // Total maximum scale usually 100
+  const totalCourseMax = maxWorkGrade + finalExamMax;
+  const scaledTargetPoints = (targetThreshold / 100) * totalCourseMax;
+
+  const pointsNeededInFinal = Math.max(0, scaledTargetPoints - currentWorkGrade);
+  const roundedNeeded = Math.round(pointsNeededInFinal * 10) / 10;
+  const isAchievable = roundedNeeded <= finalExamMax;
+
+  const ratio = roundedNeeded / (finalExamMax || 1);
+  let status: 'safe' | 'warning' | 'critical' = 'safe';
+  if (!isAchievable || ratio > 0.85) {
+    status = 'critical';
+  } else if (ratio > 0.70) {
+    status = 'warning';
+  }
+
+  return {
+    courseName,
+    currentWorkGrade,
+    maxWorkGrade,
+    finalExamMax,
+    targetLetter,
+    minFinalScoreRequired: roundedNeeded,
+    isAchievable,
+    status,
+  };
+}
+

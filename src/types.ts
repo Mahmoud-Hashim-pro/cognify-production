@@ -414,3 +414,148 @@ export interface LoginHistoryRecord {
   device?: string;
   userAgent?: string;
 }
+
+// ─── Next-Gen Academic OS: Mock Exams, Dynamic Scheduling, Citations ──────────
+
+export interface MockExamQuestion {
+  id: string;
+  type: 'mcq' | 'short' | 'essay';
+  question: string;
+  options?: string[]; // for mcq
+  correctAnswer?: string;
+  rubricCriteria: string[]; // key grading points for essays/short answers
+  points: number;
+}
+
+export interface QuestionGradingResult {
+  questionId: string;
+  studentAnswer: string;
+  scoreAwarded: number;
+  maxScore: number;
+  modelAnswer: string;
+  strengths: string[];
+  missedKeywords: string[];
+  rubricFeedback: string;
+}
+
+export interface MockExamSubmission {
+  id: string;
+  examTitle: string;
+  course: string;
+  topic: string;
+  totalScore: number;
+  maxPossibleScore: number;
+  percentage: number;
+  gpaEquivalent: string;
+  timeSpentSeconds: number;
+  createdAt: string;
+  results: QuestionGradingResult[];
+}
+
+export interface DynamicStudyTopic {
+  id: string;
+  course: string;
+  title: string;
+  difficulty: 1 | 2 | 3 | 4 | 5; // 1 = easiest, 5 = hardest
+  estimatedHours: number;
+  completed: boolean;
+}
+
+export interface DynamicStudySlot {
+  id: string;
+  date: string; // YYYY-MM-DD
+  course: string;
+  topicTitle: string;
+  hours: number;
+  slotType: 'new' | 'review' | 'mock-exam';
+  completed: boolean;
+  spacedRepetitionInterval?: number; // Day 1, 3, 7, 14
+}
+
+export interface DynamicStudyPlan {
+  id: string;
+  examDate: string;
+  targetCourses: string[];
+  topics: DynamicStudyTopic[];
+  dailySlots: DynamicStudySlot[];
+  lastRebalancedAt?: string;
+}
+
+export interface LectureDigestResult {
+  id: string;
+  title: string;
+  course?: string;
+  capsuleSummary: string; // The distilled bottom line in 1-2 sharp sentences
+  keyFormulasOrDefinitions: string[];
+  actionableInsights: string[];
+  predictedQuestions: {
+    question: string;
+    type: 'mcq' | 'essay';
+    expectedAnswer: string;
+    examSignificance: 'high' | 'medium' | 'frequent';
+  }[];
+  conceptGraph: {
+    id: string;
+    label: string;
+    category: string;
+    connections: string[];
+  }[];
+  createdAt: string;
+}
+
+export interface SocraticDialogTurn {
+  id: string;
+  speaker: 'ai' | 'student';
+  text: string;
+  timestamp: string;
+  feynmanEvaluation?: {
+    clarityScore: number; // 1-10
+    simplifiedTerms: string[];
+    missingConcepts: string[];
+    followUpPrompt: string;
+  };
+}
+
+export interface CitationItem {
+  id: string;
+  sourceType: 'book' | 'article' | 'website' | 'paper';
+  title: string;
+  authors: string[];
+  year: string;
+  publisherOrJournal?: string;
+  volume?: string;
+  issue?: string;
+  pages?: string;
+  url?: string;
+  doi?: string;
+  formattedApa?: string;
+  formattedIeee?: string;
+  formattedHarvard?: string;
+  formattedMla?: string;
+}
+
+export interface ReverseGpaPlan {
+  targetCgpa: number;
+  neededSemesterGpa: number;
+  plannedCredits: number;
+  isPossible: boolean;
+  maxAchievableCgpa: number;
+  recommendedGradeDistribution: {
+    grade: string;
+    credits: number;
+    courseCount: number;
+    description: string;
+  }[];
+  strategicAdvice: string;
+}
+
+export interface GradeRescueCourse {
+  courseName: string;
+  currentWorkGrade: number; // e.g. 38
+  maxWorkGrade: number;     // e.g. 50
+  finalExamMax: number;     // e.g. 50
+  targetLetter: string;     // e.g. 'A'
+  minFinalScoreRequired: number;
+  isAchievable: boolean;
+  status: 'safe' | 'warning' | 'critical';
+}
