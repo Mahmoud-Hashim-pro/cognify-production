@@ -20,6 +20,7 @@ import {
   Filter, Layers, Key, Cpu, Wifi, ArrowUpRight, Gauge, Info, ChevronDown, ChevronUp, Play
 } from "lucide-react";
 import { sectionOf, isAccessibilityUser } from "../lib/access";
+import { formatCountryName, COMMON_COUNTRIES } from "../lib/geo";
 import {
   getDatabaseHealth,
   getCollectionStats,
@@ -702,6 +703,22 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     } catch (err) {
       console.error("Update cognitive level error:", err);
       toast.error("Failed to update cognitive level.", "Update error");
+    } finally {
+      if (isMountedRef.current) setBusyUid(null);
+    }
+  };
+
+  const handleUpdateCountry = async (u: UserProfile, newCountry: string) => {
+    setBusyUid(u.uid);
+    try {
+      await updateDoc(doc(db, "users", u.uid), { country: newCountry });
+      toast.success(`Updated ${u.name || u.email}'s country to ${formatCountryName(newCountry)}`, 'Country updated');
+      if (selectedUserForModal && selectedUserForModal.uid === u.uid) {
+        setSelectedUserForModal({ ...selectedUserForModal, country: newCountry });
+      }
+    } catch (err) {
+      console.error("Update country error:", err);
+      toast.error("Failed to update country.", "Update error");
     } finally {
       if (isMountedRef.current) setBusyUid(null);
     }
@@ -1644,6 +1661,12 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                   <span>{u.role || 'Student'}</span>
                                   <span>•</span>
                                   <span className="uppercase">{u.level || 'Intermediate'}</span>
+                                  {u.country && u.country !== 'Unknown' && u.country !== 'N/A' && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-emerald-400 font-bold">{u.country}</span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </td>
@@ -3953,7 +3976,12 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                         )}
                       </div>
                       <div><span className="text-slate-400">Language:</span> <span className="font-bold text-white">{selectedUserForModal.language || 'English'}</span></div>
-                      <div><span className="text-slate-400">Country:</span> <span className="font-bold text-white">{selectedUserForModal.country && selectedUserForModal.country !== 'Unknown' ? selectedUserForModal.country : 'N/A'}</span></div>
+                      <div>
+                        <span className="text-slate-400">Country:</span>{' '}
+                        <span className="font-bold text-emerald-400">
+                          {formatCountryName(selectedUserForModal.country)}
+                        </span>
+                      </div>
                       <div><span className="text-slate-400">Last Active:</span> <span className="font-bold text-white">{formatDate(newestActiveIso(selectedUserForModal))}</span></div>
                       {selectedUserForModal.passwordResetRequestedAt && (
                         <div>
@@ -4034,6 +4062,20 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                         <option value="Basic">Level: Basic</option>
                         <option value="Intermediate">Level: Intermediate</option>
                         <option value="Advanced">Level: Advanced</option>
+                      </select>
+                      <select
+                        value={selectedUserForModal.country && selectedUserForModal.country !== 'Unknown' && selectedUserForModal.country !== 'N/A' ? selectedUserForModal.country : ''}
+                        onChange={(e) => handleUpdateCountry(selectedUserForModal, e.target.value)}
+                        disabled={busyUid === selectedUserForModal.uid}
+                        className="bg-slate-900 border border-slate-700 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+                        title="Set or update user's country"
+                      >
+                        <option value="" disabled>Set Country...</option>
+                        {COMMON_COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.name} ({c.code})
+                          </option>
+                        ))}
                       </select>
                       <a
                         href={`mailto:${selectedUserForModal.email}?subject=Message from Cognify Admin`}

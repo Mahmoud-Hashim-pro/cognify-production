@@ -369,17 +369,26 @@ export default function App() {
           window.history.replaceState(null, '', '#disability');
         }
         
-        // Update lastActiveDate (and country, from Vercel's edge geo header) if
-        // it's more than an hour old or missing
+        // Update lastActiveDate and country:
+        // Self-heal immediately if country is missing or Unknown, or if lastActiveDate is > 1 hr old
         const now = new Date().toISOString();
-        if (!data.lastActiveDate || (new Date(now).getTime() - new Date(data.lastActiveDate).getTime() > 3600000)) {
-           // We are doing a setDoc merge so we don't trigger an infinite loop locally.
-           // However, since we update the doc, onSnapshot will fire again.
-           // Setting the condition (e.g. 1 hr) prevents infinite loop.
+        const hasNoCountry = !data.country || data.country === 'Unknown' || data.country === 'N/A';
+        const isStaleActive = !data.lastActiveDate || (new Date(now).getTime() - new Date(data.lastActiveDate).getTime() > 3600000);
+
+        if (hasNoCountry || isStaleActive) {
            getVisitorCountryCode()
-             .then((country) => setDoc(doc(db, path), { lastActiveDate: now, country }, { merge: true }))
+             .then((country) => {
+               const updatePayload: Record<string, any> = {};
+               if (isStaleActive) updatePayload.lastActiveDate = now;
+               if (hasNoCountry && country && country !== 'Unknown') {
+                 updatePayload.country = country;
+               }
+               if (Object.keys(updatePayload).length > 0) {
+                 setDoc(doc(db, path), updatePayload, { merge: true });
+               }
+             })
              .catch((err) => {
-               console.error("Failed to update last active date:", err);
+               console.error("Failed to update last active date / country:", err);
              });
         }
       } else {
@@ -407,6 +416,12 @@ export default function App() {
             accessibilityMode = 'Motor-Euphonia';
           }
 
+          let visitorCountry: string | undefined;
+          try {
+            const c = await getVisitorCountryCode();
+            if (c && c !== 'Unknown') visitorCountry = c;
+          } catch {}
+
           const defaultProfile: UserProfile = {
             uid: user.uid,
             email: user.email || "",
@@ -428,6 +443,8 @@ export default function App() {
             organization: preLoginOrgCode || '',
             questionScore: 0,
             onboardingComplete: true,
+            lastActiveDate: new Date().toISOString(),
+            country: visitorCountry,
           };
 
           try {
@@ -478,14 +495,25 @@ export default function App() {
     const path = `users/${user.uid}`;
     let lastPing = 0;
 
-    const updatePresence = () => {
+    const updatePresence = async () => {
       if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
       const nowMs = Date.now();
       // Throttle: don't ping more than once every 90 seconds
       if (nowMs - lastPing < 90000) return;
       lastPing = nowMs;
       const nowIso = new Date(nowMs).toISOString();
-      setDoc(doc(db, path), { lastActiveDate: nowIso }, { merge: true }).catch(() => {});
+      const payload: Record<string, any> = { lastActiveDate: nowIso };
+
+      if (!profile?.country || profile.country === 'Unknown' || profile.country === 'N/A') {
+        try {
+          const country = await getVisitorCountryCode();
+          if (country && country !== 'Unknown') {
+            payload.country = country;
+          }
+        } catch {}
+      }
+
+      setDoc(doc(db, path), payload, { merge: true }).catch(() => {});
     };
 
     // Immediate initial presence ping on sign-in
@@ -508,12 +536,20 @@ export default function App() {
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('focus', onVisibilityChange);
     };
-  }, [user?.uid]);
+  }, [user?.uid, profile?.country]);
 
   const handleOnboardingComplete = async (data: Partial<UserProfile>) => {
     if (!user) return;
     const path = `users/${user.uid}`;
     
+    let userCountry = data.country || profile?.country;
+    if (!userCountry || userCountry === 'Unknown' || userCountry === 'N/A') {
+      try {
+        const c = await getVisitorCountryCode();
+        if (c && c !== 'Unknown') userCountry = c;
+      } catch {}
+    }
+
     const newProfile: UserProfile = {
       uid: user.uid,
       email: user.email || "",
@@ -528,6 +564,7 @@ export default function App() {
       accessibilityMode: 'None',
       questionScore: 0,
       onboardingComplete: true,
+      country: userCountry && userCountry !== 'Unknown' ? userCountry : undefined,
       ...data,
     };
 
