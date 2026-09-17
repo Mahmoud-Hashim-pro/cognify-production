@@ -62,6 +62,7 @@ function lazyWithRetry<T extends React.ComponentType<any>>(
 const VisionCompanionView = lazyWithRetry(() => import("./components/VisionCompanionView"));
 const MotorEuphoniaView = lazyWithRetry(() => import("./components/MotorEuphoniaView"));
 const DisabilityModeView = lazyWithRetry(() => import("./components/DisabilityModeView"));
+import type { DisabilityTab } from "./components/DisabilityModeView";
 const Login = lazyWithRetry(() => import("./components/Login"));
 const Onboarding = lazyWithRetry(() => import("./components/Onboarding"));
 const ProfilePage = lazyWithRetry(() => import("./components/ProfilePage"));
@@ -118,7 +119,7 @@ export default function App() {
   const [externalMessage, setExternalMessage] = useState("");
   const [currentAIResponse, setCurrentAIResponse] = useState("");
   const [isSTTActive, setIsSTTActive] = useState(false);
-  const [disabilityTab, setDisabilityTab] = useState<'hub' | 'chat' | 'settings' | 'video' | 'bridge' | 'org' | 'motor' | 'vision'>('hub');
+  const [disabilityTab, setDisabilityTab] = useState<DisabilityTab>('hub');
   const [isLiveCaptionsOpen, setIsLiveCaptionsOpen] = useState(false);
   const [isIqModalOpen, setIsIqModalOpen] = useState(false);
 
