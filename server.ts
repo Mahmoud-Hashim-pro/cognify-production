@@ -7,14 +7,13 @@ dotenv.config();
 
 import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";
-import learningProfileHandler from "./api/student/learningProfile";
-import proxyImageHandler from "./api/proxy-image";
+import countryHandler from "./api/geo/country";
 
 async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-  app.use(express.json({ limit: '2mb' }));
+  app.use(express.json({ limit: '50mb' }));
 
   // Set COOP header to permit Firebase Auth Google popup communication
   app.use((_req, res, next) => {
@@ -32,14 +31,9 @@ async function startServer() {
     return securityAuditHandler(req, res);
   });
 
-  // Phase 2C - Personal Learning Profile
-  app.all("/api/student/learningProfile", (req, res) => {
-    return learningProfileHandler(req, res);
-  });
-
-  // Resilient Image Proxy
-  app.all("/api/proxy-image", (req, res) => {
-    return proxyImageHandler(req, res);
+  // Geo: visitor country (Vercel headers in prod, "Unknown" locally)
+  app.all("/api/geo/country", (req, res) => {
+    return countryHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);
