@@ -14,6 +14,7 @@ import {
   loadPronDict, savePronDict, applyPronunciation, learnFromCorrection,
   mergeMappings, dictToMappings, type PronDict,
 } from '../lib/adaptiveSpeech';
+import { generateSpeechClarificationPrompt, extractSpeechSignals } from '../accessibility';
 
 interface LiveCaptionsProps {
   language?: string;
@@ -40,6 +41,7 @@ interface TranscriptSegment {
   confidence: 'high' | 'medium' | 'low';
   confidencePct?: number;       // numeric confidence (0-100) from the AI corrector
   alternatives?: string[];      // alternative interpretations for uncertain words
+  clarificationPrompt?: string; // respectful clarification prompt when confidence < 0.70
   intent?: string;
   timestamp: string;
 }
@@ -423,6 +425,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
     let confidence: 'high' | 'medium' | 'low' = 'high';
     let confidencePct = 100;
     let alternatives: string[] = [];
+    let clarificationPrompt: string | undefined;
     let intent: string | undefined;
 
     try {
@@ -466,6 +469,22 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       // Step 6: Smart replies — on-demand only (via the button) to save API quota.
       // (was auto-firing on every utterance)
 
+      // Respectful clarification when confidence drops below 70%
+      if (confidencePct < 70) {
+        const clar = generateSpeechClarificationPrompt(
+          decoded,
+          confidencePct / 100,
+          alternatives,
+          isAr ? 'ar' : 'en'
+        );
+        if (clar.requiresClarification) {
+          clarificationPrompt = clar.prompt;
+          if (clar.options.length > 0 && alternatives.length === 0) {
+            alternatives = clar.options;
+          }
+        }
+      }
+
     } catch (e) {
       console.error("Process utterance error:", e);
       confidence = 'low';
@@ -480,6 +499,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       confidence,
       confidencePct,
       alternatives,
+      clarificationPrompt,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
@@ -1003,8 +1023,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     {/* Alternative interpretations for uncertain words */}
                     {editingId !== seg.id && seg.alternatives && seg.alternatives.length > 0 && (
                       <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
-                          Did you mean
+                        <span className="text-[10px] text-amber-400/90 font-bold uppercase tracking-wider">
+                          {seg.clarificationPrompt || (isAr ? 'هل تقصد:' : 'Did you mean:')}
                         </span>
                         {seg.alternatives.map((alt, i) => (
                           <button

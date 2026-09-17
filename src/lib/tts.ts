@@ -6,6 +6,15 @@
  * powers the "read selected region aloud" feature.
  */
 
+import { extractTtsSignals } from '../accessibility/accessibilitySignals.js';
+
+export type TtsSignalListener = (signal: any) => void;
+const ttsSignalListeners: Set<TtsSignalListener> = new Set();
+export function addTtsSignalListener(listener: TtsSignalListener): () => void {
+  ttsSignalListeners.add(listener);
+  return () => { ttsSignalListeners.delete(listener); };
+}
+
 const LANG_MAP: Record<string, string> = {
   English: "en-US",
   Arabic: "ar-SA",
@@ -220,21 +229,31 @@ export function speak(
 
   let started = false;
   let finished = false;
+  let speakStartTime = 0;
 
   utterance.onstart = () => {
     started = true;
+    speakStartTime = Date.now();
     cb?.onStart?.();
   };
 
   utterance.onend = () => {
     finished = true;
     cleanup();
+    const elapsedSec = speakStartTime > 0 ? (Date.now() - speakStartTime) / 1000 : 0;
+    const signals = extractTtsSignals(elapsedSec, elapsedSec, false);
+    signals.forEach(s => ttsSignalListeners.forEach(l => l(s)));
     cb?.onEnd?.();
   };
 
   utterance.onerror = (e: any) => {
     cleanup();
-    if (e?.error === 'canceled' || e?.error === 'interrupted') return;
+    const elapsedSec = speakStartTime > 0 ? (Date.now() - speakStartTime) / 1000 : 0;
+    if (e?.error === 'canceled' || e?.error === 'interrupted') {
+      const signals = extractTtsSignals(elapsedSec, Math.max(elapsedSec, 5), true);
+      signals.forEach(s => ttsSignalListeners.forEach(l => l(s)));
+      return;
+    }
     cb?.onError?.("synth-error");
   };
 
