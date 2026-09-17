@@ -66,6 +66,12 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
   // the user switches input mode during the load.
   const signCamCancelRef = useRef(false);
 
+  // Reverse Sign-to-Speech & Meeting Diarization
+  const [autoSpeakSign, setAutoSpeakSign] = useState(false);
+  const [isMeetingMode, setIsMeetingMode] = useState(false);
+  const [meetingSpeaker, setMeetingSpeaker] = useState<'speaker_1' | 'speaker_2' | 'teacher'>('speaker_1');
+  const signSpeechTimerRef = useRef<any>(null);
+
   const KANEVSKY_PRESETS = [
     { id: 'ep_k1', phrase: "fanku", translation: "Thank you" },
     { id: 'ep_k2', phrase: "tanku", translation: "Thank you" },
@@ -457,7 +463,19 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
     const stable = clf.smoother.push(pred);
     if (stable) {
       setSignCamError("");
-      setInputText((prev) => prev + stable);
+      setInputText((prev) => {
+        const next = prev + stable;
+        if (autoSpeakSign) {
+          if (signSpeechTimerRef.current) clearTimeout(signSpeechTimerRef.current);
+          signSpeechTimerRef.current = setTimeout(() => {
+            const word = next.trim().split(/\s+/).pop();
+            if (word) {
+              speak(word, voiceLang);
+            }
+          }, 1200);
+        }
+        return next;
+      });
     }
   };
 
@@ -902,15 +920,41 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
                           <>
                             <button
                               onClick={() => setInputText((p) => p + ' ')}
-                              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all active:scale-95"
+                              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all active:scale-95"
                             >
                               {t.space}
                             </button>
                             <button
                               onClick={() => setInputText((p) => p.slice(0, -1))}
-                              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all active:scale-95"
+                              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all active:scale-95"
                             >
                               ⌫ {t.del}
+                            </button>
+                            {/* Reverse Sign-to-Speech Controls */}
+                            <button
+                              type="button"
+                              onClick={() => setAutoSpeakSign((v) => !v)}
+                              className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                                autoSpeakSign
+                                  ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-300 shadow-lg shadow-emerald-950/40'
+                                  : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white'
+                              }`}
+                              title={isArabic ? 'نطق الكلمات والحروف تلقائياً بصوت عالي' : 'Automatically speak recognized words aloud'}
+                            >
+                              <Volume2 className="w-4 h-4" />
+                              <span>{isArabic ? 'نطق تلقائي' : 'Auto-Speak'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (inputText.trim()) speak(inputText.trim(), voiceLang);
+                              }}
+                              disabled={!inputText.trim()}
+                              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 hover:bg-cyan-600/40 disabled:opacity-40 transition-all"
+                              title={isArabic ? 'انطق الإشارة المكتوبة بصوت عالي' : 'Speak recognized text aloud'}
+                            >
+                              <Volume2 className="w-4 h-4" />
+                              <span>{isArabic ? 'انطق الإشارة 🔊' : 'Speak Sign 🔊'}</span>
                             </button>
                           </>
                         )}

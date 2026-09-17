@@ -34,6 +34,8 @@ import {
   EuphoniaStorageAdapter,
   EuphoniaAudioSample,
 } from '../lib/euphoniaRecorder';
+import { getContextualPhrases, ContextualPhrase } from '../lib/contextualAacEngine';
+import { triggerHapticAlert } from '../lib/hapticNavEngine';
 
 /** Shared default adapter — constructed once, not on every render. */
 const DEFAULT_LOCAL_ADAPTER = new LocalIndexedDbStorageAdapter();
@@ -561,8 +563,16 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [selectedContactForWa, setSelectedContactForWa] = useState<EmergencyContact | null>(null);
   const [customWaMessage, setCustomWaMessage] = useState('');
-  const [isListeningForContactName, setIsListeningForContactName] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+
+  // Contextual AAC predictive suggestions
+  const [contextualPhrases] = useState<ContextualPhrase[]>(() => getContextualPhrases(new Date()));
+
+  // Emergency SOS state & continuous eye closure detection
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [emergencyCountdown, setEmergencyCountdown] = useState<number | null>(null);
+  const [emergencyGeoCoords, setEmergencyGeoCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const eyesClosedStartRef = useRef<number | null>(null);
 
   // Debounce lock for phone calls
   const isDialingRef = useRef(false);
@@ -634,6 +644,57 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
       },
     });
   };
+
+  const triggerEmergencySOS = useCallback((source: 'eye_closure' | 'button' | 'vocal') => {
+    triggerHapticAlert('danger');
+    setShowEmergencyModal(true);
+    setEmergencyCountdown(5);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setEmergencyGeoCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        (err) => {
+          console.warn('Geolocation error:', err);
+        },
+        { timeout: 5000, enableHighAccuracy: true }
+      );
+    }
+
+    const msg = isArabic
+      ? 'نداء استغاثة عاجل! تم إطلاق حالة الطوارئ!'
+      : motorLang === 'fr'
+      ? "Alerte d'urgence ! SOS déclenché !"
+      : 'Emergency SOS alert triggered!';
+    speakSafe(msg);
+  }, [isArabic, motorLang, speakSafe]);
+
+  useEffect(() => {
+    if (emergencyCountdown === null) return;
+    if (emergencyCountdown <= 0) {
+      const currentContacts = loadContacts();
+      const lat = emergencyGeoCoords?.lat;
+      const lng = emergencyGeoCoords?.lng;
+      const mapUrl = lat && lng ? `https://maps.google.com/?q=${lat},${lng}` : '';
+      const sosText = isArabic
+        ? `🚨 نداء استغاثة عاجل (Emergency SOS) من مستخدم Cognify: أحتاج إلى مساعدة طبية فورية! ${mapUrl ? `موقعي الحالي على الخريطة: ${mapUrl}` : ''}`
+        : `🚨 Emergency SOS from Cognify user: I need immediate medical assistance! ${mapUrl ? `Location: ${mapUrl}` : ''}`;
+
+      if (currentContacts.length > 0) {
+        const primary = currentContacts.find((c) => c.isPrimary) || currentContacts[0];
+        if (primary.phone) {
+          sendWhatsAppMessage(primary.phone, sosText);
+        }
+      }
+      toast.error(isArabic ? 'تم إرسال نداء الاستغاثة للمرافقين والطوارئ!' : 'Emergency SOS dispatched to caregivers!');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setEmergencyCountdown((c) => (c !== null ? c - 1 : null));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [emergencyCountdown, emergencyGeoCoords, isArabic]);
 
   /**
    * ONE shared AudioContext for every cue.
@@ -1013,6 +1074,20 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             }
           }
           const hovered = hoveredCardIdRef.current;
+
+          // Continuous 4-second Eye Closure Emergency SOS Trigger (Locked-in / ALS safety)
+          const isClosed = Boolean(gesture.isBlinking || (gesture.metrics && gesture.metrics.isBlinking));
+          if (isClosed) {
+            if (!eyesClosedStartRef.current) {
+              eyesClosedStartRef.current = Date.now();
+            } else if (Date.now() - eyesClosedStartRef.current >= 4000) {
+              triggerEmergencySOS('eye_closure');
+              eyesClosedStartRef.current = null;
+            }
+          } else {
+            eyesClosedStartRef.current = null;
+          }
+
           // While scanning, every gesture is just "press the switch".
           if (scanActiveRef.current) {
             if (gesture.isBlinking || gesture.isSmiling) scanSwitchRef.current();
@@ -2130,8 +2205,18 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
       handleSendTypedToWhatsApp();
       return;
     }
-    if (cardId === 'kb-call') {
-      openContactPicker();
+    if (cardId === 'btn-emergency-sos') {
+      triggerEmergencySOS('button');
+      return;
+    }
+    if (cardId.startsWith('aac-ctx-')) {
+      const phraseId = cardId.replace('aac-ctx-', '');
+      const item = contextualPhrases.find((p) => p.id === phraseId);
+      if (item) {
+        const text = motorLang === 'ar' ? item.textAr : motorLang === 'fr' ? item.textFr : item.textEn;
+        speakSafe(text);
+        toast.success(text);
+      }
       return;
     }
     if (cardId === 'kb-switchlang' || cardId === 'motor-lang-toggle') {
@@ -2750,6 +2835,17 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             <span>{motorLang === 'ar' ? 'عربي 🇪🇬' : motorLang === 'fr' ? 'FR 🇫🇷' : 'EN 🇬🇧'}</span>
           </button>
 
+          {/* Emergency SOS Button */}
+          <button
+            data-aac-id="btn-emergency-sos"
+            onClick={() => triggerEmergencySOS('button')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-950/60 active:scale-95 transition-all animate-pulse"
+            title={isArabic ? 'طوارئ عاجلة ونداء استغاثة' : 'Emergency SOS Alert'}
+          >
+            <AlertCircle className="w-4 h-4" />
+            <span>{isArabic ? '🚨 طوارئ SOS' : '🚨 SOS'}</span>
+          </button>
+
 
         </div>
       </div>
@@ -3020,35 +3116,77 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
         >
           {/* TAB 1: Arabic Eye-Gaze Virtual Keyboard (PySource Split Blink Keyboard) */}
           {activeTab === 'keyboard' && (
-            <GazeBlinkKeyboard
-              isArabic={isArabic}
-              dwellTimeMsOverride={headConfig.dwellTimeMs}
-              suppressOwnSelection={scanActive}
-              cursorPos={cursorPos}
-              gestureState={gestureState}
-              onSpeakText={(text) => speakSafe(text)}
-              onSendToAI={async (text) => {
-                if (!text.trim()) return;
-                setIsProcessingAi(true);
-                try {
-                  const answer = await geminiService.askGeneralQuestion(text, motorLang === 'ar' ? (profile.language || 'Arabic') : 'English');
-                  setAiResponseText(answer);
-                  speakSafe(answer);
-                  if (onSendMessage) onSendMessage(text);
-                } catch (err) {
-                  console.error(err);
-                } finally {
-                  setIsProcessingAi(false);
-                }
-              }}
-              onSendToWhatsApp={(text) => {
-                if (!text.trim()) return;
-                setCustomWaMessage(text);
-                setShowWhatsAppModal(true);
-              }}
-              onOpenCallPicker={() => setShowContactPickerModal(true)}
-              themeAccent={theme === 'amber' ? 'amber' : theme === 'emerald' ? 'emerald' : 'cyan'}
-            />
+            <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
+              {/* Contextual Predictive AAC Quick Bar */}
+              <div className="shrink-0 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center gap-1.5 overflow-x-auto select-none">
+                <div className="flex items-center gap-1 px-2 text-[10px] font-bold text-amber-400 shrink-0">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{isArabic ? 'اقتراحات سريعة:' : motorLang === 'fr' ? 'Suggestions :' : 'Smart AAC:'}</span>
+                </div>
+                {contextualPhrases.map((cp) => {
+                  const text = motorLang === 'ar' ? cp.textAr : motorLang === 'fr' ? cp.textFr : cp.textEn;
+                  const cardKey = `aac-ctx-${cp.id}`;
+                  const isHovered = hoveredCardId === cardKey;
+                  return (
+                    <button
+                      key={cp.id}
+                      data-aac-id={cardKey}
+                      onClick={() => {
+                        speakSafe(text);
+                        toast.success(text);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border relative ${
+                        isHovered
+                          ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md scale-105'
+                          : cp.category === 'urgent'
+                          ? 'bg-red-950/50 border-red-500/50 text-red-200 hover:bg-red-900/60'
+                          : 'bg-slate-950 border-slate-800 text-slate-200 hover:bg-slate-800'
+                      }`}
+                    >
+                      <span>{cp.icon}</span>
+                      <span>{text}</span>
+                      {isHovered && dwellProgress > 0 && (
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-900 rounded-b-xl overflow-hidden">
+                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <GazeBlinkKeyboard
+                  isArabic={isArabic}
+                  dwellTimeMsOverride={headConfig.dwellTimeMs}
+                  suppressOwnSelection={scanActive}
+                  cursorPos={cursorPos}
+                  gestureState={gestureState}
+                  onSpeakText={(text) => speakSafe(text)}
+                  onSendToAI={async (text) => {
+                    if (!text.trim()) return;
+                    setIsProcessingAi(true);
+                    try {
+                      const answer = await geminiService.askGeneralQuestion(text, motorLang === 'ar' ? (profile.language || 'Arabic') : 'English');
+                      setAiResponseText(answer);
+                      speakSafe(answer);
+                      if (onSendMessage) onSendMessage(text);
+                    } catch (err) {
+                      console.error(err);
+                    } finally {
+                      setIsProcessingAi(false);
+                    }
+                  }}
+                  onSendToWhatsApp={(text) => {
+                    if (!text.trim()) return;
+                    setCustomWaMessage(text);
+                    setShowWhatsAppModal(true);
+                  }}
+                  onOpenCallPicker={() => setShowContactPickerModal(true)}
+                  themeAccent={theme === 'amber' ? 'amber' : theme === 'emerald' ? 'emerald' : 'cyan'}
+                />
+              </div>
+            </div>
           )}
 
           {/* TAB 2: Google Project Euphonia Voice Training Studio & Custom ASR */}
@@ -4577,6 +4715,107 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               >
                 <Check className="w-4 h-4" />
                 <span>{isArabic ? 'العودة لواجهة التحكم والكيبورد' : 'Return to Communicator'}</span>
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Emergency SOS Modal (Triggered by 4s Eye Closure, Button, or Vocal Alert) */}
+      <AnimatePresence>
+        {showEmergencyModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-red-950/85 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-slate-950 border-2 border-red-500 rounded-3xl p-6 max-w-lg w-full shadow-2xl text-white space-y-4 text-center ring-8 ring-red-600/30 animate-pulse"
+            >
+              <div className="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center mx-auto text-red-400">
+                <AlertCircle className="w-9 h-9 animate-bounce" />
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-red-400">
+                  {isArabic ? '🚨 نداء استغاثة عاجل (Emergency SOS)' : "🚨 Urgent Emergency SOS"}
+                </h3>
+                <p className="text-xs text-slate-300 mt-1">
+                  {isArabic
+                    ? 'تم رصد إغلاق العينين لمدة 4 ثوانٍ أو طلب طوارئ. جاري إخطار جهات الاتصال المسجلة فوراً.'
+                    : '4-second eye closure or emergency trigger detected. Alerting your emergency contacts.'}
+                </p>
+              </div>
+
+              {emergencyCountdown !== null && emergencyCountdown > 0 && (
+                <div className="p-3 bg-red-950/60 border border-red-500/40 rounded-2xl">
+                  <div className="text-2xl font-mono font-black text-amber-300">
+                    {emergencyCountdown}s
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    {isArabic ? 'جاري الإرسال التلقائي للرسالة...' : 'Auto-dispatching distress message...'}
+                  </p>
+                </div>
+              )}
+
+              {emergencyGeoCoords && (
+                <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+                  <span>📍 {isArabic ? 'الإحداثيات الحالية:' : 'Current Coordinates:'}</span>
+                  <a
+                    href={`https://maps.google.com/?q=${emergencyGeoCoords.lat},${emergencyGeoCoords.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-cyan-400 hover:underline font-bold"
+                  >
+                    {emergencyGeoCoords.lat.toFixed(4)}, {emergencyGeoCoords.lng.toFixed(4)}
+                  </a>
+                </div>
+              )}
+
+              {/* Quick Contacts Dispatch */}
+              <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 text-start">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  {isArabic ? 'جهات اتصال الطوارئ:' : 'Emergency Contacts:'}
+                </div>
+                {contacts.length === 0 ? (
+                  <p className="text-xs text-slate-500">{isArabic ? 'لم يتم تسجيل أرقام طوارئ بعد.' : 'No emergency contacts saved.'}</p>
+                ) : (
+                  contacts.map((c) => (
+                    <div key={c.id} className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="font-bold text-xs text-white">{isArabic ? c.nameAr || c.name : c.name}</div>
+                        <div className="text-[10px] text-slate-400 font-mono">{c.phone || 'No phone'}</div>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {c.phone && (
+                          <button
+                            onClick={() => {
+                              const mapUrl = emergencyGeoCoords ? `https://maps.google.com/?q=${emergencyGeoCoords.lat},${emergencyGeoCoords.lng}` : '';
+                              const text = isArabic ? `🚨 نداء استغاثة عاجل! أنا بحاجة لمساعدة طبية فورية! ${mapUrl}` : `🚨 Emergency SOS! Immediate help needed! ${mapUrl}`;
+                              sendWhatsAppMessage(c.phone, text);
+                            }}
+                            className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1"
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                            <span>WhatsApp</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Cancel Button */}
+              <button
+                data-aac-id="sos-cancel"
+                onClick={() => {
+                  setShowEmergencyModal(false);
+                  setEmergencyCountdown(null);
+                  toast.info(isArabic ? 'تم إلغاء حالة الطوارئ' : 'Emergency cancelled');
+                }}
+                className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition-all border border-slate-700"
+              >
+                {isArabic ? 'إلغاء التنبيه (أنا بخير)' : "Cancel SOS (I'm OK)"}
               </button>
             </motion.div>
           </div>

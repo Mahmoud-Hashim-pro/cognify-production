@@ -2,7 +2,7 @@ export type CognitiveLevel = 'Basic' | 'Intermediate' | 'Advanced';
 export type UserRole = 'Student' | 'Professional';
 export type EducationLevel = 'Primary' | 'Secondary' | 'University' | 'Professional';
 export type Field = 'Medicine' | 'Engineering' | 'Business' | 'General' | 'Other';
-export type AccessibilityMode = 'None' | 'Speech' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Motor-Euphonia';
+export type AccessibilityMode = 'None' | 'Speech' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Motor-Euphonia' | 'Neurodiversity';
 export type LanguagePreference = 'English' | 'Arabic' | 'Egyptian Ammiya' | 'French' | 'Spanish' | 'German' | 'Italian' | 'Portuguese' | 'Russian' | 'Chinese' | 'Japanese';
 export type AccountPath = 'Graduation Project' | 'Special Needs' | 'Normal';
 
@@ -211,6 +211,10 @@ export interface UserProfile {
    * surfaces, rooms, and historical transitions.
    */
   spatialMemories?: SpatialObjectRecord[];
+  /**
+   * Universal Accessibility Passport: unified user settings across all disability modules.
+   */
+  accessibilityPassport?: AccessibilityPassport;
 }
 
 export interface VisionMemory {
@@ -218,6 +222,40 @@ export interface VisionMemory {
   label: string;        // what the user called it, e.g. "أحمد" or "دوا الضغط"
   description: string;  // the AI's description at the moment it was saved
   createdAt: string;    // ISO date string
+  memoryType?: 'object' | 'person' | 'document' | 'currency' | 'place';
+  imageUrl?: string;
+}
+
+export interface PECSCard {
+  id: string;
+  labelEn: string;
+  labelAr: string;
+  category: 'needs' | 'emotions' | 'food' | 'activities' | 'places';
+  iconName: string;
+  audioPhraseAr: string;
+  audioPhraseEn: string;
+  color: string;
+}
+
+export interface SensoryEmotionLog {
+  id: string;
+  timestamp: string;
+  level: 'calm' | 'happy' | 'overwhelmed' | 'anxious' | 'tired' | 'frustrated';
+  intensity: number; // 1-5
+  sensoryTrigger?: string;
+  comfortActivityUsed?: string;
+}
+
+export interface AccessibilityPassport {
+  primaryMode: AccessibilityMode;
+  highContrast: boolean;
+  dyslexiaFont: boolean;
+  hapticFeedback: boolean;
+  autoSpeak: boolean;
+  audioSpeed: number; // 0.75 - 1.5
+  emergencyPhone?: string;
+  emergencyName?: string;
+  allowCameraTriggers: boolean;
 }
 
 export interface SpatialObjectRecord {

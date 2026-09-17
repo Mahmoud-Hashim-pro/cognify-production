@@ -28,7 +28,12 @@ import {
   BookOpen,
   ShoppingBag,
   GraduationCap,
+  Banknote,
+  Users,
+  Palette,
+  Compass,
 } from 'lucide-react';
+import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
 import { UserProfile, VisionMemory, SpatialObjectRecord } from '../types';
@@ -127,14 +132,39 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   // Read Action: 'summarize' for lecture & document summaries, 'read' for verbatim word-for-word reading.
   const [readAction, setReadAction] = useState<'summarize' | 'read'>('summarize');
 
-  // Shopping Assistant Mode: focuses the AI on identifying products, brand,
-  // prices, currency, weight/size/flavor, and expiration dates for visually impaired shoppers.
+  // Shopping Assistant Mode
   const [shoppingMode, setShoppingMode] = useState(false);
+  // Instant Currency Reader Mode (قارئ العملات والنقود)
+  const [currencyMode, setCurrencyMode] = useState(false);
+  // Face & Familiar Person Recognition Mode (التعرف على الوجوه والمقربين)
+  const [faceMode, setFaceMode] = useState(false);
+  // Color & Outfit Matcher Mode (مساعد تناسق الملابس والألوان)
+  const [outfitMode, setOutfitMode] = useState(false);
+  // Virtual White Cane & Indoor Haptic Navigation Mode (العصا والملاحة الاهتزازية)
+  const [navGuideMode, setNavGuideMode] = useState(false);
+
+  // Saving memory as person vs object
+  const [isSavingPerson, setIsSavingPerson] = useState(false);
+
+  const resetAllModes = useCallback(() => {
+    setReadMode(false);
+    setShoppingMode(false);
+    setCurrencyMode(false);
+    setFaceMode(false);
+    setOutfitMode(false);
+    setNavGuideMode(false);
+  }, []);
 
   const toggleReadMode = useCallback(() => {
     setReadMode((prev) => {
       const next = !prev;
-      if (next) setShoppingMode(false);
+      if (next) {
+        setShoppingMode(false);
+        setCurrencyMode(false);
+        setFaceMode(false);
+        setOutfitMode(false);
+        setNavGuideMode(false);
+      }
       return next;
     });
   }, []);
@@ -142,7 +172,69 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   const toggleShoppingMode = useCallback(() => {
     setShoppingMode((prev) => {
       const next = !prev;
-      if (next) setReadMode(false);
+      if (next) {
+        setReadMode(false);
+        setCurrencyMode(false);
+        setFaceMode(false);
+        setOutfitMode(false);
+        setNavGuideMode(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleCurrencyMode = useCallback(() => {
+    setCurrencyMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setReadMode(false);
+        setShoppingMode(false);
+        setFaceMode(false);
+        setOutfitMode(false);
+        setNavGuideMode(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleFaceMode = useCallback(() => {
+    setFaceMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setReadMode(false);
+        setShoppingMode(false);
+        setCurrencyMode(false);
+        setOutfitMode(false);
+        setNavGuideMode(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleOutfitMode = useCallback(() => {
+    setOutfitMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setReadMode(false);
+        setShoppingMode(false);
+        setCurrencyMode(false);
+        setFaceMode(false);
+        setNavGuideMode(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleNavGuideMode = useCallback(() => {
+    setNavGuideMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setReadMode(false);
+        setShoppingMode(false);
+        setCurrencyMode(false);
+        setFaceMode(false);
+        setOutfitMode(false);
+      }
       return next;
     });
   }, []);
@@ -397,7 +489,31 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
 
     setLastSnapshot(frame);
     setStatus('analyzing');
-    const waitingMsg = shoppingMode
+    const waitingMsg = currencyMode
+      ? targetLang === 'ar'
+        ? 'بفحص العملة والنقود فوراً...'
+        : targetLang === 'fr'
+        ? 'Identification du billet et de la devise...'
+        : 'Identifying banknote and currency value...'
+      : faceMode
+      ? targetLang === 'ar'
+        ? 'بتعرف على الأشخاص والوجوه قدامك...'
+        : targetLang === 'fr'
+        ? 'Reconnaissance des visages et des personnes...'
+        : 'Recognizing faces and people in front of you...'
+      : outfitMode
+      ? targetLang === 'ar'
+        ? 'بفحص ألوان الملابس وتناسقها...'
+        : targetLang === 'fr'
+        ? 'Analyse des couleurs et de l\'harmonie vestimentaire...'
+        : 'Analyzing clothes, colors, and outfit harmony...'
+      : navGuideMode
+      ? targetLang === 'ar'
+        ? 'بفحص المسار والممر لكشف العوائق...'
+        : targetLang === 'fr'
+        ? 'Balayage du chemin et détection des obstacles...'
+        : 'Scanning pathway and detecting obstacles...'
+      : shoppingMode
       ? targetLang === 'ar'
         ? 'بتعرف على المنتج والأسعار قدامك...'
         : targetLang === 'fr'
@@ -422,6 +538,14 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       : "Analyzing what's in front of you...";
     setAnnounce(waitingMsg);
 
+    const knownPeople = memories.filter((m) => m.memoryType === 'person');
+    const knownPeopleContext = knownPeople.length
+      ? `\n\nFamily & Friends saved by user (announce if person matches):\n${knownPeople
+          .slice(-15)
+          .map((m) => `- "${m.label}": ${m.description}`)
+          .join('\n')}`
+      : '';
+
     const knownContext = memories.length
       ? `\n\nContext — objects/people previously saved by the user (mention only if photo matches):\n${memories
           .slice(-15)
@@ -430,7 +554,100 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       : '';
 
     let prompt = '';
-    if (shoppingMode) {
+    if (currencyMode) {
+      // Instant Currency & Banknote Reader
+      if (targetLang === 'ar') {
+        prompt = `أنت خبير فوري وقارئ نقود ذكي يتحدث بصوته لشخص كفيف يمسك ورقة نقدية أو نقوداً أمام الكاميرا.
+انظر فوراً إلى الورقة النقدية وقل قيمتها مباشرة في أجزاء من الثانية:
+1. القيمة والعملة فوراً وبدون أي مقدمات: مثلاً "عشرين جنيه مصري جديدة بلاستيك"، "مائة جنيه مصري"، "خمسون جنيهاً"، "مائتي جنيه"، "عشرة جنيهات"، "خمسة جنيهات"، أو العملات الأخرى (دولار، يورو، ريال سعودي، درهم).
+2. حالة الورقة: لو الورقة مقطوعة من الطرف أو ملصوقة بسولوتيب أو باهتة جداً، نبهه فوراً: "الورقة مقطوعة من الطرف" أو "الورقة سليمة".
+3. لو الصورة غير واضحة أو العملة مقلوبة، قل باختصار: "اقلب الورقة أو قربها شوية من الكاميرا".
+تحدث فوراً برقم الفئة والعملة مباشرة دون أي عناوين أو نجوم ماركداون.${knownContext}`;
+      } else if (targetLang === 'fr') {
+        prompt = `Vous êtes un lecteur vocal instantané de billets de banque pour une personne aveugle.
+Identifiez immédiatement le billet devant la caméra :
+1. Dénomination et devise en premier : ex. "Vingt Livres Égyptiennes en polymère", "Cent Livres Égyptiennes", "Cinquante Euros", "Vingt Dollars", "Cent Riyals Saoudiens".
+2. État du billet : précisez s'il est déchiré ou abîmé.
+3. Si c'est flou, dites "Rapprochez le billet ou retournez-le".
+Parlez directement sans astérisques markdown ni préambule.${knownContext}`;
+      } else {
+        prompt = `You are a fast voice currency reader for a blind person holding banknotes in front of the camera.
+Instantly identify the bill and announce its exact value in fractions of a second:
+1. Denomination & Currency First: e.g. "Twenty Egyptian Pounds (Polymer)", "One Hundred Egyptian Pounds", "Fifty US Dollars", "Twenty Euros", "One Hundred Saudi Riyals".
+2. Physical condition: note if the bill is torn, heavily taped, or damaged.
+3. If blurry or only partially visible, say "Bring the bill closer or flip it over."
+Speak the denomination directly without preamble, headings, or markdown asterisks.${knownContext}`;
+      }
+    } else if (faceMode) {
+      // Familiar Face & Person Recognition
+      if (targetLang === 'ar') {
+        prompt = `أنت رفيق بشري يتحدث بصوته لشخص كفيف ليتعرف على الأشخاص والوجوه أمامه.
+انظر إلى الشخص أو الأشخاص أمام الكاميرا:
+1. إذا كان الشخص يطابق أحد الأشخاص المحفوظين مسبقاً في الذاكرة أدناه، اذكر اسمه فوراً بحرارة وبشرى (مثلاً: "أحمد يقف أمامك ويبتسم"، "والدتك مقبلة نحوك").
+2. إذا لم يكن محفوظاً، صفه بسرعة وبشكل ودود ومفيد: ملامحه التقريبية (رجل/سيدة/طفل، في العشرينات/الأربعينات، يرتدي نظارة، يبتسم، ينظر إليك أو بعيداً، ملابسه).
+3. لو مفيش حد قدامك، قول له بلطف "مفيش حد قدام الكاميرا دلوقتي".
+تحدث بشكل طبيعي ومباشر كصديق يهمس في أذنه بدون أي نجوم ماركداون أو عناوين روبوتية.${knownPeopleContext || knownContext}`;
+      } else if (targetLang === 'fr') {
+        prompt = `Vous êtes un compagnon vocal bienveillant qui aide une personne aveugle à reconnaître les visages et personnes devant elle.
+Regardez la personne devant la caméra :
+1. Si la personne correspond à un proche mémorisé ci-dessous, annoncez chaleureusement son nom (ex. "Ahmed est devant vous et sourit", "Votre mère s'approche").
+2. Sinon, décrivez-la gentiment : âge approximatif, expression (souriant, neutre), lunettes, vêtements.
+3. S'il n'y a personne, dites poliment "Aucune personne détectée devant la caméra."
+Parlez directement sans astérisques markdown.${knownPeopleContext || knownContext}`;
+      } else {
+        prompt = `You are a voice companion helping a visually impaired person recognize people and familiar faces.
+Look at the person or people in front of the camera:
+1. If the person matches a previously remembered friend/family member from the context below, announce their name warmly (e.g. "Ahmed is standing right in front of you, smiling", "Your mother is approaching").
+2. If unknown, describe them kindly and helpfully: approximate age, gender, facial expression (smiling, focused), glasses/hair, clothing, and whether they are looking at the camera.
+3. If no one is there, gently say "No one is in front of the camera right now."
+Speak naturally like a friend whispering in their ear, without headings or markdown asterisks.${knownPeopleContext || knownContext}`;
+      }
+    } else if (outfitMode) {
+      // Clothes & Color Matching Assistant
+      if (targetLang === 'ar') {
+        prompt = `أنت مستشار أناقة ومساعد ألوان ذكي يتحدث بصوته لشخص كفيف لفحص ملابسه وألوانها وتناسقها.
+انظر فوراً إلى الملابس أو القطع المعروضة أمام الكاميرا:
+1. اذكر الألوان والأنماط بدقة: مثلاً "قميص أزرق كحلي سادة"، "بنطلون جينز رمادي غامق"، "فستان نبيتي مشجر".
+2. احكم على التناسق والانسجام: هل الألوان متناسقة مع بعضها؟ هل الطقم ملائم لمقابلة عمل، خروج رسمي، أم كاجوال؟ (مثلاً: "الطقم متناسق وشيك جداً"، أو "الكحلي مش راكب قوي مع البني، الأفضل قميص أبيض أو رمادي").
+3. لو فيه أي بقع أو تجاعيد واضحة، نبهه بلطف: "فيه بقعة صغيرة على الجيب اليمين".
+تحدث بأسلوب صوتي مباشر وودود بدون أي نجوم ماركداون أو عناوين روبوتية.${knownContext}`;
+      } else if (targetLang === 'fr') {
+        prompt = `Vous êtes un conseiller en style et couleurs vocal pour une personne aveugle qui vérifie sa tenue vestimentaire.
+Examinez les vêtements devant la caméra :
+1. Couleurs et motifs précis : ex. "Chemise bleu marine unie", "Pantalon gris anthracite", "Robe bordeaux".
+2. Harmonisation et style : dites si l'ensemble est assorti et pour quelle occasion (formel, travail, détente).
+3. État : signalez gentiment d'éventuelles taches ou plis visibles.
+Parlez directement sans astérisques markdown ni titres.${knownContext}`;
+      } else {
+        prompt = `You are a fashion and color matching assistant speaking aloud to a blind person checking their clothes.
+Look at the clothing item or outfit in front of the camera:
+1. Exact colors and patterns: e.g. "Solid navy blue button-down shirt", "Charcoal gray trousers", "Patterned scarf".
+2. Outfit harmony & style: evaluate whether the pieces match well and what setting they suit (e.g. "These colors match wonderfully for work or formal occasions", or "A white shirt would pair better with these trousers").
+3. Condition check: gently mention if any visible stains, wrinkles, or lint are noticed.
+Speak warmly and directly without any markdown asterisks or headings.${knownContext}`;
+      }
+    } else if (navGuideMode) {
+      // Virtual White Cane & Indoor Navigation Assistant
+      if (targetLang === 'ar') {
+        prompt = `أنت عصا ذكية ومساعد ملاحة داخلي صوتي لشخص كفيف يتحرك في المكان.
+انظر فوراً إلى المسار المباشر والأرضية والممر أمامه:
+1. هل المسار مفتوح وآمن؟ ابدأ بـ "المسار مفتوح قدامك تقدر تمشي خطوتين تلاتة" أو اذكر المسافة التقريبية.
+2. العوائق والسلالم والأسلاك: اذكر فوراً أي عائق وموقعه الدقيق بالساعة أو الاتجاه (مثلاً: "خد بالك، فيه كرسي على شمالك"، "احذر سلك ممدود على الأرض قدامك"، "قدامك درجتين سلم نازل على بعد متر"، "الباب مفتوح على يمينك").
+3. توجيه واضح وبسيط ومباشر بدون أي نجوم ماركداون أو كلام إنشائي، لأن سلامة حركته تعتمد على وضوح كلامك.${knownContext}`;
+      } else if (targetLang === 'fr') {
+        prompt = `Vous êtes une canne blanche virtuelle et guide de navigation intérieure pour une personne aveugle.
+Examinez immédiatement le chemin, le sol et la zone devant la caméra :
+1. État du passage : dites si le chemin est dégagé (ex. "Chemin dégagé pour avancer de 3 pas").
+2. Obstacles, marches et dangers : signalez immédiatement tout objet avec sa position (ex. "Attention, chaise sur votre gauche", "Attention câble au sol devant vous", "Deux marches qui descendent à 1 mètre", "Porte ouverte à 2 heures").
+3. Instructions directes et claires sans astérisques markdown.${knownContext}`;
+      } else {
+        prompt = `You are an indoor navigation assistant and virtual white cane for a blind person walking forward.
+Instantly look at the pathway, floor, and immediate area in front of the camera:
+1. Pathway status: state if the path is clear to step forward (e.g. "Clear pathway ahead for about 3 steps").
+2. Obstacles, steps, and hazards: identify objects and their precise clock direction or distance (e.g. "Caution, chair on your left", "Watch out for a cable on the floor right ahead", "Two steps going down 1 meter ahead", "Doorway is open at 2 o'clock").
+3. Deliver crisp, clear, immediate spatial instructions without any fluff or markdown asterisks.${knownContext}`;
+      }
+    } else if (shoppingMode) {
       // Shopping Assistant Mode: identifies product name, brand, price tags, currency, weight/size/flavor, expiry date
       if (targetLang === 'ar') {
         prompt = `أنت مساعد تسوق ذكي يتحدث بصوته لشخص كفيف في سوبر ماركت أو محل تسوق. انظر فوراً إلى ما هو أمام الكاميرا وتعرف على:
@@ -524,6 +741,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         }
       }
 
+      // Tactile Haptic Vibration Feedback for Indoor Navigation
+      if (navGuideMode) {
+        const nav = parseNavGuidance(cleaned, targetLang);
+        triggerHapticAlert(nav.hapticPattern);
+      }
+
       // AUTOMATICALLY REPEAT ALOUD FROM THE VERY FIRST TIME WITHOUT USER HAVING TO ASK!
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -597,6 +820,8 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       label: labelInput.trim(),
       description: lastDescription,
       createdAt: new Date().toISOString(),
+      memoryType: isSavingPerson ? 'person' : 'object',
+      imageUrl: lastSnapshot || undefined,
     };
     const prevMemories = memories;
     const updated = [...memories, memory];
@@ -779,13 +1004,89 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             </button>
           </div>
 
-          {/* Right Utilities: Read Mode + Shopping Assistant + Spatial Memory + Flip Camera + Fullscreen */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Right Utilities: Modes + Spatial Memory + Flip Camera + Fullscreen */}
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
+            <button
+              onClick={toggleCurrencyMode}
+              aria-pressed={currencyMode}
+              aria-label={t('Currency Reader', 'قارئ العملات', 'Lecteur de monnaie')}
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                currencyMode
+                  ? 'bg-emerald-500/90 border-emerald-300 text-black shadow-emerald-950/50'
+                  : 'bg-black/75 border-emerald-500/40 text-white hover:bg-black/90'
+              }`}
+              title={t(
+                'Currency Reader: detect banknotes and cash instantly',
+                'قارئ العملات: قراءة الفلوس والنقود فوراً بالصوت',
+                'Lecteur de monnaie : reconnaître les billets'
+              )}
+            >
+              <Banknote className={`w-4 h-4 shrink-0 ${currencyMode ? 'text-black' : 'text-emerald-400'}`} />
+              <span className="hidden xl:inline">{t('Cash', 'فلوس', 'Monnaie')}</span>
+            </button>
+
+            <button
+              onClick={toggleFaceMode}
+              aria-pressed={faceMode}
+              aria-label={t('Face Recognition', 'من أمامي؟', 'Qui est là ?')}
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                faceMode
+                  ? 'bg-blue-600/90 border-blue-300 text-white shadow-blue-950/50'
+                  : 'bg-black/75 border-blue-500/40 text-white hover:bg-black/90'
+              }`}
+              title={t(
+                'Face Recognition: identify familiar people and faces',
+                'من أمامي: التعرف على الوجوه والمقربين والأشخاص',
+                'Reconnaissance faciale : identifier les proches'
+              )}
+            >
+              <Users className={`w-4 h-4 shrink-0 ${faceMode ? 'text-white' : 'text-blue-400'}`} />
+              <span className="hidden xl:inline">{t('People', 'وجوه', 'Visages')}</span>
+            </button>
+
+            <button
+              onClick={toggleOutfitMode}
+              aria-pressed={outfitMode}
+              aria-label={t('Color & Outfit Matcher', 'تنسيق الملابس والألوان', 'Style & Couleurs')}
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                outfitMode
+                  ? 'bg-pink-600/90 border-pink-300 text-white shadow-pink-950/50'
+                  : 'bg-black/75 border-pink-500/40 text-white hover:bg-black/90'
+              }`}
+              title={t(
+                'Color & Outfit Matcher: match clothing colors and check style',
+                'تنسيق الملابس: فحص ألوان الملابس وتناسق الطقم',
+                'Harmonie des vêtements : vérifier les couleurs et le style'
+              )}
+            >
+              <Palette className={`w-4 h-4 shrink-0 ${outfitMode ? 'text-white' : 'text-pink-400'}`} />
+              <span className="hidden xl:inline">{t('Outfit', 'ملابس', 'Tenue')}</span>
+            </button>
+
+            <button
+              onClick={toggleNavGuideMode}
+              aria-pressed={navGuideMode}
+              aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                navGuideMode
+                  ? 'bg-cyan-500/90 border-cyan-300 text-black shadow-cyan-950/50 animate-pulse'
+                  : 'bg-black/75 border-cyan-500/40 text-white hover:bg-black/90'
+              }`}
+              title={t(
+                'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
+                'العصا الذكية: كشف العوائق والممرات مع تنبيهات اهتزازية',
+                'Canne virtuelle : obstacles et marches avec vibrations haptiques'
+              )}
+            >
+              <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-cyan-400'}`} />
+              <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
+            </button>
+
             <button
               onClick={toggleReadMode}
               aria-pressed={readMode}
               aria-label={t('Read Mode', 'وضع القراءة', 'Mode lecture')}
-              className={`px-3 py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
                 readMode
                   ? 'bg-amber-500/90 border-amber-300 text-black'
                   : 'bg-black/75 border-amber-500/40 text-white hover:bg-black/90'
@@ -797,14 +1098,14 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               )}
             >
               <BookOpen className={`w-4 h-4 shrink-0 ${readMode ? 'text-black' : 'text-amber-400'}`} />
-              <span className="hidden md:inline">{t('Read Mode', 'اقرأ لي', 'Mode lecture')}</span>
+              <span className="hidden xl:inline">{t('Read Mode', 'اقرأ لي', 'Lecture')}</span>
             </button>
 
             <button
               onClick={toggleShoppingMode}
               aria-pressed={shoppingMode}
               aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
-              className={`px-3 py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
                 shoppingMode
                   ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50'
                   : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
@@ -816,7 +1117,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               )}
             >
               <ShoppingBag className={`w-4 h-4 shrink-0 ${shoppingMode ? 'text-white' : 'text-purple-400'}`} />
-              <span className="hidden md:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
+              <span className="hidden xl:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
             </button>
 
             <button
@@ -825,11 +1126,11 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
               }}
               aria-label={t('Spatial Memory', 'الذاكرة المكانية', 'Mémoire spatiale')}
-              className="px-3 py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
               title={t('Spatial Memory: Where are my things?', 'الذاكرة المكانية: حاجتي فين؟', 'Mémoire spatiale : Où sont mes affaires ?')}
             >
               <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="hidden md:inline">{t('Where is my stuff?', 'حاجتي فين؟', 'Où est mon objet ?')}</span>
+              <span className="hidden xl:inline">{t('Where is my stuff?', 'حاجتي فين؟', 'Où est mon objet ?')}</span>
               {spatialRecords.length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               )}
@@ -839,20 +1140,20 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               <button
                 onClick={flipCamera}
                 aria-label={t('Switch camera', 'بدّل الكاميرا', 'Changer de caméra')}
-                className="p-2.5 rounded-2xl bg-black/65 text-white backdrop-blur-xl border border-white/20 hover:bg-black/85 shadow-lg active:scale-95 transition-all"
+                className="p-2 sm:p-2.5 rounded-2xl bg-black/65 text-white backdrop-blur-xl border border-white/20 hover:bg-black/85 shadow-lg active:scale-95 transition-all"
                 title={t('Switch Camera', 'تبديل الكاميرا أمامي/خلفي', 'Changer de caméra')}
               >
-                <Camera className="w-5 h-5" />
+                <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             )}
 
             <button
               onClick={toggleFullscreen}
               aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-              className="p-2.5 rounded-2xl bg-black/65 text-white backdrop-blur-xl border border-white/20 hover:bg-black/85 shadow-lg active:scale-95 transition-all"
+              className="p-2 sm:p-2.5 rounded-2xl bg-black/65 text-white backdrop-blur-xl border border-white/20 hover:bg-black/85 shadow-lg active:scale-95 transition-all"
               title={isFullscreen ? 'خروج من ملء الشاشة' : 'تكبير ملء الشاشة'}
             >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              {isFullscreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
             </button>
           </div>
         </div>
@@ -1000,143 +1301,188 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         <div className="pointer-events-auto space-y-2.5 max-w-2xl mx-auto w-full">
           {/* Primary Action: only the button matching the currently selected language shows */}
           <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
-            {companionLang === 'ar' && (
-              <button
-                onClick={() => describeScene('ar')}
-                disabled={status === 'analyzing' || status === 'starting-camera'}
-                className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
-                  shoppingMode
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
-                    : readMode
-                    ? 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60'
-                    : 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 border border-emerald-400/40 shadow-emerald-950/60'
-                }`}
-              >
-                {shoppingMode ? (
-                  <ShoppingBag className="w-5 h-5 shrink-0" />
-                ) : readMode ? (
-                  readAction === 'summarize' ? (
-                    <GraduationCap className="w-5 h-5 shrink-0" />
-                  ) : (
-                    <BookOpen className="w-5 h-5 shrink-0" />
-                  )
-                ) : (
-                  <Camera className="w-5 h-5 shrink-0" />
-                )}
-                <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                  <span>
-                    {shoppingMode
-                      ? '🇪🇬 فحص المنتج والتسوق'
-                      : readMode
-                      ? readAction === 'summarize'
-                        ? '🇪🇬 المفيد وخلاصة الكلام'
-                        : '🇪🇬 اقرأ اللي قدامي'
-                      : '🇪🇬 ماذا أمامي؟'}
-                  </span>
-                  <span className="text-[10px] font-normal opacity-90">
-                    {shoppingMode
-                      ? 'مساعد التسوق والأسعار'
-                      : readMode
-                      ? readAction === 'summarize'
-                        ? 'الزبدة وأهم نقطة بالصوت'
-                        : 'قراءة نص بالصوت كلمة بكلمة'
-                      : 'وصف فوري بالصوت'}
-                  </span>
-                </div>
-              </button>
-            )}
+            {companionLang === 'ar' && (() => {
+              const getCfg = () => {
+                if (currencyMode) return {
+                  icon: <Banknote className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
+                  title: '🇪🇬 فحص وقراءة النقود',
+                  subtitle: 'كشف فئات الجنيه والعملات بالصوت',
+                };
+                if (faceMode) return {
+                  icon: <Users className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
+                  title: '🇪🇬 من يقف أمامي؟',
+                  subtitle: 'التعرف على الأشخاص والوجوه بالصوت',
+                };
+                if (outfitMode) return {
+                  icon: <Palette className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
+                  title: '🇪🇬 فحص ألوان الملابس',
+                  subtitle: 'تناسق الطقم والألوان بالصوت',
+                };
+                if (navGuideMode) return {
+                  icon: <Compass className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-cyan-600 to-teal-700 hover:from-cyan-500 hover:to-teal-600 border border-cyan-400/40 shadow-cyan-950/60 animate-pulse',
+                  title: '🇪🇬 فحص المسار والعوائق',
+                  subtitle: 'العصا الافتراضية مع تنبيه اهتزازي',
+                };
+                if (shoppingMode) return {
+                  icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
+                  title: '🇪🇬 فحص المنتج والتسوق',
+                  subtitle: 'مساعد التسوق والأسعار',
+                };
+                if (readMode) return {
+                  icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
+                  title: readAction === 'summarize' ? '🇪🇬 المفيد وخلاصة الكلام' : '🇪🇬 اقرأ اللي قدامي',
+                  subtitle: readAction === 'summarize' ? 'الزبدة وأهم نقطة بالصوت' : 'قراءة نص بالصوت كلمة بكلمة',
+                };
+                return {
+                  icon: <Camera className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 border border-emerald-400/40 shadow-emerald-950/60',
+                  title: '🇪🇬 ماذا أمامي؟',
+                  subtitle: 'وصف فوري بالصوت',
+                };
+              };
+              const cfg = getCfg();
+              return (
+                <button
+                  onClick={() => describeScene('ar')}
+                  disabled={status === 'analyzing' || status === 'starting-camera'}
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                >
+                  {cfg.icon}
+                  <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
+                    <span>{cfg.title}</span>
+                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                  </div>
+                </button>
+              );
+            })()}
 
-            {companionLang === 'en' && (
-              <button
-                onClick={() => describeScene('en')}
-                disabled={status === 'analyzing' || status === 'starting-camera'}
-                className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
-                  shoppingMode
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
-                    : readMode
-                    ? 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60'
-                    : 'bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 border border-primary/40 shadow-indigo-950/60'
-                }`}
-              >
-                {shoppingMode ? (
-                  <ShoppingBag className="w-5 h-5 shrink-0" />
-                ) : readMode ? (
-                  readAction === 'summarize' ? (
-                    <GraduationCap className="w-5 h-5 shrink-0" />
-                  ) : (
-                    <BookOpen className="w-5 h-5 shrink-0" />
-                  )
-                ) : (
-                  <Camera className="w-5 h-5 shrink-0" />
-                )}
-                <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                  <span>
-                    {shoppingMode
-                      ? '🇬🇧 Scan product & price'
-                      : readMode
-                      ? readAction === 'summarize'
-                        ? '🇬🇧 Core takeaways & bottom line'
-                        : '🇬🇧 Read this for me'
-                      : '🇬🇧 What is here?'}
-                  </span>
-                  <span className="text-[10px] font-normal opacity-90">
-                    {shoppingMode
-                      ? 'Shopping assistant'
-                      : readMode
-                      ? readAction === 'summarize'
-                        ? 'Distilled essence & spoken facts'
-                        : 'Spoken text reading'
-                      : 'Spoken English'}
-                  </span>
-                </div>
-              </button>
-            )}
+            {companionLang === 'en' && (() => {
+              const getCfg = () => {
+                if (currencyMode) return {
+                  icon: <Banknote className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
+                  title: '🇬🇧 Scan Cash & Currency',
+                  subtitle: 'Instant denomination audio reader',
+                };
+                if (faceMode) return {
+                  icon: <Users className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
+                  title: '🇬🇧 Who is in front of me?',
+                  subtitle: 'Face & familiar person recognition',
+                };
+                if (outfitMode) return {
+                  icon: <Palette className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
+                  title: '🇬🇧 Check Outfit & Colors',
+                  subtitle: 'Color matching & style harmony',
+                };
+                if (navGuideMode) return {
+                  icon: <Compass className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-cyan-600 to-teal-700 hover:from-cyan-500 hover:to-teal-600 border border-cyan-400/40 shadow-cyan-950/60 animate-pulse',
+                  title: '🇬🇧 Scan Pathway & Obstacles',
+                  subtitle: 'Virtual cane with haptic feedback',
+                };
+                if (shoppingMode) return {
+                  icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
+                  title: '🇬🇧 Scan product & price',
+                  subtitle: 'Shopping assistant',
+                };
+                if (readMode) return {
+                  icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
+                  title: readAction === 'summarize' ? '🇬🇧 Core takeaways & bottom line' : '🇬🇧 Read this for me',
+                  subtitle: readAction === 'summarize' ? 'Distilled essence & spoken facts' : 'Spoken text reading',
+                };
+                return {
+                  icon: <Camera className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 border border-primary/40 shadow-indigo-950/60',
+                  title: '🇬🇧 What is here?',
+                  subtitle: 'Spoken English',
+                };
+              };
+              const cfg = getCfg();
+              return (
+                <button
+                  onClick={() => describeScene('en')}
+                  disabled={status === 'analyzing' || status === 'starting-camera'}
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                >
+                  {cfg.icon}
+                  <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
+                    <span>{cfg.title}</span>
+                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                  </div>
+                </button>
+              );
+            })()}
 
-            {companionLang === 'fr' && (
-              <button
-                onClick={() => describeScene('fr')}
-                disabled={status === 'analyzing' || status === 'starting-camera'}
-                className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
-                  shoppingMode
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
-                    : readMode
-                    ? 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60'
-                    : 'bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-500 hover:to-cyan-600 border border-blue-400/40 shadow-blue-950/60'
-                }`}
-              >
-                {shoppingMode ? (
-                  <ShoppingBag className="w-5 h-5 shrink-0" />
-                ) : readMode ? (
-                  readAction === 'summarize' ? (
-                    <GraduationCap className="w-5 h-5 shrink-0" />
-                  ) : (
-                    <BookOpen className="w-5 h-5 shrink-0" />
-                  )
-                ) : (
-                  <Camera className="w-5 h-5 shrink-0" />
-                )}
-                <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                  <span>
-                    {shoppingMode
-                      ? '🇫🇷 Scanner produit & prix'
-                      : readMode
-                      ? readAction === 'summarize'
-                        ? '🇫🇷 L\'essentiel & conclusion'
-                        : '🇫🇷 Lisez ceci'
-                      : '🇫🇷 Que vois-je ?'}
-                  </span>
-                  <span className="text-[10px] font-normal opacity-90">
-                    {shoppingMode
-                      ? 'Assistant achat'
-                      : readMode
-                      ? readAction === 'summarize'
-                        ? 'Synthèse utile & conclusion vocale'
-                        : 'Lecture du texte'
-                      : 'Vocal en français'}
-                  </span>
-                </div>
-              </button>
-            )}
+            {companionLang === 'fr' && (() => {
+              const getCfg = () => {
+                if (currencyMode) return {
+                  icon: <Banknote className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
+                  title: '🇫🇷 Scanner Billets & Devises',
+                  subtitle: 'Lecture audio de la monnaie',
+                };
+                if (faceMode) return {
+                  icon: <Users className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
+                  title: '🇫🇷 Qui est devant moi ?',
+                  subtitle: 'Reconnaissance faciale et proches',
+                };
+                if (outfitMode) return {
+                  icon: <Palette className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
+                  title: '🇫🇷 Harmonie des Vêtements',
+                  subtitle: 'Accord des couleurs et tenue',
+                };
+                if (navGuideMode) return {
+                  icon: <Compass className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-cyan-600 to-teal-700 hover:from-cyan-500 hover:to-teal-600 border border-cyan-400/40 shadow-cyan-950/60 animate-pulse',
+                  title: '🇫🇷 Scanner Chemin & Obstacles',
+                  subtitle: 'Canne virtuelle avec retour haptique',
+                };
+                if (shoppingMode) return {
+                  icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
+                  title: '🇫🇷 Scanner produit & prix',
+                  subtitle: 'Assistant achat',
+                };
+                if (readMode) return {
+                  icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
+                  title: readAction === 'summarize' ? "🇫🇷 L'essentiel & conclusion" : '🇫🇷 Lisez ceci',
+                  subtitle: readAction === 'summarize' ? 'Synthèse utile & conclusion vocale' : 'Lecture du texte',
+                };
+                return {
+                  icon: <Camera className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-500 hover:to-cyan-600 border border-blue-400/40 shadow-blue-950/60',
+                  title: '🇫🇷 Que vois-je ?',
+                  subtitle: 'Vocal en français',
+                };
+              };
+              const cfg = getCfg();
+              return (
+                <button
+                  onClick={() => describeScene('fr')}
+                  disabled={status === 'analyzing' || status === 'starting-camera'}
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                >
+                  {cfg.icon}
+                  <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
+                    <span>{cfg.title}</span>
+                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                  </div>
+                </button>
+              );
+            })()}
           </div>
 
           {/* Secondary Controls Bar */}
@@ -1284,6 +1630,28 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 </button>
               </div>
 
+              {/* Type Switcher: Object vs Person */}
+              <div className="flex gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsSavingPerson(false)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    !isSavingPerson ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {companionLang === 'ar' ? '📦 شيء أو غرض' : companionLang === 'fr' ? '📦 Objet' : '📦 Object / Item'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsSavingPerson(true)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    isSavingPerson ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {companionLang === 'ar' ? '👤 شخص أو صديق' : companionLang === 'fr' ? '👤 Personne' : '👤 Person / Friend'}
+                </button>
+              </div>
+
               <input
                 autoFocus
                 type="text"
@@ -1293,7 +1661,11 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') saveMemory();
                 }}
-                placeholder={companionLang === 'ar' ? 'مثلاً: "دوا الضغط" أو "مفاتيحي" أو "أحمد"' : companionLang === 'fr' ? 'ex. "Mes clés", "Télécommande", "Médicament"' : 'e.g. "My Keys", "Coffee Mug", "Ahmed"'}
+                placeholder={
+                  isSavingPerson
+                    ? (companionLang === 'ar' ? 'اسم الشخص (مثلاً: "ماما"، "أحمد"، "دكتور طارق")' : companionLang === 'fr' ? 'Nom de la personne (ex. "Maman", "Ahmed")' : 'Person name (e.g. "Mom", "Ahmed")')
+                    : (companionLang === 'ar' ? 'مثلاً: "دوا الضغط" أو "مفاتيحي"' : companionLang === 'fr' ? 'ex. "Mes clés", "Médicament"' : 'e.g. "My Keys", "Coffee Mug"')
+                }
                 className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary outline-none text-sm"
               />
 

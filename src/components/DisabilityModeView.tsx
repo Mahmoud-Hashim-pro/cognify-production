@@ -4,7 +4,7 @@ import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
   ArrowLeft, ArrowRight, MessageSquare, Activity, Globe, Check, 
-  LayoutGrid, Building2, Zap
+  LayoutGrid, Building2, Zap, Radio, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
@@ -16,10 +16,25 @@ import MotorEuphoniaView from './MotorEuphoniaView';
 import VisionCompanionView from './VisionCompanionView';
 import ChatInterface, { ChatInterfaceRef } from './ChatInterface';
 import OrgDashboard from './OrgDashboard';
+import AmbientSoundRadar from './AmbientSoundRadar';
+import NeurodiversityHub from './NeurodiversityHub';
+import CaregiverHub from './CaregiverHub';
+import AccessibilityPassportModal from './AccessibilityPassportModal';
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation } from '../lib/translations';
 
-export type DisabilityTab = 'hub' | 'chat' | 'settings' | 'video' | 'bridge' | 'org' | 'motor' | 'vision';
+export type DisabilityTab =
+  | 'hub'
+  | 'chat'
+  | 'settings'
+  | 'video'
+  | 'bridge'
+  | 'org'
+  | 'motor'
+  | 'vision'
+  | 'radar'
+  | 'neurodiversity'
+  | 'caregiver';
 
 interface DisabilityModeViewProps {
   profile: UserProfile;
@@ -48,6 +63,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 }, ref) {
   // Start on 'hub' launcher by default so user can cleanly pick their desired module without visual clutter
   const [activeTab, setActiveTab] = useState<DisabilityTab>('hub');
+  const [showPassportModal, setShowPassportModal] = useState(false);
   
   // Organization staff (e.g. Care Center / NGO) get an extra module scoped to THEIR users.
   const isOrgStaff = !!profile?.isOrgManager && !!(profile?.organization || '').trim();
@@ -229,6 +245,57 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       matchingMode: 'None',
     },
     {
+      id: 'radar' as const,
+      titleEn: 'Ambient Sound & Hazard Radar',
+      titleAr: 'رادار الأصوات والمخاطر للصم',
+      shortEn: 'Radar',
+      shortAr: 'رادار',
+      badgeEn: 'Deaf Acoustic Awareness',
+      badgeAr: 'وعي صوتي فوري للصم',
+      descEn: 'Real-time acoustic AI hazard radar detecting sirens, fire alarms, car horns, and doorbells with screen flash strobe and tactile vibrations.',
+      descAr: 'كشف صوتي بيئي مباشر لصفارات الإنذار، أجهزة كشف الدخان، كلاكس السيارات، وأجراس الأبواب مع وميض بصري واهتزازات لمسية.',
+      Icon: Radio,
+      accentColor: 'text-cyan-400',
+      borderGlow: 'hover:border-cyan-500/60 border-slate-800',
+      bgGlow: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+      buttonCls: 'bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 shadow-cyan-500/20',
+      matchingMode: 'Deaf',
+    },
+    {
+      id: 'neurodiversity' as const,
+      titleEn: 'Neurodiversity & Autism Hub',
+      titleAr: 'واحة التوحد والاضطرابات النمائية',
+      shortEn: 'Autism',
+      shortAr: 'توحد',
+      badgeEn: 'Autism, Dyslexia & ADHD',
+      badgeAr: 'التوحد، عسر القراءة وتشتت الانتباه',
+      descEn: 'Visual PECS communication cards with speech output, daily visual routine schedules, emotion & sensory regulation meter with breathing bubble, and dyslexia reading tools.',
+      descAr: 'بطاقات بيكس (PECS) للتواصل البصري المنطوق، جدول الروتين اليومي، مقياس المشاعر وفقاعة التنفس الهادئ، ومسطرة القراءة لعسر القراءة.',
+      Icon: Brain,
+      accentColor: 'text-purple-400',
+      borderGlow: 'hover:border-purple-500/60 border-slate-800',
+      bgGlow: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+      buttonCls: 'bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white shadow-purple-500/20',
+      matchingMode: 'Neurodiversity',
+    },
+    {
+      id: 'caregiver' as const,
+      titleEn: 'Caregiver & Specialist Hub',
+      titleAr: 'لوحة المرافق والمختص الطبي',
+      shortEn: 'Caregiver',
+      shortAr: 'مرافق',
+      badgeEn: 'Clinical & Family Controls',
+      badgeAr: 'إشراف الأسرة والأخصائيين',
+      descEn: 'Unified monitoring dashboard, live emergency SOS test, telemetry metrics, and one-click JSON backup & clinical profile migration.',
+      descAr: 'لوحة تحكم للمرافق والأخصائي، اختبار نداء الاستغاثة، إحصائيات الذاكرة البصرية والنطق، والنسخ الاحتياطي ونقل الملف الطبي.',
+      Icon: Shield,
+      accentColor: 'text-rose-400',
+      borderGlow: 'hover:border-rose-500/60 border-slate-800',
+      bgGlow: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+      buttonCls: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-rose-500/20',
+      matchingMode: 'Multiple',
+    },
+    {
       id: 'settings' as const,
       titleEn: 'Preferences & System Dialects',
       titleAr: 'التفضيلات وتخصيص النظام',
@@ -344,6 +411,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     : localize(profile.language, 'Standard', 'قياسي')}
                 </strong>
               </div>
+              <button
+                onClick={() => setShowPassportModal(true)}
+                title={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
+                className="px-3 py-1.5 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95"
+              >
+                <span>🛂</span>
+                <span className="hidden sm:inline">{localize(profile.language, 'Passport', 'جواز السفر')}</span>
+              </button>
               <button
                 onClick={() => setActiveTab('settings')}
                 title={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
@@ -505,6 +580,47 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               className="w-full h-full min-h-0"
             >
               <VisionCompanionView profile={profile} setProfile={setProfile} />
+            </motion.div>
+          )}
+
+          {activeTab === 'radar' && (
+            <motion.div
+              key="radar-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full h-full min-h-0"
+            >
+              <AmbientSoundRadar profile={profile} onNavigateBack={() => setActiveTab('hub')} />
+            </motion.div>
+          )}
+
+          {activeTab === 'neurodiversity' && (
+            <motion.div
+              key="neurodiversity-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full h-full min-h-0"
+            >
+              <NeurodiversityHub profile={profile} onNavigateBack={() => setActiveTab('hub')} />
+            </motion.div>
+          )}
+
+          {activeTab === 'caregiver' && (
+            <motion.div
+              key="caregiver-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full h-full min-h-0"
+            >
+              <CaregiverHub
+                profile={profile}
+                onNavigateBack={() => setActiveTab('hub')}
+                setProfile={setProfile}
+                onOpenPassport={() => setShowPassportModal(true)}
+              />
             </motion.div>
           )}
 
@@ -676,6 +792,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
         </AnimatePresence>
       </main>
+
+      {/* Universal Accessibility Passport Modal */}
+      <AccessibilityPassportModal
+        profile={profile}
+        isOpen={showPassportModal}
+        onClose={() => setShowPassportModal(false)}
+        setProfile={setProfile}
+      />
     </div>
   );
 });
