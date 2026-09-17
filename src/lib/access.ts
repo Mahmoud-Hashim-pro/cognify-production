@@ -25,16 +25,16 @@ export function sectionOf(profile: Pick<UserProfile, 'accountPath'>): AccountPat
 
 /** Views an accessibility (Special Needs) user is allowed to open — their world
  *  is the disability center plus personal/account screens and adaptive learning hub. */
-const ACCESSIBILITY_ALLOWED: AppView[] = ['disability', 'learning', 'intelligence', 'profile', 'settings', 'support', 'memory', 'gym', 'iq', 'france', 'privacy'];
+const ACCESSIBILITY_ALLOWED: AppView[] = ['disability', 'video', 'learning', 'intelligence', 'profile', 'settings', 'support', 'memory', 'gym', 'iq', 'france', 'privacy'];
 
 /**
  * Can this profile open the given view?
  *  - Admins can open anything (incl. the admin dashboard).
- *  - The disability section is only for accessibility users.
+ *  - The disability section and sign video studio are only for accessibility users.
  *  - Accessibility users are kept inside their simplified world and can't cross
  *    into the full "normal"/graduation experience.
  *  - Everyone else (Normal / Graduation Project) can open the standard views but
- *    NOT the disability section.
+ *    NOT the disability section or sign video studio.
  */
 export function canAccessView(
   profile: UserProfile | null | undefined,
@@ -49,7 +49,7 @@ export function canAccessView(
   const accessibility = isAccessibilityUser(profile);
   // Org managers (e.g. Care Center / NGO staff) can open the disability hub —
   // their org dashboard lives inside it — regardless of their own account path.
-  if (view === 'disability') return accessibility || profile.isOrgManager === true;
+  if (view === 'disability' || view === 'video') return accessibility || profile.isOrgManager === true;
   if (accessibility) return ACCESSIBILITY_ALLOWED.includes(view);
   return true;
 }

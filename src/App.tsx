@@ -96,6 +96,7 @@ export default function App() {
   // Seed from the URL hash so deep links and F5 land on the right screen.
   const [currentView, setCurrentView] = useState<AppView>(() => {
     const h = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+    if (!h || h === 'video' || h === 'disability') return 'chat';
     return (VALID_VIEWS as readonly string[]).includes(h) ? (h as any) : 'chat';
   });
   
@@ -366,16 +367,25 @@ export default function App() {
         }
 
         const data = rawData as UserProfile;
+
+        // Honor user's login-time path selection if explicitly set to Normal
+        let preLoginPath: string | null = null;
+        try {
+          preLoginPath = localStorage.getItem('preLoginAccountPath');
+        } catch {}
+
+        if (preLoginPath === 'Normal' && data.accountPath !== 'Normal') {
+          data.accountPath = 'Normal';
+          data.accessibilityMode = 'None';
+          setDoc(doc(db, path), { accountPath: 'Normal', accessibilityMode: 'None' }, { merge: true }).catch(() => {});
+        }
+
         setProfile(data);
-        // The profile is established, so the login-screen hints have served their
-        // purpose. Drop them now so they can never be re-applied to a different
-        // account later on this device. (Not cleared in the no-profile branch
-        // below — Onboarding still reads them to pre-fill the user's choices.)
         clearPreLoginState();
 
         // Smart Entry Routing:
         // If the user has special needs / accessibility mode -> land on #disability
-        // If the user is a normal student/learner -> ALWAYS land directly on #chat, never disability
+        // If the user is a normal student/learner -> ALWAYS land directly on #chat, never disability or video
         const hash = window.location.hash.replace('#', '');
         const isA11y = isAccessibilityUser(data);
         if (isA11y) {
@@ -384,7 +394,7 @@ export default function App() {
             window.history.replaceState(null, '', '#disability');
           }
         } else {
-          if (!hash || hash === 'disability' || hash === '') {
+          if (!hash || hash === 'disability' || hash === 'video' || hash === '') {
             setCurrentView('chat');
             window.history.replaceState(null, '', '#chat');
           }
