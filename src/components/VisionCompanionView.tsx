@@ -26,6 +26,7 @@ import {
   MapPin,
   Search,
   BookOpen,
+  ShoppingBag,
 } from 'lucide-react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
@@ -117,6 +118,26 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   // Read Mode: focuses the AI purely on reading visible text aloud
   // (prescriptions, bills, labels, price tags) instead of describing the scene.
   const [readMode, setReadMode] = useState(false);
+
+  // Shopping Assistant Mode: focuses the AI on identifying products, brand,
+  // prices, currency, weight/size/flavor, and expiration dates for visually impaired shoppers.
+  const [shoppingMode, setShoppingMode] = useState(false);
+
+  const toggleReadMode = useCallback(() => {
+    setReadMode((prev) => {
+      const next = !prev;
+      if (next) setShoppingMode(false);
+      return next;
+    });
+  }, []);
+
+  const toggleShoppingMode = useCallback(() => {
+    setShoppingMode((prev) => {
+      const next = !prev;
+      if (next) setReadMode(false);
+      return next;
+    });
+  }, []);
 
   // Tracks whether the description is currently being spoken aloud, so the
   // same button can toggle between "play" and "stop" the voice.
@@ -362,7 +383,13 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
 
     setLastSnapshot(frame);
     setStatus('analyzing');
-    const waitingMsg = readMode
+    const waitingMsg = shoppingMode
+      ? targetLang === 'ar'
+        ? 'بتعرف على المنتج والأسعار قدامك...'
+        : targetLang === 'fr'
+        ? 'Identification du produit et des prix...'
+        : 'Identifying product and pricing in front of you...'
+      : readMode
       ? targetLang === 'ar'
         ? 'بقرا النص اللي قدامك...'
         : targetLang === 'fr'
@@ -383,7 +410,28 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       : '';
 
     let prompt = '';
-    if (readMode) {
+    if (shoppingMode) {
+      // Shopping Assistant Mode: identifies product name, brand, price tags, currency, weight/size/flavor, expiry date
+      if (targetLang === 'ar') {
+        prompt = `أنت مساعد تسوق ذكي يتحدث بصوته لشخص كفيف في سوبر ماركت أو محل تسوق. انظر فوراً إلى ما هو أمام الكاميرا وتعرف على:
+1. اسم المنتج وماركته ونوعه بالتحديد (مثلاً: لبن جهينة كامل الدسم، مكرونة روجينا قلم، شيبسي بطعم الجبنة المتبلة، مسحوق غسيل، عصير، علبة بنادول، أو ورقة نقدية فئة خمسين جنيه).
+2. السعر إذا كان هناك ملصق سعر أو باركود واضح، واذكر العملة بوضوح (جنيه، ريال، دولار، إلخ).
+3. الحجم أو الوزن أو الطعم، وتاريخ الصلاحية أو الإنتاج إذا كان ظاهراً ومقروءاً على العبوة.
+تحدث فوراً باختصار شديد وبطريقة مباشرة ومفيدة كأنك صديق بجانبه بدون أي مقدمات أو عناوين أو ماركداون. لو الشيء غير واضح أو الكاميرا بعيدة، قول له باختصار "قرب الكاميرا شوية من المنتج عشان أقرالك تفاصيله". لا تستخدم أي نجوم ماركداون نهائياً.${knownContext}`;
+      } else if (targetLang === 'fr') {
+        prompt = `Vous êtes un assistant d'achat vocal intelligent pour une personne malvoyante dans un magasin ou supermarché. Identifiez immédiatement le produit devant la caméra :
+1. Le nom exact du produit, la marque et sa variété (ex. Lait entier Candia, paquet de biscuits, bouteille de jus, billet de 20 euros, etc.).
+2. Le prix ou l'étiquette de prix si visible, en précisant la devise.
+3. Le poids, volume, saveur et la date de péremption si lisible sur l'emballage.
+Parlez de façon directe, concise et naturelle sans titres de section ni astérisques markdown. Si le produit est flou ou trop loin, dites gentiment d'approcher la caméra.${knownContext}`;
+      } else {
+        prompt = `You are a smart voice shopping assistant for a visually impaired person in a store or supermarket. Instantly identify the item or product in front of the camera:
+1. Exact product name, brand, and variety (e.g. Tropicana Orange Juice No Pulp, Heinz Tomato Ketchup 500g, a $20 banknote, cereal box, etc.).
+2. Price tag or cost if visible, stating the currency clearly.
+3. Weight, volume, flavor, and expiration/best-by date if legible on the packaging.
+Speak directly, concisely, and naturally without any headings, robotic labels, or markdown asterisks. If the item is blurry or far, advise them to bring the camera closer.${knownContext}`;
+      }
+    } else if (readMode) {
       // Read Mode: ignore the scene entirely, just read out any visible text
       // verbatim and in order (prescriptions, bills, labels, price tags, receipts).
       if (targetLang === 'ar') {
@@ -686,10 +734,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
             </button>
           </div>
 
-          {/* Right Utilities: Read Mode + Spatial Memory + Flip Camera + Fullscreen */}
+          {/* Right Utilities: Read Mode + Shopping Assistant + Spatial Memory + Flip Camera + Fullscreen */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
-              onClick={() => setReadMode((prev) => !prev)}
+              onClick={toggleReadMode}
               aria-pressed={readMode}
               aria-label={t('Read Mode', 'وضع القراءة', 'Mode lecture')}
               className={`px-3 py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
@@ -705,6 +753,25 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
             >
               <BookOpen className={`w-4 h-4 shrink-0 ${readMode ? 'text-black' : 'text-amber-400'}`} />
               <span className="hidden md:inline">{t('Read Mode', 'اقرأ لي', 'Mode lecture')}</span>
+            </button>
+
+            <button
+              onClick={toggleShoppingMode}
+              aria-pressed={shoppingMode}
+              aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
+              className={`px-3 py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                shoppingMode
+                  ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50'
+                  : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
+              }`}
+              title={t(
+                'Shopping Assistant: identify products, prices, and expiry dates',
+                'مساعد التسوق: فحص المنتجات والأسعار وتواريخ الصلاحية',
+                'Assistant achat : identifier produits, prix et dates de péremption'
+              )}
+            >
+              <ShoppingBag className={`w-4 h-4 shrink-0 ${shoppingMode ? 'text-white' : 'text-purple-400'}`} />
+              <span className="hidden md:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
             </button>
 
             <button
@@ -817,13 +884,25 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
               <button
                 onClick={() => describeScene('ar')}
                 disabled={status === 'analyzing' || status === 'starting-camera'}
-                className="w-full min-h-[58px] sm:min-h-[66px] rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl shadow-emerald-950/60 border border-emerald-400/40 active:scale-[0.98] transition-all disabled:opacity-50"
+                className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
+                  shoppingMode
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
+                    : 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 border border-emerald-400/40 shadow-emerald-950/60'
+                }`}
               >
-                {readMode ? <BookOpen className="w-5 h-5 shrink-0" /> : <Camera className="w-5 h-5 shrink-0" />}
+                {shoppingMode ? (
+                  <ShoppingBag className="w-5 h-5 shrink-0" />
+                ) : readMode ? (
+                  <BookOpen className="w-5 h-5 shrink-0" />
+                ) : (
+                  <Camera className="w-5 h-5 shrink-0" />
+                )}
                 <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                  <span>{readMode ? '🇪🇬 اقرأ اللي قدامي' : '🇪🇬 ماذا أمامي؟'}</span>
+                  <span>
+                    {shoppingMode ? '🇪🇬 فحص المنتج والتسوق' : readMode ? '🇪🇬 اقرأ اللي قدامي' : '🇪🇬 ماذا أمامي؟'}
+                  </span>
                   <span className="text-[10px] font-normal opacity-90">
-                    {readMode ? 'قراءة نص بالصوت' : 'وصف فوري بالصوت'}
+                    {shoppingMode ? 'مساعد التسوق والأسعار' : readMode ? 'قراءة نص بالصوت' : 'وصف فوري بالصوت'}
                   </span>
                 </div>
               </button>
@@ -833,13 +912,25 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
               <button
                 onClick={() => describeScene('en')}
                 disabled={status === 'analyzing' || status === 'starting-camera'}
-                className="w-full min-h-[58px] sm:min-h-[66px] rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl shadow-indigo-950/60 border border-primary/40 active:scale-[0.98] transition-all disabled:opacity-50"
+                className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
+                  shoppingMode
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
+                    : 'bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 border border-primary/40 shadow-indigo-950/60'
+                }`}
               >
-                {readMode ? <BookOpen className="w-5 h-5 shrink-0" /> : <Camera className="w-5 h-5 shrink-0" />}
+                {shoppingMode ? (
+                  <ShoppingBag className="w-5 h-5 shrink-0" />
+                ) : readMode ? (
+                  <BookOpen className="w-5 h-5 shrink-0" />
+                ) : (
+                  <Camera className="w-5 h-5 shrink-0" />
+                )}
                 <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                  <span>{readMode ? '🇬🇧 Read this for me' : '🇬🇧 What is here?'}</span>
+                  <span>
+                    {shoppingMode ? '🇬🇧 Scan product & price' : readMode ? '🇬🇧 Read this for me' : '🇬🇧 What is here?'}
+                  </span>
                   <span className="text-[10px] font-normal opacity-90">
-                    {readMode ? 'Spoken text reading' : 'Spoken English'}
+                    {shoppingMode ? 'Shopping assistant' : readMode ? 'Spoken text reading' : 'Spoken English'}
                   </span>
                 </div>
               </button>
@@ -849,13 +940,25 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
               <button
                 onClick={() => describeScene('fr')}
                 disabled={status === 'analyzing' || status === 'starting-camera'}
-                className="w-full min-h-[58px] sm:min-h-[66px] rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-500 hover:to-cyan-600 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl shadow-blue-950/60 border border-blue-400/40 active:scale-[0.98] transition-all disabled:opacity-50"
+                className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${
+                  shoppingMode
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60'
+                    : 'bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-500 hover:to-cyan-600 border border-blue-400/40 shadow-blue-950/60'
+                }`}
               >
-                {readMode ? <BookOpen className="w-5 h-5 shrink-0" /> : <Camera className="w-5 h-5 shrink-0" />}
+                {shoppingMode ? (
+                  <ShoppingBag className="w-5 h-5 shrink-0" />
+                ) : readMode ? (
+                  <BookOpen className="w-5 h-5 shrink-0" />
+                ) : (
+                  <Camera className="w-5 h-5 shrink-0" />
+                )}
                 <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                  <span>{readMode ? '🇫🇷 Lisez ceci' : '🇫🇷 Que vois-je ?'}</span>
+                  <span>
+                    {shoppingMode ? '🇫🇷 Scanner produit & prix' : readMode ? '🇫🇷 Lisez ceci' : '🇫🇷 Que vois-je ?'}
+                  </span>
                   <span className="text-[10px] font-normal opacity-90">
-                    {readMode ? 'Lecture du texte' : 'Vocal en français'}
+                    {shoppingMode ? 'Assistant achat' : readMode ? 'Lecture du texte' : 'Vocal en français'}
                   </span>
                 </div>
               </button>
