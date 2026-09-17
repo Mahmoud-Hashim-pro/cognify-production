@@ -86,7 +86,7 @@ const ChatInterface = lazyWithRetry(() => import("./components/ChatInterface"));
 const VALID_VIEWS = [
   'chat', 'learning', 'profile', 'settings', 'video', 'disability',
   'admin', 'goals', 'gpa', 'analytics', 'planner', 'support', 'memory',
-  'institution', 'gym', 'iq', 'france', 'privacy',
+  'institution', 'gym', 'iq', 'france', 'privacy', 'intelligence',
 ] as const;
 
 export default function App() {
@@ -97,6 +97,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<AppView>(() => {
     const h = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
     if (!h || h === 'video' || h === 'disability') return 'chat';
+    if (h === 'intelligence') return 'profile';
     return (VALID_VIEWS as readonly string[]).includes(h) ? (h as any) : 'chat';
   });
   
@@ -266,7 +267,8 @@ export default function App() {
     }
 
     const handlePopState = () => {
-      const hash = window.location.hash.replace('#', '');
+      let hash = window.location.hash.replace('#', '');
+      if (hash === 'intelligence') hash = 'profile';
       if ((VALID_VIEWS as readonly string[]).includes(hash)) {
         setCurrentView(hash as any);
       } else {
@@ -844,7 +846,15 @@ export default function App() {
           />
         );
       case 'profile':
-        return <ProfilePage profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
+      case 'intelligence':
+        return (
+          <ProfilePage
+            profile={activeProfile}
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+            onNavigateBack={() => navigateTo(homeViewFor(profile))}
+            setProfile={setProfile}
+          />
+        );
       case 'admin':
         return <AdminDashboard profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
       case 'support':
