@@ -137,8 +137,14 @@ export interface UserProfile {
   activeThreadId?: string;
   tasks?: Task[];
   lastActiveDate?: string;
-  /** ISO 3166-1 alpha-2 country code, stamped from Vercel's edge geo header. */
+  /** ISO 3166-1 alpha-2 country code, stamped from edge geo header or fallback. */
   country?: string;
+  city?: string | null;
+  region?: string | null;
+  lastLoginAt?: string;
+  lastLoginCountry?: string;
+  lastLoginCity?: string | null;
+  lastLoginDevice?: string;
   /**
    * Phase 2: Cognify Memory (Transparent Student Memory).
    * Stored under users/{userId}/memory/config in Firestore.
@@ -356,4 +362,16 @@ export interface AACCardItem {
   phraseAr: string;
   actionPayload?: string;
   isAiAction?: boolean;
+}
+
+export interface LoginHistoryRecord {
+  id: string;
+  timestamp: string;
+  country: string;
+  countryName?: string;
+  region?: string | null;
+  city?: string | null;
+  ip?: string | null;
+  device?: string;
+  userAgent?: string;
 }

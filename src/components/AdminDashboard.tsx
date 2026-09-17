@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { UserProfile, CognitiveLevel, AccountPath, AccessibilityMode } from "../types";
+import { UserProfile, CognitiveLevel, AccountPath, AccessibilityMode, LoginHistoryRecord } from "../types";
 import { auth, db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { collection, onSnapshot, deleteDoc, doc, updateDoc, query, limit } from "firebase/firestore";
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { sectionOf, isAccessibilityUser } from "../lib/access";
 import { formatCountryName, COMMON_COUNTRIES } from "../lib/geo";
+import { fetchUserLoginHistory } from "../lib/loginHistory";
 import {
   getDatabaseHealth,
   getCollectionStats,
@@ -125,7 +126,31 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
   const [copiedEmails, setCopiedEmails] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [selectedUserForModal, setSelectedUserForModal] = useState<UserProfile | null>(null);
-  const [modalTab, setModalTab] = useState<'profile' | 'chats' | 'tasks' | 'raw'>('profile');
+  const [modalTab, setModalTab] = useState<'profile' | 'chats' | 'tasks' | 'logins' | 'raw'>('profile');
+  const [userLoginHistory, setUserLoginHistory] = useState<LoginHistoryRecord[]>([]);
+  const [loadingLogins, setLoadingLogins] = useState(false);
+
+  useEffect(() => {
+    if (!selectedUserForModal?.uid) {
+      setUserLoginHistory([]);
+      return;
+    }
+    let active = true;
+    setLoadingLogins(true);
+    fetchUserLoginHistory(selectedUserForModal.uid)
+      .then((history) => {
+        if (active) {
+          setUserLoginHistory(history);
+          setLoadingLogins(false);
+        }
+      })
+      .catch(() => {
+        if (active) setLoadingLogins(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [selectedUserForModal?.uid]);
   const [onlyOnlineFilter, setOnlyOnlineFilter] = useState(false);
   const [photoLightboxUrl, setPhotoLightboxUrl] = useState<string | null>(null);
   const [photoLightboxUser, setPhotoLightboxUser] = useState<UserProfile | null>(null);
@@ -3878,6 +3903,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
             <div className="flex border-b border-slate-800 bg-slate-900/90 px-6 gap-2">
               {[
                 { id: 'profile', label: 'Overview & Details', icon: UserIcon },
+                { id: 'logins', label: userLoginHistory.length > 0 ? `Logins (${userLoginHistory.length})` : 'Login History', icon: Globe },
                 { id: 'chats', label: `Chats (${selectedUserForModal.chatThreads?.length || 0})`, icon: MessageSquare },
                 { id: 'tasks', label: `Tasks (${selectedUserForModal.tasks?.length || 0})`, icon: ListTodo },
                 { id: 'raw', label: 'Raw JSON', icon: FileJson },
@@ -3982,7 +4008,22 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                           {formatCountryName(selectedUserForModal.country)}
                         </span>
                       </div>
-                      <div><span className="text-slate-400">Last Active:</span> <span className="font-bold text-white">{formatDate(newestActiveIso(selectedUserForModal))}</span></div>
+                      {selectedUserForModal.city && (
+                        <div>
+                          <span className="text-slate-400">City:</span>{' '}
+                          <span className="font-bold text-white">{selectedUserForModal.city}</span>
+                        </div>
+                      )}
+                      <div>
+                        <span className="text-slate-400">Last Active:</span>{' '}
+                        <span className="font-bold text-white">{formatDate(newestActiveIso(selectedUserForModal))}</span>
+                      </div>
+                      {selectedUserForModal.lastLoginDevice && (
+                        <div>
+                          <span className="text-slate-400">Device:</span>{' '}
+                          <span className="font-bold text-slate-300">{selectedUserForModal.lastLoginDevice}</span>
+                        </div>
+                      )}
                       {selectedUserForModal.passwordResetRequestedAt && (
                         <div>
                           <span className="text-slate-400">Last Pass Reset:</span>{' '}
@@ -4088,6 +4129,118 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 </div>
                 );
               })()}
+
+              {modalTab === 'logins' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">
+                        Login & Geolocation History
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Historical login sessions, detected countries, and device footprints.
+                      </p>
+                    </div>
+                    {loadingLogins && (
+                      <div className="flex items-center gap-2 text-xs text-cyan-400">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Fetching logs…</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {userLoginHistory.length > 0 ? (
+                    <div className="space-y-2.5">
+                      {userLoginHistory.map((record, index) => {
+                        const isLatest = index === 0;
+                        return (
+                          <div
+                            key={record.id || index}
+                            className={`p-4 rounded-2xl border transition-all ${
+                              isLatest
+                                ? 'bg-emerald-950/20 border-emerald-500/30'
+                                : 'bg-slate-950 border-slate-800/80'
+                            }`}
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-white text-sm">
+                                  {formatCountryName(record.country)}
+                                </span>
+                                {record.city && (
+                                  <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-md text-[11px]">
+                                    {record.city}{record.region ? `, ${record.region}` : ''}
+                                  </span>
+                                )}
+                                {isLatest && (
+                                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                                    Latest Session
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-mono text-[11px] text-slate-400">
+                                {formatDate(record.timestamp)}
+                              </span>
+                            </div>
+
+                            <div className="mt-2.5 pt-2.5 border-t border-slate-900 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+                              <span className="flex items-center gap-1.5">
+                                <Cpu className="w-3 h-3 text-slate-500" />
+                                {record.device || 'Standard Web Client'}
+                              </span>
+                              {record.ip && (
+                                <span className="font-mono text-slate-500 text-[10px]">
+                                  IP: {record.ip}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-6 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                          <Globe className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-white font-bold text-xs">Primary Recorded Location</div>
+                          <div className="text-[11px] text-slate-400">
+                            Captured from user profile telemetry (available even when offline).
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 pt-2 text-xs border-t border-slate-900">
+                        <div>
+                          <span className="text-slate-500 block text-[10px] uppercase">Last Known Country</span>
+                          <span className="font-bold text-emerald-400">
+                            {formatCountryName(selectedUserForModal.country)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block text-[10px] uppercase">Last Active Timestamp</span>
+                          <span className="font-mono text-slate-300 text-[11px]">
+                            {formatDate(newestActiveIso(selectedUserForModal))}
+                          </span>
+                        </div>
+                        {selectedUserForModal.city && (
+                          <div>
+                            <span className="text-slate-500 block text-[10px] uppercase">Last Known City</span>
+                            <span className="font-bold text-white">{selectedUserForModal.city}</span>
+                          </div>
+                        )}
+                        {selectedUserForModal.lastLoginDevice && (
+                          <div>
+                            <span className="text-slate-500 block text-[10px] uppercase">Last Device</span>
+                            <span className="text-slate-300">{selectedUserForModal.lastLoginDevice}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {modalTab === 'chats' && (
                 <div className="space-y-3">

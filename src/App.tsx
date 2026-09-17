@@ -26,6 +26,7 @@ import { subscribeToStudentMemory, clearStudentMemory } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
 import { initSecurityTracker } from "./lib/securityTracker";
 import { getVisitorCountryCode } from "./lib/geo";
+import { recordUserLoginSession } from "./lib/loginHistory";
 import { secureLoadKeySync, secureSaveKey, secureRemoveKey, autoMigrateStorageKeys } from "./lib/cryptoShield";
 
 function lazyWithRetry<T extends React.ComponentType<any>>(
@@ -378,6 +379,9 @@ export default function App() {
           setCurrentView('disability');
           window.history.replaceState(null, '', '#disability');
         }
+
+        // Record login telemetry (session history, device, country, city)
+        recordUserLoginSession(user.uid);
         
         // Update lastActiveDate and country:
         // Self-heal immediately if country is missing or Unknown, or if lastActiveDate is > 1 hr old

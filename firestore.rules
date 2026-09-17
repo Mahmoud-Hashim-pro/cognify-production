@@ -248,6 +248,10 @@ service cloud.firestore {
         allow read, write, delete: if isOwner(userId) || isAdmin();
       }
 
+      match /loginHistory/{historyId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
       match /studentState/{docId} {
         allow read: if isOwner(userId) || isAdmin() || isVerifiedParent(userId);
         allow write, delete: if isOwner(userId) || isAdmin();

@@ -9,6 +9,7 @@ export interface VisitorGeo {
   countryCode: string; // ISO 3166-1 alpha-2, e.g. "EG" — or "Unknown"
   region: string | null;
   city: string | null;
+  ip?: string | null;
 }
 
 const CACHE_KEY = 'cognify_visitor_geo';
@@ -201,5 +202,28 @@ export function formatCountryName(codeOrName?: string | null): string {
     return clean.toUpperCase();
   }
   return clean;
+}
+
+/**
+ * Detect client OS and browser cleanly (e.g. "Windows • Chrome" or "iOS • Safari")
+ */
+export function getDeviceSummary(): string {
+  if (typeof navigator === 'undefined') return 'Unknown Device';
+  const ua = navigator.userAgent;
+
+  let os = 'Unknown OS';
+  if (ua.includes('Win')) os = 'Windows';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+  else if (ua.includes('Mac')) os = 'macOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+
+  let browser = 'Browser';
+  if (ua.includes('Firefox/')) browser = 'Firefox';
+  else if (ua.includes('Edg/')) browser = 'Edge';
+  else if (ua.includes('Chrome/')) browser = 'Chrome';
+  else if (ua.includes('Safari/')) browser = 'Safari';
+
+  return `${os} • ${browser}`;
 }
 
