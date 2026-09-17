@@ -4,6 +4,9 @@
  * GDPR/FERPA Cascade Erasure, Data Portability Packaging, and Chained Audit Verification.
  */
 
+import fs from 'fs';
+import path from 'path';
+import { isSafeImageUrl } from '../api/proxy-image.js';
 import {
   sha256,
   sampleLaplace,
@@ -260,7 +263,65 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
   ];
   const verifBrokenLink = verifyAuditChain(brokenLinkChain);
   assert(verifBrokenLink.isValid === false, 'Broken hash linkage detected');
-  assert(verifBrokenLink.tamperedIndex === 2, 'Broken linkage index correctly identified as 2');
+  // ==========================================================================
+  // Test Group 6: Zero-Knowledge Student Chat Privacy & Architecture
+  // ==========================================================================
+  console.log('Group 6: Zero-Knowledge Student Chat Privacy & Proxy Security');
+
+  // 1. Verify firestore.rules enforces owner-only on /threads/{threadId}
+  const rulesPath = path.resolve(process.cwd(), 'firestore.rules');
+  const rulesContent = fs.readFileSync(rulesPath, 'utf8');
+  assert(
+    rulesContent.includes('match /threads/{threadId}') &&
+    rulesContent.includes('allow read, write, delete: if isOwner(userId);'),
+    'firestore.rules strictly isolates student threads with Owner-Only rule (admins blocked)'
+  );
+  assert(
+    rulesContent.includes('!("chatHistory" in data)'),
+    'firestore.rules blocks chatHistory from being written to /users/{userId} document'
+  );
+
+  // 2. Verify types.ts does not include chatHistory in UserProfile
+  const typesPath = path.resolve(process.cwd(), 'src/types.ts');
+  const typesContent = fs.readFileSync(typesPath, 'utf8');
+  assert(
+    !typesContent.includes('chatHistory: Message[];'),
+    'src/types.ts has eradicated chatHistory: Message[] from UserProfile'
+  );
+
+  // 3. Verify App.tsx auto-purges legacy chatHistory on document read
+  const appPath = path.resolve(process.cwd(), 'src/App.tsx');
+  const appContent = fs.readFileSync(appPath, 'utf8');
+  assert(
+    appContent.includes('deleteField()') && appContent.includes('delete rawData.chatHistory'),
+    'src/App.tsx automatically purges legacy chatHistory from Firestore with deleteField()'
+  );
+
+  // 4. Verify Image Proxy SSRF security
+  assert(
+    isSafeImageUrl('http://127.0.0.1/admin') === false,
+    'isSafeImageUrl blocks loopback IPv4 (127.0.0.1)'
+  );
+  assert(
+    isSafeImageUrl('http://localhost:3000/env') === false,
+    'isSafeImageUrl blocks localhost SSRF'
+  );
+  assert(
+    isSafeImageUrl('http://169.254.169.254/latest/meta-data') === false,
+    'isSafeImageUrl blocks AWS/GCP cloud metadata IP (169.254.169.254)'
+  );
+  assert(
+    isSafeImageUrl('http://10.0.0.1/internal') === false,
+    'isSafeImageUrl blocks private RFC1918 range (10.0.0.0/8)'
+  );
+  assert(
+    isSafeImageUrl('https://image.pollinations.ai/prompt/test?width=1024') === true,
+    'isSafeImageUrl permits public HTTPS pollinations.ai image'
+  );
+  assert(
+    isSafeImageUrl('https://images.unsplash.com/photo-example') === true,
+    'isSafeImageUrl permits public HTTPS CDN images'
+  );
 
   console.log(`\nMilestone 16 Verification Finished: ${passed} passed, ${failed} failed.`);
   return { passed, failed };

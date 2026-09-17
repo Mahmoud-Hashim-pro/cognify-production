@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Sparkles, ExternalLink } from 'lucide-react';
+import { Sparkles, ExternalLink, RefreshCw } from 'lucide-react';
 import MicroCheckWidget, { MicroCheckData } from './chat/MicroCheckWidget';
 
 const SIGNS_RE = /^\[Signs:\s*.*\]$/i;
@@ -10,8 +10,37 @@ const MICRO_CHECK_RE = /:::micro-check\s*([\s\S]*?):::/g;
 function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [key: string]: any }) {
   const [loaded, setLoaded] = React.useState(false);
   const [error, setError] = React.useState(false);
+  const [currentSrc, setCurrentSrc] = React.useState(src || '');
+  const [attemptedProxy, setAttemptedProxy] = React.useState(false);
+
+  React.useEffect(() => {
+    setCurrentSrc(src || '');
+    setLoaded(false);
+    setError(false);
+    setAttemptedProxy(false);
+  }, [src]);
 
   if (!src) return null;
+
+  const handleImageError = () => {
+    // 1st fallback: if direct image failed (e.g. ad-blocker or referer block), try same-origin proxy
+    if (!attemptedProxy && src) {
+      setAttemptedProxy(true);
+      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+      setCurrentSrc(proxyUrl);
+    } else {
+      // Both direct and proxy failed
+      setError(true);
+    }
+  };
+
+  const handleManualRetry = () => {
+    setError(false);
+    setLoaded(false);
+    setAttemptedProxy(false);
+    const separator = src.includes('?') ? '&' : '?';
+    setCurrentSrc(`${src}${separator}seed=${Date.now()}`);
+  };
 
   return (
     <div className="my-5 max-w-2xl rounded-3xl overflow-hidden border border-slate-800/80 bg-[#0A0C14] shadow-2xl backdrop-blur-xl group transition-all hover:border-cyan-500/40">
@@ -25,24 +54,36 @@ function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [ke
           </div>
         )}
         {error ? (
-          <div className="p-8 text-center text-xs text-rose-400 flex flex-col items-center gap-2">
+          <div className="p-8 text-center text-xs text-rose-400 flex flex-col items-center gap-3">
             <span>Unable to render image preview directly.</span>
-            <a
-              href={src}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 underline hover:text-cyan-300 font-bold text-xs"
-            >
-              Open direct image link ↗
-            </a>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleManualRetry}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-xl font-bold text-xs transition-all cursor-pointer"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Retry Generation</span>
+              </button>
+              <a
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 underline hover:text-cyan-300 font-bold text-xs"
+              >
+                Open direct image link ↗
+              </a>
+            </div>
           </div>
         ) : (
           <img
-            src={src}
+            src={currentSrc}
             alt={alt || 'Visual'}
             loading="lazy"
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
             onLoad={() => setLoaded(true)}
-            onError={() => setError(true)}
+            onError={handleImageError}
             className={`w-full h-auto max-h-[520px] object-cover rounded-3xl transition-all duration-300 group-hover:scale-[1.01] ${loaded ? 'opacity-100' : 'opacity-0'}`}
             {...props}
           />

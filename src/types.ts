@@ -132,7 +132,11 @@ export interface UserProfile {
   onboardingComplete: boolean;
   photoURL?: string;
   questionHistory: { score: number; date: string }[];
-  chatHistory: Message[]; // Legacy/Global history (to be deprecated or kept small)
+  /**
+   * Metadata index for student chat threads (titles, dates, snippets).
+   * Actual message contents are stored strictly in private owner-only subcollections:
+   * `/users/{userId}/threads/{threadId}`
+   */
   chatThreads?: ChatThread[];
   activeThreadId?: string;
   tasks?: Task[];

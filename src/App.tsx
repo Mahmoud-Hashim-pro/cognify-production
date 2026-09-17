@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Message, UserProfile, AccessibilityMode, CognitiveLevel } from "./types";
 import { auth, db, handleFirestoreError, OperationType, cleanDataForFirestore, clearPreLoginState, logout } from "./lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, setDoc, onSnapshot, getDocFromServer } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, getDocFromServer, deleteField } from "firebase/firestore";
 import { Loader2, Settings, Layers, Menu, Moon, Sun, AlertCircle, RefreshCw, Mail, ArrowLeft, Globe, Check, Key, Shield } from "lucide-react";
 import { toast, ToastContainer } from "./components/Toast";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
@@ -364,7 +364,13 @@ export default function App() {
       // only because that wipes the auth session and forces a fresh login).
       if (snapshot.metadata.hasPendingWrites && profileAppliedRef.current) return;
       if (snapshot.exists()) {
-        const data = snapshot.data() as UserProfile;
+        const rawData = snapshot.data() as any;
+        // Automatic Zero-Knowledge Privacy migration: purge legacy chatHistory from user doc
+        if (rawData && 'chatHistory' in rawData) {
+          delete rawData.chatHistory;
+          setDoc(doc(db, path), { chatHistory: deleteField() }, { merge: true }).catch(() => {});
+        }
+        const data = rawData as UserProfile;
         setProfile(data);
         // The profile is established, so the login-screen hints have served their
         // purpose. Drop them now so they can never be re-applied to a different
@@ -420,7 +426,6 @@ export default function App() {
             name: user.displayName || user.email?.split('@')[0] || "User",
             points: 100,
             questionHistory: [],
-            chatHistory: [],
             level: 'Basic',
             role: 'Student',
             educationLevel: 'University',
@@ -527,7 +532,6 @@ export default function App() {
       name: user.displayName || user.email?.split('@')[0] || "User",
       points: 100,
       questionHistory: [],
-      chatHistory: [],
       level: 'Intermediate',
       role: 'Student',
       educationLevel: 'University',
@@ -1168,7 +1172,9 @@ export default function App() {
                       lastMessageSnippet: t.lastMessageSnippet || ""
                     }));
                   }
-                  cleanProfile.chatHistory = [];
+                  // Zero-Knowledge Privacy: Ensure chatHistory is never stored on the user document
+                  delete cleanProfile.chatHistory;
+                  cleanProfile.chatHistory = deleteField();
 
                   const finalProfileToSave = cleanDataForFirestore(cleanProfile);
                   await setDoc(doc(db, path), finalProfileToSave, { merge: true });

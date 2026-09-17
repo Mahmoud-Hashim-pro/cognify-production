@@ -8,6 +8,7 @@ dotenv.config();
 import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";
 import learningProfileHandler from "./api/student/learningProfile";
+import proxyImageHandler from "./api/proxy-image";
 
 async function startServer() {
   const app = express();
@@ -34,6 +35,11 @@ async function startServer() {
   // Phase 2C - Personal Learning Profile
   app.all("/api/student/learningProfile", (req, res) => {
     return learningProfileHandler(req, res);
+  });
+
+  // Resilient Image Proxy
+  app.all("/api/proxy-image", (req, res) => {
+    return proxyImageHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);

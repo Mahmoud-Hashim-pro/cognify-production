@@ -181,7 +181,7 @@ service cloud.firestore {
              data.level in ["Basic", "Intermediate", "Advanced"] &&
              data.points is number &&
              data.onboardingComplete is bool &&
-             (!("chatHistory" in data) || data.chatHistory is list) &&
+             !("chatHistory" in data) &&
              (!("chatThreads" in data) || data.chatThreads is list) &&
              (!("questionHistory" in data) || data.questionHistory is list) &&
              (!("tasks" in data) || data.tasks is list) &&
