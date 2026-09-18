@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield,
@@ -71,6 +71,34 @@ export default function AccessibilityPassportModal({
 
   const [passport, setPassport] = useState<AccessibilityPassport>(initialPassport);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Reset form to the latest saved profile data every time the modal opens.
+  // Without this, if the user opens, closes, changes their mode externally, and
+  // opens again, the stale initialPassport (captured at first mount) is shown.
+  useEffect(() => {
+    if (isOpen) {
+      setPassport(
+        profile.accessibilityPassport || {
+          primaryMode: profile.accessibilityMode || 'None',
+          primaryCategory: profile.accessibilityMode || 'Multiple',
+          highContrast: false,
+          dyslexiaFont: false,
+          hapticFeedback: true,
+          autoSpeak: true,
+          audioSpeed: 1,
+          allowCameraTriggers: true,
+          visualSupport: { highContrast: false, autoSpeechReadout: true, hapticAssistance: true },
+          hearingSupport: { visualAcousticRadar: true, reverseSignToSpeech: true, flashingAlerts: true },
+          motorSupport: {
+            trackingMode: profile.headTrackingConfig?.trackingMode || 'iris',
+            dwellDurationMs: profile.headTrackingConfig?.dwellTimeMs || 1200,
+            emergencySosEnabled: true,
+          },
+          neurodiversitySupport: { dyslexiaFont: false, readingRuler: false, sensoryRegulation: true },
+        }
+      );
+    }
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const t = (en: string, ar: string, fr?: string) => {
     if (isAr) return ar;

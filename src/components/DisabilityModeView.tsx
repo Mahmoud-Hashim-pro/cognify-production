@@ -896,6 +896,18 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </motion.div>
           )}
 
+          {activeTab === 'org' && (
+            <motion.div
+              key="org-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full h-full min-h-0"
+            >
+              <OrgDashboard profile={profile} />
+            </motion.div>
+          )}
+
           {activeTab === 'chat' && (
             <motion.div
               key="chat-view"
