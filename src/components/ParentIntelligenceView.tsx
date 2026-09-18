@@ -22,7 +22,9 @@ import {
 import type { StudentState } from '../types/studentState';
 import type { ParentDashboardData } from '../types/parent';
 import { compileParentDashboard, verifyParentChildRelationship } from '../lib/parentIntelligence';
+import { sendCaregiverLinkRequest } from '../lib/caregiverLinking';
 import { createInitialStudentState } from '../lib/studentStateEngine';
+import { toast } from './Toast';
 
 interface ParentIntelligenceViewProps {
   student?: StudentState;
@@ -170,13 +172,27 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
   }, [activeStudent, effectiveDisplayName]);
 
   const handleLinkChild = async () => {
-    if (!childIdInput.trim()) return;
+    if (!childIdInput.trim() || !profile?.uid) return;
     const cleanId = childIdInput.trim();
     if (typeof window !== 'undefined') {
+      // Remembered locally so this screen knows which child to *display* once
+      // approved — this alone never grants any data access.
       localStorage.setItem('cognify_linked_child_uid', cleanId);
     }
-    if (profile?.uid && db) {
+    if (db) {
       setDoc(doc(db, `users/${profile.uid}`), { linkedChildUid: cleanId }, { merge: true }).catch(() => {});
+      try {
+        await sendCaregiverLinkRequest(profile.uid, profile.name || profile.email || 'A caregiver', profile.email || '', cleanId);
+        toast.success(
+          isAr
+            ? 'تم إرسال طلب الربط — في انتظار موافقة الطالب'
+            : 'Link request sent — waiting for the student to approve'
+        );
+      } catch (err) {
+        toast.error(
+          isAr ? 'تعذّر إرسال طلب الربط' : 'Could not send the link request'
+        );
+      }
     }
     setIsLinkingModalOpen(false);
     setIsDemoMode(false);
