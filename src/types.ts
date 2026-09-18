@@ -140,6 +140,14 @@ export interface UserProfile {
   lastActiveDate?: string;
   /** ISO 3166-1 alpha-2 country code, stamped from edge geo header or fallback. */
   country?: string;
+  /** UID of a parent/guardian this student has explicitly approved — grants that
+   *  parent read access under Firestore rules (isVerifiedParent). Set ONLY by the
+   *  student themself, only after they approve a pending link request. */
+  linkedParentUid?: string;
+  /** Alternative to linkedParentUid: any UID in this list also passes isVerifiedParent. */
+  authorizedParentUids?: string[];
+  /** Alternative: a parent whose verified auth email matches this also passes isVerifiedParent. */
+  parentEmail?: string;
   /** Canonical learning/cognitive state snapshot, used by institution & parent dashboards. */
   studentState?: StudentState;
   /** UID of the student this parent/guardian account is linked to. */
