@@ -295,5 +295,32 @@ service cloud.firestore {
     match /system/{docId} {
       allow read: if true; // Connection test path
     }
+
+    // ── Consent-based Caregiver/Parent Linking ──────────────────────────────
+    // Doc ID convention: {childUid}_{parentUid}. A parent can only ever
+    // create their OWN pending request; only the target child can move it to
+    // approved/rejected. Approving a request does NOT itself grant data
+    // access — the student still has to separately write linkedParentUid on
+    // their own /users/{uid} doc (see approveCaregiverLinkRequest in
+    // src/lib/caregiverLinking.ts), which the /users rules above already
+    // restrict to the owner. This collection is just the request/approval
+    // handshake, never the access grant itself.
+    match /caregiverLinkRequests/{requestId} {
+      allow create: if isAuthenticated()
+                    && request.resource.data.parentUid == request.auth.uid
+                    && request.resource.data.parentUid != request.resource.data.childUid
+                    && request.resource.data.status == 'pending'
+                    && requestId == (request.resource.data.childUid + '_' + request.resource.data.parentUid);
+      allow read: if isAuthenticated()
+                  && (resource.data.parentUid == request.auth.uid || resource.data.childUid == request.auth.uid);
+      // Only the target child may resolve a request, and only status may change.
+      allow update: if isAuthenticated()
+                    && resource.data.childUid == request.auth.uid
+                    && request.resource.data.parentUid == resource.data.parentUid
+                    && request.resource.data.childUid == resource.data.childUid
+                    && request.resource.data.status in ['approved', 'rejected'];
+      allow delete: if isAuthenticated()
+                    && (resource.data.parentUid == request.auth.uid || resource.data.childUid == request.auth.uid);
+    }
   }
 }
