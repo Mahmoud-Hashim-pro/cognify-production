@@ -5,7 +5,8 @@ import { recordExerciseResult } from '../../../lib/learningProfile';
 import ProgressBar from '../shared/ProgressBar';
 import VisualAid from '../shared/VisualAid';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
-import { Volume2, Sparkles, RefreshCw, Calculator, HelpCircle } from 'lucide-react';
+import { Volume2, Sparkles, RefreshCw, Calculator, HelpCircle, Hash } from 'lucide-react';
+import { learningAudio } from '../../../lib/learningAudio';
 
 interface MathModuleProps {
   userId: string;
@@ -32,12 +33,15 @@ export const MathModule: React.FC<MathModuleProps> = ({
   const [sessionQuestionCount, setSessionQuestionCount] = useState(1);
   const [sessionStars, setSessionStars] = useState(0);
   const [streak, setStreak] = useState(subjectProfile.consecutiveCorrect);
+  const [showCounter, setShowCounter] = useState(false);
+  const [activeCounterDots, setActiveCounterDots] = useState<number>(0);
 
   const fetchNextExercise = async () => {
     setIsLoading(true);
     setSelectedOption(null);
     setIsAnswered(false);
     setAnalysis(null);
+    setActiveCounterDots(0);
 
     try {
       const exercise = await generateAdaptiveExercise(
@@ -46,6 +50,7 @@ export const MathModule: React.FC<MathModuleProps> = ({
           difficulty: subjectProfile.currentDifficulty,
           teachingMethod: subjectProfile.preferredMethod,
           language: isArabic ? 'ar' : 'en',
+          curriculumLevel: learningProfile.curriculumLevel,
         },
         subjectProfile
       );
@@ -70,6 +75,7 @@ export const MathModule: React.FC<MathModuleProps> = ({
   const handleSelectOption = async (option: string) => {
     if (isAnswered || !currentExercise) return;
 
+    learningAudio.playClick();
     setSelectedOption(option);
     setIsAnswered(true);
     const responseTime = Date.now() - startTime;
@@ -79,9 +85,11 @@ export const MathModule: React.FC<MathModuleProps> = ({
 
     const isCorrect = resultAnalysis.isCorrect;
     if (isCorrect) {
+      learningAudio.playCorrect();
       setSessionStars((prev) => prev + currentExercise.difficulty * 2);
       setStreak((prev) => prev + 1);
     } else {
+      learningAudio.playIncorrect();
       setStreak(0);
     }
 
@@ -149,14 +157,73 @@ export const MathModule: React.FC<MathModuleProps> = ({
                 {isArabic ? 'الرياضيات الممتعة' : 'Fun Math'} • {currentExercise.topic}
               </span>
 
-              <button
-                onClick={speakQuestion}
-                className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all"
-                title={isArabic ? 'استمع للمسألة' : 'Listen to question'}
-              >
-                <Volume2 className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCounter(!showCounter)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all ${
+                    showCounter
+                      ? 'bg-blue-600 text-white border-blue-400 shadow-md shadow-blue-500/25'
+                      : 'bg-slate-800/80 hover:bg-slate-700 text-blue-300 border-slate-700'
+                  }`}
+                  title={isArabic ? 'عداد المساعدة بالنقاط' : 'Visual Counter Aid'}
+                >
+                  <Hash className="w-3.5 h-3.5" />
+                  <span>{isArabic ? 'عدّاد المساعدة' : 'Counter'}</span>
+                </button>
+
+                <button
+                  onClick={speakQuestion}
+                  className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all"
+                  title={isArabic ? 'استمع للمسألة' : 'Listen to question'}
+                >
+                  <Volume2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
+
+            {/* Interactive Visual Counter Bar */}
+            {showCounter && (
+              <div className="p-4 rounded-2xl bg-slate-950/90 border border-blue-500/40 mb-5 animate-in slide-in-from-top-2">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-black text-blue-300">
+                    {isArabic ? `النقاط المعدودة: ${activeCounterDots}` : `Counted Dots: ${activeCounterDots}`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      learningAudio.playClick();
+                      setActiveCounterDots(0);
+                    }}
+                    className="text-[11px] font-bold text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800"
+                  >
+                    {isArabic ? 'تصفير' : 'Reset'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                  {Array.from({ length: 20 }).map((_, idx) => {
+                    const isFilled = idx < activeCounterDots;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          learningAudio.playClick();
+                          setActiveCounterDots(idx + 1 === activeCounterDots ? idx : idx + 1);
+                        }}
+                        className={`w-9 h-9 rounded-xl font-black text-xs transition-all flex items-center justify-center ${
+                          isFilled
+                            ? 'bg-gradient-to-tr from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/30 scale-105'
+                            : 'bg-slate-900 border border-slate-700 text-slate-500 hover:border-slate-500'
+                        }`}
+                      >
+                        {idx + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Question Text */}
             <h3 className="text-xl sm:text-2xl font-black text-white leading-relaxed mb-6">

@@ -23,6 +23,7 @@ import {
   LearningProfile,
   SubjectType,
   ExerciseResult,
+  MistakeItem,
   ParentDashboardData,
   SubjectPerformance,
   CommonMistake,
@@ -33,7 +34,30 @@ import {
 } from '../types/learning';
 import { adaptDifficulty, detectLearningStyle } from '../services/learningAI';
 
+export { adaptDifficulty, detectLearningStyle };
+
 const LOCAL_STORAGE_KEY_PREFIX = 'cognify_learning_profile_';
+
+function safeStorageSet(key: string, value: string): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, value);
+    }
+  } catch {
+    // Ignore in non-browser or quota restricted environments
+  }
+}
+
+function safeStorageGet(key: string): string | null {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
 
 /**
  * Get or initialize learning profile from Firestore (with localStorage offline fallback)
@@ -47,18 +71,18 @@ export async function getOrCreateLearningProfile(uid: string): Promise<LearningP
 
     if (snap.exists()) {
       const data = snap.data() as LearningProfile;
-      localStorage.setItem(localKey, JSON.stringify(data));
+      safeStorageSet(localKey, JSON.stringify(data));
       return data;
     }
 
     // Initialize new profile
     const initial = createDefaultLearningProfile();
     await setDoc(profileRef, initial, { merge: true });
-    localStorage.setItem(localKey, JSON.stringify(initial));
+    safeStorageSet(localKey, JSON.stringify(initial));
     return initial;
   } catch (err) {
     console.warn('[LearningProfile] Firestore read failed, using localStorage:', err);
-    const cached = localStorage.getItem(localKey);
+    const cached = safeStorageGet(localKey);
     if (cached) {
       try {
         return JSON.parse(cached) as LearningProfile;
@@ -132,6 +156,13 @@ export async function recordExerciseResult(
       subProfile.strongTopics.push(result.topic);
       subProfile.weakTopics = subProfile.weakTopics.filter((t) => t !== result.topic);
     }
+
+    // If answered correctly, remove from mistakeQueue if it was pending review
+    if (updated.mistakeQueue && updated.mistakeQueue.length > 0) {
+      updated.mistakeQueue = updated.mistakeQueue.filter(
+        (m) => m.id !== result.exerciseId && m.exerciseId !== result.exerciseId
+      );
+    }
   } else {
     subProfile.consecutiveIncorrect += 1;
     subProfile.consecutiveCorrect = 0;
@@ -144,6 +175,30 @@ export async function recordExerciseResult(
     if (subProfile.consecutiveIncorrect >= 2 && !subProfile.weakTopics.includes(result.topic)) {
       subProfile.weakTopics.push(result.topic);
       subProfile.strongTopics = subProfile.strongTopics.filter((t) => t !== result.topic);
+    }
+    // Track mistake in Spaced Repetition Queue (keep recent 25 items)
+    if (!updated.mistakeQueue) updated.mistakeQueue = [];
+    const mistakeId = result.exerciseId;
+    const existsIndex = updated.mistakeQueue.findIndex((m) => m.id === mistakeId || m.exerciseId === mistakeId);
+    const mistakeEntry: MistakeItem = {
+      id: mistakeId,
+      exerciseId: mistakeId,
+      subject: result.subject,
+      difficulty: result.difficulty,
+      question: result.question || `Review ${result.subject} challenge`,
+      options: result.options,
+      correctAnswer: result.correctAnswer,
+      explanation: result.explanation,
+      userAnswer: result.userAnswer || result.childAnswer,
+      timestamp: Date.now(),
+    };
+    if (existsIndex >= 0) {
+      updated.mistakeQueue[existsIndex] = mistakeEntry;
+    } else {
+      updated.mistakeQueue.unshift(mistakeEntry);
+      if (updated.mistakeQueue.length > 25) {
+        updated.mistakeQueue.pop();
+      }
     }
   }
 
@@ -176,7 +231,7 @@ export async function recordExerciseResult(
   }
 
   // Save to localStorage immediately
-  localStorage.setItem(localKey, JSON.stringify(updated));
+  safeStorageSet(localKey, JSON.stringify(updated));
 
   // 4. Async Firestore updates & Learning Event Bus emission
   try {
@@ -356,4 +411,61 @@ export async function getParentDashboardAnalytics(
     learningStyle: profile.preferredLearningStyle || 'visual',
     progressOverTime,
   };
+}
+
+/**
+ * Manually or programmatically mark a mistake reviewed and resolved
+ */
+export async function resolveMistakeReview(
+  uid: string,
+  exerciseId: string,
+  currentProfile: LearningProfile
+): Promise<LearningProfile> {
+  const updated: LearningProfile = JSON.parse(JSON.stringify(currentProfile));
+  if (updated.mistakeQueue) {
+    updated.mistakeQueue = updated.mistakeQueue.filter(
+      (m) => m.id !== exerciseId && m.exerciseId !== exerciseId
+    );
+  }
+  updated.totalStarsEarned = (updated.totalStarsEarned || 0) + 5;
+  const localKey = `${LOCAL_STORAGE_KEY_PREFIX}${uid}`;
+  safeStorageSet(localKey, JSON.stringify(updated));
+
+  try {
+    const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
+    await setDoc(
+      profileRef,
+      { mistakeQueue: updated.mistakeQueue || [], totalStarsEarned: updated.totalStarsEarned },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn('[LearningProfile] Error resolving mistake review in Firestore:', err);
+  }
+
+  return updated;
+}
+
+/**
+ * Update user accessibility and curriculum preferences in Learning Hub
+ */
+export async function updateLearningSettings(
+  uid: string,
+  settings: Partial<Pick<LearningProfile, 'curriculumLevel' | 'dyslexiaFont' | 'audioEnabled' | 'speechRate'>>,
+  currentProfile: LearningProfile
+): Promise<LearningProfile> {
+  const updated: LearningProfile = {
+    ...currentProfile,
+    ...settings,
+  };
+  const localKey = `${LOCAL_STORAGE_KEY_PREFIX}${uid}`;
+  safeStorageSet(localKey, JSON.stringify(updated));
+
+  try {
+    const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
+    await setDoc(profileRef, settings, { merge: true });
+  } catch (err) {
+    console.warn('[LearningProfile] Error saving learning settings to Firestore:', err);
+  }
+
+  return updated;
 }
