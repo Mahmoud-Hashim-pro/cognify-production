@@ -21,6 +21,7 @@ import AmbientSoundRadar from './AmbientSoundRadar';
 import NeurodiversityHub from './NeurodiversityHub';
 import CaregiverHub from './CaregiverHub';
 import AccessibilityPassportModal from './AccessibilityPassportModal';
+import DeafEcosystemView from './DeafEcosystemView';
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation } from '../lib/translations';
 
@@ -35,7 +36,8 @@ export type DisabilityTab =
   | 'vision'
   | 'radar'
   | 'neurodiversity'
-  | 'caregiver';
+  | 'caregiver'
+  | 'deaf';
 
 export type ModuleCategory = 'all' | 'vision' | 'hearing' | 'motor' | 'neuro' | 'caregiver';
 
@@ -229,7 +231,32 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 shadow-teal-500/20',
       matchingMode: 'Visual',
     },
-    // 2. HEARING (Deaf Ecosystem)
+    // 2. HEARING (Deaf Ecosystem - All-in-One Suite)
+    {
+      id: 'deaf' as const,
+      category: 'hearing' as const,
+      titleEn: 'Deaf & Hard of Hearing Suite (All-in-One)',
+      titleAr: 'منظومة الصم وضعاف السمع الشاملة (الكل في واحد)',
+      shortEn: 'Deaf Suite',
+      shortAr: 'منظومة الصم',
+      badgeEn: 'All-in-One Screen',
+      badgeAr: 'شاشة متكاملة شاملة',
+      descEn: 'Consolidated workspace with instant toggles: 3D Sign Studio, Ambient Sound & Hazard Radar, and Two-Way Live Human Bridge.',
+      descAr: 'شاشة متكاملة تجمع كل أدوات التيسير السمعي مع التبديل الفوري: استوديو الإشارة 3D، رادار الأصوات والمخاطر، وجسر التخاطب المباشر.',
+      quickFeaturesAr: ['🤟 استوديو إشارة 3D', '📡 رادار مخاطر وأصوات', '💬 جسر تواصل مباشر', '⚡ تبديل فوري بين الأدوات', '🚨 وميض واهتزاز لمسي'],
+      quickFeaturesEn: ['🤟 3D Sign Studio', '📡 Sound & Hazard Radar', '💬 2-Way Human Bridge', '⚡ Instant 1-Screen Toggles', '🚨 Strobe & Haptics'],
+      subPills: [
+        { tab: 'video' as const, labelEn: '3D Sign', labelAr: 'لغة الإشارة', icon: Accessibility },
+        { tab: 'radar' as const, labelEn: 'Sound Radar', labelAr: 'رادار الأصوات', icon: Radio },
+        { tab: 'bridge' as const, labelEn: 'Live Bridge', labelAr: 'جسر التواصل', icon: Ear },
+      ],
+      Icon: Accessibility,
+      accentColor: 'text-indigo-400',
+      borderGlow: 'hover:border-indigo-500/80 border-indigo-500/40 ring-1 ring-indigo-500/20',
+      bgGlow: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/40',
+      buttonCls: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 text-white shadow-indigo-500/25',
+      matchingMode: 'Sign-Only',
+    },
     {
       id: 'video' as const,
       category: 'hearing' as const,
@@ -429,98 +456,101 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, [currentModule, MODULES]);
 
   const isAr = profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya';
+  const isDeafActive = activeTab === 'deaf' || activeTab === 'video' || activeTab === 'radar' || activeTab === 'bridge';
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="flex-1 flex flex-col h-full bg-[#0d101d] text-slate-100 overflow-hidden relative select-none">
       
       {/* ── TOP NAVIGATION BAR ── */}
-      <header className="relative z-[9995] px-4 py-2.5 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-slate-800 bg-[#121524]/95 backdrop-blur-xl shadow-lg">
-        <div className="flex items-center gap-2.5 sm:gap-3.5">
-          {/* Main App Menu Drawer Button */}
-          <button
-            onClick={() => {
-              if (isAccessibilityUser(profile) || !onNavigate) onMenuClick();
-              else onNavigate('chat');
-            }}
-            aria-label={isAccessibilityUser(profile)
-              ? localize(profile.language, 'Open menu', 'افتح القائمة')
-              : getTranslation(profile.language, 'back')}
-            className="p-2 text-slate-400 bg-slate-900 border border-slate-800 hover:text-white hover:bg-slate-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5"
-          >
-            {isAccessibilityUser(profile)
-              ? <Menu className="w-4 h-4" />
-              : <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />}
-            <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
-              {isAccessibilityUser(profile)
-                ? localize(profile.language, 'Menu', 'القائمة')
-                : getTranslation(profile.language, 'back')}
-            </span>
-          </button>
-
-          {/* If inside an active module, show clear "Back to Hub" button */}
-          {activeTab !== 'hub' ? (
+      {!isDeafActive && (
+        <header className="relative z-[9995] px-4 py-2.5 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-slate-800 bg-[#121524]/95 backdrop-blur-xl shadow-lg">
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
+            {/* Main App Menu Drawer Button */}
             <button
-              onClick={() => setActiveTab('hub')}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95"
+              onClick={() => {
+                if (isAccessibilityUser(profile) || !onNavigate) onMenuClick();
+                else onNavigate('chat');
+              }}
+              aria-label={isAccessibilityUser(profile)
+                ? localize(profile.language, 'Open menu', 'افتح القائمة')
+                : getTranslation(profile.language, 'back')}
+              className="p-2 text-slate-400 bg-slate-900 border border-slate-800 hover:text-white hover:bg-slate-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5"
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>{localize(profile.language, 'Back to Hub', 'العودة للمركز')}</span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-2 text-white">
-              <div className="p-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
-                <Accessibility className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="font-black text-sm sm:text-base tracking-tight">
-                {localize(profile.language, 'Special Needs & Accessibility OS', 'مركز منظومات ذوي الهمم والتيسير')}
+              {isAccessibilityUser(profile)
+                ? <Menu className="w-4 h-4" />
+                : <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />}
+              <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
+                {isAccessibilityUser(profile)
+                  ? localize(profile.language, 'Menu', 'القائمة')
+                  : getTranslation(profile.language, 'back')}
               </span>
-            </div>
-          )}
-        </div>
+            </button>
 
-        {/* Right Header Status / Sibling Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Sibling module pills when inside a suite */}
-          {activeTab !== 'hub' && siblingModules.length > 1 ? (
-            <div className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar">
-              {siblingModules.map((m) => (
+            {/* If inside an active module, show clear "Back to Hub" button */}
+            {activeTab !== 'hub' ? (
+              <button
+                onClick={() => setActiveTab('hub')}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>{localize(profile.language, 'Back to Hub', 'العودة للمركز')}</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 text-white">
+                <div className="p-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+                  <Accessibility className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="font-black text-sm sm:text-base tracking-tight">
+                  {localize(profile.language, 'Special Needs & Accessibility OS', 'مركز منظومات ذوي الهمم والتيسير')}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Right Header Status / Sibling Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Sibling module pills when inside a suite */}
+            {activeTab !== 'hub' && siblingModules.length > 1 ? (
+              <div className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar">
+                {siblingModules.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setActiveTab(m.id)}
+                    title={localize(profile.language, m.titleEn, m.titleAr)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                      activeTab === m.id
+                        ? 'bg-cyan-500 text-slate-950 font-black shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <m.Icon className="w-3 h-3" />
+                    <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* On Hub: show passport button & settings */
+              <div className="flex items-center gap-2">
                 <button
-                  key={m.id}
-                  onClick={() => setActiveTab(m.id)}
-                  title={localize(profile.language, m.titleEn, m.titleAr)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                    activeTab === m.id
-                      ? 'bg-cyan-500 text-slate-950 font-black shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  onClick={() => setShowPassportModal(true)}
+                  title={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 text-indigo-200 hover:text-white hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95"
                 >
-                  <m.Icon className="w-3 h-3" />
-                  <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
+                  <span>🛂</span>
+                  <span>{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
                 </button>
-              ))}
-            </div>
-          ) : (
-            /* On Hub: show passport button & settings */
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowPassportModal(true)}
-                title={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 text-indigo-200 hover:text-white hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95"
-              >
-                <span>🛂</span>
-                <span>{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('settings')}
-                title={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
-                className="p-2.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  title={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
+                  className="p-2.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+      )}
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
@@ -733,6 +763,35 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                 ))}
                               </div>
                             )}
+
+                            {/* Sub-tools Quick Toggle Pills (e.g. for Deaf Suite) */}
+                            {'subPills' in m && (m as any).subPills && (
+                              <div className="pt-2">
+                                <div className="text-[10px] font-black uppercase text-indigo-300 mb-1.5 flex items-center gap-1">
+                                  <SlidersHorizontal className="w-3 h-3 text-indigo-400" />
+                                  <span>{localize(profile.language, 'Quick Toggles in 1 Screen:', 'تبديل فوري بنفس الشاشة:')}</span>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {(m as any).subPills.map((sp: any) => {
+                                    const SpIcon = sp.icon;
+                                    return (
+                                      <button
+                                        key={sp.tab}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveTab(sp.tab);
+                                        }}
+                                        className="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-200 hover:text-white border border-indigo-500/30 text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                                      >
+                                        <SpIcon className="w-3 h-3 text-indigo-400" />
+                                        <span>{localize(profile.language, sp.labelEn, sp.labelAr)}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Action Launch Button */}
@@ -785,6 +844,27 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               <p className="text-xs text-slate-400 truncate font-medium">
                                 {localize(profile.language, m.descEn, m.descAr)}
                               </p>
+                              {'subPills' in m && (m as any).subPills && (
+                                <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                                  {(m as any).subPills.map((sp: any) => {
+                                    const SpIcon = sp.icon;
+                                    return (
+                                      <button
+                                        key={sp.tab}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveTab(sp.tab);
+                                        }}
+                                        className="px-2 py-0.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-200 hover:text-white border border-indigo-500/30 text-[10px] font-bold flex items-center gap-1 transition-all active:scale-95"
+                                      >
+                                        <SpIcon className="w-2.5 h-2.5 text-indigo-400" />
+                                        <span>{localize(profile.language, sp.labelEn, sp.labelAr)}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -831,15 +911,24 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </motion.div>
           )}
 
-          {activeTab === 'radar' && (
+          {isDeafActive && (
             <motion.div
-              key="radar-view"
+              key="deaf-unified-ecosystem"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <AmbientSoundRadar profile={profile} onNavigateBack={() => setActiveTab('hub')} />
+              <DeafEcosystemView
+                profile={profile}
+                initialTab={activeTab === 'deaf' ? 'video' : (activeTab as any)}
+                onNavigateBack={() => setActiveTab('hub')}
+                onMenuClick={onMenuClick}
+                onTabChange={(tool) => {
+                  setActiveTab(tool);
+                  onTabChange?.(tool);
+                }}
+              />
             </motion.div>
           )}
 
@@ -869,30 +958,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 setProfile={setProfile}
                 onOpenPassport={() => setShowPassportModal(true)}
               />
-            </motion.div>
-          )}
-
-          {activeTab === 'bridge' && (
-            <motion.div
-              key="bridge-view"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="w-full h-full min-h-0"
-            >
-              <HumanCommunicationBridge profile={profile} />
-            </motion.div>
-          )}
-
-          {activeTab === 'video' && (
-            <motion.div
-              key="video-view"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="w-full h-full min-h-0"
-            >
-              <SignVideoStudio profile={profile} onMenuClick={onMenuClick} isEmbedded={true} />
             </motion.div>
           )}
 
