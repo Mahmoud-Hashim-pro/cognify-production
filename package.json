@@ -34,6 +34,7 @@
     "test:security": "npx tsx tests/securityThreatModelVerification.ts",
     "test:hardening": "npx tsx tests/apiCorsAuthHardeningVerification.ts",
     "test:observability": "npx tsx tests/productionObservabilityVerification.ts",
+    "test:learning-hub": "npx tsx tests/learningHubComprehensiveVerification.ts",
     "test:benchmark:adaptive": "npx tsx tests/benchmarks/adaptiveLearningBenchmark.ts",
     "test:benchmark:pedagogical": "npx tsx tests/benchmarks/interventionEffectivenessBenchmark.ts",
     "test:benchmark:provider": "npx tsx tests/benchmarks/aiProviderBenchmark.ts",

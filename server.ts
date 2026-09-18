@@ -13,7 +13,7 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-  app.use(express.json({ limit: '50mb' }));
+  app.use(express.json({ limit: '2mb' }));
 
   // Set COOP header to permit Firebase Auth Google popup communication
   app.use((_req, res, next) => {
