@@ -73,6 +73,7 @@ import { runResilienceVerification } from './resilienceVerification.js';
 import { runBusinessTenancyVerification } from './businessTenancyVerification.js';
 import { runDeveloperApiVerification } from './developerApiVerification.js';
 import { runSecurityThreatModelVerification } from './securityThreatModelVerification.js';
+import { runLearningHubComprehensiveVerification } from './learningHubComprehensiveVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2063,6 +2064,13 @@ Keep practicing closures with higher-order functions!
     const m22Res = await runSecurityThreatModelVerification();
     totalPassed += m22Res.passed;
     totalFailed += m22Res.failed;
+  }
+
+  // 54. Milestone 23: Adaptive Learning Hub & Cognitive Curriculum
+  {
+    const m23Res = await runLearningHubComprehensiveVerification();
+    totalPassed += m23Res.passed;
+    totalFailed += m23Res.failed;
   }
 
   console.log(`\n========================================`);

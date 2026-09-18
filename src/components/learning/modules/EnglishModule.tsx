@@ -5,6 +5,7 @@ import { recordExerciseResult } from '../../../lib/learningProfile';
 import ProgressBar from '../shared/ProgressBar';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
 import { Globe, Volume2, Sparkles, Languages, MessageSquare } from 'lucide-react';
+import { learningAudio } from '../../../lib/learningAudio';
 
 interface EnglishModuleProps {
   userId: string;
@@ -45,6 +46,7 @@ export const EnglishModule: React.FC<EnglishModuleProps> = ({
           difficulty: subjectProfile.currentDifficulty,
           teachingMethod: subjectProfile.preferredMethod,
           language: 'en', // English subject is naturally targeted in English
+          curriculumLevel: learningProfile.curriculumLevel,
         },
         subjectProfile
       );
@@ -78,6 +80,7 @@ export const EnglishModule: React.FC<EnglishModuleProps> = ({
   const handleSelectOption = async (option: string) => {
     if (isAnswered || !currentExercise) return;
 
+    learningAudio.playClick();
     setSelectedOption(option);
     setIsAnswered(true);
     const responseTime = Date.now() - startTime;
@@ -87,9 +90,11 @@ export const EnglishModule: React.FC<EnglishModuleProps> = ({
 
     const isCorrect = resultAnalysis.isCorrect;
     if (isCorrect) {
+      learningAudio.playCorrect();
       setSessionStars((prev) => prev + currentExercise.difficulty * 2);
       setStreak((prev) => prev + 1);
     } else {
+      learningAudio.playIncorrect();
       setStreak(0);
     }
 

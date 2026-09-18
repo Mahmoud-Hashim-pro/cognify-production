@@ -6,6 +6,7 @@ import ProgressBar from '../shared/ProgressBar';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
 import VisualAid from '../shared/VisualAid';
 import { Lightbulb, BookOpen, Volume2, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { learningAudio } from '../../../lib/learningAudio';
 
 interface ComprehensionModuleProps {
   userId: string;
@@ -48,6 +49,7 @@ export const ComprehensionModule: React.FC<ComprehensionModuleProps> = ({
           difficulty: subjectProfile.currentDifficulty,
           teachingMethod: subjectProfile.preferredMethod,
           language: isArabic ? 'ar' : 'en',
+          curriculumLevel: learningProfile.curriculumLevel,
         },
         subjectProfile
       );
@@ -81,6 +83,7 @@ export const ComprehensionModule: React.FC<ComprehensionModuleProps> = ({
   const handleSelectOption = async (option: string) => {
     if (isAnswered || !currentExercise) return;
 
+    learningAudio.playClick();
     setSelectedOption(option);
     setIsAnswered(true);
     const responseTime = Date.now() - startTime;
@@ -90,9 +93,11 @@ export const ComprehensionModule: React.FC<ComprehensionModuleProps> = ({
 
     const isCorrect = resultAnalysis.isCorrect;
     if (isCorrect) {
+      learningAudio.playCorrect();
       setSessionStars((prev) => prev + currentExercise.difficulty * 2);
       setStreak((prev) => prev + 1);
     } else {
+      learningAudio.playIncorrect();
       setStreak(0);
     }
 

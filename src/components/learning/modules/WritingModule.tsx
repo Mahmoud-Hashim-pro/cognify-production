@@ -4,7 +4,8 @@ import { generateAdaptiveExercise, analyzeAnswer, generateLocalExercise } from '
 import { recordExerciseResult } from '../../../lib/learningProfile';
 import ProgressBar from '../shared/ProgressBar';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
-import { Edit3, CheckCircle2, Sparkles, HelpCircle, Delete } from 'lucide-react';
+import { Edit3, CheckCircle2, Sparkles, HelpCircle, Delete, RotateCcw, ArrowRight } from 'lucide-react';
+import { learningAudio } from '../../../lib/learningAudio';
 
 interface WritingModuleProps {
   userId: string;
@@ -33,6 +34,8 @@ export const WritingModule: React.FC<WritingModuleProps> = ({
   const [sessionStars, setSessionStars] = useState(0);
   const [streak, setStreak] = useState(subjectProfile.consecutiveCorrect);
   const [showHint, setShowHint] = useState(false);
+  const [assembledTiles, setAssembledTiles] = useState<string[]>([]);
+  const [availableTiles, setAvailableTiles] = useState<string[]>([]);
 
   const fetchNextExercise = async () => {
     setIsLoading(true);
@@ -41,6 +44,8 @@ export const WritingModule: React.FC<WritingModuleProps> = ({
     setIsAnswered(false);
     setAnalysis(null);
     setShowHint(false);
+    setAssembledTiles([]);
+    setAvailableTiles([]);
 
     try {
       const exercise = await generateAdaptiveExercise(
@@ -49,17 +54,23 @@ export const WritingModule: React.FC<WritingModuleProps> = ({
           difficulty: subjectProfile.currentDifficulty,
           teachingMethod: subjectProfile.preferredMethod,
           language: isArabic ? 'ar' : 'en',
+          curriculumLevel: learningProfile.curriculumLevel,
         },
         subjectProfile
       );
 
-      if (exercise) {
-        setCurrentExercise(exercise);
-      } else {
-        setCurrentExercise(generateLocalExercise('writing', subjectProfile.currentDifficulty, isArabic ? 'ar' : 'en'));
+      const resolved = exercise || generateLocalExercise('writing', subjectProfile.currentDifficulty, isArabic ? 'ar' : 'en');
+      setCurrentExercise(resolved);
+
+      if (resolved.letterTiles && resolved.letterTiles.length > 0) {
+        setAvailableTiles([...resolved.letterTiles].sort(() => Math.random() - 0.5));
       }
     } catch {
-      setCurrentExercise(generateLocalExercise('writing', subjectProfile.currentDifficulty, isArabic ? 'ar' : 'en'));
+      const localEx = generateLocalExercise('writing', subjectProfile.currentDifficulty, isArabic ? 'ar' : 'en');
+      setCurrentExercise(localEx);
+      if (localEx.letterTiles && localEx.letterTiles.length > 0) {
+        setAvailableTiles([...localEx.letterTiles].sort(() => Math.random() - 0.5));
+      }
     } finally {
       setIsLoading(false);
       setStartTime(Date.now());
@@ -70,9 +81,44 @@ export const WritingModule: React.FC<WritingModuleProps> = ({
     fetchNextExercise();
   }, []);
 
+  const handleTileClick = (tile: string, index: number) => {
+    if (isAnswered) return;
+    learningAudio.playClick();
+    const newAvailable = [...availableTiles];
+    newAvailable.splice(index, 1);
+    setAvailableTiles(newAvailable);
+
+    const newAssembled = [...assembledTiles, tile];
+    setAssembledTiles(newAssembled);
+  };
+
+  const handleRemoveTile = (tile: string, index: number) => {
+    if (isAnswered) return;
+    learningAudio.playClick();
+    const newAssembled = [...assembledTiles];
+    newAssembled.splice(index, 1);
+    setAssembledTiles(newAssembled);
+
+    setAvailableTiles([...availableTiles, tile]);
+  };
+
+  const handleClearTiles = () => {
+    if (isAnswered || !currentExercise?.letterTiles) return;
+    learningAudio.playClick();
+    setAvailableTiles([...currentExercise.letterTiles].sort(() => Math.random() - 0.5));
+    setAssembledTiles([]);
+  };
+
+  const handleSubmitTiles = () => {
+    if (isAnswered || assembledTiles.length === 0) return;
+    const answer = assembledTiles.join(assembledTiles.some((t) => t.length > 1) ? ' ' : '');
+    handleSubmitAnswer(answer);
+  };
+
   const handleSubmitAnswer = async (answer: string) => {
     if (isAnswered || !currentExercise || !answer.trim()) return;
 
+    learningAudio.playClick();
     setSelectedOption(answer);
     setIsAnswered(true);
     const responseTime = Date.now() - startTime;
@@ -82,9 +128,11 @@ export const WritingModule: React.FC<WritingModuleProps> = ({
 
     const isCorrect = resultAnalysis.isCorrect;
     if (isCorrect) {
+      learningAudio.playCorrect();
       setSessionStars((prev) => prev + currentExercise.difficulty * 2);
       setStreak((prev) => prev + 1);
     } else {
+      learningAudio.playIncorrect();
       setStreak(0);
     }
 
@@ -162,6 +210,77 @@ export const WritingModule: React.FC<WritingModuleProps> = ({
               <div className="p-3.5 rounded-2xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-xs font-medium mb-4 flex items-center gap-2 animate-in slide-in-from-top-2">
                 <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>{isArabic ? currentExercise.hintArabic || currentExercise.hint : currentExercise.hint}</span>
+              </div>
+            )}
+
+            {/* Interactive Letter / Word Builder Tray */}
+            {((currentExercise.letterTiles && currentExercise.letterTiles.length > 0) || assembledTiles.length > 0) && (
+              <div className="p-4 rounded-2xl bg-slate-950/90 border border-orange-500/40 my-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-black text-orange-400">
+                    {isArabic ? 'لوحة تركيب الحروف والكلمات:' : 'Word / Letter Builder:'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearTiles}
+                    disabled={isAnswered}
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-400 hover:text-white flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>{isArabic ? 'إعادة ترتيب' : 'Reset'}</span>
+                  </button>
+                </div>
+
+                {/* Assembled Word Tray */}
+                <div className="min-h-[52px] p-2.5 rounded-xl bg-slate-900 border-2 border-dashed border-slate-700 flex items-center justify-center gap-2 flex-wrap mb-3">
+                  {assembledTiles.length === 0 ? (
+                    <span className="text-xs text-slate-500 font-bold">
+                      {isArabic ? 'المس الحروف أو الكلمات بالأسفل لتركيبها هنا' : 'Tap tiles below to assemble your answer here'}
+                    </span>
+                  ) : (
+                    assembledTiles.map((tile, idx) => (
+                      <button
+                        key={`asm-${idx}`}
+                        type="button"
+                        onClick={() => handleRemoveTile(tile, idx)}
+                        disabled={isAnswered}
+                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black text-base shadow-md active:scale-95 animate-in zoom-in-90"
+                        title={isArabic ? 'اضغط للحذف' : 'Tap to remove'}
+                      >
+                        {tile} ✕
+                      </button>
+                    ))
+                  )}
+                </div>
+
+                {/* Available Tiles Tray */}
+                {availableTiles.length > 0 && (
+                  <div className="flex items-center justify-center gap-2 flex-wrap mb-3">
+                    {availableTiles.map((tile, idx) => (
+                      <button
+                        key={`av-${idx}`}
+                        type="button"
+                        onClick={() => handleTileClick(tile, idx)}
+                        disabled={isAnswered}
+                        className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 hover:text-white font-black text-base transition-all shadow-md active:scale-95"
+                      >
+                        {tile}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Submit Assembled Answer */}
+                {!isAnswered && assembledTiles.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSubmitTiles}
+                    className="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-orange-600/30 active:scale-95 transition-all"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{isArabic ? 'اعتماد الإجابة المركبة' : 'Submit Assembled Answer'}</span>
+                  </button>
+                )}
               </div>
             )}
 

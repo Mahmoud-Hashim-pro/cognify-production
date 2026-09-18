@@ -6,6 +6,7 @@ import ProgressBar from '../shared/ProgressBar';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
 import VisualAid from '../shared/VisualAid';
 import { Microscope, Volume2, Sparkles, Sun, Droplets, CloudRain, Flame } from 'lucide-react';
+import { learningAudio } from '../../../lib/learningAudio';
 
 interface ScienceModuleProps {
   userId: string;
@@ -46,6 +47,7 @@ export const ScienceModule: React.FC<ScienceModuleProps> = ({
           difficulty: subjectProfile.currentDifficulty,
           teachingMethod: subjectProfile.preferredMethod,
           language: isArabic ? 'ar' : 'en',
+          curriculumLevel: learningProfile.curriculumLevel,
         },
         subjectProfile
       );
@@ -79,6 +81,7 @@ export const ScienceModule: React.FC<ScienceModuleProps> = ({
   const handleSelectOption = async (option: string) => {
     if (isAnswered || !currentExercise) return;
 
+    learningAudio.playClick();
     setSelectedOption(option);
     setIsAnswered(true);
     const responseTime = Date.now() - startTime;
@@ -88,9 +91,11 @@ export const ScienceModule: React.FC<ScienceModuleProps> = ({
 
     const isCorrect = resultAnalysis.isCorrect;
     if (isCorrect) {
+      learningAudio.playCorrect();
       setSessionStars((prev) => prev + currentExercise.difficulty * 2);
       setStreak((prev) => prev + 1);
     } else {
+      learningAudio.playIncorrect();
       setStreak(0);
     }
 

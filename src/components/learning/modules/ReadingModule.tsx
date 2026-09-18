@@ -4,7 +4,8 @@ import { generateAdaptiveExercise, analyzeAnswer, generateLocalExercise } from '
 import { recordExerciseResult } from '../../../lib/learningProfile';
 import ProgressBar from '../shared/ProgressBar';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
-import { Volume2, BookOpen, Mic, Sparkles, VolumeX, Repeat } from 'lucide-react';
+import { Volume2, BookOpen, Mic, MicOff, Sparkles, VolumeX, Repeat, CheckCircle2 } from 'lucide-react';
+import { learningAudio } from '../../../lib/learningAudio';
 
 interface ReadingModuleProps {
   userId: string;
@@ -32,12 +33,16 @@ export const ReadingModule: React.FC<ReadingModuleProps> = ({
   const [sessionStars, setSessionStars] = useState(0);
   const [streak, setStreak] = useState(subjectProfile.consecutiveCorrect);
   const [speechRate, setSpeechRate] = useState<number>(0.8);
+  const [isListening, setIsListening] = useState(false);
+  const [speechFeedback, setSpeechFeedback] = useState<string | null>(null);
 
   const fetchNextExercise = async () => {
     setIsLoading(true);
     setSelectedOption(null);
     setIsAnswered(false);
     setAnalysis(null);
+    setSpeechFeedback(null);
+    setIsListening(false);
 
     try {
       const exercise = await generateAdaptiveExercise(
@@ -46,6 +51,7 @@ export const ReadingModule: React.FC<ReadingModuleProps> = ({
           difficulty: subjectProfile.currentDifficulty,
           teachingMethod: subjectProfile.preferredMethod,
           language: isArabic ? 'ar' : 'en',
+          curriculumLevel: learningProfile.curriculumLevel,
         },
         subjectProfile
       );
@@ -76,9 +82,58 @@ export const ReadingModule: React.FC<ReadingModuleProps> = ({
     window.speechSynthesis.speak(utterance);
   };
 
+  const handleSpeechPronounce = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(isArabic ? 'متصفحك لا يدعم التعرف على الصوت مباشرة.' : 'Speech Recognition is not supported in this browser.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = isArabic ? 'ar-SA' : 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      setIsListening(true);
+      setSpeechFeedback(isArabic ? 'جاري الاستماع... انطق الكلمة الآن 🎙️' : 'Listening... speak the word now! 🎙️');
+
+      recognition.onresult = (event: any) => {
+        setIsListening(false);
+        const spoken = event.results[0][0].transcript.trim().toLowerCase();
+        const target = (currentExercise?.correctAnswer || '').toLowerCase().replace(/[^\w\s\u0621-\u064A]/g, '').trim();
+        const cleanSpoken = spoken.replace(/[^\w\s\u0621-\u064A]/g, '');
+
+        if (cleanSpoken.includes(target) || target.includes(cleanSpoken)) {
+          learningAudio.playCorrect();
+          setSpeechFeedback(isArabic ? `🌟 ممتاز جداً! نطقت: "${spoken}" بدقة رائعة!` : `🌟 Fantastic! You said: "${spoken}" correctly!`);
+          handleSelectOption(currentExercise!.correctAnswer);
+        } else {
+          learningAudio.playIncorrect();
+          setSpeechFeedback(isArabic ? `سمعنا: "${spoken}". حاول نطق: "${currentExercise?.correctAnswer}" مرة أخرى!` : `We heard: "${spoken}". Let's try saying "${currentExercise?.correctAnswer}"!`);
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+        setSpeechFeedback(isArabic ? 'لم نتمكن من التقاط الصوت، حاول مجدداً.' : 'Could not hear clearly, try again!');
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch {
+      setIsListening(false);
+      setSpeechFeedback(isArabic ? 'تعذر تشغيل الميكروفون.' : 'Microphone unavailable.');
+    }
+  };
+
   const handleSelectOption = async (option: string) => {
     if (isAnswered || !currentExercise) return;
 
+    learningAudio.playClick();
     setSelectedOption(option);
     setIsAnswered(true);
     const responseTime = Date.now() - startTime;
@@ -88,9 +143,11 @@ export const ReadingModule: React.FC<ReadingModuleProps> = ({
 
     const isCorrect = resultAnalysis.isCorrect;
     if (isCorrect) {
+      learningAudio.playCorrect();
       setSessionStars((prev) => prev + currentExercise.difficulty * 2);
       setStreak((prev) => prev + 1);
     } else {
+      learningAudio.playIncorrect();
       setStreak(0);
     }
 
@@ -172,7 +229,73 @@ export const ReadingModule: React.FC<ReadingModuleProps> = ({
                   ? currentExercise.questionArabic || currentExercise.question
                   : currentExercise.question}
               </p>
+
+              {/* Syllable Breakdown Pills if available */}
+              {currentExercise.syllables && currentExercise.syllables.length > 0 && (
+                <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
+                  <span className="text-xs text-slate-400 font-bold">{isArabic ? 'المقاطع الصوتية:' : 'Phonics / Syllables:'}</span>
+                  {currentExercise.syllables.map((s, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => speakText(s, true)}
+                      className="px-3.5 py-1.5 rounded-xl bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 text-green-300 font-black text-sm transition-all active:scale-95 shadow-sm"
+                      title={isArabic ? 'استمع للمقطع' : 'Listen to syllable'}
+                    >
+                      {s} 🔊
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Read Aloud Microphone Practice Tool */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/40 to-slate-900 border border-emerald-500/30 mb-2 flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <span className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+                  <Mic className="w-4 h-4" />
+                </span>
+                <div>
+                  <p className="text-xs font-black text-emerald-300">
+                    {isArabic ? 'تحدي نطق الكلمة بصوتك' : 'Voice Reading Challenge'}
+                  </p>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    {isArabic ? 'اضغط الميكروفون واقرأ الكلمة لتقييم نطقك' : 'Tap the microphone and say the answer aloud'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSpeechPronounce}
+                disabled={isAnswered || isListening}
+                className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all shadow-md active:scale-95 ${
+                  isListening
+                    ? 'bg-rose-600 animate-pulse text-white'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
+                }`}
+              >
+                {isListening ? (
+                  <>
+                    <MicOff className="w-4 h-4" />
+                    <span>{isArabic ? 'جاري الاستماع...' : 'Listening...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-4 h-4" />
+                    <span>{isArabic ? 'اقرأ بصوتك 🎙️' : 'Read Aloud 🎙️'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Live Speech Feedback Alert */}
+            {speechFeedback && (
+              <div className="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/40 text-xs text-emerald-300 font-bold mb-3 flex items-center gap-2 animate-in fade-in">
+                <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{speechFeedback}</span>
+              </div>
+            )}
 
             {/* Multiple Choice Options Grid */}
             <p className="text-xs font-bold text-slate-400 mb-3">

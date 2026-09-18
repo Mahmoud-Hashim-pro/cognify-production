@@ -51,17 +51,37 @@ export interface SubjectProfile {
   lastExerciseAt: number; // Unix timestamp ms
 }
 
+export type CurriculumLevel = 'foundations' | 'elementary' | 'intermediate' | 'advanced';
+
 // ── Learning Profile (per-child) ───────────
 export interface LearningProfile {
   subjects: Record<SubjectType, SubjectProfile>;
   preferredLearningStyle: LearningStyle;
   overallLevel: OverallLevel;
+  curriculumLevel?: CurriculumLevel;
   totalSessionsCompleted: number;
   totalTimeSpentMinutes: number;
   lastActiveAt: number;
   streakDays: number;
   lastStreakDate: string; // YYYY-MM-DD
   totalStarsEarned: number;
+  mistakeQueue?: MistakeItem[];
+  audioEnabled?: boolean;
+  speechRate?: number;
+  dyslexiaFont?: boolean;
+}
+
+export interface MistakeItem {
+  id: string;
+  exerciseId?: string;
+  subject: SubjectType;
+  difficulty: DifficultyLevel;
+  question: string;
+  options?: string[];
+  correctAnswer: string;
+  explanation?: string;
+  userAnswer?: string;
+  timestamp: number;
 }
 
 // ── Exercise Types ─────────────────────────
@@ -72,6 +92,7 @@ export interface ExerciseConfig {
   focusTopics?: string[];
   avoidTopics?: string[];
   language: 'en' | 'ar';
+  curriculumLevel?: CurriculumLevel;
 }
 
 export interface Exercise {
@@ -91,6 +112,8 @@ export interface Exercise {
   explanationArabic?: string;
   topic: string;
   timeoutMs?: number;
+  syllables?: string[];
+  letterTiles?: string[];
 }
 
 export interface VisualAidData {
@@ -118,6 +141,10 @@ export interface ExerciseResult {
   teachingMethodUsed: TeachingMethod;
   topic: string;
   timestamp: number;
+  question?: string;
+  options?: string[];
+  explanation?: string;
+  userAnswer?: string;
 }
 
 // ── AI Analysis Response ───────────────────
@@ -337,11 +364,16 @@ export function createDefaultLearningProfile(): LearningProfile {
     subjects,
     preferredLearningStyle: 'visual',
     overallLevel: 'beginner',
+    curriculumLevel: 'elementary',
     totalSessionsCompleted: 0,
     totalTimeSpentMinutes: 0,
     lastActiveAt: Date.now(),
     streakDays: 0,
     lastStreakDate: '',
     totalStarsEarned: 0,
+    mistakeQueue: [],
+    audioEnabled: true,
+    speechRate: 0.9,
+    dyslexiaFont: false,
   };
 }

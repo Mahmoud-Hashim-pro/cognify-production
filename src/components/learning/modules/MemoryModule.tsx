@@ -4,6 +4,7 @@ import { recordExerciseResult } from '../../../lib/learningProfile';
 import ProgressBar from '../shared/ProgressBar';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
 import { Brain, Sparkles, RefreshCw, Trophy, CheckCircle2 } from 'lucide-react';
+import { learningAudio } from '../../../lib/learningAudio';
 
 interface MemoryModuleProps {
   userId: string;
@@ -78,6 +79,7 @@ export const MemoryModule: React.FC<MemoryModuleProps> = ({
       return;
     }
 
+    learningAudio.playClick();
     const newCards = [...cards];
     newCards[index].isFlipped = true;
     setCards(newCards);
@@ -91,6 +93,7 @@ export const MemoryModule: React.FC<MemoryModuleProps> = ({
 
       if (cards[firstIdx].content === cards[secondIdx].content) {
         // Match found!
+        learningAudio.playCorrect();
         setTimeout(async () => {
           const matchedCards = [...newCards];
           matchedCards[firstIdx].isMatched = true;
@@ -103,6 +106,7 @@ export const MemoryModule: React.FC<MemoryModuleProps> = ({
 
           if (nextMatched === pairCount) {
             // Game Won!
+            learningAudio.playCelebration();
             setIsCompleted(true);
             const totalDuration = Date.now() - startTime;
             setSessionStars((prev) => prev + subjectProfile.currentDifficulty * 3);
@@ -128,6 +132,7 @@ export const MemoryModule: React.FC<MemoryModuleProps> = ({
         }, 500);
       } else {
         // No match - flip back
+        learningAudio.playIncorrect();
         setTimeout(() => {
           const resetCards = [...newCards];
           resetCards[firstIdx].isFlipped = false;
