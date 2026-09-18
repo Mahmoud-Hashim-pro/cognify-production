@@ -519,6 +519,13 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
   // records manual locks and persists to localStorage, it must never trigger
   // a re-render of this performance-sensitive, camera-driven component.
   const a11yStateRef = useRef(loadStoredAccessibilityState(profile.uid || 'anonymous'));
+  // The one derived value that DOES need to be React state, because it
+  // changes what actually renders (zoom level of the whole card area).
+  // Updates only happen inside recordA11yDwellObservation (on selection,
+  // at most every 5th pick) — never per animation frame.
+  const [largeTargetMode, setLargeTargetMode] = useState(
+    Boolean(a11yStateRef.current.motor.largeTargetMode)
+  );
 
   // Settings
   const [headConfig, setHeadConfig] = useState<HeadTrackingConfig>(() => {
@@ -2180,6 +2187,10 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
         const next = deriveAdaptiveAccessibilityState(a11yStateRef.current, a11yObservationsRef.current);
         a11yStateRef.current = next;
         persistAccessibilityState(next);
+        // Only a real state change should ever trigger a render here.
+        if (Boolean(next.motor.largeTargetMode) !== largeTargetMode) {
+          setLargeTargetMode(Boolean(next.motor.largeTargetMode));
+        }
       } catch {
         /* non-fatal: adaptive suggestion skipped, dwell trigger still proceeds */
       }
@@ -2421,16 +2432,4 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
     if (scanActiveRef.current) applyScanPaint();
   });
 
-  // Adopt tuning changed on ANOTHER device. The profile arrives through App's
-  // onSnapshot listener, so this is what makes the settings actually follow the
-  // student rather than merely being backed up.
-  useEffect(() => {
-    const remote = profile?.headTrackingConfig;
-    if (!remote) return;
-    // Never fight a change this device is still debouncing — that would undo
-    // the slider the caregiver is dragging right now.
-    if (headSyncPendingRef.current) return;
-    const merged = { ...DEFAULT_HEAD_TRACKING_CONFIG, ...remote };
-    if (JSON.stringify(merged) === JSON.stringify(headConfig)) return;
-    setHeadConfig(merged);
-    trackerRef.current?.updateCon
+  // Adopt tuning changed on ANOTHER device. The profile arrive
