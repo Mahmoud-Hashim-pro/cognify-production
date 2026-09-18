@@ -11,13 +11,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
 import { toast } from './Toast';
-import SignVideoStudio from './SignVideoStudio';
-import HumanCommunicationBridge from './HumanCommunicationBridge';
 import MotorEuphoniaView from './MotorEuphoniaView';
 import VisionCompanionView from './VisionCompanionView';
 import ChatInterface, { ChatInterfaceRef } from './ChatInterface';
 import OrgDashboard from './OrgDashboard';
-import AmbientSoundRadar from './AmbientSoundRadar';
 import NeurodiversityHub from './NeurodiversityHub';
 import CaregiverHub from './CaregiverHub';
 import AccessibilityPassportModal from './AccessibilityPassportModal';
@@ -239,12 +236,12 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       titleAr: 'منظومة الصم وضعاف السمع الشاملة (الكل في واحد)',
       shortEn: 'Deaf Suite',
       shortAr: 'منظومة الصم',
-      badgeEn: 'All-in-One Screen',
-      badgeAr: 'شاشة متكاملة شاملة',
-      descEn: 'Consolidated workspace with instant toggles: 3D Sign Studio, Ambient Sound & Hazard Radar, and Two-Way Live Human Bridge.',
-      descAr: 'شاشة متكاملة تجمع كل أدوات التيسير السمعي مع التبديل الفوري: استوديو الإشارة 3D، رادار الأصوات والمخاطر، وجسر التخاطب المباشر.',
-      quickFeaturesAr: ['🤟 استوديو إشارة 3D', '📡 رادار مخاطر وأصوات', '💬 جسر تواصل مباشر', '⚡ تبديل فوري بين الأدوات', '🚨 وميض واهتزاز لمسي'],
-      quickFeaturesEn: ['🤟 3D Sign Studio', '📡 Sound & Hazard Radar', '💬 2-Way Human Bridge', '⚡ Instant 1-Screen Toggles', '🚨 Strobe & Haptics'],
+      badgeEn: 'Deaf & Hard of Hearing',
+      badgeAr: 'الصم وضعاف السمع',
+      descEn: 'All-in-one unified deaf ecosystem: 3D Sign Language Studio, Ambient Sound & Hazard Radar, and Two-Way Live Human Bridge with instant toggles.',
+      descAr: 'منظومة متكاملة تجمع كل أدوات التيسير السمعي في شاشة واحدة مع التبديل الفوري: استوديو الإشارة 3D، رادار الأصوات والمخاطر، وجسر التخاطب المباشر.',
+      quickFeaturesAr: ['🤟 استوديو إشارة 3D', '📡 رادار مخاطر وأصوات', '💬 جسر تواصل مباشر', '⚡ تبديل فوري بنفس الشاشة', '🚨 وميض واهتزاز لمسي'],
+      quickFeaturesEn: ['🤟 3D Sign Studio', '📡 Sound & Hazard Radar', '💬 2-Way Human Bridge', '⚡ 1-Screen Instant Toggles', '🚨 Strobe & Haptics'],
       subPills: [
         { tab: 'video' as const, labelEn: '3D Sign', labelAr: 'لغة الإشارة', icon: Accessibility },
         { tab: 'radar' as const, labelEn: 'Sound Radar', labelAr: 'رادار الأصوات', icon: Radio },
@@ -256,66 +253,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       bgGlow: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/40',
       buttonCls: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 text-white shadow-indigo-500/25',
       matchingMode: 'Sign-Only',
-    },
-    {
-      id: 'video' as const,
-      category: 'hearing' as const,
-      titleEn: 'AI 3D Sign Language Studio',
-      titleAr: 'استوديو لغة الإشارة ثلاثي الأبعاد',
-      shortEn: '3D Sign',
-      shortAr: 'لغة الإشارة',
-      badgeEn: 'Deaf & Hard of Hearing',
-      badgeAr: 'الصم وضعاف السمع',
-      descEn: '3D signing avatar with reverse sign-to-speech, finger spelling, Arabic and global sign dictionaries, and live speech translation into sign language.',
-      descAr: 'أفاتار ثلاثي الأبعاد للغة الإشارة، نطق الإشارة لصوت مسموع فورياً، قواميس إشارية عربية وعالمية، وتحويل الكلام المنطوق لإشارة حية.',
-      quickFeaturesAr: ['أفاتار إشارة تفاعلي 3D', 'نطق الإشارة لصوت مسموع', 'أبجدية الأصابع وقواميس', 'تحويل الكلام الصوتي لإشارة'],
-      quickFeaturesEn: ['Interactive 3D Avatar', 'Sign to Speech Voice', 'Fingerspelling & Lexicon', 'Live Audio to Sign'],
-      Icon: Accessibility,
-      accentColor: 'text-indigo-400',
-      borderGlow: 'hover:border-indigo-500/60 border-slate-800',
-      bgGlow: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30',
-      buttonCls: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 text-white shadow-indigo-500/25',
-      matchingMode: 'Sign-Only',
-    },
-    {
-      id: 'radar' as const,
-      category: 'hearing' as const,
-      titleEn: 'Ambient Sound & Hazard Radar',
-      titleAr: 'رادار الأصوات والمخاطر البيئية',
-      shortEn: 'Sound Radar',
-      shortAr: 'رادار الأصوات',
-      badgeEn: 'Acoustic Hazard Alert',
-      badgeAr: 'وعي صوتي مباشر',
-      descEn: 'Real-time acoustic AI radar detecting sirens, fire alarms, car horns, and doorbells with screen flash strobe and tactile vibrations for deaf users.',
-      descAr: 'كشف صوتي بيئي مباشر لصفارات الإنذار، أجهزة كشف الدخان، كلاكس السيارات، وأجراس الأبواب مع وميض بصري واهتزازات لمسية.',
-      quickFeaturesAr: ['كشف سارينات الإسعاف والحريق', 'كشف كلاكس السيارات', 'تنبيه جرس الباب والرضع', 'وميض بصري واهتزاز لمسي'],
-      quickFeaturesEn: ['Sirens & Smoke Alarms', 'Car Horn Detection', 'Doorbell & Baby Cry', 'Visual Flash Strobe & Haptics'],
-      Icon: Radio,
-      accentColor: 'text-cyan-400',
-      borderGlow: 'hover:border-cyan-500/60 border-slate-800',
-      bgGlow: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-      buttonCls: 'bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 shadow-cyan-500/20',
-      matchingMode: 'Deaf',
-    },
-    {
-      id: 'bridge' as const,
-      category: 'hearing' as const,
-      titleEn: 'Two-Way Human Bridge',
-      titleAr: 'جسر التواصل البشري الحي',
-      shortEn: 'Human Bridge',
-      shortAr: 'جسر التواصل',
-      badgeEn: 'Live Conversation',
-      badgeAr: 'تواصل مباشر وجهاً لوجه',
-      descEn: 'Instant face-to-face communication bridge between deaf and hearing people with high-contrast live speech captions and synthetic audio playback.',
-      descAr: 'محادثة فورية مباشرة بين الصم والسامعين بنصوص كبيرة وواضحة لقراءة الشفاه، مع زر للنطق الصوتي الفوري باللهجة المصرية والإنجليزية.',
-      quickFeaturesAr: ['نصوص كبيرة عالية التباين', 'نطق صوتي فوري بلهجات متعددة', 'تواصل ثنائي الاتجاه بدون وسيط'],
-      quickFeaturesEn: ['Large High-Contrast Text', 'Instant Multilingual TTS', 'Direct 2-Way Flow'],
-      Icon: Ear,
-      accentColor: 'text-cyan-400',
-      borderGlow: 'hover:border-cyan-500/60 border-slate-800',
-      bgGlow: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-      buttonCls: 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-cyan-500/20',
-      matchingMode: 'Vocal-Deaf',
     },
     // 3. MOTOR & ALS
     {
@@ -710,6 +647,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {filteredModules.map((m) => {
                       const isMyCurrentMode =
                         (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
+                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Deaf' || profile.accessibilityMode === 'Vocal-Deaf')) ||
                         (m.id === 'chat' && profile.accessibilityMode === 'Speech');
 
                       return (
@@ -814,6 +752,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {filteredModules.map((m) => {
                       const isMyCurrentMode =
                         (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
+                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Deaf' || profile.accessibilityMode === 'Vocal-Deaf')) ||
                         (m.id === 'chat' && profile.accessibilityMode === 'Speech');
 
                       return (
