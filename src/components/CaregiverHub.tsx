@@ -23,6 +23,12 @@ import { UserProfile } from '../types';
 import { EmergencyContact } from '../lib/contacts';
 import { loadContacts, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
+import {
+  listenPendingCaregiverRequests,
+  approveCaregiverLinkRequest,
+  rejectCaregiverLinkRequest,
+  CaregiverLinkRequest,
+} from '../lib/caregiverLinking';
 import { isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
 
@@ -43,6 +49,36 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     if (!profile.uid) return;
     restoreContactsFromCloud(profile.uid).then(setContacts);
   }, [profile.uid]);
+
+  // Pending "someone wants to link as your parent/caregiver" requests —
+  // the ONLY thing that can ever grant a parent real access is the student
+  // approving one of these, which writes linkedParentUid on their own profile.
+  const [pendingLinkRequests, setPendingLinkRequests] = useState<CaregiverLinkRequest[]>([]);
+  useEffect(() => {
+    if (!profile.uid) return;
+    const unsubscribe = listenPendingCaregiverRequests(profile.uid, setPendingLinkRequests);
+    return unsubscribe;
+  }, [profile.uid]);
+
+  const handleApproveLink = async (parentUid: string) => {
+    if (!profile.uid) return;
+    try {
+      await approveCaregiverLinkRequest(profile.uid, parentUid);
+      if (setProfile) setProfile({ ...profile, linkedParentUid: parentUid });
+      toast.success(isAr ? 'تم قبول الطلب' : isFr ? 'Demande approuvée' : 'Request approved');
+    } catch {
+      toast.error(isAr ? 'حصل خطأ، حاول تاني' : isFr ? 'Une erreur est survenue' : 'Something went wrong');
+    }
+  };
+
+  const handleRejectLink = async (parentUid: string) => {
+    if (!profile.uid) return;
+    try {
+      await rejectCaregiverLinkRequest(profile.uid, parentUid);
+    } catch {
+      toast.error(isAr ? 'حصل خطأ، حاول تاني' : isFr ? 'Une erreur est survenue' : 'Something went wrong');
+    }
+  };
   const [testSent, setTestSent] = useState(false);
 
   const t = (en: string, ar: string, fr?: string) => {
@@ -136,6 +172,50 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
       {/* Main Grid Content */}
       <div className="max-w-5xl mx-auto w-full space-y-6">
+        {/* Pending Caregiver Link Requests — the only place a parent's access can be granted */}
+        {pendingLinkRequests.length > 0 && (
+          <div className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-lg space-y-3">
+            <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
+              <Shield className="w-5 h-5" />
+              <span>
+                {t('Caregiver access requests', 'طلبات ربط مرافق/ولي أمر', "Demandes de liaison d'accompagnant")}
+              </span>
+            </div>
+            {pendingLinkRequests.map((req) => (
+              <div
+                key={req.parentUid}
+                className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <div className="font-bold text-sm text-white truncate">{req.parentName}</div>
+                  <div className="text-[11px] text-slate-400 truncate">
+                    {t(
+                      'wants to view your progress and accessibility settings',
+                      'عايز يشوف تقدمك وإعدادات الوصول الميسر بتاعتك',
+                      'souhaite voir vos progrès et vos réglages d\'accessibilité'
+                    )}
+                    {req.parentEmail ? ` · ${req.parentEmail}` : ''}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => handleRejectLink(req.parentUid)}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-300 text-xs font-bold transition-colors"
+                  >
+                    {t('Decline', 'رفض', 'Refuser')}
+                  </button>
+                  <button
+                    onClick={() => handleApproveLink(req.parentUid)}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors"
+                  >
+                    {t('Approve', 'موافقة', 'Approuver')}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Status Telemetry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
           {/* Vision Telemetry */}
