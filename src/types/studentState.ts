@@ -4,7 +4,7 @@
  * concept mastery, pedagogy strategy, and personal learning models.
  */
 
-import type { CognitiveStage } from '../../api/_lib/ai';
+import type { CognitiveStage } from '../lib/studentStateScaffolding';
 import type { RetentionSchedule } from '../lib/spacedRetention';
 import type { InterventionDirective } from '../lib/interventionEngine';
 import type { AccessibilityState } from './accessibilityState';

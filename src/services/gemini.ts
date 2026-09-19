@@ -3,7 +3,7 @@ import { toast } from "../components/Toast";
 import { auth } from "../lib/firebase";
 import { secureLoadKeySync } from "../lib/cryptoShield";
 import { isArabicLocale } from "../lib/translations";
-import { formatStudentStateBlock } from "../../api/_lib/ai";
+import { formatStudentStateBlock } from "../lib/studentStateScaffolding";
 import { ensureImageInResponse } from "../lib/imageSynthesis";
 
 // SECURITY: provider keys are NEVER read in the browser any more.

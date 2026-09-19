@@ -9,7 +9,7 @@
   },
   "rewrites": [
     {
-      "source": "/((?!api/|assets/).*)",
+      "source": "/((?!api/|assets/|models/|sw\\.js|manifest\\.webmanifest|.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
   ],

@@ -7,7 +7,7 @@
 
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from './firebase';
-import { CognitiveStage, resolveCognitiveStage } from '../../api/_lib/ai';
+import { CognitiveStage, resolveCognitiveStage } from './studentStateScaffolding';
 import { diagnosePrerequisiteGap, PrerequisiteDiagnosis } from './conceptGraph';
 import { decideIntervention, InterventionDirective } from './interventionEngine';
 import {
