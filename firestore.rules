@@ -257,6 +257,11 @@ service cloud.firestore {
         allow write, delete: if isOwner(userId) || isAdmin();
       }
 
+      match /learningProfile/{docId} {
+        allow read: if isOwner(userId) || isAdmin() || isVerifiedParent(userId);
+        allow write, delete: if isOwner(userId) || isAdmin();
+      }
+
       match /goals/{goalId} {
         allow read, write, delete: if isOwner(userId) || isAdmin();
       }

@@ -647,7 +647,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {filteredModules.map((m) => {
                       const isMyCurrentMode =
                         (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
-                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Deaf' || profile.accessibilityMode === 'Vocal-Deaf')) ||
+                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Vocal-Deaf')) ||
                         (m.id === 'chat' && profile.accessibilityMode === 'Speech');
 
                       return (
@@ -752,7 +752,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {filteredModules.map((m) => {
                       const isMyCurrentMode =
                         (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
-                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Deaf' || profile.accessibilityMode === 'Vocal-Deaf')) ||
+                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Vocal-Deaf')) ||
                         (m.id === 'chat' && profile.accessibilityMode === 'Speech');
 
                       return (

@@ -40,6 +40,7 @@ export interface SubjectProfile {
   correctAnswers: number;
   totalAnswers: number;
   accuracyRate: number;
+  accuracy?: number;
   avgResponseTimeMs: number;
   commonMistakeTypes: string[];
   weakTopics: string[];

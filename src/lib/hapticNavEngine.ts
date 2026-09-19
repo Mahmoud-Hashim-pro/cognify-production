@@ -1,10 +1,10 @@
-﻿/**
+/**
  * Haptic Navigation Engine
  * Provides tactical vibration alerts and indoor obstacle feedback
  * for blind and visually impaired users.
  */
 
-export type HapticAlertPattern = 'clear' | 'warning' | 'danger' | 'turn-left' | 'turn-right' | 'arrival';
+export type HapticAlertPattern = 'clear' | 'warning' | 'danger' | 'turn-left' | 'turn-right' | 'arrival' | 'single-pulse';
 
 export interface NavGuidanceResult {
   hazardLevel: 'safe' | 'caution' | 'danger';
@@ -24,6 +24,7 @@ export function triggerHapticAlert(pattern: HapticAlertPattern): boolean {
   try {
     switch (pattern) {
       case 'clear':
+      case 'single-pulse':
         return navigator.vibrate([60]);
       case 'warning':
         return navigator.vibrate([150, 80, 150]);
