@@ -6,66 +6,63 @@ import {
   Chrome, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, 
   ArrowLeft, ArrowRight, 
   Sparkles, Tag, ChevronDown, LockKeyhole, Globe,
-  Brain, GraduationCap, Heart, Check
+  Brain, GraduationCap, Heart, Check, Mic
 } from 'lucide-react';
 
 type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
 type DisabilityOption = 'Visual' | 'Hearing' | 'Motor' | 'Speech' | 'Cognitive';
 
-// Each Special Needs accessibility feature, tagged with which disability chip(s) it's the primary match for.
-// Selecting a chip brings its matching feature(s) to the top and marks them as the "FOCUS" for that mode,
-// instead of the panel always defaulting to showing Vision Companion first regardless of selection.
-const SPECIAL_NEEDS_FEATURES: {
-  key: string;
-  Icon: typeof Sparkles;
-  title: { en: string; ar: string };
-  description: { en: string; ar: string };
-  matches: DisabilityOption[];
-}[] = [
+type SpecialNeedFeature = {
+  key: DisabilityOption;
+  icon: React.ElementType;
+  titleEn: string;
+  titleAr: string;
+  descEn: string;
+  descAr: string;
+};
+
+const SPECIAL_NEEDS_FEATURES: SpecialNeedFeature[] = [
   {
-    key: 'vision',
-    Icon: Sparkles,
-    title: { en: 'Vision Companion & OCR', ar: 'رفيق الرؤية وقارئ المستندات' },
-    description: { en: 'Real-time camera scene and book page reader', ar: 'قراءة صوتية للمشاهد والكتب عبر الكاميرا' },
-    matches: ['Visual'],
+    key: 'Visual',
+    icon: Sparkles,
+    titleEn: 'Vision Companion & OCR',
+    titleAr: 'رفيق الرؤية وقارئ المستندات',
+    descEn: 'Real-time camera scene and book page reader',
+    descAr: 'قراءة صوتية للمشاهد والكتب عبر الكاميرا',
   },
   {
-    key: 'sign-language',
-    Icon: Heart,
-    title: { en: '3D Sign Language Avatar', ar: 'أفاتار لغة الإشارة ثلاثي الأبعاد' },
-    description: { en: 'Continuous sign rendering for hearing support', ar: 'ترجمة فورية وتفاعلية للإشارة بـ 3D' },
-    matches: ['Hearing'],
+    key: 'Hearing',
+    icon: Heart,
+    titleEn: '3D Sign Language Avatar',
+    titleAr: 'أفاتار لغة الإشارة ثلاثي الأبعاد',
+    descEn: 'Continuous sign rendering for hearing support',
+    descAr: 'ترجمة فورية وتفاعلية للإشارة بـ 3D',
   },
   {
-    key: 'motor-voice',
-    Icon: Check,
-    title: { en: 'Hands-Free Motor & Voice', ar: 'أوامر صوتية وتحكم حركي' },
-    description: { en: 'Complete vocal control without physical touch', ar: 'تحكم كامل وتوجيه بدون لمس الشاشة' },
-    matches: ['Motor', 'Speech'],
+    key: 'Motor',
+    icon: Check,
+    titleEn: 'Hands-Free Motor & Voice',
+    titleAr: 'أوامر صوتية وتحكم حركي',
+    descEn: 'Complete vocal control without physical touch',
+    descAr: 'تحكم كامل وتوجيه بدون لمس الشاشة',
   },
   {
-    key: 'cognitive-scaffolding',
-    Icon: Brain,
-    title: { en: 'Cognitive Micro-Scaffolding', ar: 'تفكيك إدراكي ميسّر' },
-    description: { en: 'High-contrast UI and distraction-free cards', ar: 'واجهة عالية التباين ومعلومات بدون تشويش' },
-    matches: ['Cognitive'],
+    key: 'Speech',
+    icon: Mic,
+    titleEn: 'Speech-to-Text Bridge',
+    titleAr: 'جسر تحويل الكلام إلى نص',
+    descEn: 'Converts spoken input into clear text and quick-phrase replies',
+    descAr: 'يحوّل الكلام إلى نص واضح وردود سريعة جاهزة',
+  },
+  {
+    key: 'Cognitive',
+    icon: Brain,
+    titleEn: 'Cognitive Micro-Scaffolding',
+    titleAr: 'تفكيك إدراكي ميسّر',
+    descEn: 'High-contrast UI and distraction-free cards',
+    descAr: 'واجهة عالية التباين ومعلومات بدون تشويش',
   },
 ];
-
-function getSpecialNeedsFeatures(
-  selected: DisabilityOption,
-  t: (en: string, ar: string) => string
-) {
-  return SPECIAL_NEEDS_FEATURES
-    .map((f) => ({
-      key: f.key,
-      Icon: f.Icon,
-      title: t(f.title.en, f.title.ar),
-      description: t(f.description.en, f.description.ar),
-      isPrimary: f.matches.includes(selected),
-    }))
-    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
-}
 
 export default function Login() {
   const [lang, setLang] = useState<'en' | 'ar'>(() => {
@@ -537,29 +534,36 @@ export default function Login() {
 
                               {activePreviewPath === 'Special Needs' && (
                                 <>
-                                  {getSpecialNeedsFeatures(selectedDisability, t).map((feature) => (
-                                    <div
-                                      key={feature.key}
-                                      className={`p-2.5 rounded-xl border flex items-start gap-2 transition-all ${
-                                        feature.isPrimary
-                                          ? 'bg-rose-500/10 border-rose-500/40 ring-1 ring-rose-500/30'
-                                          : 'bg-slate-900/60 border-slate-800'
-                                      }`}
-                                    >
-                                      <feature.Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${feature.isPrimary ? 'text-rose-300' : 'text-rose-400'}`} />
-                                      <div>
-                                        <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                                          {feature.title}
-                                          {feature.isPrimary && (
-                                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                                              {t('FOCUS', 'محدد')}
-                                            </span>
-                                          )}
-                                        </div>
-                                        <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{feature.description}</div>
-                                      </div>
-                                    </div>
-                                  ))}
+                                  {[...SPECIAL_NEEDS_FEATURES]
+                                    .sort((a, b) => (a.key === selectedDisability ? -1 : b.key === selectedDisability ? 1 : 0))
+                                    .map((feature) => {
+                                      const isActive = feature.key === selectedDisability;
+                                      const Icon = feature.icon;
+                                      return (
+                                        <motion.div
+                                          key={feature.key}
+                                          layout
+                                          className={`p-2.5 rounded-xl flex items-start gap-2 transition-colors ${
+                                            isActive
+                                              ? 'bg-rose-500/10 border border-rose-500/50 ring-1 ring-rose-500/30 sm:col-span-2'
+                                              : 'bg-slate-900/60 border border-slate-800'
+                                          }`}
+                                        >
+                                          <Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${isActive ? 'text-rose-300' : 'text-rose-400'}`} />
+                                          <div>
+                                            <div className="flex items-center gap-1.5">
+                                              <div className="text-xs font-bold text-slate-200">{t(feature.titleEn, feature.titleAr)}</div>
+                                              {isActive && (
+                                                <span className="text-[9px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/15 border border-rose-500/30 rounded-full px-1.5 py-0.5">
+                                                  {t('Selected', 'مُختار')}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t(feature.descEn, feature.descAr)}</div>
+                                          </div>
+                                        </motion.div>
+                                      );
+                                    })}
                                 </>
                               )}
                             </div>
