@@ -6,74 +6,109 @@ import {
   Chrome, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, 
   ArrowLeft, ArrowRight, 
   Sparkles, Tag, ChevronDown, LockKeyhole, Globe,
-  Brain, GraduationCap, Heart, Check
+  Brain, GraduationCap, Heart, Check, Mic, Ear, Activity, MessageSquare, Sun, Moon
 } from 'lucide-react';
 
 type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
 type DisabilityOption = 'Visual' | 'Hearing' | 'Motor' | 'Speech' | 'Cognitive';
 
-// Each Special Needs accessibility feature, tagged with which disability chip(s) it's the primary match for.
-// Selecting a chip brings its matching feature(s) to the top and marks them as the "FOCUS" for that mode,
-// instead of the panel always defaulting to showing Vision Companion first regardless of selection.
-const SPECIAL_NEEDS_FEATURES: {
-  key: string;
-  Icon: typeof Sparkles;
-  title: { en: string; ar: string };
-  description: { en: string; ar: string };
-  matches: DisabilityOption[];
-}[] = [
+type SpecialNeedFeature = {
+  key: DisabilityOption;
+  icon: React.ElementType;
+  titleEn: string;
+  titleAr: string;
+  descEn: string;
+  descAr: string;
+};
+
+// Mirrors the real modules implemented in DisabilityModeView.tsx, so the
+// login preview never promises a feature the product doesn't actually have.
+const SPECIAL_NEEDS_FEATURES: SpecialNeedFeature[] = [
   {
-    key: 'vision',
-    Icon: Sparkles,
-    title: { en: 'Vision Companion & OCR', ar: 'رفيق الرؤية وقارئ المستندات' },
-    description: { en: 'Real-time camera scene and book page reader', ar: 'قراءة صوتية للمشاهد والكتب عبر الكاميرا' },
-    matches: ['Visual'],
+    key: 'Visual',
+    icon: Eye,
+    titleEn: 'Visual Companion (AI Eyes)',
+    titleAr: 'الرفيق البصري الذكي',
+    descEn: 'Audio companion that reads currency, matches clothing colors, and recognizes faces',
+    descAr: 'رفيق صوتي يقرأ العملات، وينسّق الملابس، ويتعرف على الأشخاص والوجوه',
   },
   {
-    key: 'sign-language',
-    Icon: Heart,
-    title: { en: '3D Sign Language Avatar', ar: 'أفاتار لغة الإشارة ثلاثي الأبعاد' },
-    description: { en: 'Continuous sign rendering for hearing support', ar: 'ترجمة فورية وتفاعلية للإشارة بـ 3D' },
-    matches: ['Hearing'],
+    key: 'Hearing',
+    icon: Ear,
+    titleEn: 'Deaf & Hard of Hearing Suite',
+    titleAr: 'منظومة الصم وضعاف السمع',
+    descEn: '3D sign language studio, sound & hazard radar, and a live two-way communication bridge',
+    descAr: 'استوديو إشارة 3D، رادار الأصوات والمخاطر، وجسر تواصل مباشر ثنائي الاتجاه',
   },
   {
-    key: 'motor-voice',
-    Icon: Check,
-    title: { en: 'Hands-Free Motor & Voice', ar: 'أوامر صوتية وتحكم حركي' },
-    description: { en: 'Complete vocal control without physical touch', ar: 'تحكم كامل وتوجيه بدون لمس الشاشة' },
-    matches: ['Motor', 'Speech'],
+    key: 'Motor',
+    icon: Activity,
+    titleEn: 'Motor & Euphonia Control',
+    titleAr: 'التحكم الحركي وإيفونيا',
+    descEn: 'Head-tracking pointer, eye-gaze keyboard, and hands-free vocal triggers',
+    descAr: 'قيادة المؤشر بحركة الرأس، لوحة العين، وأوامر صوتية بدون لمس',
   },
   {
-    key: 'cognitive-scaffolding',
-    Icon: Brain,
-    title: { en: 'Cognitive Micro-Scaffolding', ar: 'تفكيك إدراكي ميسّر' },
-    description: { en: 'High-contrast UI and distraction-free cards', ar: 'واجهة عالية التباين ومعلومات بدون تشويش' },
-    matches: ['Cognitive'],
+    key: 'Speech',
+    icon: MessageSquare,
+    titleEn: 'Live Communication Bridge (AAC)',
+    titleAr: 'جسر التواصل المباشر (AAC)',
+    descEn: 'Quick-phrase AAC bank with text-to-speech and sign output for real conversations',
+    descAr: 'عبارات تواصل سريعة جاهزة مع تحويل النص لصوت وإشارة للمحادثات الفعلية',
+  },
+  {
+    key: 'Cognitive',
+    icon: Brain,
+    titleEn: 'Neurodiversity & Autism Hub',
+    titleAr: 'واحة التوحد وصعوبات التعلم',
+    descEn: 'Spoken PECS cards, visual routines, and calming sensory tools',
+    descAr: 'بطاقات PECS ناطقة، جدول روتين بصري، وأدوات تهدئة حسية',
   },
 ];
 
-function getSpecialNeedsFeatures(
-  selected: DisabilityOption,
-  t: (en: string, ar: string) => string
-) {
-  return SPECIAL_NEEDS_FEATURES
-    .map((f) => ({
-      key: f.key,
-      Icon: f.Icon,
-      title: t(f.title.en, f.title.ar),
-      description: t(f.description.en, f.description.ar),
-      isPrimary: f.matches.includes(selected),
-    }))
-    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
-}
-
 export default function Login() {
   const [lang, setLang] = useState<'en' | 'ar'>(() => {
+    try {
+      const saved = localStorage.getItem('preLoginLanguage');
+      if (saved === 'Arabic') return 'ar';
+      if (saved === 'English') return 'en';
+    } catch { /* storage unavailable */ }
     if (typeof navigator !== 'undefined' && /^ar/i.test(navigator.language || '')) {
       return 'ar';
     }
     return 'en';
   });
+
+  // Theme toggle — mirrors App.tsx's toggleTheme exactly (same 'theme' localStorage
+  // key and .dark class on <html>) so a choice made here carries straight into the
+  // signed-in app instead of being a login-only setting that resets after signup.
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : true;
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    if (isDarkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    try {
+      localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    } catch { /* storage unavailable */ }
+  };
+
+  // Persist the language choice so it survives into Onboarding instead of being
+  // silently discarded the moment the person continues past this screen. (Actually
+  // written in handleContinuePath below, alongside the other pre-login choices —
+  // see the comment there for why.)
 
   const [mode, setMode] = useState<'path-selection' | 'email-login' | 'email-register' | 'reset-password'>('path-selection');
   const [email, setEmail] = useState("");
@@ -137,6 +172,11 @@ export default function Login() {
     clearPreLoginState();
     try {
       localStorage.setItem('preLoginAccountPath', accountPath);
+      // Written here (after clearPreLoginState, alongside preLoginAccountPath) —
+      // not in a useEffect on `lang` — because clearPreLoginState() wipes every
+      // PRE_LOGIN_KEYS entry, including this one, so writing it any earlier would
+      // just get erased the moment this function runs.
+      localStorage.setItem('preLoginLanguage', lang === 'ar' ? 'Arabic' : 'English');
       if (accountPath === 'Special Needs') {
         const fullMap: Record<DisabilityOption, string> = {
           'Visual': 'Visual Impairment',
@@ -301,7 +341,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0C14] text-slate-100 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8 font-sans relative overflow-x-hidden selection:bg-rose-500/30 selection:text-white" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="cognify-login-shell min-h-screen bg-[#0A0C14] text-slate-100 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8 font-sans relative overflow-x-hidden selection:bg-rose-500/30 selection:text-white" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Background ambient lighting */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-rose-500/10 rounded-full blur-[140px]" />
@@ -317,23 +357,33 @@ export default function Login() {
               <Sparkles className="w-5 h-5 text-rose-400" />
             </div>
           </div>
-          <span className="text-xl font-black text-white tracking-tight">Super Human</span>
+          <span className="text-xl font-black text-text-main dark:text-white tracking-tight">Super Human</span>
         </div>
 
-        {/* Language Switcher */}
-        <div className="flex items-center gap-1 p-1 bg-slate-900/90 border border-slate-800 rounded-full shadow-inner">
+        {/* Theme + Language Switcher */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setLang('en')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'en' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            type="button"
+            onClick={toggleTheme}
+            aria-label={t('Toggle light / dark theme', 'تبديل المظهر الليلي والنهاري')}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white transition-colors shrink-0"
           >
-            EN
+            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-          <button
-            onClick={() => setLang('ar')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'ar' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
-          >
-            AR
-          </button>
+          <div className="flex items-center gap-1 p-1 bg-slate-900/90 border border-slate-800 rounded-full shadow-inner">
+            <button
+              onClick={() => setLang('en')}
+              className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'en' ? 'bg-slate-800 text-text-main dark:text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLang('ar')}
+              className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'ar' ? 'bg-slate-800 text-text-main dark:text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            >
+              AR
+            </button>
+          </div>
         </div>
       </header>
 
@@ -355,7 +405,7 @@ export default function Login() {
                   <span>{t("Same mentor, different calibration", "نفس المساعد، بمعايرة مخصصة لك")}</span>
                 </div>
 
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.15]">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-text-main dark:text-white tracking-tight leading-[1.15]">
                   {isRtl ? (
                     <>سؤال واحد. <span className="text-amber-400">ثلاثة</span> <span className="text-rose-400">طرق</span> <span className="text-teal-400">لسماع</span> الإجابة.</>
                   ) : (
@@ -430,7 +480,7 @@ export default function Login() {
                               </div>
 
                               <div className="flex-1">
-                                <h3 className="text-sm sm:text-base font-black text-white tracking-tight leading-snug">
+                                <h3 className="text-sm sm:text-base font-black text-text-main dark:text-white tracking-tight leading-snug">
                                   {activePreviewPath === 'Normal' && t("Personalized AI Cognitive Mentor", "المساعد المعرفي الذكي المخصص")}
                                   {activePreviewPath === 'Graduation Project' && (
                                     <span className="flex items-center gap-2 flex-wrap">
@@ -452,8 +502,8 @@ export default function Login() {
                                     "ذكاء اصطناعي يفهم مقررات كليتك وتخصصك بدقة. يدعم صياغة الرسالة، توثيق المراجع، ومتابعة تسليمات مشروعك."
                                   )}
                                   {activePreviewPath === 'Special Needs' && t(
-                                    "Assistive multi-modal suite for visual, hearing, motor, and cognitive needs with 3D sign avatar, live camera OCR reader, and vocal controls.",
-                                    "منظومة إتاحة شاملة للإعاقات البصرية والسمعية والحركية والإدراكية مع أفاتار لغة إشارة 3D، كاميرا ذكية، وأوامر صوتية."
+                                    "Assistive multi-modal suite for visual, hearing, motor, and cognitive needs — AI vision companion, 3D sign language, hands-free motor control, and AAC communication.",
+                                    "منظومة إتاحة شاملة للإعاقات البصرية والسمعية والحركية والإدراكية — رفيق بصري ذكي، لغة إشارة 3D، تحكم حركي بدون لمس، وتواصل AAC."
                                   )}
                                 </p>
                               </div>
@@ -537,29 +587,36 @@ export default function Login() {
 
                               {activePreviewPath === 'Special Needs' && (
                                 <>
-                                  {getSpecialNeedsFeatures(selectedDisability, t).map((feature) => (
-                                    <div
-                                      key={feature.key}
-                                      className={`p-2.5 rounded-xl border flex items-start gap-2 transition-all ${
-                                        feature.isPrimary
-                                          ? 'bg-rose-500/10 border-rose-500/40 ring-1 ring-rose-500/30'
-                                          : 'bg-slate-900/60 border-slate-800'
-                                      }`}
-                                    >
-                                      <feature.Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${feature.isPrimary ? 'text-rose-300' : 'text-rose-400'}`} />
-                                      <div>
-                                        <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                                          {feature.title}
-                                          {feature.isPrimary && (
-                                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                                              {t('FOCUS', 'محدد')}
-                                            </span>
-                                          )}
-                                        </div>
-                                        <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{feature.description}</div>
-                                      </div>
-                                    </div>
-                                  ))}
+                                  {[...SPECIAL_NEEDS_FEATURES]
+                                    .sort((a, b) => (a.key === selectedDisability ? -1 : b.key === selectedDisability ? 1 : 0))
+                                    .map((feature) => {
+                                      const isActive = feature.key === selectedDisability;
+                                      const Icon = feature.icon;
+                                      return (
+                                        <motion.div
+                                          key={feature.key}
+                                          layout
+                                          className={`p-2.5 rounded-xl flex items-start gap-2 transition-colors ${
+                                            isActive
+                                              ? 'bg-rose-500/10 border border-rose-500/50 ring-1 ring-rose-500/30 sm:col-span-2'
+                                              : 'bg-slate-900/60 border border-slate-800'
+                                          }`}
+                                        >
+                                          <Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${isActive ? 'text-rose-300' : 'text-rose-400'}`} />
+                                          <div>
+                                            <div className="flex items-center gap-1.5">
+                                              <div className="text-xs font-bold text-slate-200">{t(feature.titleEn, feature.titleAr)}</div>
+                                              {isActive && (
+                                                <span className="text-[9px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/15 border border-rose-500/30 rounded-full px-1.5 py-0.5">
+                                                  {t('Selected', 'مُختار')}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t(feature.descEn, feature.descAr)}</div>
+                                          </div>
+                                        </motion.div>
+                                      );
+                                    })}
                                 </>
                               )}
                             </div>
@@ -579,7 +636,7 @@ export default function Login() {
                         <span className="text-slate-300 font-semibold text-xs">
                           {activePreviewPath === 'Normal' && t("Adaptive AI Chat · GPA Engine · Spaced Retention · Cognitive Tests", "دردشة تكيّفية · حاسبة GPA · تكرار متباعد · اختبارات ذهنية")}
                           {activePreviewPath === 'Graduation Project' && t("All Normal Features + Faculty Context + Thesis AI + Citations", "كل مميزات العادي + ربط الكلية + إرشاد الرسالة + توثيق المراجع")}
-                          {activePreviewPath === 'Special Needs' && t("All Normal Features + Vision AI + 3D Sign Language + Hearing Bridge + Motor Mode", "كل مميزات العادي + كاميرا الرؤية + لغة إشارة 3D + جسر السمع + تحكم صوتي")}
+                          {activePreviewPath === 'Special Needs' && t("All Normal Features + Vision AI + 3D Sign Language + AAC Communication + Motor Control", "كل مميزات العادي + رفيق بصري ذكي + لغة إشارة 3D + تواصل AAC + تحكم حركي")}
                         </span>
                       </div>
                     </div>
@@ -589,7 +646,7 @@ export default function Login() {
                   <div className="lg:col-span-5 flex flex-col justify-between space-y-5 lg:border-s lg:border-slate-800/80 lg:ps-7">
                     <div className="space-y-3.5">
                       <div>
-                        <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                        <h2 className="text-lg sm:text-xl font-black text-text-main dark:text-white tracking-tight">
                           {t("Choose your path", "اختر مسارك")}
                         </h2>
                         <p className="text-[11px] text-slate-400 font-medium mt-0.5">
@@ -812,7 +869,7 @@ export default function Login() {
                 /* Reset Password View */
                 <div className="space-y-4 text-start">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-black text-white tracking-tight">{t("Reset Password", "إعادة تعيين كلمة المرور")}</h2>
+                    <h2 className="text-xl font-black text-text-main dark:text-white tracking-tight">{t("Reset Password", "إعادة تعيين كلمة المرور")}</h2>
                     <p className="text-xs text-slate-400">{t("Enter your email to receive recovery instructions.", "أدخل بريدك الإلكتروني لإرسال رابط الاستعادة.")}</p>
                   </div>
 
@@ -836,7 +893,7 @@ export default function Login() {
                           placeholder="name@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-[#181C2E] border border-slate-700 text-white placeholder-slate-500 text-xs rounded-xl py-3 px-4 outline-none focus:border-rose-400"
+                          className="w-full bg-[#181C2E] border border-slate-700 text-text-main dark:text-white placeholder-slate-500 text-xs rounded-xl py-3 px-4 outline-none focus:border-rose-400"
                         />
                       </div>
 
@@ -861,7 +918,7 @@ export default function Login() {
                 /* Unified Tabs (Sign In / Create Account) */
                 <div className="space-y-4 text-start">
                   <div className="space-y-1 text-center">
-                    <h2 className="text-xl font-black text-white tracking-tight">
+                    <h2 className="text-xl font-black text-text-main dark:text-white tracking-tight">
                       {mode === 'email-login' ? t("Welcome Back", "أهلاً بك مجدداً") : t("Create Your Profile", "إنشاء حسابك الجديد")}
                     </h2>
                     <p className="text-xs text-slate-400">
@@ -878,7 +935,7 @@ export default function Login() {
                       onClick={() => { setMode('email-login'); setError(null); }}
                       className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
                         mode === 'email-login'
-                          ? 'bg-slate-800 text-white shadow-sm'
+                          ? 'bg-slate-800 text-text-main dark:text-white shadow-sm'
                           : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
@@ -889,7 +946,7 @@ export default function Login() {
                       onClick={() => { setMode('email-register'); setError(null); }}
                       className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
                         mode === 'email-register'
-                          ? 'bg-slate-800 text-white shadow-sm'
+                          ? 'bg-slate-800 text-text-main dark:text-white shadow-sm'
                           : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
@@ -909,7 +966,7 @@ export default function Login() {
                           placeholder="name@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className={`w-full bg-[#181C2E] border border-slate-700 text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-rose-400 ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
+                          className={`w-full bg-[#181C2E] border border-slate-700 text-text-main dark:text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-rose-400 ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
                         />
                       </div>
                     </div>
@@ -924,7 +981,7 @@ export default function Login() {
                           placeholder="••••••••"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className={`w-full bg-[#181C2E] border border-slate-700 text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-rose-400 ${isRtl ? 'pr-9 pl-9' : 'pl-9 pr-9'}`}
+                          className={`w-full bg-[#181C2E] border border-slate-700 text-text-main dark:text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-rose-400 ${isRtl ? 'pr-9 pl-9' : 'pl-9 pr-9'}`}
                         />
                         <button
                           type="button"
@@ -951,7 +1008,7 @@ export default function Login() {
                             placeholder="••••••••"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`w-full bg-[#181C2E] border border-slate-700 text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-rose-400 ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
+                            className={`w-full bg-[#181C2E] border border-slate-700 text-text-main dark:text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-rose-400 ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
                           />
                         </div>
                       </motion.div>

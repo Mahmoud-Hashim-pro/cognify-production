@@ -188,6 +188,61 @@
   background-color: #7C5CFF !important;
 }
 
+/* --- Login page: light-mode overrides ---------------------------------
+   Login.tsx was built dark-first with literal slate/hex colors (not the
+   bg-bg-main/text-text-main design tokens the rest of the app uses), so it
+   never responded to the light/dark toggle. These rules re-theme it for
+   light mode only (absence of .dark) without touching its dark-mode look,
+   which stays exactly as designed. Buttons that are intentionally the same
+   in both themes (gradient CTAs, the white "Continue with Google" button)
+   are left alone on purpose. */
+:root:not(.dark) .cognify-login-shell {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+}
+:root:not(.dark) .cognify-login-shell .bg-\[\#0A0C14\],
+:root:not(.dark) .cognify-login-shell .bg-\[\#0E111D\],
+:root:not(.dark) .cognify-login-shell .bg-\[\#181C2E\],
+:root:not(.dark) .cognify-login-shell .bg-\[\#121524\] {
+  background-color: var(--color-bg-card) !important;
+}
+:root:not(.dark) .cognify-login-shell .border-slate-700,
+:root:not(.dark) .cognify-login-shell .border-slate-700\/50,
+:root:not(.dark) .cognify-login-shell .border-slate-700\/60,
+:root:not(.dark) .cognify-login-shell .border-slate-700\/80,
+:root:not(.dark) .cognify-login-shell .border-slate-800,
+:root:not(.dark) .cognify-login-shell .border-slate-800\/80 {
+  border-color: var(--color-border) !important;
+}
+:root:not(.dark) .cognify-login-shell .bg-slate-900,
+:root:not(.dark) .cognify-login-shell .bg-slate-900\/60,
+:root:not(.dark) .cognify-login-shell .bg-slate-900\/90,
+:root:not(.dark) .cognify-login-shell .bg-slate-800,
+:root:not(.dark) .cognify-login-shell .bg-slate-800\/40,
+:root:not(.dark) .cognify-login-shell .bg-slate-800\/50,
+:root:not(.dark) .cognify-login-shell .bg-slate-800\/80,
+:root:not(.dark) .cognify-login-shell .bg-slate-800\/90,
+:root:not(.dark) .cognify-login-shell .bg-slate-700\/50,
+:root:not(.dark) .cognify-login-shell .bg-slate-600 {
+  background-color: var(--color-surface-3) !important;
+}
+:root:not(.dark) .cognify-login-shell .text-slate-100,
+:root:not(.dark) .cognify-login-shell .text-slate-200 {
+  color: var(--color-text-main) !important;
+}
+:root:not(.dark) .cognify-login-shell .text-slate-300,
+:root:not(.dark) .cognify-login-shell .text-slate-400,
+:root:not(.dark) .cognify-login-shell .text-slate-500,
+:root:not(.dark) .cognify-login-shell .text-slate-600 {
+  color: var(--color-text-muted) !important;
+}
+/* hover:text-white states (icon buttons, tab pills, back link) assume a dark
+   surface; every surface they sit on is flipped to a light one above, so the
+   hover color needs to flip with it or the text disappears on hover. */
+:root:not(.dark) .cognify-login-shell .hover\:text-white:hover {
+  color: var(--color-text-main) !important;
+}
+
 
 
 /* Splash screen animations */
