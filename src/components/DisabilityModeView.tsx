@@ -51,6 +51,37 @@ interface DisabilityModeViewProps {
   setProfile?: (profile: UserProfile) => void;
 }
 
+/**
+ * Auto-detects which suite an accessibility user should land in directly,
+ * based on their chosen accessibilityMode (primary) or free-text
+ * disabilityType (fallback for older profiles / non-standard entries).
+ * Returns 'hub' (the card overview) when nothing maps cleanly — never guess
+ * a suite the user didn't actually indicate.
+ */
+function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
+  switch (profile.accessibilityMode) {
+    case 'Visual':
+      return 'vision';
+    case 'Vocal-Deaf':
+    case 'Sign-Only':
+    case 'Speech':
+      return 'deaf';
+    case 'Motor-Euphonia':
+      return 'motor';
+    case 'Neurodiversity':
+      return 'neurodiversity';
+    default:
+      break;
+  }
+  const freeText = (profile.disabilityType || '').toLowerCase();
+  if (!freeText) return 'hub';
+  if (/visual|blind|vision/.test(freeText)) return 'vision';
+  if (/deaf|hearing|speech|vocal/.test(freeText)) return 'deaf';
+  if (/motor|euphonia|paraly|quadr/.test(freeText)) return 'motor';
+  if (/adhd|autis|dyslex|cognitiv|neurodiv/.test(freeText)) return 'neurodiversity';
+  return 'hub';
+}
+
 const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeViewProps>(function DisabilityModeView({
   profile,
   onMenuClick,
@@ -63,7 +94,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   onTabChange,
   setProfile
 }, ref) {
-  const [activeTab, setActiveTab] = useState<DisabilityTab>('hub');
+  const [activeTab, setActiveTab] = useState<DisabilityTab>(() => detectDirectDisabilityTab(profile));
   const [showPassportModal, setShowPassportModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ModuleCategory>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
