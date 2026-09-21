@@ -28,7 +28,8 @@ import { getTranslation, isRTL } from "../lib/translations";
 import { IQ_QUESTION_BATTERY, calculateStandardizedIq, IqQuestion } from "../lib/iqAssessment";
 
 interface OnboardingProps {
-  onComplete: (data: Partial<UserProfile>) => void;
+  onComplete: (data: Partial<UserProfile>) => void | Promise<void>;
+  user?: any;
 }
 
 const UNIVERSITIES = [
@@ -59,11 +60,12 @@ const SUSTAINABILITY_GOALS = [
   { id: 'zero-hunger', label: 'Zero Hunger / Sustainable Food', icon: <Sprout className="w-5 h-5 text-accent" /> }
 ];
 
-export default function Onboarding({ onComplete }: OnboardingProps) {
+export default function Onboarding({ onComplete, user }: OnboardingProps) {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<Partial<UserProfile>>({
-    email: auth.currentUser?.email || "",
+    email: user?.email || auth.currentUser?.email || "",
     accountPath: (localStorage.getItem('preLoginAccountPath') as any) || "Normal",
     universityEmail: localStorage.getItem('preLoginUniEmail') || "",
     // University/Faculty <select> elements fall back to displaying "Other"
@@ -229,21 +231,28 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     setStep(5);
   };
 
-  const finishOnboarding = () => {
-    onComplete({
-      ...formData,
-      level: formData.level || 'Intermediate',
-      iqScore: formData.iqScore || 100,
-      cognitiveDomains: formData.cognitiveDomains || {
-        fluidReasoning: 70,
-        quantitativeLogic: 70,
-        workingMemory: 70,
-        processingSpeed: 70,
-      },
-      lastIqTestDate: formData.lastIqTestDate || new Date().toISOString(),
-      lastQuizDate: new Date().toISOString(),
-      onboardingComplete: true,
-    });
+  const finishOnboarding = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onComplete({
+        ...formData,
+        email: user?.email || formData.email || auth.currentUser?.email || "",
+        level: formData.level || 'Intermediate',
+        iqScore: formData.iqScore || 100,
+        cognitiveDomains: formData.cognitiveDomains || {
+          fluidReasoning: 70,
+          quantitativeLogic: 70,
+          workingMemory: 70,
+          processingSpeed: 70,
+        },
+        lastIqTestDate: formData.lastIqTestDate || new Date().toISOString(),
+        lastQuizDate: new Date().toISOString(),
+        onboardingComplete: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderLanguageStep = () => (
@@ -982,9 +991,19 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
         <button
           onClick={finishOnboarding}
-          className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2 group mt-2"
+          disabled={isSubmitting}
+          className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2 group mt-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
-          {getTranslation(formData.language, 'finish')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+          {isSubmitting ? (
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              {isRtl ? 'جاري تجهيز مساحتك...' : 'Setting up your space...'}
+            </span>
+          ) : (
+            <>
+              {getTranslation(formData.language, 'finish')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+            </>
+          )}
         </button>
       </motion.div>
     );

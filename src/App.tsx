@@ -499,6 +499,19 @@ export default function App() {
             setProfile(null);
           }
         } else {
+          // If the student already completed onboarding on this device (or cached in localStorage),
+          // preserve the local profile state instead of clobbering to null and looping back to step 1!
+          const cachedProfileJson = typeof window !== 'undefined' ? localStorage.getItem(`cognify_profile_${user.uid}`) : null;
+          if (cachedProfileJson) {
+            try {
+              const cached = JSON.parse(cachedProfileJson);
+              if (cached && cached.onboardingComplete) {
+                setProfile(cached);
+                setDoc(doc(db, path), cleanDataForFirestore(cached), { merge: true }).catch(() => {});
+                return;
+              }
+            } catch {}
+          }
           setProfile(null);
         }
       }
@@ -587,9 +600,6 @@ export default function App() {
     }
 
     const newProfile: UserProfile = {
-      uid: user.uid,
-      email: user.email || "",
-      name: user.displayName || user.email?.split('@')[0] || "User",
       points: 100,
       questionHistory: [],
       level: 'Intermediate',
@@ -598,31 +608,34 @@ export default function App() {
       field: 'General',
       accessibilityMode: 'None',
       questionScore: 0,
-      onboardingComplete: true,
+      name: user.displayName || user.email?.split('@')[0] || "User",
       country: userCountry && userCountry !== 'Unknown' ? userCountry : undefined,
       ...data,
+      // Critical: Immutable identity and completion fields MUST come after ...data
+      // so they can never be overwritten by empty/stale formData from onboarding steps!
+      uid: user.uid,
+      email: (user.email || data.email || "").trim(),
+      onboardingComplete: true,
     };
 
+    // Cache locally immediately to eliminate any race condition or snapshot reset loop
     try {
-      const cleanedProfile = cleanDataForFirestore(newProfile);
+      localStorage.setItem(`cognify_profile_${user.uid}`, JSON.stringify(newProfile));
+      localStorage.setItem(`cognify_onboarded_${user.uid}`, 'true');
+    } catch {}
+
+    const cleanedProfile = cleanDataForFirestore(newProfile);
+    setProfile(cleanedProfile);
+
+    const targetView: AppView = isAccessibilityUser(cleanedProfile) ? 'disability' : 'chat';
+    setCurrentView(targetView);
+    window.history.replaceState(null, '', `#${targetView}`);
+
+    try {
       await setDoc(doc(db, path), cleanedProfile, { merge: true });
-      // Cleanly and immediately update local state to navigate the user away from Onboarding to the dashboard.
-      setProfile(cleanedProfile);
-      if (isAccessibilityUser(cleanedProfile)) {
-        setCurrentView('disability');
-        window.history.replaceState(null, '', '#disability');
-      } else {
-        setCurrentView('chat');
-        window.history.replaceState(null, '', '#chat');
-      }
     } catch (err) {
-      console.error("Failed to save onboarding profile:", err);
-      // Fallback: update local profile so user is not stuck on onboarding screen
-      setProfile(newProfile);
-      if (newProfile.accountPath === 'Special Needs') {
-        setCurrentView('disability');
-        window.history.replaceState(null, '', '#disability');
-      }
+      console.error("Failed to save onboarding profile to Firestore:", err);
+      // Even if Firestore write fails, local state and localStorage keep the user in the app!
     }
   };
 
@@ -752,7 +765,7 @@ export default function App() {
 
   // If user exists but no profile, show Onboarding
   if (!profile || !profile.onboardingComplete) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
+    return <Onboarding user={user} onComplete={handleOnboardingComplete} />;
   }
 
   const renderView = () => {

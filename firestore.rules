@@ -155,7 +155,11 @@ service cloud.firestore {
     // since isValidUser() skips schema checks for admins.
     function identityPreserved() {
       return request.resource.data.uid == resource.data.uid
-          && request.resource.data.get('email', '') == resource.data.get('email', '');
+          && (
+            !('email' in resource.data) ||
+            resource.data.get('email', '') == '' ||
+            request.resource.data.get('email', '').lower() == resource.data.get('email', '').lower()
+          );
     }
 
     // A verified parent/guardian is explicitly authorized on the target student's profile
