@@ -12,6 +12,61 @@ import {
 type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
 type DisabilityOption = 'Visual' | 'Hearing' | 'Motor' | 'Speech' | 'Cognitive';
 
+// Each Special Needs accessibility feature, tagged with which disability chip(s) it's the primary match for.
+// Selecting a chip brings its matching feature(s) to the top and marks them as the "FOCUS" for that mode,
+// instead of the panel always defaulting to showing Vision Companion first regardless of selection.
+const SPECIAL_NEEDS_FEATURES: {
+  key: string;
+  Icon: typeof Sparkles;
+  title: { en: string; ar: string };
+  description: { en: string; ar: string };
+  matches: DisabilityOption[];
+}[] = [
+  {
+    key: 'vision',
+    Icon: Sparkles,
+    title: { en: 'Vision Companion & OCR', ar: 'رفيق الرؤية وقارئ المستندات' },
+    description: { en: 'Real-time camera scene and book page reader', ar: 'قراءة صوتية للمشاهد والكتب عبر الكاميرا' },
+    matches: ['Visual'],
+  },
+  {
+    key: 'sign-language',
+    Icon: Heart,
+    title: { en: '3D Sign Language Avatar', ar: 'أفاتار لغة الإشارة ثلاثي الأبعاد' },
+    description: { en: 'Continuous sign rendering for hearing support', ar: 'ترجمة فورية وتفاعلية للإشارة بـ 3D' },
+    matches: ['Hearing'],
+  },
+  {
+    key: 'motor-voice',
+    Icon: Check,
+    title: { en: 'Hands-Free Motor & Voice', ar: 'أوامر صوتية وتحكم حركي' },
+    description: { en: 'Complete vocal control without physical touch', ar: 'تحكم كامل وتوجيه بدون لمس الشاشة' },
+    matches: ['Motor', 'Speech'],
+  },
+  {
+    key: 'cognitive-scaffolding',
+    Icon: Brain,
+    title: { en: 'Cognitive Micro-Scaffolding', ar: 'تفكيك إدراكي ميسّر' },
+    description: { en: 'High-contrast UI and distraction-free cards', ar: 'واجهة عالية التباين ومعلومات بدون تشويش' },
+    matches: ['Cognitive'],
+  },
+];
+
+function getSpecialNeedsFeatures(
+  selected: DisabilityOption,
+  t: (en: string, ar: string) => string
+) {
+  return SPECIAL_NEEDS_FEATURES
+    .map((f) => ({
+      key: f.key,
+      Icon: f.Icon,
+      title: t(f.title.en, f.title.ar),
+      description: t(f.description.en, f.description.ar),
+      isPrimary: f.matches.includes(selected),
+    }))
+    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
+}
+
 export default function Login() {
   const [lang, setLang] = useState<'en' | 'ar'>(() => {
     if (typeof navigator !== 'undefined' && /^ar/i.test(navigator.language || '')) {
@@ -482,37 +537,29 @@ export default function Login() {
 
                               {activePreviewPath === 'Special Needs' && (
                                 <>
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Sparkles className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Vision Companion & OCR", "رفيق الرؤية وقارئ المستندات")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Real-time camera scene and book page reader", "قراءة صوتية للمشاهد والكتب عبر الكاميرا")}</div>
+                                  {getSpecialNeedsFeatures(selectedDisability, t).map((feature) => (
+                                    <div
+                                      key={feature.key}
+                                      className={`p-2.5 rounded-xl border flex items-start gap-2 transition-all ${
+                                        feature.isPrimary
+                                          ? 'bg-rose-500/10 border-rose-500/40 ring-1 ring-rose-500/30'
+                                          : 'bg-slate-900/60 border-slate-800'
+                                      }`}
+                                    >
+                                      <feature.Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${feature.isPrimary ? 'text-rose-300' : 'text-rose-400'}`} />
+                                      <div>
+                                        <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                                          {feature.title}
+                                          {feature.isPrimary && (
+                                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                                              {t('FOCUS', 'محدد')}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{feature.description}</div>
+                                      </div>
                                     </div>
-                                  </div>
-
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Heart className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("3D Sign Language Avatar", "أفاتار لغة الإشارة ثلاثي الأبعاد")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Continuous sign rendering for hearing support", "ترجمة فورية وتفاعلية للإشارة بـ 3D")}</div>
-                                    </div>
-                                  </div>
-
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Check className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Hands-Free Motor & Voice", "أوامر صوتية وتحكم حركي")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Complete vocal control without physical touch", "تحكم كامل وتوجيه بدون لمس الشاشة")}</div>
-                                    </div>
-                                  </div>
-
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Brain className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Cognitive Micro-Scaffolding", "تفكيك إدراكي ميسّر")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("High-contrast UI and distraction-free cards", "واجهة عالية التباين ومعلومات بدون تشويش")}</div>
-                                    </div>
-                                  </div>
+                                  ))}
                                 </>
                               )}
                             </div>
