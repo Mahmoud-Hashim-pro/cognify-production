@@ -79,6 +79,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     faculty: localStorage.getItem('preLoginFaculty') || "Other",
     department: localStorage.getItem('preLoginDepartment') || "",
     disabilityType: localStorage.getItem('preLoginDisability') || "",
+    language: (localStorage.getItem('preLoginLanguage') as any) || undefined,
     role: "Student",
     educationLevel: "University",
     university: "Other",
