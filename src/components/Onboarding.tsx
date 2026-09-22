@@ -79,7 +79,6 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     faculty: localStorage.getItem('preLoginFaculty') || "Other",
     department: localStorage.getItem('preLoginDepartment') || "",
     disabilityType: localStorage.getItem('preLoginDisability') || "",
-    language: (localStorage.getItem('preLoginLanguage') as any) || undefined,
     role: "Student",
     educationLevel: "University",
     university: "Other",
@@ -114,6 +113,10 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     if (formData.accountPath === 'Special Needs') {
       const disabilityType = formData.disabilityType || localStorage.getItem('preLoginDisability') || 'Other';
 
+      // Must cover every option Login.tsx's disability picker can send via
+      // 'preLoginDisability' (Visual/Hearing/Speech/Motor/Cognitive) — missing a
+      // branch here silently leaves accessibilityMode at 'None' for that user,
+      // even though their disabilityType free-text was recorded correctly.
       let accessibilityMode: UserProfile['accessibilityMode'] = 'None';
       if (disabilityType === 'Visual Impairment') {
         accessibilityMode = 'Visual';
@@ -123,6 +126,8 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         accessibilityMode = 'Speech';
       } else if (disabilityType === 'Motor Impairment') {
         accessibilityMode = 'Motor-Euphonia';
+      } else if (disabilityType === 'Cognitive/Learning Disability') {
+        accessibilityMode = 'Neurodiversity';
       }
 
       onComplete({
