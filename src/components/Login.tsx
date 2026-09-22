@@ -7,7 +7,7 @@ import {
   Chrome, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, 
   ArrowLeft, ArrowRight, 
   Sparkles, Tag, ChevronDown, LockKeyhole, Globe,
-  Brain, GraduationCap, Heart, Check
+  Brain, GraduationCap, Heart, Check, Ear, Activity, Zap, Compass
 } from 'lucide-react';
 import type { AccessibilityMode } from '../types';
 
@@ -377,25 +377,35 @@ export default function Login() {
       {/* Top Navbar */}
       <header className="max-w-5xl mx-auto w-full flex items-center justify-between z-10 py-3 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-400 p-0.5 shadow-lg shadow-rose-500/20 flex items-center justify-center">
-            <div className="w-full h-full bg-[#0E111D] rounded-[14px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-rose-400" />
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-600 p-0.5 shadow-xl shadow-cyan-500/20 flex items-center justify-center">
+            <div className="w-full h-full bg-[#0B0F1F] rounded-[14px] flex items-center justify-center">
+              <Brain className="w-5 h-5 text-cyan-400" />
             </div>
           </div>
-          <span className="text-xl font-black text-white tracking-tight">Super Human</span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-black text-white tracking-tight">Cognify</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                2.0
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-400 font-medium">
+              {t("Adaptive AI Study Mentor", "مدرّسك الذكي التكيّفي")}
+            </span>
+          </div>
         </div>
 
         {/* Language Switcher */}
         <div className="flex items-center gap-1 p-1 bg-slate-900/90 border border-slate-800 rounded-full shadow-inner">
           <button
             onClick={() => setLang('en')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'en' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'en' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm' : 'text-slate-400 hover:text-white'}`}
           >
             EN
           </button>
           <button
             onClick={() => setLang('ar')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'ar' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'ar' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm' : 'text-slate-400 hover:text-white'}`}
           >
             AR
           </button>
@@ -415,34 +425,34 @@ export default function Login() {
             >
               {/* Hero Title Header */}
               <div className="space-y-2.5 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-300 shadow-sm">
-                  <Tag className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{t("Same mentor, different calibration", "نفس المساعد، بمعايرة مخصصة لك")}</span>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/15 via-rose-500/10 to-teal-500/15 border border-amber-500/30 text-amber-300 shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{t("Personalized Calibration · One Platform, Three Experiences", "معايرة تكيّفية مخصصة · منصة واحدة، ثلاث تجارب")}</span>
                 </div>
 
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.15]">
                   {isRtl ? (
-                    <>سؤال واحد. <span className="text-amber-400">ثلاثة</span> <span className="text-rose-400">طرق</span> <span className="text-teal-400">لسماع</span> الإجابة.</>
+                    <>سؤال واحد. <span className="text-amber-400">ثلاثة</span> <span className="text-rose-400">طرق</span> <span className="text-cyan-400">لسماع</span> الإجابة.</>
                   ) : (
-                    <>One question. <span className="text-amber-400">Three</span> <span className="text-rose-400">ways</span> <span className="text-teal-400">to</span> hear the answer.</>
+                    <>One question. <span className="text-amber-400">Three</span> <span className="text-rose-400">ways</span> <span className="text-cyan-400">to</span> hear the answer.</>
                   )}
                 </h1>
 
-                <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
                   {t(
-                    "Cognify doesn't just change its tone — it transforms its entire capabilities. Pick a path on the right and watch the mode overview on the left update.",
-                    "كوجنيفاي لا يغير نبرته فقط — بل يغير إمكانياته ومميزاته بالكامل. اختر مساراً على اليمين وشاهد ملخص قدرات كل وضع على اليسار فوراً."
+                    "Cognify doesn't just change its tone — it transforms its entire capabilities. Select a path below to see live capabilities and continue.",
+                    "كوجنيفاي لا يغير نبرته فقط — بل يغير إمكانياته ومميزاته بالكامل. اختر مساراً لمشاهدة قدراته المباشرة والمتابعة فوراً."
                   )}
                 </p>
               </div>
 
               {/* Main Interactive Comparison Card - Split View */}
-              <div className="bg-[#121524]/95 border border-slate-800/80 rounded-[28px] overflow-hidden shadow-2xl backdrop-blur-2xl">
+              <div className="bg-[#0D1122]/95 border border-slate-700/70 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-2xl ring-1 ring-white/5">
                 {/* Top Tri-Color Strip */}
-                <div className="grid grid-cols-3 h-1 w-full">
-                  <div className="bg-amber-400" />
-                  <div className="bg-teal-400" />
-                  <div className="bg-rose-500" />
+                <div className="grid grid-cols-3 h-1.5 w-full">
+                  <div className="bg-gradient-to-r from-amber-400 to-amber-500" />
+                  <div className="bg-gradient-to-r from-teal-400 to-emerald-500" />
+                  <div className="bg-gradient-to-r from-rose-500 to-pink-500" />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-5 sm:p-7 md:p-8">
@@ -537,38 +547,46 @@ export default function Login() {
                             <div className="h-px bg-slate-700/50 w-full" />
 
                             {/* Eye-catching Feature Highlights */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                               {activePreviewPath === 'Normal' && (
                                 <>
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("4 Adaptive Pedagogy Styles", "4 أساليب شرح تكيّفية")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Step-by-Step, Socratic, Visual & Technical", "خطوة بخطوة، سقراطي، تشبيهات وتقني")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-amber-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <Sparkles className="w-4 h-4 text-amber-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("4 Adaptive Pedagogy Styles", "4 أساليب شرح تكيّفية")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Step-by-Step, Socratic, Visual & Technical", "خطوة بخطوة، سقراطي، تشبيهات وتقني")}</div>
                                     </div>
                                   </div>
 
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Dynamic GPA & Goal Tracker", "حاسبة GPA وتتبع الأهداف")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Live grade forecasting & study countdowns", "توقعات فورية للمعدل وعد تنازلي للمهام")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-amber-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <Check className="w-4 h-4 text-amber-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("Dynamic GPA & Goal Tracker", "حاسبة GPA وتتبع الأهداف")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Live grade forecasting & study countdowns", "توقعات فورية للمعدل وعد تنازلي للمهام")}</div>
                                     </div>
                                   </div>
 
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Brain className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Cognitive Gym & IQ Assessment", "الجيم المعرفي واختبارات الذكاء")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Daily brain workouts and cognitive metrics", "تمارين ذهنية يومية لقياس سرعة التفكير")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-amber-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <Brain className="w-4 h-4 text-amber-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("Cognitive Gym & IQ Assessment", "الجيم المعرفي واختبارات الذكاء")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Daily brain workouts and cognitive metrics", "تمارين ذهنية يومية لقياس سرعة التفكير")}</div>
                                     </div>
                                   </div>
 
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Tag className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Spaced Retention Flashcards", "تكرار متباعد ذكي")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Active recall cards against forgetting", "بطاقات استذكار لمحاربة النسيان")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-amber-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <Tag className="w-4 h-4 text-amber-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("Spaced Retention Flashcards", "تكرار متباعد ذكي")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Active recall cards against forgetting", "بطاقات استذكار لمحاربة النسيان")}</div>
                                     </div>
                                   </div>
                                 </>
@@ -576,35 +594,43 @@ export default function Login() {
 
                               {activePreviewPath === 'Graduation Project' && (
                                 <>
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <GraduationCap className="w-3.5 h-3.5 text-teal-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Faculty Curriculum Alignment", "ربط مباشر بمقررات كليتك")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("AI knows your specific college & department", "فهم كامل لمقررات وتخصص كليتك")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-teal-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <GraduationCap className="w-4 h-4 text-teal-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("Faculty Curriculum Alignment", "ربط مباشر بمقررات كليتك")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("AI knows your specific college & department", "فهم كامل لمقررات وتخصص كليتك")}</div>
                                     </div>
                                   </div>
 
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Sparkles className="w-3.5 h-3.5 text-teal-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Thesis & Literature Reviews", "صياغة الرسالة ومراجعة المراجع")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Academic methodology and research synthesis", "منهجيات بحث أكاديمية وصياغة علمية")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-teal-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <Sparkles className="w-4 h-4 text-teal-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("Thesis & Literature Reviews", "صياغة الرسالة ومراجعة المراجع")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Academic methodology and research synthesis", "منهجيات بحث أكاديمية وصياغة علمية")}</div>
                                     </div>
                                   </div>
 
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Check className="w-3.5 h-3.5 text-teal-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Automated Citation Engine", "محرك التوثيق الأكاديمي")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("IEEE, APA, Harvard format in a single click", "تنسيق مراجع معتمد بنقرة واحدة")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-teal-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <Check className="w-4 h-4 text-teal-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("Automated Citation Engine", "محرك التوثيق الأكاديمي")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("IEEE, APA, Harvard format in a single click", "تنسيق مراجع معتمد بنقرة واحدة")}</div>
                                     </div>
                                   </div>
 
-                                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                    <Brain className="w-3.5 h-3.5 text-teal-400 shrink-0 mt-0.5" />
-                                    <div>
-                                      <div className="text-xs font-bold text-slate-200">{t("Sprint & Milestone Deliverables", "تتبع مراحل وتسليمات المشروع")}</div>
-                                      <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{t("Track supervisor notes and project deadlines", "تتبع ملاحظات المشرف ومواعيد المناقشة")}</div>
+                                  <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-700/70 hover:border-teal-500/50 flex items-start gap-3 shadow-md transition-all">
+                                    <div className="w-8 h-8 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                                      <Brain className="w-4 h-4 text-teal-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white leading-snug">{t("Sprint & Milestone Deliverables", "تتبع مراحل وتسليمات المشروع")}</div>
+                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Track supervisor notes and project deadlines", "تتبع ملاحظات المشرف ومواعيد المناقشة")}</div>
                                     </div>
                                   </div>
                                 </>
@@ -615,23 +641,27 @@ export default function Login() {
                                   {getSpecialNeedsFeatures(selectedDisability, t).map((feature) => (
                                     <div
                                       key={feature.key}
-                                      className={`p-2.5 rounded-xl border flex items-start gap-2 transition-all ${
+                                      className={`p-3 rounded-2xl border flex items-start gap-3 transition-all shadow-md ${
                                         feature.isPrimary
-                                          ? 'bg-rose-500/10 border-rose-500/40 ring-1 ring-rose-500/30'
-                                          : 'bg-slate-900/60 border-slate-800'
+                                          ? 'bg-rose-500/15 border-rose-500/50 ring-1 ring-rose-500/30'
+                                          : 'bg-slate-900/80 border-slate-700/70 hover:border-slate-600'
                                       }`}
                                     >
-                                      <feature.Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${feature.isPrimary ? 'text-rose-300' : 'text-rose-400'}`} />
-                                      <div>
-                                        <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                                          {feature.title}
+                                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                                        feature.isPrimary ? 'bg-rose-500/25 border border-rose-400/50' : 'bg-slate-800 border border-slate-700'
+                                      }`}>
+                                        <feature.Icon className={`w-4 h-4 ${feature.isPrimary ? 'text-rose-300' : 'text-rose-400'}`} />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <div className="text-xs font-bold text-white flex items-center gap-1.5 leading-snug">
+                                          <span className="truncate">{feature.title}</span>
                                           {feature.isPrimary && (
-                                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black tracking-wider bg-rose-500/30 text-rose-200 border border-rose-400/50 shrink-0">
                                               {t('FOCUS', 'محدد')}
                                             </span>
                                           )}
                                         </div>
-                                        <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{feature.description}</div>
+                                        <div className="text-[11px] text-slate-300 leading-tight mt-1">{feature.description}</div>
                                       </div>
                                     </div>
                                   ))}
@@ -679,38 +709,51 @@ export default function Login() {
                         aria-label={t("Choose your path", "اختر مسارك")}
                         className="space-y-3 relative outline-none"
                       >
-                        {/* Connecting Line */}
-                        <div className={`absolute top-4 bottom-4 ${isRtl ? 'right-[11px]' : 'left-[11px]'} w-0.5 bg-slate-800 z-0 pointer-events-none`} />
-
-                        {/* 1. Normal */}
+                        {/* 1. Normal Path */}
                         <Radio
                           value="Normal"
                           onMouseEnter={() => setHoveredPath('Normal')}
                           onMouseLeave={() => setHoveredPath(null)}
                           className={({ isSelected, isFocusVisible }) =>
-                            `relative z-10 flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all outline-none ${
+                            `relative z-10 w-full flex items-start gap-3.5 p-4 rounded-2xl cursor-pointer border transition-all duration-200 outline-none ${
                               isSelected
-                                ? 'bg-amber-500/10 border-amber-500/40 shadow-md shadow-amber-500/5'
-                                : 'bg-transparent border-transparent hover:bg-slate-800/40'
-                            } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                                ? 'bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-slate-900/90 border-amber-500 shadow-xl shadow-amber-500/15 ring-1 ring-amber-400/40 scale-[1.01]'
+                                : 'bg-slate-900/60 border-slate-800/90 hover:bg-slate-800/70 hover:border-slate-700 shadow-sm'
+                            } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-950' : ''}`
                           }
                         >
                           {({ isSelected }) => (
                             <>
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all ${
                                 isSelected
-                                  ? 'bg-amber-400 text-slate-950 ring-4 ring-amber-400/20'
-                                  : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                  ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 shadow-md shadow-amber-500/30'
+                                  : 'bg-slate-800/90 text-slate-400 border border-slate-700/80'
                               }`}>
-                                <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-slate-950' : 'bg-slate-600'}`} />
+                                <Brain className="w-5 h-5" />
                               </div>
-                              <div>
-                                <div className={`text-sm font-black transition-colors ${isSelected ? 'text-amber-300' : 'text-slate-200'}`}>
-                                  {t("Normal", "عادي")}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className={`text-sm sm:text-base font-black transition-colors ${isSelected ? 'text-amber-300' : 'text-white'}`}>
+                                    {t("Normal Path", "المسار القياسي (عام)")}
+                                  </span>
+                                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${
+                                    isSelected
+                                      ? 'bg-amber-400/20 text-amber-300 border-amber-400/40'
+                                      : 'bg-slate-800 text-slate-400 border-slate-700'
+                                  }`}>
+                                    {t("Active · Ready", "جاهز للبدء")}
+                                  </span>
                                 </div>
-                                <div className="text-xs text-slate-400 font-medium mt-0.5">
-                                  {t("Standard cognitive evaluation path.", "المسار القياسي للتقييم المعرفي العام.")}
-                                </div>
+                                <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
+                                  {t("Adaptive AI mentor, Socratic explanations, GPA forecasting & spaced retention flashcards.", "مساعد معرفي ذكي يتكيف مع استيعابك، حاسبة GPA، وتكرار متباعد لحفظ المعلومات.")}
+                                </p>
+                              </div>
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                isSelected
+                                  ? 'bg-amber-400 text-slate-950 shadow-sm ring-4 ring-amber-400/20'
+                                  : 'border border-slate-700 bg-slate-800/50'
+                              }`}>
+                                {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                               </div>
                             </>
                           )}
@@ -723,34 +766,41 @@ export default function Login() {
                             onMouseEnter={() => setHoveredPath('Graduation Project')}
                             onMouseLeave={() => setHoveredPath(null)}
                             className={({ isSelected, isFocusVisible }) =>
-                              `w-full flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all outline-none ${
+                              `w-full flex items-start gap-3.5 p-4 rounded-2xl cursor-pointer border transition-all duration-200 outline-none ${
                                 isSelected
-                                  ? 'bg-teal-500/10 border-teal-500/40 shadow-md shadow-teal-500/5'
-                                  : 'bg-transparent border-transparent hover:bg-slate-800/40'
-                              } ${isFocusVisible ? 'ring-2 ring-teal-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                                  ? 'bg-gradient-to-r from-teal-500/20 via-teal-500/10 to-slate-900/90 border-teal-500 shadow-xl shadow-teal-500/15 ring-1 ring-teal-400/40 scale-[1.01]'
+                                  : 'bg-slate-900/60 border-slate-800/90 hover:bg-slate-800/70 hover:border-slate-700 shadow-sm'
+                              } ${isFocusVisible ? 'ring-2 ring-teal-400 ring-offset-2 ring-offset-slate-950' : ''}`
                             }
                           >
                             {({ isSelected }) => (
                               <>
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all ${
                                   isSelected
-                                    ? 'bg-teal-400 text-slate-950 ring-4 ring-teal-400/20'
-                                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                    ? 'bg-gradient-to-br from-teal-400 to-emerald-600 text-slate-950 shadow-md shadow-teal-500/30'
+                                    : 'bg-slate-800/90 text-slate-400 border border-slate-700/80'
                                 }`}>
-                                  <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-slate-950' : 'bg-slate-600'}`} />
+                                  <GraduationCap className="w-5 h-5" />
                                 </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className={`text-sm font-black transition-colors ${isSelected ? 'text-teal-300' : 'text-slate-200'}`}>
-                                      {t("Graduation Project", "مشروع تخرج")}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className={`text-sm sm:text-base font-black transition-colors ${isSelected ? 'text-teal-300' : 'text-white'}`}>
+                                      {t("Graduation Project", "مشروع التخرج")}
                                     </span>
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 animate-pulse">
                                       {t("Coming Soon", "قريباً")}
                                     </span>
                                   </div>
-                                  <div className="text-xs text-slate-400 font-medium mt-0.5">
-                                    {t("Anchored to your faculty & department.", "مرتبط بكليتك وتخصصك ومقرراتك الأكاديمية.")}
-                                  </div>
+                                  <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
+                                    {t("Anchored to your faculty, department, courses & thesis formatting standards.", "مرتبط بكليتك وتخصصك ومقرراتك الأكاديمية وصياغة الرسائل العلمية.")}
+                                  </p>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                  isSelected
+                                    ? 'bg-teal-400 text-slate-950 shadow-sm ring-4 ring-teal-400/20'
+                                    : 'border border-slate-700 bg-slate-800/50'
+                                }`}>
+                                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                                 </div>
                               </>
                             )}
@@ -761,7 +811,7 @@ export default function Login() {
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
-                              className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-semibold leading-relaxed space-y-1.5 ms-9"
+                              className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-semibold leading-relaxed space-y-1.5 ms-4"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <div className="flex items-center gap-1.5 font-black text-amber-300">
@@ -770,8 +820,8 @@ export default function Login() {
                               </div>
                               <p className="text-[11px] text-amber-200/90 font-medium">
                                 {t(
-                                  "The Graduation Project pathway is under active development and will be unlocked in an upcoming release. Please select the 'Normal' or 'Special Needs' path to register and access all active modules today.",
-                                  "مسار مشروع التخرج قيد التجهيز وسيتم إطلاقه في تحديث قادم. يرجى اختيار المسار 'العادي' أو 'ذوي الهمم' للبدء والاستمتاع بكافة الأنظمة المتاحة."
+                                  "The Graduation Project pathway is under active development. Please select 'Normal' or 'Special Needs' to continue and unlock all active tools today.",
+                                  "مسار مشروع التخرج قيد التجهيز وسيتم إطلاقه قريباً. يرجى اختيار المسار 'العادي' أو 'ذوي الهمم' للمتابعة الآن."
                                 )}
                               </p>
                             </motion.div>
@@ -785,29 +835,41 @@ export default function Login() {
                             onMouseEnter={() => setHoveredPath('Special Needs')}
                             onMouseLeave={() => setHoveredPath(null)}
                             className={({ isSelected, isFocusVisible }) =>
-                              `w-full flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all outline-none ${
+                              `w-full flex items-start gap-3.5 p-4 rounded-2xl cursor-pointer border transition-all duration-200 outline-none ${
                                 isSelected
-                                  ? 'bg-rose-500/10 border-rose-500/40 shadow-md shadow-rose-500/5'
-                                  : 'bg-transparent border-transparent hover:bg-slate-800/40'
-                              } ${isFocusVisible ? 'ring-2 ring-rose-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                                  ? 'bg-gradient-to-r from-rose-500/20 via-pink-500/10 to-slate-900/90 border-rose-500 shadow-xl shadow-rose-500/15 ring-1 ring-rose-400/40 scale-[1.01]'
+                                  : 'bg-slate-900/60 border-slate-800/90 hover:bg-slate-800/70 hover:border-slate-700 shadow-sm'
+                              } ${isFocusVisible ? 'ring-2 ring-rose-400 ring-offset-2 ring-offset-slate-950' : ''}`
                             }
                           >
                             {({ isSelected }) => (
                               <>
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all ${
                                   isSelected
-                                    ? 'bg-rose-500 text-white ring-4 ring-rose-500/20'
-                                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                    ? 'bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md shadow-rose-500/30'
+                                    : 'bg-slate-800/90 text-slate-400 border border-slate-700/80'
                                 }`}>
-                                  <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-white' : 'bg-slate-600'}`} />
+                                  <Heart className="w-5 h-5" />
                                 </div>
-                                <div>
-                                  <div className={`text-sm font-black transition-colors ${isSelected ? 'text-rose-300' : 'text-slate-200'}`}>
-                                    {t("Special Needs", "احتياجات خاصة (ذوي الهمم)")}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className={`text-sm sm:text-base font-black transition-colors ${isSelected ? 'text-rose-300' : 'text-white'}`}>
+                                      {t("Special Needs (Accessibility)", "مسار ذوي الهمم والإتاحة")}
+                                    </span>
+                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0">
+                                      {t("4 Modalities", "4 أنظمة")}
+                                    </span>
                                   </div>
-                                  <div className="text-xs text-slate-400 font-medium mt-0.5">
-                                    {t("Customized accessible experience.", "تجربة مخصصة سهلة الوصول مع دعم لغة الإشارة والتتبع.")}
-                                  </div>
+                                  <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
+                                    {t("Assistive multi-modal hub: 3D sign avatar, audio camera eyes, motor & neuro tools.", "منظومة إتاحة شاملة: لغة إشارة 3D، رفيق بصري ذكي، تحكم حركي، وأدوات توحد.")}
+                                  </p>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                  isSelected
+                                    ? 'bg-rose-500 text-white shadow-sm ring-4 ring-rose-500/20'
+                                    : 'border border-slate-700 bg-slate-800/50'
+                                }`}>
+                                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                                 </div>
                               </>
                             )}
@@ -818,7 +880,7 @@ export default function Login() {
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
-                              className="space-y-2 pt-2 ps-9"
+                              className="pt-2 ps-2"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <RadioGroup
@@ -826,28 +888,37 @@ export default function Login() {
                                 onChange={(val) => setSelectedDisability(val as DisabilityOption)}
                                 aria-label={t("Accessibility focus", "نوع الإتاحة المطلوب")}
                                 orientation="horizontal"
-                                className="space-y-2 outline-none"
+                                className="space-y-2.5 outline-none p-3.5 rounded-2xl bg-[#090C16]/95 border border-rose-500/30 shadow-inner"
                               >
-                                <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                                  {t("Accessibility focus", "نوع الإتاحة المطلوب")}
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[11px] font-black uppercase tracking-wider text-rose-300 flex items-center gap-1.5">
+                                    <Sparkles className="w-3.5 h-3.5 text-rose-400" />
+                                    {t("Select Primary Focus Suite:", "اختر نظام التركيز الأساسي:")}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-medium">
+                                    {t("All tools remain unlocked", "جميع الأدوات تظل متاحة")}
+                                  </span>
                                 </div>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {(['Visual', 'Hearing', 'Motor', 'Cognitive'] as DisabilityOption[]).map((dis) => (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {[
+                                    { id: 'Visual' as const, icon: Eye, labelEn: 'Visual (AI Eyes)', labelAr: 'الرفيق البصري (كاميرا)' },
+                                    { id: 'Hearing' as const, icon: Ear, labelEn: 'Deaf & Hearing (3D)', labelAr: 'الصم وضعاف السمع (إشارة)' },
+                                    { id: 'Motor' as const, icon: Activity, labelEn: 'Motor & Voice Control', labelAr: 'التحكم الحركي وإيفونيا' },
+                                    { id: 'Cognitive' as const, icon: Brain, labelEn: 'Neurodiversity & Autism', labelAr: 'التوحد وصعوبات التعلم' },
+                                  ].map((item) => (
                                     <Radio
-                                      key={dis}
-                                      value={dis}
+                                      key={item.id}
+                                      value={item.id}
                                       className={({ isSelected, isFocusVisible }) =>
-                                        `px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all outline-none ${
+                                        `flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all outline-none border ${
                                           isSelected
-                                            ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20'
-                                            : 'bg-slate-800/80 border border-slate-700/80 text-slate-300 hover:border-slate-500'
-                                        } ${isFocusVisible ? 'ring-2 ring-rose-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                                            ? 'bg-rose-500/25 border-rose-400 text-white shadow-md shadow-rose-500/20 font-black'
+                                            : 'bg-slate-900/70 border-slate-800 text-slate-300 hover:border-slate-600 hover:bg-slate-800/60 font-semibold'
+                                        } ${isFocusVisible ? 'ring-2 ring-rose-400 ring-offset-1 ring-offset-slate-900' : ''}`
                                       }
                                     >
-                                      {dis === 'Visual' && t('Visual Companion', 'الرفيق البصري')}
-                                      {dis === 'Hearing' && t('Deaf & Hearing Suite', 'منظومة الصم وضعاف السمع')}
-                                      {dis === 'Motor' && t('Motor & Euphonia Control', 'التحكم الحركي وإيفونيا')}
-                                      {dis === 'Cognitive' && t('Neurodiversity & Autism Hub', 'واحة التوحد وصعوبات التعلم')}
+                                      <item.icon className="w-4 h-4 shrink-0 text-rose-400" />
+                                      <span className="text-xs truncate">{t(item.labelEn, item.labelAr)}</span>
                                     </Radio>
                                   ))}
                                 </div>
@@ -862,21 +933,23 @@ export default function Login() {
                     <AriaButton
                       onPress={handleContinuePath}
                       isDisabled={accountPath === 'Graduation Project'}
-                      className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
+                      className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-2xl transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
                         accountPath === 'Normal'
-                          ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-rose-400 text-slate-950 hover:opacity-95 shadow-amber-500/20'
+                          ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-rose-500 text-slate-950 hover:brightness-110 shadow-amber-500/25 ring-1 ring-amber-300/30'
                           : accountPath === 'Graduation Project'
-                          ? 'bg-slate-800/90 text-slate-400 border border-slate-700/80 shadow-none'
-                          : 'bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white hover:opacity-95 shadow-rose-500/25'
+                          ? 'bg-slate-800 text-slate-400 border border-slate-700/80 shadow-none'
+                          : 'bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 text-white hover:brightness-110 shadow-rose-500/30 ring-1 ring-rose-300/30'
                       }`}
                     >
-                      <span>
+                      <span className="text-xs sm:text-sm font-black">
                         {accountPath === 'Graduation Project'
-                          ? t("Coming Soon · Choose Another Path", "متاح قريباً · يرجى اختيار مسار آخر")
-                          : t("Continue", "المتابعة")}
+                          ? t("Choose Another Path to Continue", "يرجى اختيار مسار آخر للمتابعة")
+                          : accountPath === 'Normal'
+                          ? t("Continue with Normal Path", "المتابعة بالمسار القياسي")
+                          : t("Continue with Special Needs Path", "المتابعة بمسار ذوي الهمم")}
                       </span>
                       {accountPath !== 'Graduation Project' && (
-                        <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
+                        <ArrowRight className={`w-4 h-4 shrink-0 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
                       )}
                     </AriaButton>
                   </div>
