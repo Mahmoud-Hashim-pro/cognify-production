@@ -792,7 +792,12 @@ export default function Login() {
                                 {t("Accessibility focus", "نوع الإتاحة المطلوب")}
                               </label>
                               <div className="flex flex-wrap gap-1.5">
-                                {(['Visual', 'Hearing', 'Motor', 'Speech', 'Cognitive'] as DisabilityOption[]).map((dis) => (
+                                {/* 'Speech' isn't its own chip: it maps to the same real feature and
+                                    downstream tab as 'Motor' (Motor & Euphonia Control), so showing both
+                                    just duplicated one button with the same label. Selecting 'Motor' here
+                                    still covers speech users — detectDirectDisabilityTab/DisabilityModeView
+                                    route 'Motor-Euphonia' and 'Speech' to the same suite either way. */}
+                                {(['Visual', 'Hearing', 'Motor', 'Cognitive'] as DisabilityOption[]).map((dis) => (
                                   <button
                                     key={dis}
                                     type="button"
@@ -803,11 +808,10 @@ export default function Login() {
                                         : 'bg-slate-800/80 border border-slate-700/80 text-slate-300 hover:border-slate-500'
                                     }`}
                                   >
-                                    {dis === 'Visual' && t('Visual', 'بصري')}
-                                    {dis === 'Hearing' && t('Hearing', 'سمعي')}
-                                    {dis === 'Motor' && t('Motor', 'حركي')}
-                                    {dis === 'Speech' && t('Speech', 'نطق')}
-                                    {dis === 'Cognitive' && t('Cognitive', 'إدراكي')}
+                                    {dis === 'Visual' && t('Visual Companion', 'الرفيق البصري')}
+                                    {dis === 'Hearing' && t('Deaf & Hearing Suite', 'منظومة الصم وضعاف السمع')}
+                                    {dis === 'Motor' && t('Motor & Euphonia Control', 'التحكم الحركي وإيفونيا')}
+                                    {dis === 'Cognitive' && t('Neurodiversity & Autism Hub', 'واحة التوحد وصعوبات التعلم')}
                                   </button>
                                 ))}
                               </div>
