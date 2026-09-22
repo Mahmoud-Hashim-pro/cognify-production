@@ -113,22 +113,28 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     if (formData.accountPath === 'Special Needs') {
       const disabilityType = formData.disabilityType || localStorage.getItem('preLoginDisability') || 'Other';
 
-      // Must cover every option Login.tsx's disability picker can send via
-      // 'preLoginDisability' (Visual/Hearing/Speech/Motor/Cognitive) — missing a
-      // branch here silently leaves accessibilityMode at 'None' for that user,
-      // even though their disabilityType free-text was recorded correctly.
-      let accessibilityMode: UserProfile['accessibilityMode'] = 'None';
-      if (disabilityType === 'Visual Impairment') {
-        accessibilityMode = 'Visual';
-      } else if (disabilityType === 'Hearing Impairment') {
-        accessibilityMode = 'Vocal-Deaf';
-      } else if (disabilityType === 'Speech Impairment') {
-        accessibilityMode = 'Speech';
-      } else if (disabilityType === 'Motor Impairment') {
-        accessibilityMode = 'Motor-Euphonia';
-      } else if (disabilityType === 'Cognitive/Learning Disability') {
-        accessibilityMode = 'Neurodiversity';
+      const preLoginMode = localStorage.getItem('preLoginAccessibilityMode') as UserProfile['accessibilityMode'] | null;
+      let accessibilityMode: UserProfile['accessibilityMode'] = preLoginMode || 'None';
+      if (accessibilityMode === 'None') {
+        if (disabilityType === 'Visual Impairment') {
+          accessibilityMode = 'Visual';
+        } else if (disabilityType === 'Hearing Impairment') {
+          accessibilityMode = 'Vocal-Deaf';
+        } else if (disabilityType === 'Speech Impairment') {
+          accessibilityMode = 'Speech';
+        } else if (disabilityType === 'Motor Impairment') {
+          accessibilityMode = 'Motor-Euphonia';
+        } else if (disabilityType === 'Cognitive/Learning Disability') {
+          accessibilityMode = 'Neurodiversity';
+        }
       }
+
+      try {
+        const mappedTab = accessibilityMode === 'Motor-Euphonia' ? 'motor' :
+                          accessibilityMode === 'Neurodiversity' ? 'neurodiversity' :
+                          accessibilityMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
+        localStorage.setItem('cognify_default_disability_tab', mappedTab);
+      } catch {}
 
       onComplete({
         ...formData,

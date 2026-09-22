@@ -59,32 +59,25 @@ interface DisabilityModeViewProps {
  * a suite the user didn't actually indicate.
  */
 function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
-  switch (profile.accessibilityMode) {
-    case 'Visual':
-      return 'vision';
-    case 'Vocal-Deaf':
-    case 'Sign-Only':
-      return 'deaf';
-    case 'Motor-Euphonia':
-    case 'Speech':
-      return 'motor';
-    case 'Neurodiversity':
-      return 'neurodiversity';
-    default:
-      break;
-  }
-  const freeText = (profile.disabilityType || '').toLowerCase();
-  if (/visual|blind|vision/.test(freeText)) return 'vision';
-  if (/deaf|hearing|vocal/.test(freeText)) return 'deaf';
-  if (/motor|euphonia|paraly|quadr|speech/.test(freeText)) return 'motor';
-  if (/adhd|autis|dyslex|cognitiv|neurodiv/.test(freeText)) return 'neurodiversity';
+  const mode = String(profile.accessibilityMode || '').toLowerCase().trim();
+  if (mode.includes('motor') || mode === 'speech') return 'motor';
+  if (mode.includes('neuro') || mode.includes('cognitiv') || mode.includes('autis')) return 'neurodiversity';
+  if (mode.includes('deaf') || mode.includes('sign') || mode.includes('hearing') || mode.includes('vocal')) return 'deaf';
+  if (mode.includes('visu') || mode.includes('blind')) return 'vision';
 
+  // Check persistent user preference in localStorage
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
-    if (saved && (saved === 'vision' || saved === 'deaf' || saved === 'motor' || saved === 'neurodiversity')) {
+    if (saved === 'motor' || saved === 'neurodiversity' || saved === 'deaf' || saved === 'vision') {
       return saved as DisabilityTab;
     }
   } catch {}
+
+  const freeText = String(profile.disabilityType || '').toLowerCase().trim();
+  if (/motor|euphonia|paraly|quadr|speech|als/.test(freeText)) return 'motor';
+  if (/adhd|autis|dyslex|cognitiv|neurodiv|learning/.test(freeText)) return 'neurodiversity';
+  if (/deaf|hearing|vocal|sign/.test(freeText)) return 'deaf';
+  if (/visual|blind|vision|sight/.test(freeText)) return 'vision';
 
   return 'vision';
 }
@@ -127,13 +120,18 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     onTabChange?.(activeTab); 
   }, [activeTab, onTabChange]);
 
+  const lastProfileModeRef = useRef<string>(profile?.accessibilityMode || '');
   // Keep activeTab in sync with profile accessibility mode and bypass 'hub'
   useEffect(() => {
-    const directTab = detectDirectDisabilityTab(profile);
-    if (activeTab === 'hub') {
+    const currentMode = profile?.accessibilityMode || '';
+    if (currentMode && currentMode !== lastProfileModeRef.current) {
+      lastProfileModeRef.current = currentMode;
+      const directTab = detectDirectDisabilityTab(profile);
       setActiveTab(directTab);
+    } else if (activeTab === 'hub') {
+      setActiveTab(detectDirectDisabilityTab(profile));
     }
-  }, [activeTab, profile.accessibilityMode, profile.disabilityType]);
+  }, [activeTab, profile?.accessibilityMode, profile?.disabilityType]);
 
   // Set default suite persistently when user chooses a suite
   const handleSelectTab = React.useCallback((tab: DisabilityTab) => {

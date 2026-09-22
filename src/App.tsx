@@ -371,16 +371,35 @@ export default function App() {
 
         const data = rawData as UserProfile;
 
-        // Honor user's login-time path selection if explicitly set to Normal
+        // Honor user's login-time path selection
         let preLoginPath: string | null = null;
+        let preLoginMode: string | null = null;
+        let preLoginDis: string | null = null;
         try {
           preLoginPath = localStorage.getItem('preLoginAccountPath');
+          preLoginMode = localStorage.getItem('preLoginAccessibilityMode');
+          preLoginDis = localStorage.getItem('preLoginDisability');
         } catch {}
 
         if (preLoginPath === 'Normal' && data.accountPath !== 'Normal') {
           data.accountPath = 'Normal';
           data.accessibilityMode = 'None';
           setDoc(doc(db, path), { accountPath: 'Normal', accessibilityMode: 'None' }, { merge: true }).catch(() => {});
+        } else if (preLoginPath === 'Special Needs' && preLoginMode && preLoginMode !== 'None') {
+          data.accountPath = 'Special Needs';
+          data.accessibilityMode = preLoginMode as AccessibilityMode;
+          if (preLoginDis) data.disabilityType = preLoginDis;
+          try {
+            const mappedTab = preLoginMode === 'Motor-Euphonia' ? 'motor' :
+                              preLoginMode === 'Neurodiversity' ? 'neurodiversity' :
+                              preLoginMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
+            localStorage.setItem('cognify_default_disability_tab', mappedTab);
+          } catch {}
+          setDoc(doc(db, path), cleanDataForFirestore({ 
+            accountPath: 'Special Needs', 
+            accessibilityMode: preLoginMode, 
+            disabilityType: preLoginDis || data.disabilityType 
+          }), { merge: true }).catch(() => {});
         }
 
         setProfile(data);
@@ -432,31 +451,39 @@ export default function App() {
         // If the user selected 'Special Needs' at login but has no profile, auto-create it immediately to bypass onboarding!
         let preLoginPath: string | null = null;
         let preLoginDisability: string | null = null;
+        let preLoginMode: string | null = null;
         let preLoginOrgCode: string | null = null;
         try {
           preLoginPath = localStorage.getItem('preLoginAccountPath');
           preLoginDisability = localStorage.getItem('preLoginDisability');
+          preLoginMode = localStorage.getItem('preLoginAccessibilityMode');
           preLoginOrgCode = localStorage.getItem('preLoginOrgCode');
         } catch {}
 
         if (preLoginPath === 'Special Needs') {
           const disabilityType = preLoginDisability || 'Other';
           
-          // Kept in sync with the identical mapping in Onboarding.tsx — both must
-          // cover every value Login.tsx's disability picker can send, or a user
-          // silently ends up with accessibilityMode 'None'.
-          let accessibilityMode: AccessibilityMode = 'None';
-          if (disabilityType === 'Visual Impairment') {
-            accessibilityMode = 'Visual';
-          } else if (disabilityType === 'Hearing Impairment') {
-            accessibilityMode = 'Vocal-Deaf';
-          } else if (disabilityType === 'Speech Impairment') {
-            accessibilityMode = 'Speech';
-          } else if (disabilityType === 'Motor Impairment') {
-            accessibilityMode = 'Motor-Euphonia';
-          } else if (disabilityType === 'Cognitive/Learning Disability') {
-            accessibilityMode = 'Neurodiversity';
+          let accessibilityMode: AccessibilityMode = (preLoginMode as AccessibilityMode) || 'None';
+          if (accessibilityMode === 'None') {
+            if (disabilityType === 'Visual Impairment') {
+              accessibilityMode = 'Visual';
+            } else if (disabilityType === 'Hearing Impairment') {
+              accessibilityMode = 'Vocal-Deaf';
+            } else if (disabilityType === 'Speech Impairment') {
+              accessibilityMode = 'Speech';
+            } else if (disabilityType === 'Motor Impairment') {
+              accessibilityMode = 'Motor-Euphonia';
+            } else if (disabilityType === 'Cognitive/Learning Disability') {
+              accessibilityMode = 'Neurodiversity';
+            }
           }
+
+          try {
+            const mappedTab = accessibilityMode === 'Motor-Euphonia' ? 'motor' :
+                              accessibilityMode === 'Neurodiversity' ? 'neurodiversity' :
+                              accessibilityMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
+            localStorage.setItem('cognify_default_disability_tab', mappedTab);
+          } catch {}
 
           let visitorCountry: string | undefined;
           try {
