@@ -381,10 +381,16 @@ export default function App() {
           preLoginDis = localStorage.getItem('preLoginDisability');
         } catch {}
 
-        if (preLoginPath === 'Normal' && data.accountPath !== 'Normal') {
+        if (preLoginPath === 'Normal') {
           data.accountPath = 'Normal';
           data.accessibilityMode = 'None';
-          setDoc(doc(db, path), { accountPath: 'Normal', accessibilityMode: 'None' }, { merge: true }).catch(() => {});
+          data.disabilityType = '';
+          try {
+            localStorage.removeItem('cognify_default_disability_tab');
+            localStorage.removeItem('preLoginAccessibilityMode');
+            localStorage.removeItem('preLoginDisability');
+          } catch {}
+          setDoc(doc(db, path), { accountPath: 'Normal', accessibilityMode: 'None', disabilityType: '' }, { merge: true }).catch(() => {});
         } else if (preLoginPath === 'Special Needs' && preLoginMode && preLoginMode !== 'None') {
           data.accountPath = 'Special Needs';
           data.accessibilityMode = preLoginMode as AccessibilityMode;
@@ -409,17 +415,15 @@ export default function App() {
         // If the user has special needs / accessibility mode -> land on #disability
         // If the user is a normal student/learner -> ALWAYS land directly on #chat, never disability or video
         const hash = window.location.hash.replace('#', '');
-        const isA11y = isAccessibilityUser(data);
+        const isA11y = preLoginPath === 'Normal' ? false : isAccessibilityUser(data);
         if (isA11y) {
           if (!hash || hash === 'chat' || hash === '') {
             setCurrentView('disability');
             window.history.replaceState(null, '', '#disability');
           }
         } else {
-          if (!hash || hash === 'disability' || hash === 'video' || hash === '') {
-            setCurrentView('chat');
-            window.history.replaceState(null, '', '#chat');
-          }
+          setCurrentView('chat');
+          window.history.replaceState(null, '', '#chat');
         }
 
         // Record login telemetry (session history, device, country, city)

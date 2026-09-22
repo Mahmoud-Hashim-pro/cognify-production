@@ -206,6 +206,10 @@ export default function Login() {
         // The real enum value, stored directly — Onboarding.tsx / App.tsx should
         // read this first instead of re-parsing the prose label above.
         localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
+      } else {
+        localStorage.setItem('preLoginAccessibilityMode', 'None');
+        localStorage.removeItem('preLoginDisability');
+        localStorage.removeItem('cognify_default_disability_tab');
       }
     } catch (err) {
       console.warn("LocalStorage unavailable in current context:", err);

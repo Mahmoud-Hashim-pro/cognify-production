@@ -247,8 +247,12 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
+      const isNorm = formData.accountPath === 'Normal' || !formData.accountPath;
       await onComplete({
         ...formData,
+        accountPath: isNorm ? 'Normal' : formData.accountPath,
+        accessibilityMode: isNorm ? 'None' : (formData.accessibilityMode || 'None'),
+        disabilityType: isNorm ? '' : (formData.disabilityType || ''),
         email: user?.email || formData.email || auth.currentUser?.email || "",
         level: formData.level || 'Intermediate',
         iqScore: formData.iqScore || 100,
