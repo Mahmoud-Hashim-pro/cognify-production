@@ -64,9 +64,9 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
       return 'vision';
     case 'Vocal-Deaf':
     case 'Sign-Only':
-    case 'Speech':
       return 'deaf';
     case 'Motor-Euphonia':
+    case 'Speech':
       return 'motor';
     case 'Neurodiversity':
       return 'neurodiversity';
@@ -76,8 +76,8 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
   const freeText = (profile.disabilityType || '').toLowerCase();
   if (!freeText) return 'hub';
   if (/visual|blind|vision/.test(freeText)) return 'vision';
-  if (/deaf|hearing|speech|vocal/.test(freeText)) return 'deaf';
-  if (/motor|euphonia|paraly|quadr/.test(freeText)) return 'motor';
+  if (/deaf|hearing|vocal/.test(freeText)) return 'deaf';
+  if (/motor|euphonia|paraly|quadr|speech/.test(freeText)) return 'motor';
   if (/adhd|autis|dyslex|cognitiv|neurodiv/.test(freeText)) return 'neurodiversity';
   return 'hub';
 }
@@ -424,6 +424,18 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     }] : []),
   ];
 
+  // Whether a module card is the one the user's accessibilityMode actually lands them
+  // in — kept in sync with detectDirectDisabilityTab's mapping (Speech -> motor,
+  // Vocal-Deaf/Sign-Only -> deaf) so the "Active Mode" badge and quick-launch card
+  // never point at a different suite than the one Speech/Deaf users are auto-routed to.
+  const isModuleActiveForProfile = (m: (typeof MODULES)[number]) => {
+    if (!profile.accessibilityMode || profile.accessibilityMode === 'None') return false;
+    if (m.matchingMode === profile.accessibilityMode) return true;
+    if (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Vocal-Deaf')) return true;
+    if (m.id === 'motor' && profile.accessibilityMode === 'Speech') return true;
+    return false;
+  };
+
   // Filter modules based on selectedCategory
   const filteredModules = useMemo(() => {
     if (selectedCategory === 'all') return MODULES;
@@ -565,7 +577,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 
                 {/* 1. Quick Launch Personalized Card (if user has active mode) */}
                 {profile.accessibilityMode && profile.accessibilityMode !== 'None' && (() => {
-                  const matched = MODULES.find(m => m.matchingMode === profile.accessibilityMode);
+                  const matched = MODULES.find(isModuleActiveForProfile);
                   if (!matched) return null;
                   return (
                     <section className="bg-gradient-to-r from-cyan-500/15 via-indigo-500/10 to-transparent border border-cyan-500/40 rounded-[28px] p-6 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -702,10 +714,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 {viewMode === 'grid' ? (
                   <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {filteredModules.map((m) => {
-                      const isMyCurrentMode =
-                        (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
-                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Vocal-Deaf')) ||
-                        (m.id === 'chat' && profile.accessibilityMode === 'Speech');
+                      const isMyCurrentMode = isModuleActiveForProfile(m);
 
                       return (
                         <div
@@ -807,10 +816,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   /* HIGH-ACCESSIBILITY LIST MODE (LARGE TOUCH TARGETS - MIN 64px) */
                   <section className="space-y-3">
                     {filteredModules.map((m) => {
-                      const isMyCurrentMode =
-                        (m.matchingMode === profile.accessibilityMode && profile.accessibilityMode !== 'None') ||
-                        (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Vocal-Deaf')) ||
-                        (m.id === 'chat' && profile.accessibilityMode === 'Speech');
+                      const isMyCurrentMode = isModuleActiveForProfile(m);
 
                       return (
                         <div
