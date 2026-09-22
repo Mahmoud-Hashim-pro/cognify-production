@@ -64,7 +64,7 @@ const SPECIAL_NEEDS_FEATURES: {
   {
     key: 'sign-language',
     Icon: Heart,
-    title: { en: 'Deaf & Hard of Hearing Suite', ar: 'منظومة الصم وضعاف السمع الشاملة' },
+    title: { en: 'Deaf & Hard of Hearing Suite (All-in-One)', ar: 'منظومة الصم وضعاف السمع الشاملة (الكل في واحد)' },
     description: { en: '3D sign language studio, sound & hazard radar, and a live two-way communication bridge', ar: 'استوديو لغة إشارة ثلاثي الأبعاد، رادار للأصوات والمخاطر، وجسر تواصل مباشر ثنائي الاتجاه' },
     matches: ['Hearing'],
   },
@@ -495,7 +495,17 @@ export default function Login() {
                                       </span>
                                     </span>
                                   )}
-                                  {activePreviewPath === 'Special Needs' && t("All-in-One Multi-Modal Accessibility Hub", "مركز الإتاحة الشامل ومتعدد الوسائط")}
+                                  {activePreviewPath === 'Special Needs' && (
+                                    <span className="flex items-center gap-2 flex-wrap">
+                                      <span>{t("All-in-One Multi-Modal Accessibility Hub", "مركز الإتاحة الشامل ومتعدد الوسائط")}</span>
+                                      {/* Matches the real "All Suites" count inside the app (DisabilityModeView's
+                                          MODULES minus the admin-only Org Hub) — keep this number in sync if a
+                                          suite is ever added/removed there. */}
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">
+                                        {t(`${SPECIAL_NEEDS_FEATURES.length} Suites`, `${SPECIAL_NEEDS_FEATURES.length} أدوات`)}
+                                      </span>
+                                    </span>
+                                  )}
                                 </h3>
                                 <p className="text-[11px] sm:text-xs text-slate-300 font-medium mt-1 leading-relaxed">
                                   {activePreviewPath === 'Normal' && t(
