@@ -64,9 +64,9 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
       return 'vision';
     case 'Vocal-Deaf':
     case 'Sign-Only':
-    case 'Speech':
       return 'deaf';
     case 'Motor-Euphonia':
+    case 'Speech':
       return 'motor';
     case 'Neurodiversity':
       return 'neurodiversity';
@@ -75,8 +75,8 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
   }
   const freeText = (profile.disabilityType || '').toLowerCase();
   if (/visual|blind|vision/.test(freeText)) return 'vision';
-  if (/deaf|hearing|speech|vocal/.test(freeText)) return 'deaf';
-  if (/motor|euphonia|paraly|quadr/.test(freeText)) return 'motor';
+  if (/deaf|hearing|vocal/.test(freeText)) return 'deaf';
+  if (/motor|euphonia|paraly|quadr|speech/.test(freeText)) return 'motor';
   if (/adhd|autis|dyslex|cognitiv|neurodiv/.test(freeText)) return 'neurodiversity';
 
   try {
@@ -468,6 +468,18 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       matchingMode: '',
     }] : []),
   ];
+
+  // Whether a module card is the one the user's accessibilityMode actually lands them
+  // in — kept in sync with detectDirectDisabilityTab's mapping (Speech -> motor,
+  // Vocal-Deaf/Sign-Only -> deaf) so the "Active Mode" badge and quick-launch card
+  // never point at a different suite than the one Speech/Deaf users are auto-routed to.
+  const isModuleActiveForProfile = (m: (typeof MODULES)[number]) => {
+    if (!profile.accessibilityMode || profile.accessibilityMode === 'None') return false;
+    if (m.matchingMode === profile.accessibilityMode) return true;
+    if (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Vocal-Deaf')) return true;
+    if (m.id === 'motor' && profile.accessibilityMode === 'Speech') return true;
+    return false;
+  };
 
   // Filter modules based on selectedCategory
   const filteredModules = useMemo(() => {
