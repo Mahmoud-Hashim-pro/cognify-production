@@ -1,6 +1,7 @@
 import { localize } from '../lib/translations';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { RadioGroup as AriaRadioGroup, Radio as AriaRadio, Button as AriaButton } from 'react-aria-components';
+import { RadioGroup as AriaRadioGroup, Radio as AriaRadio } from 'react-aria-components';
+import { AriaButton } from './ui/AriaButton';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
