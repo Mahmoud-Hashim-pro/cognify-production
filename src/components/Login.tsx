@@ -82,6 +82,33 @@ const SPECIAL_NEEDS_FEATURES: {
     description: { en: 'Spoken PECS cards, visual daily routines, and calming sensory tools', ar: 'بطاقات PECS ناطقة، جدول روتين يومي بصري، وأدوات تهدئة حسية' },
     matches: ['Cognitive'],
   },
+  {
+    // These last three aren't tied to any single chip (matches: []) — available to
+    // every Special Needs account regardless of which focus they pick, so they're
+    // always listed but never get the "SELECTED" highlight. Together with the four
+    // above, this is the full real set of 7 suites in DisabilityModeView's MODULES
+    // (All Suites badge shows "7") — don't drop any of these three or the preview
+    // undersells the app again.
+    key: 'caregiver',
+    Icon: Heart,
+    title: { en: 'Caregiver & Specialist Hub', ar: 'لوحة المرافق والمختص الطبي' },
+    description: { en: 'Family & clinical monitoring dashboard, live SOS test dispatch, and encrypted backup', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، ونسخ احتياطي مشفر' },
+    matches: [],
+  },
+  {
+    key: 'chat',
+    Icon: Sparkles,
+    title: { en: 'Adaptive Cognitive Tutor', ar: 'المساعد التعليمي الذكي المهيأ' },
+    description: { en: 'Pedagogical tutoring assistant tailored to your pace, with step-by-step guidance and full screen-reader support', ar: 'مساعد تعليمي يتكيف مع وتيرتك، بشرح خطوة بخطوة ودعم كامل لقارئات الشاشة' },
+    matches: [],
+  },
+  {
+    key: 'settings',
+    Icon: Globe,
+    title: { en: 'Preferences & Dialects', ar: 'التفضيلات واللغات' },
+    description: { en: '11 languages & dialects including Egyptian Ammiya, plus adjustable accessibility profiles and display settings', ar: '11 لغة ولهجة ومنها المصري، مع إمكانية ضبط ملفات الإتاحة وإعدادات العرض' },
+    matches: [],
+  },
 ];
 
 function getSpecialNeedsFeatures(
