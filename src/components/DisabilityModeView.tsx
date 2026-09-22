@@ -1,5 +1,6 @@
 import { localize } from '../lib/translations';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { RadioGroup as AriaRadioGroup, Radio as AriaRadio, Button as AriaButton } from 'react-aria-components';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
@@ -503,15 +504,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         <header className="relative z-[9995] px-4 py-2.5 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-slate-800 bg-[#121524]/95 backdrop-blur-xl shadow-lg">
           <div className="flex items-center gap-2.5 sm:gap-3.5">
             {/* Main App Menu Drawer Button */}
-            <button
-              onClick={() => {
+            <AriaButton
+              onPress={() => {
                 if (isAccessibilityUser(profile) || !onNavigate) onMenuClick();
                 else onNavigate('chat');
               }}
               aria-label={isAccessibilityUser(profile)
                 ? localize(profile.language, 'Open menu', 'افتح القائمة')
                 : getTranslation(profile.language, 'back')}
-              className="p-2 text-slate-400 bg-slate-900 border border-slate-800 hover:text-white hover:bg-slate-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5"
+              className="p-2 text-slate-400 bg-slate-900 border border-slate-800 hover:text-white hover:bg-slate-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer"
             >
               {isAccessibilityUser(profile)
                 ? <Menu className="w-4 h-4" />
@@ -521,74 +522,87 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   ? localize(profile.language, 'Menu', 'القائمة')
                   : getTranslation(profile.language, 'back')}
               </span>
-            </button>
+            </AriaButton>
 
             {/* Primary Disability Mode Switcher: Instant, Uncluttered, Accessible */}
-            <div className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-2xl shadow-inner gap-1">
+            <AriaRadioGroup
+              value={(activeTab === 'bridge' || activeTab === 'radar') ? 'deaf' : (activeTab as string)}
+              onChange={(suiteId) => handleSelectTab(suiteId as DisabilityTab)}
+              aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
+              orientation="horizontal"
+              className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-2xl shadow-inner gap-1 outline-none"
+            >
               {[
                 { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', icon: '👁️' },
                 { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', icon: '🧏' },
                 { id: 'motor' as const, labelAr: 'حركية', labelEn: 'Motor', icon: '🦾' },
                 { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', icon: '🧠' },
-              ].map((suite) => {
-                const isSelected = (activeTab as string) === suite.id || (suite.id === 'deaf' && ((activeTab as string) === 'bridge' || (activeTab as string) === 'radar'));
-                return (
-                  <button
-                    key={suite.id}
-                    onClick={() => handleSelectTab(suite.id)}
-                    className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 ${
+              ].map((suite) => (
+                <AriaRadio
+                  key={suite.id}
+                  value={suite.id}
+                  className={({ isSelected, isFocusVisible }) =>
+                    `px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none ${
                       isSelected
                         ? 'bg-cyan-500 text-slate-950 font-black shadow-md'
                         : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <span>{suite.icon}</span>
-                    <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
-                  </button>
-                );
-              })}
-            </div>
+                    } ${isFocusVisible ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                  }
+                >
+                  <span>{suite.icon}</span>
+                  <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
+                </AriaRadio>
+              ))}
+            </AriaRadioGroup>
           </div>
 
           {/* Right Header Status / Sibling Switcher */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Sibling module pills when inside a suite */}
             {activeTab !== 'hub' && siblingModules.length > 1 ? (
-              <div className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar">
+              <AriaRadioGroup
+                value={activeTab as string}
+                onChange={(mId) => setActiveTab(mId as DisabilityTab)}
+                aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
+                orientation="horizontal"
+                className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none"
+              >
                 {siblingModules.map((m) => (
-                  <button
+                  <AriaRadio
                     key={m.id}
-                    onClick={() => setActiveTab(m.id)}
+                    value={m.id}
                     title={localize(profile.language, m.titleEn, m.titleAr)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                      activeTab === m.id
-                        ? 'bg-cyan-500 text-slate-950 font-black shadow-sm'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
+                    className={({ isSelected, isFocusVisible }) =>
+                      `px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
+                        isSelected
+                          ? 'bg-cyan-500 text-slate-950 font-black shadow-sm'
+                          : 'text-slate-400 hover:text-white'
+                      } ${isFocusVisible ? 'ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-900' : ''}`
+                    }
                   >
                     <m.Icon className="w-3 h-3" />
                     <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
-                  </button>
+                  </AriaRadio>
                 ))}
-              </div>
+              </AriaRadioGroup>
             ) : (
               /* On Hub: show passport button & settings */
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowPassportModal(true)}
-                  title={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 text-indigo-200 hover:text-white hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95"
+                <AriaButton
+                  onPress={() => setShowPassportModal(true)}
+                  aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 text-indigo-200 hover:text-white hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 cursor-pointer"
                 >
                   <span>🛂</span>
                   <span>{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('settings')}
-                  title={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
-                  className="p-2.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
+                </AriaButton>
+                <AriaButton
+                  onPress={() => setActiveTab('settings')}
+                  aria-label={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
+                  className="p-2.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer"
                 >
                   <Settings className="w-4 h-4" />
-                </button>
+                </AriaButton>
               </div>
             )}
           </div>

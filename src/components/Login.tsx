@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { RadioGroup, Radio, Button as AriaButton } from 'react-aria-components';
 import { signInWithGoogle, signInWithGoogleRedirect, loginWithEmail, registerWithEmail, auth, clearPreLoginState } from '../lib/firebase';
 import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
@@ -672,86 +673,95 @@ export default function Login() {
                       </div>
 
                       {/* Vertical Path Selector Timeline */}
-                      <div className="space-y-3 relative" role="radiogroup" aria-label={t("Choose your path", "اختر مسارك")}>
+                      <RadioGroup
+                        value={accountPath}
+                        onChange={(val) => setAccountPath(val as AccountPath)}
+                        aria-label={t("Choose your path", "اختر مسارك")}
+                        className="space-y-3 relative outline-none"
+                      >
                         {/* Connecting Line */}
-                        <div className={`absolute top-4 bottom-4 ${isRtl ? 'right-[11px]' : 'left-[11px]'} w-0.5 bg-slate-800 z-0`} />
+                        <div className={`absolute top-4 bottom-4 ${isRtl ? 'right-[11px]' : 'left-[11px]'} w-0.5 bg-slate-800 z-0 pointer-events-none`} />
 
                         {/* 1. Normal */}
-                        <div
-                          role="radio"
-                          aria-checked={accountPath === 'Normal'}
-                          tabIndex={0}
-                          onClick={() => setAccountPath('Normal')}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAccountPath('Normal'); } }}
+                        <Radio
+                          value="Normal"
                           onMouseEnter={() => setHoveredPath('Normal')}
                           onMouseLeave={() => setHoveredPath(null)}
-                          className={`relative z-10 flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all ${
-                            accountPath === 'Normal'
-                              ? 'bg-amber-500/10 border-amber-500/40 shadow-md shadow-amber-500/5'
-                              : 'bg-transparent border-transparent hover:bg-slate-800/40'
-                          }`}
+                          className={({ isSelected, isFocusVisible }) =>
+                            `relative z-10 flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all outline-none ${
+                              isSelected
+                                ? 'bg-amber-500/10 border-amber-500/40 shadow-md shadow-amber-500/5'
+                                : 'bg-transparent border-transparent hover:bg-slate-800/40'
+                            } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                          }
                         >
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                            accountPath === 'Normal'
-                              ? 'bg-amber-400 text-slate-950 ring-4 ring-amber-400/20'
-                              : 'bg-slate-800 text-slate-400 border border-slate-700'
-                          }`}>
-                            <div className={`w-2 h-2 rounded-full ${accountPath === 'Normal' ? 'bg-slate-950' : 'bg-slate-600'}`} />
-                          </div>
-                          <div>
-                            <div className={`text-sm font-black transition-colors ${accountPath === 'Normal' ? 'text-amber-300' : 'text-slate-200'}`}>
-                              {t("Normal", "عادي")}
-                            </div>
-                            <div className="text-xs text-slate-400 font-medium mt-0.5">
-                              {t("Standard cognitive evaluation path.", "المسار القياسي للتقييم المعرفي العام.")}
-                            </div>
-                          </div>
-                        </div>
+                          {({ isSelected }) => (
+                            <>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                                isSelected
+                                  ? 'bg-amber-400 text-slate-950 ring-4 ring-amber-400/20'
+                                  : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              }`}>
+                                <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-slate-950' : 'bg-slate-600'}`} />
+                              </div>
+                              <div>
+                                <div className={`text-sm font-black transition-colors ${isSelected ? 'text-amber-300' : 'text-slate-200'}`}>
+                                  {t("Normal", "عادي")}
+                                </div>
+                                <div className="text-xs text-slate-400 font-medium mt-0.5">
+                                  {t("Standard cognitive evaluation path.", "المسار القياسي للتقييم المعرفي العام.")}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </Radio>
 
                         {/* 2. Graduation Project */}
-                        <div
-                          role="radio"
-                          aria-checked={accountPath === 'Graduation Project'}
-                          tabIndex={0}
-                          onClick={() => setAccountPath('Graduation Project')}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAccountPath('Graduation Project'); } }}
-                          onMouseEnter={() => setHoveredPath('Graduation Project')}
-                          onMouseLeave={() => setHoveredPath(null)}
-                          className={`relative z-10 flex flex-col gap-3 p-3.5 rounded-2xl cursor-pointer border transition-all ${
-                            accountPath === 'Graduation Project'
-                              ? 'bg-teal-500/10 border-teal-500/40 shadow-md shadow-teal-500/5'
-                              : 'bg-transparent border-transparent hover:bg-slate-800/40'
-                          }`}
-                        >
-                          <div className="flex items-start gap-3.5">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                              accountPath === 'Graduation Project'
-                                ? 'bg-teal-400 text-slate-950 ring-4 ring-teal-400/20'
-                                : 'bg-slate-800 text-slate-400 border border-slate-700'
-                            }`}>
-                              <div className={`w-2 h-2 rounded-full ${accountPath === 'Graduation Project' ? 'bg-slate-950' : 'bg-slate-600'}`} />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`text-sm font-black transition-colors ${accountPath === 'Graduation Project' ? 'text-teal-300' : 'text-slate-200'}`}>
-                                  {t("Graduation Project", "مشروع تخرج")}
-                                </span>
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
-                                  {t("Coming Soon", "قريباً")}
-                                </span>
-                              </div>
-                              <div className="text-xs text-slate-400 font-medium mt-0.5">
-                                {t("Anchored to your faculty & department.", "مرتبط بكليتك وتخصصك ومقرراتك الأكاديمية.")}
-                              </div>
-                            </div>
-                          </div>
+                        <div className="relative z-10 space-y-2">
+                          <Radio
+                            value="Graduation Project"
+                            onMouseEnter={() => setHoveredPath('Graduation Project')}
+                            onMouseLeave={() => setHoveredPath(null)}
+                            className={({ isSelected, isFocusVisible }) =>
+                              `w-full flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all outline-none ${
+                                isSelected
+                                  ? 'bg-teal-500/10 border-teal-500/40 shadow-md shadow-teal-500/5'
+                                  : 'bg-transparent border-transparent hover:bg-slate-800/40'
+                              } ${isFocusVisible ? 'ring-2 ring-teal-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                            }
+                          >
+                            {({ isSelected }) => (
+                              <>
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                                  isSelected
+                                    ? 'bg-teal-400 text-slate-950 ring-4 ring-teal-400/20'
+                                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                }`}>
+                                  <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-slate-950' : 'bg-slate-600'}`} />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className={`text-sm font-black transition-colors ${isSelected ? 'text-teal-300' : 'text-slate-200'}`}>
+                                      {t("Graduation Project", "مشروع تخرج")}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                                      {t("Coming Soon", "قريباً")}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-slate-400 font-medium mt-0.5">
+                                    {t("Anchored to your faculty & department.", "مرتبط بكليتك وتخصصك ومقرراتك الأكاديمية.")}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </Radio>
 
                           {/* Graduation Coming Soon Note */}
                           {accountPath === 'Graduation Project' && (
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
-                              className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-semibold leading-relaxed space-y-1.5"
+                              className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-semibold leading-relaxed space-y-1.5 ms-9"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <div className="flex items-center gap-1.5 font-black text-amber-300">
@@ -769,39 +779,41 @@ export default function Login() {
                         </div>
 
                         {/* 3. Special Needs */}
-                        <div
-                          role="radio"
-                          aria-checked={accountPath === 'Special Needs'}
-                          tabIndex={0}
-                          onClick={() => setAccountPath('Special Needs')}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAccountPath('Special Needs'); } }}
-                          onMouseEnter={() => setHoveredPath('Special Needs')}
-                          onMouseLeave={() => setHoveredPath(null)}
-                          className={`relative z-10 flex flex-col gap-3 p-3.5 rounded-2xl cursor-pointer border transition-all ${
-                            accountPath === 'Special Needs'
-                              ? 'bg-rose-500/10 border-rose-500/40 shadow-md shadow-rose-500/5'
-                              : 'bg-transparent border-transparent hover:bg-slate-800/40'
-                          }`}
-                        >
-                          <div className="flex items-start gap-3.5">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                              accountPath === 'Special Needs'
-                                ? 'bg-rose-500 text-white ring-4 ring-rose-500/20'
-                                : 'bg-slate-800 text-slate-400 border border-slate-700'
-                            }`}>
-                              <div className={`w-2 h-2 rounded-full ${accountPath === 'Special Needs' ? 'bg-white' : 'bg-slate-600'}`} />
-                            </div>
-                            <div>
-                              <div className={`text-sm font-black transition-colors ${accountPath === 'Special Needs' ? 'text-rose-300' : 'text-slate-200'}`}>
-                                {t("Special Needs", "احتياجات خاصة (ذوي الهمم)")}
-                              </div>
-                              <div className="text-xs text-slate-400 font-medium mt-0.5">
-                                {t("Customized accessible experience.", "تجربة مخصصة سهلة الوصول مع دعم لغة الإشارة والتتبع.")}
-                              </div>
-                            </div>
-                          </div>
+                        <div className="relative z-10 space-y-2">
+                          <Radio
+                            value="Special Needs"
+                            onMouseEnter={() => setHoveredPath('Special Needs')}
+                            onMouseLeave={() => setHoveredPath(null)}
+                            className={({ isSelected, isFocusVisible }) =>
+                              `w-full flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all outline-none ${
+                                isSelected
+                                  ? 'bg-rose-500/10 border-rose-500/40 shadow-md shadow-rose-500/5'
+                                  : 'bg-transparent border-transparent hover:bg-slate-800/40'
+                              } ${isFocusVisible ? 'ring-2 ring-rose-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                            }
+                          >
+                            {({ isSelected }) => (
+                              <>
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                                  isSelected
+                                    ? 'bg-rose-500 text-white ring-4 ring-rose-500/20'
+                                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                }`}>
+                                  <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-white' : 'bg-slate-600'}`} />
+                                </div>
+                                <div>
+                                  <div className={`text-sm font-black transition-colors ${isSelected ? 'text-rose-300' : 'text-slate-200'}`}>
+                                    {t("Special Needs", "احتياجات خاصة (ذوي الهمم)")}
+                                  </div>
+                                  <div className="text-xs text-slate-400 font-medium mt-0.5">
+                                    {t("Customized accessible experience.", "تجربة مخصصة سهلة الوصول مع دعم لغة الإشارة والتتبع.")}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </Radio>
 
-                          {/* Focus Chips */}
+                          {/* Focus Chips: independent React Aria RadioGroup */}
                           {accountPath === 'Special Needs' && (
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
@@ -809,46 +821,48 @@ export default function Login() {
                               className="space-y-2 pt-2 ps-9"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                                {t("Accessibility focus", "نوع الإتاحة المطلوب")}
-                              </label>
-                              <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t("Accessibility focus", "نوع الإتاحة المطلوب")}>
-                                {/* 'Speech' isn't its own chip: it maps to the same real feature and
-                                    downstream tab as 'Motor' (Motor & Euphonia Control), so showing both
-                                    just duplicated one button with the same label. Selecting 'Motor' here
-                                    still covers speech users — detectDirectDisabilityTab/DisabilityModeView
-                                    route 'Motor-Euphonia' and 'Speech' to the same suite either way. */}
-                                {(['Visual', 'Hearing', 'Motor', 'Cognitive'] as DisabilityOption[]).map((dis) => (
-                                  <button
-                                    key={dis}
-                                    type="button"
-                                    role="radio"
-                                    aria-checked={selectedDisability === dis}
-                                    onClick={() => setSelectedDisability(dis)}
-                                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                                      selectedDisability === dis
-                                        ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20'
-                                        : 'bg-slate-800/80 border border-slate-700/80 text-slate-300 hover:border-slate-500'
-                                    }`}
-                                  >
-                                    {dis === 'Visual' && t('Visual Companion', 'الرفيق البصري')}
-                                    {dis === 'Hearing' && t('Deaf & Hearing Suite', 'منظومة الصم وضعاف السمع')}
-                                    {dis === 'Motor' && t('Motor & Euphonia Control', 'التحكم الحركي وإيفونيا')}
-                                    {dis === 'Cognitive' && t('Neurodiversity & Autism Hub', 'واحة التوحد وصعوبات التعلم')}
-                                  </button>
-                                ))}
-                              </div>
+                              <RadioGroup
+                                value={selectedDisability}
+                                onChange={(val) => setSelectedDisability(val as DisabilityOption)}
+                                aria-label={t("Accessibility focus", "نوع الإتاحة المطلوب")}
+                                orientation="horizontal"
+                                className="space-y-2 outline-none"
+                              >
+                                <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                                  {t("Accessibility focus", "نوع الإتاحة المطلوب")}
+                                </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {(['Visual', 'Hearing', 'Motor', 'Cognitive'] as DisabilityOption[]).map((dis) => (
+                                    <Radio
+                                      key={dis}
+                                      value={dis}
+                                      className={({ isSelected, isFocusVisible }) =>
+                                        `px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all outline-none ${
+                                          isSelected
+                                            ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20'
+                                            : 'bg-slate-800/80 border border-slate-700/80 text-slate-300 hover:border-slate-500'
+                                        } ${isFocusVisible ? 'ring-2 ring-rose-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                                      }
+                                    >
+                                      {dis === 'Visual' && t('Visual Companion', 'الرفيق البصري')}
+                                      {dis === 'Hearing' && t('Deaf & Hearing Suite', 'منظومة الصم وضعاف السمع')}
+                                      {dis === 'Motor' && t('Motor & Euphonia Control', 'التحكم الحركي وإيفونيا')}
+                                      {dis === 'Cognitive' && t('Neurodiversity & Autism Hub', 'واحة التوحد وصعوبات التعلم')}
+                                    </Radio>
+                                  ))}
+                                </div>
+                              </RadioGroup>
                             </motion.div>
                           )}
                         </div>
-                      </div>
+                      </RadioGroup>
                     </div>
 
                     {/* Continue Button */}
-                    <button
-                      onClick={handleContinuePath}
-                      disabled={accountPath === 'Graduation Project'}
-                      className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed ${
+                    <AriaButton
+                      onPress={handleContinuePath}
+                      isDisabled={accountPath === 'Graduation Project'}
+                      className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                         accountPath === 'Normal'
                           ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-rose-400 text-slate-950 hover:opacity-95 shadow-amber-500/20'
                           : accountPath === 'Graduation Project'
@@ -864,7 +878,7 @@ export default function Login() {
                       {accountPath !== 'Graduation Project' && (
                         <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
                       )}
-                    </button>
+                    </AriaButton>
                   </div>
                 </div>
               </div>
