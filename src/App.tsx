@@ -109,6 +109,7 @@ export default function App() {
   // have real data — otherwise the very first snapshot can be skipped and the
   // loading gate never releases ("SYNCING PROFILE…" forever).
   const profileAppliedRef = useRef(false);
+  const initialRouteAppliedRef = useRef(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   // True when the profile sync failed or timed out (as opposed to "this user
   // genuinely has no profile yet"). Without this the app can't tell the two
@@ -331,6 +332,7 @@ export default function App() {
     // account fires its onComplete and overwrites the existing profile (points/level).
     setProfileLoading(true);
     profileAppliedRef.current = false;
+    initialRouteAppliedRef.current = false;
     setProfileSyncFailed(false);
     let cancelled = false; // set on cleanup; guards the async auto-create continuation
 
@@ -412,18 +414,30 @@ export default function App() {
         clearPreLoginState();
 
         // Smart Entry Routing:
-        // If the user has special needs / accessibility mode -> land on #disability
-        // If the user is a normal student/learner -> ALWAYS land directly on #chat, never disability or video
-        const hash = window.location.hash.replace('#', '');
-        const isA11y = preLoginPath === 'Normal' ? false : isAccessibilityUser(data);
-        if (isA11y) {
-          if (!hash || hash === 'chat' || hash === '') {
-            setCurrentView('disability');
-            window.history.replaceState(null, '', '#disability');
+        // Execute ONLY ONCE on initial entry/mount so subsequent background snapshots
+        // (like country lookup completing 2s later, or task progress writes)
+        // NEVER override the user's active view or bounce them between screens!
+        if (!initialRouteAppliedRef.current) {
+          initialRouteAppliedRef.current = true;
+          const hash = window.location.hash.replace('#', '');
+          const isA11y = preLoginPath === 'Normal' ? false : isAccessibilityUser(data);
+          if (isA11y) {
+            // For accessibility users: if no hash or default empty/chat on first load, land on disability
+            if (!hash || hash === 'chat' || hash === '') {
+              setCurrentView('disability');
+              window.history.replaceState(null, '', '#disability');
+            } else if ((VALID_VIEWS as readonly string[]).includes(hash)) {
+              setCurrentView(hash as any);
+            }
+          } else {
+            // For normal users: if no hash, land on chat. If deep-linked or user navigated to another valid view, PRESERVE it!
+            if (!hash || hash === 'disability' || hash === 'video') {
+              setCurrentView('chat');
+              window.history.replaceState(null, '', '#chat');
+            } else if ((VALID_VIEWS as readonly string[]).includes(hash)) {
+              setCurrentView(hash as any);
+            }
           }
-        } else {
-          setCurrentView('chat');
-          window.history.replaceState(null, '', '#chat');
         }
 
         // Record login telemetry (session history, device, country, city)

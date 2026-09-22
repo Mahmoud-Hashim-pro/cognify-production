@@ -60,13 +60,7 @@ interface DisabilityModeViewProps {
  * a suite the user didn't actually indicate.
  */
 function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
-  const mode = String(profile.accessibilityMode || '').toLowerCase().trim();
-  if (mode.includes('motor') || mode === 'speech') return 'motor';
-  if (mode.includes('neuro') || mode.includes('cognitiv') || mode.includes('autis')) return 'neurodiversity';
-  if (mode.includes('deaf') || mode.includes('sign') || mode.includes('hearing') || mode.includes('vocal')) return 'deaf';
-  if (mode.includes('visu') || mode.includes('blind')) return 'vision';
-
-  // Check persistent user preference in localStorage
+  // 1. If user explicitly clicked and chose a tab before, honor that manual choice!
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
     if (saved === 'motor' || saved === 'neurodiversity' || saved === 'deaf' || saved === 'vision') {
@@ -74,7 +68,13 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
     }
   } catch {}
 
-  const freeText = String(profile.disabilityType || '').toLowerCase().trim();
+  const mode = String(profile?.accessibilityMode || '').toLowerCase().trim();
+  if (mode.includes('motor') || mode === 'speech') return 'motor';
+  if (mode.includes('neuro') || mode.includes('cognitiv') || mode.includes('autis')) return 'neurodiversity';
+  if (mode.includes('deaf') || mode.includes('sign') || mode.includes('hearing') || mode.includes('vocal')) return 'deaf';
+  if (mode.includes('visu') || mode.includes('blind')) return 'vision';
+
+  const freeText = String(profile?.disabilityType || '').toLowerCase().trim();
   if (/motor|euphonia|paraly|quadr|speech|als/.test(freeText)) return 'motor';
   if (/adhd|autis|dyslex|cognitiv|neurodiv|learning/.test(freeText)) return 'neurodiversity';
   if (/deaf|hearing|vocal|sign/.test(freeText)) return 'deaf';
@@ -122,17 +122,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, [activeTab, onTabChange]);
 
   const lastProfileModeRef = useRef<string>(profile?.accessibilityMode || '');
-  // Keep activeTab in sync with profile accessibility mode and bypass 'hub'
+  // Keep activeTab in sync with external profile accessibility mode updates ONLY
   useEffect(() => {
     const currentMode = profile?.accessibilityMode || '';
     if (currentMode && currentMode !== lastProfileModeRef.current) {
       lastProfileModeRef.current = currentMode;
       const directTab = detectDirectDisabilityTab(profile);
       setActiveTab(directTab);
-    } else if (activeTab === 'hub') {
-      setActiveTab(detectDirectDisabilityTab(profile));
     }
-  }, [activeTab, profile?.accessibilityMode, profile?.disabilityType]);
+  }, [profile?.accessibilityMode, profile?.disabilityType]);
 
   // Set default suite persistently when user chooses a suite
   const handleSelectTab = React.useCallback((tab: DisabilityTab) => {
@@ -149,9 +147,12 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       else if (tab === 'motor') { newMode = 'Motor-Euphonia'; newType = 'Motor Impairment'; }
       else if (tab === 'neurodiversity') { newMode = 'Neurodiversity'; newType = 'Cognitive/Learning Disability'; }
 
-      if (newMode && profile?.uid && setProfile) {
-        setProfile({ ...profile, accessibilityMode: newMode, disabilityType: newType || profile.disabilityType });
-        setDoc(doc(db, `users/${profile.uid}`), cleanDataForFirestore({ accessibilityMode: newMode, disabilityType: newType }), { merge: true }).catch(() => {});
+      if (newMode) {
+        lastProfileModeRef.current = newMode;
+        if (profile?.uid && setProfile) {
+          setProfile({ ...profile, accessibilityMode: newMode, disabilityType: newType || profile.disabilityType });
+          setDoc(doc(db, `users/${profile.uid}`), cleanDataForFirestore({ accessibilityMode: newMode, disabilityType: newType }), { merge: true }).catch(() => {});
+        }
       }
     }
   }, [profile, setProfile, onTabChange]);
@@ -163,10 +164,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       onMenuClick();
     }
   }, [onNavigate, onMenuClick]);
-
-  useEffect(() => () => { 
-    onTabChange?.('chat'); 
-  }, [onTabChange]);
 
   const SUPPORTED_LANGUAGES: { id: LanguagePreference; label: string; flag: string; nativeName: string }[] = [
     { id: 'French', label: 'French', flag: '🇫🇷', nativeName: 'Français' },
