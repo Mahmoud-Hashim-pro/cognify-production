@@ -108,7 +108,7 @@ export default function AccessibilityPassportModal({
 
   const handleSave = async () => {
     setIsSaving(true);
-    let cat = passport.primaryCategory;
+    let cat = passport.primaryCategory as string;
     let resolvedMode: AccessibilityMode = profile.accessibilityMode;
     if (cat === 'Motor') resolvedMode = 'Motor-Euphonia';
     else if (cat === 'Deaf') resolvedMode = 'Vocal-Deaf';

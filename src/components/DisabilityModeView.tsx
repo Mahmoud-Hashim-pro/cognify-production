@@ -531,7 +531,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 { id: 'motor' as const, labelAr: 'حركية', labelEn: 'Motor', icon: '🦾' },
                 { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', icon: '🧠' },
               ].map((suite) => {
-                const isSelected = activeTab === suite.id || (suite.id === 'deaf' && (activeTab === 'bridge' || activeTab === 'radar'));
+                const isSelected = (activeTab as string) === suite.id || (suite.id === 'deaf' && ((activeTab as string) === 'bridge' || (activeTab as string) === 'radar'));
                 return (
                   <button
                     key={suite.id}
