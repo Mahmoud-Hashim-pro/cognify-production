@@ -1,5 +1,5 @@
 import { localize } from '../lib/translations';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
