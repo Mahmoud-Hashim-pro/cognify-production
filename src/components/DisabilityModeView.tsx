@@ -454,11 +454,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               </span>
             </button>
 
-            {/* "Back to Hub" is deliberately hidden for accessibility users once they've
-                landed directly in their suite — Menu already gives full navigation,
-                and a blind/motor-impaired user shouldn't have to tab/scan past an
-                extra button they didn't ask for just to reach their tool. */}
-            {activeTab !== 'hub' && !isAccessibilityUser(profile) ? (
+            {/* "Back to Hub" is always shown once the user has navigated away from
+                the hub — including accessibility users who were auto-routed straight
+                into their suite (detectDirectDisabilityTab). Without this, those users
+                have NO way back to the other assistive tools: the Menu button opens the
+                app-level drawer (settings/sign out), not this hub, and re-opening the
+                Accessibility section from the sidebar just re-runs the same auto-detect
+                and drops them back in the same single suite. */}
+            {activeTab !== 'hub' ? (
               <button
                 onClick={() => setActiveTab('hub')}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95"
