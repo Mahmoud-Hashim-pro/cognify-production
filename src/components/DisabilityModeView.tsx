@@ -82,6 +82,20 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
   return 'hub';
 }
 
+// Maps a suite tab to its category filter chip, so "Back to Hub" can re-open the
+// hub pre-filtered to the single suite the user just left, instead of always
+// dumping them into "All Suites" (7 cards) when they only ever use one.
+function categoryForTab(tab: DisabilityTab): ModuleCategory {
+  switch (tab) {
+    case 'vision': return 'vision';
+    case 'deaf': return 'hearing';
+    case 'motor': return 'motor';
+    case 'neurodiversity': return 'neuro';
+    case 'caregiver': return 'caregiver';
+    default: return 'all';
+  }
+}
+
 const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeViewProps>(function DisabilityModeView({
   profile,
   onMenuClick,
@@ -463,7 +477,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 and drops them back in the same single suite. */}
             {activeTab !== 'hub' ? (
               <button
-                onClick={() => setActiveTab('hub')}
+                onClick={() => {
+                  // Land back on the single category the user was just using
+                  // ("Deaf & Hard of Hearing", "Visual & Blind", etc.), not the
+                  // full 7-card "All Suites" list they never asked to see.
+                  setSelectedCategory(categoryForTab(activeTab));
+                  setActiveTab('hub');
+                }}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />

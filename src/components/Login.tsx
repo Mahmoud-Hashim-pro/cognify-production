@@ -64,7 +64,7 @@ const SPECIAL_NEEDS_FEATURES: {
   {
     key: 'sign-language',
     Icon: Heart,
-    title: { en: 'Deaf & Hard of Hearing Suite', ar: 'منظومة الصم وضعاف السمع الشاملة' },
+    title: { en: 'Deaf & Hard of Hearing Suite (All-in-One)', ar: 'منظومة الصم وضعاف السمع الشاملة (الكل في واحد)' },
     description: { en: '3D sign language studio, sound & hazard radar, and a live two-way communication bridge', ar: 'استوديو لغة إشارة ثلاثي الأبعاد، رادار للأصوات والمخاطر، وجسر تواصل مباشر ثنائي الاتجاه' },
     matches: ['Hearing'],
   },
@@ -81,6 +81,33 @@ const SPECIAL_NEEDS_FEATURES: {
     title: { en: 'Neurodiversity & Autism Hub', ar: 'واحة التوحد وصعوبات التعلم' },
     description: { en: 'Spoken PECS cards, visual daily routines, and calming sensory tools', ar: 'بطاقات PECS ناطقة، جدول روتين يومي بصري، وأدوات تهدئة حسية' },
     matches: ['Cognitive'],
+  },
+  {
+    // These last three aren't tied to any single chip (matches: []) — available to
+    // every Special Needs account regardless of which focus they pick, so they're
+    // always listed but never get the "SELECTED" highlight. Together with the four
+    // above, this is the full real set of 7 suites in DisabilityModeView's MODULES
+    // (All Suites badge shows "7") — don't drop any of these three or the preview
+    // undersells the app again.
+    key: 'caregiver',
+    Icon: Heart,
+    title: { en: 'Caregiver & Specialist Hub', ar: 'لوحة المرافق والمختص الطبي' },
+    description: { en: 'Family & clinical monitoring dashboard, live SOS test dispatch, and encrypted backup', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، ونسخ احتياطي مشفر' },
+    matches: [],
+  },
+  {
+    key: 'chat',
+    Icon: Sparkles,
+    title: { en: 'Adaptive Cognitive Tutor', ar: 'المساعد التعليمي الذكي المهيأ' },
+    description: { en: 'Pedagogical tutoring assistant tailored to your pace, with step-by-step guidance and full screen-reader support', ar: 'مساعد تعليمي يتكيف مع وتيرتك، بشرح خطوة بخطوة ودعم كامل لقارئات الشاشة' },
+    matches: [],
+  },
+  {
+    key: 'settings',
+    Icon: Globe,
+    title: { en: 'Preferences & Dialects', ar: 'التفضيلات واللغات' },
+    description: { en: '11 languages & dialects including Egyptian Ammiya, plus adjustable accessibility profiles and display settings', ar: '11 لغة ولهجة ومنها المصري، مع إمكانية ضبط ملفات الإتاحة وإعدادات العرض' },
+    matches: [],
   },
 ];
 
@@ -468,7 +495,17 @@ export default function Login() {
                                       </span>
                                     </span>
                                   )}
-                                  {activePreviewPath === 'Special Needs' && t("All-in-One Multi-Modal Accessibility Hub", "مركز الإتاحة الشامل ومتعدد الوسائط")}
+                                  {activePreviewPath === 'Special Needs' && (
+                                    <span className="flex items-center gap-2 flex-wrap">
+                                      <span>{t("All-in-One Multi-Modal Accessibility Hub", "مركز الإتاحة الشامل ومتعدد الوسائط")}</span>
+                                      {/* Matches the real "All Suites" count inside the app (DisabilityModeView's
+                                          MODULES minus the admin-only Org Hub) — keep this number in sync if a
+                                          suite is ever added/removed there. */}
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30 shrink-0">
+                                        {t(`${SPECIAL_NEEDS_FEATURES.length} Suites`, `${SPECIAL_NEEDS_FEATURES.length} أدوات`)}
+                                      </span>
+                                    </span>
+                                  )}
                                 </h3>
                                 <p className="text-[11px] sm:text-xs text-slate-300 font-medium mt-1 leading-relaxed">
                                   {activePreviewPath === 'Normal' && t(
