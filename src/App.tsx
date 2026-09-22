@@ -442,6 +442,9 @@ export default function App() {
         if (preLoginPath === 'Special Needs') {
           const disabilityType = preLoginDisability || 'Other';
           
+          // Kept in sync with the identical mapping in Onboarding.tsx — both must
+          // cover every value Login.tsx's disability picker can send, or a user
+          // silently ends up with accessibilityMode 'None'.
           let accessibilityMode: AccessibilityMode = 'None';
           if (disabilityType === 'Visual Impairment') {
             accessibilityMode = 'Visual';
@@ -451,6 +454,8 @@ export default function App() {
             accessibilityMode = 'Speech';
           } else if (disabilityType === 'Motor Impairment') {
             accessibilityMode = 'Motor-Euphonia';
+          } else if (disabilityType === 'Cognitive/Learning Disability') {
+            accessibilityMode = 'Neurodiversity';
           }
 
           let visitorCountry: string | undefined;
