@@ -168,6 +168,11 @@ export default function Login() {
   const authTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+  }, [lang, isRtl]);
+
+  useEffect(() => {
     isMountedRef.current = true;
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as any });
 
@@ -663,13 +668,17 @@ export default function Login() {
                       </div>
 
                       {/* Vertical Path Selector Timeline */}
-                      <div className="space-y-3 relative">
+                      <div className="space-y-3 relative" role="radiogroup" aria-label={t("Choose your path", "اختر مسارك")}>
                         {/* Connecting Line */}
                         <div className={`absolute top-4 bottom-4 ${isRtl ? 'right-[11px]' : 'left-[11px]'} w-0.5 bg-slate-800 z-0`} />
 
                         {/* 1. Normal */}
                         <div
+                          role="radio"
+                          aria-checked={accountPath === 'Normal'}
+                          tabIndex={0}
                           onClick={() => setAccountPath('Normal')}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAccountPath('Normal'); } }}
                           onMouseEnter={() => setHoveredPath('Normal')}
                           onMouseLeave={() => setHoveredPath(null)}
                           className={`relative z-10 flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer border transition-all ${
@@ -697,7 +706,11 @@ export default function Login() {
 
                         {/* 2. Graduation Project */}
                         <div
+                          role="radio"
+                          aria-checked={accountPath === 'Graduation Project'}
+                          tabIndex={0}
                           onClick={() => setAccountPath('Graduation Project')}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAccountPath('Graduation Project'); } }}
                           onMouseEnter={() => setHoveredPath('Graduation Project')}
                           onMouseLeave={() => setHoveredPath(null)}
                           className={`relative z-10 flex flex-col gap-3 p-3.5 rounded-2xl cursor-pointer border transition-all ${
@@ -753,7 +766,11 @@ export default function Login() {
 
                         {/* 3. Special Needs */}
                         <div
+                          role="radio"
+                          aria-checked={accountPath === 'Special Needs'}
+                          tabIndex={0}
                           onClick={() => setAccountPath('Special Needs')}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAccountPath('Special Needs'); } }}
                           onMouseEnter={() => setHoveredPath('Special Needs')}
                           onMouseLeave={() => setHoveredPath(null)}
                           className={`relative z-10 flex flex-col gap-3 p-3.5 rounded-2xl cursor-pointer border transition-all ${
@@ -791,7 +808,7 @@ export default function Login() {
                               <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
                                 {t("Accessibility focus", "نوع الإتاحة المطلوب")}
                               </label>
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t("Accessibility focus", "نوع الإتاحة المطلوب")}>
                                 {/* 'Speech' isn't its own chip: it maps to the same real feature and
                                     downstream tab as 'Motor' (Motor & Euphonia Control), so showing both
                                     just duplicated one button with the same label. Selecting 'Motor' here
@@ -801,6 +818,8 @@ export default function Login() {
                                   <button
                                     key={dis}
                                     type="button"
+                                    role="radio"
+                                    aria-checked={selectedDisability === dis}
                                     onClick={() => setSelectedDisability(dis)}
                                     className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                                       selectedDisability === dis

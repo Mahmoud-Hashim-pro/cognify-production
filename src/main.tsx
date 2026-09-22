@@ -8,6 +8,29 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './index.css';
 
+// ── DOM Mutation Safety Net for Translation & Screen Readers (TalkBack/VoiceOver) ──
+// Prevents React from crashing with NotFoundError when external tools (Google Translate,
+// TalkBack, accessibility extensions) reparent or wrap text nodes in the DOM.
+if (typeof Node === 'function' && Node.prototype) {
+  const originalRemoveChild = Node.prototype.removeChild;
+  Node.prototype.removeChild = function <T extends Node>(child: T): T {
+    if (child.parentNode !== this) {
+      console.warn('[A11y/DOM] Suppressed invalid removeChild (parent mismatch caused by translation/screen-reader):', child, this);
+      return child;
+    }
+    return originalRemoveChild.apply(this, arguments as any) as T;
+  };
+
+  const originalInsertBefore = Node.prototype.insertBefore;
+  Node.prototype.insertBefore = function <T extends Node>(newNode: T, referenceNode: Node | null): T {
+    if (referenceNode && referenceNode.parentNode !== this) {
+      console.warn('[A11y/DOM] Suppressed invalid insertBefore (reference mismatch caused by translation/screen-reader):', referenceNode, this);
+      return newNode;
+    }
+    return originalInsertBefore.apply(this, arguments as any) as T;
+  };
+}
+
 // Real error tracking — lazy-loaded so it never bloats the initial bundle, and
 // only active if VITE_SENTRY_DSN is configured. The DSN is a public client key.
 const SENTRY_DSN = (import.meta as any).env?.VITE_SENTRY_DSN as string | undefined;
