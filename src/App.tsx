@@ -1238,7 +1238,7 @@ export default function App() {
                       lastMessageSnippet: t.lastMessageSnippet || ""
                     }));
                   }
-                  cleanProfile.chatHistory = [];
+                  delete cleanProfile.chatHistory;
 
                   const finalProfileToSave = cleanDataForFirestore(cleanProfile);
                   await setDoc(doc(db, path), finalProfileToSave, { merge: true });
