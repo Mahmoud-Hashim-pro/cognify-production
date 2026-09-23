@@ -524,7 +524,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
             {/* Primary Disability Mode Switcher: Instant, Uncluttered, Accessible */}
             <AriaRadioGroup
-              value={(activeTab === 'bridge' || activeTab === 'radar') ? 'deaf' : (activeTab as string)}
+              value={((activeTab as string) === 'bridge' || (activeTab as string) === 'radar') ? 'deaf' : (activeTab as string)}
               onChange={(suiteId) => handleSelectTab(suiteId as DisabilityTab)}
               aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
               orientation="horizontal"
@@ -569,7 +569,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   <AriaRadio
                     key={m.id}
                     value={m.id}
-                    title={localize(profile.language, m.titleEn, m.titleAr)}
                     className={({ isSelected, isFocusVisible }) =>
                       `px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
                         isSelected
@@ -578,8 +577,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       } ${isFocusVisible ? 'ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-900' : ''}`
                     }
                   >
-                    <m.Icon className="w-3 h-3" />
-                    <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
+                    {/* react-aria-components' Radio doesn't expose a typed `title` prop —
+                        put the full-name hover tooltip on an inner span instead so it
+                        still shows on hover without fighting the library's types. */}
+                    <span
+                      title={localize(profile.language, m.titleEn, m.titleAr)}
+                      className="flex items-center gap-1.5"
+                    >
+                      <m.Icon className="w-3 h-3" />
+                      <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
+                    </span>
                   </AriaRadio>
                 ))}
               </AriaRadioGroup>

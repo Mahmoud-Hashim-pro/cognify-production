@@ -480,7 +480,7 @@ export default function App() {
 
         if (preLoginPath === 'Special Needs') {
           const disabilityType = preLoginDisability || 'Other';
-          
+
           let accessibilityMode: AccessibilityMode = (preLoginMode as AccessibilityMode) || 'None';
           if (accessibilityMode === 'None') {
             if (disabilityType === 'Visual Impairment') {
