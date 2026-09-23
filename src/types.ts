@@ -144,13 +144,14 @@ export interface UserProfile {
    *  parent read access under Firestore rules (isVerifiedParent). Set ONLY by the
    *  student themself, only after they approve a pending link request. */
   linkedParentUid?: string;
-  /** Alternative to linkedParentUid: any UID in this list also passes isVerifiedParent. */
+  /** Alternative to linkedParentUid: any UID in this list also passes isVerifiedParent.
+   *  Used for every caregiver/specialist after the first — lets a student be
+   *  monitored by more than one parent/doctor/therapist at once. */
   authorizedParentUids?: string[];
-  /** Display info for every approved caregiver (parent/specialist), kept in sync with
-   *  authorizedParentUids so CaregiverHub can list & individually revoke each one
-   *  without an extra lookup. linkedParentUid holds the first ("primary") uid for
-   *  back-compat with any code that still reads only that single field. */
-  linkedCaregivers?: { uid: string; name: string; email: string; linkedAt: number }[];
+  /** Display info (name/email/when-linked) for every uid in linkedParentUid +
+   *  authorizedParentUids, keyed by that uid, so CaregiverHub can show a real
+   *  "who has access" list instead of a single opaque slot. */
+  linkedCaregiversInfo?: Record<string, { name: string; email: string; linkedAt: number }>;
   /** Alternative: a parent whose verified auth email matches this also passes isVerifiedParent. */
   parentEmail?: string;
   /** Canonical learning/cognitive state snapshot, used by institution & parent dashboards. */
