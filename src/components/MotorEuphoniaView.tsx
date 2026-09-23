@@ -88,22 +88,9 @@ const VOCAL_ACTION_LABELS: { value: VocalTriggerAction; en: string; ar: string }
 ];
 
 const TAB_ORDER = [
-  'keyboard', 'smart-room',
+  'keyboard', 'euphonia-studio', 'smart-room',
   'pain-sensory', 'class-ai', 'custom-bank', 'eye-games',
 ] as const;
-
-/** Trained command phrases Voice Mode listens for while it's continuously
- * open. Matched with a loose "does the transcript contain this" check so
- * small mic mis-hearings still land — a dysarthric or slurred "close the
- * voice" still needs to close the mic. Add more command phrases/actions
- * here later (e.g. 'select', 'next') the same way. */
-const VOICE_MODE_COMMANDS: { action: 'close-mic'; phrasesAr: string[]; phrasesEn: string[] }[] = [
-  {
-    action: 'close-mic',
-    phrasesAr: ['اقفل الصوت', 'اقفل المايك', 'أوقف الصوت', 'قفل الصوت', 'سكت الصوت', 'اغلق الصوت'],
-    phrasesEn: ['close the voice', 'close the mic', 'stop the voice', 'stop listening', 'turn off the mic', 'mic off'],
-  },
-];
 import {
   transcribe,
   getEuphoniaApiUrl,
@@ -314,9 +301,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
     return en;
   };
 
-  // Active Category Tab (Includes Eye Keyboard, Smart Room, Sensory, AI Class, Custom Bank & Eye Games)
+  // Active Category Tab (Includes Eye Keyboard, Studio, Smart Room, Sensory, AI Class, Custom Bank & Eye Games)
   const [activeTab, setActiveTab] = useState<
-    'keyboard' | 'smart-room' | 'pain-sensory' | 'class-ai' | 'custom-bank' | 'eye-games'
+    'keyboard' | 'euphonia-studio' | 'smart-room' | 'pain-sensory' | 'class-ai' | 'custom-bank' | 'eye-games'
   >('keyboard');
 
   // Flexible UI Layout Mode: 'docked' (Sidebar on Left) | 'floating' (Full Width Keyboard with Floating Mini PIP) | 'hidden' (100% Full Width Focused)
@@ -661,23 +648,6 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
   const voiceContactRecRef = useRef<any>(null);
   const [isListeningForContactName, setIsListeningForContactName] = useState(false);
   const teacherRecRef = useRef<any>(null);
-
-  // Voice Mode: for students who want to control the app by speaking instead
-  // of with their eyes/head. When on, the mic opens by itself (no click
-  // needed) and stays continuously listening for a trained command phrase —
-  // right now just the phrase that closes the mic again ("اقفل الصوت" /
-  // "close the voice"), so voice-only users always have a way to turn it off
-  // without needing the eye pointer.
-  const voiceCommandRecRef = useRef<any>(null);
-  const [isVoiceModeActive, setIsVoiceModeActive] = useState(false);
-  const [isVoiceModeListening, setIsVoiceModeListening] = useState(false);
-  // Mirrors isVoiceModeActive for the SpeechRecognition onend handler, which
-  // closes over stale state otherwise and would keep "restarting" a mode the
-  // student had already turned off.
-  const isVoiceModeActiveRef = useRef(false);
-  // Set once, the first time Voice Mode takes the mic from the vocal-sound
-  // engine; calling it hands the mic back and clears itself.
-  const restoreMicAfterVoiceModeRef = useRef<(() => void) | null>(null);
 
   // Keep the magnetic-snap cache in sync with the visible tab
   useEffect(() => {
@@ -1488,8 +1458,6 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
       cancelSpeech();
       try { voiceContactRecRef.current?.stop(); } catch { /* ignore */ }
       try { teacherRecRef.current?.stop(); } catch { /* ignore */ }
-      isVoiceModeActiveRef.current = false; // stop onend from restarting it below
-      try { voiceCommandRecRef.current?.stop(); } catch { /* ignore */ }
       // euphoniaRecRef was declared and never assigned, so this stopped nothing
       // and the mic stayed live after leaving the screen. The real recorder is
       // the module-level singleton.
@@ -1975,110 +1943,6 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
     }
   };
 
-  // Check a recognized transcript against the trained Voice Mode command
-  // phrases (loose substring match so a slurred/partial utterance still hits).
-  const matchVoiceModeCommand = (spoken: string): 'close-mic' | null => {
-    const lower = spoken.trim().toLowerCase();
-    for (const cmd of VOICE_MODE_COMMANDS) {
-      if (cmd.phrasesAr.some((p) => lower.includes(p)) || cmd.phrasesEn.some((p) => lower.includes(p))) {
-        return cmd.action;
-      }
-    }
-    return null;
-  };
-
-  // Turn Voice Mode fully off: stop the recognizer, and give the mic back to
-  // the vocal-sound engine if Voice Mode was the one that took it.
-  const stopVoiceMode = () => {
-    isVoiceModeActiveRef.current = false;
-    setIsVoiceModeActive(false);
-    setIsVoiceModeListening(false);
-    try { voiceCommandRecRef.current?.stop(); } catch { /* ignore */ }
-    voiceCommandRecRef.current = null;
-    if (restoreMicAfterVoiceModeRef.current) {
-      restoreMicAfterVoiceModeRef.current();
-      restoreMicAfterVoiceModeRef.current = null;
-    }
-  };
-
-  // Voice Mode: for a student who'd rather speak than use the eye pointer.
-  // The mic opens by itself (no click needed) and stays continuously
-  // listening — restarting itself if the browser auto-stops it after a
-  // pause — until the student speaks the trained "close the voice" phrase,
-  // or turns it off by hand.
-  const startVoiceModeListener = () => {
-    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRec) {
-      toast.error(isArabic ? 'المتصفح لا يدعم التعرف على الصوت' : 'Speech recognition not supported in browser');
-      isVoiceModeActiveRef.current = false;
-      setIsVoiceModeActive(false);
-      return;
-    }
-
-    try {
-      cancelSpeech();
-      if (!restoreMicAfterVoiceModeRef.current) {
-        restoreMicAfterVoiceModeRef.current = releaseMicForRecognition();
-      }
-      const rec = new SpeechRec();
-      voiceCommandRecRef.current = rec;
-      rec.continuous = true;
-      rec.interimResults = false;
-      rec.lang = profile.language === 'Egyptian Ammiya' ? 'ar-EG' : isArabic ? 'ar-SA' : 'en-US';
-
-      rec.onstart = () => setIsVoiceModeListening(true);
-
-      rec.onresult = (e: any) => {
-        const last = e.results[e.results.length - 1];
-        const spoken = last[0].transcript as string;
-        const command = matchVoiceModeCommand(spoken);
-        if (command === 'close-mic') {
-          toast.info(isArabic ? '🎙️ تم إغلاق المايك بالأمر الصوتي' : '🎙️ Mic closed by voice command');
-          stopVoiceMode();
-          return;
-        }
-        // Not a recognized command — surface it like the Dysarthria decoder
-        // does, so voice-only students can still see/hear and act on it.
-        setSpeechTranscript(spoken);
-        speakSafe(spoken);
-        if (onSendMessage) onSendMessage(spoken);
-      };
-
-      rec.onerror = (e: any) => {
-        // 'no-speech' fires constantly while it idles between utterances —
-        // that's normal for an always-open mic, not an error worth a toast.
-        const reason = e?.error || 'unknown';
-        if (reason !== 'no-speech') {
-          toast.error(isArabic ? `تعذر التعرف على الصوت (${reason})` : `Speech recognition failed (${reason})`);
-        }
-      };
-
-      rec.onend = () => {
-        setIsVoiceModeListening(false);
-        // Continuous recognition still gets auto-stopped by the browser
-        // after enough silence — restart it as long as Voice Mode is still
-        // meant to be on, so it truly stays "open" hands-free.
-        if (isVoiceModeActiveRef.current) {
-          try { rec.start(); } catch { /* already starting/stopped */ }
-        }
-      };
-
-      rec.start();
-    } catch {
-      setIsVoiceModeListening(false);
-    }
-  };
-
-  const toggleVoiceMode = () => {
-    if (isVoiceModeActiveRef.current) {
-      stopVoiceMode();
-    } else {
-      isVoiceModeActiveRef.current = true;
-      setIsVoiceModeActive(true);
-      startVoiceModeListener();
-    }
-  };
-
   // Teacher / Classroom Speech Listener & Auto-Response Generator
   const startTeacherClassListener = () => {
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -2340,6 +2204,10 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
     // 0. Top Category Tabs
     if (cardId === 'tab-keyboard') {
       setActiveTab('keyboard');
+      return;
+    }
+    if (cardId === 'tab-euphonia-studio') {
+      setActiveTab('euphonia-studio');
       return;
     }
     if (cardId === 'tab-smart-room') {
@@ -2902,13 +2770,67 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             )}
           </button>
 
+          {/* Tab: Euphonia Voice Studio */}
+          <button
+            data-aac-id="tab-euphonia-studio"
+            onClick={() => setActiveTab('euphonia-studio')}
+            className={`relative px-2.5 sm:px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all ${
+              activeTab === 'euphonia-studio'
+                ? themeClasses.activeTab + ' shadow-md'
+                : 'bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <Radio className="w-3.5 h-3.5" />
+            <span>{isArabic ? 'استوديو إيفونيا' : 'Euphonia Studio'}</span>
+            {hoveredCardId === 'tab-euphonia-studio' && dwellProgress > 0 && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-950 rounded-b-xl overflow-hidden">
+                <div className="h-full bg-amber-400 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+              </div>
+            )}
+          </button>
         </div>
 
         {/* 2. Quick Tracking Tuning & Recalibration */}
         <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-          {/* Tracking mode is fixed to Iris (eye) tracking — the Iris/Nose/Hybrid
-              switcher was removed to simplify this toolbar; headConfig.trackingMode
-              still defaults to 'iris' below. */}
+          {/* Tracking Mode Switcher */}
+          <div className="flex items-center gap-0.5 bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[11px]">
+            <button
+              onClick={() => updateHeadConfig({ trackingMode: 'iris' })}
+              className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                (headConfig.trackingMode || 'iris') === 'iris'
+                  ? 'bg-amber-400 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title={isArabic ? 'بؤبؤ العين' : 'Eye Iris'}
+              aria-label={isArabic ? 'وضع تتبع بؤبؤ العين' : 'Iris tracking mode'}
+            >
+              👁️ <span className="hidden md:inline">{isArabic ? 'بؤبؤ' : 'Iris'}</span>
+            </button>
+            <button
+              onClick={() => updateHeadConfig({ trackingMode: 'nose' })}
+              className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                headConfig.trackingMode === 'nose'
+                  ? 'bg-amber-400 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title={isArabic ? 'الأنف والرأس' : 'Nose Head'}
+              aria-label={isArabic ? 'وضع تتبع الأنف والرأس' : 'Nose/head tracking mode'}
+            >
+              👤 <span className="hidden md:inline">{isArabic ? 'رأس' : 'Nose'}</span>
+            </button>
+            <button
+              onClick={() => updateHeadConfig({ trackingMode: 'hybrid' })}
+              className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                headConfig.trackingMode === 'hybrid'
+                  ? 'bg-amber-400 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title={isArabic ? 'هجين' : 'Hybrid'}
+              aria-label={isArabic ? 'وضع التتبع الهجين' : 'Hybrid tracking mode'}
+            >
+              ⚡ <span className="hidden md:inline">{isArabic ? 'هجين' : 'Hybrid'}</span>
+            </button>
+          </div>
 
           {/* Dwell Time Adjuster */}
           <div className="flex items-center gap-1 bg-slate-950 rounded-xl px-1.5 py-0.5 border border-slate-800 text-[11px]">
@@ -2916,6 +2838,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             <button
               onClick={() => updateHeadConfig({ dwellTimeMs: Math.max(500, headConfig.dwellTimeMs - 100) })}
               className="px-1 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold"
+              aria-label={isArabic ? 'تقليل زمن التثبيت' : 'Decrease dwell time'}
             >
               -
             </button>
@@ -2923,6 +2846,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             <button
               onClick={() => updateHeadConfig({ dwellTimeMs: Math.min(2200, headConfig.dwellTimeMs + 100) })}
               className="px-1 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold"
+              aria-label={isArabic ? 'زيادة زمن التثبيت' : 'Increase dwell time'}
             >
               +
             </button>
@@ -2957,6 +2881,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 : 'bg-slate-950 text-slate-300 hover:bg-slate-800 border border-slate-700'
             }`}
             title={isCameraActive ? (isArabic ? 'إيقاف الكاميرا' : 'Stop Camera') : (isArabic ? 'تشغيل الكاميرا' : 'Start Camera')}
+            aria-label={isCameraActive ? (isArabic ? 'إيقاف الكاميرا' : 'Stop Camera') : (isArabic ? 'تشغيل الكاميرا' : 'Start Camera')}
           >
             {isCameraActive ? <Camera className="w-3.5 h-3.5" /> : <CameraOff className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">{isCameraActive ? (isArabic ? 'إيقاف الكاميرا' : 'Stop Camera') : (isArabic ? 'تشغيل الكاميرا' : 'Start Camera')}</span>
@@ -2971,48 +2896,24 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 : 'bg-slate-950 text-slate-300 hover:bg-slate-800 border border-slate-700'
             }`}
             title={isAudioEngineActive ? (isArabic ? 'إيقاف إيفونيا' : 'Stop Euphonia') : (isArabic ? 'أصوات إيفونيا' : 'Vocal Sounds')}
+            aria-label={isAudioEngineActive ? (isArabic ? 'إيقاف إيفونيا' : 'Stop Euphonia') : (isArabic ? 'أصوات إيفونيا' : 'Vocal Sounds')}
           >
             {isAudioEngineActive ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">{isAudioEngineActive ? (isArabic ? 'إيقاف إيفونيا' : 'Stop Euphonia') : (isArabic ? 'أصوات إيفونيا' : 'Vocal Sounds')}</span>
           </button>
 
-          {/* Voice Mode Toggle — for a student who prefers speaking over the eye
-              pointer. Opens the mic by itself and keeps listening until it hears
-              the trained "close the voice" phrase, or the student taps this again. */}
-          <button
-            onClick={toggleVoiceMode}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
-              isVoiceModeActive
-                ? isVoiceModeListening
-                  ? 'bg-rose-500 text-white animate-pulse shadow-rose-500/20'
-                  : 'bg-emerald-500 text-slate-950 shadow-emerald-500/20'
-                : 'bg-slate-950 text-slate-300 hover:bg-slate-800 border border-slate-700'
-            }`}
-            title={
-              isArabic
-                ? isVoiceModeActive
-                  ? 'إيقاف وضع الصوت (قل "اقفل الصوت" لإغلاقه أيضاً)'
-                  : 'تشغيل وضع الصوت بدل العين'
-                : isVoiceModeActive
-                ? 'Turn off Voice Mode (or say "close the voice")'
-                : 'Use voice instead of eye tracking'
-            }
-          >
-            {isVoiceModeActive ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">
-              {isArabic
-                ? isVoiceModeActive
-                  ? (isVoiceModeListening ? 'وضع الصوت (يستمع)' : 'وضع الصوت')
-                  : 'صوت بدل العين'
-                : isVoiceModeActive
-                ? (isVoiceModeListening ? 'Voice Mode (listening)' : 'Voice Mode')
-                : 'Voice instead of eye'}
-            </span>
-          </button>
-
-          {/* Layout is fixed to the docked (side-by-side) mode — the Docked/Floating
-              switcher was removed to simplify this toolbar. sidebarMode stays
-              'docked' below. */}
+          {/* Layout Flexibility Switcher: Docked vs Floating */}
+          <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5">
+            <button
+              onClick={() => setSidebarMode(sidebarMode === 'docked' ? 'floating' : 'docked')}
+              className="px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 text-slate-300 hover:text-white"
+              title={sidebarMode === 'docked' ? (isArabic ? 'تحويل إلى كاميرا عائمة' : 'Switch to floating camera') : (isArabic ? 'تثبيت جانبي' : 'Switch to side-by-side')}
+              aria-label={sidebarMode === 'docked' ? (isArabic ? 'تحويل إلى كاميرا عائمة' : 'Switch to floating camera') : (isArabic ? 'تثبيت جانبي' : 'Switch to side-by-side')}
+            >
+              {sidebarMode === 'docked' ? <Columns2 className="w-3.5 h-3.5 text-amber-400" /> : <Maximize2 className="w-3.5 h-3.5 text-amber-400" />}
+              <span className="hidden md:inline">{sidebarMode === 'docked' ? (isArabic ? 'جانبي' : 'Docked') : (isArabic ? 'عائم' : 'Floating')}</span>
+            </button>
+          </div>
 
           {/* Motor Language Switcher: Arabic <-> English <-> French */}
           <button
@@ -3208,6 +3109,49 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             </div>
           </div>
 
+          {/* Euphonia Audio Signal Analyzer Bar */}
+          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-2 sm:p-2.5 shadow-xl shrink-0">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Mic className="w-3.5 h-3.5 text-emerald-400" />
+                {/* Renamed from "Euphonia Vocal Sounds" — that name duplicated the
+                    "Vocal Sounds" toggle button in the toolbar above almost
+                    word-for-word, making them look like two different features
+                    when this is just a live level meter FOR that same toggle. */}
+                {isArabic ? 'مستوى الميكروفون (حي)' : 'Live Mic Level'}
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {audioMetrics.peakFrequency > 0 ? `${audioMetrics.peakFrequency} Hz` : '0 Hz'}
+              </span>
+            </div>
+
+            {/* Live Volume Bar */}
+            <div className="h-2.5 rounded-full bg-slate-800 overflow-hidden relative mb-2">
+              <div
+                className={`h-full transition-all duration-75 rounded-full ${
+                  audioMetrics.isTriggering ? 'bg-amber-400 shadow-[0_0_10px_#fbbf24]' : 'bg-emerald-500'
+                }`}
+                style={{ width: `${Math.min(100, audioMetrics.volume * 250)}%` }}
+              />
+            </div>
+
+            {/* Triggers */}
+            <div className="grid grid-cols-3 gap-1.5 text-center">
+              {triggers.map((t) => (
+                <div
+                  key={t.id}
+                  className={`p-1.5 rounded-xl border text-[10px] transition-all ${
+                    audioMetrics.activeTriggerName === t.name
+                      ? 'bg-amber-400/20 border-amber-400 text-amber-300 font-black'
+                      : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  <p className="truncate font-bold">{isArabic ? t.nameAr : t.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Direct Dysarthric Speech AI Decoder */}
           <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-2 sm:p-2.5 shadow-xl shrink-0">
             <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
@@ -3283,6 +3227,44 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
           {/* TAB 1: Arabic Eye-Gaze Virtual Keyboard (PySource Split Blink Keyboard) */}
           {activeTab === 'keyboard' && (
             <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
+              {/* Contextual Predictive AAC Quick Bar */}
+              <div className="shrink-0 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center gap-1.5 overflow-x-auto select-none">
+                <div className="flex items-center gap-1 px-2 text-[10px] font-bold text-amber-400 shrink-0">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{isArabic ? 'اقتراحات سريعة:' : motorLang === 'fr' ? 'Suggestions :' : 'Smart AAC:'}</span>
+                </div>
+                {contextualPhrases.map((cp) => {
+                  const text = motorLang === 'ar' ? cp.textAr : motorLang === 'fr' ? cp.textFr : cp.textEn;
+                  const cardKey = `aac-ctx-${cp.id}`;
+                  const isHovered = hoveredCardId === cardKey;
+                  return (
+                    <button
+                      key={cp.id}
+                      data-aac-id={cardKey}
+                      onClick={() => {
+                        speakSafe(text);
+                        toast.success(text);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border relative ${
+                        isHovered
+                          ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md scale-105'
+                          : cp.category === 'urgent'
+                          ? 'bg-red-950/50 border-red-500/50 text-red-200 hover:bg-red-900/60'
+                          : 'bg-slate-950 border-slate-800 text-slate-200 hover:bg-slate-800'
+                      }`}
+                    >
+                      <span>{cp.icon}</span>
+                      <span>{text}</span>
+                      {isHovered && dwellProgress > 0 && (
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-900 rounded-b-xl overflow-hidden">
+                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
               <div className="flex-1 min-h-0 overflow-hidden">
                 <GazeBlinkKeyboard
                   isArabic={isArabic}
@@ -3313,6 +3295,182 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   onOpenCallPicker={() => setShowContactPickerModal(true)}
                   themeAccent={theme === 'amber' ? 'amber' : theme === 'emerald' ? 'emerald' : 'cyan'}
                 />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: Google Project Euphonia Voice Training Studio & Custom ASR */}
+          {activeTab === 'euphonia-studio' && (
+            <div className="bg-slate-900 rounded-3xl border-2 border-slate-800 p-6 shadow-2xl flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-slate-800 gap-3">
+                <div>
+                  <h3 className="text-xl font-black text-white flex items-center gap-2">
+                    <Radio className="w-6 h-6 text-amber-400" />
+                    {isArabic ? 'استوديو تدريب الصوت (Project Euphonia)' : 'Project Euphonia Voice Training'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium mt-1">
+                    {isArabic
+                      ? `${euphoniaPhraseBank.length} عبارة مصممة لتغطية أصوات اللغة — سجّل كل عبارة 3 مرات على الأقل`
+                      : `${euphoniaPhraseBank.length} phonemically-balanced phrases — record each 3+ times`}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                <button
+                  onClick={exportEuphoniaTrainingData}
+                  disabled={isExportingSamples}
+                  className="px-4 py-3 rounded-2xl font-black text-xs flex items-center gap-2 shadow-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 disabled:opacity-50"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>
+                    {isExportingSamples
+                      ? (isArabic ? 'جاري التصدير...' : 'Exporting...')
+                      : (isArabic ? 'تصدير التسجيلات' : 'Export data')}
+                  </span>
+                </button>
+                <button
+                  onClick={toggleEuphoniaLiveListener}
+                  className={`px-5 py-3 rounded-2xl font-black text-xs flex items-center gap-2 shadow-lg transition-all ${
+                    isEuphoniaLiveListening ? 'bg-rose-500 text-white animate-pulse' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                  }`}
+                >
+                  <Mic className="w-4 h-4" />
+                  <span>{isEuphoniaLiveListening ? (isArabic ? 'جاري الاستماع...' : 'Listening...') : (isArabic ? '🎙️ تحدث الآن' : 'Speak Now')}</span>
+                </button>
+                </div>
+              </div>
+
+              {/* Mic level VU meter while recording or live-matching */}
+              {(recordingPhraseId || isEuphoniaLiveListening) && (
+                <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div className="h-full bg-emerald-400 transition-all duration-75" style={{ width: `${micLevel * 100}%` }} />
+                </div>
+              )}
+
+              {euphoniaMatchedPhrase && (
+                <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/50 text-xs text-emerald-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-white font-black text-sm">"{euphoniaMatchedPhrase}"</span>
+                  </div>
+                  <span className="text-[10px] font-mono opacity-70">
+                    {euphoniaMatchSource === 'custom-model' ? (isArabic ? 'نموذج مخصص' : 'custom model') : (isArabic ? 'متصفح' : 'browser')}
+                  </span>
+                </div>
+              )}
+
+              {/* Category filter chips */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {['all', ...Array.from(new Set(euphoniaPhraseBank.map((p) => p.category)))].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setEuphoniaCategoryFilter(cat)}
+                    className={`px-3 py-1.5 rounded-xl text-[11px] font-black whitespace-nowrap transition-all ${
+                      euphoniaCategoryFilter === cat ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {cat === 'all' ? (isArabic ? 'الكل' : 'All') : `${getCategoryIcon(cat)} ${cat}`}
+                  </button>
+                ))}
+              </div>
+
+              {/* Training cards grid — driven by the 100-phrase bank */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[520px] overflow-y-auto pr-1">
+                {euphoniaPhraseBank
+                  .filter((p) => euphoniaCategoryFilter === 'all' || p.category === euphoniaCategoryFilter)
+                  .map((phrase) => {
+                    const cardKey = `eup-phrase-${phrase.id}`;
+                    const samplesRecorded = euphoniaTrainingState[phrase.id] || 0;
+                    const isRecordingThis = recordingPhraseId === phrase.id;
+                    const isFullyTrained = samplesRecorded >= 3;
+                    const isHovered = hoveredCardId === cardKey;
+
+                    return (
+                      <div
+                        key={phrase.id}
+                        data-aac-id={cardKey}
+                        onClick={() => handleCardTrigger(cardKey)}
+                        className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between min-h-[130px] ${
+                          isHovered
+                            ? 'border-amber-400 bg-amber-400 text-slate-950 shadow-2xl scale-[1.02]'
+                            : 'border-slate-800 bg-slate-950 text-white hover:border-amber-400/40'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-2xl">{getCategoryIcon(phrase.category)}</span>
+                            <span className={`text-[10px] font-black px-2 py-1 rounded-full border ${
+                              isFullyTrained ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+                            }`}>
+                              {samplesRecorded} / 3
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-xs sm:text-sm leading-relaxed">"{phrase.text}"</h4>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-800/40">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              recordEuphoniaSample(phrase);
+                            }}
+                            disabled={isRecordingThis || euphoniaRecorder.isRecording()}
+                            className={`px-3 py-1.5 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 shadow-md ${
+                              isRecordingThis ? 'bg-rose-500 text-white animate-pulse' : 'bg-slate-800 hover:bg-slate-700 text-amber-400'
+                            }`}
+                          >
+                            <Mic className="w-3.5 h-3.5" />
+                            <span>{isRecordingThis ? (isArabic ? 'تسجيل...' : 'Recording...') : (isArabic ? 'تسجيل عينة' : 'Record')}</span>
+                          </button>
+
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {isFullyTrained ? '🏆 مكتمل' : '⏳ قيد التدريب'}
+                          </span>
+                        </div>
+
+                        {isHovered && dwellProgress > 0 && (
+                          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-950/60 rounded-b-2xl overflow-hidden">
+                            <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* API URL settings — "set the URL of the Cloud Run instance" from repo README */}
+              <div className="mt-2 p-4 rounded-2xl bg-slate-950 border border-slate-800">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+                  {isArabic ? 'رابط خادم النموذج المخصص (اختياري - Google Cloud Run)' : 'Custom Model API URL (optional - Google Cloud Run)'}
+                </h4>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={euphoniaApiUrlInput}
+                    onChange={(e) => setEuphoniaApiUrlInput(e.target.value)}
+                    placeholder="https://your-cloud-run-service.a.run.app"
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"
+                    dir="ltr"
+                  />
+                  <button
+                    onClick={handleSaveEuphoniaApiUrl}
+                    className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 font-black text-slate-950 text-xs"
+                  >
+                    {isArabic ? 'حفظ واختبار' : 'Save & Test'}
+                  </button>
+                </div>
+                {euphoniaApiHealthy !== null && (
+                  <p className={`text-[11px] mt-2 font-bold ${euphoniaApiHealthy ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {euphoniaApiHealthy
+                      ? (isArabic ? '✅ متصل — سيُستخدم نموذجك المدرّب في المطابقة الحية' : '✅ Connected — your trained model will be used for live matching')
+                      : (isArabic ? '⚠️ غير متصل — سيُستخدم المتصفح كحل احتياطي' : '⚠️ Unreachable — browser ASR will be used as fallback')}
+                  </p>
+                )}
+                <p className="text-[10px] text-slate-500 mt-2">
+                  {isArabic
+                    ? 'درّب نموذجاً مخصصاً من صوتك عبر training_colabs في مستودع Project Euphonia، وانشره كخدمة، ثم ضع رابطها هنا.'
+                    : 'Train a personalized model on your voice via the training_colabs notebooks in the Project Euphonia repo, deploy it as a service, and paste its URL here.'}
+                </p>
               </div>
             </div>
           )}
