@@ -12,15 +12,16 @@
 import {
   collection,
   doc,
+  getDoc,
   setDoc,
   updateDoc,
   onSnapshot,
   serverTimestamp,
   arrayUnion,
   arrayRemove,
+  deleteField,
 } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from './firebase';
-import type { UserProfile } from '../types';
 
 export interface CaregiverLinkRequest {
   parentUid: string;
@@ -81,39 +82,40 @@ export function listenPendingCaregiverRequests(
 
 /**
  * Student side: approve a request. This is the ONLY function that grants
- * real access — it writes to the student's OWN profile, which Firestore
- * rules require to come from the student themself.
- *
- * A student can have MORE THAN ONE approved caregiver/specialist (e.g. a
- * parent AND a therapist) — approving a second request must ADD to the
- * existing access list, never overwrite it. authorizedParentUids is what
- * verifyParentChildRelationship() actually checks for every uid beyond the
- * first; linkedParentUid is kept as the first ("primary") one purely for
- * back-compat with older code that still reads only that single field.
+ * real access. Previously this always overwrote linkedParentUid, which
+ * meant approving a second caregiver silently kicked the first one out —
+ * now the first approval still fills linkedParentUid (kept for back-compat
+ * with any code that only reads that single field), and every approval
+ * after that is added to authorizedParentUids instead, so a student can be
+ * genuinely monitored by more than one parent/doctor/therapist at once.
  */
 export async function approveCaregiverLinkRequest(
   childUid: string,
   parentUid: string,
-  parentName: string,
-  parentEmail: string
+  parentName?: string,
+  parentEmail?: string
 ): Promise<void> {
   const id = requestId(childUid, parentUid);
   await updateDoc(doc(db, 'caregiverLinkRequests', id), { status: 'approved' });
 
-  const entry: NonNullable<UserProfile['linkedCaregivers']>[number] = {
-    uid: parentUid,
-    name: parentName || 'A caregiver',
-    email: parentEmail || '',
-    linkedAt: Date.now(),
-  };
+  const childRef = doc(db, `users/${childUid}`);
+  const childSnap = await getDoc(childRef);
+  const existingPrimary = childSnap.exists() ? (childSnap.data().linkedParentUid as string | undefined) : undefined;
 
-  // updateDoc (not setDoc merge) so arrayUnion actually unions against the
-  // existing array instead of the write racing a merge on a doc that may not
-  // have the field yet; the student's profile doc always exists by this point.
-  await updateDoc(doc(db, `users/${childUid}`), cleanDataForFirestore({
-    authorizedParentUids: arrayUnion(parentUid),
-    linkedCaregivers: arrayUnion(entry),
-  }));
+  const update: Record<string, unknown> = {
+    [`linkedCaregiversInfo.${parentUid}`]: {
+      name: parentName || 'Caregiver',
+      email: parentEmail || '',
+      linkedAt: Date.now(),
+    },
+  };
+  if (!existingPrimary || existingPrimary === parentUid) {
+    update.linkedParentUid = parentUid;
+  } else {
+    update.authorizedParentUids = arrayUnion(parentUid);
+  }
+
+  await setDoc(childRef, cleanDataForFirestore(update), { merge: true });
 }
 
 /** Student side: reject a request. Grants nothing, just closes it out. */
@@ -123,32 +125,52 @@ export async function rejectCaregiverLinkRequest(childUid: string, parentUid: st
 }
 
 /**
- * Student side: revoke ONE previously-approved caregiver's access, without
- * touching any other caregiver still linked. Also clears linkedParentUid if
- * it was this same uid, so no back-compat reader keeps treating them as
- * primary after they've been removed.
+ * Student side: revoke ONE previously-approved caregiver's access at any
+ * time, without touching any other caregiver still linked to this account.
+ * If the revoked uid was the primary linkedParentUid, the next uid still in
+ * authorizedParentUids (if any) is promoted so access for everyone else is
+ * preserved.
  */
-export async function revokeSpecificCaregiverAccess(
-  childUid: string,
-  parentUid: string,
-  currentLinkedCaregivers: NonNullable<UserProfile['linkedCaregivers']>
-): Promise<void> {
-  const remaining = currentLinkedCaregivers.filter((c) => c.uid !== parentUid);
-  const removedEntries = currentLinkedCaregivers.filter((c) => c.uid === parentUid);
-  await updateDoc(doc(db, `users/${childUid}`), cleanDataForFirestore({
-    authorizedParentUids: arrayRemove(parentUid),
-    // arrayRemove needs the exact stored object(s) — remove every matching
-    // entry for this uid rather than assuming there's only ever one.
-    ...(removedEntries.length ? { linkedCaregivers: arrayRemove(...removedEntries) } : {}),
-  }));
-  await setDoc(doc(db, `users/${childUid}`), { linkedParentUid: remaining[0]?.uid || '' }, { merge: true });
+export async function revokeParentAccess(childUid: string, parentUid: string): Promise<void> {
+  const childRef = doc(db, `users/${childUid}`);
+  const childSnap = await getDoc(childRef);
+  if (!childSnap.exists()) return;
+  const data = childSnap.data();
+  const currentPrimary = data.linkedParentUid as string | undefined;
+  const currentOthers: string[] = Array.isArray(data.authorizedParentUids) ? data.authorizedParentUids : [];
+
+  const update: Record<string, unknown> = {
+    [`linkedCaregiversInfo.${parentUid}`]: deleteField(),
+  };
+
+  if (currentPrimary === parentUid) {
+    const [promoted, ...rest] = currentOthers;
+    update.linkedParentUid = promoted || '';
+    update.authorizedParentUids = rest;
+  } else {
+    update.authorizedParentUids = arrayRemove(parentUid);
+  }
+
+  await setDoc(childRef, cleanDataForFirestore(update), { merge: true });
 }
 
-/** Student side: revoke ALL previously-approved carevigers' access at once. */
-export async function revokeParentAccess(childUid: string): Promise<void> {
-  await setDoc(
-    doc(db, `users/${childUid}`),
-    cleanDataForFirestore({ linkedParentUid: '', authorizedParentUids: [], linkedCaregivers: [] }),
-    { merge: true }
-  );
+/** Every caregiver currently linked to this profile, for display/management UI. */
+export function getLinkedCaregivers(profile: {
+  linkedParentUid?: string;
+  authorizedParentUids?: string[];
+  linkedCaregiversInfo?: Record<string, { name: string; email: string; linkedAt: number }>;
+}): { uid: string; name: string; email: string; linkedAt: number; isPrimary: boolean }[] {
+  const uids = [
+    ...(profile.linkedParentUid ? [profile.linkedParentUid] : []),
+    ...(profile.authorizedParentUids || []),
+  ];
+  return uids
+    .filter((uid, i) => uids.indexOf(uid) === i) // de-dupe
+    .map((uid) => ({
+      uid,
+      isPrimary: uid === profile.linkedParentUid,
+      name: profile.linkedCaregiversInfo?.[uid]?.name || 'Caregiver',
+      email: profile.linkedCaregiversInfo?.[uid]?.email || '',
+      linkedAt: profile.linkedCaregiversInfo?.[uid]?.linkedAt || 0,
+    }));
 }
