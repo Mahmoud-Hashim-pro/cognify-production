@@ -109,7 +109,6 @@ export default function App() {
   // have real data — otherwise the very first snapshot can be skipped and the
   // loading gate never releases ("SYNCING PROFILE…" forever).
   const profileAppliedRef = useRef(false);
-  const initialRouteAppliedRef = useRef(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   // True when the profile sync failed or timed out (as opposed to "this user
   // genuinely has no profile yet"). Without this the app can't tell the two
@@ -332,7 +331,6 @@ export default function App() {
     // account fires its onComplete and overwrites the existing profile (points/level).
     setProfileLoading(true);
     profileAppliedRef.current = false;
-    initialRouteAppliedRef.current = false;
     setProfileSyncFailed(false);
     let cancelled = false; // set on cleanup; guards the async auto-create continuation
 
@@ -373,70 +371,35 @@ export default function App() {
 
         const data = rawData as UserProfile;
 
-        // Honor user's login-time path selection
+        // Honor user's login-time path selection if explicitly set to Normal
         let preLoginPath: string | null = null;
-        let preLoginMode: string | null = null;
-        let preLoginDis: string | null = null;
         try {
           preLoginPath = localStorage.getItem('preLoginAccountPath');
-          preLoginMode = localStorage.getItem('preLoginAccessibilityMode');
-          preLoginDis = localStorage.getItem('preLoginDisability');
         } catch {}
 
-        if (preLoginPath === 'Normal') {
+        if (preLoginPath === 'Normal' && data.accountPath !== 'Normal') {
           data.accountPath = 'Normal';
           data.accessibilityMode = 'None';
-          data.disabilityType = '';
-          try {
-            localStorage.removeItem('cognify_default_disability_tab');
-            localStorage.removeItem('preLoginAccessibilityMode');
-            localStorage.removeItem('preLoginDisability');
-          } catch {}
-          setDoc(doc(db, path), { accountPath: 'Normal', accessibilityMode: 'None', disabilityType: '' }, { merge: true }).catch(() => {});
-        } else if (preLoginPath === 'Special Needs' && preLoginMode && preLoginMode !== 'None') {
-          data.accountPath = 'Special Needs';
-          data.accessibilityMode = preLoginMode as AccessibilityMode;
-          if (preLoginDis) data.disabilityType = preLoginDis;
-          try {
-            const mappedTab = preLoginMode === 'Motor-Euphonia' ? 'motor' :
-                              preLoginMode === 'Neurodiversity' ? 'neurodiversity' :
-                              preLoginMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-            localStorage.setItem('cognify_default_disability_tab', mappedTab);
-          } catch {}
-          setDoc(doc(db, path), cleanDataForFirestore({ 
-            accountPath: 'Special Needs', 
-            accessibilityMode: preLoginMode, 
-            disabilityType: preLoginDis || data.disabilityType 
-          }), { merge: true }).catch(() => {});
+          setDoc(doc(db, path), { accountPath: 'Normal', accessibilityMode: 'None' }, { merge: true }).catch(() => {});
         }
 
         setProfile(data);
         clearPreLoginState();
 
         // Smart Entry Routing:
-        // Execute ONLY ONCE on initial entry/mount so subsequent background snapshots
-        // (like country lookup completing 2s later, or task progress writes)
-        // NEVER override the user's active view or bounce them between screens!
-        if (!initialRouteAppliedRef.current) {
-          initialRouteAppliedRef.current = true;
-          const hash = window.location.hash.replace('#', '');
-          const isA11y = preLoginPath === 'Normal' ? false : isAccessibilityUser(data);
-          if (isA11y) {
-            // For accessibility users: if no hash or default empty/chat on first load, land on disability
-            if (!hash || hash === 'chat' || hash === '') {
-              setCurrentView('disability');
-              window.history.replaceState(null, '', '#disability');
-            } else if ((VALID_VIEWS as readonly string[]).includes(hash)) {
-              setCurrentView(hash as any);
-            }
-          } else {
-            // For normal users: if no hash, land on chat. If deep-linked or user navigated to another valid view, PRESERVE it!
-            if (!hash || hash === 'disability' || hash === 'video') {
-              setCurrentView('chat');
-              window.history.replaceState(null, '', '#chat');
-            } else if ((VALID_VIEWS as readonly string[]).includes(hash)) {
-              setCurrentView(hash as any);
-            }
+        // If the user has special needs / accessibility mode -> land on #disability
+        // If the user is a normal student/learner -> ALWAYS land directly on #chat, never disability or video
+        const hash = window.location.hash.replace('#', '');
+        const isA11y = isAccessibilityUser(data);
+        if (isA11y) {
+          if (!hash || hash === 'chat' || hash === '') {
+            setCurrentView('disability');
+            window.history.replaceState(null, '', '#disability');
+          }
+        } else {
+          if (!hash || hash === 'disability' || hash === 'video' || hash === '') {
+            setCurrentView('chat');
+            window.history.replaceState(null, '', '#chat');
           }
         }
 
@@ -469,39 +432,41 @@ export default function App() {
         // If the user selected 'Special Needs' at login but has no profile, auto-create it immediately to bypass onboarding!
         let preLoginPath: string | null = null;
         let preLoginDisability: string | null = null;
-        let preLoginMode: string | null = null;
+        let preLoginAccessibilityMode: string | null = null;
         let preLoginOrgCode: string | null = null;
         try {
           preLoginPath = localStorage.getItem('preLoginAccountPath');
           preLoginDisability = localStorage.getItem('preLoginDisability');
-          preLoginMode = localStorage.getItem('preLoginAccessibilityMode');
+          preLoginAccessibilityMode = localStorage.getItem('preLoginAccessibilityMode');
           preLoginOrgCode = localStorage.getItem('preLoginOrgCode');
         } catch {}
 
         if (preLoginPath === 'Special Needs') {
           const disabilityType = preLoginDisability || 'Other';
-          
-          let accessibilityMode: AccessibilityMode = (preLoginMode as AccessibilityMode) || 'None';
-          if (accessibilityMode === 'None') {
-            if (disabilityType === 'Visual Impairment') {
-              accessibilityMode = 'Visual';
-            } else if (disabilityType === 'Hearing Impairment') {
-              accessibilityMode = 'Vocal-Deaf';
-            } else if (disabilityType === 'Speech Impairment') {
-              accessibilityMode = 'Speech';
-            } else if (disabilityType === 'Motor Impairment') {
-              accessibilityMode = 'Motor-Euphonia';
-            } else if (disabilityType === 'Cognitive/Learning Disability') {
-              accessibilityMode = 'Neurodiversity';
-            }
-          }
 
-          try {
-            const mappedTab = accessibilityMode === 'Motor-Euphonia' ? 'motor' :
-                              accessibilityMode === 'Neurodiversity' ? 'neurodiversity' :
-                              accessibilityMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-            localStorage.setItem('cognify_default_disability_tab', mappedTab);
-          } catch {}
+          // Login.tsx stores the real enum value directly under
+          // 'preLoginAccessibilityMode' — prefer that (kept in sync with the
+          // identical logic in Onboarding.tsx). The prose-matching fallback below
+          // only covers sessions started before that key existed, and must keep
+          // covering every value Login.tsx's picker can send, or a user silently
+          // ends up with accessibilityMode 'None'.
+          const VALID_MODES: AccessibilityMode[] = ['Visual', 'Vocal-Deaf', 'Sign-Only', 'Speech', 'Motor-Euphonia', 'Neurodiversity'];
+          const storedMode = preLoginAccessibilityMode as AccessibilityMode | null;
+
+          let accessibilityMode: AccessibilityMode = 'None';
+          if (storedMode && VALID_MODES.includes(storedMode)) {
+            accessibilityMode = storedMode;
+          } else if (disabilityType === 'Visual Impairment') {
+            accessibilityMode = 'Visual';
+          } else if (disabilityType === 'Hearing Impairment') {
+            accessibilityMode = 'Vocal-Deaf';
+          } else if (disabilityType === 'Speech Impairment') {
+            accessibilityMode = 'Speech';
+          } else if (disabilityType === 'Motor Impairment') {
+            accessibilityMode = 'Motor-Euphonia';
+          } else if (disabilityType === 'Cognitive/Learning Disability') {
+            accessibilityMode = 'Neurodiversity';
+          }
 
           let visitorCountry: string | undefined;
           try {
@@ -1283,7 +1248,7 @@ export default function App() {
                       lastMessageSnippet: t.lastMessageSnippet || ""
                     }));
                   }
-                  delete cleanProfile.chatHistory;
+                  cleanProfile.chatHistory = [];
 
                   const finalProfileToSave = cleanDataForFirestore(cleanProfile);
                   await setDoc(doc(db, path), finalProfileToSave, { merge: true });
