@@ -27,7 +27,8 @@ import {
   listenPendingCaregiverRequests,
   approveCaregiverLinkRequest,
   rejectCaregiverLinkRequest,
-  revokeSpecificCaregiverAccess,
+  revokeParentAccess,
+  getLinkedCaregivers,
   CaregiverLinkRequest,
 } from '../lib/caregiverLinking';
 import { isArabicLocale } from '../lib/translations';
@@ -61,27 +62,46 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     return unsubscribe;
   }, [profile.uid]);
 
-  // A student can have more than one approved caregiver (a parent AND a
-  // specialist, for example) — approve/revoke must add or remove one entry
-  // without disturbing whoever else is already linked.
-  const linkedCaregivers = profile.linkedCaregivers || [];
-
   const handleApproveLink = async (req: CaregiverLinkRequest) => {
     if (!profile.uid) return;
     try {
       await approveCaregiverLinkRequest(profile.uid, req.parentUid, req.parentName, req.parentEmail);
       if (setProfile) {
-        const already = linkedCaregivers.some((c) => c.uid === req.parentUid);
+        const isFirst = !profile.linkedParentUid || profile.linkedParentUid === req.parentUid;
         setProfile({
           ...profile,
-          linkedParentUid: profile.linkedParentUid || req.parentUid,
-          authorizedParentUids: [...(profile.authorizedParentUids || []), req.parentUid],
-          linkedCaregivers: already
-            ? linkedCaregivers
-            : [...linkedCaregivers, { uid: req.parentUid, name: req.parentName, email: req.parentEmail, linkedAt: Date.now() }],
+          linkedParentUid: isFirst ? req.parentUid : profile.linkedParentUid,
+          authorizedParentUids: isFirst
+            ? profile.authorizedParentUids
+            : [...(profile.authorizedParentUids || []), req.parentUid],
+          linkedCaregiversInfo: {
+            ...(profile.linkedCaregiversInfo || {}),
+            [req.parentUid]: { name: req.parentName, email: req.parentEmail, linkedAt: Date.now() },
+          },
         });
       }
       toast.success(isAr ? 'تم قبول الطلب' : isFr ? 'Demande approuvée' : 'Request approved');
+    } catch {
+      toast.error(isAr ? 'حصل خطأ، حاول تاني' : isFr ? 'Une erreur est survenue' : 'Something went wrong');
+    }
+  };
+
+  const handleRevokeCaregiver = async (parentUid: string) => {
+    if (!profile.uid) return;
+    try {
+      await revokeParentAccess(profile.uid, parentUid);
+      if (setProfile) {
+        const wasPrimary = profile.linkedParentUid === parentUid;
+        const remainingOthers = (profile.authorizedParentUids || []).filter((u) => u !== parentUid);
+        const { [parentUid]: _removed, ...restInfo } = profile.linkedCaregiversInfo || {};
+        setProfile({
+          ...profile,
+          linkedParentUid: wasPrimary ? remainingOthers[0] || '' : profile.linkedParentUid,
+          authorizedParentUids: wasPrimary ? remainingOthers.slice(1) : remainingOthers,
+          linkedCaregiversInfo: restInfo,
+        });
+      }
+      toast.success(t('Access revoked', 'تم إلغاء الصلاحية'));
     } catch {
       toast.error(isAr ? 'حصل خطأ، حاول تاني' : isFr ? 'Une erreur est survenue' : 'Something went wrong');
     }
@@ -91,25 +111,6 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     if (!profile.uid) return;
     try {
       await rejectCaregiverLinkRequest(profile.uid, parentUid);
-    } catch {
-      toast.error(isAr ? 'حصل خطأ، حاول تاني' : isFr ? 'Une erreur est survenue' : 'Something went wrong');
-    }
-  };
-
-  const handleRevokeCaregiver = async (caregiverUid: string) => {
-    if (!profile.uid) return;
-    try {
-      await revokeSpecificCaregiverAccess(profile.uid, caregiverUid, linkedCaregivers);
-      if (setProfile) {
-        const remaining = linkedCaregivers.filter((c) => c.uid !== caregiverUid);
-        setProfile({
-          ...profile,
-          linkedParentUid: profile.linkedParentUid === caregiverUid ? (remaining[0]?.uid || '') : profile.linkedParentUid,
-          authorizedParentUids: (profile.authorizedParentUids || []).filter((u) => u !== caregiverUid),
-          linkedCaregivers: remaining,
-        });
-      }
-      toast.success(isAr ? 'تم إلغاء الربط' : isFr ? 'Accès révoqué' : 'Access revoked');
     } catch {
       toast.error(isAr ? 'حصل خطأ، حاول تاني' : isFr ? 'Une erreur est survenue' : 'Something went wrong');
     }
@@ -251,44 +252,50 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
         )}
 
-        {/* Currently-linked caregivers — a student can have more than one
-            (e.g. a parent AND a therapist) approved at the same time, each
-            individually revocable without affecting the others. */}
-        {linkedCaregivers.length > 0 && (
-          <div className="p-4 rounded-3xl bg-slate-900/60 border border-slate-800 shadow-lg space-y-3">
-            <div className="flex items-center justify-between gap-2">
+        {/* Linked Caregivers & Specialists — every uid with real read access to
+            this profile (linkedParentUid + authorizedParentUids), with a
+            per-person revoke control. Previously invisible: approving a 2nd
+            caregiver silently replaced the 1st with no way to even see who
+            had access. */}
+        {(() => {
+          const linked = getLinkedCaregivers(profile);
+          if (linked.length === 0) return null;
+          return (
+            <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-lg space-y-3">
               <div className="flex items-center gap-2 text-slate-200 font-bold text-sm">
-                <Users className="w-5 h-5 text-cyan-400" />
+                <Users className="w-5 h-5 text-indigo-400" />
                 <span>
-                  {t('Linked caregivers & specialists', 'المرافقين والمختصين المرتبطين', 'Accompagnants et spécialistes liés')}
+                  {t('Linked caregivers & specialists', 'المرافقون والمختصون المرتبطون', 'Accompagnants & spécialistes liés')}
                 </span>
+                <span className="text-[11px] font-normal text-slate-500">({linked.length})</span>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                {linkedCaregivers.length}
-              </span>
-            </div>
-            {linkedCaregivers.map((c) => (
-              <div
-                key={c.uid}
-                className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3"
-              >
-                <div className="min-w-0">
-                  <div className="font-bold text-sm text-white truncate">{c.name}</div>
-                  <div className="text-[11px] text-slate-400 truncate">
-                    {c.email}
-                    {c.uid === profile.linkedParentUid ? ` · ${t('Primary', 'أساسي', 'Principal')}` : ''}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleRevokeCaregiver(c.uid)}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-300 text-xs font-bold transition-colors shrink-0"
+              {linked.map((c) => (
+                <div
+                  key={c.uid}
+                  className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3"
                 >
-                  {t('Remove access', 'إلغاء الوصول', 'Retirer')}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm text-white truncate flex items-center gap-1.5">
+                      <span>{c.name}</span>
+                      {c.isPrimary && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-900 text-indigo-300 font-bold">
+                          {t('Primary', 'أساسي')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-400 truncate">{c.email}</div>
+                  </div>
+                  <button
+                    onClick={() => handleRevokeCaregiver(c.uid)}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-300 hover:text-red-300 text-xs font-bold transition-colors shrink-0"
+                  >
+                    {t('Revoke access', 'إلغاء الصلاحية', "Révoquer l'accès")}
+                  </button>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Status Telemetry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
