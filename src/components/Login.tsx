@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RadioGroup, Radio, Button as AriaButton } from 'react-aria-components';
+import { RadioGroup, Radio } from 'react-aria-components';
+import { AriaButton } from './ui/AriaButton';
 import { signInWithGoogle, signInWithGoogleRedirect, loginWithEmail, registerWithEmail, auth, clearPreLoginState } from '../lib/firebase';
 import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
@@ -946,7 +947,12 @@ export default function Login() {
                           ? t("Choose Another Path to Continue", "يرجى اختيار مسار آخر للمتابعة")
                           : accountPath === 'Normal'
                           ? t("Continue with Normal Path", "المتابعة بالمسار القياسي")
-                          : t("Continue with Special Needs Path", "المتابعة بمسار ذوي الهمم")}
+                          : (() => {
+                              const primaryFeature = getSpecialNeedsFeatures(selectedDisability, t).find((f) => f.isPrimary);
+                              return primaryFeature
+                                ? t(`Continue to ${primaryFeature.title}`, `المتابعة إلى ${primaryFeature.title}`)
+                                : t("Continue with Special Needs Path", "المتابعة بمسار ذوي الهمم");
+                            })()}
                       </span>
                       {accountPath !== 'Graduation Project' && (
                         <ArrowRight className={`w-4 h-4 shrink-0 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
