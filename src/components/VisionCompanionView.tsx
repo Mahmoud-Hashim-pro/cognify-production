@@ -42,7 +42,6 @@ import { localize, isArabicLocale } from '../lib/translations';
 import { generateAdaptiveResponse } from '../services/gemini';
 import { speak, cancelSpeech, unlockSpeechSynthesis } from '../lib/tts';
 import { toast } from './Toast';
-import DocumentReaderModal from './DocumentReaderModal';
 import {
   extractSpatialObjectsFromVision,
   recordObservedSpatialObjects,
@@ -148,6 +147,32 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   // Saving memory as person vs object
   const [isSavingPerson, setIsSavingPerson] = useState(false);
 
+  // Supported languages: Arabic, English, French
+  const [companionLang, setCompanionLang] = useState<'ar' | 'en' | 'fr'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem(COMPANION_LANG_STORAGE_KEY);
+      if (saved === 'ar' || saved === 'en' || saved === 'fr') return saved;
+    }
+    if (isArabicLang(profile?.language)) return 'ar';
+    if (profile?.language === 'French' || (profile?.language as unknown as string) === 'fr') return 'fr';
+    return 'ar'; // neutral placeholder while the first-launch picker is shown
+  });
+
+  const announceFeature = useCallback((titleAr: string, titleEn: string, titleFr: string, isActive: boolean) => {
+    const text = companionLang === 'ar'
+      ? (isActive ? `تم تفعيل ${titleAr}` : `تم إيقاف ${titleAr}`)
+      : companionLang === 'fr'
+      ? (isActive ? `Mode ${titleFr} activé` : `Mode ${titleFr} désactivé`)
+      : (isActive ? `${titleEn} mode activated` : `${titleEn} mode deactivated`);
+
+    const voiceLang = companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English';
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    }
+    speak(text, voiceLang as any);
+  }, [companionLang]);
+
   const resetAllModes = useCallback(() => {
     setReadMode(false);
     setShoppingMode(false);
@@ -167,9 +192,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setOutfitMode(false);
         setNavGuideMode(false);
       }
+      announceFeature('قارئ النصوص والكتب والروشتات', 'Document and Text Reader', 'Lecture de Documents', next);
       return next;
     });
-  }, []);
+  }, [announceFeature]);
 
   const toggleShoppingMode = useCallback(() => {
     setShoppingMode((prev) => {
@@ -181,9 +207,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setOutfitMode(false);
         setNavGuideMode(false);
       }
+      announceFeature('مساعد فحص المنتجات والتسوق', 'Shopping and Product Scanner', 'Assistant Shopping', next);
       return next;
     });
-  }, []);
+  }, [announceFeature]);
 
   const toggleCurrencyMode = useCallback(() => {
     setCurrencyMode((prev) => {
@@ -195,9 +222,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setOutfitMode(false);
         setNavGuideMode(false);
       }
+      announceFeature('قارئ العملات والنقود المصرية', 'Egyptian Currency Reader', 'Lecteur de Monnaie', next);
       return next;
     });
-  }, []);
+  }, [announceFeature]);
 
   const toggleFaceMode = useCallback(() => {
     setFaceMode((prev) => {
@@ -209,9 +237,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setOutfitMode(false);
         setNavGuideMode(false);
       }
+      announceFeature('التعرف على الوجوه والمقربين', 'Face Recognition and Familiar People', 'Reconnaissance Faciale', next);
       return next;
     });
-  }, []);
+  }, [announceFeature]);
 
   const toggleOutfitMode = useCallback(() => {
     setOutfitMode((prev) => {
@@ -223,9 +252,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setFaceMode(false);
         setNavGuideMode(false);
       }
+      announceFeature('فحص وتنسيق ألوان الملابس', 'Color and Outfit Matcher', 'Style et Couleurs', next);
       return next;
     });
-  }, []);
+  }, [announceFeature]);
 
   const toggleNavGuideMode = useCallback(() => {
     setNavGuideMode((prev) => {
@@ -237,24 +267,14 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setFaceMode(false);
         setOutfitMode(false);
       }
+      announceFeature('العصا الذكية وتنبيهات المسافات', 'Smart White Cane Navigation', 'Canne Virtuelle', next);
       return next;
     });
-  }, []);
+  }, [announceFeature]);
 
   // Tracks whether the description is currently being spoken aloud, so the
   // same button can toggle between "play" and "stop" the voice.
   const [isSpeaking, setIsSpeaking] = useState(false);
-
-  // Supported languages: Arabic, English, French
-  const [companionLang, setCompanionLang] = useState<'ar' | 'en' | 'fr'>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = window.localStorage.getItem(COMPANION_LANG_STORAGE_KEY);
-      if (saved === 'ar' || saved === 'en' || saved === 'fr') return saved;
-    }
-    if (isArabicLang(profile?.language)) return 'ar';
-    if (profile?.language === 'French' || (profile?.language as unknown as string) === 'fr') return 'fr';
-    return 'ar'; // neutral placeholder while the first-launch picker is shown
-  });
 
   // Has the user ever picked a language before (this device)? If not, show
   // the first-launch language picker instead of silently defaulting to English.
@@ -1127,6 +1147,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               onClick={() => {
                 setShowSpatialMemory(true);
                 if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
+                announceFeature('الذاكرة المكانية وحاجتي فين', 'Spatial Memory Object Locator', 'Localisation des Objets', true);
               }}
               aria-label={t('Spatial Memory', 'الذاكرة المكانية', 'Mémoire spatiale')}
               className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
@@ -1141,15 +1162,15 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
 
             <button
               onClick={() => setShowDocumentReader(true)}
-              aria-label={t('Documents: summarize, read aloud, or convert to Word', 'المستندات: تلخيص وقراءة وتحويل لوورد', 'Documents : résumer, lire, convertir')}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-teal-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+              aria-label={t('Documents', 'مستندات', 'Documents')}
+              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-cyan-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
               title={t(
-                'Documents: summarize a lecture, read a PDF aloud, or convert it to Word',
-                'المستندات: تلخيص محاضرة، قراءة PDF بصوت عالي، أو تحويله لوورد',
-                'Documents : résumer un cours, lire un PDF, ou le convertir en Word'
+                'Documents: read/summarize a PDF and convert it to Word, plus speech-to-text',
+                'مستندات: اقرأ أو لخّص ملف PDF وحوّليه لوورد، وحوّلي الصوت لنص',
+                'Documents : lire/résumer un PDF et le convertir en Word, plus la reconnaissance vocale'
               )}
             >
-              <FileText className="w-4 h-4 text-teal-400 shrink-0" />
+              <FileText className="w-4 h-4 text-cyan-400 shrink-0" />
               <span className="hidden xl:inline">{t('Documents', 'مستندات', 'Documents')}</span>
             </button>
 
@@ -1851,13 +1872,11 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         )}
       </AnimatePresence>
 
+      {/* Document Reader & Speech ⇄ Text — separate full-screen panel, not a
+          camera mode (see DocumentReaderPanel.tsx header comment for why). */}
       <AnimatePresence>
         {showDocumentReader && (
-          <DocumentReaderModal
-            profile={profile}
-            companionLang={companionLang}
-            onClose={() => setShowDocumentReader(false)}
-          />
+          <DocumentReaderPanel profile={profile} onClose={() => setShowDocumentReader(false)} />
         )}
       </AnimatePresence>
     </div>
