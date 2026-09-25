@@ -17,9 +17,13 @@ import {
   Mic,
   Brain,
   FileJson,
-  Check
+  Check,
+  Flame,
+  Smile,
+  Frown,
+  Meh
 } from 'lucide-react';
-import { UserProfile } from '../types';
+import { UserProfile, SensoryEmotionLog } from '../types';
 import { EmergencyContact } from '../lib/contacts';
 import { loadContacts, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
@@ -30,6 +34,7 @@ import {
   revokeSpecificCaregiverAccess,
   CaregiverLinkRequest,
 } from '../lib/caregiverLinking';
+import { getRecentSensoryLogs } from '../lib/neurodiversityEngine';
 import { isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
 
@@ -46,14 +51,15 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   const isFr = lang === 'French';
 
   const [contacts, setContacts] = useState<EmergencyContact[]>(loadContacts);
+  const [sensoryLogs, setSensoryLogs] = useState<SensoryEmotionLog[]>([]);
+
   useEffect(() => {
     if (!profile.uid) return;
     restoreContactsFromCloud(profile.uid).then(setContacts);
+    getRecentSensoryLogs(profile.uid, 10).then(setSensoryLogs);
   }, [profile.uid]);
 
-  // Pending "someone wants to link as your parent/caregiver" requests —
-  // the ONLY thing that can ever grant a parent real access is the student
-  // approving one of these, which writes linkedParentUid on their own profile.
+  // Pending "someone wants to link as your parent/caregiver" requests
   const [pendingLinkRequests, setPendingLinkRequests] = useState<CaregiverLinkRequest[]>([]);
   useEffect(() => {
     if (!profile.uid) return;
@@ -61,9 +67,6 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     return unsubscribe;
   }, [profile.uid]);
 
-  // A student can have more than one approved caregiver (a parent AND a
-  // specialist, for example) — approve/revoke must add or remove one entry
-  // without disturbing whoever else is already linked.
   const linkedCaregivers = profile.linkedCaregivers || [];
 
   const handleApproveLink = async (req: CaregiverLinkRequest) => {
@@ -134,6 +137,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       headTrackingConfig: profile.headTrackingConfig,
       vocalTriggers: profile.vocalTriggers,
       contacts: loadContacts(),
+      sensoryLogs: sensoryLogs,
       exportedAt: new Date().toISOString(),
       version: 'Cognify-Access-2.0',
     };
@@ -165,10 +169,12 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     }
   };
 
+  const latestSensory = sensoryLogs[0];
+
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-950 text-white overflow-y-auto p-4 sm:p-6" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <header className="pb-4 border-b border-slate-800 flex items-center justify-between gap-3 mb-6">
+      <header className="pb-4 border-b border-slate-800 flex items-center justify-between gap-3 mb-6 flex-wrap">
         <div className="flex items-center gap-2.5">
           {onNavigateBack && (
             <button
@@ -188,7 +194,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 {t('Caregiver & Specialist Command Hub', 'لوحة تحكم المرافق والمختص الطبي', 'Centre Accompagnant & Spécialiste')}
               </h1>
               <p className="text-[11px] text-slate-400">
-                {t('Telemetry, safety controls, backup and assistive passport configuration', 'متابعة المؤشرات الحيوية، تجربة الطوارئ، النسخ الاحتياطي وجواز الوصول الميسر')}
+                {t('Telemetry, safety controls, sensory alerts and assistive passport configuration', 'متابعة المؤشرات الحيوية، الإنذار الحسي، تجربة الطوارئ وجواز الوصول الميسر')}
               </p>
             </div>
           </div>
@@ -207,7 +213,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
       {/* Main Grid Content */}
       <div className="max-w-5xl mx-auto w-full space-y-6">
-        {/* Pending Caregiver Link Requests — the only place a parent's access can be granted */}
+        {/* Pending Caregiver Link Requests */}
         {pendingLinkRequests.length > 0 && (
           <div className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-lg space-y-3">
             <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
@@ -251,9 +257,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
         )}
 
-        {/* Currently-linked caregivers — a student can have more than one
-            (e.g. a parent AND a therapist) approved at the same time, each
-            individually revocable without affecting the others. */}
+        {/* Linked Caregivers */}
         {linkedCaregivers.length > 0 && (
           <div className="p-4 rounded-3xl bg-slate-900/60 border border-slate-800 shadow-lg space-y-3">
             <div className="flex items-center justify-between gap-2">
@@ -314,6 +318,22 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             </div>
           </div>
 
+          {/* Sensory Regulation Telemetry */}
+          <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 flex items-center gap-3.5 shadow-lg">
+            <div className="w-11 h-11 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+              <Activity className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Sensory State', 'الحالة والضغط الحسي')}</div>
+              <div className="text-base font-black text-white flex items-center gap-1.5">
+                <span>{latestSensory ? `${latestSensory.intensity}/5` : 'هادئ'}</span>
+                <span className="text-[10px] text-purple-300 font-normal truncate">
+                  ({latestSensory ? latestSensory.level : 'Calm'})
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Contacts Telemetry */}
           <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 flex items-center gap-3.5 shadow-lg">
             <div className="w-11 h-11 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
@@ -324,20 +344,50 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <div className="text-xl font-black text-white">{contacts.length} {t('Saved', 'مسجل')}</div>
             </div>
           </div>
+        </div>
 
-          {/* Passport Telemetry */}
-          <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 flex items-center gap-3.5 shadow-lg">
-            <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-              <Shield className="w-6 h-6" />
+        {/* Sensory & Emotion Telemetry Feed */}
+        {sensoryLogs.length > 0 && (
+          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="font-black text-base flex items-center gap-2">
+                <Activity className="w-5 h-5 text-purple-400" />
+                <span>{t('Recent Sensory & Meltdown Regulation Telemetry', 'سجل المؤشرات الحسية ونوبات الضغط (Early Warnings)')}</span>
+              </h3>
+              <span className="text-xs text-slate-400 font-mono">{sensoryLogs.length} {t('Logs', 'سجلات')}</span>
             </div>
-            <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Passport Mode', 'نمط الجواز الميسر')}</div>
-              <div className="text-sm font-black text-indigo-300 truncate">
-                {profile.accessibilityPassport?.primaryCategory || profile.accessibilityMode || t('Standard', 'قياسي')}
-              </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+              {sensoryLogs.slice(0, 6).map((log) => (
+                <div
+                  key={log.id}
+                  className={`p-3 rounded-2xl border flex items-center justify-between gap-2 ${
+                    log.intensity >= 4
+                      ? 'bg-rose-950/30 border-rose-500/40 text-rose-200'
+                      : 'bg-slate-950 border-slate-800 text-slate-200'
+                  }`}
+                >
+                  <div>
+                    <div className="font-bold text-xs flex items-center gap-1.5">
+                      <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                        log.intensity >= 4 ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300'
+                      }`}>
+                        {log.intensity}/5
+                      </span>
+                      <span className="truncate">{log.sensoryTrigger || log.level}</span>
+                    </div>
+                    {log.comfortActivityUsed && (
+                      <div className="text-[10px] text-slate-400 mt-0.5 truncate">{log.comfortActivityUsed}</div>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 shrink-0">
+                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Safety & SOS Testing Section */}
         <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 shadow-xl">

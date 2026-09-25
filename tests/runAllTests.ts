@@ -74,6 +74,7 @@ import { runBusinessTenancyVerification } from './businessTenancyVerification.js
 import { runDeveloperApiVerification } from './developerApiVerification.js';
 import { runSecurityThreatModelVerification } from './securityThreatModelVerification.js';
 import { runLearningHubComprehensiveVerification } from './learningHubComprehensiveVerification.js';
+import { runNeurodiversityEngineVerification } from './neurodiversityEngineVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2071,6 +2072,13 @@ Keep practicing closures with higher-order functions!
     const m23Res = await runLearningHubComprehensiveVerification();
     totalPassed += m23Res.passed;
     totalFailed += m23Res.failed;
+  }
+
+  // 55. Milestone 24: Neurodiversity, PECS, Visual Routine & Sensory Meltdown Telemetry
+  {
+    const m24Res = await runNeurodiversityEngineVerification();
+    totalPassed += m24Res.passed;
+    totalFailed += m24Res.failed;
   }
 
   console.log(`\n========================================`);
