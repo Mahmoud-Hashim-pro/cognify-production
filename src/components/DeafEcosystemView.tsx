@@ -13,7 +13,6 @@ import {
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
-import SignVideoStudio from './SignVideoStudio';
 import AmbientSoundRadar from './AmbientSoundRadar';
 import HumanCommunicationBridge from './HumanCommunicationBridge';
 import type { DisabilityTab } from './DisabilityModeView';
@@ -363,13 +362,6 @@ export default function DeafEcosystemView({
               transition={{ duration: 0.15 }}
               className="w-full h-full min-h-0 overflow-y-auto"
             >
-              <SignVideoStudio
-                profile={profile}
-                onMenuClick={onMenuClick}
-                isEmbedded={true}
-                onNavigateBack={onNavigateBack}
-              />
-              <div className="border-t-2 border-indigo-500/30 mx-4 my-2" />
               <HumanCommunicationBridge
                 profile={profile}
               />
