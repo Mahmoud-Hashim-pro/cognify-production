@@ -33,12 +33,15 @@ import {
   Type,
   RefreshCw,
   Sparkles,
+  History,
+  Trash2,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { generateAdaptiveResponse } from '../services/gemini';
 import { speak, cancelSpeech } from '../lib/tts';
 import { isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
+import { DocHistoryEntry, loadDocHistory, saveDocHistoryEntry, deleteDocHistoryEntry } from '../lib/docHistory';
 
 interface DocumentReaderModalProps {
   profile: UserProfile;
@@ -88,6 +91,10 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
   const [isSpeakingResult, setIsSpeakingResult] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- History / archive state ---
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<DocHistoryEntry[]>(() => loadDocHistory(profile.uid));
 
   // --- Speech <-> Text state ---
   const [ttsInput, setTtsInput] = useState('');
@@ -206,6 +213,14 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
       setResultText(result || '');
       setResultLang(outLang);
       if (result) {
+        setHistory(
+          saveDocHistoryEntry(profile.uid, {
+            fileName: fileName || (isArabicLocale(profile.language) ? 'مستند' : 'Document'),
+            action,
+            lang: outLang,
+            resultText: result,
+          })
+        );
         setIsSpeakingResult(true);
         speak(result, ttsLangName(outLang), {
           onEnd: () => setIsSpeakingResult(false),
@@ -376,6 +391,28 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
     } catch { /* clipboard unavailable */ }
   };
 
+  const openHistoryEntry = (entry: DocHistoryEntry) => {
+    cancelSpeech();
+    setIsSpeakingResult(false);
+    setFileName(entry.fileName);
+    setFileMime('');
+    setFileData(''); // intentionally not restored — see docHistory.ts header comment
+    setResultText(entry.resultText);
+    setResultLang(entry.lang);
+    setShowHistory(false);
+  };
+
+  const handleDeleteHistoryEntry = (id: string) => {
+    setHistory(deleteDocHistoryEntry(profile.uid, id));
+  };
+
+  const actionLabel = (action: DocHistoryEntry['action']) =>
+    action === 'summarize'
+      ? t('Summary', 'تلخيص', 'Résumé')
+      : action === 'translate'
+      ? t('Translation', 'ترجمة', 'Traduction')
+      : t('Full read', 'قراءة كاملة', 'Lecture complète');
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -411,28 +448,75 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
         </div>
 
         {/* Tool switcher */}
-        <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-xl shrink-0">
-          <button
-            onClick={() => setTool('document')}
-            aria-pressed={tool === 'document'}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-              tool === 'document' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            {t('Document Reader', 'قارئ المستندات', 'Lecteur de documents')}
-          </button>
-          <button
-            onClick={() => setTool('speech')}
-            aria-pressed={tool === 'speech'}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-              tool === 'speech' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Type className="w-3.5 h-3.5" />
-            {t('Speech ⇄ Text', 'نص ⇄ صوت', 'Texte ⇄ Voix')}
-          </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-xl flex-1">
+            <button
+              onClick={() => setTool('document')}
+              aria-pressed={tool === 'document'}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                tool === 'document' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              {t('Document Reader', 'قارئ المستندات', 'Lecteur de documents')}
+            </button>
+            <button
+              onClick={() => setTool('speech')}
+              aria-pressed={tool === 'speech'}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                tool === 'speech' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Type className="w-3.5 h-3.5" />
+              {t('Speech ⇄ Text', 'نص ⇄ صوت', 'Texte ⇄ Voix')}
+            </button>
+          </div>
+          {tool === 'document' && (
+            <button
+              onClick={() => setShowHistory((v) => !v)}
+              aria-pressed={showHistory}
+              aria-label={t('Document history', 'أرشيف المستندات', 'Historique des documents')}
+              className={`shrink-0 p-2.5 rounded-xl border transition-all ${
+                showHistory
+                  ? 'bg-teal-500 border-teal-500 text-slate-950'
+                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-4 h-4" />
+            </button>
+          )}
         </div>
+
+        {showHistory && tool === 'document' && (
+          <div className="space-y-2 shrink-0 max-h-48 overflow-y-auto p-1">
+            {history.length === 0 ? (
+              <p className="text-xs text-slate-500 text-center py-4">
+                {t('No documents read yet.', 'لسه معملتيش أي مستند.', 'Aucun document pour le moment.')}
+              </p>
+            ) : (
+              history.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950 border border-slate-800"
+                >
+                  <button onClick={() => openHistoryEntry(entry)} className="flex-1 min-w-0 text-start">
+                    <div className="text-xs font-bold text-slate-100 truncate">{entry.fileName}</div>
+                    <div className="text-[10px] text-slate-500">
+                      {actionLabel(entry.action)} · {new Date(entry.createdAt).toLocaleDateString()}
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteHistoryEntry(entry.id)}
+                    aria-label={t('Delete', 'حذف', 'Supprimer')}
+                    className="shrink-0 p-1.5 rounded-lg hover:bg-red-500/20 text-slate-500 hover:text-red-300"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
 
         <div className="overflow-y-auto flex-1 space-y-4 pr-0.5">
           {tool === 'document' ? (
@@ -472,6 +556,8 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                     </button>
                   </div>
 
+                  {fileData && (
+                  <>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => runDocumentAction('summarize')}
@@ -528,6 +614,18 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                       {t('Translate Document', 'ترجمة المستند', 'Traduire le document')}
                     </button>
                   </div>
+                  </>
+                  )}
+
+                  {!fileData && fileName && (
+                    <p className="text-[11px] text-slate-500 px-1">
+                      {t(
+                        'Loaded from history — upload the file again to re-run or translate it differently.',
+                        'اتحمّل من الأرشيف — لازم ترفعي الملف تاني عشان تعملي عليه إجراء جديد أو ترجمة مختلفة.',
+                        "Chargé depuis l'historique — reteleversez le fichier pour relancer une action."
+                      )}
+                    </p>
+                  )}
 
                   {resultText && (
                     <div className="space-y-2">
