@@ -1,0 +1,66 @@
+/**
+ * Emergency SOS Dispatcher Client Service
+ *
+ * Provides a reliable, non-interactive emergency dispatch pathway for quadriplegic
+ * and ALS patients. Unlike window.open('wa.me'), this dispatches a server-side
+ * background event without requiring user manual clicks or being blocked by popup guards.
+ */
+
+export interface EmergencyDispatchResult {
+  success: boolean;
+  incidentId?: string;
+  dispatchedAt?: string;
+  channels?: string[];
+  message: string;
+  fallbackDirectCall?: boolean;
+}
+
+export async function dispatchServerEmergencySOS(params: {
+  uid?: string;
+  studentName?: string;
+  caregiverPhone?: string;
+  caregiverName?: string;
+  location?: { lat: number; lng: number };
+  source?: 'eye_closure' | 'button' | 'vocal';
+  text?: string;
+}): Promise<EmergencyDispatchResult> {
+  const timestamp = new Date().toISOString();
+
+  try {
+    const res = await fetch('/api/emergency/dispatch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...params,
+        timestamp,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        success: true,
+        incidentId: data.incidentId,
+        dispatchedAt: data.dispatchedAt || timestamp,
+        channels: data.channels || ['server_event_bus'],
+        message: data.message || 'Emergency signal confirmed by server.',
+      };
+    }
+
+    const errData = await res.json().catch(() => ({}));
+    return {
+      success: false,
+      message: errData.error || `Server responded with status ${res.status}`,
+      fallbackDirectCall: true,
+    };
+  } catch (err: any) {
+    console.error('[Emergency Dispatch Failed]:', err);
+    return {
+      success: false,
+      message: err.message || 'Network error while contacting emergency dispatch.',
+      fallbackDirectCall: true,
+    };
+  }
+}

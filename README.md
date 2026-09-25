@@ -79,11 +79,11 @@ Student Interaction (Chat / Formative Check / Video / Speech)
 - **Normalized Gain Evaluation**: Uses Hake's normalized gain equation ($g = \frac{Post - Pre}{100 - Pre}$) to measure actual knowledge transfer between pre- and post-assessments.
 
 ### 2. Multi-Modal Accessibility Suite
-- **Vision Companion (Blind & Low-Vision)**: Real-time scene, text, and hazard narration. All camera frames are processed in volatile memory and **never written to disk or cloud (0% Disk / 0% Cloud)**.
+- **Vision Companion (Blind & Low-Vision)**: Real-time scene, text, and hazard narration. Camera frames are sent to Google Gemini for AI inference, then immediately discarded — **never persisted to disk, database, or any Cognify server (0% Disk / 0% Database Storage)**. Ephemeral cloud inference is required for multimodal AI; see [PRIVACY_SPECIFICATION.md](PRIVACY_SPECIFICATION.md) for the full data-flow audit.
 - **Spatial Memory Engine**: Localizes and tracks physical objects (keys, eyeglasses, canes) across rooms with chronological surface history (last 10 surfaces) and epistemic honesty (never hallucinates an unobserved item).
-- **Sign Avatar 3D (Deaf & Hard of Hearing)**: Real-time 3D signing avatar powered by Three.js and custom sign pose translation.
+- **Sign Avatar 3D (Deaf & Hard of Hearing)**: Real-time 3D signing avatar powered by Three.js. **Note:** Current gesture poses are ASL-based approximations pending review by a certified Arabic Sign Language (ArSL) linguist. A disclaimer is displayed in-app. Certified ArSL integration is on the roadmap (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - **Two-Way Hearing Bridge**: Live bilingual speech-to-text transcription with adjustable font sizes and high-contrast styling.
-- **Motor Euphonia & Switch Access**: Minimal-motor single-switch interface, dwell clickers, and high-contrast navigation for motor-impaired learners.
+- **Motor Euphonia & Switch Access**: Minimal-motor single-switch interface, dwell clickers, emergency SOS dispatch (server-side via Telegram/SMS), and high-contrast navigation for motor-impaired learners.
 - **Speech Sanitizer**: Natural voice filtering in TTS engine (`cleanForSpeech`), removing markdown noise, asterisks, and robotic labels before audio synthesis.
 
 ### 3. Academic Command Center & Analytics

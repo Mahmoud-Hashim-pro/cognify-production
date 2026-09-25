@@ -8,6 +8,7 @@ dotenv.config();
 import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";
 import countryHandler from "./api/geo/country";
+import emergencyDispatchHandler from "./api/emergency/dispatch";
 
 async function startServer() {
   const app = express();
@@ -34,6 +35,11 @@ async function startServer() {
   // Geo: visitor country (Vercel headers in prod, "Unknown" locally)
   app.all("/api/geo/country", (req, res) => {
     return countryHandler(req, res);
+  });
+
+  // Emergency SOS automated server-side dispatch
+  app.all("/api/emergency/dispatch", (req, res) => {
+    return emergencyDispatchHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);
