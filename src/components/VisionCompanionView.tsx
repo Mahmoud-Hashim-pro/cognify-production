@@ -42,6 +42,7 @@ import { localize, isArabicLocale } from '../lib/translations';
 import { generateAdaptiveResponse } from '../services/gemini';
 import { speak, cancelSpeech, unlockSpeechSynthesis } from '../lib/tts';
 import { toast } from './Toast';
+import DocumentReaderModal from './DocumentReaderModal';
 import {
   extractSpatialObjectsFromVision,
   recordObservedSpatialObjects,
