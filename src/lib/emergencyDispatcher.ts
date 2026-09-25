@@ -6,6 +6,8 @@
  * background event without requiring user manual clicks or being blocked by popup guards.
  */
 
+import { auth } from './firebase';
+
 export interface EmergencyDispatchResult {
   success: boolean;
   incidentId?: string;
@@ -27,11 +29,17 @@ export async function dispatchServerEmergencySOS(params: {
   const timestamp = new Date().toISOString();
 
   try {
+    const token = auth?.currentUser ? await auth.currentUser.getIdToken().catch(() => null) : null;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch('/api/emergency/dispatch', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         ...params,
         timestamp,

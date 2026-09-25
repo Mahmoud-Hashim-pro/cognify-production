@@ -3,8 +3,17 @@
  *
  * Replaces client-side window.open with a guaranteed, non-interactive server-side
  * notification pipeline. Essential for ALS/quadriplegic patients who cannot click buttons.
+ *
+ * Hardened with:
+ * 1. Mandatory Firebase Authentication ID Token verification (prevents open-relay abuse).
+ * 2. Sliding-window rate limiting per UID and IP (prevents SMS spamming / bombing).
+ * 3. E.164 phone sanitization and validation.
+ * 4. Persistent non-PII incident audit trail logging.
+ * 5. Deterministic fallback direct call if zero channels deliver.
  */
 import { applyCorsHeaders } from '../_lib/cors.js';
+import { verifyRequestAuth } from '../_lib/authGuard.js';
+import { checkRateLimit } from '../_lib/rateLimiter.js';
 
 export interface EmergencyDispatchPayload {
   uid?: string;
@@ -17,10 +26,55 @@ export interface EmergencyDispatchPayload {
   timestamp?: string;
 }
 
+function sanitizeAndValidatePhone(phone?: string): string | null {
+  if (!phone || typeof phone !== 'string') return null;
+  const cleaned = phone.replace(/[\s\-\(\)\.]/g, '').trim();
+  // Valid international E.164 phone standard: e.g. +201012345678 or standard 10-15 digit string
+  if (/^\+?[1-9]\d{7,14}$/.test(cleaned)) {
+    return cleaned;
+  }
+  return null;
+}
+
+// Store metadata-only incident audit trail in Firestore (Zero audio/video PII)
+async function recordIncidentAuditLog(incidentData: {
+  incidentId: string;
+  uid: string;
+  timestamp: string;
+  source: string;
+  channelsNotified: string[];
+  channelErrors: string[];
+  fallbackDirectCall: boolean;
+  hasLocation: boolean;
+}) {
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0347404066';
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/emergency_incidents?documentId=${incidentData.incidentId}`;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          incidentId: { stringValue: incidentData.incidentId },
+          uid: { stringValue: incidentData.uid },
+          timestamp: { stringValue: incidentData.timestamp },
+          source: { stringValue: incidentData.source },
+          channelsNotified: { arrayValue: { values: incidentData.channelsNotified.map((c) => ({ stringValue: c })) } },
+          channelErrors: { arrayValue: { values: incidentData.channelErrors.map((e) => ({ stringValue: e })) } },
+          fallbackDirectCall: { booleanValue: incidentData.fallbackDirectCall },
+          hasLocation: { booleanValue: incidentData.hasLocation },
+        },
+      }),
+    }).catch(() => {});
+  } catch {
+    // Non-blocking telemetry
+  }
+}
+
 export default async function handler(req: any, res: any) {
   res.setHeader?.('Cache-Control', 'no-store, max-age=0');
 
-  // CORS Guard
+  // 1. CORS Guard
   if (!applyCorsHeaders(req, res)) {
     return;
   }
@@ -29,35 +83,61 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // 2. Mandatory Authentication Guard (Prevents Open-Relay SMS abuse)
+  const authResult = await verifyRequestAuth(req);
+  if (!authResult.authenticated || !authResult.uid) {
+    return res.status(401).json({
+      success: false,
+      error: authResult.error || 'Authentication required for emergency dispatch.',
+      fallbackDirectCall: true,
+    });
+  }
+  const authenticatedUid = authResult.uid;
+
+  // 3. Sliding-Window Rate Limiting (5 requests/minute per UID, 15 per IP)
+  const clientIp = req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
+  const userRate = checkRateLimit(`sos:uid:${authenticatedUid}`, 5);
+  const ipRate = checkRateLimit(`sos:ip:${clientIp}`, 15);
+
+  if (!userRate.allowed || !ipRate.allowed) {
+    console.warn(`[SOS Rate Limit Exceeded]: UID=${authenticatedUid} IP=${clientIp}`);
+    return res.status(429).json({
+      success: false,
+      error: 'Rate limit exceeded: Too many SOS dispatch attempts. Please dial emergency services directly.',
+      fallbackDirectCall: true,
+      retryAfterMs: Math.max(userRate.resetMs, ipRate.resetMs),
+    });
+  }
+
   try {
     const payload: EmergencyDispatchPayload = req.body || {};
     const incidentId = `SOS-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     const timestamp = payload.timestamp || new Date().toISOString();
-    // SAFETY: Only count a channel as notified if the HTTP request actually succeeded.
-    // 'server_event_bus' is removed from the default — it only appears if we log to a
-    // real persistence store. A patient must not be told their SOS was delivered unless
-    // at least one real-world notification channel (Telegram / SMS / Webhook) confirmed it.
+
     const channelsNotified: string[] = [];
     const channelErrors: string[] = [];
 
     const student = payload.studentName || 'Cognify Student';
+    const validCaregiverPhone = sanitizeAndValidatePhone(payload.caregiverPhone);
+
     const locationStr = payload.location?.lat && payload.location?.lng
       ? `https://maps.google.com/?q=${payload.location.lat},${payload.location.lng}`
       : 'Location unavailable';
 
     const alertMessage = `🚨 [CRITICAL EMERGENCY SOS]
 Incident ID: ${incidentId}
-Student: ${student} (UID: ${payload.uid || 'Anonymous'})
+Student: ${student} (UID: ${authenticatedUid})
 Trigger Source: ${payload.source || 'eye_closure'}
-Caregiver Contact: ${payload.caregiverName || 'Primary Caregiver'} (${payload.caregiverPhone || 'Not set'})
+Caregiver Contact: ${payload.caregiverName || 'Primary Caregiver'} (${validCaregiverPhone || 'Not set or unverified'})
 Message: ${payload.text || 'Immediate medical/caregiver assistance requested!'}
 Live Map: ${locationStr}
 Time: ${timestamp}`;
 
     console.warn(`[EMERGENCY SOS DISPATCHED]:`, {
       incidentId,
+      authenticatedUid,
       student,
-      phone: payload.caregiverPhone,
+      phone: validCaregiverPhone,
       location: payload.location,
       time: timestamp,
     });
@@ -69,7 +149,7 @@ Time: ${timestamp}`;
         const whRes = await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ incidentId, alertMessage, payload, timestamp }),
+          body: JSON.stringify({ incidentId, alertMessage, payload, timestamp, uid: authenticatedUid }),
         });
         if (whRes.ok) {
           channelsNotified.push('webhook_pager');
@@ -106,15 +186,15 @@ Time: ${timestamp}`;
       }
     }
 
-    // 3. Dispatch to Twilio SMS (if configured)
+    // 3. Dispatch to Twilio SMS (if configured and caregiver phone is valid)
     const twilioSid = process.env.TWILIO_ACCOUNT_SID;
     const twilioAuth = process.env.TWILIO_AUTH_TOKEN;
     const twilioFrom = process.env.TWILIO_FROM_PHONE;
-    if (twilioSid && twilioAuth && twilioFrom && payload.caregiverPhone) {
+    if (twilioSid && twilioAuth && twilioFrom && validCaregiverPhone) {
       try {
         const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuth}`).toString('base64');
         const smsParams = new URLSearchParams();
-        smsParams.append('To', payload.caregiverPhone);
+        smsParams.append('To', validCaregiverPhone);
         smsParams.append('From', twilioFrom);
         smsParams.append('Body', alertMessage);
 
@@ -137,17 +217,32 @@ Time: ${timestamp}`;
         channelErrors.push(`sms: ${smsErr?.message || 'network error'}`);
         console.error('[SOS SMS Error]:', smsErr);
       }
+    } else if (payload.caregiverPhone && !validCaregiverPhone) {
+      channelErrors.push('sms: Invalid caregiver phone format (E.164 required)');
     }
 
     // CRITICAL SAFETY CHECK: If zero real-world channels delivered the alert,
     // return success:false so the client triggers a direct phone-call fallback.
-    // A patient must NEVER be falsely told their emergency was dispatched.
     const noRealChannelsConfigured =
       !webhookUrl && !(tgToken && tgChatId) && !(twilioSid && twilioAuth && twilioFrom);
     const allConfiguredChannelsFailed =
       channelsNotified.length === 0 && channelErrors.length > 0;
 
-    if (noRealChannelsConfigured || allConfiguredChannelsFailed) {
+    const fallbackDirectCall = noRealChannelsConfigured || allConfiguredChannelsFailed;
+
+    // Asynchronously record immutable audit trail (metadata only)
+    recordIncidentAuditLog({
+      incidentId,
+      uid: authenticatedUid,
+      timestamp,
+      source: payload.source || 'eye_closure',
+      channelsNotified,
+      channelErrors,
+      fallbackDirectCall,
+      hasLocation: !!(payload.location?.lat && payload.location?.lng),
+    });
+
+    if (fallbackDirectCall) {
       console.error('[SOS CRITICAL]: No real-world channels delivered the emergency. Returning fallback flag.', {
         noRealChannelsConfigured,
         channelErrors,
@@ -160,7 +255,7 @@ Time: ${timestamp}`;
         channelErrors,
         fallbackDirectCall: true,
         message: noRealChannelsConfigured
-          ? 'Emergency server received SOS but no notification channels are configured (TELEGRAM_BOT_TOKEN / TWILIO_ACCOUNT_SID / EMERGENCY_WEBHOOK_URL). Direct call fallback activated.'
+          ? 'Emergency server received SOS but no notification channels are configured. Direct call fallback activated.'
           : 'Emergency dispatched to server but all configured channels failed. Direct call fallback activated.',
       });
     }
@@ -179,6 +274,7 @@ Time: ${timestamp}`;
     return res.status(500).json({
       success: false,
       error: err.message || 'Failed to dispatch emergency alert.',
+      fallbackDirectCall: true,
     });
   }
 }

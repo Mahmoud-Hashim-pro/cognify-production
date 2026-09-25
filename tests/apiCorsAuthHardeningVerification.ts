@@ -16,6 +16,7 @@ import learningProfileHandler from '../api/student/learningProfile.js';
 import securityAuditHandler from '../api/telemetry/securityAudit.js';
 import generateAdaptiveResponseHandler from '../api/gemini/generateAdaptiveResponse.js';
 import generateAdaptiveResponseStreamHandler from '../api/gemini/generateAdaptiveResponseStream.js';
+import emergencyDispatchHandler from '../api/emergency/dispatch.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -439,6 +440,105 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
     const mStream2 = makeRes();
     await generateAdaptiveResponseStreamHandler(streamTooManyAttachmentsReq, mStream2.res);
     assert(mStream2.getCode() === 400, 'generateAdaptiveResponseStream rejects > 5 attachments with HTTP 400');
+  }
+
+  // --------------------------------------------------------------------------
+  // Group 7: Emergency SOS Dispatch Security & Fail-Closed Guard (/api/emergency/dispatch)
+  // --------------------------------------------------------------------------
+  console.log('\nGroup 7: Emergency SOS Dispatch Security & Fail-Closed Guard');
+  {
+    const makeRes = () => {
+      let code = 200;
+      let body: any = null;
+      return {
+        res: {
+          setHeader: () => {},
+          status: (c: number) => {
+            code = c;
+            return {
+              json: (b: any) => { body = b; return b; },
+              end: () => {},
+            };
+          },
+        },
+        getCode: () => code,
+        getBody: () => body,
+      };
+    };
+
+    // 1. Rejects unauthenticated request with HTTP 401
+    const unauthSosReq = {
+      method: 'POST',
+      body: {
+        studentName: 'Test Student',
+        caregiverPhone: '+201012345678',
+        source: 'eye_closure',
+      },
+      headers: { 'content-type': 'application/json' },
+    };
+    const mSos1 = makeRes();
+    await emergencyDispatchHandler(unauthSosReq, mSos1.res);
+    assert(mSos1.getCode() === 401, 'emergencyDispatch rejects unauthenticated caller with HTTP 401');
+    assert(mSos1.getBody()?.fallbackDirectCall === true, 'emergencyDispatch 401 provides fallbackDirectCall: true');
+
+    // 2. Accepts valid Bearer token and returns fallbackDirectCall when zero notification channels are configured
+    const validSosReq = {
+      method: 'POST',
+      body: {
+        studentName: 'Test Student',
+        caregiverPhone: '+201012345678',
+        source: 'eye_closure',
+        location: { lat: 30.0444, lng: 31.2357 },
+      },
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test_valid_token_student_verified_99',
+      },
+    };
+    const mSos2 = makeRes();
+    await emergencyDispatchHandler(validSosReq, mSos2.res);
+    assert(mSos2.getCode() === 200, 'emergencyDispatch processes authenticated caller with HTTP 200');
+    assert(mSos2.getBody()?.fallbackDirectCall === true, 'emergencyDispatch reliably signals fallbackDirectCall: true when 0 channels delivered');
+    assert(typeof mSos2.getBody()?.incidentId === 'string' && mSos2.getBody()?.incidentId.startsWith('SOS-'), 'emergencyDispatch generates valid incidentId');
+
+    // 3. Rejects invalid phone formats (prevents SMS spamming / bombing)
+    const invalidPhoneSosReq = {
+      method: 'POST',
+      body: {
+        studentName: 'Test Student',
+        caregiverPhone: 'invalid_phone_number_spam_string',
+        source: 'button',
+      },
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test_valid_token_student_phone_test',
+      },
+    };
+    const mSos3 = makeRes();
+    await emergencyDispatchHandler(invalidPhoneSosReq, mSos3.res);
+    assert(mSos3.getBody()?.channelErrors?.some((e: string) => e.includes('Invalid caregiver phone')), 'emergencyDispatch rejects non-E.164 phone numbers');
+
+    // 4. Rate Limiting: 5 requests/min per UID
+    const spamUid = 'spam_test_uid_sos';
+    let hitRateLimit = false;
+    for (let i = 0; i < 7; i++) {
+      const spamReq = {
+        method: 'POST',
+        body: { studentName: 'Spam Bot' },
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer test_valid_token_${spamUid}`,
+        },
+      };
+      const mSpam = makeRes();
+      await emergencyDispatchHandler(spamReq, mSpam.res);
+      if (mSpam.getCode() === 429) {
+        hitRateLimit = true;
+        assert(mSpam.getBody()?.fallbackDirectCall === true, 'emergencyDispatch 429 returns fallbackDirectCall: true');
+        break;
+      }
+    }
+    assert(hitRateLimit === true, 'emergencyDispatch enforces 5 req/min sliding-window rate limit per UID');
   }
 
   console.log(`\n====================================================================`);
