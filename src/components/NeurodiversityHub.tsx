@@ -35,6 +35,7 @@ import { toast } from './Toast';
 interface NeurodiversityHubProps {
   profile: UserProfile;
   onNavigateBack?: () => void;
+  onOpenLearningHub?: () => void;
 }
 
 const DEFAULT_PECS_CARDS: PECSCard[] = [
@@ -270,6 +271,16 @@ export default function NeurodiversityHub({ profile, onNavigateBack }: Neurodive
             <span>📖</span>
             <span>{t('Reading Tools', 'أدوات القراءة', 'Lecture')}</span>
           </button>
+          {onOpenLearningHub && (
+            <button
+              onClick={onOpenLearningHub}
+              className="px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 border border-amber-500/40 hover:border-amber-400 hover:text-white"
+              title={t('Open Adaptive Learning Hub Curriculum', 'فتح مركز المناهج التعليمية الميسرة', 'Ouvrir le Pôle Apprentissage Adapté')}
+            >
+              <span>🎓</span>
+              <span>{t('Adaptive Curriculum', 'المناهج الميسرة', 'Curriculum')}</span>
+            </button>
+          )}
         </div>
       </header>
 

@@ -22,6 +22,7 @@ import CaregiverHub from './CaregiverHub';
 import AccessibilityPassportModal from './AccessibilityPassportModal';
 import DeafEcosystemView from './DeafEcosystemView';
 const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
+const LearningHub = React.lazy(() => import('./learning/LearningHub'));
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation } from '../lib/translations';
 
@@ -36,6 +37,7 @@ export type DisabilityTab =
   | 'vision'
   | 'radar'
   | 'neurodiversity'
+  | 'learning'
   | 'caregiver'
   | 'deaf'
   | 'orchestrator';
@@ -94,7 +96,8 @@ function categoryForTab(tab: DisabilityTab): ModuleCategory {
     case 'vision': return 'vision';
     case 'deaf': return 'hearing';
     case 'motor': return 'motor';
-    case 'neurodiversity': return 'neuro';
+    case 'neurodiversity':
+    case 'learning': return 'neuro';
     case 'caregiver': return 'caregiver';
     default: return 'all';
   }
@@ -404,6 +407,27 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       borderGlow: 'hover:border-purple-500/60 border-slate-800',
       bgGlow: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
       buttonCls: 'bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white shadow-purple-500/20',
+      matchingMode: 'Neurodiversity',
+    },
+    // 5. ADAPTIVE LEARNING HUB & CURRICULUM
+    {
+      id: 'learning' as const,
+      category: 'neuro' as const,
+      titleEn: 'Adaptive Learning Hub (Curriculum)',
+      titleAr: 'مركز المناهج والتعلّم التكيّفي',
+      shortEn: 'Learning Hub',
+      shortAr: 'المناهج الميسرة',
+      badgeEn: 'Dyslexia & Learning Support',
+      badgeAr: 'صعوبات التعلّم وعسر القراءة',
+      descEn: 'Interactive multi-sensory curriculum for math, reading, writing, memory, and science with OpenDyslexic font support and parent dashboard.',
+      descAr: 'مناهج تفاعلية متكيفة ومتعددة الحواس: رياضيات، قراءة، كتابة، ذاكرة، وعلوم، مع دعم خط عسر القراءة المخصص وتشجيع صوتي ولوحة متابعة للأهل.',
+      quickFeaturesAr: ['7 مواد تفاعلية مهيأة', 'دعم خط عسر القراءة', 'تكييف الصعوبة الذكي', 'لوحة متابعة تقدم الأهل'],
+      quickFeaturesEn: ['7 Adaptive Subjects', 'OpenDyslexic Font', 'Dynamic Level Adaptation', 'Parent Progress Tracker'],
+      Icon: Sparkles,
+      accentColor: 'text-amber-400',
+      borderGlow: 'hover:border-amber-500/60 border-slate-800',
+      bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+      buttonCls: 'bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 text-slate-950 shadow-yellow-500/20',
       matchingMode: 'Neurodiversity',
     },
     // 5. CAREGIVER & UNIVERSAL
@@ -756,7 +780,33 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <NeurodiversityHub profile={profile} onNavigateBack={handleNavigateBack} />
+              <NeurodiversityHub
+                profile={profile}
+                onNavigateBack={handleNavigateBack}
+                onOpenLearningHub={() => handleSelectTab('learning')}
+              />
+            </motion.div>
+          )}
+
+          {activeTab === 'learning' && (
+            <motion.div
+              key="learning-hub-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
+            >
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <LearningHub
+                  profile={profile}
+                  onNavigateBack={handleNavigateBack}
+                  onMenuClick={onMenuClick}
+                />
+              </React.Suspense>
             </motion.div>
           )}
 
