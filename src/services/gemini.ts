@@ -967,7 +967,25 @@ export async function* generateAdaptiveResponseStream(
     }
 
     const isHtml = res.headers.get('Content-Type')?.includes('text/html') || false;
-    const isMissingBackend = isHtml || res.status === 404;
+    let isMissingBackend = isHtml || res.status === 404;
+
+    if (!res.ok || isMissingBackend) {
+      // Automatic transparent fallback to live Cloud Run Full-Stack backend
+      try {
+        const cloudRunRes = await fetch('https://ais-pre-yrqajcztyb24fektpr6ddb-78152961995.europe-west1.run.app/api/gemini/generateAdaptiveResponseStream', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ message, profile, history, attachments, studentState }),
+          signal
+        });
+        if (cloudRunRes.ok && !cloudRunRes.headers.get('Content-Type')?.includes('text/html')) {
+          res = cloudRunRes;
+          isMissingBackend = false;
+        }
+      } catch {
+        // Continue to client-side fallback
+      }
+    }
 
     if (!res.ok || isMissingBackend) {
       if (isMissingBackend) {
@@ -1143,6 +1161,17 @@ export async function generateAdaptiveResponse(
 
     const isHtml = res.headers.get('Content-Type')?.includes('text/html');
     if (!res.ok || isHtml) {
+      try {
+        const cloudRunRes = await fetch('https://ais-pre-yrqajcztyb24fektpr6ddb-78152961995.europe-west1.run.app/api/gemini/generateAdaptiveResponse', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ message, profile, history, attachments, studentState })
+        });
+        if (cloudRunRes.ok && !cloudRunRes.headers.get('Content-Type')?.includes('text/html')) {
+          const data = await cloudRunRes.json();
+          return data.result;
+        }
+      } catch {}
       if (isHtml || res.status === 404) backendUp = false;
       return direct();
     }

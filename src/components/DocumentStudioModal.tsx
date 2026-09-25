@@ -981,7 +981,7 @@ ${currentDoc.summary}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4"
+          className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4"
           onClick={onClose}
         >
           <motion.div
@@ -1067,7 +1067,7 @@ ${currentDoc.summary}
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-slate-800 px-4 gap-1 sm:gap-2 overflow-x-auto bg-slate-950/40">
+            <div className="flex border-b border-slate-800 px-4 gap-1 sm:gap-2 overflow-x-auto scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-slate-950/40">
               <button
                 type="button"
                 onClick={() => setDocStudioTab('pdf')}

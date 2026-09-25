@@ -9,6 +9,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://ais-pre-yrqajcztyb24fektpr6ddb-78152961995.europe-west1.run.app/api/:path*"
+    },
+    {
       "source": "/((?!api/|assets/|models/|sw\\.js|manifest\\.webmanifest|.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
