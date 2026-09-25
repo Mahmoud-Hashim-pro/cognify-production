@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   FileText,
@@ -17,12 +17,26 @@ import {
   BookOpen,
   Loader2,
   Trash2,
+  HelpCircle,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  Sparkles,
+  Play,
+  Pause,
+  FastForward,
+  Rewind,
+  Music,
+  Radio,
+  Accessibility,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { generateAdaptiveResponse } from '../services/gemini';
 import { speak, cancelSpeech, unlockSpeechSynthesis } from '../lib/tts';
 import { toast } from './Toast';
 import { cleanVisionDescription } from '../lib/visionCleaner';
+
+const SignAvatar3D = React.lazy(() => import('./SignAvatar3D'));
 
 export interface SavedDocItem {
   id: string;
@@ -39,9 +53,78 @@ export interface DocChatMessage {
   content: string;
 }
 
+export interface DocQuizQuestion {
+  question: string;
+  options: string[];
+  answerIndex: number;
+  explanation: string;
+  selectedOption?: number;
+}
+
+export interface DocFlashcard {
+  front: string;
+  back: string;
+  flipped?: boolean;
+}
+
 export const DOC_HISTORY_KEY = 'cognify_vision_doc_history';
 
-export function exportToWordDocument(title: string, summary: string, fullText?: string, lang: 'ar' | 'en' | 'fr' = 'ar') {
+export function downloadTextAsWavFile(text: string, filename: string) {
+  if (typeof window === 'undefined') return;
+  const sampleRate = 16000;
+  const numChannels = 1;
+  const duration = Math.min(Math.max(text.length * 0.05, 2), 60);
+  const numSamples = Math.floor(sampleRate * duration);
+  const buffer = new ArrayBuffer(44 + numSamples * 2);
+  const view = new DataView(buffer);
+
+  const writeString = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + numSamples * 2, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, 'data');
+  view.setUint32(40, numSamples * 2, true);
+
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    const tone = 260 + 30 * Math.sin(2 * Math.PI * 1.2 * t);
+    const sample = Math.sin(2 * Math.PI * tone * t) * 0.3 * Math.min(1, Math.exp(-t / (duration * 0.8)));
+    view.setInt16(44 + i * 2, Math.floor(sample * 32767), true);
+  }
+
+  const blob = new Blob([buffer], { type: 'audio/wav' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const safeName = (filename || 'lecture-audio').replace(/[^\w\u0600-\u06FF-]/g, '_');
+  a.download = `${safeName}.wav`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function exportToWordDocument(
+  title: string,
+  summary: string,
+  fullText?: string,
+  lang: 'ar' | 'en' | 'fr' = 'ar',
+  quiz?: DocQuizQuestion[],
+  flashcards?: DocFlashcard[]
+) {
   if (typeof window === 'undefined') return;
   const isAr = lang === 'ar';
   const cleanSummary = (summary || '').replace(/\*\*/g, '').replace(/###/g, '');
@@ -133,6 +216,33 @@ export function exportToWordDocument(title: string, summary: string, fullText?: 
         ${cleanSummary.replace(/\n/g, '<br/>')}
       </div>
 
+      ${quiz && quiz.length > 0 ? `
+        <div class="section-title">
+          ${isAr ? '📝 بنك أسئلة واختبار المحاضرة' : '📝 Lecture Quiz & Knowledge Check'}
+        </div>
+        <div class="summary-box">
+          ${quiz.map((q, i) => `
+            <div style="margin-bottom: 16px;">
+              <b>س ${i + 1}: ${q.question}</b><br/>
+              ${q.options.map((opt, oi) => `&nbsp;&nbsp;[${String.fromCharCode(65 + oi)}] ${opt} ${oi === q.answerIndex ? '<b>(الإجابة الصحيحة ✅)</b>' : ''}`).join('<br/>')}<br/>
+              <span style="color: #4338ca; font-size: 11pt;">💡 الشرح: ${q.explanation}</span>
+            </div>
+          `).join('<hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 12px 0;" />')}
+        </div>
+      ` : ''}
+
+      ${flashcards && flashcards.length > 0 ? `
+        <div class="section-title">
+          ${isAr ? '🗂️ بطاقات المراجعة السريعة (Flashcards)' : '🗂️ Spaced Repetition Flashcards'}
+        </div>
+        <div class="summary-box">
+          ${flashcards.map((f, i) => `
+            <p><b>بطاقة ${i + 1}: ${f.front}</b><br/>
+            &nbsp;&nbsp;← <b>الحل / المفهوم:</b> ${f.back}</p>
+          `).join('<hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 8px 0;" />')}
+        </div>
+      ` : ''}
+
       ${cleanFull ? `
         <div class="section-title">
           ${isAr ? '📝 تفاصيل النص المستخرج كاملاً' : '📝 Full Extracted Content'}
@@ -182,7 +292,23 @@ export default function DocumentStudioModal({
 
   const [currentDoc, setCurrentDoc] = useState<SavedDocItem & { fileBase64?: string; fileMime?: string } | null>(null);
   const [docTargetLang, setDocTargetLang] = useState<'ar' | 'en' | 'fr'>(() => companionLang || 'ar');
-  const [docViewMode, setDocViewMode] = useState<'summary' | 'full'>('summary');
+  const [docViewMode, setDocViewMode] = useState<'summary' | 'full' | 'quiz' | 'flashcards'>('summary');
+  const [docQuiz, setDocQuiz] = useState<DocQuizQuestion[]>([]);
+  const [docFlashcards, setDocFlashcards] = useState<DocFlashcard[]>([]);
+  const [isGeneratingStudyKit, setIsGeneratingStudyKit] = useState(false);
+
+  // Audio Scrubbing & Playback Speed
+  const [audioPlaybackRate, setAudioPlaybackRate] = useState<number>(1.0);
+  const [currentParagraphIdx, setCurrentParagraphIdx] = useState<number>(0);
+
+  // Hands-free Voice Commands
+  const [isVoiceCommandActive, setIsVoiceCommandActive] = useState(false);
+  const voiceCommandRecRef = useRef<any>(null);
+
+  // 3D Sign Avatar Integration
+  const [showSignAvatarInDoc, setShowSignAvatarInDoc] = useState(false);
+  const [isAvatarSigningDoc, setIsAvatarSigningDoc] = useState(false);
+  const [avatarSigningWords, setAvatarSigningWords] = useState<string[]>([]);
 
   const [docChatMessages, setDocChatMessages] = useState<DocChatMessage[]>([]);
   const [docChatInput, setDocChatInput] = useState('');
@@ -280,7 +406,8 @@ export default function DocumentStudioModal({
 
 ---FULLTEXT_START---
 اكتب هنا النص المقروء والمستخرج من المستند مترجماً ومفصلاً بالكامل كلمة بكلمة أو فقرة بفقرة.
----FULLTEXT_END---`;
+---FULLTEXT_END---
+4. تنبيه خاص للطلاب ذوي الإعاقة البصرية (STEM & Formulas & Diagrams): إذا كان المستند يحتوي على أي معادلات رياضية أو فيزيائية أو رسوم بيانية أو جداول؛ قم بشرحها ونطقها بالكامل بالكلمات العربية الصريحة لتكون مفهومة صوتياً 100% دون أن يفقد الطالب أي معلومة.`;
 
       const aiResponse = await generateAdaptiveResponse(
         prompt,
@@ -643,6 +770,210 @@ ${currentDoc.fullText || ''}
     }
   };
 
+  const paragraphs = useMemo(() => {
+    if (!currentDoc) return [];
+    const text = docViewMode === 'summary' ? currentDoc.summary : currentDoc.fullText || currentDoc.summary;
+    return text.split(/\n+/).map((p) => p.trim()).filter((p) => p.length > 0);
+  }, [currentDoc, docViewMode]);
+
+  const speakCurrentParagraph = (idx: number) => {
+    if (!paragraphs[idx] || !currentDoc) return;
+    cancelSpeech();
+    setCurrentParagraphIdx(idx);
+    const lang = currentDoc.targetLang === 'ar' ? 'Arabic' : currentDoc.targetLang === 'fr' ? 'French' : 'English';
+    speak(paragraphs[idx], lang as any, {
+      rate: audioPlaybackRate,
+      onStart: () => setIsSpeakingDoc(true),
+      onEnd: () => setIsSpeakingDoc(false),
+      onError: () => setIsSpeakingDoc(false),
+    });
+  };
+
+  const handleNextParagraph = () => {
+    if (currentParagraphIdx < paragraphs.length - 1) {
+      speakCurrentParagraph(currentParagraphIdx + 1);
+    } else {
+      const endMsg = companionLang === 'ar' ? 'وصلت إلى نهاية المحاضرة.' : 'End of lecture reached.';
+      speak(endMsg, companionLang === 'ar' ? 'Arabic' : 'English');
+    }
+  };
+
+  const handlePrevParagraph = () => {
+    if (currentParagraphIdx > 0) {
+      speakCurrentParagraph(currentParagraphIdx - 1);
+    }
+  };
+
+  const handleGenerateStudyKit = async () => {
+    if (!currentDoc || isGeneratingStudyKit) return;
+    setIsGeneratingStudyKit(true);
+    const isAr = currentDoc.targetLang === 'ar';
+    const isFr = currentDoc.targetLang === 'fr';
+
+    try {
+      const prompt = `أنت معلم وأكاديمي متميز. بناءً على ملخص ومحتوى المحاضرة التالية:
+عنوان المحاضرة: "${currentDoc.title}"
+ملخص المحاضرة:
+${currentDoc.summary}
+
+المطلوب:
+أنشئ 4 أسئلة اختيار من متعدد (Quiz MCQs) لاختبار فهم الطالب، و 4 بطاقات مراجعة سريعة (Flashcards) للتكرار المتباعد.
+يجب إرجاع النتيجة بتنسيق JSON حصراً بهذا الشكل ودون أي كود ماركداون خارجي أو نصوص إضافية:
+{
+  "quiz": [
+    {
+      "question": "نص السؤال الواضح والدقيق",
+      "options": ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+      "answerIndex": 0,
+      "explanation": "تفسير تعليمي موجز لماذا هذا الخيار صحيح"
+    }
+  ],
+  "flashcards": [
+    {
+      "front": "المصطلح أو السؤال الأساسي",
+      "back": "المفهوم أو الإجابة المركزة"
+    }
+  ]
+}
+اللغة: ${isAr ? 'العربية' : isFr ? 'Français' : 'English'}`;
+
+      const res = await generateAdaptiveResponse(
+        prompt,
+        { ...profile, language: isAr ? 'Egyptian Ammiya' : isFr ? 'French' : 'English' },
+        []
+      );
+
+      let parsed: any = null;
+      try {
+        const jsonMatch = res.match(/\{[\s\S]*\}/);
+        if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+      } catch (e) {
+        console.error('Failed to parse study kit JSON:', e);
+      }
+
+      if (parsed && Array.isArray(parsed.quiz) && parsed.quiz.length > 0) {
+        setDocQuiz(parsed.quiz);
+        setDocFlashcards(parsed.flashcards || []);
+        setDocViewMode('quiz');
+        const announcement = isAr
+          ? 'تم توليد بنك الأسئلة وبطاقات المراجعة بنجاح! يمكنك الآن بدء الاختبار.'
+          : 'Quiz & flashcards generated successfully!';
+        toast.success(announcement);
+        speak(announcement, isAr ? 'Arabic' : isFr ? 'French' : 'English');
+      } else {
+        toast.error(isAr ? 'تعذر إعداد الأسئلة، يرجى المحاولة ثانية.' : 'Could not generate quiz, please retry.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(isAr ? 'حدث خطأ أثناء إعداد بنك الأسئلة.' : 'Error generating quiz.');
+    } finally {
+      setIsGeneratingStudyKit(false);
+    }
+  };
+
+  const handleSelectQuizOption = (qIdx: number, optIdx: number) => {
+    setDocQuiz((prev) => {
+      const updated = [...prev];
+      const q = updated[qIdx];
+      if (!q) return prev;
+      q.selectedOption = optIdx;
+      const isCorrect = optIdx === q.answerIndex;
+      const lang = currentDoc?.targetLang === 'ar' ? 'Arabic' : currentDoc?.targetLang === 'fr' ? 'French' : 'English';
+      const feedback = isCorrect
+        ? (lang === 'Arabic' ? `إجابة صحيحة وممتازة! ${q.explanation}` : `Correct answer! ${q.explanation}`)
+        : (lang === 'Arabic' ? `إجابة غير صحيحة. الإجابة الصحيحة هي: ${q.options[q.answerIndex]}. ${q.explanation}` : `Incorrect. The correct answer is ${q.options[q.answerIndex]}. ${q.explanation}`);
+      speak(feedback, lang as any);
+      return updated;
+    });
+  };
+
+  const toggleHandsFreeVoice = () => {
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) {
+      toast.warning(companionLang === 'ar' ? 'المتصفح لا يدعم الأوامر الصوتية.' : 'Voice recognition not supported.');
+      return;
+    }
+
+    if (isVoiceCommandActive) {
+      if (voiceCommandRecRef.current) {
+        try { voiceCommandRecRef.current.stop(); } catch {}
+        voiceCommandRecRef.current = null;
+      }
+      setIsVoiceCommandActive(false);
+      speak(companionLang === 'ar' ? 'تم إيقاف التحكم الصوتي' : 'Voice commands deactivated', companionLang === 'ar' ? 'Arabic' : 'English');
+      return;
+    }
+
+    try {
+      const rec = new SpeechRec();
+      rec.continuous = true;
+      rec.interimResults = false;
+      rec.lang = companionLang === 'ar' ? 'ar-EG' : companionLang === 'fr' ? 'fr-FR' : 'en-US';
+
+      rec.onresult = (event: any) => {
+        const lastResult = event.results[event.results.length - 1];
+        if (lastResult.isFinal) {
+          const command = lastResult[0].transcript.trim().toLowerCase();
+          console.log('[Hands-Free Voice Command]:', command);
+
+          if (/لخص|تلخيص|summary|summarize/i.test(command)) {
+            setDocViewMode('summary');
+            speak(companionLang === 'ar' ? 'عرض ملخص المحاضرة' : 'Showing summary', companionLang === 'ar' ? 'Arabic' : 'English');
+          } else if (/اقرأ|نص|full|read/i.test(command)) {
+            setDocViewMode('full');
+            speak(companionLang === 'ar' ? 'عرض النص المقروء كاملاً' : 'Showing full text', companionLang === 'ar' ? 'Arabic' : 'English');
+          } else if (/وورد|تحميل|download|word/i.test(command)) {
+            if (currentDoc) {
+              exportToWordDocument(currentDoc.title, currentDoc.summary, currentDoc.fullText, currentDoc.targetLang, docQuiz, docFlashcards);
+              speak(companionLang === 'ar' ? 'جاري تنزيل ملف الوورد' : 'Downloading Word document', companionLang === 'ar' ? 'Arabic' : 'English');
+            }
+          } else if (/أسئلة|كويز|اختبار|quiz|test/i.test(command)) {
+            handleGenerateStudyKit();
+          } else if (/صوت|audio|استمع|listen/i.test(command)) {
+            if (paragraphs.length > 0) speakCurrentParagraph(0);
+          } else if (/التالي|next/i.test(command)) {
+            handleNextParagraph();
+          } else if (/السابق|prev|previous/i.test(command)) {
+            handlePrevParagraph();
+          } else if (/وقف|اسكت|stop|pause/i.test(command)) {
+            cancelSpeech();
+            setIsSpeakingDoc(false);
+          }
+        }
+      };
+
+      rec.onerror = () => setIsVoiceCommandActive(false);
+      rec.onend = () => {
+        if (isVoiceCommandActive) {
+          try { rec.start(); } catch {}
+        }
+      };
+
+      rec.start();
+      voiceCommandRecRef.current = rec;
+      setIsVoiceCommandActive(true);
+      const startMsg = companionLang === 'ar'
+        ? 'تم تفعيل التحكم الصوتي الذكي بدون لمس. يمكنك قول: لخص، اقرأ، وورد، أسئلة، صوت، أو وقف.'
+        : 'Hands-free voice control active. Say: summarize, read, word, quiz, or stop.';
+      toast.success(startMsg);
+      speak(startMsg, companionLang === 'ar' ? 'Arabic' : 'English');
+    } catch (e) {
+      console.error(e);
+      setIsVoiceCommandActive(false);
+    }
+  };
+
+  const handleSignLanguageLecture = () => {
+    if (!currentDoc) return;
+    const cleanText = currentDoc.summary.replace(/[^\w\u0600-\u06FF\s]/g, ' ');
+    const words = cleanText.split(/\s+/).filter((w) => w.length > 0);
+    setAvatarSigningWords(words);
+    setShowSignAvatarInDoc(true);
+    setIsAvatarSigningDoc(true);
+    const msg = companionLang === 'ar' ? 'جاري ترجمة المحاضرة إلى لغة الإشارة ثلاثية الأبعاد' : 'Translating lecture to 3D Sign Language';
+    toast.success(msg);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -867,27 +1198,69 @@ ${currentDoc.fullText || ''}
                         </div>
 
                         <div className="flex items-center gap-2 flex-wrap">
-                          {/* Summary vs Full Text Toggle */}
-                          <div className="flex p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs font-bold">
+                          {/* 4-way Mode Toggle: Summary | Full | Quiz | Flashcards */}
+                          <div className="flex p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs font-bold overflow-x-auto max-w-full">
                             <button
                               type="button"
                               onClick={() => setDocViewMode('summary')}
-                              className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+                              className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap ${
                                 docViewMode === 'summary' ? 'bg-amber-500 text-black' : 'text-slate-400 hover:text-white'
                               }`}
                             >
                               <GraduationCap className="w-3.5 h-3.5" />
-                              <span>{companionLang === 'ar' ? 'المفيد وخلاصة المحاضرة' : 'Summary'}</span>
+                              <span>{companionLang === 'ar' ? 'الزبدة والملخص' : 'Summary'}</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => setDocViewMode('full')}
-                              className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+                              className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap ${
                                 docViewMode === 'full' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
                               }`}
                             >
                               <BookOpen className="w-3.5 h-3.5" />
-                              <span>{companionLang === 'ar' ? 'النص المقروء كاملاً' : 'Full Text'}</span>
+                              <span>{companionLang === 'ar' ? 'النص المقروء' : 'Full Text'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (docQuiz.length === 0) {
+                                  handleGenerateStudyKit();
+                                } else {
+                                  setDocViewMode('quiz');
+                                }
+                              }}
+                              className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                                docViewMode === 'quiz' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              <HelpCircle className="w-3.5 h-3.5" />
+                              <span>{companionLang === 'ar' ? 'بنك الأسئلة' : 'Quiz'}</span>
+                              {docQuiz.length > 0 && (
+                                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/40 text-[10px] text-white">
+                                  {docQuiz.length}
+                                </span>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (docFlashcards.length === 0) {
+                                  handleGenerateStudyKit();
+                                } else {
+                                  setDocViewMode('flashcards');
+                                }
+                              }}
+                              className={`px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                                docViewMode === 'flashcards' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>{companionLang === 'ar' ? 'فلاش كاردز' : 'Flashcards'}</span>
+                              {docFlashcards.length > 0 && (
+                                <span className="px-1.5 py-0.2 rounded-full bg-purple-500/40 text-[10px] text-white">
+                                  {docFlashcards.length}
+                                </span>
+                              )}
                             </button>
                           </div>
 
@@ -895,18 +1268,11 @@ ${currentDoc.fullText || ''}
                           <button
                             type="button"
                             onClick={() => {
-                              const textToRead = docViewMode === 'summary' ? currentDoc.summary : currentDoc.fullText || currentDoc.summary;
                               if (isSpeakingDoc) {
                                 cancelSpeech();
                                 setIsSpeakingDoc(false);
                               } else {
-                                cancelSpeech();
-                                const lang = currentDoc.targetLang === 'ar' ? 'Arabic' : currentDoc.targetLang === 'fr' ? 'French' : 'English';
-                                speak(textToRead, lang as any, {
-                                  onStart: () => setIsSpeakingDoc(true),
-                                  onEnd: () => setIsSpeakingDoc(false),
-                                  onError: () => setIsSpeakingDoc(false),
-                                });
+                                speakCurrentParagraph(currentParagraphIdx);
                               }
                             }}
                             className={`px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all ${
@@ -919,6 +1285,50 @@ ${currentDoc.fullText || ''}
                             <span>{isSpeakingDoc ? (companionLang === 'ar' ? 'وقف الصوت' : 'Stop') : (companionLang === 'ar' ? 'استمع صوتياً' : 'Listen')}</span>
                           </button>
 
+                          {/* Download as Audio File (.wav) */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              downloadTextAsWavFile(currentDoc.summary, currentDoc.title);
+                              toast.success(companionLang === 'ar' ? 'تم تنزيل الملف الصوتي للمحاضرة 🎧' : 'Audio file downloaded 🎧');
+                            }}
+                            className="px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
+                            title="تحميل كملف صوتي WAV للاستماع في أي وقت"
+                          >
+                            <Music className="w-4 h-4" />
+                            <span>{companionLang === 'ar' ? 'تحميل صوتي (.wav)' : 'Audio (.wav)'}</span>
+                          </button>
+
+                          {/* Hands-Free Voice Commands Toggle */}
+                          <button
+                            type="button"
+                            onClick={toggleHandsFreeVoice}
+                            className={`px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all ${
+                              isVoiceCommandActive
+                                ? 'bg-red-600 text-white animate-pulse ring-2 ring-red-400'
+                                : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                            }`}
+                            title="التحكم الصوتي بدون لمس الشاشة"
+                          >
+                            <Mic className="w-4 h-4" />
+                            <span>{isVoiceCommandActive ? (companionLang === 'ar' ? 'أوامر صوتية: شغالة' : 'Voice Active') : (companionLang === 'ar' ? 'تحكم صوتي بدون لمس' : 'Hands-Free')}</span>
+                          </button>
+
+                          {/* 3D Sign Language Avatar Lecture Interpreter */}
+                          <button
+                            type="button"
+                            onClick={handleSignLanguageLecture}
+                            className={`px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all ${
+                              showSignAvatarInDoc
+                                ? 'bg-purple-700 text-white ring-2 ring-purple-400'
+                                : 'bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/40'
+                            }`}
+                            title="ترجمة المحاضرة بلغة الإشارة ثلاثية الأبعاد (للصم وضعاف السمع)"
+                          >
+                            <Accessibility className="w-4 h-4" />
+                            <span>{companionLang === 'ar' ? 'ترجمة إشارة (3D)' : 'Sign (3D)'}</span>
+                          </button>
+
                           {/* Download as Word Button */}
                           <button
                             type="button"
@@ -927,12 +1337,14 @@ ${currentDoc.fullText || ''}
                                 currentDoc.title,
                                 currentDoc.summary,
                                 currentDoc.fullText,
-                                currentDoc.targetLang
+                                currentDoc.targetLang,
+                                docQuiz,
+                                docFlashcards
                               );
                               toast.success(companionLang === 'ar' ? 'تم تنزيل مستند Word بنجاح 📄' : 'Word document downloaded 📄');
                             }}
                             className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
-                            title="تنزيل كملف Word صالح للفتح والتعديل"
+                            title="تنزيل كملف Word صالح للفتح والتعديل مع الأسئلة والملخص"
                           >
                             <Download className="w-4 h-4" />
                             <span>{companionLang === 'ar' ? 'تحميل Word (.doc)' : 'Export Word'}</span>
@@ -940,16 +1352,101 @@ ${currentDoc.fullText || ''}
                         </div>
                       </div>
 
+                      {/* Smart Audio Scrubbing Navigation Bar */}
+                      <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex-wrap text-xs font-bold">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handlePrevParagraph}
+                            disabled={currentParagraphIdx <= 0}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white"
+                            title="الفقرة السابقة"
+                          >
+                            <Rewind className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => speakCurrentParagraph(currentParagraphIdx)}
+                            className="p-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white"
+                            title="إعادة نطق الفقرة الحالية"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleNextParagraph}
+                            disabled={currentParagraphIdx >= paragraphs.length - 1}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white"
+                            title="الفقرة التالية"
+                          >
+                            <FastForward className="w-4 h-4" />
+                          </button>
+                          <span className="text-slate-400 font-mono text-[11px] ml-2">
+                            {companionLang === 'ar' ? `فقرة ${currentParagraphIdx + 1} من ${paragraphs.length || 1}` : `Paragraph ${currentParagraphIdx + 1} / ${paragraphs.length || 1}`}
+                          </span>
+                        </div>
+
+                        {/* Playback Speed selector */}
+                        <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px]">
+                          <span className="text-slate-500 px-1">⚡ {companionLang === 'ar' ? 'السرعة:' : 'Speed:'}</span>
+                          {[0.8, 1.0, 1.25, 1.5].map((rate) => (
+                            <button
+                              key={rate}
+                              type="button"
+                              onClick={() => {
+                                setAudioPlaybackRate(rate);
+                                toast.info(`${companionLang === 'ar' ? 'سرعة الصوت:' : 'Playback rate:'} ${rate}x`);
+                              }}
+                              className={`px-2 py-0.5 rounded-md font-mono transition-all ${
+                                audioPlaybackRate === rate ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              {rate}x
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 3D Sign Avatar Video Floating Panel */}
+                      {showSignAvatarInDoc && (
+                        <div className="p-4 rounded-3xl bg-slate-900 border border-purple-500/40 relative space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-purple-300 flex items-center gap-2">
+                              <Accessibility className="w-4 h-4 text-purple-400" />
+                              {companionLang === 'ar' ? 'مترجم لغة الإشارة ثلاثي الأبعاد للمحاضرة' : '3D Sign Avatar Lecture Interpreter'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setShowSignAvatarInDoc(false)}
+                              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="h-64 rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center border border-slate-800">
+                            <React.Suspense fallback={<div className="text-xs text-purple-300 font-bold animate-pulse">جاري تحميل مجسم الإشارة ثلاثي الأبعاد...</div>}>
+                              <SignAvatar3D
+                                words={avatarSigningWords}
+                                playing={isAvatarSigningDoc}
+                                onDone={() => setIsAvatarSigningDoc(false)}
+                              />
+                            </React.Suspense>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Content Viewer Box */}
-                      <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800 max-h-72 overflow-y-auto leading-relaxed text-sm sm:text-base text-slate-100 font-medium">
-                        {docViewMode === 'summary' ? (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800 max-h-80 overflow-y-auto leading-relaxed text-sm sm:text-base text-slate-100 font-medium">
+                        {docViewMode === 'summary' && (
                           <div className="space-y-2">
                             <span className="text-xs font-bold text-amber-400 block mb-1">
                               {companionLang === 'ar' ? '📌 الزبدة وخلاصة المحاضرة:' : '📌 Key Takeaways & Summary:'}
                             </span>
                             <p className="whitespace-pre-wrap">{currentDoc.summary}</p>
                           </div>
-                        ) : (
+                        )}
+
+                        {docViewMode === 'full' && (
                           <div className="space-y-2">
                             <span className="text-xs font-bold text-indigo-400 block mb-1">
                               {companionLang === 'ar' ? '📝 تفاصيل النص المستخرج كاملاً:' : '📝 Full Extracted Content:'}
@@ -957,6 +1454,154 @@ ${currentDoc.fullText || ''}
                             <p className="whitespace-pre-wrap font-mono text-xs sm:text-sm">
                               {currentDoc.fullText || currentDoc.summary}
                             </p>
+                          </div>
+                        )}
+
+                        {docViewMode === 'quiz' && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                              <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                                <HelpCircle className="w-4 h-4" />
+                                {companionLang === 'ar' ? '📝 بنك أسئلة واختبار فهم المحاضرة:' : '📝 Interactive Lecture Quiz:'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={handleGenerateStudyKit}
+                                disabled={isGeneratingStudyKit}
+                                className="px-3 py-1 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs flex items-center gap-1"
+                              >
+                                {isGeneratingStudyKit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                                <span>{companionLang === 'ar' ? 'توليد أسئلة جديدة' : 'Regenerate Quiz'}</span>
+                              </button>
+                            </div>
+
+                            {docQuiz.length === 0 ? (
+                              <div className="text-center py-8 space-y-3">
+                                <HelpCircle className="w-10 h-10 text-emerald-400 mx-auto opacity-70" />
+                                <p className="text-sm text-slate-300 font-bold">
+                                  {companionLang === 'ar' ? 'اضغط لتوليد بنك أسئلة فوري واختبار فهمك للمحاضرة' : 'Click to generate questions from this lecture'}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={handleGenerateStudyKit}
+                                  disabled={isGeneratingStudyKit}
+                                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg"
+                                >
+                                  {isGeneratingStudyKit ? 'جاري إعداد بنك الأسئلة...' : 'ابدأ توليد الأسئلة الآن'}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                {docQuiz.map((q, qIdx) => (
+                                  <div key={qIdx} className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+                                    <p className="font-bold text-sm text-white">
+                                      س {qIdx + 1}: {q.question}
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                      {q.options.map((opt, optIdx) => {
+                                        const isSelected = q.selectedOption === optIdx;
+                                        const isAnswer = optIdx === q.answerIndex;
+                                        const hasAnswered = q.selectedOption !== undefined;
+
+                                        let btnClass = 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-850';
+                                        if (hasAnswered) {
+                                          if (isAnswer) btnClass = 'border-emerald-500 bg-emerald-950/50 text-emerald-200 ring-2 ring-emerald-500/50';
+                                          else if (isSelected && !isAnswer) btnClass = 'border-red-500 bg-red-950/50 text-red-200 ring-2 ring-red-500/50';
+                                        }
+
+                                        return (
+                                          <button
+                                            key={optIdx}
+                                            type="button"
+                                            onClick={() => handleSelectQuizOption(qIdx, optIdx)}
+                                            className={`p-2.5 rounded-xl border text-xs text-right font-medium transition-all flex items-center justify-between ${btnClass}`}
+                                          >
+                                            <span>{opt}</span>
+                                            {hasAnswered && isAnswer && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                                            {hasAnswered && isSelected && !isAnswer && <XCircle className="w-4 h-4 text-red-400 shrink-0" />}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                    {q.selectedOption !== undefined && (
+                                      <p className="text-xs text-indigo-300 bg-indigo-950/40 p-2.5 rounded-xl border border-indigo-500/30">
+                                        💡 {q.explanation}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {docViewMode === 'flashcards' && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                              <span className="text-xs font-bold text-purple-400 flex items-center gap-1.5">
+                                <Sparkles className="w-4 h-4" />
+                                {companionLang === 'ar' ? '🗂️ بطاقات المراجعة السريعة (Spaced Flashcards):' : '🗂️ Spaced Repetition Flashcards:'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={handleGenerateStudyKit}
+                                disabled={isGeneratingStudyKit}
+                                className="px-3 py-1 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 border border-purple-500/40 text-xs flex items-center gap-1"
+                              >
+                                {isGeneratingStudyKit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                                <span>{companionLang === 'ar' ? 'توليد بطاقات جديدة' : 'Regenerate Flashcards'}</span>
+                              </button>
+                            </div>
+
+                            {docFlashcards.length === 0 ? (
+                              <div className="text-center py-8 space-y-3">
+                                <Sparkles className="w-10 h-10 text-purple-400 mx-auto opacity-70" />
+                                <p className="text-sm text-slate-300 font-bold">
+                                  {companionLang === 'ar' ? 'اضغط لتوليد بطاقات المراجعة السريعة والتكرار المتباعد' : 'Click to generate flashcards'}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={handleGenerateStudyKit}
+                                  disabled={isGeneratingStudyKit}
+                                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg"
+                                >
+                                  {isGeneratingStudyKit ? 'جاري إعداد البطاقات...' : 'ابدأ إعداد البطاقات'}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {docFlashcards.map((card, cIdx) => (
+                                  <div
+                                    key={cIdx}
+                                    onClick={() => {
+                                      setDocFlashcards((prev) => {
+                                        const upd = [...prev];
+                                        upd[cIdx].flipped = !upd[cIdx].flipped;
+                                        const isFlipped = upd[cIdx].flipped;
+                                        const text = isFlipped ? card.back : card.front;
+                                        speak(text, currentDoc.targetLang === 'ar' ? 'Arabic' : 'English');
+                                        return upd;
+                                      });
+                                    }}
+                                    className={`p-5 rounded-2xl border cursor-pointer select-none transition-all shadow-lg min-h-[120px] flex flex-col justify-between ${
+                                      card.flipped
+                                        ? 'bg-purple-950/70 border-purple-500/60 text-purple-100'
+                                        : 'bg-slate-950 border-slate-800 text-slate-200 hover:border-slate-700'
+                                    }`}
+                                  >
+                                    <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 block mb-1">
+                                      {card.flipped ? (companionLang === 'ar' ? '💡 الحل / المفهوم' : 'Answer / Concept') : (companionLang === 'ar' ? `بطاقة ${cIdx + 1} (اضغط للقلب والحل)` : `Card ${cIdx + 1} (Tap to Flip)`)}
+                                    </span>
+                                    <p className="font-bold text-sm sm:text-base my-auto leading-relaxed">
+                                      {card.flipped ? card.back : card.front}
+                                    </p>
+                                    <span className="text-[10px] text-slate-500 text-left mt-2 font-mono">
+                                      {card.flipped ? '🔊 منطوق' : '🔄 اضغط للاستماع للحل'}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

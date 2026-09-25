@@ -21,6 +21,7 @@ import NeurodiversityHub from './NeurodiversityHub';
 import CaregiverHub from './CaregiverHub';
 import AccessibilityPassportModal from './AccessibilityPassportModal';
 import DeafEcosystemView from './DeafEcosystemView';
+const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation } from '../lib/translations';
 
@@ -36,7 +37,8 @@ export type DisabilityTab =
   | 'radar'
   | 'neurodiversity'
   | 'caregiver'
-  | 'deaf';
+  | 'deaf'
+  | 'orchestrator';
 
 export type ModuleCategory = 'all' | 'vision' | 'hearing' | 'motor' | 'neuro' | 'caregiver';
 
@@ -341,7 +343,28 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 text-white shadow-indigo-500/25',
       matchingMode: 'Sign-Only',
     },
-    // 3. MOTOR & ALS
+    // 3. CROSS-DISABILITY SENSORY BRIDGE (UNIVERSAL MESH)
+    {
+      id: 'orchestrator' as const,
+      category: 'hearing' as const,
+      titleEn: 'Cross-Disability Sensory Bridge (Universal Mesh)',
+      titleAr: 'جسر التواصل التبادلي بين الإعاقات (شبكة الحواس الشاملة)',
+      shortEn: 'Sensory Bridge',
+      shortAr: 'جسر الإعاقات',
+      badgeEn: 'Blind ⇄ Deaf ⇄ Motor ⇄ Deaf-Blind',
+      badgeAr: 'كفيف ⇄ أصم ⇄ شلل ⇄ كفيف-أصم',
+      descEn: 'Direct bilateral peer-to-peer relay connecting blind & deaf students without human interpreters, tactile Morse haptic matrix for deaf-blind, and single-switch autonomic scanner for ALS.',
+      descAr: 'جسر ثنائي مباشر للتواصل بين الكفيف والأصم بدون مترجم بشري، مصفوفة مورس بالاهتزاز اللمسي للصم-المكفوفين، والمسح الذكي بالمفتاح الفردي لمرضى التصلب والشلل ALS.',
+      quickFeaturesAr: ['جسر كفيف ⇄ أصم فوري', 'مصفوفة مورس اللمسية بالاهتزاز', 'مسح المفتاح الفردي لشلل ALS', 'استغاثة SOS شاملة متعددة الحواس'],
+      quickFeaturesEn: ['Blind ⇄ Deaf Bilateral Relay', 'Tactile Morse Haptics', 'Single-Switch ALS Scanner', 'Omni-Sensory SOS Beacon'],
+      Icon: Sparkles,
+      accentColor: 'text-cyan-400',
+      borderGlow: 'hover:border-cyan-500/80 border-cyan-500/40 ring-1 ring-cyan-500/30',
+      bgGlow: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
+      buttonCls: 'bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 text-white shadow-cyan-500/25',
+      matchingMode: 'Multiple',
+    },
+    // 4. MOTOR & ALS
     {
       id: 'motor' as const,
       category: 'motor' as const,
@@ -481,7 +504,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   // Filter modules based on selectedCategory
   const filteredModules = useMemo(() => {
     if (selectedCategory === 'all') return MODULES;
-    return MODULES.filter((m) => m.category === selectedCategory);
+    return MODULES.filter((m) => m.category === selectedCategory || (m.id === 'orchestrator' && (selectedCategory === 'vision' || selectedCategory === 'hearing' || selectedCategory === 'motor')));
   }, [selectedCategory, MODULES]);
 
   // Current active module metadata for sibling bar
@@ -740,6 +763,28 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 setProfile={setProfile}
                 onOpenPassport={() => setShowPassportModal(true)}
               />
+            </motion.div>
+          )}
+
+          {activeTab === 'orchestrator' && (
+            <motion.div
+              key="orchestrator-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full h-full min-h-0"
+            >
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <CrossDisabilityOrchestrator
+                  profile={profile}
+                  onNavigateBack={handleNavigateBack}
+                  onMenuClick={onMenuClick}
+                />
+              </React.Suspense>
             </motion.div>
           )}
 
