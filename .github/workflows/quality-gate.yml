@@ -1,0 +1,39 @@
+name: Quality Gate & Automated Verification
+
+on:
+  push:
+    branches:
+      - main
+      - Esraa
+  pull_request:
+    branches:
+      - main
+      - Esraa
+
+jobs:
+  verify:
+    name: Type-Check, Build & Invariant Test Battery
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: 🛡️ TypeScript Type Validation
+        run: npx tsc --noEmit
+
+      - name: 📦 Production Build Verification
+        run: npm run build
+
+      - name: 🧪 Execute 3,500+ Automated Test Suite
+        run: npm test

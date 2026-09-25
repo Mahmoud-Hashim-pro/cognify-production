@@ -13,14 +13,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
 import { toast } from './Toast';
-import MotorEuphoniaView from './MotorEuphoniaView';
-import VisionCompanionView from './VisionCompanionView';
-import ChatInterface, { ChatInterfaceRef } from './ChatInterface';
-import OrgDashboard from './OrgDashboard';
-import NeurodiversityHub from './NeurodiversityHub';
-import CaregiverHub from './CaregiverHub';
-import AccessibilityPassportModal from './AccessibilityPassportModal';
-import DeafEcosystemView from './DeafEcosystemView';
+import type { ChatInterfaceRef } from './ChatInterface';
+const MotorEuphoniaView = React.lazy(() => import('./MotorEuphoniaView'));
+const VisionCompanionView = React.lazy(() => import('./VisionCompanionView'));
+const ChatInterface = React.lazy(() => import('./ChatInterface'));
+const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
+const NeurodiversityHub = React.lazy(() => import('./NeurodiversityHub'));
+const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
+const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
+const DeafEcosystemView = React.lazy(() => import('./DeafEcosystemView'));
 const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
 const LearningHub = React.lazy(() => import('./learning/LearningHub'));
 import { isAccessibilityUser } from '../lib/access';
@@ -735,7 +736,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <MotorEuphoniaView profile={profile} />
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <MotorEuphoniaView profile={profile} />
+              </React.Suspense>
             </motion.div>
           )}
 
@@ -747,7 +754,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <VisionCompanionView profile={profile} setProfile={setProfile} />
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <VisionCompanionView profile={profile} setProfile={setProfile} />
+              </React.Suspense>
             </motion.div>
           )}
 
@@ -759,16 +772,22 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <DeafEcosystemView
-                profile={profile}
-                initialTab={activeTab === 'deaf' ? 'bridge' : (activeTab as any)}
-                onNavigateBack={handleNavigateBack}
-                onMenuClick={onMenuClick}
-                onTabChange={(tool) => {
-                  setActiveTab(tool);
-                  onTabChange?.(tool);
-                }}
-              />
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <DeafEcosystemView
+                  profile={profile}
+                  initialTab={activeTab === 'deaf' ? 'bridge' : (activeTab as any)}
+                  onNavigateBack={handleNavigateBack}
+                  onMenuClick={onMenuClick}
+                  onTabChange={(tool) => {
+                    setActiveTab(tool);
+                    onTabChange?.(tool);
+                  }}
+                />
+              </React.Suspense>
             </motion.div>
           )}
 
@@ -780,11 +799,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <NeurodiversityHub
-                profile={profile}
-                onNavigateBack={handleNavigateBack}
-                onOpenLearningHub={() => handleSelectTab('learning')}
-              />
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <NeurodiversityHub
+                  profile={profile}
+                  onNavigateBack={handleNavigateBack}
+                  onOpenLearningHub={() => handleSelectTab('learning')}
+                />
+              </React.Suspense>
             </motion.div>
           )}
 
@@ -818,12 +843,18 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <CaregiverHub
-                profile={profile}
-                onNavigateBack={handleNavigateBack}
-                setProfile={setProfile}
-                onOpenPassport={() => setShowPassportModal(true)}
-              />
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <CaregiverHub
+                  profile={profile}
+                  onNavigateBack={handleNavigateBack}
+                  setProfile={setProfile}
+                  onOpenPassport={() => setShowPassportModal(true)}
+                />
+              </React.Suspense>
             </motion.div>
           )}
 
@@ -857,7 +888,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0"
             >
-              <OrgDashboard profile={profile} />
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <OrgDashboard profile={profile} />
+              </React.Suspense>
             </motion.div>
           )}
 
@@ -870,18 +907,24 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               className="w-full h-full min-h-0 flex flex-col p-3 sm:p-4 md:p-6 lg:p-8 pb-0"
             >
               <div className="flex-1 min-h-0 bg-[#121524] rounded-t-3xl shadow-2xl border border-slate-800 overflow-hidden relative flex flex-col">
-                <ChatInterface
-                  ref={ref}
-                  profile={profile}
-                  onQuestionEvaluated={onQuestionEvaluated || (() => {})}
-                  syncMessages={syncMessages || (() => {})}
-                  onMenuClick={onMenuClick}
-                  externalMessage={externalMessage}
-                  onStreamingUpdate={onStreamingUpdate}
-                  onSTTStateChange={onSTTStateChange}
-                  isEmbedded={true}
-                  setProfile={setProfile}
-                />
+                <React.Suspense fallback={
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                    <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                }>
+                  <ChatInterface
+                    ref={ref}
+                    profile={profile}
+                    onQuestionEvaluated={onQuestionEvaluated || (() => {})}
+                    syncMessages={syncMessages || (() => {})}
+                    onMenuClick={onMenuClick}
+                    externalMessage={externalMessage}
+                    onStreamingUpdate={onStreamingUpdate}
+                    onSTTStateChange={onSTTStateChange}
+                    isEmbedded={true}
+                    setProfile={setProfile}
+                  />
+                </React.Suspense>
               </div>
             </motion.div>
           )}
