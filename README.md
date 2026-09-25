@@ -208,5 +208,30 @@ Cognify is optimized for deployment on **Vercel** with zero configuration:
 
 ---
 
+## 🔍 Technical Invariants & Known System Constraints
+
+Cognify is engineered with strict technical honesty. The following requirements and runtime characteristics apply:
+
+1. **Emergency SOS Notification Pipeline**:
+   - Dispatches via server-side endpoints (`/api/emergency/dispatch`) to Webhook, Telegram Bot API, or Twilio SMS when environment variables (`TELEGRAM_BOT_TOKEN`, `TWILIO_ACCOUNT_SID`, etc.) are configured.
+   - If notification channels fail or credentials are not supplied, the server explicitly returns `success: false` and triggers a client direct phone-call fallback (`tel:`) rather than generating false delivery confirmations.
+
+2. **Acoustic Hazard Sentinel (Deaf & Hard of Hearing)**:
+   - Utilizes Web Audio API Digital Signal Processing (FFT spectral energy, RMS decibels, and transient attack analysis) to identify sound signatures (fire alarms, horns, doorbells, knocks, baby crying, dog barking).
+   - Standard mono device microphones detect frequency signatures and volume intensity omnidirectionally, not 3D spatial Direction-of-Arrival (DoA). An in-app technical note makes this transparent to users.
+
+3. **Facial & Gaze Tracking**:
+   - Integrates MediaPipe FaceMesh (478 landmarks, iris displacement vectors, adaptive EAR blink baselines).
+   - Bundles an automatic CDN fallback (`@mediapipe/face_mesh@0.4.1633559619`) to guarantee execution even in environments without pre-downloaded local binary models.
+
+4. **Speech-to-Text & Live Captions**:
+   - Real-time bilingual speech recognition utilizes the browser Web Speech API with Gemini-assisted transcript correction.
+   - Supported on Chrome, Edge, and Safari with an active internet connection (Firefox does not provide native Web Speech API support).
+
+5. **Sign Language Avatar (3D)**:
+   - Procedural dual-arm Three.js signing avatar. Poses currently use ASL-based fingerspelling approximations pending full certified Arabic Sign Language (ArSL) dictionary review; a persistent notice is displayed in-app.
+
+---
+
 ## 📄 License & Attribution
 Engineered and maintained by the **Cognify Development Team** as an assistive educational innovation for students and people of determination.
