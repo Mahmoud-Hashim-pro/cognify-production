@@ -100,6 +100,8 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   const [outfitMode, setOutfitMode] = useState(false);
   // Virtual White Cane & Indoor Haptic Navigation Mode (العصا والملاحة الاهتزازية)
   const [navGuideMode, setNavGuideMode] = useState(false);
+  // Lecture & Blackboard Scanner Mode (سكانر المحاضرات والسبورة الجامعية)
+  const [lectureMode, setLectureMode] = useState(false);
 
   // Saving memory as person vs object
   const [isSavingPerson, setIsSavingPerson] = useState(false);
@@ -137,6 +139,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     setFaceMode(false);
     setOutfitMode(false);
     setNavGuideMode(false);
+    setLectureMode(false);
   }, []);
 
   const toggleReadMode = useCallback(() => {
@@ -148,8 +151,25 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setFaceMode(false);
         setOutfitMode(false);
         setNavGuideMode(false);
+        setLectureMode(false);
       }
       announceFeature('قارئ النصوص والكتب والروشتات', 'Document and Text Reader', 'Lecture de Documents', next);
+      return next;
+    });
+  }, [announceFeature]);
+
+  const toggleLectureMode = useCallback(() => {
+    setLectureMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setReadMode(false);
+        setShoppingMode(false);
+        setCurrencyMode(false);
+        setFaceMode(false);
+        setOutfitMode(false);
+        setNavGuideMode(false);
+      }
+      announceFeature('سكانر المحاضرات والسبورة الجامعية', 'Lecture and Board Scanner', 'Scanner de Cours et Tableau', next);
       return next;
     });
   }, [announceFeature]);
@@ -163,6 +183,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setFaceMode(false);
         setOutfitMode(false);
         setNavGuideMode(false);
+        setLectureMode(false);
       }
       announceFeature('مساعد فحص المنتجات والتسوق', 'Shopping and Product Scanner', 'Assistant Shopping', next);
       return next;
@@ -178,6 +199,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setFaceMode(false);
         setOutfitMode(false);
         setNavGuideMode(false);
+        setLectureMode(false);
       }
       announceFeature('قارئ العملات والنقود المصرية', 'Egyptian Currency Reader', 'Lecteur de Monnaie', next);
       return next;
@@ -193,6 +215,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setCurrencyMode(false);
         setOutfitMode(false);
         setNavGuideMode(false);
+        setLectureMode(false);
       }
       announceFeature('التعرف على الوجوه والمقربين', 'Face Recognition and Familiar People', 'Reconnaissance Faciale', next);
       return next;
@@ -208,6 +231,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setCurrencyMode(false);
         setFaceMode(false);
         setNavGuideMode(false);
+        setLectureMode(false);
       }
       announceFeature('فحص وتنسيق ألوان الملابس', 'Color and Outfit Matcher', 'Style et Couleurs', next);
       return next;
@@ -223,6 +247,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         setCurrencyMode(false);
         setFaceMode(false);
         setOutfitMode(false);
+        setLectureMode(false);
       }
       announceFeature('العصا الذكية وتنبيهات المسافات', 'Smart White Cane Navigation', 'Canne Virtuelle', next);
       return next;
@@ -248,8 +273,18 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     setLangChosen(true);
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(COMPANION_LANG_STORAGE_KEY, lang);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+      }
     }
-  }, []);
+    const voice = lang === 'ar' ? 'Arabic' : lang === 'fr' ? 'French' : 'English';
+    const spoken = lang === 'ar' ? 'تم تفعيل اللغة العربية' : lang === 'fr' ? 'Langue française activée' : 'English language activated';
+    speak(spoken, voice as any);
+    if (setProfile && profile) {
+      setProfile({ ...profile, language: lang === 'ar' ? 'Egyptian Ammiya' : lang === 'fr' ? 'French' : 'English' });
+    }
+  }, [profile, setProfile]);
 
   // Spatial memory drawer state
   const [showSpatialMemory, setShowSpatialMemory] = useState(false);
@@ -471,7 +506,13 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
 
     setLastSnapshot(frame);
     setStatus('analyzing');
-    const waitingMsg = currencyMode
+    const waitingMsg = lectureMode
+      ? targetLang === 'ar'
+        ? 'بفحص السبورة وشريحة المحاضرة فوراً...'
+        : targetLang === 'fr'
+        ? 'Analyse du tableau et des diapositives de cours...'
+        : 'Scanning lecture board, slides, and formulas...'
+      : currencyMode
       ? targetLang === 'ar'
         ? 'بفحص العملة والنقود فوراً...'
         : targetLang === 'fr'
@@ -536,7 +577,41 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       : '';
 
     let prompt = '';
-    if (currencyMode) {
+    const langMandate =
+      targetLang === 'en'
+        ? 'CRITICAL MANDATE: You MUST reply entirely in English. Do NOT use any Arabic characters or Arabic script whatsoever.\n'
+        : targetLang === 'fr'
+        ? 'DIRECTIVE CRITIQUE : Vous DEVEZ répondre entièrement en français. Ne produisez AUCUN caractère arabe.\n'
+        : 'توجيه حاسم: تحدث باللغة العربية العامية السهلة والمباشرة والودودة.\n';
+
+    if (lectureMode) {
+      // University Lecture, Blackboard, Whiteboard, and Slides Scanner
+      if (targetLang === 'ar') {
+        prompt = `${langMandate}أنت أستاذ جامعي ومساعد أكاديمي صوتي متقدم جداً لطالب جامعي كفيف يجلس داخل قاعة المحاضرات ويوجه كاميرته نحو السبورة، الشاشة، أو ورقة المحاضرة.
+انظر فوراً إلى السبورة أو الشاشة واستخرج المحتوى الأكاديمي بدقة متناهية بالترتيب التالي:
+1. موضوع المحاضرة والعنوان: قل مباشرة مثلاً: "المحاضرة عن الخوارزميات وهياكل البيانات"، أو "شرح قانون نيوتن الثاني".
+2. القوانين والمعادلات والرموز: اقرأ أي قانون أو معادلة رياضية أو برمجية مكتوبة على السبورة بدقة شديدة وبلفظ واضح.
+3. المخططات والرسومات التوضيحية: إذا كان هناك رسم تخطيطي أو أسهم أو جدول، اشرح معناه والعلاقة بين عناصره بأسلوب وصفي صوتي دقيق.
+4. الخلاصة والزبدة الأكاديمية: اختم في جملتين مباشرتين بأهم فكرة لازم الطالب الكفيف يركز عليها ويكتبها في باله للامتحان.
+تحدث فوراً بصوت طبيعي كأستاذ يشرح لطلابه بدون أي نجوم ماركداون (**) أو عناوين روبوتية لكي يُنطق الشرح صوتياً بسلاسة.${knownContext}`;
+      } else if (targetLang === 'fr') {
+        prompt = `${langMandate}Vous êtes un professeur d'université et assistant académique vocal pour un étudiant malvoyant assistant à un cours magistral et pointant sa caméra vers le tableau, l'écran de projection ou des notes de cours.
+Identifiez immédiatement le contenu pédagogique devant la caméra :
+1. Sujet et titre du cours : annoncez directement le thème (ex. "Cours sur les algorithmes et structures de données", "Mécanique quantique").
+2. Formules, équations et définitions : lisez intégralement et clairement toute équation ou formule inscrite au tableau.
+3. Schémas et graphiques : décrivez tout schéma, organigramme ou courbe avec ses axes et relations clés.
+4. L'essentiel à retenir : concluez par 1 ou 2 phrases nettes résumant le point capital pour l'examen.
+Parlez de façon naturelle et fluide sans astérisques markdown ni titres robotiques.${knownContext}`;
+      } else {
+        prompt = `${langMandate}You are an expert university professor and voice academic companion for a visually impaired student attending a lecture and pointing their camera at the blackboard, whiteboard, projector slides, or lecture notes.
+Analyze the board or slide immediately with academic precision:
+1. Lecture Topic & Objective: State the core topic directly (e.g. "Lecture on Graph Algorithms & Shortest Path", "Newtonian Mechanics").
+2. Equations, Formulas & Code: Read out every mathematical formula, equation, or code snippet with crystal-clear verbal notation.
+3. Diagrams & Visual Schematics: Describe any flowcharts, graphs, or visual models, detailing their flow and key components.
+4. Essential Bottom-Line Takeaway: Conclude in 1-2 sharp, memorable sentences summarizing what the student must remember for the exam.
+Speak naturally and directly in fluent academic prose without markdown asterisks (**) or robotic labels.${knownContext}`;
+      }
+    } else if (currencyMode) {
       // Instant Currency & Banknote Reader
       if (targetLang === 'ar') {
         prompt = `أنت خبير فوري وقارئ نقود ذكي يتحدث بصوته لشخص كفيف يمسك ورقة نقدية أو نقوداً أمام الكاميرا.
@@ -693,6 +768,10 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       prompt = `You are a warm, helpful human companion speaking directly aloud to a blind person through their camera. Speak immediately in fluent, natural conversational prose as if you are a friend standing right beside them: Go straight to the point without any section titles, headings, or robotic boilerplate. If there are no hazards, start directly with reassuring words (e.g. "No hazards around you. Directly in front of you is..."). Describe people, objects, surfaces, and any visible text smoothly and naturally. Do NOT use markdown asterisks (**), bullet dashes, or labels like "Hazards:", "Visible Text:", or "Scene Description:".${knownContext}`;
     }
 
+    if (!prompt.includes(langMandate.trim())) {
+      prompt = `${langMandate}\n${prompt}`;
+    }
+
     try {
       const cleanData = frame.replace(/^data:[^;]+;base64,/, '');
       const result = await generateAdaptiveResponse(
@@ -700,6 +779,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         {
           ...profile,
           language: targetLang === 'ar' ? 'Egyptian Ammiya' : targetLang === 'fr' ? 'French' : 'English',
+          memory: profile.memory
+            ? {
+                ...profile.memory,
+                preferredLanguage: targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English',
+              }
+            : undefined,
         },
         [],
         [{ name: 'scene.jpg', type: 'image/jpeg', data: cleanData }]
@@ -1084,6 +1169,25 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             </button>
 
             <button
+              onClick={toggleLectureMode}
+              aria-pressed={lectureMode}
+              aria-label={t('Lecture & Board Scanner', 'سكانر المحاضرات والسبورة', 'Scanner de cours et tableau')}
+              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                lectureMode
+                  ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50 ring-2 ring-purple-400'
+                  : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
+              }`}
+              title={t(
+                'Lecture & Board Scanner: extract blackboard text, formulas, and academic slides',
+                'سكانر المحاضرات والسبورة: قراءة السبورة والمعادلات وشرح السلايد بالصوت',
+                'Scanner de cours : lire le tableau, équations et diapositives'
+              )}
+            >
+              <GraduationCap className={`w-4 h-4 shrink-0 ${lectureMode ? 'text-white' : 'text-purple-400'}`} />
+              <span className="hidden xl:inline">{t('Lecture', 'محاضرات', 'Cours')}</span>
+            </button>
+
+            <button
               onClick={toggleShoppingMode}
               aria-pressed={shoppingMode}
               aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
@@ -1243,11 +1347,25 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2 pr-2 gap-2 flex-wrap">
                   <span className="font-bold flex items-center gap-1.5 text-primary">
                     <Sparkles className="w-4 h-4" />
-                    {readMode && readAction === 'summarize'
+                    {lectureMode
+                      ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة 🎓' : companionLang === 'fr' ? 'Analyse du Cours et Tableau 🎓' : 'Lecture Board & Slide Digest 🎓')
+                      : readMode && readAction === 'summarize'
                       ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
                       : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
                   </span>
                   <div className="flex items-center gap-1.5">
+                    {lectureMode && (
+                      <button
+                        onClick={() => {
+                          setShowDocStudio(true);
+                        }}
+                        className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition-colors"
+                        title={t('Open in Document Studio', 'فتح في استوديو المحاضرات والمستندات', 'Ouvrir dans le Studio')}
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>{t('Doc Studio', 'استوديو المحاضرة', 'Studio')}</span>
+                      </button>
+                    )}
                     {readMode && lastSnapshot && (
                       <button
                         onClick={() => {
@@ -1309,6 +1427,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
           <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
             {companionLang === 'ar' && (() => {
               const getCfg = () => {
+                if (lectureMode) return {
+                  icon: <GraduationCap className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-cyan-800 hover:from-purple-600 hover:to-cyan-700 border border-purple-400/40 shadow-purple-950/60',
+                  title: '🇪🇬 مسح السبورة والمحاضرة',
+                  subtitle: 'استخراج القوانين والشرح الأكاديمي بالصوت',
+                };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
                   gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
@@ -1370,6 +1494,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
 
             {companionLang === 'en' && (() => {
               const getCfg = () => {
+                if (lectureMode) return {
+                  icon: <GraduationCap className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-cyan-800 hover:from-purple-600 hover:to-cyan-700 border border-purple-400/40 shadow-purple-950/60',
+                  title: '🇬🇧 Scan Lecture Board & Slides',
+                  subtitle: 'Extract formulas, diagrams & academic digest',
+                };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
                   gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
@@ -1431,6 +1561,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
 
             {companionLang === 'fr' && (() => {
               const getCfg = () => {
+                if (lectureMode) return {
+                  icon: <GraduationCap className="w-5 h-5 shrink-0" />,
+                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-cyan-800 hover:from-purple-600 hover:to-cyan-700 border border-purple-400/40 shadow-purple-950/60',
+                  title: '🇫🇷 Scanner Tableau & Cours',
+                  subtitle: 'Formules, schémas et synthèse académique',
+                };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
                   gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',

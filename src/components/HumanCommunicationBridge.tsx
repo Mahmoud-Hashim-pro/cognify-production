@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { toast } from './Toast';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
@@ -29,7 +30,11 @@ import {
   HelpCircle,
   Activity,
   Sliders,
-  Maximize2
+  Maximize2,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  X
 } from 'lucide-react';
 
 const SignAvatar3D = React.lazy(() => import('./SignAvatar3D'));
@@ -54,6 +59,8 @@ export default function HumanCommunicationBridge({ profile }: HumanCommunication
   const [speechRate, setSpeechRate] = useState<number>(1.0);
   const [activeAacCategory, setActiveAacCategory] = useState<AACCategory>('medical');
   const [activeMode, setActiveMode] = useState<ActiveMode>('bridge');
+  const [showAacDrawer, setShowAacDrawer] = useState<boolean>(false);
+  const [showFullTimeline, setShowFullTimeline] = useState<boolean>(false);
 
   // Multi-language booleans
   const isArabic = isArabicLocale(voiceDialect);
@@ -521,33 +528,45 @@ Question: "${q}"`;
   return (
     <div 
       dir={isArabic ? 'rtl' : 'ltr'}
-      className="flex-1 flex flex-col bg-[#0b0f19] text-slate-100 relative overflow-hidden h-full p-3 sm:p-5 select-none"
+      className="flex-1 flex flex-col bg-[#0b0f19] text-slate-100 relative overflow-hidden h-full p-2.5 sm:p-3 select-none"
     >
-      
-      {/* ── TOP UNIFIED HEADER WITH DIALECT & CONTROLS ── */}
-      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#13182b] p-3.5 sm:p-4 rounded-2xl border border-slate-800 shadow-xl shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-500 flex items-center justify-center text-white shadow-md shrink-0">
-            <MessageSquare className="w-5 h-5" />
+      {/* ── TOP UNIFIED SLIM BAR WITH MODE TABS & DIALECT CONTROLS ── */}
+      <div className="shrink-0 mb-2 flex flex-wrap items-center justify-between gap-2 bg-[#13182b] p-2 sm:px-3 sm:py-1.5 rounded-xl border border-slate-800 shadow-md">
+        {/* Left: Mode Switcher */}
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-500 flex items-center justify-center text-white shadow-sm shrink-0">
+            <MessageSquare className="w-3.5 h-3.5" />
           </div>
-          <div>
-            <h2 className="text-sm sm:text-base font-black text-white flex items-center gap-2">
-              <span>{t.title}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-                Live All-in-One
-              </span>
-            </h2>
-            <p className="text-[11px] text-slate-400 line-clamp-1">
-              {t.subtitle}
-            </p>
+          <div className="flex items-center bg-slate-900/90 p-0.5 rounded-lg border border-slate-800">
+            <button
+              onClick={() => setActiveMode('bridge')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeMode === 'bridge'
+                  ? 'bg-indigo-600 text-white shadow-sm font-black'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>{t.modeBridge}</span>
+            </button>
+            <button
+              onClick={() => setActiveMode('ai-tutor')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeMode === 'ai-tutor'
+                  ? 'bg-purple-600 text-white shadow-sm font-black'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5" />
+              <span>{t.modeAiTutor}</span>
+            </button>
           </div>
         </div>
 
-        {/* Dialect and Speed Controls */}
-        <div className="flex flex-wrap items-center gap-2 self-stretch sm:self-auto justify-end">
-          {/* Dialect Selector */}
-          <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-            <span className="text-[10px] font-bold text-slate-400 px-1.5">🗣️</span>
+        {/* Right: Dialect & Speed */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-slate-900/90 p-0.5 rounded-lg border border-slate-800">
+            <span className="text-[10px] text-slate-400 px-1">🗣️</span>
             {[
               { id: 'Egyptian Ammiya', label: '🇪🇬 مصري' },
               { id: 'Arabic', label: '🇸🇦 فصحى' },
@@ -557,9 +576,9 @@ Question: "${q}"`;
               <button
                 key={id}
                 onClick={() => setVoiceDialect(id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                  voiceDialect === id 
-                    ? 'bg-indigo-600 text-white shadow-md font-black' 
+                className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all ${
+                  voiceDialect === id
+                    ? 'bg-indigo-600 text-white shadow-sm font-black'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -568,14 +587,13 @@ Question: "${q}"`;
             ))}
           </div>
 
-          {/* Speech Rate Controls */}
-          <div className="flex items-center gap-1 bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-800 text-xs">
+          <div className="hidden sm:flex items-center gap-1 bg-slate-900/90 px-1.5 py-0.5 rounded-lg border border-slate-800 text-[11px]">
             <span className="text-[10px] text-slate-400 font-bold">{t.speed}</span>
             {[0.8, 1.0, 1.25].map((rate) => (
               <button
                 key={rate}
                 onClick={() => setSpeechRate(rate)}
-                className={`px-1.5 py-0.5 rounded text-[11px] font-mono font-bold transition-all ${
+                className={`px-1 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
                   speechRate === rate ? 'bg-purple-600 text-white font-black' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -586,121 +604,115 @@ Question: "${q}"`;
         </div>
       </div>
 
-      {/* ── MODE SWITCHER TABS ── */}
-      <div className="grid grid-cols-2 gap-2 mb-4 shrink-0">
-        <button
-          onClick={() => setActiveMode('bridge')}
-          className={`py-2 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 border transition-all ${
-            activeMode === 'bridge'
-              ? 'bg-indigo-600 text-white border-indigo-400 shadow-lg shadow-indigo-500/20'
-              : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span>{t.modeBridge}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveMode('ai-tutor')}
-          className={`py-2 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 border transition-all ${
-            activeMode === 'ai-tutor'
-              ? 'bg-purple-600 text-white border-purple-400 shadow-lg shadow-purple-500/20'
-              : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Brain className="w-4 h-4" />
-          <span>{t.modeAiTutor}</span>
-        </button>
-      </div>
-
-      {/* ── TWO-COLUMN INTERACTIVE WORKSPACE ── */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0 overflow-y-auto pb-2">
+      {/* ── TWO-COLUMN INTERACTIVE WORKSPACE (ZERO SCROLL) ── */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-2.5 min-h-0 overflow-hidden">
         
-        {/* ── COLUMN A: CONTROLS & INPUTS (BASED ON ACTIVE MODE) ── */}
-        <div className="bg-[#13182b] rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-col justify-between min-h-0">
+        {/* ── COLUMN A: DEAF CONSOLE / AI TUTOR ── */}
+        <div className="bg-[#13182b] rounded-2xl border border-slate-800 p-2.5 sm:p-3 shadow-xl flex flex-col justify-between min-h-0 overflow-hidden relative">
           
           {activeMode === 'bridge' ? (
-            <div className="flex flex-col h-full justify-between gap-3">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
-                      <UserCheck className="w-4 h-4" />
-                    </span>
-                    <h3 className="text-xs sm:text-sm font-black text-white">{t.sideAHeader}</h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
-                    Signs & Text ➔ Voice
+            <div className="flex flex-col h-full justify-between min-h-0">
+              <div className="flex items-center justify-between shrink-0 mb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
+                    <UserCheck className="w-3.5 h-3.5" />
                   </span>
+                  <h3 className="text-xs sm:text-sm font-black text-white">{t.sideAHeader}</h3>
                 </div>
-
-                {/* Quick Gestures Ribbon */}
-                <div className="mb-3">
-                  <p className="text-[10px] font-bold text-slate-400 mb-1 flex items-center gap-1">
-                    <Hand className="w-3 h-3 text-indigo-400" />
-                    <span>{t.gestureTitle}</span>
-                  </p>
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-                    {QUICK_GESTURES.map((g, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          handleSpeakToRoom(g.text);
-                          handleSignText(g.text);
-                        }}
-                        title={g.text}
-                        className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:bg-indigo-950/40 text-center transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5"
-                      >
-                        <span className="text-sm">{g.icon}</span>
-                        <span className="text-[10px] font-bold text-slate-300 truncate w-full">{g.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Scenario AAC Tabs & Phrases */}
-                <div className="mb-2">
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                    {(Object.keys(AAC_CATEGORIES) as AACCategory[]).map((catKey) => {
-                      const cat = AAC_CATEGORIES[catKey];
-                      const isActive = activeAacCategory === catKey;
-                      return (
-                        <button
-                          key={catKey}
-                          onClick={() => setActiveAacCategory(catKey)}
-                          className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all flex items-center gap-1 shrink-0 border ${
-                            isActive
-                              ? `${cat.color} shadow-sm font-black`
-                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-                          }`}
-                        >
-                          <span>{cat.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-1.5 mt-2 max-h-[130px] overflow-y-auto p-1 bg-slate-900/60 rounded-xl border border-slate-800/80">
-                    {AAC_CATEGORIES[activeAacCategory].phrases.map((phrase, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setInputText(phrase.text);
-                          handleSpeakToRoom(phrase.text);
-                          handleSignText(phrase.text);
-                        }}
-                        className="p-2 rounded-lg bg-slate-900 hover:bg-indigo-900/30 hover:border-indigo-500/40 border border-slate-800 text-start text-xs font-bold text-slate-200 transition-all active:scale-95 flex items-center gap-1.5 truncate"
-                      >
-                        <span className="text-sm shrink-0">{phrase.icon}</span>
-                        <span className="truncate">{phrase.text}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                
+                {/* AAC Drawer Trigger */}
+                <button
+                  onClick={() => setShowAacDrawer((prev) => !prev)}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold border transition-all flex items-center gap-1.5 ${
+                    showAacDrawer
+                      ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
+                      : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+                  }`}
+                >
+                  <Layers className="w-3 h-3 text-cyan-400" />
+                  <span>{isArabic ? 'عبارات AAC' : isFrench ? 'Phrases AAC' : 'AAC Phrases'}</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showAacDrawer ? 'rotate-180' : ''}`} />
+                </button>
               </div>
 
-              {/* Textarea & Actions */}
-              <div>
+              {/* Quick Gestures Ribbon (Compact single row of 6) */}
+              <div className="grid grid-cols-6 gap-1 shrink-0 mb-2">
+                {QUICK_GESTURES.map((g, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      handleSpeakToRoom(g.text);
+                      handleSignText(g.text);
+                    }}
+                    title={g.text}
+                    className="py-1 px-0.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 hover:bg-indigo-950/40 text-center transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5"
+                  >
+                    <span className="text-xs">{g.icon}</span>
+                    <span className="text-[9px] font-bold text-slate-300 truncate w-full">{g.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Overlay AAC Drawer (Floating overlay that never pushes layout) */}
+              <AnimatePresence>
+                {showAacDrawer && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                    className="absolute inset-x-2.5 top-11 z-30 bg-[#0e1324]/95 backdrop-blur-md border border-slate-700 rounded-xl p-2.5 shadow-2xl flex flex-col max-h-[220px]"
+                  >
+                    <div className="flex items-center justify-between mb-1.5 shrink-0">
+                      <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+                        {(Object.keys(AAC_CATEGORIES) as AACCategory[]).map((catKey) => {
+                          const cat = AAC_CATEGORIES[catKey];
+                          const isActive = activeAacCategory === catKey;
+                          return (
+                            <button
+                              key={catKey}
+                              onClick={() => setActiveAacCategory(catKey)}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all shrink-0 border ${
+                                isActive
+                                  ? `${cat.color} font-black`
+                                  : 'bg-slate-900 border-slate-800 text-slate-400'
+                              }`}
+                            >
+                              {cat.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <button
+                        onClick={() => setShowAacDrawer(false)}
+                        className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 shrink-0"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1 overflow-y-auto flex-1 p-0.5">
+                      {AAC_CATEGORIES[activeAacCategory].phrases.map((phrase, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setInputText(phrase.text);
+                            handleSpeakToRoom(phrase.text);
+                            handleSignText(phrase.text);
+                            setShowAacDrawer(false);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-900 hover:bg-indigo-900/40 border border-slate-800/80 text-start text-[11px] font-bold text-slate-200 transition-all active:scale-95 flex items-center gap-1.5 truncate"
+                        >
+                          <span className="text-xs shrink-0">{phrase.icon}</span>
+                          <span className="truncate">{phrase.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Text Input Area */}
+              <div className="flex-1 flex flex-col min-h-0 mb-2">
                 <textarea
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
@@ -712,58 +724,57 @@ Question: "${q}"`;
                     }
                   }}
                   placeholder={t.typePlaceholder}
-                  className="w-full min-h-[70px] p-3 bg-slate-900 border border-slate-800 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-100 font-medium text-xs sm:text-sm mb-2"
+                  className="w-full flex-1 p-2.5 bg-slate-900/90 border border-slate-800 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500/50 text-slate-100 font-medium text-xs sm:text-sm leading-relaxed"
                 />
+              </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => handleSpeakToRoom()}
-                    disabled={!inputText.trim()}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-40 text-slate-950 font-black rounded-xl shadow-lg transition-all active:scale-95 text-xs sm:text-sm"
-                  >
-                    {isSpeakingOut ? <Square className="w-4 h-4 fill-current" /> : <Volume2 className="w-4 h-4" />}
-                    <span>{t.speakBtn}</span>
-                  </button>
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2 shrink-0">
+                <button
+                  onClick={() => handleSpeakToRoom()}
+                  disabled={!inputText.trim()}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-40 text-slate-950 font-black rounded-xl shadow-md transition-all active:scale-95 text-xs sm:text-sm"
+                >
+                  {isSpeakingOut ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
+                  <span>{t.speakBtn}</span>
+                </button>
 
-                  <button
-                    onClick={() => handleSignText()}
-                    disabled={!inputText.trim()}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 text-xs sm:text-sm"
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    <span>{t.signBtn}</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleSignText()}
+                  disabled={!inputText.trim()}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 text-xs sm:text-sm"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>{t.signBtn}</span>
+                </button>
               </div>
             </div>
           ) : (
             /* AI TUTOR MODE */
-            <div className="flex flex-col h-full justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="p-1 rounded-lg bg-purple-500/20 text-purple-400">
-                    <Brain className="w-4 h-4" />
-                  </span>
-                  <h3 className="text-xs sm:text-sm font-black text-white">{t.modeAiTutor}</h3>
-                </div>
-
-                <p className="text-xs text-slate-400 mb-3">
-                  {isArabic
-                    ? 'اكتب سؤالك أو موضوع المحاضرة، وسيشرحه الذكاء الاصطناعي بلغة الإشارة 3D والنطق الصوتي المبسط.'
-                    : isFrench
-                    ? 'Posez votre question et l\'IA l\'expliquera en langue des signes 3D et synthèse vocale.'
-                    : 'Ask any question and Cognify AI will explain it via 3D sign language and vocal synthesis.'}
-                </p>
-
-                {aiAnswerText && (
-                  <div className="p-3 bg-purple-950/30 border border-purple-500/30 rounded-xl mb-3 max-h-[180px] overflow-y-auto">
-                    <span className="text-[10px] text-purple-400 font-bold block mb-1">{t.aiTag}:</span>
-                    <p className="text-xs sm:text-sm font-medium text-slate-200 leading-relaxed">{aiAnswerText}</p>
-                  </div>
-                )}
+            <div className="flex flex-col h-full justify-between min-h-0">
+              <div className="flex items-center gap-2 mb-1.5 shrink-0">
+                <span className="p-1 rounded-lg bg-purple-500/20 text-purple-400">
+                  <Brain className="w-3.5 h-3.5" />
+                </span>
+                <h3 className="text-xs sm:text-sm font-black text-white">{t.modeAiTutor}</h3>
               </div>
 
-              <div>
+              {aiAnswerText ? (
+                <div className="flex-1 min-h-0 overflow-y-auto p-2.5 bg-purple-950/20 border border-purple-500/30 rounded-xl mb-2">
+                  <span className="text-[10px] text-purple-400 font-bold block mb-1">{t.aiTag}:</span>
+                  <p className="text-xs sm:text-sm font-medium text-slate-200 leading-relaxed">{aiAnswerText}</p>
+                </div>
+              ) : (
+                <div className="flex-1 min-h-0 flex items-center justify-center text-center p-3 text-slate-400 text-xs bg-slate-900/40 rounded-xl border border-slate-800/80 mb-2">
+                  {isArabic
+                    ? 'اكتب سؤالك وسيقوم المعلم الذكي بشرحه فوراً بالنطق الصوتي وترجمته بلغة الإشارة 3D.'
+                    : isFrench
+                    ? 'Posez votre question et l\'IA l\'expliquera en 3D et voix.'
+                    : 'Ask a question and AI will explain it via voice & 3D sign.'}
+                </div>
+              )}
+
+              <div className="shrink-0">
                 <textarea
                   value={aiQuestion}
                   onChange={(e) => setAiQuestion(e.target.value)}
@@ -774,15 +785,15 @@ Question: "${q}"`;
                     }
                   }}
                   placeholder={t.askAiPlaceholder}
-                  className="w-full min-h-[80px] p-3 bg-slate-900 border border-slate-800 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-slate-100 font-medium text-xs sm:text-sm mb-2"
+                  className="w-full h-[58px] p-2 bg-slate-900 border border-slate-800 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-purple-500/50 text-slate-100 font-medium text-xs mb-1.5"
                 />
 
                 <button
                   onClick={handleAskAiTutor}
                   disabled={!aiQuestion.trim() || isAiAnswering}
-                  className="w-full py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:brightness-110 disabled:opacity-40 text-white font-black rounded-xl shadow-lg transition-all active:scale-98 flex items-center justify-center gap-2 text-xs sm:text-sm"
+                  className="w-full py-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:brightness-110 disabled:opacity-40 text-white font-black rounded-xl shadow-md transition-all active:scale-98 flex items-center justify-center gap-1.5 text-xs"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3.5 h-3.5" />
                   <span>{isAiAnswering ? t.aiThinking : t.askAiBtn}</span>
                 </button>
               </div>
@@ -792,142 +803,221 @@ Question: "${q}"`;
         </div>
 
         {/* ── COLUMN B: UNIFIED 3D SIGN AVATAR STAGE & PARTNER MIC ── */}
-        <div className="bg-[#13182b] rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-col justify-between min-h-0">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="p-1 rounded-lg bg-rose-500/20 text-rose-400">
-                  <Mic className="w-4 h-4" />
-                </span>
-                <h3 className="text-xs sm:text-sm font-black text-white">{t.sideBHeader}</h3>
-              </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300">
-                Partner ➔ 3D Sign
+        <div className="bg-[#13182b] rounded-2xl border border-slate-800 p-2.5 sm:p-3 shadow-xl flex flex-col justify-between min-h-0 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-1.5 shrink-0">
+            <div className="flex items-center gap-1.5">
+              <span className="p-1 rounded-lg bg-rose-500/20 text-rose-400">
+                <Mic className="w-3.5 h-3.5" />
               </span>
+              <h3 className="text-xs sm:text-sm font-black text-white">{t.sideBHeader}</h3>
             </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300">
+              Partner ➔ 3D Sign
+            </span>
+          </div>
 
-            {/* Master 3D Sign Avatar Viewport */}
-            <div className="relative h-[240px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 mb-3 flex items-center justify-center">
-              <React.Suspense fallback={
-                <div className="text-center p-4">
-                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                  <span className="text-xs text-slate-400">Loading 3D Sign Avatar...</span>
-                </div>
-              }>
-                <SignAvatar3D
-                  words={partnerSignSequence.length > 0 ? partnerSignSequence : sequence}
-                  playing={isPartnerSigning || isSigning}
-                  onDone={() => {
-                    setIsPartnerSigning(false);
-                    setIsSigning(false);
-                  }}
-                />
-              </React.Suspense>
+          {/* Master 3D Sign Avatar Viewport */}
+          <div className="flex-1 min-h-[140px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 mb-2 flex items-center justify-center relative">
+            <React.Suspense fallback={
+              <div className="text-center p-3">
+                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-1.5" />
+                <span className="text-xs text-slate-400">Loading 3D Sign Avatar...</span>
+              </div>
+            }>
+              <SignAvatar3D
+                words={partnerSignSequence.length > 0 ? partnerSignSequence : sequence}
+                playing={isPartnerSigning || isSigning}
+                onDone={() => {
+                  setIsPartnerSigning(false);
+                  setIsSigning(false);
+                }}
+              />
+            </React.Suspense>
 
-              {isListeningPartner && (
-                <div className="absolute top-2.5 left-2.5 bg-rose-500/90 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-pulse shadow-md">
-                  <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-                  <span>{t.listeningActive}</span>
-                </div>
-              )}
-            </div>
+            {isListeningPartner && (
+              <div className="absolute top-2 left-2 bg-rose-500/90 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse shadow-md z-10">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                <span>{t.listeningActive}</span>
+              </div>
+            )}
+          </div>
 
-            {/* Live Partner Captions */}
-            <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl mb-3 min-h-[50px]">
-              <span className="text-[10px] text-slate-400 font-bold block mb-0.5">{t.partnerTag}:</span>
-              <p className="text-xs sm:text-sm font-bold text-emerald-400 break-words leading-relaxed">
-                {partnerTranscript || (isListeningPartner ? t.listeningActive : t.partnerPlaceholder)}
-              </p>
-            </div>
+          {/* Live Partner Captions */}
+          <div className="shrink-0 bg-slate-900/90 border border-slate-800 p-2 rounded-xl mb-2 min-h-[42px] max-h-[50px] overflow-hidden flex flex-col justify-center">
+            <span className="text-[9px] text-slate-400 font-bold block leading-none mb-0.5">{t.partnerTag}:</span>
+            <p className="text-xs font-bold text-emerald-400 truncate leading-snug">
+              {partnerTranscript || (isListeningPartner ? t.listeningActive : t.partnerPlaceholder)}
+            </p>
           </div>
 
           {/* Partner Listen Toggle Button */}
           <button
             onClick={togglePartnerListening}
-            className={`w-full py-3 rounded-xl font-black transition-all shadow-lg text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-98 ${
+            className={`shrink-0 w-full py-2.5 rounded-xl font-black transition-all shadow-md text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-98 ${
               isListeningPartner
                 ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse'
                 : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white'
             }`}
           >
-            {isListeningPartner ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
+            {isListeningPartner ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-3.5 h-3.5" />}
             <span>{isListeningPartner ? t.listenBtnStop : t.listenBtnStart}</span>
           </button>
         </div>
 
       </div>
 
-      {/* ── LIVE TWO-WAY DIALOGUE TIMELINE FOOTER ── */}
-      <div className="shrink-0 bg-[#13182b] border border-slate-800 rounded-2xl p-3 sm:p-3.5 mt-2">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-indigo-400" />
-            <h4 className="text-xs font-black text-white">{t.timelineTitle}</h4>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 font-mono">
+      {/* ── LIVE TWO-WAY DIALOGUE SLIM TICKER ── */}
+      <div className="shrink-0 bg-[#13182b] border border-slate-800 rounded-xl px-3 py-1.5 mt-2 flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <button
+            onClick={() => setShowFullTimeline(true)}
+            className="text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 shrink-0"
+          >
+            <span>{t.timelineTitle}</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 font-mono">
               {dialogueLog.length}
             </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleCopyTranscript}
-              className="p-1 px-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-[11px] font-bold flex items-center gap-1 transition-all"
-            >
-              {copiedTranscript ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{t.copy}</span>
-            </button>
-            <button
-              onClick={handleExportTranscript}
-              className="p-1 px-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-[11px] font-bold flex items-center gap-1 transition-all"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>{t.saveTxt}</span>
-            </button>
-            <button
-              onClick={() => setDialogueLog([])}
-              className="p-1 px-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-rose-950/40 hover:text-rose-400 text-slate-500 text-[11px] transition-all"
-              title={t.clear}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          </button>
+          
+          {dialogueLog.length > 0 && (
+            <span className="text-[11px] text-slate-400 truncate hidden md:inline border-s border-slate-800 ps-2">
+              <strong className="text-slate-300">
+                {dialogueLog[dialogueLog.length - 1].sender === 'user' ? t.meTag : dialogueLog[dialogueLog.length - 1].sender === 'ai' ? t.aiTag : t.partnerTag}:
+              </strong>{' '}
+              {dialogueLog[dialogueLog.length - 1].text}
+            </span>
+          )}
         </div>
 
-        <div className="max-h-[90px] overflow-y-auto space-y-1.5 pr-1">
-          {dialogueLog.map((msg) => {
-            const isMe = msg.sender === 'user';
-            const isAi = msg.sender === 'ai';
-            return (
-              <div 
-                key={msg.id}
-                className={`p-1.5 px-2.5 rounded-xl text-xs flex items-start justify-between gap-3 border ${
-                  isMe 
-                    ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-100' 
-                    : isAi
-                    ? 'bg-purple-950/20 border-purple-500/30 text-purple-100'
-                    : 'bg-indigo-950/20 border-indigo-500/30 text-indigo-100'
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded shrink-0 ${
-                    isMe 
-                      ? 'bg-emerald-500/30 text-emerald-300' 
-                      : isAi
-                      ? 'bg-purple-500/30 text-purple-300'
-                      : 'bg-indigo-500/30 text-indigo-300'
-                  }`}>
-                    {isMe ? t.meTag : isAi ? t.aiTag : t.partnerTag}
-                  </span>
-                  <span className="truncate">{msg.text}</span>
-                </div>
-                <span className="text-[10px] text-slate-500 font-mono shrink-0">{msg.timestamp}</span>
-              </div>
-            );
-          })}
-          <div ref={dialogueEndRef} />
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => setShowFullTimeline(true)}
+            className="p-1 px-2 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/50 text-[11px] font-bold flex items-center gap-1 transition-all"
+          >
+            <span>{isArabic ? 'عرض المحادثة' : isFrench ? 'Afficher' : 'View Log'}</span>
+          </button>
+          <button
+            onClick={handleCopyTranscript}
+            className="p-1 px-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-[11px] font-bold flex items-center gap-1 transition-all"
+          >
+            {copiedTranscript ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+            <span className="hidden sm:inline">{t.copy}</span>
+          </button>
+          <button
+            onClick={handleExportTranscript}
+            className="p-1 px-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-[11px] font-bold flex items-center gap-1 transition-all"
+          >
+            <Download className="w-3 h-3" />
+            <span className="hidden sm:inline">{t.saveTxt}</span>
+          </button>
+          <button
+            onClick={() => setDialogueLog([])}
+            className="p-1 px-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-rose-950/40 hover:text-rose-400 text-slate-500 text-[11px] transition-all"
+            title={t.clear}
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
         </div>
       </div>
 
+      {/* ── FULL DIALOGUE TIMELINE MODAL ── */}
+      <AnimatePresence>
+        {showFullTimeline && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#13182b] border border-slate-700 rounded-2xl w-full max-w-lg p-4 shadow-2xl flex flex-col max-h-[85vh]"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-indigo-400" />
+                  <h4 className="text-sm font-black text-white">{t.timelineTitle}</h4>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 font-mono">
+                    {dialogueLog.length}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowFullTimeline(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 mb-3">
+                {dialogueLog.length === 0 ? (
+                  <p className="text-xs text-slate-500 text-center py-8">
+                    {isArabic ? 'لا توجد رسائل بعد في هذه الجلسة' : 'No messages in this session yet'}
+                  </p>
+                ) : (
+                  dialogueLog.map((msg) => {
+                    const isMe = msg.sender === 'user';
+                    const isAi = msg.sender === 'ai';
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`p-2 rounded-xl text-xs flex items-start justify-between gap-3 border ${
+                          isMe
+                            ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-100'
+                            : isAi
+                            ? 'bg-purple-950/20 border-purple-500/30 text-purple-100'
+                            : 'bg-indigo-950/20 border-indigo-500/30 text-indigo-100'
+                        }`}
+                      >
+                        <div className="flex items-start gap-2 min-w-0">
+                          <span
+                            className={`text-[9px] font-black px-1.5 py-0.5 rounded shrink-0 mt-0.5 ${
+                              isMe
+                                ? 'bg-emerald-500/30 text-emerald-300'
+                                : isAi
+                                ? 'bg-purple-500/30 text-purple-300'
+                                : 'bg-indigo-500/30 text-indigo-300'
+                            }`}
+                          >
+                            {isMe ? t.meTag : isAi ? t.aiTag : t.partnerTag}
+                          </span>
+                          <span className="break-words leading-relaxed">{msg.text}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-mono shrink-0">{msg.timestamp}</span>
+                      </div>
+                    );
+                  })
+                )}
+                <div ref={dialogueEndRef} />
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopyTranscript}
+                    className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    {copiedTranscript ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{t.copy}</span>
+                  </button>
+                  <button
+                    onClick={handleExportTranscript}
+                    className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>{t.saveTxt}</span>
+                  </button>
+                </div>
+                <button
+                  onClick={() => setShowFullTimeline(false)}
+                  className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all"
+                >
+                  {isArabic ? 'إغلاق' : 'Close'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -360,7 +360,7 @@ export default function DeafEcosystemView({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.15 }}
-              className="w-full h-full min-h-0 overflow-y-auto"
+              className="w-full h-full min-h-0 overflow-hidden flex flex-col"
             >
               <HumanCommunicationBridge
                 profile={profile}
