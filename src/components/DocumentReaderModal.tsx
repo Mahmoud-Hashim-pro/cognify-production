@@ -47,7 +47,7 @@ interface DocumentReaderModalProps {
 }
 
 type DocTool = 'document' | 'speech';
-type DocAction = 'summarize' | 'read';
+type DocAction = 'summarize' | 'read' | 'translate';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB — same cap ChatInterface.tsx already uses for PDFs
 
@@ -73,6 +73,18 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingAction, setProcessingAction] = useState<DocAction | null>(null);
   const [resultText, setResultText] = useState('');
+  // The language resultText is actually written in — usually companionLang,
+  // but after a translate action it's whatever target language was picked,
+  // which may differ from companionLang. Drives TTS voice + docx direction
+  // for the result, independent of the UI's own language.
+  const [resultLang, setResultLang] = useState<'ar' | 'en' | 'fr'>('en');
+  // Target language for the "Translate" action specifically — lets someone
+  // read/summarize in one language but translate the same document into a
+  // different one (e.g. upload an English PDF, translate the summary to
+  // Arabic) without changing the whole UI's language.
+  const [translateTarget, setTranslateTarget] = useState<'ar' | 'en' | 'fr'>(
+    () => (companionLang === 'ar' ? 'en' : 'ar') // sensible default: translate to the "other" language
+  );
   const [isSpeakingResult, setIsSpeakingResult] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +109,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
     setFileMime('');
     setFileData('');
     setResultText('');
+    setResultLang(companionLang);
     cancelSpeech();
     setIsSpeakingResult(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -163,12 +176,23 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
         : companionLang === 'fr'
         ? "Ce fichier est un cours ou un document d'étude. Résumez les points et idées principaux clairement, dans un style parlé naturel, sans titres ni markdown."
         : 'This file is a lecture or study document. Summarize the key points and main ideas clearly, in a natural spoken style as if explaining it to me, with no headings or markdown asterisks. Focus on what matters for studying it.';
-    } else {
+    } else if (action === 'read') {
       prompt = companionLang === 'ar'
         ? 'اقرأ كل النص المكتوب في هذا المستند بالكامل وبالترتيب، كلمة بكلمة، من غير أي تلخيص أو حذف أو تعليق، ومن غير عناوين أو ماركداون.'
         : companionLang === 'fr'
         ? "Lisez tout le texte de ce document dans l'ordre, mot pour mot, sans résumer, sans titres ni markdown."
         : 'Read out all the text in this document in order, word for word, with no summarizing, no omissions, and no headings or markdown.';
+    } else {
+      // translate: read the WHOLE document (whatever language it's actually
+      // written in) and translate it in full into translateTarget — this is
+      // deliberately not the same as summarize+translate, so nothing in the
+      // source document is dropped.
+      const targetName = geminiLangName(translateTarget);
+      prompt = translateTarget === 'ar'
+        ? `اقرأ كل النص المكتوب في هذا المستند، أيًا كانت لغته الأصلية، وترجمه بالكامل إلى العربية بأسلوب واضح وطبيعي، من غير حذف أو تلخيص، ومن غير عناوين أو ماركداون.`
+        : translateTarget === 'fr'
+        ? `Lisez tout le texte de ce document, quelle que soit sa langue d'origine, et traduisez-le intégralement en français, sans rien omettre, sans titres ni markdown.`
+        : `Read all the text in this document, regardless of its original language, and translate it in full into English, without omitting or summarizing anything, and without headings or markdown.`;
     }
 
     try {
@@ -178,10 +202,12 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
         [],
         [{ name: fileName || 'document', type: fileMime, data: fileData }],
       );
+      const outLang = action === 'translate' ? translateTarget : companionLang;
       setResultText(result || '');
+      setResultLang(outLang);
       if (result) {
         setIsSpeakingResult(true);
-        speak(result, ttsLangName(companionLang), {
+        speak(result, ttsLangName(outLang), {
           onEnd: () => setIsSpeakingResult(false),
           onError: () => setIsSpeakingResult(false),
         });
@@ -206,7 +232,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
     }
     if (!resultText) return;
     setIsSpeakingResult(true);
-    speak(resultText, ttsLangName(companionLang), {
+    speak(resultText, ttsLangName(resultLang), {
       onEnd: () => setIsSpeakingResult(false),
       onError: () => setIsSpeakingResult(false),
     });
@@ -220,7 +246,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
       // actually presses this button, so it never slows down the rest of
       // the Visual Companion feature.
       const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import('docx');
-      const isAr = companionLang === 'ar';
+      const isAr = resultLang === 'ar';
       const paragraphs = resultText
         .split(/\n+/)
         .filter((line) => line.trim().length > 0)
@@ -470,6 +496,36 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                         <Volume2 className="w-4 h-4" />
                       )}
                       {t('Read Full Text', 'قراءة كاملة', 'Lecture complète')}
+                    </button>
+                  </div>
+
+                  {/* Translate: read the document in whatever language it's
+                      actually written in and translate the whole thing into
+                      a chosen target — independent from companionLang, so
+                      e.g. an English PDF can come out as an Arabic summary
+                      without switching the whole panel's language. */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                    <select
+                      value={translateTarget}
+                      onChange={(e) => setTranslateTarget(e.target.value as 'ar' | 'en' | 'fr')}
+                      aria-label={t('Translate to', 'ترجمة إلى', 'Traduire vers')}
+                      className="bg-slate-900 border border-slate-700 rounded-lg text-xs font-bold text-white px-2 py-2 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    >
+                      <option value="ar">{t('Arabic', 'العربية', 'Arabe')}</option>
+                      <option value="en">{t('English', 'الإنجليزية', 'Anglais')}</option>
+                      <option value="fr">{t('French', 'الفرنسية', 'Français')}</option>
+                    </select>
+                    <button
+                      onClick={() => runDocumentAction('translate')}
+                      disabled={isProcessing}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs disabled:opacity-50 transition-all active:scale-95"
+                    >
+                      {isProcessing && processingAction === 'translate' ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4" />
+                      )}
+                      {t('Translate Document', 'ترجمة المستند', 'Traduire le document')}
                     </button>
                   </div>
 
