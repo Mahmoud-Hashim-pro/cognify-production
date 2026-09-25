@@ -650,38 +650,49 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           {activeTab === 'hub' && (
             <motion.div
               key="hub-clean-selector"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col items-center justify-center p-6 text-center select-none"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.25 }}
+              className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-center select-none"
             >
-              <div className="max-w-md w-full bg-[#121524]/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-                <div className="w-14 h-14 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 mx-auto flex items-center justify-center shadow-lg">
-                  <Accessibility className="w-7 h-7" />
+              <div className="max-w-lg w-full bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-2xl space-y-6 relative overflow-hidden">
+                {/* Ambient Decorative Glow */}
+                <div className="absolute -top-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500/20 via-indigo-500/15 to-transparent border border-cyan-500/40 text-cyan-300 mx-auto flex items-center justify-center shadow-lg shadow-cyan-950/40">
+                  <Accessibility className="w-8 h-8" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-white">
-                    {localize(profile.language, 'Accessibility Suites', 'منظومة إمكانية الوصول والتيسير')}
+                  <h2 className="text-xl font-black text-white tracking-tight">
+                    {localize(profile.language, 'Accessibility Command Center', 'منظومة إمكانية الوصول والتيسير')}
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1">
-                    {localize(profile.language, 'Select your primary assistive suite for instant direct access', 'اختر منظومة التيسير المناسبة لدخول مباشر وسريع')}
+                  <p className="text-xs text-slate-400 mt-1.5 font-medium max-w-sm mx-auto">
+                    {localize(profile.language, 'Select your assistive suite for instant, distraction-free direct access', 'اختر منظومة التيسير المناسبة لدخول فوري مخصص ومباشر')}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-start">
                   {[
-                    { id: 'vision' as const, labelAr: 'المرافق البصري', labelEn: 'Visual AI', icon: '👁️', descAr: 'قراءة، ملابس وفلوس', descEn: 'Vision companion' },
-                    { id: 'deaf' as const, labelAr: 'منظومة الصم', labelEn: 'Deaf Suite', icon: '🧏', descAr: 'إشارة ورادار أصوات', descEn: '3D Sign & Radar' },
-                    { id: 'motor' as const, labelAr: 'التحكم الحركي', labelEn: 'Motor Euphonia', icon: '🦾', descAr: 'تتبع الرأس والعين', descEn: 'Hands-free control' },
-                    { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي', labelEn: 'Neurodiversity', icon: '🧠', descAr: 'بطاقات PECS وروتين', descEn: 'Sensory & Routine' },
+                    { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', icon: '👁️', descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-emerald-500/60 hover:shadow-emerald-950/30' },
+                    { id: 'deaf' as const, labelAr: 'منظومة الصم المتكاملة', labelEn: 'Deaf Ecosystem', icon: '🧏', descAr: 'استوديو الإشارة 3D، رادار الأصوات، وجسر التواصل', descEn: '3D Sign Avatar, Sound Sentinel & Live Bridge', glow: 'hover:border-indigo-500/60 hover:shadow-indigo-950/30' },
+                    { id: 'motor' as const, labelAr: 'التحكم الحركي وإيفونيا', labelEn: 'Motor & Euphonia', icon: '🦾', descAr: 'تتبع الرأس والعين، لوحة الرمش، و SOS الطوارئ', descEn: 'Head pointer, eye-blink AAC & 4s GPS SOS', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/30' },
+                    { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي والتوحد', labelEn: 'Neurodiversity Hub', icon: '🧠', descAr: 'بطاقات PECS الناطقة، الروتين، ومسطرة القراءة', descEn: 'Spoken PECS cards, routines & calm bubble', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/30' },
                   ].map((s) => (
                     <button
                       key={s.id}
                       onClick={() => handleSelectTab(s.id)}
-                      className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-800 text-start transition-all active:scale-95 shadow-md group"
+                      className={`p-4 rounded-2xl bg-slate-900/90 border border-slate-800/90 ${s.glow} hover:bg-slate-800/80 transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between`}
                     >
-                      <span className="text-2xl block mb-2">{s.icon}</span>
-                      <span className="text-xs font-black text-white group-hover:text-cyan-300 block">{localize(profile.language, s.labelEn, s.labelAr)}</span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">{localize(profile.language, s.descEn, s.descAr)}</span>
+                      <div>
+                        <span className="text-2xl block mb-2">{s.icon}</span>
+                        <span className="text-xs font-black text-white group-hover:text-cyan-300 block transition-colors">{localize(profile.language, s.labelEn, s.labelAr)}</span>
+                        <span className="text-[11px] text-slate-400 block mt-1 leading-relaxed font-normal">{localize(profile.language, s.descEn, s.descAr)}</span>
+                      </div>
+                      <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-cyan-400 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                        <span>{localize(profile.language, 'Launch Suite', 'دخول المنظومة')}</span>
+                        <ChevronRight className={`w-3 h-3 ${isAr ? 'rotate-180' : ''}`} />
+                      </div>
                     </button>
                   ))}
                 </div>

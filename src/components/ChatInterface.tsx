@@ -2716,8 +2716,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               multiple
               accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.webp,.txt"
             />
-            
-            <div className={`relative w-full rounded-2xl bg-[#121524]/90 border border-slate-800/90 shadow-xl backdrop-blur-2xl focus-within:border-cyan-500/60 focus-within:ring-2 focus-within:ring-cyan-500/20 transition-all p-1 sm:p-1.5 flex flex-col justify-between ${isListening ? 'border-cyan-400 ring-4 ring-cyan-500/20' : ''}`}>
+            <div className={`relative w-full rounded-2xl bg-[#121524]/95 border border-slate-700/60 shadow-2xl backdrop-blur-2xl focus-within:border-cyan-400/80 focus-within:ring-2 focus-within:ring-cyan-500/25 transition-all p-1.5 sm:p-2 flex flex-col justify-between ${isListening ? 'border-cyan-400 ring-4 ring-cyan-500/30' : ''}`}>
               
               {/* Upper Section: Textarea Input */}
               <div className="relative w-full flex items-center">
@@ -2977,16 +2976,16 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                       onClick={() => { stopRef.current = true; abortRef.current?.abort(); }}
                       title={localize(profile.language, "Stop generating", "إيقاف التوليد")}
                       aria-label={localize(profile.language, "Stop generating", "إيقاف التوليد")}
-                      className="w-7 h-7 sm:w-7.5 sm:h-7.5 bg-slate-900 border border-slate-700 text-white rounded-lg flex items-center justify-center hover:bg-slate-800 transition-all shadow-sm active:scale-95 shrink-0"
+                      className="w-8 h-8 bg-slate-900 border border-slate-700 text-white rounded-xl flex items-center justify-center hover:bg-slate-800 transition-all shadow-sm active:scale-95 shrink-0"
                     >
-                      <Square className="w-3 h-3 fill-current" />
+                      <Square className="w-3.5 h-3.5 fill-current" />
                     </button>
                   ) : (
                     <button
                       type="submit"
                       disabled={!input.trim() && selectedFiles.length === 0}
                       aria-label={localize(profile.language, "Send message", "إرسال")}
-                      className="w-7 h-7 sm:w-7.5 sm:h-7.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg flex items-center justify-center hover:from-cyan-400 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 disabled:border disabled:border-slate-800 disabled:shadow-none transition-all shadow-sm shadow-cyan-500/20 active:scale-95 shrink-0"
+                      className="w-8 h-8 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white rounded-xl flex items-center justify-center hover:from-cyan-400 hover:to-indigo-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 disabled:border disabled:border-slate-800 disabled:shadow-none transition-all shadow-md shadow-cyan-500/25 active:scale-95 shrink-0"
                     >
                       <Send className="w-3.5 h-3.5" />
                     </button>
