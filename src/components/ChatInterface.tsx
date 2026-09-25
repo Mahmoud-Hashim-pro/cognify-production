@@ -1731,55 +1731,69 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         ) : (
           <div className="w-full max-w-3xl space-y-10">
             {messages.filter((m) => m.role === 'user').length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center py-8 sm:py-14 space-y-6 w-full animate-fadeIn">
+              <div className="flex flex-col items-center justify-center text-center py-6 sm:py-10 space-y-7 w-full animate-fadeIn select-none">
+                {/* Futuristic Glowing AI Core Orb */}
                 <div className="relative">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-cyan-500/20 via-blue-600/20 to-purple-600/20 border border-cyan-500/30 flex items-center justify-center shadow-2xl shadow-cyan-500/10">
-                    <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400 animate-pulse" />
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                    className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-indigo-500/20 to-purple-600/30 rounded-full blur-2xl opacity-70 -z-10"
+                  />
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-[#12162B] via-[#1B2142] to-[#12162B] border-2 border-cyan-400/40 flex items-center justify-center shadow-2xl shadow-cyan-500/25 relative group">
+                    <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-cyan-300 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="absolute inset-0 rounded-3xl bg-cyan-400/10 animate-pulse pointer-events-none" />
                   </div>
-                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-3xl blur-xl opacity-20 -z-10" />
                 </div>
 
-                <div className="space-y-2 max-w-lg">
-                  <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                    {localize(profile.language, 'How can I help you today?', 'كيف يمكنني مساعدتك اليوم؟')}
+                {/* Hero Title & Subtitle */}
+                <div className="space-y-2.5 max-w-xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-black uppercase tracking-wider mb-1 shadow-sm shadow-cyan-950/40">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                    <span>{localize(profile.language, 'Adaptive Cognitive Tutor 2.0', 'المعلّم الإدراكي المتكيف 2.0')}</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+                    {localize(profile.language, 'What are we mastering today?', 'ما الذي سنبدأ في إتقانه اليوم؟')}
                   </h2>
-                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal max-w-md mx-auto">
                     {localize(
                       profile.language,
-                      'Your adaptive AI academic & learning copilot. Ask questions, analyze slides, or practice key concepts.',
-                      'رفيقك الأكاديمي والتعليمي الذكي. اسأل أي سؤال، حلل ملفاتك وسلايداتك، أو تدرب على المفاهيم المعقدة.'
+                      'Your personalized AI academic copilot with step-by-step scaffolding, real-world analogies, and multi-modal sensory support.',
+                      'مساعدك الأكاديمي الذكي المخصص: شرح متدرج خطوة بخطوة، تشبيهات واقعية، ودعم متعدد الحواس لكافة الطلاب.'
                     )}
                   </p>
                 </div>
 
-                {/* Starter Prompts Grid */}
+                {/* 4 Powerful Interactive Study Cards */}
                 {(() => {
                   const ar = isArabicLocale(profile.language);
-                  const f = profile.field || (ar ? 'مجالك' : 'your field');
-                  const chips = ar
+                  const f = profile.field || (ar ? 'تخصصك' : 'your topic');
+                  const cards = ar
                     ? [
-                        { text: `اشرح لي مفهوم مهم في ${f} ببساطة`, icon: '💡' },
-                        { text: `اعمللي خطة مذاكرة لأسبوع`, icon: '📅' },
-                        { text: `لخّص لي موضوع أو ملف PDF`, icon: '📄' },
-                        { text: `اسألني أسئلة عشان أراجع`, icon: '🎯' },
+                        { title: 'شرح المفاهيم المعقدة', desc: `شرح متدرج ومبسط في ${f} بأمثلة واقعية`, prompt: `اشرح لي أهم وأصعب مفهوم في ${f} بأسلوب مبسط ومتدرج مع تشبيه من الحياة اليومية.`, icon: '💡', accent: 'from-amber-500/20 to-orange-500/5 hover:border-amber-400/60' },
+                        { title: 'خطة دراسية ذكية للأسبوع', desc: 'جدول عملي لتنظيم وقتك ومذاكرتك للاختبارات', prompt: `اعمللي خطة مذاكرة أسبوعية واقعية ومنظمة لمراجعة مواد ${f} بكفاءة.`, icon: '📅', accent: 'from-cyan-500/20 to-blue-500/5 hover:border-cyan-400/60' },
+                        { title: 'تلخيص وتحليل ملفات PDF', desc: 'استخراج الأفكار، المعادلات، والنقاط المهمة', prompt: `لخص لي أهم النقاط الأكاديمية والأسئلة المتوقعة في السلايدات أو المحاضرة.`, icon: '📄', accent: 'from-emerald-500/20 to-teal-500/5 hover:border-emerald-400/60' },
+                        { title: 'اختبار تدريبي تفاعلي', desc: 'أسئلة ذكية لقياس الفهم الفعلي وتثبيت المعلومة', prompt: `اطرح عليّ 3 أسئلة تدريبية متدرجة الصعوبة في ${f} لاختبار مدى فهمي واستيعابي.`, icon: '🎯', accent: 'from-purple-500/20 to-indigo-500/5 hover:border-purple-400/60' },
                       ]
                     : [
-                        { text: `Explain a key ${f} concept simply`, icon: '💡' },
-                        { text: `Make me a 1-week study plan`, icon: '📅' },
-                        { text: `Summarize an article or PDF`, icon: '📄' },
-                        { text: `Quiz me to review`, icon: '🎯' },
+                        { title: 'Master Deep Concepts', desc: `Step-by-step scaffolding in ${f} with real analogies`, prompt: `Explain the most important core concept in ${f} using intuitive step-by-step analogies.`, icon: '💡', accent: 'from-amber-500/20 to-orange-500/5 hover:border-amber-400/60' },
+                        { title: '1-Week Study Roadmap', desc: 'Structured revision timetable for upcoming exams', prompt: `Create a realistic 7-day study plan to master ${f} efficiently.`, icon: '📅', accent: 'from-cyan-500/20 to-blue-500/5 hover:border-cyan-400/60' },
+                        { title: 'PDF & Lecture Synthesizer', desc: 'Extract key formulas, exam points and summaries', prompt: `Summarize the essential takeaways and key exam concepts for this topic.`, icon: '📄', accent: 'from-emerald-500/20 to-teal-500/5 hover:border-emerald-400/60' },
+                        { title: 'Interactive Quiz & Review', desc: 'Targeted recall questions with instant feedback', prompt: `Quiz me with 3 progressive questions in ${f} to verify my active retention.`, icon: '🎯', accent: 'from-purple-500/20 to-indigo-500/5 hover:border-purple-400/60' },
                       ];
                   return (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 w-full max-w-2xl">
-                      {chips.map((p) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 w-full max-w-2xl text-start">
+                      {cards.map((c) => (
                         <button
-                          key={p.text}
+                          key={c.title}
                           type="button"
-                          onClick={() => handleSubmit(undefined, p.text)}
-                          className="text-start text-xs sm:text-sm p-4 rounded-2xl border border-slate-800/80 bg-[#121524]/60 hover:border-cyan-500/50 hover:bg-[#161a2e] text-slate-300 hover:text-white transition-all shadow-lg backdrop-blur-xl active:scale-[0.98] flex items-center gap-3 group cursor-pointer"
+                          onClick={() => handleSubmit(undefined, c.prompt)}
+                          className={`p-4 rounded-3xl border border-slate-800/90 bg-gradient-to-br ${c.accent} bg-[#121524]/75 text-slate-300 hover:text-white transition-all shadow-xl backdrop-blur-2xl active:scale-[0.98] flex items-start gap-3.5 group cursor-pointer hover:-translate-y-1`}
                         >
-                          <span className="text-xl p-2 rounded-xl bg-[#0A0C14] border border-slate-800 group-hover:border-cyan-500/40 transition-colors shrink-0">{p.icon}</span>
-                          <span className="font-semibold leading-snug">{p.text}</span>
+                          <span className="text-2xl p-2.5 rounded-2xl bg-[#0A0D1A] border border-white/10 group-hover:border-white/20 transition-all shrink-0 shadow-inner group-hover:scale-110">{c.icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-black text-sm text-white group-hover:text-cyan-300 transition-colors">{c.title}</h4>
+                            <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{c.desc}</p>
+                          </div>
                         </button>
                       ))}
                     </div>
