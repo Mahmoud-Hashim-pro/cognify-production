@@ -63,54 +63,11 @@ const isArabicLang = (lang?: string) => isArabicLocale(lang);
 // so it's only asked once instead of defaulting to English every time.
 const COMPANION_LANG_STORAGE_KEY = 'cognify_vision_companion_lang';
 
-/**
- * Sanitizes visual descriptions for both on-screen display and spoken output:
- * - Strips robotic labels like "**Hazards:** None", "**Visible Text:** None", "**Scene Description:**"
- * - Converts "Hazards: None" to "No hazards around you." / "مفيش أخطار حواليك."
- * - Strips all markdown formatting (asterisks, bullet dashes, backticks)
- * - Removes spoken symbol words (asterisk, star, استريك, نجمة)
- */
-export function cleanVisionDescription(raw: string, lang: 'ar' | 'en' | 'fr' = 'en'): string {
-  if (!raw) return '';
-  return raw
-    .replace(/\[Signs:.*?\]/g, '')
-    // English robotic boilerplate
-    .replace(/\*\*Hazards:\*\*\s*(None detected[^\n.]*|None[^\n.]*)[.]?/gi, 'No hazards around you.')
-    .replace(/Hazards:\s*(None detected[^\n.]*|None[^\n.]*)[.]?/gi, 'No hazards around you.')
-    .replace(/\*\*Visible Text:\*\*\s*(None[^\n.]*|N\/A[^\n.]*)[.]?/gi, '')
-    .replace(/Visible Text:\s*(None[^\n.]*|N\/A[^\n.]*)[.]?/gi, '')
-    .replace(/\*\*(Scene Description|Description):\*\*/gi, '')
-    .replace(/(Scene Description|Description):/gi, '')
-    .replace(/\*\*(Lecture Summary|Summary|Key Points):\*\*/gi, '')
-    .replace(/(Lecture Summary|Summary|Key Points):/gi, '')
-    // Arabic robotic boilerplate
-    .replace(/\*\*المخاطر:\*\*\s*(لا توجد[^\n.]*|لا يوجد[^\n.]*)[.]?/gi, 'مفيش أخطار حواليك.')
-    .replace(/المخاطر:\s*(لا توجد[^\n.]*|لا يوجد[^\n.]*)[.]?/gi, 'مفيش أخطار حواليك.')
-    .replace(/\*\*النصوص( المكتوبة)?:\*\*\s*(لا توجد[^\n.]*|لا يوجد[^\n.]*)[.]?/gi, '')
-    .replace(/النصوص( المكتوبة)?:\s*(لا توجد[^\n.]*|لا يوجد[^\n.]*)[.]?/gi, '')
-    .replace(/\*\*(وصف المشهد|الوصف):\*\*/gi, '')
-    .replace(/(وصف المشهد|الوصف):/gi, '')
-    .replace(/\*\*(ملخص المحاضرة|الملخص|النقاط الرئيسية):\*\*/gi, '')
-    .replace(/(ملخص المحاضرة|الملخص|النقاط الرئيسية):/gi, '')
-    // French robotic boilerplate
-    .replace(/\*\*Dangers?:\*\*\s*(Aucun[^\n.]*)[.]?/gi, 'Aucun danger autour de vous.')
-    .replace(/Dangers?:\s*(Aucun[^\n.]*)[.]?/gi, 'Aucun danger autour de vous.')
-    .replace(/\*\*Textes?( visibles?)?:\*\*\s*(Aucun[^\n.]*)[.]?/gi, '')
-    .replace(/Textes?( visibles?)?:\s*(Aucun[^\n.]*)[.]?/gi, '')
-    .replace(/\*\*(Description de la scène|Description):\*\*/gi, '')
-    .replace(/(Description de la scène|Description):/gi, '')
-    .replace(/\*\*(Résumé du cours|Résumé|Points clés):\*\*/gi, '')
-    .replace(/(Résumé du cours|Résumé|Points clés):/gi, '')
-    // Spoken symbol artifacts
-    .replace(/(?:^|\s+)(asterisk|استريك|نجمة|بوليت)(?=\s+|$)/giu, ' ')
-    // Markdown formatting (*, #, _, `, ~, [], (), <>)
-    .replace(/[*+#_`~\[\]()<>]/g, '')
-    // Bullet dashes
-    .replace(/^\s*[-•]\s+/gm, '')
-    .replace(/\s+-\s+/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-}
+export { cleanVisionDescription } from '../lib/visionCleaner';
+import { cleanVisionDescription } from '../lib/visionCleaner';
+export { exportToWordDocument, DOC_HISTORY_KEY } from './DocumentStudioModal';
+export type { SavedDocItem, DocChatMessage } from './DocumentStudioModal';
+import DocumentStudioModal from './DocumentStudioModal';
 
 export default function VisionCompanionView({ profile, setProfile }: VisionCompanionViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -296,12 +253,14 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
 
   // Spatial memory drawer state
   const [showSpatialMemory, setShowSpatialMemory] = useState(false);
-  const [showDocumentReader, setShowDocumentReader] = useState(false);
   const [spatialRecords, setSpatialRecords] = useState<SpatialObjectRecord[]>(() =>
     profile?.uid ? getSpatialObjects(profile.uid) : []
   );
   const [spatialQueryInput, setSpatialQueryInput] = useState('');
   const [spatialQueryResult, setSpatialQueryResult] = useState<string | null>(null);
+
+  // ── Document & Lecture Studio State ──
+  const [showDocStudio, setShowDocStudio] = useState(false);
 
   // Hydrate spatial objects from owner-only encrypted Firestore subcollection
   useEffect(() => {
@@ -1145,6 +1104,29 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
 
             <button
               onClick={() => {
+                setShowDocStudio(true);
+                announceFeature(
+                  'استوديو المستندات وتلخيص المحاضرات والـ PDF',
+                  'Document and Lecture Studio',
+                  'Studio de Documents et Cours',
+                  true
+                );
+              }}
+              aria-label={t('Document & Lecture Studio', 'المستندات والمحاضرات', 'Documents & Cours')}
+              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-indigo-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+              title={t(
+                'Document & Lecture Studio: read PDF, convert to Word, lecture audio recording, translation, speech-to-text',
+                'المستندات والمحاضرات: قراءة PDF، تحويل لـ Word، تسجيل وتلخيص المحاضرات، ترجمة، تحويل الصوت لكتابة',
+                'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
+              )}
+            >
+              <FileText className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-indigo-300 font-mono">PDF</span>
+            </button>
+
+            <button
+              onClick={() => {
                 setShowSpatialMemory(true);
                 if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
                 announceFeature('الذاكرة المكانية وحاجتي فين', 'Spatial Memory Object Locator', 'Localisation des Objets', true);
@@ -1158,20 +1140,6 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               {spatialRecords.length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               )}
-            </button>
-
-            <button
-              onClick={() => setShowDocumentReader(true)}
-              aria-label={t('Documents', 'مستندات', 'Documents')}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-cyan-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-              title={t(
-                'Documents: read/summarize a PDF and convert it to Word, plus speech-to-text',
-                'مستندات: اقرأ أو لخّص ملف PDF وحوّليه لوورد، وحوّلي الصوت لنص',
-                'Documents : lire/résumer un PDF et le convertir en Word, plus la reconnaissance vocale'
-              )}
-            >
-              <FileText className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span className="hidden xl:inline">{t('Documents', 'مستندات', 'Documents')}</span>
             </button>
 
             {(status === 'ready' || status === 'analyzing') && (
@@ -1566,6 +1534,23 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               <MapPin className="w-4 h-4" />
               <span>📍 {spatialRecords.length}</span>
             </button>
+
+            <button
+              onClick={() => {
+                setShowDocStudio(true);
+                announceFeature(
+                  'استوديو المستندات وتلخيص المحاضرات والـ PDF',
+                  'Document and Lecture Studio',
+                  'Studio de Documents et Cours',
+                  true
+                );
+              }}
+              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-indigo-500/40 text-indigo-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95"
+              title={companionLang === 'ar' ? 'المستندات وتلخيص المحاضرات' : 'Docs & Lectures'}
+            >
+              <FileText className="w-4 h-4" />
+              <span>{companionLang === 'ar' ? 'مستندات وPDF' : 'Docs & PDF'}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1872,13 +1857,14 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         )}
       </AnimatePresence>
 
-      {/* Document Reader & Speech ⇄ Text — separate full-screen panel, not a
-          camera mode (see DocumentReaderPanel.tsx header comment for why). */}
-      <AnimatePresence>
-        {showDocumentReader && (
-          <DocumentReaderPanel profile={profile} onClose={() => setShowDocumentReader(false)} />
-        )}
-      </AnimatePresence>
+      {/* Document & Lecture Studio Modal */}
+      <DocumentStudioModal
+        isOpen={showDocStudio}
+        onClose={() => setShowDocStudio(false)}
+        profile={profile}
+        companionLang={companionLang}
+        onAnnounce={(msg) => setAnnounce(msg)}
+      />
     </div>
   );
 }
