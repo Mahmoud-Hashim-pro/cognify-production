@@ -75,6 +75,7 @@ import { runDeveloperApiVerification } from './developerApiVerification.js';
 import { runSecurityThreatModelVerification } from './securityThreatModelVerification.js';
 import { runLearningHubComprehensiveVerification } from './learningHubComprehensiveVerification.js';
 import { runNeurodiversityEngineVerification } from './neurodiversityEngineVerification.js';
+import { runArslCurriculumAndModelVerification } from './arslCurriculumAndModelVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2079,6 +2080,13 @@ Keep practicing closures with higher-order functions!
     const m24Res = await runNeurodiversityEngineVerification();
     totalPassed += m24Res.passed;
     totalFailed += m24Res.failed;
+  }
+
+  // 56. Milestone 25: ArSL 24-Lecture Curriculum & Temporal ML Recognizer
+  {
+    const m25Res = await runArslCurriculumAndModelVerification();
+    totalPassed += m25Res.passed;
+    totalFailed += m25Res.failed;
   }
 
   console.log(`\n========================================`);
