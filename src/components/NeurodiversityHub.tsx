@@ -29,7 +29,8 @@ import {
   History,
   Send,
   MessageSquareWarning,
-  Activity
+  Activity,
+  PhoneCall
 } from 'lucide-react';
 import { UserProfile, PECSCard, SensoryEmotionLog } from '../types';
 import { speak } from '../lib/tts';
@@ -105,6 +106,15 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
   const [breathingCount, setBreathingCount] = useState(4);
   const [recentLogs, setRecentLogs] = useState<SensoryEmotionLog[]>([]);
   const [showLogsDrawer, setShowLogsDrawer] = useState(false);
+  const [dispatchStatus, setDispatchStatus] = useState<{
+    state: 'idle' | 'dispatching' | 'delivered' | 'fallback';
+    message?: string;
+    channels?: string[];
+    dispatchedAt?: string;
+    fallbackDirectCall?: boolean;
+    caregiverPhone?: string;
+  }>({ state: 'idle' });
+  const [showCaregiverBeacon, setShowCaregiverBeacon] = useState(false);
 
   const breathingTimerRef = useRef<any>(null);
 
@@ -239,12 +249,39 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
 
     if (lvl === 5) {
       setIsBreathingActive(true);
-      toast.warning(
-        t(
-          'Meltdown alert dispatched to caregiver server. Starting calming breathwork.',
-          'تم إرسال إشعار الأزمة الحسية تلقائياً لخادم رعاية المرافق، وتفعيل تمرين التنفس الهادئ لمساعدتك.'
-        )
-      );
+      setShowCaregiverBeacon(true);
+      setTimeout(() => setShowCaregiverBeacon(false), 10000);
+
+      const res = log.dispatchResult;
+      const timeNow = new Date().toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (res?.success && !res?.fallbackDirectCall) {
+        setDispatchStatus({
+          state: 'delivered',
+          message: res.message,
+          channels: res.channels,
+          dispatchedAt: timeNow,
+        });
+        toast.success(
+          t(
+            `Meltdown alert delivered via: ${res.channels?.join(', ')}`,
+            `تم تسليم إشعار الأزمة للمرافق بنجاح عبر: ${res.channels?.join('، ')}`
+          )
+        );
+      } else {
+        setDispatchStatus({
+          state: 'fallback',
+          message: res?.message || t('Server channels unavailable. Direct call fallback activated.', 'تعذر الإرسال عبر قنوات الخادم. تم تفعيل الاتصال المباشر.'),
+          fallbackDirectCall: true,
+          caregiverPhone: res?.details?.caregiverPhone,
+          dispatchedAt: timeNow,
+        });
+        toast.warning(
+          t(
+            'Server channels unavailable. Direct call fallback activated.',
+            'قنوات الخادم غير متاحة. تم تفعيل الاتصال المباشر بالمرافق.'
+          )
+        );
+      }
     } else if (lvl === 4) {
       setIsBreathingActive(true);
       toast.info(t('High sensory load detected. Let\'s breathe calmly.', 'رصدنا ضغطاً حسياً مرتفعاً. يلا نتنفس بهدوء معاً.'));
@@ -292,7 +329,9 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
 
   return (
     <div
-      className="flex-1 flex flex-col h-full bg-slate-950 text-white overflow-hidden select-none relative"
+      className={`flex-1 flex flex-col h-full bg-slate-950 text-white overflow-hidden select-none relative transition-all duration-700 ${
+        showCaregiverBeacon ? 'ring-4 ring-amber-400/60 shadow-[0_0_80px_rgba(251,191,36,0.3)]' : ''
+      }`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
       {/* Universal Visual Comfort Modal */}
@@ -301,6 +340,27 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
         onClose={() => setShowVisualComfortModal(false)}
         language={lang}
       />
+
+      {/* Visual Ambient Beacon Notification for Nearby Caregiver */}
+      {showCaregiverBeacon && (
+        <div className="bg-amber-500/20 border-b border-amber-500/40 text-amber-200 text-xs px-4 py-2 flex items-center justify-between animate-pulse z-30">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+            <span className="font-bold">
+              {t(
+                'Ambient Room Beacon Active: Calming visual cue for nearby caregiver (no auditory distress)',
+                'منارة الغرفة البصرية نشطة: وميض هادئ لتنبيه المرافق القريب دون إزعاج سمعي للطفل'
+              )}
+            </span>
+          </div>
+          <button
+            onClick={() => setShowCaregiverBeacon(false)}
+            className="text-amber-300 hover:text-white text-[11px] underline px-2 py-0.5"
+          >
+            {t('Dismiss Beacon', 'إلغاء المنارة')}
+          </button>
+        </div>
+      )}
 
       {/* Header Bar */}
       <header className="p-3 sm:p-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/90 backdrop-blur-xl z-20 flex-wrap">
@@ -386,6 +446,24 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
 
       {/* Main Tab Views */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0">
+        {/* Clinical Governance & AAC Notice Banner */}
+        <div className="mb-4 max-w-5xl mx-auto p-3 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 flex items-center gap-3 text-xs text-indigo-200">
+          <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-300 shrink-0">
+            <Shield className="w-4 h-4" />
+          </div>
+          <div className="flex-1 leading-relaxed">
+            <span className="font-bold text-indigo-100">
+              {t('Clinical Note (ABA / SLP):', 'ملاحظة سريرية (ABA / SLP):')}
+            </span>{' '}
+            <span>
+              {t(
+                'PECS communication vocabulary and daily routines are continuously aligned with Speech-Language Pathologists and Applied Behavior Analysis protocols for AAC compliance.',
+                'معجم بطاقات PECS والروتين اليومي يخضع للمراجعة المستمرة مع أخصائيي التخاطب والتحليل السلوكي (ABA) لضمان مطابقة معايير التواصل البديل والمعزز (AAC).'
+              )}
+            </span>
+          </div>
+        </div>
+
         {/* ── 1. CUSTOMIZABLE PECS CARDS ── */}
         {activeSubTab === 'pecs' && (
           <div className="space-y-4 max-w-5xl mx-auto">
@@ -591,6 +669,60 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
                 </span>
               </div>
             </div>
+
+            {/* Dynamic Meltdown Alert Status Confirmation */}
+            {dispatchStatus.state !== 'idle' && (
+              <div
+                className={`p-4 rounded-3xl border text-xs text-start transition-all flex items-start gap-3 shadow-lg ${
+                  dispatchStatus.state === 'dispatching'
+                    ? 'bg-amber-500/10 border-amber-500/40 text-amber-200'
+                    : dispatchStatus.state === 'delivered'
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-200'
+                    : 'bg-rose-500/10 border-rose-500/40 text-rose-200'
+                }`}
+              >
+                <div className="mt-0.5 shrink-0">
+                  {dispatchStatus.state === 'dispatching' && <Activity className="w-5 h-5 animate-spin text-amber-400" />}
+                  {dispatchStatus.state === 'delivered' && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+                  {dispatchStatus.state === 'fallback' && <AlertTriangle className="w-5 h-5 text-rose-400" />}
+                </div>
+
+                <div className="flex-1 space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-sm">
+                      {dispatchStatus.state === 'dispatching' && t('Dispatching Alert to Caregiver...', 'جارٍ إرسال الإشعار لخادم المرافق...')}
+                      {dispatchStatus.state === 'delivered' && t('Caregiver Alert Confirmed Delivered', 'تم تأكيد وصول الإشعار للمرافق بنجاح')}
+                      {dispatchStatus.state === 'fallback' && t('Caregiver Fallback Direct Alert', 'تنبيه مباشر بديل للمرافق')}
+                    </span>
+                    {dispatchStatus.dispatchedAt && (
+                      <span className="font-mono text-[10px] opacity-75">{dispatchStatus.dispatchedAt}</span>
+                    )}
+                  </div>
+                  <p className="text-xs opacity-90 leading-relaxed">{dispatchStatus.message}</p>
+                  {dispatchStatus.channels && dispatchStatus.channels.length > 0 && (
+                    <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                      <span className="text-[10px] text-slate-400">{t('Channels:', 'القنوات:')}</span>
+                      {dispatchStatus.channels.map((ch) => (
+                        <span key={ch} className="px-2 py-0.5 rounded-lg bg-slate-900 text-[10px] font-mono text-emerald-300 border border-emerald-500/30">
+                          {ch}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {dispatchStatus.fallbackDirectCall && dispatchStatus.caregiverPhone && (
+                    <div className="pt-2">
+                      <a
+                        href={`tel:${dispatchStatus.caregiverPhone}`}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md"
+                      >
+                        <PhoneCall className="w-4 h-4" />
+                        <span>{t('Call Caregiver Now', 'اتصل بالمرافق هاتفياً الآن')} ({dispatchStatus.caregiverPhone})</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Sensory Logs History Drawer */}
             {showLogsDrawer && recentLogs.length > 0 && (

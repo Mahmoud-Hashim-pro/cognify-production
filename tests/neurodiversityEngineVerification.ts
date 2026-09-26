@@ -2,6 +2,8 @@
  * Neurodiversity Engine, PECS, Visual Routine, and Meltdown Alert Verification Suite.
  */
 
+import fs from 'fs';
+import path from 'path';
 import {
   loadPecsCards,
   savePecsCards,
@@ -190,6 +192,26 @@ export async function runNeurodiversityEngineVerification() {
     assert(
       analysis.scheduleCorrelation?.clinicalRecommendation.includes('ABA'),
       'Generates actionable clinical ABA/OT sensory break recommendation'
+    );
+  }
+
+  // Test 8: Anti-Regression Security Invariant (Zero-Client-Popup Meltdown Dispatch)
+  {
+    const engineFilePath = path.resolve(process.cwd(), 'src/lib/neurodiversityEngine.ts');
+    assert(fs.existsSync(engineFilePath), 'neurodiversityEngine.ts source file exists on disk');
+    const engineCode = fs.readFileSync(engineFilePath, 'utf-8');
+
+    assert(
+      !engineCode.includes('sendWhatsAppMessage('),
+      'neurodiversityEngine does NOT call sendWhatsAppMessage (eliminates wa.me popup during acute meltdown)'
+    );
+    assert(
+      !engineCode.includes('api.whatsapp.com') && !engineCode.includes('https://wa.me'),
+      'neurodiversityEngine contains 0 references to external WhatsApp web links'
+    );
+    assert(
+      engineCode.includes('dispatchServerEmergencySOS'),
+      'Meltdown alerts flow directly through hardened server-side dispatchServerEmergencySOS'
     );
   }
 

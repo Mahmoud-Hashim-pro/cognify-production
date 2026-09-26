@@ -315,7 +315,7 @@ export async function recordSensoryLog(
   if (newLog.intensity >= 4 || newLog.level === 'overwhelmed' || newLog.level === 'anxious') {
     triggerHapticAlert('warning');
     if (newLog.intensity === 5) {
-      await dispatchMeltdownCaregiverAlert(userName || 'الطالب', newLog.sensoryTrigger, uid);
+      newLog.dispatchResult = await dispatchMeltdownCaregiverAlert(userName || 'الطالب', newLog.sensoryTrigger, uid);
     }
   }
 
