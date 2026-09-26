@@ -21,6 +21,7 @@ const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
 const NeurodiversityHub = React.lazy(() => import('./NeurodiversityHub'));
 const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
 const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
+const VisualComfortModal = React.lazy(() => import('./VisualComfortModal'));
 const DeafEcosystemView = React.lazy(() => import('./DeafEcosystemView'));
 const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
 const LearningHub = React.lazy(() => import('./learning/LearningHub'));
@@ -118,6 +119,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 }, ref) {
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => detectDirectDisabilityTab(profile));
   const [showPassportModal, setShowPassportModal] = useState(false);
+  const [showVisualComfortModal, setShowVisualComfortModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ModuleCategory>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
@@ -639,8 +641,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 ))}
               </AriaRadioGroup>
             ) : (
-              /* On Hub: show passport button & settings */
+              /* On Hub: show visual comfort button, passport button & settings */
               <div className="flex items-center gap-2">
+                <AriaButton
+                  onPress={() => setShowVisualComfortModal(true)}
+                  aria-label={localize(profile.language, 'Visual Comfort & Dyslexia Tools', 'أدوات الراحة البصرية وتيسير القراءة')}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 cursor-pointer"
+                >
+                  <span>📖</span>
+                  <span>{localize(profile.language, 'Visual Comfort', 'الراحة البصرية')}</span>
+                </AriaButton>
                 <AriaButton
                   onPress={() => setShowPassportModal(true)}
                   aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
@@ -1058,6 +1068,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         onClose={() => setShowPassportModal(false)}
         profile={profile}
         setProfile={setProfile}
+      />
+
+      {/* Universal Visual Comfort & Dyslexia Modal */}
+      <VisualComfortModal
+        isOpen={showVisualComfortModal}
+        onClose={() => setShowVisualComfortModal(false)}
+        language={profile.language}
       />
     </div>
   );

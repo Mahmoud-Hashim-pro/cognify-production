@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield,
@@ -21,7 +21,12 @@ import {
   Flame,
   Smile,
   Frown,
-  Meh
+  Meh,
+  Clock,
+  Sparkles,
+  Lightbulb,
+  TrendingUp,
+  BarChart2
 } from 'lucide-react';
 import { UserProfile, SensoryEmotionLog } from '../types';
 import { EmergencyContact } from '../lib/contacts';
@@ -34,7 +39,13 @@ import {
   revokeSpecificCaregiverAccess,
   CaregiverLinkRequest,
 } from '../lib/caregiverLinking';
-import { getRecentSensoryLogs } from '../lib/neurodiversityEngine';
+import {
+  getRecentSensoryLogs,
+  loadVisualSchedule,
+  analyzeSensoryPatterns,
+  VisualScheduleItem,
+  SensoryPatternAnalysis,
+} from '../lib/neurodiversityEngine';
 import { isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
 
@@ -52,12 +63,20 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
   const [contacts, setContacts] = useState<EmergencyContact[]>(loadContacts);
   const [sensoryLogs, setSensoryLogs] = useState<SensoryEmotionLog[]>([]);
+  const [schedule, setSchedule] = useState<VisualScheduleItem[]>([]);
 
   useEffect(() => {
     if (!profile.uid) return;
     restoreContactsFromCloud(profile.uid).then(setContacts);
-    getRecentSensoryLogs(profile.uid, 10).then(setSensoryLogs);
+    getRecentSensoryLogs(profile.uid, 50).then(setSensoryLogs);
+    loadVisualSchedule(profile.uid).then(setSchedule);
   }, [profile.uid]);
+
+  // Compute Clinical ABA & OT Sensory Pattern Analytics
+  const patternAnalysis: SensoryPatternAnalysis = useMemo(
+    () => analyzeSensoryPatterns(sensoryLogs, schedule),
+    [sensoryLogs, schedule]
+  );
 
   // Pending "someone wants to link as your parent/caregiver" requests
   const [pendingLinkRequests, setPendingLinkRequests] = useState<CaregiverLinkRequest[]>([]);
@@ -194,7 +213,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 {t('Caregiver & Specialist Command Hub', 'لوحة تحكم المرافق والمختص الطبي', 'Centre Accompagnant & Spécialiste')}
               </h1>
               <p className="text-[11px] text-slate-400">
-                {t('Telemetry, safety controls, sensory alerts and assistive passport configuration', 'متابعة المؤشرات الحيوية، الإنذار الحسي، تجربة الطوارئ وجواز الوصول الميسر')}
+                {t('Telemetry, safety controls, sensory pattern analytics and clinical insights', 'متابعة المؤشرات الحيوية، التحليل السريري للأنماط الحسية، تجربة الطوارئ وجواز الوصول')}
               </p>
             </div>
           </div>
@@ -346,48 +365,106 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
         </div>
 
-        {/* Sensory & Emotion Telemetry Feed */}
-        {sensoryLogs.length > 0 && (
-          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="font-black text-base flex items-center gap-2">
-                <Activity className="w-5 h-5 text-purple-400" />
-                <span>{t('Recent Sensory & Meltdown Regulation Telemetry', 'سجل المؤشرات الحسية ونوبات الضغط (Early Warnings)')}</span>
-              </h3>
-              <span className="text-xs text-slate-400 font-mono">{sensoryLogs.length} {t('Logs', 'سجلات')}</span>
+        {/* ── CLINICAL ABA & OT SENSORY PATTERN ANALYTICS ── */}
+        <div className="p-5 sm:p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-5 shadow-2xl">
+          <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
+                <BarChart2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-white flex items-center gap-2">
+                  <span>{t('Clinical Sensory & Meltdown Analytics (ABA / OT)', 'التحليل السريري للأنماط ونوبات الضغط الحسي (ABA / OT)')}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 font-normal">
+                    {patternAnalysis.totalMeltdowns} {t('Episodes Tracked', 'نوبة مرصودة')}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {t('Pattern detection to guide speech-language & behavioral therapy adaptations', 'اكتشاف الأنماط المتكررة لمساعدة أخصائي السلوك والتخاطب في ضبط خطة التدخل')}
+                </p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-              {sensoryLogs.slice(0, 6).map((log) => (
-                <div
-                  key={log.id}
-                  className={`p-3 rounded-2xl border flex items-center justify-between gap-2 ${
-                    log.intensity >= 4
-                      ? 'bg-rose-950/30 border-rose-500/40 text-rose-200'
-                      : 'bg-slate-950 border-slate-800 text-slate-200'
-                  }`}
-                >
-                  <div>
-                    <div className="font-bold text-xs flex items-center gap-1.5">
-                      <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
-                        log.intensity >= 4 ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300'
-                      }`}>
-                        {log.intensity}/5
-                      </span>
-                      <span className="truncate">{log.sensoryTrigger || log.level}</span>
-                    </div>
-                    {log.comfortActivityUsed && (
-                      <div className="text-[10px] text-slate-400 mt-0.5 truncate">{log.comfortActivityUsed}</div>
-                    )}
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-400 shrink-0">
-                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-              ))}
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <Clock className="w-4 h-4 text-indigo-400" />
+              <span>{t('Peak Overload Window:', 'ذروة نوبات الضغط:')} <strong className="text-amber-300 font-bold">{isAr ? patternAnalysis.peakTimeWindow : patternAnalysis.peakTimeWindowEn}</strong></span>
             </div>
           </div>
-        )}
+
+          {/* ABA Routine Correlation Alert Banner */}
+          {patternAnalysis.scheduleCorrelation && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-purple-500/15 to-indigo-500/15 border border-amber-500/40 space-y-1.5 shadow-lg">
+              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs">
+                <Lightbulb className="w-4 h-4 text-amber-400" />
+                <span>{t('Actionable Clinical Insight & Routine Correlation:', 'اكتشاف ارتباط سريري بالروتين اليومي (ABA Insight):')}</span>
+              </div>
+              <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                {isAr ? patternAnalysis.scheduleCorrelation.clinicalRecommendation : patternAnalysis.scheduleCorrelation.clinicalRecommendationEn}
+              </p>
+            </div>
+          )}
+
+          {/* Distribution & Triggers Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Time of Day Distribution */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+              <h4 className="font-bold text-xs text-slate-300 flex items-center justify-between">
+                <span>{t('Meltdown Time-of-Day Distribution:', 'توزيع النوبات خلال ساعات اليوم:')}</span>
+                <span className="text-[10px] text-slate-400 font-normal">{patternAnalysis.totalMeltdowns} {t('Total', 'إجمالي')}</span>
+              </h4>
+
+              <div className="space-y-2 text-xs">
+                {[
+                  { label: t('Morning (06:00 - 12:00)', 'الصباح (06:00 - 12:00)'), count: patternAnalysis.timeOfDayDistribution.morning, color: 'bg-amber-400' },
+                  { label: t('Afternoon (12:00 - 17:00)', 'بعد الظهر (12:00 - 17:00)'), count: patternAnalysis.timeOfDayDistribution.afternoon, color: 'bg-rose-400' },
+                  { label: t('Evening (17:00 - 22:00)', 'المساء (17:00 - 22:00)'), count: patternAnalysis.timeOfDayDistribution.evening, color: 'bg-purple-400' },
+                  { label: t('Night (22:00 - 06:00)', 'الليل (22:00 - 06:00)'), count: patternAnalysis.timeOfDayDistribution.night, color: 'bg-blue-400' },
+                ].map((item, idx) => {
+                  const pct = patternAnalysis.totalMeltdowns > 0 ? Math.round((item.count / patternAnalysis.totalMeltdowns) * 100) : 0;
+                  return (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-[11px] text-slate-400">
+                        <span>{item.label}</span>
+                        <span className="font-mono font-bold text-slate-200">{item.count} ({pct}%)</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
+                        <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Top Triggers */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+              <h4 className="font-bold text-xs text-slate-300 flex items-center justify-between">
+                <span>{t('Most Frequent Sensory Triggers:', 'أبرز المثيرات الحسية المتكررة:')}</span>
+                <span className="text-[10px] text-slate-400 font-normal">{patternAnalysis.topTriggers.length} {t('Identified', 'محددة')}</span>
+              </h4>
+
+              {patternAnalysis.topTriggers.length === 0 ? (
+                <div className="py-6 text-center text-xs text-slate-500">
+                  {t('No high-intensity sensory triggers recorded yet.', 'لا توجد مثيرات حسية مرتفعة مسجلة حتى الآن.')}
+                </div>
+              ) : (
+                <div className="space-y-2 text-xs">
+                  {patternAnalysis.topTriggers.map((tr, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-[11px] text-slate-300">
+                        <span className="truncate">{tr.trigger}</span>
+                        <span className="font-mono font-bold text-rose-300 shrink-0">{tr.count}x ({tr.percentage}%)</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
+                        <div className="h-full bg-rose-500 rounded-full transition-all duration-500" style={{ width: `${tr.percentage}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Safety & SOS Testing Section */}
         <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 shadow-xl">

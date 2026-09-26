@@ -4,15 +4,17 @@
  * Provides:
  * 1. Persistent Personalized PECS (Picture Exchange Communication System) cards.
  * 2. Predictability-Centric Daily Visual Routine with persistent task completion.
- * 3. Sensory Regulation, Emotion Logging, and Immediate Caregiver Meltdown Alerts.
- * 4. Dyslexia & Visual Comfort persistence (High-legibility fonts, tints, reading ruler).
+ * 3. Sensory Regulation, Emotion Logging, and Server-Side Meltdown Dispatch.
+ * 4. Clinical ABA & OT Pattern Analytics (Peak times, triggers, routine correlations).
+ * 5. Dyslexia & Universal Visual Comfort persistence.
  */
 
 import { doc, getDoc, setDoc, collection, addDoc, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from './firebase';
 import { PECSCard, SensoryEmotionLog } from '../types';
-import { loadContacts, sendWhatsAppMessage, isValidContactPhone } from './contacts';
+import { loadContacts, isValidContactPhone } from './contacts';
 import { triggerHapticAlert } from './hapticNavEngine';
+import { dispatchServerEmergencySOS, EmergencyDispatchResult } from './emergencyDispatcher';
 import { speak } from './tts';
 
 export interface VisualScheduleItem {
@@ -30,6 +32,27 @@ export interface VisualComfortSettings {
   isDyslexiaFont: boolean;
   showReadingRuler: boolean;
   tintColor: 'none' | 'cream' | 'mint' | 'rose';
+}
+
+export interface SensoryPatternAnalysis {
+  totalLogs: number;
+  totalMeltdowns: number; // intensity >= 4
+  timeOfDayDistribution: {
+    morning: number; // 06:00 - 12:00
+    afternoon: number; // 12:00 - 17:00
+    evening: number; // 17:00 - 22:00
+    night: number; // 22:00 - 06:00
+  };
+  peakTimeWindow: string;
+  peakTimeWindowEn: string;
+  topTriggers: { trigger: string; count: number; percentage: number }[];
+  scheduleCorrelation: {
+    correlatedTaskTitle: string;
+    correlationCount: number;
+    percentage: number;
+    clinicalRecommendation: string;
+    clinicalRecommendationEn: string;
+  } | null;
 }
 
 const STORAGE_KEYS = {
@@ -246,7 +269,7 @@ export async function deleteScheduleItem(uid: string | undefined, itemId: string
 }
 
 // ─────────────────────────────────────────────────────────────
-// 3. SENSORY & EMOTIONAL REGULATION WITH CAREGIVER MELTDOWN ALERT
+// 3. SENSORY & EMOTIONAL REGULATION WITH SERVER-SIDE MELTDOWN DISPATCH
 // ─────────────────────────────────────────────────────────────
 
 export async function recordSensoryLog(
@@ -288,10 +311,11 @@ export async function recordSensoryLog(
   }
 
   // 3. Automated Caregiver Early Alerting on Meltdown or Severe Overload
+  // Uses hardened server-side dispatch instead of requiring the distressed child to click WhatsApp!
   if (newLog.intensity >= 4 || newLog.level === 'overwhelmed' || newLog.level === 'anxious') {
     triggerHapticAlert('warning');
     if (newLog.intensity === 5) {
-      dispatchMeltdownCaregiverAlert(userName || 'الطالب', newLog.sensoryTrigger);
+      await dispatchMeltdownCaregiverAlert(userName || 'الطالب', newLog.sensoryTrigger, uid);
     }
   }
 
@@ -338,23 +362,160 @@ export async function getRecentSensoryLogs(uid?: string, limitCount: number = 20
 
 /**
  * Dispatches an automated early alert to the primary caregiver when a Meltdown / Severe Overload occurs.
+ * Uses the hardened server-side emergency dispatch pipeline with rate limiting,
+ * authentication verification, audit logging, and automated SMS / Telegram / Webhook dispatch.
  */
-export function dispatchMeltdownCaregiverAlert(studentName: string, trigger?: string): void {
+export async function dispatchMeltdownCaregiverAlert(
+  studentName: string,
+  trigger?: string,
+  uid?: string
+): Promise<EmergencyDispatchResult> {
   const contacts = loadContacts();
   const primary = contacts.find((c) => c.isPrimaryEmergency && isValidContactPhone(c.phone)) ||
                   contacts.find((c) => isValidContactPhone(c.phone));
 
-  if (primary && primary.phone) {
-    const alertMsg = `⚠️ [تنبيه رعاية حسية - Cognify] الطالب ${studentName} سجل الآن حالة إجهاد / انفجار حسي (Meltdown)${
-      trigger ? ` بسبب: ${trigger}` : ''
-    }. يُرجى التدخل وتقديم الدعم الحسي وتهدئة البيئة المحيطة.`;
-    
-    sendWhatsAppMessage(primary.phone, alertMsg);
-  }
+  const caregiverPhone = primary?.phone || '';
+  const caregiverName = primary?.nameAr || primary?.nameEn || 'Primary Caregiver';
+
+  const textMsg = `الطالب ${studentName} سجل الآن حالة إجهاد / انفجار حسي (Meltdown)${
+    trigger ? ` بسبب: ${trigger}` : ''
+  }. يُرجى التدخل وتقديم الدعم الحسي وتهدئة المكان.`;
+
+  return await dispatchServerEmergencySOS({
+    uid,
+    studentName,
+    caregiverPhone,
+    caregiverName,
+    source: 'sensory_meltdown',
+    incidentType: 'sensory_meltdown',
+    severity: 'moderate',
+    trigger,
+    text: textMsg,
+  });
 }
 
 // ─────────────────────────────────────────────────────────────
-// 4. PERSISTENT DYSLEXIA & VISUAL COMFORT ENGINE
+// 4. CLINICAL ABA & OT PATTERN ANALYTICS
+// ─────────────────────────────────────────────────────────────
+
+export function analyzeSensoryPatterns(
+  logs: SensoryEmotionLog[],
+  schedule: VisualScheduleItem[] = []
+): SensoryPatternAnalysis {
+  const meltdowns = logs.filter((l) => l.intensity >= 4 || l.level === 'overwhelmed' || l.level === 'anxious');
+  const totalMeltdowns = meltdowns.length;
+
+  const timeDist = {
+    morning: 0,
+    afternoon: 0,
+    evening: 0,
+    night: 0,
+  };
+
+  const triggerMap: Record<string, number> = {};
+  const scheduleCorrelationMap: Record<string, number> = {};
+
+  for (const m of meltdowns) {
+    let hour = 12;
+    const timeStrMatch = (m.timestamp || '').match(/T(\d{2}):/);
+    if (timeStrMatch) {
+      hour = parseInt(timeStrMatch[1], 10);
+    } else {
+      const d = new Date(m.timestamp);
+      hour = isNaN(d.getHours()) ? 12 : d.getHours();
+    }
+
+    if (hour >= 6 && hour < 12) timeDist.morning++;
+    else if (hour >= 12 && hour < 17) timeDist.afternoon++;
+    else if (hour >= 17 && hour < 22) timeDist.evening++;
+    else timeDist.night++;
+
+    const tr = m.sensoryTrigger || 'غير محدد';
+    triggerMap[tr] = (triggerMap[tr] || 0) + 1;
+
+    // Check correlation with daily schedule
+    if (schedule.length > 0) {
+      let bestItem: VisualScheduleItem | null = null;
+      let minDiff = Infinity;
+      for (const item of schedule) {
+        const timeMatch = item.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (timeMatch) {
+          let itemHour = parseInt(timeMatch[1], 10);
+          const isPm = timeMatch[3].toUpperCase() === 'PM';
+          if (isPm && itemHour < 12) itemHour += 12;
+          if (!isPm && itemHour === 12) itemHour = 0;
+
+          const diff = hour - itemHour;
+          if (diff >= 0 && diff <= 3 && diff < minDiff) {
+            minDiff = diff;
+            bestItem = item;
+          }
+        }
+      }
+      if (bestItem) {
+        const title = bestItem.titleAr || bestItem.titleEn;
+        scheduleCorrelationMap[title] = (scheduleCorrelationMap[title] || 0) + 1;
+      }
+    }
+  }
+
+  // Peak Window
+  let peakTimeWindow = 'غير محدد بعد';
+  let peakTimeWindowEn = 'Unspecified yet';
+  const maxVal = Math.max(timeDist.morning, timeDist.afternoon, timeDist.evening, timeDist.night);
+  if (totalMeltdowns > 0) {
+    if (maxVal === timeDist.morning) {
+      peakTimeWindow = 'الصباح (06:00 ص - 12:00 م)';
+      peakTimeWindowEn = 'Morning (06:00 AM - 12:00 PM)';
+    } else if (maxVal === timeDist.afternoon) {
+      peakTimeWindow = 'بعد الظهر (12:00 م - 05:00 م)';
+      peakTimeWindowEn = 'Afternoon (12:00 PM - 05:00 PM)';
+    } else if (maxVal === timeDist.evening) {
+      peakTimeWindow = 'المساء (05:00 م - 10:00 م)';
+      peakTimeWindowEn = 'Evening (05:00 PM - 10:00 PM)';
+    } else {
+      peakTimeWindow = 'الليل (10:00 م - 06:00 ص)';
+      peakTimeWindowEn = 'Night (10:00 PM - 06:00 AM)';
+    }
+  }
+
+  // Top Triggers
+  const topTriggers = Object.entries(triggerMap)
+    .map(([trigger, count]) => ({
+      trigger,
+      count,
+      percentage: totalMeltdowns > 0 ? Math.round((count / totalMeltdowns) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4);
+
+  // Schedule Correlation & Clinical Recommendation for ABA Therapists
+  let scheduleCorrelation: SensoryPatternAnalysis['scheduleCorrelation'] = null;
+  const topCorrelated = Object.entries(scheduleCorrelationMap).sort((a, b) => b[1] - a[1])[0];
+  if (topCorrelated && totalMeltdowns > 0) {
+    const pct = Math.round((topCorrelated[1] / totalMeltdowns) * 100);
+    scheduleCorrelation = {
+      correlatedTaskTitle: topCorrelated[0],
+      correlationCount: topCorrelated[1],
+      percentage: pct,
+      clinicalRecommendation: `${pct}% من نوبات الإجهاد الحسي تزامنت بعد: "${topCorrelated[0]}". توصية سريرية لمحلل السلوك (ABA) وأخصائي العلاج الوظيفي (OT): يُنصح بجدولة استراحة حسية هادئة (Sensory Break) مدتها 10 دقائق وتخفيف الإضاءة فور الانتهاء من هذا النشاط.`,
+      clinicalRecommendationEn: `${pct}% of sensory overload episodes occurred after: "${topCorrelated[0]}". ABA & OT Clinical Recommendation: Schedule a 10-minute quiet sensory break and reduce ambient stimulation immediately following this activity.`,
+    };
+  }
+
+  return {
+    totalLogs: logs.length,
+    totalMeltdowns,
+    timeOfDayDistribution: timeDist,
+    peakTimeWindow,
+    peakTimeWindowEn,
+    topTriggers,
+    scheduleCorrelation,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 5. UNIVERSAL DYSLEXIA & VISUAL COMFORT ENGINE
 // ─────────────────────────────────────────────────────────────
 
 export function loadVisualComfortSettings(): VisualComfortSettings {

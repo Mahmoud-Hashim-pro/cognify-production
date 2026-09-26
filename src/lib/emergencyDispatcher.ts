@@ -23,7 +23,10 @@ export async function dispatchServerEmergencySOS(params: {
   caregiverPhone?: string;
   caregiverName?: string;
   location?: { lat: number; lng: number };
-  source?: 'eye_closure' | 'button' | 'vocal';
+  source?: 'eye_closure' | 'button' | 'vocal' | 'sensory_meltdown' | 'fall_detected';
+  severity?: 'critical' | 'moderate' | 'warning';
+  incidentType?: 'emergency_sos' | 'sensory_meltdown' | 'fall_detected';
+  trigger?: string;
   text?: string;
 }): Promise<EmergencyDispatchResult> {
   const timestamp = new Date().toISOString();
@@ -37,7 +40,12 @@ export async function dispatchServerEmergencySOS(params: {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch('/api/emergency/dispatch', {
+    const baseUrl = typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : 'http://localhost:3000';
+    const endpoint = typeof window !== 'undefined' ? '/api/emergency/dispatch' : `${baseUrl}/api/emergency/dispatch`;
+
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify({

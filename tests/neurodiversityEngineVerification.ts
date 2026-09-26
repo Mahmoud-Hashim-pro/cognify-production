@@ -14,13 +14,15 @@ import {
   deleteScheduleItem,
   recordSensoryLog,
   getRecentSensoryLogs,
+  dispatchMeltdownCaregiverAlert,
+  analyzeSensoryPatterns,
   loadVisualComfortSettings,
   saveVisualComfortSettings,
   INITIAL_PECS_CARDS,
   INITIAL_SCHEDULE,
   VisualScheduleItem,
 } from '../src/lib/neurodiversityEngine.js';
-import { PECSCard } from '../src/types.js';
+import { PECSCard, SensoryEmotionLog } from '../src/types.js';
 
 let passed = 0;
 let failed = 0;
@@ -130,7 +132,7 @@ export async function runNeurodiversityEngineVerification() {
     assert(recent[0].intensity === 5, 'Most recent high-intensity meltdown log appears first in Caregiver feed');
   }
 
-  // Test 5: Dyslexia & Visual Comfort Persistence
+  // Test 5: Universal Dyslexia & Visual Comfort Persistence
   {
     const defaultComfort = loadVisualComfortSettings();
     assert(typeof defaultComfort.isDyslexiaFont === 'boolean', 'Visual comfort settings initialized with dyslexia font flag');
@@ -145,6 +147,50 @@ export async function runNeurodiversityEngineVerification() {
     assert(updatedComfort.isDyslexiaFont === true, 'Dyslexia font preference persisted correctly');
     assert(updatedComfort.showReadingRuler === true, 'Reading ruler preference persisted correctly');
     assert(updatedComfort.tintColor === 'cream', 'Warm cream tint background persisted correctly');
+  }
+
+  // Test 6: Server-Side Meltdown Caregiver Alert Dispatch (Non-Interactive / Fail-Closed)
+  {
+    const result = await dispatchMeltdownCaregiverAlert('سارة', 'ضوضاء عالية في الفصل', 'test-user-autism-1');
+    assert(typeof result.success === 'boolean', 'Server meltdown alert dispatch returns deterministic boolean result');
+    assert(Boolean(result.message), 'Server meltdown alert dispatch includes human-readable response message');
+    assert(
+      result.success === true || result.fallbackDirectCall === true,
+      'Server meltdown alert safely succeeds or gracefully engages fail-closed fallback without client popup'
+    );
+  }
+
+  // Test 7: Clinical ABA & OT Sensory Pattern Analytics & Routine Correlation
+  {
+    const mockSchedule: VisualScheduleItem[] = [
+      { id: 'sch-1', time: '08:00 AM', titleAr: 'الاستيقاظ والروتين الصباحي', titleEn: 'Morning Routine', titleFr: 'Matin', icon: '🪥', done: true },
+      { id: 'sch-2', time: '10:00 AM', titleAr: 'جلسة التعلم والقراءة الممتعة', titleEn: 'Learning Session', titleFr: 'Étude', icon: '📚', done: false },
+      { id: 'sch-3', time: '01:00 PM', titleAr: 'وجبة الغداء', titleEn: 'Lunch', titleFr: 'Déjeuner', icon: '🍲', done: false },
+    ];
+
+    const mockSensoryLogs: SensoryEmotionLog[] = [
+      { id: 'l-1', timestamp: '2026-09-26T10:45:00.000Z', level: 'overwhelmed', intensity: 5, sensoryTrigger: 'ضوضاء محيطة مفرطة' },
+      { id: 'l-2', timestamp: '2026-09-26T11:15:00.000Z', level: 'anxious', intensity: 4, sensoryTrigger: 'إجهاد بعد جلسة القراءة' },
+      { id: 'l-3', timestamp: '2026-09-26T11:45:00.000Z', level: 'overwhelmed', intensity: 5, sensoryTrigger: 'ضوضاء محيطة مفرطة' },
+      { id: 'l-4', timestamp: '2026-09-26T14:30:00.000Z', level: 'calm', intensity: 1, sensoryTrigger: 'بيئة هادئة' },
+      { id: 'l-5', timestamp: '2026-09-26T18:00:00.000Z', level: 'happy', intensity: 2 },
+    ];
+
+    const analysis = analyzeSensoryPatterns(mockSensoryLogs, mockSchedule);
+
+    assert(analysis.totalMeltdowns === 3, 'Calculates exact count of meltdowns/overloads (3 episodes >= 4)');
+    assert(analysis.timeOfDayDistribution.morning === 3, 'Correctly groups morning episodes into 06:00 - 12:00 window');
+    assert(analysis.topTriggers[0].trigger === 'ضوضاء محيطة مفرطة', 'Identifies top recurring sensory trigger');
+    assert(analysis.topTriggers[0].count === 2, 'Computes correct frequency count for top trigger');
+    assert(analysis.scheduleCorrelation !== null, 'Successfully correlates meltdown cluster with scheduled routine');
+    assert(
+      analysis.scheduleCorrelation?.correlatedTaskTitle === 'جلسة التعلم والقراءة الممتعة',
+      'Correlates morning meltdowns with preceding 10:00 AM Learning Session'
+    );
+    assert(
+      analysis.scheduleCorrelation?.clinicalRecommendation.includes('ABA'),
+      'Generates actionable clinical ABA/OT sensory break recommendation'
+    );
   }
 
   console.log(`\n  Neurodiversity Verification: ${passed} Passed, ${failed} Failed\n`);

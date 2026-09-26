@@ -49,11 +49,9 @@ import {
   VisualScheduleItem,
   recordSensoryLog,
   getRecentSensoryLogs,
-  loadVisualComfortSettings,
-  saveVisualComfortSettings,
-  VisualComfortSettings,
   dispatchMeltdownCaregiverAlert,
 } from '../lib/neurodiversityEngine';
+import VisualComfortModal from './VisualComfortModal';
 
 interface NeurodiversityHubProps {
   profile: UserProfile;
@@ -75,7 +73,8 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
   const isAr = isArabicLocale(lang);
   const isFr = lang === 'French';
 
-  const [activeSubTab, setActiveSubTab] = useState<'pecs' | 'schedule' | 'emotions' | 'dyslexia'>('pecs');
+  const [activeSubTab, setActiveSubTab] = useState<'pecs' | 'schedule' | 'emotions'>('pecs');
+  const [showVisualComfortModal, setShowVisualComfortModal] = useState(false);
   
   // ── 1. PERSISTENT PECS CARDS ──
   const [pecsCards, setPecsCards] = useState<PECSCard[]>([]);
@@ -107,10 +106,6 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
   const [recentLogs, setRecentLogs] = useState<SensoryEmotionLog[]>([]);
   const [showLogsDrawer, setShowLogsDrawer] = useState(false);
 
-  // ── 4. DYSLEXIA & VISUAL COMFORT ──
-  const [visualComfort, setVisualComfort] = useState<VisualComfortSettings>(loadVisualComfortSettings());
-  const [rulerY, setRulerY] = useState(250);
-
   const breathingTimerRef = useRef<any>(null);
 
   const t = (en: string, ar: string, fr?: string) => {
@@ -125,13 +120,6 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
     loadVisualSchedule(profile.uid).then(setSchedule);
     getRecentSensoryLogs(profile.uid, 15).then(setRecentLogs);
   }, [profile.uid]);
-
-  // Update Visual Comfort Settings
-  const updateComfort = (updates: Partial<VisualComfortSettings>) => {
-    const updated = { ...visualComfort, ...updates };
-    setVisualComfort(updated);
-    saveVisualComfortSettings(updated);
-  };
 
   // Speak PECS card
   const speakCard = (card: PECSCard) => {
@@ -216,7 +204,7 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
     toast.info(t('Task removed', 'تم حذف المهمة'));
   };
 
-  // Emotion Level Change & Persistent Logging + Caregiver Meltdown Alert
+  // Emotion Level Change & Persistent Logging + Server-Side Meltdown Dispatch
   const handleSelectEmotionLevel = async (lvl: 1 | 2 | 3 | 4 | 5) => {
     setCurrentEmotionLevel(lvl);
 
@@ -253,8 +241,8 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
       setIsBreathingActive(true);
       toast.warning(
         t(
-          'Meltdown alert recorded. We notified your caregiver and started calming breathwork.',
-          'تم تسجيل حالة الانفجار الحسي وإشعار المرافق تلقائياً، وتفعيل تمرين التنفس الهادئ لمساعدتك.'
+          'Meltdown alert dispatched to caregiver server. Starting calming breathwork.',
+          'تم إرسال إشعار الأزمة الحسية تلقائياً لخادم رعاية المرافق، وتفعيل تمرين التنفس الهادئ لمساعدتك.'
         )
       );
     } else if (lvl === 4) {
@@ -300,37 +288,19 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
     };
   }, [isBreathingActive]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (visualComfort.showReadingRuler) {
-      setRulerY(e.clientY);
-    }
-  };
-
   const filteredPecs = pecsFilter === 'all' ? pecsCards : pecsCards.filter((c) => c.category === pecsFilter);
 
   return (
     <div
-      onMouseMove={handleMouseMove}
-      className={`flex-1 flex flex-col h-full bg-slate-950 text-white overflow-hidden select-none relative ${
-        visualComfort.isDyslexiaFont ? 'font-mono tracking-wide' : ''
-      } ${
-        visualComfort.tintColor === 'cream'
-          ? 'bg-amber-950/20'
-          : visualComfort.tintColor === 'mint'
-          ? 'bg-emerald-950/20'
-          : visualComfort.tintColor === 'rose'
-          ? 'bg-rose-950/20'
-          : ''
-      }`}
+      className="flex-1 flex flex-col h-full bg-slate-950 text-white overflow-hidden select-none relative"
       dir={isAr ? 'rtl' : 'ltr'}
     >
-      {/* Reading Ruler Overlay */}
-      {visualComfort.showReadingRuler && (
-        <div
-          style={{ top: `${rulerY - 35}px` }}
-          className="fixed left-0 right-0 h-20 bg-amber-400/15 border-y-2 border-amber-400/40 pointer-events-none z-50 transition-all duration-75 shadow-lg backdrop-blur-[0.5px]"
-        />
-      )}
+      {/* Universal Visual Comfort Modal */}
+      <VisualComfortModal
+        isOpen={showVisualComfortModal}
+        onClose={() => setShowVisualComfortModal(false)}
+        language={lang}
+      />
 
       {/* Header Bar */}
       <header className="p-3 sm:p-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/90 backdrop-blur-xl z-20 flex-wrap">
@@ -352,11 +322,11 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
               <h1 className="font-black text-sm sm:text-base leading-tight flex items-center gap-2">
                 <span>{t('Neurodiversity & Autism Hub', 'واحة التوحد والاضطرابات النمائية', 'Pôle Neurodiversité & Autisme')}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/40 text-emerald-300 font-normal">
-                  {t('Persistent & Caregiver Linked', 'محفوظ سحابياً ومربوط بالمرافق', 'Persistant')}
+                  {t('Server Dispatched & Persistent', 'محفوظ سحابياً ومربوط بمركز الرعاية', 'Persistant')}
                 </span>
               </h1>
               <p className="text-[11px] text-slate-400">
-                {t('Customizable PECS cards, visual routines, sensory early-alerts & dyslexia tools', 'بطاقات PECS قابلة للتخصيص، روتين بصري محفوظ، إنذار مبكر للأزمات وأدوات عسر القراءة')}
+                {t('Customizable PECS communication cards, visual routine schedules & server-side meltdown early alerts', 'بطاقات PECS قابلة للتخصيص، روتين بصري منظم، والإنذار المبكر للأزمات عبر الخادم')}
               </p>
             </div>
           </div>
@@ -380,7 +350,7 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
             }`}
           >
             <span>📅</span>
-            <span>{t('Visual Schedule', 'جدول الروتين', 'Planning')}</span>
+            <span>{t('Visual Routine', 'جدول الروتين', 'Planning')}</span>
           </button>
           <button
             onClick={() => setActiveSubTab('emotions')}
@@ -389,17 +359,19 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
             }`}
           >
             <span>🧘</span>
-            <span>{t('Sensory & Emotions', 'المشاعر والإنذار المبكر', 'Émotions')}</span>
+            <span>{t('Sensory & Early Alerts', 'المشاعر والإنذار المبكر', 'Émotions')}</span>
           </button>
+          
+          {/* Universal Visual Comfort Tool Button */}
           <button
-            onClick={() => setActiveSubTab('dyslexia')}
-            className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
-              activeSubTab === 'dyslexia' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
-            }`}
+            onClick={() => setShowVisualComfortModal(true)}
+            className="px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 hover:border-slate-500"
+            title={t('Open Visual Comfort & Dyslexia Settings', 'فتح أدوات الراحة البصرية وتيسير القراءة')}
           >
             <span>📖</span>
-            <span>{t('Dyslexia Assist', 'تيسير القراءة', 'Lecture')}</span>
+            <span>{t('Visual Comfort', 'أدوات القراءة والراحة البصرية')}</span>
           </button>
+
           {onOpenLearningHub && (
             <button
               onClick={onOpenLearningHub}
@@ -567,7 +539,7 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
           </div>
         )}
 
-        {/* ── 3. SENSORY & EMOTIONS + CAREGIVER ALERT + BREATHING BUBBLE ── */}
+        {/* ── 3. SENSORY & EMOTIONS + SERVER-SIDE MELTDOWN DISPATCH + BREATHING BUBBLE ── */}
         {activeSubTab === 'emotions' && (
           <div className="max-w-xl mx-auto space-y-6 text-center">
             {/* 5-Point Emotion & Sensory Level Meter */}
@@ -613,8 +585,8 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
                 <Shield className="w-3.5 h-3.5 text-indigo-400" />
                 <span>
                   {t(
-                    'Level 5 automatically alerts the registered primary caregiver for immediate sensory de-escalation.',
-                    'المستوى 5 (انفجار حسي) يرسل تنبيهاً فورياً للمرافق المعتمد لتقديم الدعم الحسي وتهدئة المكان.'
+                    'Level 5 automatically dispatches a secure server alert to the primary caregiver for immediate sensory de-escalation.',
+                    'المستوى 5 (انفجار حسي) يرسل تلقائياً إشعار استغاثة آمن عبر الخادم للمرافق المعتمد لتقديم الدعم الحسي فوراً.'
                   )}
                 </span>
               </div>
@@ -688,85 +660,6 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
               >
                 {isBreathingActive ? t('Stop Breathing', 'إيقاف التمرين', 'Arrêter') : t('Start Breathing Bubble', 'ابدأ فقاعة التنفس', 'Démarrer')}
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── 4. DYSLEXIA & READING TOOLS (PERSISTENT) ── */}
-        {activeSubTab === 'dyslexia' && (
-          <div className="max-w-2xl mx-auto space-y-5">
-            <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-              <h3 className="font-black text-sm text-slate-200 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-indigo-400" />
-                <span>{t('Dyslexia & Visual Comfort Controls (Saved to Profile)', 'أدوات تيسير القراءة وعسر القراءة (محفوظة لحسابك)', 'Confort Visuel')}</span>
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Dyslexia High-Legibility Font */}
-                <button
-                  onClick={() => updateComfort({ isDyslexiaFont: !visualComfort.isDyslexiaFont })}
-                  className={`p-3 rounded-2xl border text-start flex items-center justify-between transition-all ${
-                    visualComfort.isDyslexiaFont ? 'bg-indigo-600/30 border-indigo-400 text-indigo-200 font-mono' : 'bg-slate-950 border-slate-800 text-slate-400'
-                  }`}
-                >
-                  <div>
-                    <div className="font-bold text-xs text-white">{t('High-Legibility Font', 'خط عالي التباين وواسع', 'Police Lisible')}</div>
-                    <div className="text-[10px] text-slate-400">{t('Increases letter and word spacing', 'يوسع المسافات بين الحروف والكلمات')}</div>
-                  </div>
-                  <span className="text-xl">🔤</span>
-                </button>
-
-                {/* Reading Ruler Toggle */}
-                <button
-                  onClick={() => updateComfort({ showReadingRuler: !visualComfort.showReadingRuler })}
-                  className={`p-3 rounded-2xl border text-start flex items-center justify-between transition-all ${
-                    visualComfort.showReadingRuler ? 'bg-amber-600/30 border-amber-400 text-amber-200' : 'bg-slate-950 border-slate-800 text-slate-400'
-                  }`}
-                >
-                  <div>
-                    <div className="font-bold text-xs text-white">{t('Reading Ruler Bar', 'مسطرة القراءة المضيئة', 'Règle de Lecture')}</div>
-                    <div className="text-[10px] text-slate-400">{t('Highlights reading line with cursor', 'تظليل سطر القراءة الحالي مع حركة المؤشر')}</div>
-                  </div>
-                  <span className="text-xl">📏</span>
-                </button>
-              </div>
-
-              {/* Tint Colors */}
-              <div className="space-y-1.5 pt-2 border-t border-slate-800">
-                <label className="text-xs text-slate-400 font-bold block">
-                  {t('Comfort Tint (Reduces Screen Glare):', 'لون خلفية هادئ ومريح للعين (يقلل الوهج):')}
-                </label>
-                <div className="flex gap-2">
-                  {[
-                    { id: 'none', label: t('Default Dark', 'داكن عادي') },
-                    { id: 'cream', label: t('Warm Cream', 'كريمي دافئ') },
-                    { id: 'mint', label: t('Soft Mint', 'أخضر نعناعي') },
-                    { id: 'rose', label: t('Gentle Rose', 'وردي خفيف') },
-                  ].map((tint) => (
-                    <button
-                      key={tint.id}
-                      onClick={() => updateComfort({ tintColor: tint.id as any })}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        visualComfort.tintColor === tint.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'
-                      }`}
-                    >
-                      {tint.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Reading Test Box */}
-            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                {t('Sample Reading Experience:', 'معاينة القراءة والتجربة:')}
-              </h4>
-              <p className="text-sm leading-loose text-slate-200">
-                {isAr
-                  ? 'كل عقل في كوجنيفاي فريد ومميز بطريقته الخاصة. مع مسطرة القراءة والخط الواسع، تصبح الكلمات أوضح والتركيز أسهل بكثير بدون أي إجهاد بصري.'
-                  : 'Every mind in Cognify is wonderfully unique. With the reading ruler and spacious typography, comprehension flows smoothly with zero visual fatigue.'}
-              </p>
             </div>
           </div>
         )}

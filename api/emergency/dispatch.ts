@@ -21,7 +21,10 @@ export interface EmergencyDispatchPayload {
   caregiverPhone?: string;
   caregiverName?: string;
   location?: { lat: number; lng: number };
-  source?: 'eye_closure' | 'button' | 'vocal';
+  source?: 'eye_closure' | 'button' | 'vocal' | 'sensory_meltdown' | 'fall_detected';
+  severity?: 'critical' | 'moderate' | 'warning';
+  incidentType?: 'emergency_sos' | 'sensory_meltdown' | 'fall_detected';
+  trigger?: string;
   text?: string;
   timestamp?: string;
 }
@@ -111,7 +114,9 @@ export default async function handler(req: any, res: any) {
 
   try {
     const payload: EmergencyDispatchPayload = req.body || {};
-    const incidentId = `SOS-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    const isMeltdown = payload.incidentType === 'sensory_meltdown' || payload.source === 'sensory_meltdown';
+    const prefix = isMeltdown ? 'MELTDOWN' : 'SOS';
+    const incidentId = `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     const timestamp = payload.timestamp || new Date().toISOString();
 
     const channelsNotified: string[] = [];
@@ -124,12 +129,18 @@ export default async function handler(req: any, res: any) {
       ? `https://maps.google.com/?q=${payload.location.lat},${payload.location.lng}`
       : 'Location unavailable';
 
-    const alertMessage = `🚨 [CRITICAL EMERGENCY SOS]
+    const alertTitle = isMeltdown ? '⚠️ [SENSORY MELTDOWN ALERT - COGNIFY]' : '🚨 [CRITICAL EMERGENCY SOS]';
+    const defaultText = isMeltdown
+      ? `Student is experiencing an acute sensory meltdown / overload.${payload.trigger ? ` Trigger: ${payload.trigger}` : ''} Immediate caregiver de-escalation & environmental calming needed.`
+      : 'Immediate medical/caregiver assistance requested!';
+
+    const alertMessage = `${alertTitle}
 Incident ID: ${incidentId}
 Student: ${student} (UID: ${authenticatedUid})
-Trigger Source: ${payload.source || 'eye_closure'}
+Severity: ${payload.severity || (isMeltdown ? 'moderate' : 'critical')}
+Trigger Source: ${payload.source || (isMeltdown ? 'sensory_meltdown' : 'eye_closure')}
 Caregiver Contact: ${payload.caregiverName || 'Primary Caregiver'} (${validCaregiverPhone || 'Not set or unverified'})
-Message: ${payload.text || 'Immediate medical/caregiver assistance requested!'}
+Message: ${payload.text || defaultText}
 Live Map: ${locationStr}
 Time: ${timestamp}`;
 
