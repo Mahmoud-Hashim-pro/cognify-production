@@ -28,6 +28,8 @@ const LearningHub = React.lazy(() => import('./learning/LearningHub'));
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation } from '../lib/translations';
 
+import BurgundyConstellationHero from './BurgundyConstellationHero';
+
 export type DisabilityTab =
   | 'hub'
   | 'chat'
@@ -57,6 +59,8 @@ interface DisabilityModeViewProps {
   onSTTStateChange?: (active: boolean) => void;
   onTabChange?: (tab: DisabilityTab) => void;
   setProfile?: (profile: UserProfile) => void;
+  isDarkMode?: boolean;
+  toggleTheme?: () => void;
 }
 
 /**
@@ -115,7 +119,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   onStreamingUpdate,
   onSTTStateChange,
   onTabChange,
-  setProfile
+  setProfile,
+  isDarkMode,
+  toggleTheme,
 }, ref) {
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => detectDirectDisabilityTab(profile));
   const [showPassportModal, setShowPassportModal] = useState(false);
@@ -679,56 +685,73 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           {/* ═════════════════════════════════════════════════════════════════════
               VIEW: CLEAN DIRECT ACCESSIBILITY SUITE SELECTOR (NO CARD CLUTTER)
              ═════════════════════════════════════════════════════════════════════ */}
+          {/* ═════════════════════════════════════════════════════════════════════
+              VIEW: ROYAL BURGUNDY CONSTELLATION HERO & ASSISTIVE SUITES HUB
+             ═════════════════════════════════════════════════════════════════════ */}
           {activeTab === 'hub' && (
             <motion.div
-              key="hub-clean-selector"
+              key="hub-burgundy-showcase"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.25 }}
-              className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-center select-none"
+              className="flex-1 flex flex-col items-center overflow-y-auto p-4 sm:p-6 select-none custom-scrollbar"
             >
-              <div className="max-w-lg w-full bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-2xl space-y-6 relative overflow-hidden">
-                {/* Ambient Decorative Glow */}
-                <div className="absolute -top-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="max-w-4xl w-full space-y-6">
+                {/* 1. Royal Burgundy & Gold Constellation Hero Showcase */}
+                <BurgundyConstellationHero
+                  profile={profile}
+                  onLaunchPrimary={() => {
+                    const target = detectDirectDisabilityTab(profile);
+                    handleSelectTab(target);
+                  }}
+                  onExploreModes={() => {
+                    const el = document.getElementById('suites-grid');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  onSelectSuite={(suiteId) => handleSelectTab(suiteId)}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
+                />
 
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500/20 via-indigo-500/15 to-transparent border border-cyan-500/40 text-cyan-300 mx-auto flex items-center justify-center shadow-lg shadow-cyan-950/40">
-                  <Accessibility className="w-8 h-8" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-white tracking-tight">
-                    {localize(profile.language, 'Accessibility Command Center', 'منظومة إمكانية الوصول والتيسير')}
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1.5 font-medium max-w-sm mx-auto">
-                    {localize(profile.language, 'Select your assistive suite for instant, distraction-free direct access', 'اختر منظومة التيسير المناسبة لدخول فوري مخصص ومباشر')}
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-start">
-                  {[
-                    { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-emerald-500/60 hover:shadow-emerald-950/30', iconColor: 'text-emerald-400', iconBg: 'bg-emerald-500/15 border-emerald-500/30' },
-                    { id: 'deaf' as const, labelAr: 'منظومة الصم المتكاملة', labelEn: 'Deaf Ecosystem', Icon: Ear, descAr: 'استوديو الإشارة 3D، رادار الأصوات، وجسر التواصل', descEn: '3D Sign Avatar, Sound Sentinel & Live Bridge', glow: 'hover:border-indigo-500/60 hover:shadow-indigo-950/30', iconColor: 'text-indigo-400', iconBg: 'bg-indigo-500/15 border-indigo-500/30' },
-                    { id: 'motor' as const, labelAr: 'التحكم الحركي وإيفونيا', labelEn: 'Motor & Euphonia', Icon: Activity, descAr: 'تتبع الرأس والعين، لوحة الرمش، و SOS الطوارئ', descEn: 'Head pointer, eye-blink AAC & 4s GPS SOS', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/30', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
-                    { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي والتوحد', labelEn: 'Neurodiversity Hub', Icon: Brain, descAr: 'بطاقات PECS الناطقة، الروتين، ومسطرة القراءة', descEn: 'Spoken PECS cards, routines & calm bubble', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/30', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
-                  ].map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => handleSelectTab(s.id)}
-                      className={`p-4 min-h-[140px] rounded-2xl bg-[#171E2E] border border-slate-700/80 ${s.glow} hover:bg-slate-800/80 transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between`}
-                    >
-                      <div>
-                        <div className={`w-9 h-9 rounded-xl ${s.iconBg} border flex items-center justify-center ${s.iconColor} mb-2.5 group-hover:scale-105 transition-transform`}>
-                          <s.Icon className="w-5 h-5" />
+                {/* 2. Direct Assistive Suites Grid */}
+                <div id="suites-grid" className="pt-2">
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-rose-300 flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{localize(profile.language, 'Dedicated Assistive Suites', 'منظومات التيسير المتخصصة')}</span>
+                    </h3>
+                    <span className="text-[10px] text-slate-400 font-bold">
+                      {localize(profile.language, 'Select to launch immediately', 'اختر منظومة للتشغيل الفوري')}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-start">
+                    {[
+                      { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
+                      { id: 'deaf' as const, labelAr: 'منظومة الصم المتكاملة', labelEn: 'Deaf Ecosystem', Icon: Ear, descAr: 'استوديو الإشارة 3D، رادار الأصوات، وجسر التواصل', descEn: '3D Sign Avatar, Sound Sentinel & Live Bridge', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
+                      { id: 'motor' as const, labelAr: 'التحكم الحركي وإيفونيا', labelEn: 'Motor & Euphonia', Icon: Activity, descAr: 'تتبع الرأس والعين، لوحة الرمش، و SOS الطوارئ', descEn: 'Head pointer, eye-blink AAC & 4s GPS SOS', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-300', iconBg: 'bg-amber-500/15 border-amber-500/30' },
+                      { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي والتوحد', labelEn: 'Neurodiversity Hub', Icon: Brain, descAr: 'بطاقات PECS الناطقة، الروتين، ومسطرة القراءة', descEn: 'Spoken PECS cards, routines & calm bubble', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/40', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
+                    ].map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => handleSelectTab(s.id)}
+                        className={`p-4 min-h-[140px] rounded-2xl bg-[#171E2E] border border-slate-700/80 ${s.glow} hover:bg-slate-800/80 transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between cursor-pointer`}
+                      >
+                        <div>
+                          <div className={`w-9 h-9 rounded-xl ${s.iconBg} border flex items-center justify-center ${s.iconColor} mb-2.5 group-hover:scale-105 transition-transform`}>
+                            <s.Icon className="w-5 h-5" />
+                          </div>
+                          <span className="text-xs font-black text-white group-hover:text-amber-300 block transition-colors">{localize(profile.language, s.labelEn, s.labelAr)}</span>
+                          <span className="text-[11px] text-slate-300 block mt-1 leading-relaxed font-normal">{localize(profile.language, s.descEn, s.descAr)}</span>
                         </div>
-                        <span className="text-xs font-black text-white group-hover:text-amber-300 block transition-colors">{localize(profile.language, s.labelEn, s.labelAr)}</span>
-                        <span className="text-[11px] text-slate-300 block mt-1 leading-relaxed font-normal">{localize(profile.language, s.descEn, s.descAr)}</span>
-                      </div>
-                      <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-amber-400 opacity-90 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                        <span>{localize(profile.language, 'Launch Suite', 'دخول المنظومة')}</span>
-                        <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
-                      </div>
-                    </button>
-                  ))}
+                        <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-amber-400 opacity-90 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                          <span>{localize(profile.language, 'Launch Suite', 'دخول المنظومة')}</span>
+                          <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -42,6 +42,13 @@
   --color-brand-accent: #F59E0B;
   --color-brand-accent-glow: #FDE68A;
   --color-brand-calm: #10B981;
+
+  /* Royal Burgundy & Gold Identity (Cognify Inclusion Mesh) */
+  --color-brand-burgundy: #2D0B16;
+  --color-brand-wine: #4A1224;
+  --color-brand-ruby: #831843;
+  --color-brand-gold: #E5A93C;
+  --color-brand-gold-glow: #FDE68A;
 }
 
 @layer base {
@@ -74,6 +81,13 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cognify-burgundy-hero {
+  position: relative;
+  background: radial-gradient(circle at 50% 15%, rgba(131, 24, 67, 0.45) 0%, rgba(45, 11, 22, 0.95) 45%, rgba(14, 4, 8, 0.98) 100%);
+  border: 1px solid rgba(229, 169, 60, 0.25);
+  box-shadow: 0 30px 60px -15px rgba(45, 11, 22, 0.6), inset 0 1px 0 rgba(229, 169, 60, 0.25);
 }
 
 .aurora-card-glow:hover {

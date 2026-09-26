@@ -897,6 +897,8 @@ export default function App() {
           onSTTStateChange={setIsSTTActive}
           onTabChange={setDisabilityTab}
           setProfile={setProfile}
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
         />;
       case 'memory':
         return (
