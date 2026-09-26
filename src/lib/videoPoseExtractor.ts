@@ -1,9 +1,7 @@
 /**
  * videoPoseExtractor.ts — Video Reference Pose Extractor for ArSL Standardization
  * 
- * Extracts 3D hand and facial joint landmarks from accredited reference sign videos
- * (e.g., Mohamed Nabil's 24-lecture ArSL curriculum) to replace manual coordinate guessing
- * with authenticated linguistic ground truth.
+ * Extracts 3D hand and facial joint landmarks from video keyframes to assist developers in future empirical data collection.
  */
 
 import { Point3D, normalizeHandLandmarks } from './temporalSignRecognizer';

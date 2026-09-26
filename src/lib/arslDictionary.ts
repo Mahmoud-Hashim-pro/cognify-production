@@ -1,12 +1,18 @@
 /**
- * arslDictionary.ts — Official Egyptian & Arabic Sign Language (ArSL) Dictionary
- * Based on the 24-Lecture Foundational Curriculum by Mohamed Nabil ("هحببك فى الإشارة").
+ * arslDictionary.ts — Experimental Egyptian & Arabic Sign Language (ArSL) Lexicon
+ * 
+ * ⚠️ TRANSPARENCY & ETHICAL DISCLOSURE:
+ * This dictionary is an INTERNAL EXPERIMENTAL PROTOTYPE for 3D avatar rigging and frontend development.
+ * It is NOT an accredited or officially endorsed curriculum.
+ * Signs are organized into 24 thematic vocabulary modules for developer convenience.
+ * Official deployment requires clinical and dialectal review by accredited Deaf organizations
+ * (such as the Egyptian Association for the Care of the Deaf / الجمعية المصرية لرعاية الصم).
  * 
  * Features:
  * - Formal HamNoSys (Hamburg Notation System) structural definitions:
  *   Handshape, Orientation, Location, Movement, Two-handed symmetry, Non-manual facial markers.
- * - Full curriculum catalog across all 24 video lectures with verified YouTube reference URLs.
- * - 200+ authentic lexical sign descriptors + complete 28-letter Egyptian sign alphabet.
+ * - 24 structured thematic categories (greetings, numbers, family, academic terms, healthcare, etc.).
+ * - 200+ draft lexical sign descriptors + complete 28-letter Egyptian sign alphabet.
  * - Bidirectional alias mapping, dialect normalization, and 3D pose generator for Three.js avatars.
  */
 
@@ -67,7 +73,7 @@ export interface HamNoSysPose {
   /** Non-manual facial and head linguistic markers */
   nonManual?: 'question_eyebrows' | 'happy_smile' | 'neutral' | 'concern_furrow' | 'head_nod' | 'head_shake';
 
-  /** Reference lecture index (1 - 24) in Mohamed Nabil's ArSL curriculum */
+  /** Reference lecture index (1 - 24) in developer thematic dictionary */
   lectureId: number;
 
   /** Hold duration in milliseconds for smooth animation pacing */
@@ -100,224 +106,225 @@ export interface ArslLectureInfo {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 1. ALL 24 FOUNDATIONAL LECTURES (محمد نبيل - هحببك فى الإشارة)
+// 1. ALL 24 FOUNDATIONAL LECTURES (المعجم التجريبي حسب الموضوعات (24 وحدة موضوعية))
 // ─────────────────────────────────────────────────────────────
 
-export const ARSL_LECTURES_CATALOG: ArslLectureInfo[] = [
+export const ARSL_THEMATIC_CATALOG: ArslLectureInfo[] = [
+
   {
     id: 1,
-    titleAr: 'المحاضرة 1: الأبجدية الإشارية المصرية كاملة',
-    titleEn: 'Lecture 1: Full Egyptian Sign Alphabet (Fingerspelling)',
+    titleAr: 'الوحدة 1: الأبجدية الإشارية المصرية كاملة',
+    titleEn: 'Thematic Module 1: Full Egyptian Sign Alphabet (Fingerspelling)',
     topicAr: 'الأبجدية من أ إلى ي وقواعد هجاء الأسماء والحركات',
     topicEn: 'Alphabet A-Y and fingerspelling names & letters',
-    videoUrl: 'https://youtu.be/Tw44A1185uc',
+    videoUrl: '',
     vocabCount: 28,
   },
   {
     id: 2,
-    titleAr: 'المحاضرة 2: الأرقام والأعداد والعمليات الحسابية',
-    titleEn: 'Lecture 2: Numbers, Digits & Arithmetic Operations',
+    titleAr: 'الوحدة 2: الأرقام والأعداد والعمليات الحسابية',
+    titleEn: 'Thematic Module 2: Numbers, Digits & Arithmetic Operations',
     topicAr: 'الأعداد من 1 إلى الملايين، الآحاد والعشرات والجمع',
     topicEn: 'Numbers 1-1000+, counting dynamics & math signs',
-    videoUrl: 'https://youtu.be/MuVrNSmBkxo',
+    videoUrl: '',
     vocabCount: 18,
   },
   {
     id: 3,
-    titleAr: 'المحاضرة 3: التحيات والتعارف والسلام',
-    titleEn: 'Lecture 3: Greetings, Introductions & Polite Courtesies',
+    titleAr: 'الوحدة 3: التحيات والتعارف والسلام',
+    titleEn: 'Thematic Module 3: Greetings, Introductions & Polite Courtesies',
     topicAr: 'السلام عليكم، اسمي، كيف حالك، تمام، شكراً، عفواً',
     topicEn: 'Hello, what is your name, fine, thank you, welcome',
-    videoUrl: 'https://youtu.be/QdgQfTQsJfY',
+    videoUrl: '',
     vocabCount: 14,
   },
   {
     id: 4,
-    titleAr: 'المحاضرة 4: الأسرة والعائلة وصلة القرابة',
-    titleEn: 'Lecture 4: Family Members & Kinship Ties',
+    titleAr: 'الوحدة 4: الأسرة والعائلة وصلة القرابة',
+    titleEn: 'Thematic Module 4: Family Members & Kinship Ties',
     topicAr: 'أب، أم، أخ، أخت، ابن، ابنة، جد، جدة، عائلة',
     topicEn: 'Father, mother, brother, sister, family, grandfather',
-    videoUrl: 'https://youtu.be/YNUKpiHT-Hs',
+    videoUrl: '',
     vocabCount: 15,
   },
   {
     id: 5,
-    titleAr: 'المحاضرة 5: الوقت وأيام الأسبوع والشهور والتقويم',
-    titleEn: 'Lecture 5: Time, Days of Week, Months & Calendar',
+    titleAr: 'الوحدة 5: الوقت وأيام الأسبوع والشهور والتقويم',
+    titleEn: 'Thematic Module 5: Time, Days of Week, Months & Calendar',
     topicAr: 'السبت إلى الجمعة، اليوم، أمس، غداً، ساعة، متى',
     topicEn: 'Days of week, today, tomorrow, yesterday, clock, when',
-    videoUrl: 'https://youtu.be/pDuIpvUF6WY',
+    videoUrl: '',
     vocabCount: 16,
   },
   {
     id: 6,
-    titleAr: 'المحاضرة 6: الألوان والصفات الأساسية',
-    titleEn: 'Lecture 6: Colors & Foundational Adjectives',
+    titleAr: 'الوحدة 6: الألوان والصفات الأساسية',
+    titleEn: 'Thematic Module 6: Colors & Foundational Adjectives',
     topicAr: 'أبيض، أسود، أحمر، أزرق، كبير، صغير، سريع، بطيء',
     topicEn: 'Colors (red, blue, etc.), big, small, fast, slow',
-    videoUrl: 'https://youtu.be/YEoM31uvBSs',
+    videoUrl: '',
     vocabCount: 14,
   },
   {
     id: 7,
-    titleAr: 'المحاضرة 7: الأطعمة والمشروبات والفواكه',
-    titleEn: 'Lecture 7: Food, Beverages & Fruits',
+    titleAr: 'الوحدة 7: الأطعمة والمشروبات والفواكه',
+    titleEn: 'Thematic Module 7: Food, Beverages & Fruits',
     topicAr: 'أكل، شرب، ماء، شاي، قهوة، عصير، حليب، خبز، تفاح',
     topicEn: 'Eat, drink, water, tea, coffee, juice, bread, apple',
-    videoUrl: 'https://youtu.be/jUc7tat2EwU',
+    videoUrl: '',
     vocabCount: 15,
   },
   {
     id: 8,
-    titleAr: 'المحاضرة 8: المنزل والأثاث والغرف',
-    titleEn: 'Lecture 8: Home, Furniture & Household Items',
+    titleAr: 'الوحدة 8: المنزل والأثاث والغرف',
+    titleEn: 'Thematic Module 8: Home, Furniture & Household Items',
     topicAr: 'بيت، شقة، غرفة، سرير، باب، نافذة، كرسي، طاولة، مطبخ',
     topicEn: 'House, room, bed, door, window, chair, table, kitchen',
-    videoUrl: 'https://www.youtube.com/live/LQrdyMBg5to',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 9,
-    titleAr: 'المحاضرة 9: الملابس والإكسسوارات',
-    titleEn: 'Lecture 9: Clothing & Accessories',
+    titleAr: 'الوحدة 9: الملابس والإكسسوارات',
+    titleEn: 'Thematic Module 9: Clothing & Accessories',
     topicAr: 'قميص، بنطلون، فستان، حذاء، ساعة، نظارة، حجاب',
     topicEn: 'Shirt, pants, dress, shoes, watch, glasses, hijab',
-    videoUrl: 'https://youtu.be/O_ifFcw9Nys',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 10,
-    titleAr: 'المحاضرة 10: المهن والوظائف',
-    titleEn: 'Lecture 10: Professions & Occupations',
+    titleAr: 'الوحدة 10: المهن والوظائف',
+    titleEn: 'Thematic Module 10: Professions & Occupations',
     topicAr: 'دكتور، مهندس، معلم، محامي، ضابط، محاسب، طالب',
     topicEn: 'Doctor, engineer, teacher, lawyer, officer, student',
-    videoUrl: 'https://youtu.be/dBBYbFmT55c',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 11,
-    titleAr: 'المحاضرة 11: الأماكن والمواصلات',
-    titleEn: 'Lecture 11: Places, Transportation & Vehicles',
+    titleAr: 'الوحدة 11: الأماكن والمواصلات',
+    titleEn: 'Thematic Module 11: Places, Transportation & Vehicles',
     topicAr: 'مستشفى، مدرسة، جامعة، مسجد، شارع، سيارة، حافلة، قطار',
     topicEn: 'Hospital, school, university, street, car, bus, train',
-    videoUrl: 'https://youtu.be/S5uFRBrn1Sk',
+    videoUrl: '',
     vocabCount: 14,
   },
   {
     id: 12,
-    titleAr: 'المحاضرة 12: الأفعال اليومية والحركات الشائعة',
-    titleEn: 'Lecture 12: Daily Action Verbs',
+    titleAr: 'الوحدة 12: الأفعال اليومية والحركات الشائعة',
+    titleEn: 'Thematic Module 12: Daily Action Verbs',
     topicAr: 'يذهب، يرجع، يأتي، يرى، يسمع، يكتب، يقرأ، ينام، يشتري',
     topicEn: 'Go, come, see, hear, write, read, sleep, buy, help',
-    videoUrl: 'https://youtu.be/oGqzEtz6Cqs',
+    videoUrl: '',
     vocabCount: 15,
   },
   {
     id: 13,
-    titleAr: 'المحاضرة 13: الصحة والجسم والأعضاء والأمراض',
-    titleEn: 'Lecture 13: Health, Body Parts & Medical Terms',
+    titleAr: 'الوحدة 13: الصحة والجسم والأعضاء والأمراض',
+    titleEn: 'Thematic Module 13: Health, Body Parts & Medical Terms',
     topicAr: 'رأس، عين، أذن، يد، قلب، مريض، دواء، علاج، ألم، حرارة',
     topicEn: 'Head, eye, ear, heart, sick, medicine, pain, fever',
-    videoUrl: 'https://youtu.be/-qTCsl9hDPQ',
+    videoUrl: '',
     vocabCount: 14,
   },
   {
     id: 14,
-    titleAr: 'المحاضرة 14: المشاعر والأحاسيس النفسية',
-    titleEn: 'Lecture 14: Emotions & Psychological States',
+    titleAr: 'الوحدة 14: المشاعر والأحاسيس النفسية',
+    titleEn: 'Thematic Module 14: Emotions & Psychological States',
     topicAr: 'سعيد، حزين، غاضب، خائف، متعب، قلق، متفائل، متفاجئ',
     topicEn: 'Happy, sad, angry, afraid, tired, anxious, hopeful',
-    videoUrl: 'https://youtu.be/7RDnVq8NWi8',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 15,
-    titleAr: 'المحاضرة 15: الطوارئ والنجدة والأمان والشرطة',
-    titleEn: 'Lecture 15: Emergency, Safety, Police & Rescue',
+    titleAr: 'الوحدة 15: الطوارئ والنجدة والأمان والشرطة',
+    titleEn: 'Thematic Module 15: Emergency, Safety, Police & Rescue',
     topicAr: 'مساعدة، طوارئ، نجدة، شرطة، إطفاء، إسعاف، حادث، حريق، خطر',
     topicEn: 'Help, emergency, police, fire, ambulance, danger, safe',
-    videoUrl: 'https://youtu.be/ju6p5v1XVn8',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 16,
-    titleAr: 'المحاضرة 16: المصطلحات الأكاديمية والتعليمية',
-    titleEn: 'Lecture 16: Academic & Classroom Terms',
+    titleAr: 'الوحدة 16: المصطلحات الأكاديمية والتعليمية',
+    titleEn: 'Thematic Module 16: Academic & Classroom Terms',
     topicAr: 'امتحان، سؤال، جواب، مسألة، فهمت، لم أفهم، دراسة، درجات',
     topicEn: 'Exam, question, answer, understood, didn\'t understand, homework',
-    videoUrl: 'https://youtu.be/8-2njSIPaoo',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 17,
-    titleAr: 'المحاضرة 17: الحيوانات والطيور والطبيعة',
-    titleEn: 'Lecture 17: Animals, Birds & Nature',
+    titleAr: 'الوحدة 17: الحيوانات والطيور والطبيعة',
+    titleEn: 'Thematic Module 17: Animals, Birds & Nature',
     topicAr: 'كلب، قطة، حصان، عصفور، أسد، شمس، قمر، مطر، بحر، شجر',
     topicEn: 'Dog, cat, horse, bird, sun, moon, rain, sea, tree',
-    videoUrl: 'https://youtu.be/KpbwLDiUDaM',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 18,
-    titleAr: 'المحاضرة 18: التعاملات اليومية والتسوق والفلوس',
-    titleEn: 'Lecture 18: Daily Commerce, Money & Shopping',
+    titleAr: 'الوحدة 18: التعاملات اليومية والتسوق والفلوس',
+    titleEn: 'Thematic Module 18: Daily Commerce, Money & Shopping',
     topicAr: 'فلوس، جنيه، غالي، رخيص، حساب، فاتورة، بنك، سوق، محل',
     topicEn: 'Money, Egyptian Pound, expensive, cheap, bill, bank, shop',
-    videoUrl: 'https://youtu.be/rQTFL8aemn4',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 19,
-    titleAr: 'المحاضرة 19: الدين والمناسبات والأعياد',
-    titleEn: 'Lecture 19: Religion, Occasions & Holidays',
+    titleAr: 'الوحدة 19: الدين والمناسبات والأعياد',
+    titleEn: 'Thematic Module 19: Religion, Occasions & Holidays',
     topicAr: 'الله، رسول، قرآن، صلاة، صوم، رمضان، عيد، مبارك، مكة',
     topicEn: 'God, Quran, prayer, fasting, Ramadan, Eid Mubarak, Mecca',
-    videoUrl: 'https://youtu.be/h92VztuIvNw',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 20,
-    titleAr: 'المحاضرة 20: الدولة والمحافظات والمدن',
-    titleEn: 'Lecture 20: Egyptian Governorates & Geography',
+    titleAr: 'الوحدة 20: الدولة والمحافظات والمدن',
+    titleEn: 'Thematic Module 20: Egyptian Governorates & Geography',
     topicAr: 'مصر، القاهرة، الإسكندرية، الجيزة، الصعيد، بحري، سيناء، أسوان',
     topicEn: 'Egypt, Cairo, Alexandria, Giza, Upper Egypt, Sinai, Aswan',
-    videoUrl: 'https://youtu.be/SlNRUfgpblw',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 21,
-    titleAr: 'المحاضرة 21: التكنولوجيا والاتصالات والإنترنت',
-    titleEn: 'Lecture 21: Technology, Digital Media & Devices',
+    titleAr: 'الوحدة 21: التكنولوجيا والاتصالات والإنترنت',
+    titleEn: 'Thematic Module 21: Technology, Digital Media & Devices',
     topicAr: 'حاسوب، هاتف، إنترنت، رسالة، فيديو، فيسبوك، واتساب، شاحن',
     topicEn: 'Computer, mobile, internet, message, video, social apps',
-    videoUrl: 'https://youtu.be/3CGj-2ipuK0',
+    videoUrl: '',
     vocabCount: 12,
   },
   {
     id: 22,
-    titleAr: 'المحاضرة 22: قواعد لغة الإشارة المصرية وتعبيرات الوجه',
-    titleEn: 'Lecture 22: ArSL Grammar & Facial Markers',
+    titleAr: 'الوحدة 22: قواعد لغة الإشارة المصرية وتعبيرات الوجه',
+    titleEn: 'Thematic Module 22: ArSL Grammar & Facial Markers',
     topicAr: 'ترتيب الجملة، إشارات النفي، رفع الحاجبين للاستفهام',
     topicEn: 'Topic-Comment grammar, non-manual markers & negation',
-    videoUrl: 'https://youtu.be/XM0TOfAw8_8',
+    videoUrl: '',
     vocabCount: 10,
   },
   {
     id: 23,
-    titleAr: 'المحاضرة 23: المحادثات الحية والمواقف الواقعية',
-    titleEn: 'Lecture 23: Real-Life Simulated Dialogues',
+    titleAr: 'الوحدة 23: المحادثات الحية والمواقف الواقعية',
+    titleEn: 'Thematic Module 23: Real-Life Simulated Dialogues',
     topicAr: 'محادثة في المستشفى، محادثة في الجامعة، محادثة في الشارع',
     topicEn: 'Conversations at hospital, university and in public',
-    videoUrl: 'https://youtu.be/nPfcYjdEeBU',
+    videoUrl: '',
     vocabCount: 10,
   },
   {
     id: 24,
-    titleAr: 'المحاضرة 24: المراجعة التفاعلية الشاملة وتدريبات الطلاقة',
-    titleEn: 'Lecture 24: Comprehensive Review & Fluency Drills',
+    titleAr: 'الوحدة 24: المراجعة التفاعلية الشاملة وتدريبات الطلاقة',
+    titleEn: 'Thematic Module 24: Comprehensive Review & Fluency Drills',
     topicAr: 'مراجعة معجم الـ 24 محاضرة وتأكيد دقة الحركة والمفردات',
     topicEn: 'Full 24-lecture mastery review and sentence synthesis',
-    videoUrl: 'https://www.youtube.com/live/T53Jm0SfAS8',
+    videoUrl: '',
     vocabCount: 10,
   },
 ];
@@ -325,6 +332,9 @@ export const ARSL_LECTURES_CATALOG: ArslLectureInfo[] = [
 // ─────────────────────────────────────────────────────────────
 // 2. CORE LEXICAL ARSL VOCABULARY DICTIONARY (HAMNOSYS NOTATION)
 // ─────────────────────────────────────────────────────────────
+
+export const ARSL_LECTURES_CATALOG = ARSL_THEMATIC_CATALOG;
+export type ArslThematicModule = ArslLectureInfo;
 
 export const ARSL_DICTIONARY: ArslSignEntry[] = [
   // ── LECTURE 3: GREETINGS & INTRODUCTIONS ──
@@ -335,8 +345,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'تحيات وتعارف',
     categoryEn: 'Greetings',
     lectureId: 3,
-    lectureTitleAr: 'المحاضرة 3: التحيات والتعارف والسلام',
-    videoUrl: 'https://youtu.be/QdgQfTQsJfY',
+    lectureTitleAr: 'الوحدة 3: التحيات والتعارف والسلام',
+    videoUrl: '',
     descriptionAr: 'كف مبسوط يلامس الجبهة ثم ينفتح للأمام وللخارج بإيماءة احترام مع ابتسامة ترحيبية.',
     descriptionEn: 'Flat palm touches forehead then extends forward and outwards in welcoming posture.',
     hamnosys: {
@@ -359,8 +369,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'تحيات وتعارف',
     categoryEn: 'Greetings',
     lectureId: 3,
-    lectureTitleAr: 'المحاضرة 3: التحيات والتعارف والسلام',
-    videoUrl: 'https://youtu.be/QdgQfTQsJfY',
+    lectureTitleAr: 'الوحدة 3: التحيات والتعارف والسلام',
+    videoUrl: '',
     descriptionAr: 'إصبعا السبابة والوسطى يلامسان بعضهما بنقر أفقي مكرر عند الصدر.',
     descriptionEn: 'Index and middle fingers tap horizontally at chest level.',
     hamnosys: {
@@ -382,8 +392,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'تحيات وتعارف',
     categoryEn: 'Greetings',
     lectureId: 3,
-    lectureTitleAr: 'المحاضرة 3: التحيات والتعارف والسلام',
-    videoUrl: 'https://youtu.be/QdgQfTQsJfY',
+    lectureTitleAr: 'الوحدة 3: التحيات والتعارف والسلام',
+    videoUrl: '',
     descriptionAr: 'أطراف الأصابع تلامس الذقن ثم تتحرك للأمام نحو المخاطَب مع إمالة خفيفة للرأس.',
     descriptionEn: 'Fingertips touch the chin and extend forward towards interlocutor.',
     hamnosys: {
@@ -405,8 +415,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'تحيات وتعارف',
     categoryEn: 'Greetings',
     lectureId: 3,
-    lectureTitleAr: 'المحاضرة 3: التحيات والتعارف والسلام',
-    videoUrl: 'https://youtu.be/QdgQfTQsJfY',
+    lectureTitleAr: 'الوحدة 3: التحيات والتعارف والسلام',
+    videoUrl: '',
     descriptionAr: 'اليد مفتوحة للأعلى وتتحرك للأسفل بانسيابية تعبيراً عن التواضع والرد بالود.',
     descriptionEn: 'Open upward palm sweeps gently downwards in friendly acknowledgement.',
     hamnosys: {
@@ -428,8 +438,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'تحيات وتعارف',
     categoryEn: 'Greetings',
     lectureId: 3,
-    lectureTitleAr: 'المحاضرة 3: التحيات والتعارف والسلام',
-    videoUrl: 'https://youtu.be/QdgQfTQsJfY',
+    lectureTitleAr: 'الوحدة 3: التحيات والتعارف والسلام',
+    videoUrl: '',
     descriptionAr: 'الكفان يتجهان للصدر ثم يلتفان للأمام مع رفع الحاجبين للاستفهام.',
     descriptionEn: 'Both hands pivot from chest outward with raised eyebrows for inquiry.',
     hamnosys: {
@@ -452,8 +462,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'تحيات وتعارف',
     categoryEn: 'Greetings',
     lectureId: 3,
-    lectureTitleAr: 'المحاضرة 3: التحيات والتعارف والسلام',
-    videoUrl: 'https://youtu.be/QdgQfTQsJfY',
+    lectureTitleAr: 'الوحدة 3: التحيات والتعارف والسلام',
+    videoUrl: '',
     descriptionAr: 'رفع الإبهام لأعلى مع حركة إيماءة هادئة وإشارة الصدر للحمد.',
     descriptionEn: 'Thumbs-up gesture with affirmative head nod and subtle chest touch.',
     hamnosys: {
@@ -477,8 +487,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'الأسرة والعائلة',
     categoryEn: 'Family',
     lectureId: 4,
-    lectureTitleAr: 'المحاضرة 4: الأسرة والعائلة وصلة القرابة',
-    videoUrl: 'https://youtu.be/YNUKpiHT-Hs',
+    lectureTitleAr: 'الوحدة 4: الأسرة والعائلة وصلة القرابة',
+    videoUrl: '',
     descriptionAr: 'إبهام اليد المفتوحة يلامس الجبهة (المنطقة الذكورية العليا في لغة الإشارة المصرية).',
     descriptionEn: 'Thumb of open hand taps forehead (male semantic zone in ArSL).',
     hamnosys: {
@@ -499,8 +509,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'الأسرة والعائلة',
     categoryEn: 'Family',
     lectureId: 4,
-    lectureTitleAr: 'المحاضرة 4: الأسرة والعائلة وصلة القرابة',
-    videoUrl: 'https://youtu.be/YNUKpiHT-Hs',
+    lectureTitleAr: 'الوحدة 4: الأسرة والعائلة وصلة القرابة',
+    videoUrl: '',
     descriptionAr: 'إبهام اليد المفتوحة يلامس الذقن أو الخد (المنطقة الأنثوية في لغة الإشارة المصرية).',
     descriptionEn: 'Thumb of open hand taps chin/cheek (female semantic zone in ArSL).',
     hamnosys: {
@@ -521,8 +531,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'الأسرة والعائلة',
     categoryEn: 'Family',
     lectureId: 4,
-    lectureTitleAr: 'المحاضرة 4: الأسرة والعائلة وصلة القرابة',
-    videoUrl: 'https://youtu.be/YNUKpiHT-Hs',
+    lectureTitleAr: 'الوحدة 4: الأسرة والعائلة وصلة القرابة',
+    videoUrl: '',
     descriptionAr: 'إشارة الذكر (لمس الجبهة) تتبعها ملامسة سبابتي اليدين متطابقتين أفقياً.',
     descriptionEn: 'Male marker at forehead followed by parallel index finger touching.',
     hamnosys: {
@@ -544,8 +554,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'الأسرة والعائلة',
     categoryEn: 'Family',
     lectureId: 4,
-    lectureTitleAr: 'المحاضرة 4: الأسرة والعائلة وصلة القرابة',
-    videoUrl: 'https://youtu.be/YNUKpiHT-Hs',
+    lectureTitleAr: 'الوحدة 4: الأسرة والعائلة وصلة القرابة',
+    videoUrl: '',
     descriptionAr: 'إشارة الأنثى (لمس الذقن) تتبعها ملامسة سبابتي اليدين متطابقتين أفقياً.',
     descriptionEn: 'Female marker at chin followed by parallel index finger touching.',
     hamnosys: {
@@ -567,8 +577,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'الأسرة والعائلة',
     categoryEn: 'Family',
     lectureId: 4,
-    lectureTitleAr: 'المحاضرة 4: الأسرة والعائلة وصلة القرابة',
-    videoUrl: 'https://youtu.be/YNUKpiHT-Hs',
+    lectureTitleAr: 'الوحدة 4: الأسرة والعائلة وصلة القرابة',
+    videoUrl: '',
     descriptionAr: 'اليدان بحرف C تتقابلان وتدوران في دائرة متصلة حتى تلتصق الخناصر معاً.',
     descriptionEn: 'Both hands in C/circle shape sweep in complete circular motion connecting pinkies.',
     hamnosys: {
@@ -592,8 +602,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أطعمة ومشروبات',
     categoryEn: 'Food & Drinks',
     lectureId: 7,
-    lectureTitleAr: 'المحاضرة 7: الأطعمة والمشروبات والفواكه',
-    videoUrl: 'https://youtu.be/jUc7tat2EwU',
+    lectureTitleAr: 'الوحدة 7: الأطعمة والمشروبات والفواكه',
+    videoUrl: '',
     descriptionAr: 'شكل حرف W بثلاثة أصابع يلامس الذقن بنقرتين متتاليتين.',
     descriptionEn: 'Three fingers (W sign) tap chin twice.',
     hamnosys: {
@@ -614,8 +624,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أطعمة ومشروبات',
     categoryEn: 'Food & Drinks',
     lectureId: 7,
-    lectureTitleAr: 'المحاضرة 7: الأطعمة والمشروبات والفواكه',
-    videoUrl: 'https://youtu.be/jUc7tat2EwU',
+    lectureTitleAr: 'الوحدة 7: الأطعمة والمشروبات والفواكه',
+    videoUrl: '',
     descriptionAr: 'الأصابع الخمسة مضمومة كقرصة تتحرك نحو الفم تكراراً كلقيمات الطعام.',
     descriptionEn: 'Flattened O-pinch hand moves repeatedly towards mouth.',
     hamnosys: {
@@ -636,8 +646,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أطعمة ومشروبات',
     categoryEn: 'Food & Drinks',
     lectureId: 7,
-    lectureTitleAr: 'المحاضرة 7: الأطعمة والمشروبات والفواكه',
-    videoUrl: 'https://youtu.be/jUc7tat2EwU',
+    lectureTitleAr: 'الوحدة 7: الأطعمة والمشروبات والفواكه',
+    videoUrl: '',
     descriptionAr: 'اليد في شكل كوب مائل تتحرك للأعلى نحو الفم كما لو كان يرتشف.',
     descriptionEn: 'Hand in C-cup shape tilts toward mouth as if taking a sip.',
     hamnosys: {
@@ -660,8 +670,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أماكن ومواصلات',
     categoryEn: 'Places & Transport',
     lectureId: 11,
-    lectureTitleAr: 'المحاضرة 11: الأماكن والمواصلات',
-    videoUrl: 'https://youtu.be/S5uFRBrn1Sk',
+    lectureTitleAr: 'الوحدة 11: الأماكن والمواصلات',
+    videoUrl: '',
     descriptionAr: 'رسم إشارة الصليب أو النبض الطبي بإصبعي السبابة والوسطى على الكتف المقابل.',
     descriptionEn: 'Two fingers trace medical cross on upper opposite shoulder.',
     hamnosys: {
@@ -682,8 +692,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أماكن ومواصلات',
     categoryEn: 'Places & Transport',
     lectureId: 11,
-    lectureTitleAr: 'المحاضرة 11: الأماكن والمواصلات',
-    videoUrl: 'https://youtu.be/S5uFRBrn1Sk',
+    lectureTitleAr: 'الوحدة 11: الأماكن والمواصلات',
+    videoUrl: '',
     descriptionAr: 'اليدان مقبوضتان تمسكان بعجلة القيادة الافتراضية مع حركة تدوير متبادلة.',
     descriptionEn: 'Both fists mime holding and steering a steering wheel with alternating tilt.',
     hamnosys: {
@@ -705,8 +715,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أماكن ومواصلات',
     categoryEn: 'Places & Transport',
     lectureId: 11,
-    lectureTitleAr: 'المحاضرة 11: الأماكن والمواصلات',
-    videoUrl: 'https://youtu.be/S5uFRBrn1Sk',
+    lectureTitleAr: 'الوحدة 11: الأماكن والمواصلات',
+    videoUrl: '',
     descriptionAr: 'اليد المفتوحة تصفق أفقياً على كف اليد الأخرى الساندة مرتين (رمز التعلم والتدريب).',
     descriptionEn: 'Dominant open palm claps down on horizontal support palm twice.',
     hamnosys: {
@@ -730,8 +740,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'طوارئ ونجدة',
     categoryEn: 'Emergency',
     lectureId: 15,
-    lectureTitleAr: 'المحاضرة 15: الطوارئ والنجدة والأمان والشرطة',
-    videoUrl: 'https://youtu.be/ju6p5v1XVn8',
+    lectureTitleAr: 'الوحدة 15: الطوارئ والنجدة والأمان والشرطة',
+    videoUrl: '',
     descriptionAr: 'قبضة اليد بإبهام للأعلى تستقر على كف اليد الأخرى وترتفعان معاً للأعلى.',
     descriptionEn: 'Thumbs-up fist rests on open support palm, and both lift upward together.',
     hamnosys: {
@@ -754,8 +764,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'طوارئ ونجدة',
     categoryEn: 'Emergency',
     lectureId: 15,
-    lectureTitleAr: 'المحاضرة 15: الطوارئ والنجدة والأمان والشرطة',
-    videoUrl: 'https://youtu.be/ju6p5v1XVn8',
+    lectureTitleAr: 'الوحدة 15: الطوارئ والنجدة والأمان والشرطة',
+    videoUrl: '',
     descriptionAr: 'اليد في شكل C تلامس الصدر الأيسر موضع شارة الشرطة.',
     descriptionEn: 'C-hand taps upper left chest where a police badge is situated.',
     hamnosys: {
@@ -776,8 +786,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'طوارئ ونجدة',
     categoryEn: 'Emergency',
     lectureId: 15,
-    lectureTitleAr: 'المحاضرة 15: الطوارئ والنجدة والأمان والشرطة',
-    videoUrl: 'https://youtu.be/ju6p5v1XVn8',
+    lectureTitleAr: 'الوحدة 15: الطوارئ والنجدة والأمان والشرطة',
+    videoUrl: '',
     descriptionAr: 'السبابة تهتز تحذيرياً للأمام وللخلف مع تقطيب الجبين بحزم.',
     descriptionEn: 'Index finger wags back and forth warningly with stern facial expression.',
     hamnosys: {
@@ -801,8 +811,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أكاديمي وتعليم',
     categoryEn: 'Academic',
     lectureId: 16,
-    lectureTitleAr: 'المحاضرة 16: المصطلحات الأكاديمية والتعليمية',
-    videoUrl: 'https://youtu.be/8-2njSIPaoo',
+    lectureTitleAr: 'الوحدة 16: المصطلحات الأكاديمية والتعليمية',
+    videoUrl: '',
     descriptionAr: 'السبابتان مستقيمتان ثم تنثنيان معاً لأسفل كعلامات الاستفهام المكررة في ورقة الامتحان.',
     descriptionEn: 'Both index fingers bend repeatedly like question marks descending on a page.',
     hamnosys: {
@@ -824,8 +834,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أكاديمي وتعليم',
     categoryEn: 'Academic',
     lectureId: 16,
-    lectureTitleAr: 'المحاضرة 16: المصطلحات الأكاديمية والتعليمية',
-    videoUrl: 'https://youtu.be/8-2njSIPaoo',
+    lectureTitleAr: 'الوحدة 16: المصطلحات الأكاديمية والتعليمية',
+    videoUrl: '',
     descriptionAr: 'السبابة ترسم علامة استفهام في الهواء مع رفع الحاجبين.',
     descriptionEn: 'Index finger traces a question mark in the air with raised eyebrows.',
     hamnosys: {
@@ -847,8 +857,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أكاديمي وتعليم',
     categoryEn: 'Academic',
     lectureId: 16,
-    lectureTitleAr: 'المحاضرة 16: المصطلحات الأكاديمية والتعليمية',
-    videoUrl: 'https://youtu.be/8-2njSIPaoo',
+    lectureTitleAr: 'الوحدة 16: المصطلحات الأكاديمية والتعليمية',
+    videoUrl: '',
     descriptionAr: 'السبابة تفتح كالمصباح المنير بجوار الجبهة مع إيماءة الرأس الإيجابية.',
     descriptionEn: 'Index flicks open like a lightbulb beside forehead with head nod.',
     hamnosys: {
@@ -870,8 +880,8 @@ export const ARSL_DICTIONARY: ArslSignEntry[] = [
     categoryAr: 'أكاديمي وتعليم',
     categoryEn: 'Academic',
     lectureId: 16,
-    lectureTitleAr: 'المحاضرة 16: المصطلحات الأكاديمية والتعليمية',
-    videoUrl: 'https://youtu.be/8-2njSIPaoo',
+    lectureTitleAr: 'الوحدة 16: المصطلحات الأكاديمية والتعليمية',
+    videoUrl: '',
     descriptionAr: 'السبابة تفتح بجوار الجبهة مع هز الرأس نفياً وتقطيب الحاجبين.',
     descriptionEn: 'Index finger near forehead combined with negative headshake and furrowed brows.',
     hamnosys: {

@@ -2082,7 +2082,7 @@ Keep practicing closures with higher-order functions!
     totalFailed += m24Res.failed;
   }
 
-  // 56. Milestone 25: ArSL 24-Lecture Curriculum & Temporal ML Recognizer
+  // 56. Milestone 25: ArSL Thematic Dictionary & In-Browser ML Pipeline (Synthetic Benchmark)
   {
     const m25Res = await runArslCurriculumAndModelVerification();
     totalPassed += m25Res.passed;

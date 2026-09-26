@@ -13,60 +13,62 @@
 | **Emergency SOS Dispatch** | ✅ Live Multi-Channel (SMS, Webhook, Direct Dialer Fallback) | Requires active device cellular/network connectivity | Hardware IoT SOS Button integration via Bluetooth |
 | **Vision Companion (AI Eyes)** | ✅ Ephemeral zero-knowledge camera scene analysis & currency reader | Dependent on camera lens focus & ambient illumination | Offline Mobile OCR & Edge-TensorFlow Lite model |
 | **Motor Euphonia Control** | ✅ MediaPipe Head tracking + 4-second Eye closure SOS | Calibrated for standard webcams (30fps) | High-speed IR eye-gaze sensor support |
-| **3D Sign Avatar (Deaf)** | ✅ Bi-directional HamNoSys 3D Rig (Mohamed Nabil 24-Lecture Curriculum) | Covers 24 curriculum topics + 200 lexical signs + alphabet fallback | Continuous natural conversational ArSL & live crowd-sourced sign bank |
-| **ArSL ML Recognizer (Camera)** | ✅ Browser-based TensorFlow.js Temporal Model + KArSL Dataset Adapter | 16-frame normalized MediaPipe window + Confusion Matrix Studio | Multi-user crowd data collection with diverse lighting conditions |
+| **3D Sign Avatar (Deaf)** | ⚠️ Experimental Prototype (HamNoSys Rig & Thematic Lexicon) | Internal lookup table with 24 thematic categories & fingerspelling fallback | Formal accreditation & validation with Egyptian Deaf Associations |
+| **ArSL ML Recognizer (Camera)** | ⚠️ Architectural PoC (Trained on Synthetic Vectors Only) | In-browser sliding window pipeline; 0.0% real-world accuracy on humans | Ingesting authenticated human video datasets (e.g., KArSL) with Deaf partners |
 | **Sound & Hazard Radar** | ✅ Client-side Web Audio DSP spectral analysis + frequency tracking | DSP heuristic & pattern matching (not black-box classifier) | ML Sound Event Detection (YAMNet on Edge) |
 | **Autism & Sensory Regulation** | ✅ Persistent PECS, Visual Routine, 4-4-4 Breathing Bubble & Server Meltdown Dispatch | Non-clinical digital scaffold (not a medical diagnostic or therapist replacement) | **ABA & SLP Clinical Protocol** (See Appendix C: `docs/ABA_CLINICAL_VALIDATION_PROTOCOL.md`) |
 | **Data Privacy & Epistemic Honesty** | ✅ FERPA/COPPA compliant, 0% cloud storage of video/mic buffers | Ephemeral in-memory inference with client-side redaction | SOC-2 Type II External Compliance Audit |
 
 ---
 
-## 2. 🤟 ArSL (Arabic & Egyptian Sign Language) Dual-Direction Suite & 24-Lecture Curriculum
+## 2. 🤟 ArSL (Arabic & Egyptian Sign Language) Dual-Direction Suite & Prototype Architecture
 
-Cognify features a scientifically grounded dual-direction ArSL engine rooted in the accredited curriculum of Mohamed Nabil ("هحببك فى الإشارة" — 24 Foundational Lectures):
+> [!IMPORTANT]
+> **Radical Transparency & Linguistic Integrity Disclosure**:  
+> All 3D sign poses and ML models currently running in Cognify are **internal engineering prototypes (Proof of Concept)**. They use standard HamNoSys anatomical notations to test 3D avatar rendering and pipeline plumbing. The camera ML recognizer is currently trained on **synthetically generated geometric landmark vectors**, NOT real deaf human participants. Cognify explicitly states across both the user interface and this dossier that these signs are experimental and unverified until official clinical/linguistic audits are completed in partnership with accredited Deaf organizations (e.g., The Egyptian Society for the Care of the Deaf).
 
 ```mermaid
 flowchart LR
-    subgraph Plan1["Plan 1: Text-to-Sign (3D Avatar)"]
-        T["Text / Speech Input"] --> D["ArSL HamNoSys Dictionary (200+ Signs)"]
+    subgraph Plan1["Plan 1: Text-to-Sign (3D Avatar Rig)"]
+        T["Text / Speech Input"] --> D["ArSL HamNoSys Dictionary (Draft Prototype)"]
         D --> H["HamNoSys Joint Mapping Engine"]
         H --> A["3D Bi-Directional Avatar (Handshape + Location + Face)"]
     end
-    subgraph Plan2["Plan 2: Sign-to-Text (ML Vision)"]
+    subgraph Plan2["Plan 2: Sign-to-Text (ML Vision Pipeline)"]
         C["Live Camera Feed (MediaPipe Hands)"] --> N["Invariant 3D Normalization (Wrist Origin)"]
         N --> B["Temporal Buffer (16 Frames x 126 Features)"]
-        B --> M["In-Browser TensorFlow.js Model"]
+        B --> M["In-Browser TensorFlow.js Model (Synthetic Training)"]
         M --> Conf["N x N Confusion Matrix & Phonological Diagnostics"]
     end
 ```
 
-### Complete 24-Lecture Curriculum Architecture:
-1. **Lecture 1**: الحروف الأبجدية كاملة (Complete ArSL Alphabet Fingerspelling)
-2. **Lecture 2**: الأرقام (1-100) والعمليات الحسابية (Numbers & Math)
-3. **Lecture 3**: التحيات والمجاملات والتعارف (Greetings & Introductions)
-4. **Lecture 4**: أيام الأسبوع والزمن (Days of Week & Time Concepts)
-5. **Lecture 5**: أفراد العائلة والقرابة (Family & Relatives)
-6. **Lecture 6**: ألوان الحياة اليومية (Everyday Colors)
-7. **Lecture 7**: الخضروات والأطعمة (Vegetables & Food)
-8. **Lecture 8**: الفواكه والمشروبات (Fruits & Drinks)
-9. **Lecture 9**: أدوات المطبخ وتناول الطعام (Kitchenware & Dining)
-10. **Lecture 10**: الأجهزة المنزلية والأثاث (Home Appliances & Furniture)
-11. **Lecture 11**: الملابس والمظهر الشخصي (Clothing & Attire)
-12. **Lecture 12**: أجزاء الجسم والحواس (Human Anatomy & Senses)
-13. **Lecture 13**: وسائل النقل والمواصلات (Transportation & Transit)
-14. **Lecture 14**: المهن والوظائف (Professions & Occupations)
-15. **Lecture 15**: الصحة والأعراض الطبية والمستشفى (Healthcare, Symptoms & Hospital)
-16. **Lecture 16**: المؤسسات الحكومية والخدمات العامة (Government & Public Services)
-17. **Lecture 17**: المدرسة والجامعة والمصطلحات الأكاديمية (Education & Academia)
-18. **Lecture 18**: المشاعر والحالات النفسية (Emotions & Mental States)
-19. **Lecture 19**: الحيوانات والطيور (Animals & Birds)
-20. **Lecture 20**: الدين والعبادات الإسلامية (Islamic Worship & Terms)
-21. **Lecture 21**: الصفات والأضداد المقابلة (Adjectives & Antonyms)
-22. **Lecture 22**: الاستفهام وحروف الجر (Questions & Prepositions)
-23. **Lecture 23**: أفعال شائعة في الحياة اليومية (Common Everyday Verbs)
-24. **Lecture 24**: مراجعة شاملة وتكوين الجمل والطلاقة (Comprehensive Review, Syntax & Fluency)
+### 24 Thematic Vocabulary Modules (Internal Developer Draft):
+1. **Module 1**: الحروف الأبجدية كاملة (Egyptian Sign Alphabet Fingerspelling)
+2. **Module 2**: الأرقام (1-100) والعمليات الحسابية (Numbers & Math)
+3. **Module 3**: التحيات والمجاملات والتعارف (Greetings & Introductions)
+4. **Module 4**: أيام الأسبوع والزمن (Days of Week & Time Concepts)
+5. **Module 5**: أفراد العائلة والقرابة (Family & Relatives)
+6. **Module 6**: ألوان الحياة اليومية (Everyday Colors)
+7. **Module 7**: الخضروات والأطعمة (Vegetables & Food)
+8. **Module 8**: الفواكه والمشروبات (Fruits & Drinks)
+9. **Module 9**: أدوات المطبخ وتناول الطعام (Kitchenware & Dining)
+10. **Module 10**: الأجهزة المنزلية والأثاث (Home Appliances & Furniture)
+11. **Module 11**: الملابس والمظهر الشخصي (Clothing & Attire)
+12. **Module 12**: أجزاء الجسم والحواس (Human Anatomy & Senses)
+13. **Module 13**: وسائل النقل والمواصلات (Transportation & Transit)
+14. **Module 14**: المهن والوظائف (Professions & Occupations)
+15. **Module 15**: الصحة والأعراض الطبية والمستشفى (Healthcare, Symptoms & Hospital)
+16. **Module 16**: المؤسسات الحكومية والخدمات العامة (Government & Public Services)
+17. **Module 17**: المدرسة والجامعة والمصطلحات الأكاديمية (Education & Academia)
+18. **Module 18**: المشاعر والحالات النفسية (Emotions & Mental States)
+19. **Module 19**: الحيوانات والطيور (Animals & Birds)
+20. **Module 20**: الدين والعبادات الإسلامية (Islamic Worship & Terms)
+21. **Module 21**: الصفات والأضداد المقابلة (Adjectives & Antonyms)
+22. **Module 22**: الاستفهام وحروف الجر (Questions & Prepositions)
+23. **Module 23**: أفعال شائعة في الحياة اليومية (Common Everyday Verbs)
+24. **Module 24**: مراجعة شاملة وتكوين الجمل والطلاقة (Comprehensive Review, Syntax & Fluency)
 
-### Phonological HamNoSys Notation System:
+### Phonological HamNoSys Notation System (Prototype):
 Each lexical sign incorporates:
 - **Handshape**: Flat, fist, index point, pinch, victory, horn, cupped, thumb up, C-hand, open curved.
 - **Location**: Neutral chest, head, forehead, chin, mouth, nose, shoulder, heart.
@@ -79,10 +81,11 @@ Each lexical sign incorporates:
 ## 3. 📊 Technical Audit & Verification Proof Matrix
 
 - **Total Automated Test Assertions**: `3,580+` Passing Invariants across 25 milestone test suites (`100% Success Rate`).
-- **Milestone 25 (ArSL Suite)**: 31/31 assertions passed covering curriculum integrity, HamNoSys 3D joint transformation, invariant coordinate normalization, and TF.js temporal classification.
+- **Milestone 25 (ArSL Suite)**: 31/31 assertions passed covering thematic schema integrity, HamNoSys 3D joint transformation, invariant coordinate normalization, and synthetic TF.js pipeline compilation.
 - **Adversarial Security Battery**: `42/42` Threat Injection & Data-Exfiltration vectors blocked (`100% Defense Rate`).
 - **Zero Privacy Leakage Guarantee**: 0% persistent disk/cloud retention for live video frames and microphone audio streams.
-- **Pedagogical Hake Gain ($g$)**: Demonstrated average normalized learning gain of `0.6921` across student simulations.
+- **Algorithmic Cognitive Scaffolding Gain ($g = 0.6921$)**: Validated in closed-loop automated student simulation tests (`tests/fullSimulation.ts`) verifying prerequisite diagnosis and adaptive scaffolding logic, NOT human clinical trials.
+
 
 ---
 

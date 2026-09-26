@@ -16,7 +16,7 @@ import {
   FEATURES_PER_FRAME,
   Point3D,
 } from '../src/lib/temporalSignRecognizer.js';
-import { loadKArslBenchmarkDataset } from '../src/lib/kArslDatasetAdapter.js';
+import { generateSyntheticBenchmarkDataset } from '../src/lib/kArslDatasetAdapter.js';
 import { computeConfusionMatrix } from '../src/lib/signConfusionMatrix.js';
 import { extractKeyframeFromLandmarks, inferHamNoSysFromKeyframes } from '../src/lib/videoPoseExtractor.js';
 
@@ -34,26 +34,26 @@ function assert(condition: boolean, name: string) {
 }
 
 export async function runArslCurriculumAndModelVerification() {
-  console.log('\n[25] ArSL 24-Lecture Curriculum & Temporal ML Recognizer Verification');
+  console.log('\n[25] ArSL Thematic Dictionary & In-Browser ML Pipeline Verification (Synthetic Benchmark)');
 
-  // Test 1: Full 24 Lectures Catalog Integrity
+  // Test 1: Full 24 Thematic Modules Integrity
   {
-    assert(ARSL_LECTURES_CATALOG.length === 24, 'All 24 lectures from Mohamed Nabil curriculum are cataloged');
+    assert(ARSL_LECTURES_CATALOG.length === 24, 'All 24 thematic vocabulary modules are cataloged');
     
     // Check all IDs 1 to 24 are present in order
     const idsPresent = ARSL_LECTURES_CATALOG.every((l, idx) => l.id === idx + 1);
-    assert(idsPresent, 'Lectures 1 through 24 have sequential and continuous IDs');
+    assert(idsPresent, 'Thematic modules 1 through 24 have sequential and continuous IDs');
 
-    // Check YouTube links format
-    const allHaveUrls = ARSL_LECTURES_CATALOG.every((l) => Boolean(l.videoUrl) && l.videoUrl.includes('youtu'));
-    assert(allHaveUrls, 'All 24 lectures link to genuine reference YouTube course videos');
+    // Check title and topic presence
+    const allHaveTopics = ARSL_LECTURES_CATALOG.every((l) => Boolean(l.titleAr) && Boolean(l.topicAr));
+    assert(allHaveTopics, 'All 24 modules define bilingual title and lexical topic boundaries');
 
-    // Check specific landmark lectures
+    // Check specific landmark modules
     const lec1 = ARSL_LECTURES_CATALOG.find((l) => l.id === 1);
-    assert(lec1?.titleAr.includes('الأبجدية'), 'Lecture 1 covers the complete sign alphabet');
+    assert(lec1?.titleAr.includes('الأبجدية'), 'Module 1 covers the complete sign alphabet');
 
     const lec24 = ARSL_LECTURES_CATALOG.find((l) => l.id === 24);
-    assert(lec24?.titleAr.includes('المراجعة التفاعلية'), 'Lecture 24 covers comprehensive review & fluency');
+    assert(lec24?.titleAr.includes('المراجعة'), 'Module 24 covers comprehensive review & fluency');
   }
 
   // Test 2: HamNoSys Dictionary Structure & Anatomical Grounding
@@ -98,10 +98,10 @@ export async function runArslCurriculumAndModelVerification() {
     assert(emptyNorm.length === 63 && emptyNorm.every((v) => v === 0), 'Null hands return zeroed baseline vector');
   }
 
-  // Test 5: KArSL Benchmark Dataset Partition & Augmentation
+  // Test 5: Synthetic Benchmark Landmark Generator & Pipeline Invariants
   {
-    const dataset = loadKArslBenchmarkDataset(4);
-    assert(dataset.trainXs.length > 0 && dataset.testXs.length > 0, 'Generates train and test feature splits');
+    const dataset = generateSyntheticBenchmarkDataset(4);
+    assert(dataset.trainXs.length > 0 && dataset.testXs.length > 0, 'Generates train and test feature splits from synthetic vectors');
     assert(
       dataset.trainXs[0].length === TEMPORAL_WINDOW_SIZE * FEATURES_PER_FRAME,
       'Dataset temporal sequence window matches 16 frames * 126 features'
@@ -109,13 +109,13 @@ export async function runArslCurriculumAndModelVerification() {
     assert(dataset.classes.length === ARSL_CORE_CLASSES.length, 'Dataset covers all core ArSL target classes');
   }
 
-  // Test 6: In-Browser Temporal Model Compilation & Training
+  // Test 6: In-Browser Temporal Model Compilation & Training (Synthetic Vectors)
   {
     const recognizer = new TemporalSignRecognizer();
     await recognizer.initializeModel();
     assert(recognizer.isReady, 'TensorFlow.js temporal classification model compiled successfully');
 
-    const dataset = loadKArslBenchmarkDataset(2);
+    const dataset = generateSyntheticBenchmarkDataset(2);
     let trainedEpochs = 0;
     const history = await recognizer.train(dataset.trainXs, dataset.trainYs, 3, (metric) => {
       trainedEpochs = metric.epoch;
@@ -125,7 +125,7 @@ export async function runArslCurriculumAndModelVerification() {
     assert(history !== null, 'Model training produces valid loss history');
   }
 
-  // Test 7: Clinical Confusion Matrix & Phonological Evaluation
+  // Test 7: Confusion Matrix Engine & Phonological Evaluation (Synthetic Benchmark)
   {
     const trueLabels = [0, 1, 2, 3, 3, 4, 5, 5];
     const predLabels = [0, 1, 2, 3, 4, 4, 5, 7]; // Introduced 3->4 (Father/Mother) and 5->7 (Water/Drink)

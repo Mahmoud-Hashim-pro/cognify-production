@@ -1,11 +1,18 @@
 /**
- * kArslDatasetAdapter.ts — Dataset Adapter for KArSL (King Saud University ArSL Dataset) & ArSL2018
+ * syntheticSignDatasetGenerator.ts (formerly kArslDatasetAdapter.ts)
  * 
- * Provides:
- * - Standardized schema & loader for academic Arabic Sign Language datasets.
- * - Deterministic synthetic & canonical landmark generation calibrated to HamNoSys trajectories.
- * - Realistic data augmentation pipeline (spatial perturbation, temporal speed variation, hand scale jitter).
- * - Ready-to-train (xs, ys) tensors for in-browser ML training and evaluation.
+ * ⚠️ TRANSPARENCY & SCIENTIFIC INTEGRITY DISCLOSURE:
+ * This module generates SYNTHETIC geometric landmark trajectories for architectural pipeline verification.
+ * It is NOT the official KArSL (King Saud University) or ArSL2018 human participant dataset.
+ * It does NOT contain real-world video or sensor data from Deaf individuals.
+ * 
+ * Purpose:
+ * - Validate pipeline dimensions (16 frames × 126 features) and TensorFlow.js compilation in-browser.
+ * - Test Confusion Matrix calculation, precision/recall math, and UI responsiveness.
+ * - Act as a placeholder until genuine, ethically collected and linguistically verified human datasets are integrated.
+ * 
+ * Real-world Accuracy Notice:
+ * Models trained on these synthetic trajectories have NOT been validated against real signers.
  */
 
 import { ARSL_CORE_CLASSES, TEMPORAL_WINDOW_SIZE, FEATURES_PER_FRAME, Point3D } from './temporalSignRecognizer';
@@ -100,7 +107,7 @@ function augmentFrame(features: number[], jitterAmount = 0.02, scaleFactor = 1.0
 /**
  * Loads a calibrated KArSL / ArSL benchmark dataset for model training and confusion matrix evaluation.
  */
-export function loadKArslBenchmarkDataset(samplesPerClass: number = 8): DatasetBundle {
+export function generateSyntheticBenchmarkDataset(samplesPerClass: number = 8): DatasetBundle {
   const trainXs: number[][] = [];
   const trainYs: number[][] = [];
   const testXs: number[][] = [];
@@ -153,3 +160,6 @@ export function loadKArslBenchmarkDataset(samplesPerClass: number = 8): DatasetB
     classes: ARSL_CORE_CLASSES,
   };
 }
+
+/** @deprecated Use generateSyntheticBenchmarkDataset. Generates synthetic vectors only. */
+export const loadKArslBenchmarkDataset = generateSyntheticBenchmarkDataset;
