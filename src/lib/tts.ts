@@ -183,6 +183,9 @@ export interface SpeakCallbacks {
   /** err carries a short machine-readable reason when known: 'unsupported' |
    *  'empty' | 'synth-error' | 'silent-fail' (speak() never actually started). */
   onError?: (err?: string) => void;
+  rate?: number;
+  pitch?: number;
+  volume?: number;
 }
 
 /** True if the platform's speechSynthesis has at least one Arabic voice installed. */
@@ -225,6 +228,16 @@ export function speak(
   if (!utterance.text) {
     cb?.onError?.("empty");
     return;
+  }
+
+  if (typeof cb?.rate === "number") {
+    utterance.rate = cb.rate;
+  }
+  if (typeof cb?.pitch === "number") {
+    utterance.pitch = cb.pitch;
+  }
+  if (typeof cb?.volume === "number") {
+    utterance.volume = cb.volume;
   }
 
   activeUtterances.add(utterance);
