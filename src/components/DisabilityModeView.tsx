@@ -7,7 +7,7 @@ import {
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
   ArrowLeft, ArrowRight, MessageSquare, Activity, Globe, Check, 
   LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
-  SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List
+  SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
@@ -578,26 +578,26 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               onChange={(suiteId) => handleSelectTab(suiteId as DisabilityTab)}
               aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
               orientation="horizontal"
-              className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-2xl shadow-inner gap-1 outline-none"
+              className="flex items-center bg-[#171E2E] border border-slate-800 p-1 rounded-2xl shadow-inner gap-1 outline-none"
             >
               {[
-                { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', icon: '👁️' },
-                { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', icon: '🧏' },
-                { id: 'motor' as const, labelAr: 'حركية', labelEn: 'Motor', icon: '🦾' },
-                { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', icon: '🧠' },
+                { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
+                { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
+                { id: 'motor' as const, labelAr: 'حركية', labelEn: 'Motor', Icon: Activity },
+                { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', Icon: Brain },
               ].map((suite) => (
                 <AriaRadio
                   key={suite.id}
                   value={suite.id}
                   className={({ isSelected, isFocusVisible }) =>
-                    `px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none ${
+                    `px-2.5 sm:px-3 min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none ${
                       isSelected
-                        ? 'bg-cyan-500 text-slate-950 font-black shadow-md'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                    } ${isFocusVisible ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                        ? 'bg-amber-400 text-slate-950 font-black shadow-md'
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900' : ''}`
                   }
                 >
-                  <span>{suite.icon}</span>
+                  <suite.Icon className="w-3.5 h-3.5 shrink-0" />
                   <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
                 </AriaRadio>
               ))}
@@ -613,28 +613,25 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 onChange={(mId) => setActiveTab(mId as DisabilityTab)}
                 aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
                 orientation="horizontal"
-                className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none"
+                className="flex items-center bg-[#171E2E] border border-slate-800 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none"
               >
                 {siblingModules.map((m) => (
                   <AriaRadio
                     key={m.id}
                     value={m.id}
                     className={({ isSelected, isFocusVisible }) =>
-                      `px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
+                      `px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
                         isSelected
-                          ? 'bg-cyan-500 text-slate-950 font-black shadow-sm'
-                          : 'text-slate-400 hover:text-white'
-                      } ${isFocusVisible ? 'ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-900' : ''}`
+                          ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                          : 'text-slate-300 hover:text-white'
+                      } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-slate-900' : ''}`
                     }
                   >
-                    {/* react-aria-components' Radio doesn't expose a typed `title` prop —
-                        put the full-name hover tooltip on an inner span instead so it
-                        still shows on hover without fighting the library's types. */}
                     <span
                       title={localize(profile.language, m.titleEn, m.titleAr)}
                       className="flex items-center gap-1.5"
                     >
-                      <m.Icon className="w-3 h-3" />
+                      <m.Icon className="w-3.5 h-3.5" />
                       <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
                     </span>
                   </AriaRadio>
@@ -646,23 +643,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 <AriaButton
                   onPress={() => setShowVisualComfortModal(true)}
                   aria-label={localize(profile.language, 'Visual Comfort & Dyslexia Tools', 'أدوات الراحة البصرية وتيسير القراءة')}
-                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 cursor-pointer"
+                  className="px-3.5 min-h-[44px] py-2 rounded-xl bg-[#171E2E] border border-slate-800 text-slate-200 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
                 >
-                  <span>📖</span>
+                  <BookOpen className="w-4 h-4 text-amber-400" />
                   <span>{localize(profile.language, 'Visual Comfort', 'الراحة البصرية')}</span>
                 </AriaButton>
                 <AriaButton
                   onPress={() => setShowPassportModal(true)}
                   aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600/30 to-purple-600/30 border border-indigo-500/40 text-indigo-200 hover:text-white hover:bg-indigo-600/50 transition-all text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 cursor-pointer"
+                  className="px-3.5 min-h-[44px] py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/40 text-amber-200 hover:text-white hover:bg-amber-500/30 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
                 >
-                  <span>🛂</span>
+                  <ShieldCheck className="w-4 h-4 text-amber-300" />
                   <span>{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
                 </AriaButton>
                 <AriaButton
                   onPress={() => setActiveTab('settings')}
                   aria-label={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
-                  className="p-2.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer"
+                  className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-300 hover:text-white bg-[#171E2E] border border-slate-800 rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
                 >
                   <Settings className="w-4 h-4" />
                 </AriaButton>
@@ -709,24 +706,26 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-start">
                   {[
-                    { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', icon: '👁️', descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-emerald-500/60 hover:shadow-emerald-950/30' },
-                    { id: 'deaf' as const, labelAr: 'منظومة الصم المتكاملة', labelEn: 'Deaf Ecosystem', icon: '🧏', descAr: 'استوديو الإشارة 3D، رادار الأصوات، وجسر التواصل', descEn: '3D Sign Avatar, Sound Sentinel & Live Bridge', glow: 'hover:border-indigo-500/60 hover:shadow-indigo-950/30' },
-                    { id: 'motor' as const, labelAr: 'التحكم الحركي وإيفونيا', labelEn: 'Motor & Euphonia', icon: '🦾', descAr: 'تتبع الرأس والعين، لوحة الرمش، و SOS الطوارئ', descEn: 'Head pointer, eye-blink AAC & 4s GPS SOS', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/30' },
-                    { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي والتوحد', labelEn: 'Neurodiversity Hub', icon: '🧠', descAr: 'بطاقات PECS الناطقة، الروتين، ومسطرة القراءة', descEn: 'Spoken PECS cards, routines & calm bubble', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/30' },
+                    { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-emerald-500/60 hover:shadow-emerald-950/30', iconColor: 'text-emerald-400', iconBg: 'bg-emerald-500/15 border-emerald-500/30' },
+                    { id: 'deaf' as const, labelAr: 'منظومة الصم المتكاملة', labelEn: 'Deaf Ecosystem', Icon: Ear, descAr: 'استوديو الإشارة 3D، رادار الأصوات، وجسر التواصل', descEn: '3D Sign Avatar, Sound Sentinel & Live Bridge', glow: 'hover:border-indigo-500/60 hover:shadow-indigo-950/30', iconColor: 'text-indigo-400', iconBg: 'bg-indigo-500/15 border-indigo-500/30' },
+                    { id: 'motor' as const, labelAr: 'التحكم الحركي وإيفونيا', labelEn: 'Motor & Euphonia', Icon: Activity, descAr: 'تتبع الرأس والعين، لوحة الرمش، و SOS الطوارئ', descEn: 'Head pointer, eye-blink AAC & 4s GPS SOS', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/30', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
+                    { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي والتوحد', labelEn: 'Neurodiversity Hub', Icon: Brain, descAr: 'بطاقات PECS الناطقة، الروتين، ومسطرة القراءة', descEn: 'Spoken PECS cards, routines & calm bubble', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/30', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
                   ].map((s) => (
                     <button
                       key={s.id}
                       onClick={() => handleSelectTab(s.id)}
-                      className={`p-4 rounded-2xl bg-slate-900/90 border border-slate-800/90 ${s.glow} hover:bg-slate-800/80 transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between`}
+                      className={`p-4 min-h-[140px] rounded-2xl bg-[#171E2E] border border-slate-700/80 ${s.glow} hover:bg-slate-800/80 transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between`}
                     >
                       <div>
-                        <span className="text-2xl block mb-2">{s.icon}</span>
-                        <span className="text-xs font-black text-white group-hover:text-cyan-300 block transition-colors">{localize(profile.language, s.labelEn, s.labelAr)}</span>
-                        <span className="text-[11px] text-slate-400 block mt-1 leading-relaxed font-normal">{localize(profile.language, s.descEn, s.descAr)}</span>
+                        <div className={`w-9 h-9 rounded-xl ${s.iconBg} border flex items-center justify-center ${s.iconColor} mb-2.5 group-hover:scale-105 transition-transform`}>
+                          <s.Icon className="w-5 h-5" />
+                        </div>
+                        <span className="text-xs font-black text-white group-hover:text-amber-300 block transition-colors">{localize(profile.language, s.labelEn, s.labelAr)}</span>
+                        <span className="text-[11px] text-slate-300 block mt-1 leading-relaxed font-normal">{localize(profile.language, s.descEn, s.descAr)}</span>
                       </div>
-                      <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-cyan-400 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                      <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-amber-400 opacity-90 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                         <span>{localize(profile.language, 'Launch Suite', 'دخول المنظومة')}</span>
-                        <ChevronRight className={`w-3 h-3 ${isAr ? 'rotate-180' : ''}`} />
+                        <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
                       </div>
                     </button>
                   ))}
