@@ -252,6 +252,29 @@ export default function App() {
     }
   }, [isDarkMode]);
 
+  // Universal Accessibility Settings Sync (Font Scale, High Contrast, Reduced Motion)
+  useEffect(() => {
+    try {
+      const savedPassport = profile?.accessibilityPassport;
+      const root = document.documentElement;
+
+      // Font size scaling
+      const fontScale = savedPassport?.fontSizeScale || (localStorage.getItem('cognify_font_scale') as any) || 'normal';
+      root.classList.remove('font-scale-normal', 'font-scale-medium', 'font-scale-large', 'font-scale-extra-large');
+      root.classList.add(`font-scale-${fontScale}`);
+
+      // High contrast mode
+      const isHighContrast = Boolean(savedPassport?.highContrast || localStorage.getItem('cognify_high_contrast') === 'true');
+      root.classList.toggle('high-contrast', isHighContrast);
+
+      // Reduce motion
+      const isReduceMotion = Boolean(savedPassport?.reduceMotion || localStorage.getItem('cognify_reduce_motion') === 'true');
+      root.classList.toggle('reduce-motion', isReduceMotion);
+    } catch (e) {
+      console.warn('Failed to apply global accessibility attributes:', e);
+    }
+  }, [profile?.accessibilityPassport]);
+
   // Handle manual theme toggle
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -1234,6 +1257,15 @@ export default function App() {
         dir={direction}
       >
         <ToastContainer rtl={direction === 'rtl'} />
+
+        {/* WCAG 2.4.1 Skip to main content link */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2.5 focus:bg-amber-500 focus:text-slate-950 focus:font-black focus:rounded-2xl focus:shadow-2xl focus:ring-4 focus:ring-amber-300 transition-all text-xs"
+        >
+          {localize(profile?.language, 'Skip to main content', 'الانتقال إلى المحتوى الرئيسي')}
+        </a>
+
         <PwaInstallPrompt language={profile?.language} />
         <ReadAloudSelection language={profile?.language} />
 
@@ -1300,7 +1332,7 @@ export default function App() {
         </div>
 
 
-        <main className="flex-1 relative overflow-hidden flex flex-col md:flex-row">
+        <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
           <Suspense
             fallback={
               <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
