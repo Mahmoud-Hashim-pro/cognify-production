@@ -35,6 +35,7 @@ export type DisabilityTab =
   | 'chat'
   | 'settings'
   | 'video'
+  | 'studio'
   | 'bridge'
   | 'org'
   | 'motor'

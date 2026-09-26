@@ -62,13 +62,14 @@ export interface HamNoSysPose {
     | 'circle'          // حركة دائرية
     | 'wave'            // تلويح
     | 'open_close'      // فتح وإغلاق الأصابع
-    | 'contact_tap';    // نقر اليدين معاً
+    | 'contact_tap'     // نقر اليدين معاً
+    | 'stroke';         // مسح / ملامسة ممتدة
 
   /** Whether the sign requires both hands */
   twoHanded: boolean;
 
   /** Symmetry mode if twoHanded */
-  symmetry?: 'mirrored' | 'parallel' | 'alternating' | 'support_dominant';
+  symmetry?: 'mirrored' | 'parallel' | 'alternating' | 'support_dominant' | 'contact_tap';
 
   /** Non-manual facial and head linguistic markers */
   nonManual?: 'question_eyebrows' | 'happy_smile' | 'neutral' | 'concern_furrow' | 'head_nod' | 'head_shake';
