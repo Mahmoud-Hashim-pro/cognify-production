@@ -1008,12 +1008,34 @@ export async function* generateAdaptiveResponseStream(
       
       if (!isMissingBackend) {
         if (res.status === 401) {
-          const authErrMsg = isArabic
-            ? "انتهت صلاحية جلسة تسجيل الدخول أو تعذر التحقق من الهوية (رمز 401). يرجى تسجيل الخروج ثم الدخول مجدداً."
+          const isGuest =
+            !auth.currentUser ||
+            profile.uid === 'guest-explorer' ||
+            profile.uid === 'guest_preview' ||
+            Boolean(profile.email?.includes('guest'));
+
+          const authErrMsg = isGuest
+            ? isArabic
+              ? "وضع المعاينة الاستكشافية: ميزات الذكاء الاصطناعي السحابية تتطلب تسجيل الدخول. يمكنك تسجيل حسابك مجاناً لتفعيل الكاميرا الذكية بكامل قدراتها."
+              : isFrench
+              ? "Mode Aperçu : Les fonctionnalités d'IA cloud nécessitent une connexion. Veuillez vous connecter ou créer un compte gratuit pour activer la caméra intelligente."
+              : "Preview Mode: Live AI cloud vision requires sign-in. Please sign in or create a free account to activate full camera intelligence."
+            : isArabic
+            ? "انتهت صلاحية جلسة تسجيل الدخول. يرجى تسجيل الخروج ثم الدخول مجدداً."
             : isFrench
-            ? "La session d'authentification a expiré ou est invalide (Code 401). Veuillez vous reconnecter."
-            : "Authentication session expired or invalid (Status: 401). Please sign out and sign back in.";
-          toast.error(authErrMsg, isArabic ? "خطأ في المصادقة" : "Authentication Required");
+            ? "La session d'authentification a expiré. Veuillez vous reconnecter."
+            : "Authentication session expired. Please sign out and sign back in.";
+
+          toast.error(
+            authErrMsg,
+            isArabic
+              ? isGuest
+                ? "تسجيل الدخول مطلوب"
+                : "جلسة منتهية"
+              : isGuest
+              ? "Sign In Required"
+              : "Session Expired"
+          );
           yield { text: `⚠️ **${authErrMsg}**`, done: true, error: true };
           return;
         } else if (res.status === 503) {

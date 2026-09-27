@@ -84,6 +84,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   const [labelInput, setLabelInput] = useState('');
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showGuestAuthCard, setShowGuestAuthCard] = useState(false);
 
   // Read Mode: focuses the AI on reading visible text or summarizing lectures/documents.
   const [readMode, setReadMode] = useState(false);
@@ -285,6 +286,71 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       setProfile({ ...profile, language: lang === 'ar' ? 'Egyptian Ammiya' : lang === 'fr' ? 'French' : 'English' });
     }
   }, [profile, setProfile]);
+
+  const playDemoSample = useCallback((lang: 'ar' | 'en' | 'fr' = companionLang) => {
+    let sampleText = '';
+    if (currencyMode) {
+      sampleText =
+        lang === 'ar'
+          ? 'ورقة نقدية فئة خمسين جنيهاً مصرياً، الورقة سليمة وجاهزة للاستخدام.'
+          : lang === 'fr'
+          ? 'Billet de cinquante Livres Égyptiennes, en excellent état.'
+          : 'Fifty Egyptian Pounds banknote, in crisp condition.';
+    } else if (navGuideMode) {
+      sampleText =
+        lang === 'ar'
+          ? 'المسار سالك أمامك لحوالي ثلاث خطوات. انتبه، يوجد كرسي على يسارك عند الساعة العاشرة، وباب الغرفة مفتوح على بعد مترين.'
+          : lang === 'fr'
+          ? 'Chemin dégagé sur environ trois pas. Attention, une chaise sur votre gauche à dix heures, porte ouverte à deux mètres.'
+          : 'Clear pathway ahead for three steps. Caution, chair on your left at 10 o\'clock, doorway open two meters ahead.';
+    } else if (faceMode) {
+      sampleText =
+        lang === 'ar'
+          ? 'شخص يقف أمامك على بعد متر ونصف، في أواخر العشرينات يرتدي نظارة ويبتسم إليك.'
+          : lang === 'fr'
+          ? 'Une personne se tient devant vous à un mètre et demi, fin vingtaine, portant des lunettes et vous souriant.'
+          : 'A person is standing one and a half meters in front of you, late twenties, wearing glasses and smiling at you.';
+    } else if (shoppingMode) {
+      sampleText =
+        lang === 'ar'
+          ? 'علبة لبن جهينة كامل الدسم سعة واحد لتر، تاريخ الصلاحية ساري حتى نهاية الشهر القادم.'
+          : lang === 'fr'
+          ? 'Brique de lait entier un litre, date de péremption valide jusqu\'au mois prochain.'
+          : 'One liter full cream milk carton, expiration date valid through next month.';
+    } else if (readMode) {
+      sampleText =
+        lang === 'ar'
+          ? 'المفيد من هذا المستند: موعد المحاضرة القادمة يوم الأحد الساعة العاشرة صباحاً في القاعة الرئيسية.'
+          : lang === 'fr'
+          ? 'L\'essentiel : le prochain cours aura lieu dimanche à dix heures dans l\'amphithéâtre principal.'
+          : 'Core takeaway: next lecture is scheduled for Sunday at 10:00 AM in the main auditorium.';
+    } else {
+      sampleText =
+        lang === 'ar'
+          ? 'مفيش أخطار حواليك. قدامك مكتب عمل عليه لابتوب مفتوح وكوب ماء على يمينك، والمسار أمامك سالك تماماً.'
+          : lang === 'fr'
+          ? 'Aucun danger autour de vous. Devant vous se trouve un bureau avec un ordinateur portable ouvert et un verre d\'eau sur votre droite, le passage est libre.'
+          : 'No hazards around you. Directly in front of you is a work desk with an open laptop and a cup of water on your right, the pathway is clear.';
+    }
+
+    setShowGuestAuthCard(false);
+    setLastDescription(sampleText);
+    setStatus('ready');
+    setAnnounce(sampleText);
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    }
+
+    const voiceLang = lang === 'ar' ? 'Arabic' : lang === 'fr' ? 'French' : 'English';
+    setTimeout(() => {
+      speak(sampleText, voiceLang, {
+        onStart: () => setIsSpeaking(true),
+        onEnd: () => setIsSpeaking(false),
+      });
+    }, 60);
+  }, [companionLang, currencyMode, navGuideMode, faceMode, shoppingMode, readMode]);
 
   // Spatial memory drawer state
   const [showSpatialMemory, setShowSpatialMemory] = useState(false);
@@ -791,6 +857,46 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       );
 
       if (!isMountedRef.current) return;
+      const isAuthNotice =
+        result.includes('المعاينة') ||
+        result.includes('تسجيل الدخول') ||
+        result.includes('Preview Mode') ||
+        result.includes('Mode Aperçu') ||
+        result.includes('Authentication') ||
+        result.includes('401') ||
+        result.includes('المصادقة');
+
+      if (isAuthNotice) {
+        setShowGuestAuthCard(true);
+        setStatus('ready');
+        const cleaned = cleanVisionDescription(result, targetLang);
+        setLastDescription(cleaned);
+
+        const spokenNotice =
+          targetLang === 'ar'
+            ? 'أهلاً بك في المعاينة التجريبية لمنصة كوجنيفاي. ميزات الذكاء الاصطناعي السحابية تتطلب تسجيل الدخول. يمكنك تسجيل حسابك مجاناً لتفعيل الكاميرا الذكية بكامل قدراتها، أو تجربة عينة صوتية حية.'
+            : targetLang === 'fr'
+            ? "Bienvenue sur l'aperçu Cognify. Les fonctionnalités d'IA cloud nécessitent une connexion. Veuillez vous connecter ou créer un compte gratuit pour activer la caméra intelligente, ou écouter un exemple audio."
+            : 'Welcome to Cognify preview mode. Cloud AI vision requires an account. Please sign in or create a free account to activate live camera intelligence, or try a live audio walkthrough.';
+
+        setAnnounce(spokenNotice);
+
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.resume();
+        }
+
+        const voiceLang = targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English';
+        setTimeout(() => {
+          speak(spokenNotice, voiceLang, {
+            onStart: () => setIsSpeaking(true),
+            onEnd: () => setIsSpeaking(false),
+          });
+        }, 60);
+        return;
+      }
+
+      setShowGuestAuthCard(false);
       const cleaned = cleanVisionDescription(result, targetLang);
       setLastDescription(cleaned);
       setStatus('ready');
@@ -966,6 +1072,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
     cancelSpeech();
     setIsSpeaking(false);
     setLastDescription('');
+    setShowGuestAuthCard(false);
     setLastSnapshot(null);
   };
 
@@ -1329,11 +1436,73 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
           )}
 
           {lastDescription && status !== 'analyzing' && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="relative w-full max-w-2xl pointer-events-auto"
-            >
+            showGuestAuthCard ? (
+              <motion.div
+                initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                className="relative w-full max-w-xl pointer-events-auto"
+              >
+                <button
+                  onClick={closeDescription}
+                  aria-label={t('Close', 'إغلاق', 'Fermer')}
+                  title={companionLang === 'ar' ? 'إغلاق' : companionLang === 'fr' ? 'Fermer' : 'Close'}
+                  className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-500 hover:bg-red-400 border-2 border-white text-white flex items-center justify-center shadow-xl transition-colors z-20"
+                >
+                  <X className="w-5 h-5" strokeWidth={3} />
+                </button>
+
+                <div className="bg-[#120816]/95 backdrop-blur-2xl border-2 border-[#E5A93C]/60 text-white rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 ring-1 ring-[#E5A93C]/30">
+                  <div className="flex items-center justify-between gap-2 border-b border-[#4A1224]/80 pb-3">
+                    <div className="flex items-center gap-2 text-[#E5A93C]">
+                      <Sparkles className="w-5 h-5 text-[#E5A93C]" />
+                      <span className="font-black text-sm sm:text-base">
+                        {companionLang === 'ar'
+                          ? 'المعاينة التجريبية — الرفيق البصري'
+                          : companionLang === 'fr'
+                          ? 'Aperçu Démo — Compagnon Visuel'
+                          : 'Guest Preview — Vision Companion'}
+                      </span>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-[11px] font-bold">
+                      {companionLang === 'ar' ? 'تسجيل الدخول مطلوب' : companionLang === 'fr' ? 'Connexion requise' : 'Sign In Required'}
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                    {lastDescription}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <button
+                      onClick={() => {
+                        try {
+                          sessionStorage.removeItem('cognify_guest_preview');
+                          localStorage.removeItem('cognify_guest_preview');
+                          window.location.hash = '';
+                        } catch {}
+                        window.location.reload();
+                      }}
+                      className="px-4 py-3 rounded-2xl bg-gradient-to-r from-[#E5A93C] to-[#d6982b] text-slate-950 font-black text-xs sm:text-sm hover:brightness-110 transition-all shadow-lg shadow-[#E5A93C]/20 flex items-center justify-center gap-2 active:scale-95 text-center"
+                    >
+                      <span>{companionLang === 'ar' ? 'تسجيل الدخول / إنشاء حساب مجاني' : companionLang === 'fr' ? 'Se connecter / Compte gratuit' : 'Sign In / Create Free Account'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => playDemoSample(companionLang)}
+                      className="px-4 py-3 rounded-2xl bg-[#4A1224]/80 hover:bg-[#4A1224] border border-[#E5A93C]/40 text-[#E5A93C] font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95 text-center"
+                    >
+                      <Volume2 className="w-4 h-4 text-[#E5A93C] shrink-0" />
+                      <span>{companionLang === 'ar' ? 'اسمع عينة صوتية حية 🔊' : companionLang === 'fr' ? 'Écouter une démo vocale 🔊' : 'Hear Audio Demo Sample 🔊'}</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="relative w-full max-w-2xl pointer-events-auto"
+              >
               <button
                 onClick={closeDescription}
                 aria-label={t('Close', 'إغلاق', 'Fermer')}
@@ -1416,7 +1585,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 </p>
               </div>
             </motion.div>
-          )}
+          ))}
 
         </div>
 
