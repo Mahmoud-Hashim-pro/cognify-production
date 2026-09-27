@@ -99,6 +99,16 @@ export interface EvaluationRecord {
   durationMinutes: number;
 }
 
+export interface ParentalConsentRecord {
+  verified: boolean;
+  verifiedAt: string; // ISO 8601
+  parentEmail: string;
+  parentName: string;
+  relationship: 'parent' | 'legal_guardian' | 'specialist';
+  grantedScopes: ('camera' | 'microphone' | 'eye_tracking' | 'facial_gestures' | 'ai_tutoring')[];
+  method: 'guardian_signature' | 'email_verification' | 'caregiver_link';
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -153,6 +163,8 @@ export interface UserProfile {
   linkedCaregivers?: { uid: string; name: string; email: string; linkedAt: number }[];
   /** Alternative: a parent whose verified auth email matches this also passes isVerifiedParent. */
   parentEmail?: string;
+  /** Verifiable parental consent record for COPPA / GDPR-K compliance before sensor activation. */
+  parentalConsent?: ParentalConsentRecord;
   /** Canonical learning/cognitive state snapshot, used by institution & parent dashboards. */
   studentState?: StudentState;
   /** UID of the student this parent/guardian account is linked to. */

@@ -310,27 +310,27 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
 
   // 4. Verify Image Proxy SSRF security
   assert(
-    isSafeImageUrl('http://127.0.0.1/admin') === false,
+    (await isSafeImageUrl('http://127.0.0.1/admin')) === false,
     'isSafeImageUrl blocks loopback IPv4 (127.0.0.1)'
   );
   assert(
-    isSafeImageUrl('http://localhost:3000/env') === false,
+    (await isSafeImageUrl('http://localhost:3000/env')) === false,
     'isSafeImageUrl blocks localhost SSRF'
   );
   assert(
-    isSafeImageUrl('http://169.254.169.254/latest/meta-data') === false,
+    (await isSafeImageUrl('http://169.254.169.254/latest/meta-data')) === false,
     'isSafeImageUrl blocks AWS/GCP cloud metadata IP (169.254.169.254)'
   );
   assert(
-    isSafeImageUrl('http://10.0.0.1/internal') === false,
+    (await isSafeImageUrl('http://10.0.0.1/internal')) === false,
     'isSafeImageUrl blocks private RFC1918 range (10.0.0.0/8)'
   );
   assert(
-    isSafeImageUrl('https://image.pollinations.ai/prompt/test?width=1024') === true,
+    (await isSafeImageUrl('https://image.pollinations.ai/prompt/test?width=1024')) === true,
     'isSafeImageUrl permits public HTTPS pollinations.ai image'
   );
   assert(
-    isSafeImageUrl('https://images.unsplash.com/photo-example') === true,
+    (await isSafeImageUrl('https://images.unsplash.com/photo-example')) === true,
     'isSafeImageUrl permits public HTTPS CDN images'
   );
 
