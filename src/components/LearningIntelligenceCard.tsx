@@ -100,17 +100,13 @@ export default function LearningIntelligenceCard({ profile }: LearningIntelligen
     ? Math.round(
         (masteryEntries.reduce((acc, [_, r]) => acc + r.confidence, 0) / masteryEntries.length) * 100
       )
-    : 75;
+    : 0;
 
   const intel = {
     confidenceScore: avgConfidence,
     cognitiveStrengths: hasLiveMastery
       ? liveMasteredConcepts.slice(0, 3).map((c) => c.conceptName)
-      : [
-          isAr ? 'التعرف على الأنماط المنطقية' : 'Visual Matrix Pattern Completion',
-          isAr ? 'الاستنتاج التحليلي' : 'Deductive Syllogistic Inferences',
-          isAr ? 'التفكيك التدريجي للمسائل' : 'Step-by-step Structural Breakdown',
-        ],
+      : [],
     masteredConcepts: hasLiveMastery ? liveMasteredConcepts : [],
     developingConcepts: hasLiveMastery ? liveDevelopingConcepts : [],
   };
@@ -254,9 +250,15 @@ export default function LearningIntelligenceCard({ profile }: LearningIntelligen
           <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">
             {localize(profile.language, 'Mastery Confidence', 'نسبة الثقة في الإتقان')}
           </span>
-          <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400 font-mono">
-            {intel.confidenceScore}%
-          </span>
+          {hasLiveMastery ? (
+            <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-emerald-400 font-mono">
+              {intel.confidenceScore}%
+            </span>
+          ) : (
+            <span className="text-xs font-semibold text-slate-400">
+              {localize(profile.language, 'Awaiting initial assessment', 'بانتظار التقييم الأولي')}
+            </span>
+          )}
         </div>
       </div>
 
@@ -266,17 +268,30 @@ export default function LearningIntelligenceCard({ profile }: LearningIntelligen
           <Award className="w-4 h-4 text-amber-400" />
           {localize(profile.language, 'Verified Cognitive Strengths', 'نقاط القوة المعرفية المثبتة')}
         </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {intel.cognitiveStrengths.map((str, idx) => (
-            <div
-              key={idx}
-              className="p-3 rounded-2xl bg-[#150917] border border-[#4A1224]/60 text-xs font-semibold text-slate-200 flex items-center gap-2.5 shadow-inner"
-            >
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>{str}</span>
-            </div>
-          ))}
-        </div>
+        {hasLiveMastery && intel.cognitiveStrengths.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {intel.cognitiveStrengths.map((str, idx) => (
+              <div
+                key={idx}
+                className="p-3 rounded-2xl bg-[#150917] border border-[#4A1224]/60 text-xs font-semibold text-slate-200 flex items-center gap-2.5 shadow-inner"
+              >
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{str}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-3.5 rounded-2xl bg-[#150917]/70 border border-[#4A1224]/40 text-xs text-slate-400 flex items-center gap-2">
+            <Info className="w-4 h-4 text-[#E5A93C] shrink-0" />
+            <span>
+              {localize(
+                profile.language,
+                'Start interactive learning sessions to empirically diagnose your cognitive strengths.',
+                'ابدأ جلسات التعلم التفاعلية لبناء خريطة نقاط القوة المعرفية الخاصة بك.'
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Dominant Empirical Learning Modality (PLM Longitudinal Intelligence) */}
