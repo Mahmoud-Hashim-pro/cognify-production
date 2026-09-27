@@ -24,7 +24,8 @@ import {
   sendWhatsAppMessage,
   WHATSAPP_QUICK_MESSAGES,
 } from '../lib/contacts';
-import { dispatchServerEmergencySOS } from '../lib/emergencyDispatcher';
+import { useEmergencySOS } from '../hooks/useEmergencySOS';
+import { useEyeClosureDetection } from '../hooks/useEyeClosureDetection';
 import {
   loadStoredAccessibilityState,
   setManualPreference,
@@ -162,6 +163,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import GazeBlinkKeyboard from './GazeBlinkKeyboard';
+import ParentalConsentModal from './ParentalConsentModal';
 
 interface MotorEuphoniaViewProps {
   profile: UserProfile;
@@ -278,7 +280,7 @@ const GAME_BUBBLES = [
   { id: 'b-2', char: 'ب', x: 70, y: 25, color: 'bg-emerald-400 text-slate-950' },
   { id: 'b-3', char: 'ج', x: 35, y: 70, color: 'bg-indigo-400 text-white' },
   { id: 'b-4', char: 'د', x: 80, y: 65, color: 'bg-rose-400 text-white' },
-  { id: 'b-5', char: 'هـ', x: 50, y: 45, color: 'bg-cyan-400 text-slate-950' },
+  { id: 'b-5', char: 'هـ', x: 50, y: 45, color: 'bg-[#E5A93C] text-slate-950' },
 ];
 
 export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEuphoniaViewProps) {
@@ -603,14 +605,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
   // Contextual AAC predictive suggestions
   const [contextualPhrases] = useState<ContextualPhrase[]>(() => getContextualPhrases(new Date()));
 
-  // Emergency SOS state & continuous eye closure detection
-  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
-  const [emergencyCountdown, setEmergencyCountdown] = useState<number | null>(null);
-  const [emergencyGeoCoords, setEmergencyGeoCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [sosDispatchStatus, setSosDispatchStatus] = useState<'idle' | 'sending' | 'confirmed' | 'failed'>('idle');
-  const [sosIncidentId, setSosIncidentId] = useState<string>('');
-  const [sosDispatchedChannels, setSosDispatchedChannels] = useState<string[]>([]);
-  const eyesClosedStartRef = useRef<number | null>(null);
+
 
   // Debounce lock for phone calls
   const isDialingRef = useRef(false);
@@ -684,81 +679,30 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
     });
   };
 
-  const triggerEmergencySOS = useCallback((source: 'eye_closure' | 'button' | 'vocal') => {
-    triggerHapticAlert('danger');
-    setShowEmergencyModal(true);
-    setEmergencyCountdown(5);
-    setSosDispatchStatus('idle');
-    setSosIncidentId('');
-    setSosDispatchedChannels([]);
+  const {
+    showEmergencyModal,
+    setShowEmergencyModal,
+    emergencyCountdown,
+    setEmergencyCountdown,
+    emergencyGeoCoords,
+    sosDispatchStatus,
+    sosIncidentId,
+    sosDispatchedChannels,
+    triggerEmergencySOS,
+    cancelEmergencySOS,
+  } = useEmergencySOS({
+    profile,
+    motorLang,
+    isArabic,
+    speakSafe,
+  });
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setEmergencyGeoCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        },
-        (err) => {
-          console.warn('Geolocation error:', err);
-        },
-        { timeout: 5000, enableHighAccuracy: true }
-      );
-    }
+  const [showParentalConsentModal, setShowParentalConsentModal] = useState(false);
 
-    const msg = isArabic
-      ? 'نداء استغاثة عاجل! تم إطلاق حالة الطوارئ!'
-      : motorLang === 'fr'
-      ? "Alerte d'urgence ! SOS déclenché !"
-      : 'Emergency SOS alert triggered!';
-    speakSafe(msg);
-  }, [isArabic, motorLang, speakSafe]);
-
-  useEffect(() => {
-    if (emergencyCountdown === null) return;
-    if (emergencyCountdown <= 0) {
-      setSosDispatchStatus('sending');
-      const currentContacts = loadContacts();
-      const lat = emergencyGeoCoords?.lat;
-      const lng = emergencyGeoCoords?.lng;
-      const mapUrl = lat && lng ? `https://maps.google.com/?q=${lat},${lng}` : '';
-      const primary = currentContacts.find((c) => c.isPrimaryEmergency) || currentContacts[0];
-      const caregiverPhone = primary?.phone || '';
-      const caregiverName = isArabic ? (primary?.nameAr || primary?.nameEn) : (primary?.nameEn || primary?.nameAr);
-
-      const sosText = isArabic
-        ? `🚨 نداء استغاثة عاجل (Emergency SOS) من مستخدم Cognify: أحتاج إلى مساعدة طبية فورية! ${mapUrl ? `موقعي الحالي على الخريطة: ${mapUrl}` : ''}`
-        : `🚨 Emergency SOS from Cognify user: I need immediate medical assistance! ${mapUrl ? `Location: ${mapUrl}` : ''}`;
-
-      dispatchServerEmergencySOS({
-        uid: profile?.uid,
-        studentName: profile?.name || (isArabic ? 'طالب كوجنيفاي' : 'Cognify Student'),
-        caregiverPhone,
-        caregiverName,
-        location: emergencyGeoCoords || undefined,
-        source: 'eye_closure',
-        text: sosText,
-      }).then((res) => {
-        if (res.success) {
-          setSosDispatchStatus('confirmed');
-          setSosIncidentId(res.incidentId || '');
-          setSosDispatchedChannels(res.channels || ['server_event_bus']);
-          toast.success(isArabic ? `تم استلام وتوثيق الاستغاثة بالخادم (${res.incidentId})` : `SOS confirmed by server (${res.incidentId})`);
-          speakSafe(isArabic ? 'تم تأكيد وصول نداء الاستغاثة بنجاح إلى الخادم والمرافقين' : 'Emergency SOS confirmed and dispatched by server');
-        } else {
-          setSosDispatchStatus('failed');
-          toast.error(isArabic ? 'تعذر الإرسال التلقائي عبر الخادم، يرجى الاتصال المباشر!' : 'Server dispatch failed, please call directly');
-          speakSafe(isArabic ? 'تنبيه: تعذر الإرسال التلقائي، جاري التحويل للاتصال المباشر' : 'Warning: Automated dispatch failed');
-          if (caregiverPhone) {
-            makePhoneCall(caregiverPhone);
-          }
-        }
-      });
-      return;
-    }
-    const timer = setTimeout(() => {
-      setEmergencyCountdown((c) => (c !== null ? c - 1 : null));
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [emergencyCountdown, emergencyGeoCoords, isArabic, profile?.name, profile?.uid, speakSafe]);
+  const eyeClosureDetector = useEyeClosureDetection({
+    thresholdMs: 4000,
+    onTrigger: () => triggerEmergencySOS('eye_closure'),
+  });
 
   /**
    * ONE shared AudioContext for every cue.
@@ -1098,6 +1042,12 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
       return;
     }
 
+    // COPPA Compliance Gate: require parental consent before turning on biometric sensors for special needs accounts
+    if (profile.accountPath === 'Special Needs' && !profile.parentalConsent?.verified) {
+      setShowParentalConsentModal(true);
+      return;
+    }
+
     if (!videoRef.current) return;
     // Re-entrancy guard: the on-screen button and the auto-start effect could
     // both fire (isCameraActive is only set AFTER getUserMedia resolves), which
@@ -1149,17 +1099,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
           const hovered = hoveredCardIdRef.current;
 
           // Continuous 4-second Eye Closure Emergency SOS Trigger (Locked-in / ALS safety)
-          const isClosed = Boolean(gesture.isBlinking || (gesture.metrics && gesture.metrics.isBlinking));
-          if (isClosed) {
-            if (!eyesClosedStartRef.current) {
-              eyesClosedStartRef.current = Date.now();
-            } else if (Date.now() - eyesClosedStartRef.current >= 4000) {
-              triggerEmergencySOS('eye_closure');
-              eyesClosedStartRef.current = null;
-            }
-          } else {
-            eyesClosedStartRef.current = null;
-          }
+          eyeClosureDetector.processGesture(gesture);
 
           // While scanning, every gesture is just "press the switch".
           if (scanActiveRef.current) {
@@ -2681,12 +2621,12 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
       cursorDot: 'bg-amber-400',
     },
     cyan: {
-      accentText: 'text-cyan-400',
-      accentBg: 'bg-cyan-400 text-slate-950',
-      activeTab: 'bg-cyan-400 text-slate-950 border-cyan-300',
-      keyHover: 'border-cyan-400 bg-cyan-400 text-slate-950 ring-4 ring-cyan-400/40',
-      cursorRing: 'text-cyan-400',
-      cursorDot: 'bg-cyan-400',
+      accentText: 'text-[#E5A93C]',
+      accentBg: 'bg-[#E5A93C] text-slate-950',
+      activeTab: 'bg-[#E5A93C] text-slate-950 border-[#E5A93C]/40',
+      keyHover: 'border-[#E5A93C] bg-[#E5A93C] text-slate-950 ring-4 ring-[#E5A93C]/40',
+      cursorRing: 'text-[#E5A93C]',
+      cursorDot: 'bg-[#E5A93C]',
     },
     emerald: {
       accentText: 'text-emerald-400',
@@ -2707,7 +2647,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
   }[theme];
 
   return (
-    <div className={`flex-1 flex flex-col h-full bg-slate-950 text-white overflow-hidden relative p-1.5 sm:p-2.5 lg:p-3 select-none font-sans ${isFullscreen ? 'fixed inset-0 z-[99998] p-3' : ''}`}>
+    <div className={`flex-1 flex flex-col h-full bg-[#080409] text-white overflow-hidden relative p-1.5 sm:p-2.5 lg:p-3 select-none font-sans ${isFullscreen ? 'fixed inset-0 z-[99998] p-3' : ''}`}>
       {/* Head Pointer / Eye-Gaze MediaPipe Visual Interactive Cursor.
           Previously this rendered unconditionally — even with tracking OFF
           ("Start Eye Tracker" not yet pressed), a ring+dot reticle sat at
@@ -2744,7 +2684,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 r="24"
                 stroke="currentColor"
                 strokeWidth="3.5"
-                className={`${cursorPos.isSnapped ? 'text-indigo-400' : 'text-emerald-400'} transition-all duration-75`}
+                className={`${cursorPos.isSnapped ? 'text-[#E5A93C]' : 'text-emerald-400'} transition-all duration-75`}
                 fill="none"
                 strokeDasharray="150"
                 strokeDashoffset={150 - 150 * dwellProgress}
@@ -2753,7 +2693,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
             {/* Ergonomic OS-Style System Pointer Dot (Visually Static, Zero Glow/Pulse) */}
             <div className={`absolute w-4 h-4 rounded-full border-2 border-white flex items-center justify-center shadow-md transition-colors duration-150 ${
-              cursorPos.isSnapped ? 'bg-indigo-600 ring-2 ring-indigo-300/60' : 'bg-slate-900'
+              cursorPos.isSnapped ? 'bg-indigo-600 ring-2 ring-indigo-300/60' : 'bg-[#150917]'
             }`}>
               <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-150 ${
                 cursorPos.isSnapped ? 'bg-white' : 'bg-slate-200'
@@ -2765,7 +2705,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
             {/* Center-gaze recenter target — a dot at the true centre to look at. */}
       {showCenterDot && (
-        <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm pointer-events-none">
+        <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-[#080409]/80 backdrop-blur-sm pointer-events-none">
           <p className="text-amber-300 font-black text-lg mb-6">
             {isArabic ? 'انظر إلى النقطة في المنتصف' : 'Look at the centre dot'}
           </p>
@@ -2777,7 +2717,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
       )}
 
       {/* Consolidated High-Efficiency Top Command Bar (Single Ergonomic Row) */}
-      <div className="shrink-0 mb-2 p-1.5 sm:p-2 rounded-2xl bg-slate-900/95 border border-slate-800 flex items-center justify-between gap-1.5 sm:gap-2 flex-wrap text-xs shadow-md">
+      <div className="shrink-0 mb-2 p-1.5 sm:p-2 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 flex items-center justify-between gap-1.5 sm:gap-2 flex-wrap text-xs shadow-md">
         {/* 1. Mode Navigation Tabs (Eye-Gaze Accessible with Dwell Progress) */}
         <div className="flex items-center gap-1 sm:gap-1.5">
           {/* Tab: Eye Keyboard */}
@@ -2787,13 +2727,13 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             className={`relative px-2.5 sm:px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all ${
               activeTab === 'keyboard'
                 ? themeClasses.activeTab + ' shadow-md'
-                : 'bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800'
+                : 'bg-[#080409] border border-[#4A1224]/60 text-slate-300 hover:bg-slate-800'
             }`}
           >
             <KeyboardIcon className="w-3.5 h-3.5" />
             <span>{isArabic ? 'كيبورد العين' : 'Eye Keyboard'}</span>
             {hoveredCardId === 'tab-keyboard' && dwellProgress > 0 && (
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-950 rounded-b-xl overflow-hidden">
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#080409] rounded-b-xl overflow-hidden">
                 <div className="h-full bg-amber-400 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
               </div>
             )}
@@ -2804,7 +2744,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
         {/* 2. Quick Tracking Tuning & Recalibration */}
         <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
           {/* Dwell Time Adjuster */}
-          <div className="flex items-center gap-1 bg-slate-950 rounded-xl px-1.5 py-0.5 border border-slate-800 text-[11px]">
+          <div className="flex items-center gap-1 bg-[#080409] rounded-xl px-1.5 py-0.5 border border-[#4A1224]/60 text-[11px]">
             <span className="text-slate-400 hidden sm:inline">{isArabic ? 'تثبيت:' : 'Dwell:'}</span>
             <button
               onClick={() => updateHeadConfig({ dwellTimeMs: Math.max(500, headConfig.dwellTimeMs - 100) })}
@@ -2847,7 +2787,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
               isCameraActive
                 ? 'bg-amber-500 text-slate-950 shadow-amber-500/20'
-                : 'bg-slate-950 text-slate-300 hover:bg-slate-800 border border-slate-700'
+                : 'bg-[#080409] text-slate-300 hover:bg-slate-800 border border-[#4A1224]/50'
             }`}
             title={isCameraActive ? (isArabic ? 'إيقاف الكاميرا' : 'Stop Camera') : (isArabic ? 'تشغيل الكاميرا' : 'Start Camera')}
           >
@@ -2861,7 +2801,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
               isAudioEngineActive
                 ? 'bg-emerald-500 text-slate-950 shadow-emerald-500/20'
-                : 'bg-slate-950 text-slate-300 hover:bg-slate-800 border border-slate-700'
+                : 'bg-[#080409] text-slate-300 hover:bg-slate-800 border border-[#4A1224]/50'
             }`}
             title={isAudioEngineActive ? (isArabic ? 'إيقاف إيفونيا' : 'Stop Euphonia') : (isArabic ? 'أصوات إيفونيا' : 'Vocal Sounds')}
           >
@@ -2884,7 +2824,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   : '🇬🇧 Switched to English'
               );
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-200 hover:text-white font-bold text-xs transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#080409] hover:bg-[#150917] border border-[#4A1224]/60 text-slate-200 hover:text-white font-bold text-xs transition-all shadow-sm"
             title={motorLang === 'ar' ? 'Switch to English' : motorLang === 'en' ? 'Passer au français' : 'التحويل للعربية'}
           >
             <Languages className="w-3.5 h-3.5 text-amber-400" />
@@ -2939,18 +2879,18 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   : cameraCorner === 'bottom-left'
                   ? 'fixed bottom-5 left-5'
                   : 'fixed bottom-5 right-5'
-              } z-[9990] ${cameraCorner === 'minimized' ? 'w-auto' : 'w-80 max-w-[92vw]'} flex flex-col gap-2 bg-slate-950/95 backdrop-blur-xl border-2 border-amber-400 p-3 rounded-3xl shadow-2xl transition-all max-h-[80vh] overflow-y-auto`
+              } z-[9990] ${cameraCorner === 'minimized' ? 'w-auto' : 'w-80 max-w-[92vw]'} flex flex-col gap-2 bg-[#080409]/95 backdrop-blur-xl border-2 border-amber-400 p-3 rounded-3xl shadow-2xl transition-all max-h-[80vh] overflow-y-auto`
             : 'fixed -left-[9999px] w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
         }>
           {sidebarMode === 'floating' && (
-            <div className="flex items-center justify-between pb-1.5 border-b border-slate-800 gap-1 flex-wrap">
+            <div className="flex items-center justify-between pb-1.5 border-b border-[#4A1224]/60 gap-1 flex-wrap">
               <span className="text-[11px] font-black text-amber-400 flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5" />
                 {isArabic ? 'الكاميرا' : 'Camera'}
               </span>
 
               {/* Corner Placement Controls */}
-              <div className="flex items-center gap-0.5 bg-slate-900 rounded-lg p-0.5 border border-slate-800">
+              <div className="flex items-center gap-0.5 bg-[#150917] rounded-lg p-0.5 border border-[#4A1224]/60">
                 <button
                   type="button"
                   onClick={() => setCameraCorner('top-left')}
@@ -2995,7 +2935,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
               <button 
                 onClick={() => setSidebarMode('docked')} 
-                className="text-[10px] text-slate-300 hover:text-white px-2 py-0.5 rounded-lg bg-slate-800 font-bold border border-slate-700"
+                className="text-[10px] text-slate-300 hover:text-white px-2 py-0.5 rounded-lg bg-slate-800 font-bold border border-[#4A1224]/50"
               >
                 {isArabic ? 'ثبّت جانبًا ⇲' : 'Dock it ⇲'}
               </button>
@@ -3003,7 +2943,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
           )}
 
           {/* Live Webcam Box */}
-          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-2 sm:p-2.5 shadow-xl relative overflow-hidden shrink-0">
+          <div className="bg-[#0E0610]/95 rounded-2xl border border-[#4A1224]/60 p-2 sm:p-2.5 shadow-xl relative overflow-hidden shrink-0">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5 text-amber-400" />
@@ -3019,7 +2959,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               )}
             </div>
 
-            <div className="relative aspect-video max-h-32 sm:max-h-36 rounded-xl bg-black flex items-center justify-center overflow-hidden border border-slate-800">
+            <div className="relative aspect-video max-h-32 sm:max-h-36 rounded-xl bg-black flex items-center justify-center overflow-hidden border border-[#4A1224]/60">
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover -scale-x-100"
@@ -3034,7 +2974,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 className="absolute inset-0 w-full h-full pointer-events-none object-cover"
               />
               {!isCameraActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-400 bg-slate-950/90 p-3 text-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-400 bg-[#080409]/90 p-3 text-center">
                   <Eye className="w-8 h-8 text-amber-400 animate-pulse" />
                   <p className="text-xs font-bold text-white">
                     {isArabic ? 'تتبع حركة بؤبؤ العين (Eye Gaze)' : 'Eye-Gaze Pupil Tracking'}
@@ -3051,7 +2991,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
               {/* Eye-Gaze Status HUD */}
               {isCameraActive && (
-                <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between text-[10px] bg-slate-950/85 backdrop-blur-md rounded-xl px-2.5 py-1 text-white border border-slate-800">
+                <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between text-[10px] bg-[#080409]/85 backdrop-blur-md rounded-xl px-2.5 py-1 text-white border border-[#4A1224]/60">
                   <span className="flex items-center gap-1 text-amber-400 font-black">
                     <Eye className="w-3.5 h-3.5" /> {isArabic ? 'بؤبؤ العين نشط' : 'Pupil Active'}
                   </span>
@@ -3064,7 +3004,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
           </div>
 
           {/* Euphonia Audio Signal Analyzer Bar */}
-          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-2 sm:p-2.5 shadow-xl shrink-0">
+          <div className="bg-[#0E0610]/95 rounded-2xl border border-[#4A1224]/60 p-2 sm:p-2.5 shadow-xl shrink-0">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Mic className="w-3.5 h-3.5 text-emerald-400" />
@@ -3097,7 +3037,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   className={`p-1.5 rounded-xl border text-[10px] transition-all ${
                     audioMetrics.activeTriggerName === t.name
                       ? 'bg-amber-400/20 border-amber-400 text-amber-300 font-black'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                      : 'bg-[#080409]/60 border-[#4A1224]/60 text-slate-400'
                   }`}
                 >
                   <p className="truncate font-bold">{isArabic ? t.nameAr : t.name}</p>
@@ -3107,9 +3047,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
           </div>
 
           {/* Direct Dysarthric Speech AI Decoder */}
-          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-2 sm:p-2.5 shadow-xl shrink-0">
+          <div className="bg-[#0E0610]/95 rounded-2xl border border-[#4A1224]/60 p-2 sm:p-2.5 shadow-xl shrink-0">
             <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <Sparkles className="w-3.5 h-3.5 text-[#E5A93C]" />
               {isArabic ? 'فك شفرة الكلام غير النمطي' : 'Dysarthria Decoder'}
             </h3>
 
@@ -3143,7 +3083,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             </button>
 
             {speechTranscript && (
-              <div className="mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+              <div className="mt-2 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 text-[11px] text-slate-300">
                 "{speechTranscript}"
               </div>
             )}
@@ -3182,7 +3122,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
           {activeTab === 'keyboard' && (
             <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
               {/* Contextual Predictive AAC Quick Bar */}
-              <div className="shrink-0 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center gap-1.5 overflow-x-auto select-none">
+              <div className="shrink-0 p-1.5 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 flex items-center gap-1.5 overflow-x-auto select-none">
                 <div className="flex items-center gap-1 px-2 text-[10px] font-bold text-amber-400 shrink-0">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>{isArabic ? 'اقتراحات سريعة:' : motorLang === 'fr' ? 'Suggestions :' : 'Smart AAC:'}</span>
@@ -3204,14 +3144,14 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                           ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md scale-105'
                           : cp.category === 'urgent'
                           ? 'bg-red-950/50 border-red-500/50 text-red-200 hover:bg-red-900/60'
-                          : 'bg-slate-950 border-slate-800 text-slate-200 hover:bg-slate-800'
+                          : 'bg-[#080409] border-[#4A1224]/60 text-slate-200 hover:bg-slate-800'
                       }`}
                     >
                       <span>{cp.icon}</span>
                       <span>{text}</span>
                       {isHovered && dwellProgress > 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-900 rounded-b-xl overflow-hidden">
-                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#150917] rounded-b-xl overflow-hidden">
+                          <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                         </div>
                       )}
                     </button>
@@ -3255,8 +3195,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
           {/* TAB 2: Google Project Euphonia Voice Training Studio & Custom ASR */}
           {activeTab === 'euphonia-studio' && (
-            <div className="bg-slate-900 rounded-3xl border-2 border-slate-800 p-6 shadow-2xl flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-slate-800 gap-3">
+            <div className="bg-[#150917] rounded-3xl border-2 border-[#4A1224]/60 p-6 shadow-2xl flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-[#4A1224]/60 gap-3">
                 <div>
                   <h3 className="text-xl font-black text-white flex items-center gap-2">
                     <Radio className="w-6 h-6 text-amber-400" />
@@ -3347,7 +3287,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                         className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between min-h-[130px] ${
                           isHovered
                             ? 'border-amber-400 bg-amber-400 text-slate-950 shadow-2xl scale-[1.02]'
-                            : 'border-slate-800 bg-slate-950 text-white hover:border-amber-400/40'
+                            : 'border-[#4A1224]/60 bg-[#080409] text-white hover:border-amber-400/40'
                         }`}
                       >
                         <div>
@@ -3362,7 +3302,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                           <h4 className="font-bold text-xs sm:text-sm leading-relaxed">"{phrase.text}"</h4>
                         </div>
 
-                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-800/40">
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#4A1224]/40">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -3383,8 +3323,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                         </div>
 
                         {isHovered && dwellProgress > 0 && (
-                          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-950/60 rounded-b-2xl overflow-hidden">
-                            <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#080409]/60 rounded-b-2xl overflow-hidden">
+                            <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                           </div>
                         )}
                       </div>
@@ -3393,7 +3333,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               </div>
 
               {/* API URL settings — "set the URL of the Cloud Run instance" from repo README */}
-              <div className="mt-2 p-4 rounded-2xl bg-slate-950 border border-slate-800">
+              <div className="mt-2 p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
                   {isArabic ? 'رابط خادم النموذج المخصص (اختياري - Google Cloud Run)' : 'Custom Model API URL (optional - Google Cloud Run)'}
                 </h4>
@@ -3403,7 +3343,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                     value={euphoniaApiUrlInput}
                     onChange={(e) => setEuphoniaApiUrlInput(e.target.value)}
                     placeholder="https://your-cloud-run-service.a.run.app"
-                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"
+                    className="flex-1 bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"
                     dir="ltr"
                   />
                   <button
@@ -3431,8 +3371,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
           {/* TAB 3: Steve Saling Smart Room Automation Board */}
           {activeTab === 'smart-room' && (
-            <div className="bg-slate-900 rounded-3xl border-2 border-slate-800 p-6 shadow-2xl flex flex-col gap-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="bg-[#150917] rounded-3xl border-2 border-[#4A1224]/60 p-6 shadow-2xl flex flex-col gap-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#4A1224]/60">
                 <div>
                   <h3 className="text-xl font-black text-white flex items-center gap-2">
                     <Zap className="w-6 h-6 text-amber-400" />
@@ -3466,20 +3406,20 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                           ? `${themeClasses.accentBg} shadow-xl`
                           : isHovered
                           ? `${themeClasses.accentBg} shadow-xl scale-105 ring-2 ring-amber-300`
-                          : 'border-slate-800 bg-slate-950 text-white hover:border-slate-700'
+                          : 'border-[#4A1224]/60 bg-[#080409] text-white hover:border-[#4A1224]/50'
                       }`}
                     >
                       <span className="text-4xl">{item.icon}</span>
                       <span className="text-base text-center">{isArabic ? item.labelAr : item.labelEn}</span>
                       {isItemActive && (
-                        <span className="text-[11px] font-bold bg-slate-950 text-amber-400 px-3 py-0.5 rounded-full">
+                        <span className="text-[11px] font-bold bg-[#080409] text-amber-400 px-3 py-0.5 rounded-full">
                           {isArabic ? 'مفعل الآن' : 'ACTIVE'}
                         </span>
                       )}
 
                       {isHovered && dwellProgress > 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-slate-950/60 rounded-b-3xl overflow-hidden">
-                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#080409]/60 rounded-b-3xl overflow-hidden">
+                          <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                         </div>
                       )}
                     </button>
@@ -3491,8 +3431,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
           {/* TAB 4: Pain & Sensory Health Needs Board */}
           {activeTab === 'pain-sensory' && (
-            <div className="bg-slate-900 rounded-3xl border-2 border-slate-800 p-6 shadow-2xl flex flex-col gap-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="bg-[#150917] rounded-3xl border-2 border-[#4A1224]/60 p-6 shadow-2xl flex flex-col gap-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#4A1224]/60">
                 <div>
                   <h3 className="text-xl font-black text-white flex items-center gap-2">
                     <Heart className="w-6 h-6 text-rose-400" />
@@ -3516,15 +3456,15 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       className={`relative p-6 rounded-3xl border-2 font-black text-sm flex flex-col items-center justify-center gap-3 transition-all min-h-[140px] ${
                         isHovered
                           ? 'border-rose-400 bg-rose-500 text-white shadow-2xl scale-105 ring-4 ring-rose-400/40'
-                          : 'border-slate-800 bg-slate-950 text-white hover:border-rose-500/40'
+                          : 'border-[#4A1224]/60 bg-[#080409] text-white hover:border-rose-500/40'
                       }`}
                     >
                       <span className="text-4xl">{item.icon}</span>
                       <span className="text-base text-center">{item.labelAr}</span>
 
                       {isHovered && dwellProgress > 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-slate-950/60 rounded-b-3xl overflow-hidden">
-                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#080409]/60 rounded-b-3xl overflow-hidden">
+                          <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                         </div>
                       )}
                     </button>
@@ -3536,11 +3476,11 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
           {/* TAB 5: AI Classroom & Teacher Live Responses */}
           {activeTab === 'class-ai' && (
-            <div className="bg-slate-900 rounded-3xl border-2 border-slate-800 p-6 shadow-2xl flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-slate-800 gap-3">
+            <div className="bg-[#150917] rounded-3xl border-2 border-[#4A1224]/60 p-6 shadow-2xl flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-[#4A1224]/60 gap-3">
                 <div>
                   <h3 className="text-xl font-black text-white flex items-center gap-2">
-                    <GraduationCap className="w-6 h-6 text-indigo-400" />
+                    <GraduationCap className="w-6 h-6 text-[#E5A93C]" />
                     {isArabic ? 'المعلم الذكي والردود التفاعلية بالحصة (AI Classroom Autopilot)' : 'AI Classroom & Teacher Assistant'}
                   </h3>
                   <p className="text-xs text-slate-400 font-medium mt-1">
@@ -3563,7 +3503,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               </div>
 
               {teacherHeardSpeech && (
-                <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 text-xs text-indigo-200">
+                <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-[#E5A93C]/30 text-xs text-indigo-200">
                   <span className="font-bold">{isArabic ? 'ما قاله المعلم: ' : 'Teacher said: '}</span>
                   "{teacherHeardSpeech}"
                 </div>
@@ -3586,18 +3526,18 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       className={`relative p-5 rounded-2xl border-2 font-black text-sm text-start flex items-center gap-3 transition-all min-h-[90px] ${
                         isHovered
                           ? 'border-indigo-400 bg-indigo-600 text-white shadow-2xl scale-105 ring-4 ring-indigo-400/40'
-                          : 'border-slate-800 bg-slate-950 text-slate-200 hover:border-indigo-500/40'
+                          : 'border-[#4A1224]/60 bg-[#080409] text-slate-200 hover:border-[#E5A93C]/30'
                       }`}
                     >
-                      <span className="p-2 rounded-xl bg-slate-900 border border-slate-700 text-indigo-400 text-base font-black shrink-0">
+                      <span className="p-2 rounded-xl bg-[#150917] border border-[#4A1224]/50 text-[#E5A93C] text-base font-black shrink-0">
                         {idx + 1}
                       </span>
                       <p className="flex-1 text-xs sm:text-sm leading-relaxed">{optText}</p>
-                      <Volume2 className="w-5 h-5 text-indigo-400 shrink-0" />
+                      <Volume2 className="w-5 h-5 text-[#E5A93C] shrink-0" />
 
                       {isHovered && dwellProgress > 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-950/60 rounded-b-2xl overflow-hidden">
-                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#080409]/60 rounded-b-2xl overflow-hidden">
+                          <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                         </div>
                       )}
                     </button>
@@ -3609,8 +3549,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
           {/* TAB 6: Personal Custom Phrase Bank */}
           {activeTab === 'custom-bank' && (
-            <div className="bg-slate-900 rounded-3xl border-2 border-slate-800 p-6 shadow-2xl flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-slate-800 gap-3">
+            <div className="bg-[#150917] rounded-3xl border-2 border-[#4A1224]/60 p-6 shadow-2xl flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-[#4A1224]/60 gap-3">
                 <div>
                   <h3 className="text-xl font-black text-white flex items-center gap-2">
                     <BookmarkPlus className="w-6 h-6 text-amber-400" />
@@ -3629,7 +3569,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   value={newPhraseInput}
                   onChange={(e) => setNewPhraseInput(e.target.value)}
                   placeholder={isArabic ? 'اكتب عبارة جديدة لإضافتها لبنكك الشخصي...' : 'Type a new phrase to save...'}
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400"
+                  className="flex-1 bg-[#080409] border border-[#4A1224]/60 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400"
                 />
                 <button
                   onClick={handleAddCustomPhrase}
@@ -3654,7 +3594,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between min-h-[100px] ${
                         isHovered
                           ? 'border-amber-400 bg-amber-400 text-slate-950 shadow-2xl scale-105'
-                          : 'border-slate-800 bg-slate-950 text-white hover:border-amber-400/40'
+                          : 'border-[#4A1224]/60 bg-[#080409] text-white hover:border-amber-400/40'
                       }`}
                     >
                       <div className="flex items-start gap-2.5">
@@ -3664,7 +3604,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-800/40 text-[10px]">
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#4A1224]/40 text-[10px]">
                         <span className="flex items-center gap-1 font-bold">
                           <Volume2 className="w-3.5 h-3.5" /> {isArabic ? 'نطق فوري' : 'Speak'}
                         </span>
@@ -3680,8 +3620,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       </div>
 
                       {isHovered && dwellProgress > 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-950/60 rounded-b-2xl overflow-hidden">
-                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#080409]/60 rounded-b-2xl overflow-hidden">
+                          <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                         </div>
                       )}
                     </div>
@@ -3693,8 +3633,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
           {/* TAB 7: Eye Gaze Games & Accuracy Training */}
           {activeTab === 'eye-games' && (
-            <div className="bg-slate-900 rounded-3xl border-2 border-slate-800 p-6 shadow-2xl flex flex-col gap-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="bg-[#150917] rounded-3xl border-2 border-[#4A1224]/60 p-6 shadow-2xl flex flex-col gap-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#4A1224]/60">
                 <div>
                   <h3 className="text-xl font-black text-white flex items-center gap-2">
                     <Gamepad2 className="w-6 h-6 text-amber-400" />
@@ -3733,7 +3673,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               </div>
 
               {/* Game Area */}
-              <div className="relative aspect-video rounded-3xl bg-slate-950 border-2 border-slate-800 overflow-hidden p-6 flex items-center justify-center">
+              <div className="relative aspect-video rounded-3xl bg-[#080409] border-2 border-[#4A1224]/60 overflow-hidden p-6 flex items-center justify-center">
                 {GAME_BUBBLES.map((bubble) => {
                   const cardKey = `game-bubble-${bubble.id}`;
                   const isPopped = gamePoppedIds.includes(bubble.id);
@@ -3805,15 +3745,15 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   className={`relative p-3.5 rounded-2xl border-2 font-black text-xs flex flex-col items-center justify-center gap-1.5 transition-all min-h-[76px] ${
                     isHovered
                       ? 'border-amber-400 bg-amber-400 text-slate-950 shadow-xl scale-105 ring-2 ring-amber-300'
-                      : 'border-slate-800 bg-slate-900 text-white hover:border-slate-700'
+                      : 'border-[#4A1224]/60 bg-[#150917] text-white hover:border-[#4A1224]/50'
                   }`}
                 >
                   <span className="text-2xl">{need.icon}</span>
                   <span className="truncate">{isArabic ? need.labelAr : need.labelEn}</span>
 
                   {isHovered && dwellProgress > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-950 rounded-b-2xl overflow-hidden">
-                      <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#080409] rounded-b-2xl overflow-hidden">
+                      <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                     </div>
                   )}
                 </button>
@@ -3827,10 +3767,10 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-3xl bg-slate-900 border-2 border-indigo-500/40 shadow-xl"
+              className="p-4 rounded-3xl bg-[#150917] border-2 border-[#E5A93C]/30 shadow-xl"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
+                <span className="text-xs font-bold text-[#E5A93C] flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4" />
                   {isArabic ? 'إجابة مرشدك الدراسي الذكي (Cognify AI)' : 'Cognify AI Mentor Answer'}
                 </span>
@@ -3888,7 +3828,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               >
                 <div className="w-16 h-16 rounded-full bg-amber-400/20 animate-ping absolute" />
                 <div className="w-12 h-12 rounded-full border-4 border-amber-300 flex items-center justify-center bg-amber-400 shadow-[0_0_30px_#fbbf24]">
-                  <div className="w-3 h-3 rounded-full bg-slate-950" />
+                  <div className="w-3 h-3 rounded-full bg-[#080409]" />
                 </div>
               </motion.div>
             )}
@@ -3936,7 +3876,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 try { trackerRef.current?.resetCalibration(); } catch { /* ignore */ }
                 setShowCalibrationModal(false);
               }}
-              className="absolute bottom-8 px-6 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs"
+              className="absolute bottom-8 px-6 py-2.5 rounded-2xl bg-[#150917] hover:bg-slate-800 border border-[#4A1224]/50 text-slate-300 font-bold text-xs"
             >
               {isArabic ? 'إلغاء المعايرة' : 'Cancel'}
             </button>
@@ -3970,9 +3910,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="bg-[#150917] border-2 border-[#4A1224]/60 rounded-3xl p-6 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+              <div className="flex items-center justify-between pb-4 border-b border-[#4A1224]/60 mb-4">
                 <div className="flex items-center gap-3">
                   <span className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
                     <PhoneCall className="w-6 h-6" />
@@ -4041,7 +3981,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 ${
                         isHovered
                           ? 'border-amber-400 bg-amber-400 text-slate-950 shadow-2xl scale-105'
-                          : 'border-slate-800 bg-slate-950 hover:border-amber-400/50'
+                          : 'border-[#4A1224]/60 bg-[#080409] hover:border-amber-400/50'
                       }`}
                     >
                       <span className="text-4xl">{c.avatar}</span>
@@ -4060,8 +4000,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       <Phone className={`w-6 h-6 shrink-0 ${hasNumber ? 'text-emerald-400' : 'text-slate-600'}`} />
 
                       {isHovered && dwellProgress > 0 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-950/50 rounded-b-2xl overflow-hidden">
-                          <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#080409]/50 rounded-b-2xl overflow-hidden">
+                          <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                         </div>
                       )}
                     </div>
@@ -4081,9 +4021,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="bg-[#150917] border-2 border-[#4A1224]/60 rounded-3xl p-6 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+              <div className="flex items-center justify-between pb-4 border-b border-[#4A1224]/60 mb-4">
                 <div className="flex items-center gap-3">
                   <span className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     <MessageCircle className="w-6 h-6" />
@@ -4122,7 +4062,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                         className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 ${
                           isHovered
                             ? 'border-emerald-400 bg-emerald-400 text-slate-950 shadow-2xl scale-105'
-                            : 'border-slate-800 bg-slate-950 hover:border-emerald-400/50'
+                            : 'border-[#4A1224]/60 bg-[#080409] hover:border-emerald-400/50'
                         }`}
                       >
                         <span className="text-4xl">{c.avatar}</span>
@@ -4135,8 +4075,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                         <MessageCircle className="w-6 h-6 text-emerald-400 shrink-0" />
 
                         {isHovered && dwellProgress > 0 && (
-                          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-950/50 rounded-b-2xl overflow-hidden">
-                            <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#080409]/50 rounded-b-2xl overflow-hidden">
+                            <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                           </div>
                         )}
                       </div>
@@ -4146,7 +4086,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               ) : (
                 /* Step 2: Select Quick Message Phrase or Send Custom Text */
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{selectedContactForWa.avatar}</span>
                       <span className="font-black text-sm text-white">
@@ -4193,7 +4133,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                           className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between min-h-[90px] ${
                             isHovered
                               ? 'border-emerald-400 bg-emerald-400 text-slate-950 shadow-2xl scale-105'
-                              : 'border-slate-800 bg-slate-950 hover:border-emerald-400/50'
+                              : 'border-[#4A1224]/60 bg-[#080409] hover:border-emerald-400/50'
                           }`}
                         >
                           <p className="text-xs font-black leading-relaxed">
@@ -4204,8 +4144,8 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                           </span>
 
                           {isHovered && dwellProgress > 0 && (
-                            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-950/50 rounded-b-2xl overflow-hidden">
-                              <div className="h-full bg-slate-950 transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
+                            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#080409]/50 rounded-b-2xl overflow-hidden">
+                              <div className="h-full bg-[#080409] transition-all duration-75" style={{ width: `${dwellProgress * 100}%` }} />
                             </div>
                           )}
                         </div>
@@ -4232,9 +4172,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="bg-[#150917] border-2 border-[#4A1224]/60 rounded-3xl p-6 max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+              <div className="flex items-center justify-between pb-4 border-b border-[#4A1224]/60 mb-4">
                 <div className="flex items-center gap-3">
                   <span className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     <Users className="w-6 h-6" />
@@ -4260,7 +4200,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
               <div className="space-y-3">
                 {contacts.map((c) => (
-                  <div key={c.id} className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                  <div key={c.id} className="p-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xl">{c.avatar}</span>
                       <span className="font-bold text-sm text-white">{isArabic ? c.nameAr : c.nameEn}</span>
@@ -4286,7 +4226,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                         if (profile.uid) syncContactsToCloud(profile.uid, contacts);
                       }}
                       placeholder={isArabic ? 'مثال: 01012345678+' : 'e.g. +201012345678'}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-sm focus:border-emerald-500 focus:outline-none"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/50 text-white font-mono text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                 ))}
@@ -4315,9 +4255,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="bg-[#150917] border-2 border-[#4A1224]/60 rounded-3xl p-6 max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+              <div className="flex items-center justify-between pb-4 border-b border-[#4A1224]/60 mb-4">
                 <h3 className="font-black text-lg text-white flex items-center gap-2">
                   <Sliders className="w-5 h-5 text-amber-400" />
                   {isArabic ? 'إعدادات ومعايرة تتبع حركة العين' : 'Eye-Gaze Calibration'}
@@ -4349,7 +4289,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Large Target Mode — student can always override the adaptive engine's suggestion */}
-                <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#0E0610]/70 border border-[#4A1224]/60">
                   <div>
                     <div className="font-bold text-white text-xs">
                       {isArabic ? 'أزرار أكبر' : motorLang === 'fr' ? 'Boutons plus grands' : 'Larger Buttons'}
@@ -4401,7 +4341,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Pointer steadiness */}
-                <div className="py-2 border-t border-slate-800">
+                <div className="py-2 border-t border-[#4A1224]/60">
                   <div className="flex items-center justify-between text-[12px] font-bold mb-1">
                     <span className="text-white">
                       {isArabic ? 'ثبات المؤشر' : 'Pointer steadiness'}
@@ -4431,7 +4371,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Facial Expression Triggers Toggle */}
-                <div className="flex items-center justify-between py-2 border-t border-slate-800">
+                <div className="flex items-center justify-between py-2 border-t border-[#4A1224]/60">
                   <div>
                     <p className="font-bold text-white">
                       {isArabic ? 'النقر بغمضة العين والابتسامة' : 'Blink & Smile Clicks'}
@@ -4446,7 +4386,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Single-switch auto scanning */}
-                <div className="py-2 border-t border-slate-800">
+                <div className="py-2 border-t border-[#4A1224]/60">
                   <div className="flex items-center justify-between">
                     <div className="pe-3">
                       <p className="font-bold text-white flex items-center gap-1.5">
@@ -4477,7 +4417,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                             className={`flex-1 py-2 rounded-xl text-[11px] font-bold border-2 transition ${
                               (headConfig.autoScanMode || 'row-column') === m
                                 ? 'bg-amber-400 text-slate-950 border-amber-300'
-                                : 'bg-slate-900 text-slate-300 border-slate-700'
+                                : 'bg-[#150917] text-slate-300 border-[#4A1224]/50'
                             }`}
                           >
                             {m === 'row-column'
@@ -4509,7 +4449,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Vocal sound triggers — tuned to this student's own voice */}
-                <div className="py-2 border-t border-slate-800">
+                <div className="py-2 border-t border-[#4A1224]/60">
                   <p className="font-bold text-white flex items-center gap-1.5">
                     <Mic className="w-4 h-4 text-emerald-400" />
                     {isArabic ? 'الأصوات الصوتية' : 'Vocal Sounds'}
@@ -4530,7 +4470,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
                   <div className="space-y-2.5">
                     {triggers.map((t) => (
-                      <div key={t.id} className="rounded-2xl bg-slate-950/60 border border-slate-800 p-2.5">
+                      <div key={t.id} className="rounded-2xl bg-[#080409]/60 border border-[#4A1224]/60 p-2.5">
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-bold text-white text-[12px] truncate">
                             {isArabic ? t.nameAr : t.name}
@@ -4546,7 +4486,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                         <select
                           value={t.action}
                           onChange={(e) => updateTrigger(t.id, { action: e.target.value as VocalTriggerAction })}
-                          className="mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-[11px] text-slate-200"
+                          className="mt-2 w-full bg-[#150917] border border-[#4A1224]/50 rounded-xl px-2 py-1.5 text-[11px] text-slate-200"
                         >
                           {VOCAL_ACTION_LABELS.map((a) => (
                             <option key={a.value} value={a.value}>{isArabic ? a.ar : a.en}</option>
@@ -4594,7 +4534,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
 
                 {/* Calibration Accuracy Indicator */}
                 {calibAccuracy !== null && (
-                  <div className="flex items-center justify-between py-2 border-t border-slate-800 text-xs">
+                  <div className="flex items-center justify-between py-2 border-t border-[#4A1224]/60 text-xs">
                     <span className="font-bold text-slate-300">
                       {isArabic ? 'دقة آخر معايرة (9 نقاط):' : 'Last 9-Point Calibration:'}
                     </span>
@@ -4606,7 +4546,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-slate-800">
+                <div className="pt-4 border-t border-[#4A1224]/60">
                   <button
                     onClick={() => setShowConfigModal(false)}
                     className="w-full py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 font-black text-slate-950 transition-all shadow-lg"
@@ -4628,12 +4568,12 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border-2 border-cyan-500/40 rounded-3xl p-6 max-w-4xl w-full shadow-2xl overflow-y-auto max-h-[92vh] text-white"
+              className="bg-[#150917] border-2 border-[#E5A93C]/40 rounded-3xl p-6 max-w-4xl w-full shadow-2xl overflow-y-auto max-h-[92vh] text-white"
             >
               {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
+              <div className="flex items-center justify-between pb-4 border-b border-[#4A1224]/60 mb-5">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-lg">
+                  <div className="p-2.5 rounded-2xl bg-[#4A1224]/50 text-[#E5A93C] border border-[#E5A93C]/40 shadow-lg">
                     <Activity className="w-6 h-6" />
                   </div>
                   <div>
@@ -4656,22 +4596,22 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               {/* 5-Step Pipeline Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 {/* Step 1: Eye tracking camera */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60 relative overflow-hidden flex flex-col justify-between">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center border border-cyan-500/40">
+                    <span className="w-6 h-6 rounded-full bg-[#4A1224]/50 text-[#E5A93C] font-black text-xs flex items-center justify-center border border-[#E5A93C]/40">
                       1
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
                       {isCameraActive ? 'LIVE 60 FPS' : 'STANDBY'}
                     </span>
                   </div>
-                  <h4 className="font-black text-sm text-cyan-300 mb-1">
+                  <h4 className="font-black text-sm text-[#E5A93C] mb-1">
                     {isArabic ? '1. كاميرا تتبع حركة العين' : '1. Eye Tracking Camera'}
                   </h4>
                   <p className="text-xs text-slate-400 mb-3">
                     {isArabic ? 'مستشعر الرؤية عالي الدقة المعالج لموجات الضوء والوجه.' : 'High-resolution optical feed capturing 478 3D facial landmarks.'}
                   </p>
-                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
+                  <div className="p-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-[11px] font-mono space-y-1">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Resolution:</span>
                       <span className="text-white">640 × 480 px</span>
@@ -4684,9 +4624,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Step 2: Working range of camera / Headbox */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60 relative overflow-hidden flex flex-col justify-between">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center border border-cyan-500/40">
+                    <span className="w-6 h-6 rounded-full bg-[#4A1224]/50 text-[#E5A93C] font-black text-xs flex items-center justify-center border border-[#E5A93C]/40">
                       2
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
@@ -4697,13 +4637,13 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       {eyeLiveMetrics?.isWithinWorkingRange ? 'IN RANGE ✓' : 'OUT OF RANGE ⚠️'}
                     </span>
                   </div>
-                  <h4 className="font-black text-sm text-cyan-300 mb-1">
+                  <h4 className="font-black text-sm text-[#E5A93C] mb-1">
                     {isArabic ? '2. نطاق عمل الكاميرا (3D Headbox)' : '2. Camera Working Range'}
                   </h4>
                   <p className="text-xs text-slate-400 mb-3">
                     {isArabic ? 'حجم المنشور الهرمي ثلاثي الأبعاد المسموح لحركة الرأس والعينين.' : '3D headbox volume for user positioning.'}
                   </p>
-                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
+                  <div className="p-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-[11px] font-mono space-y-1">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Distance:</span>
                       <span className="text-amber-400 font-bold">{eyeLiveMetrics?.distanceCm || 58} cm</span>
@@ -4716,22 +4656,22 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Step 3: Pupil center measured by camera */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60 relative overflow-hidden flex flex-col justify-between">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center border border-cyan-500/40">
+                    <span className="w-6 h-6 rounded-full bg-[#4A1224]/50 text-[#E5A93C] font-black text-xs flex items-center justify-center border border-[#E5A93C]/40">
                       3
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-pink-500/20 text-pink-400 border border-pink-500/30 font-bold">
                       SUB-PIXEL IRIS
                     </span>
                   </div>
-                  <h4 className="font-black text-sm text-cyan-300 mb-1">
+                  <h4 className="font-black text-sm text-[#E5A93C] mb-1">
                     {isArabic ? '3. قياس مركز بؤبؤ العين' : '3. Pupil/Iris Center Measurement'}
                   </h4>
                   <p className="text-xs text-slate-400 mb-3">
                     {isArabic ? 'استخراج إحداثيات مركز القزحية بدقة أجزاء الملليمتر (468 & 473).' : '3D iris centroid extracted relative to eye corners.'}
                   </p>
-                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
+                  <div className="p-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-[11px] font-mono space-y-1">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Left Iris (468):</span>
                       <span className="text-pink-400">{(eyeLiveMetrics?.leftPupil?.x * 100 || 50).toFixed(1)}%</span>
@@ -4744,9 +4684,9 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Step 4: Image processing algorithm & blink detection */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60 relative overflow-hidden flex flex-col justify-between">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center border border-cyan-500/40">
+                    <span className="w-6 h-6 rounded-full bg-[#4A1224]/50 text-[#E5A93C] font-black text-xs flex items-center justify-center border border-[#E5A93C]/40">
                       4
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
@@ -4757,13 +4697,13 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                       {gestureState.isBlinking ? 'BLINK DETECTED 👁️' : 'EYES OPEN'}
                     </span>
                   </div>
-                  <h4 className="font-black text-sm text-cyan-300 mb-1">
+                  <h4 className="font-black text-sm text-[#E5A93C] mb-1">
                     {isArabic ? '4. خوارزمية معالجة الصورة واكتشاف الغمض' : '4. Blink & Gesture Algorithm'}
                   </h4>
                   <p className="text-xs text-slate-400 mb-3">
                     {isArabic ? 'حساب نسبة اتساع العين (EAR) للتمييز بين الرمش الطبيعي والغمض الإرادي للكتابة.' : 'Eye Aspect Ratio (EAR) filters involuntary vs deliberate blinks.'}
                   </p>
-                  <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1">
+                  <div className="p-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-[11px] font-mono space-y-1">
                     <div className="flex justify-between">
                       <span className="text-slate-400">EAR Metric:</span>
                       <span className="text-amber-300 font-bold">{eyeLiveMetrics?.avgEAR ? eyeLiveMetrics.avgEAR.toFixed(3) : '0.285'}</span>
@@ -4776,22 +4716,22 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                 </div>
 
                 {/* Step 5: Mathematical mapping models to screen coordinates */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 relative overflow-hidden flex flex-col justify-between md:col-span-2">
+                <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60 relative overflow-hidden flex flex-col justify-between md:col-span-2">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center border border-cyan-500/40">
+                    <span className="w-6 h-6 rounded-full bg-[#4A1224]/50 text-[#E5A93C] font-black text-xs flex items-center justify-center border border-[#E5A93C]/40">
                       5
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold">
                       POLYNOMIAL MAPPING MATRIX
                     </span>
                   </div>
-                  <h4 className="font-black text-sm text-cyan-300 mb-1">
+                  <h4 className="font-black text-sm text-[#E5A93C] mb-1">
                     {isArabic ? '5. النموذج الرياضي للربط مع إحداثيات الشاشة' : '5. Mathematical Screen Mapping Model'}
                   </h4>
                   <p className="text-xs text-slate-400 mb-3">
                     {isArabic ? 'تحويل متجه النظر الزاوي (Gaze Angle Vector) إلى بكسلات الشاشة (Screen X, Y) باستخدام مصفوفة المعايرة والتسارع اللاخطي والتثبيت المغناطيسي.' : 'Translates raw gaze vector into accurate on-screen pixels with magnetic target locking.'}
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-[11px] font-mono">
                     <div>
                       <span className="text-slate-400 block">Screen Target:</span>
                       <span className="text-white font-bold">({Math.round(cursorPos.x)}px, {Math.round(cursorPos.y)}px)</span>
@@ -4804,7 +4744,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                     </div>
                     <div>
                       <span className="text-slate-400 block">Mapping Equation:</span>
-                      <span className="text-cyan-400 font-bold">S = W × (0.5 + a·ΔG^1.1)</span>
+                      <span className="text-[#E5A93C] font-bold">S = W × (0.5 + a·ΔG^1.1)</span>
                     </div>
                   </div>
                 </div>
@@ -4813,7 +4753,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               {/* Close Button */}
               <button
                 onClick={() => setShowScientificArchitectureModal(false)}
-                className="w-full py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-300 font-black text-slate-950 transition-all shadow-lg text-sm flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-[#E5A93C] hover:bg-[#4A1224]/40 font-black text-slate-950 transition-all shadow-lg text-sm flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />
                 <span>{isArabic ? 'العودة لواجهة التحكم والكيبورد' : 'Return to Communicator'}</span>
@@ -4831,7 +4771,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-slate-950 border-2 border-red-500 rounded-3xl p-6 max-w-lg w-full shadow-2xl text-white space-y-4 text-center ring-8 ring-red-600/30 animate-pulse"
+              className="bg-[#080409] border-2 border-red-500 rounded-3xl p-6 max-w-lg w-full shadow-2xl text-white space-y-4 text-center ring-8 ring-red-600/30 animate-pulse"
             >
               <div className="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center mx-auto text-red-400">
                 <AlertCircle className="w-9 h-9 animate-bounce" />
@@ -4860,13 +4800,13 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               )}
 
               {emergencyGeoCoords && (
-                <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+                <div className="p-3 bg-[#150917] rounded-2xl border border-[#4A1224]/60 text-xs text-slate-300 flex items-center justify-between">
                   <span>📍 {isArabic ? 'الإحداثيات الحالية:' : 'Current Coordinates:'}</span>
                   <a
                     href={`https://maps.google.com/?q=${emergencyGeoCoords.lat},${emergencyGeoCoords.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-cyan-400 hover:underline font-bold"
+                    className="font-mono text-[#E5A93C] hover:underline font-bold"
                   >
                     {emergencyGeoCoords.lat.toFixed(4)}, {emergencyGeoCoords.lng.toFixed(4)}
                   </a>
@@ -4882,7 +4822,7 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
                   <p className="text-xs text-slate-500">{isArabic ? 'لم يتم تسجيل أرقام طوارئ بعد.' : 'No emergency contacts saved.'}</p>
                 ) : (
                   contacts.map((c) => (
-                    <div key={c.id} className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
+                    <div key={c.id} className="p-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 flex items-center justify-between gap-2">
                       <div>
                         <div className="font-bold text-xs text-white">{isArabic ? (c.nameAr || c.nameEn) : c.nameEn}</div>
                         <div className="text-[10px] text-slate-400 font-mono">{c.phone || 'No phone'}</div>
@@ -4911,11 +4851,10 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
               <button
                 data-aac-id="sos-cancel"
                 onClick={() => {
-                  setShowEmergencyModal(false);
-                  setEmergencyCountdown(null);
+                  cancelEmergencySOS();
                   toast.info(isArabic ? 'تم إلغاء حالة الطوارئ' : 'Emergency cancelled');
                 }}
-                className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition-all border border-slate-700"
+                className="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition-all border border-[#4A1224]/50"
               >
                 {isArabic ? 'إلغاء التنبيه (أنا بخير)' : "Cancel SOS (I'm OK)"}
               </button>
@@ -4923,6 +4862,18 @@ export default function MotorEuphoniaView({ profile, onSendMessage }: MotorEupho
           </div>
         )}
       </AnimatePresence>
+
+      {/* COPPA / GDPR-K Verifiable Parental Consent Modal */}
+      <ParentalConsentModal
+        isOpen={showParentalConsentModal}
+        profile={profile}
+        onConsentGranted={(consent) => {
+          profile.parentalConsent = consent;
+          setShowParentalConsentModal(false);
+          toggleCamera();
+        }}
+        onCancel={() => setShowParentalConsentModal(false)}
+      />
     </div>
   );
 }

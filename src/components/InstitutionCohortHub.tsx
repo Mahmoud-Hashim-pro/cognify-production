@@ -157,10 +157,10 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
   // Unauthorized view
   if (!isAuthorized) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#0A0C14] text-slate-100 relative selection:bg-cyan-500/30 selection:text-white overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#080409] text-slate-100 relative selection:bg-[#E5A93C]/30 selection:text-[#E5A93C] overflow-hidden">
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
           <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px]" />
-          <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[140px]" />
+          <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-[#4A1224]/30 rounded-full blur-[140px]" />
         </div>
         <div className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-3xl mb-4 text-amber-400 shadow-xl backdrop-blur-xl">
           <Building2 className="w-10 h-10" />
@@ -181,22 +181,22 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
   const activeOrgDisplay = stats.orgCode && stats.orgCode !== 'ALL_INSTITUTIONS' ? stats.orgCode : (userOrg || L('Global Cohort', 'الدفعة الشاملة'));
 
   return (
-    <div className="w-full h-full overflow-y-auto custom-scrollbar p-4 md:p-8 bg-[#0A0C14] text-slate-100 relative selection:bg-cyan-500/30 selection:text-white overflow-x-hidden font-sans">
+    <div className="w-full h-full overflow-y-auto custom-scrollbar p-4 md:p-8 bg-[#080409] text-slate-100 relative selection:bg-[#E5A93C]/30 selection:text-[#E5A93C] overflow-x-hidden font-sans">
       {/* Ambient Lighting Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-[#4A1224]/30 rounded-full blur-[140px]" />
         <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[140px]" />
       </div>
 
       <div className="max-w-6xl mx-auto space-y-6 pb-24">
         {/* Header Bar */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 shadow-2xl backdrop-blur-xl">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 shadow-2xl backdrop-blur-xl">
           <div className="flex items-center gap-4">
             {onNavigateBack && (
               <button
                 onClick={onNavigateBack}
-                className="p-2.5 text-slate-300 hover:text-white bg-[#181C2E] border border-slate-800 hover:border-slate-700 rounded-2xl active:scale-95 transition-all flex items-center gap-2 shrink-0"
+                className="p-2.5 text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 transition-all flex items-center gap-2 shrink-0"
                 title={L('Back to Assistant', 'العودة للمساعد')}
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -206,14 +206,14 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             {onMenuClick && (
               <button
                 onClick={onMenuClick}
-                className="p-2.5 text-slate-300 hover:text-white bg-[#181C2E] border border-slate-800 hover:border-slate-700 rounded-2xl active:scale-95 transition-all shrink-0"
+                className="p-2.5 text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 transition-all shrink-0"
                 aria-label="Open navigation menu"
                 title={L('Open Menu', 'فتح القائمة')}
               >
                 <Menu className="w-5 h-5" />
               </button>
             )}
-            <div className="p-3.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-2xl">
+            <div className="p-3.5 bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] rounded-2xl">
               <Building2 className="w-7 h-7" />
             </div>
             <div>
@@ -221,7 +221,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                 <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">
                   {L('Institution & Cohort Hub', 'مركز المؤسسات والدفعات الأكاديمية')}
                 </h1>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
                   <GraduationCap className="w-3.5 h-3.5" />
                   {activeOrgDisplay}
                 </span>
@@ -238,7 +238,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
           {/* Action buttons */}
           <div className="flex items-center gap-3">
             {isAdmin && (
-              <div className="flex items-center gap-2 bg-[#0A0C14] border border-slate-800 px-3.5 py-2 rounded-2xl text-xs">
+              <div className="flex items-center gap-2 bg-[#080409] border border-[#4A1224]/60 px-3.5 py-2 rounded-2xl text-xs">
                 <span className="text-slate-400 font-bold">{L('Org Filter:', 'فلتر الجهة:')}</span>
                 <input
                   type="text"
@@ -252,7 +252,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             <button
               onClick={handleExportCsv}
               disabled={loading || exporting || stats.totalStudents === 0}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-cyan-500/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 hover:from-amber-400 hover:to-blue-500 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-[#E5A93C]/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               title={L('Export cohort analytics as CSV report', 'تصدير تحليلات الدفعة كتقرير CSV')}
             >
               {exporting ? (
@@ -266,13 +266,13 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 p-1.5 bg-[#121524]/90 border border-slate-800/80 rounded-2xl backdrop-blur-xl w-fit">
+        <div className="flex items-center gap-2 p-1.5 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-2xl backdrop-blur-xl w-fit">
           <button
             onClick={() => setActiveSection('roster')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
               activeSection === 'roster'
-                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-white shadow-lg shadow-[#E5A93C]/20'
+                : 'text-slate-400 hover:text-white hover:bg-[#150917]/60'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -283,7 +283,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
               activeSection === 'intelligence'
                 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                : 'text-slate-400 hover:text-white hover:bg-[#150917]/60'
             }`}
           >
             <Sparkles className="w-4 h-4" />
@@ -360,7 +360,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
         {/* Loading Indicator */}
         {loading ? (
           <div className="flex flex-col items-center justify-center p-20 gap-3">
-            <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+            <Loader2 className="w-8 h-8 text-[#E5A93C] animate-spin" />
             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
               {L('Computing Cohort Analytics...', 'جارِ احتساب تحليلات الدفعة...')}
             </span>
@@ -370,8 +370,8 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: Enrolled Students */}
-              <div className="bg-[#121524]/90 border border-slate-800/80 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-slate-700 transition-all backdrop-blur-xl">
-                <div className="p-3 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-2xl">
+              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-[#4A1224]/50 transition-all backdrop-blur-xl">
+                <div className="p-3 bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] rounded-2xl">
                   <Users className="w-6 h-6" />
                 </div>
                 <div>
@@ -385,7 +385,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               </div>
 
               {/* Card 2: Active Learners */}
-              <div className="bg-[#121524]/90 border border-slate-800/80 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-slate-700 transition-all backdrop-blur-xl">
+              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-[#4A1224]/50 transition-all backdrop-blur-xl">
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl">
                   <Activity className="w-6 h-6" />
                 </div>
@@ -403,8 +403,8 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               </div>
 
               {/* Card 3: Accessibility Adoption */}
-              <div className="bg-[#121524]/90 border border-slate-800/80 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-slate-700 transition-all backdrop-blur-xl">
-                <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl">
+              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-[#4A1224]/50 transition-all backdrop-blur-xl">
+                <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-[#E5A93C] rounded-2xl">
                   <Accessibility className="w-6 h-6" />
                 </div>
                 <div>
@@ -421,7 +421,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               </div>
 
               {/* Card 4: Avg Mastery Points */}
-              <div className="bg-[#121524]/90 border border-slate-800/80 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-slate-700 transition-all backdrop-blur-xl">
+              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 shadow-xl rounded-3xl p-5 flex items-center gap-4 hover:border-[#4A1224]/50 transition-all backdrop-blur-xl">
                 <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl">
                   <Sparkles className="w-6 h-6" />
                 </div>
@@ -443,7 +443,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
 
             {/* GPA Card if academic records exist */}
             {stats.averageGpa !== null && (
-              <div className="bg-[#121524]/90 border border-slate-800/80 shadow-xl rounded-3xl p-5 flex items-center justify-between backdrop-blur-xl">
+              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 shadow-xl rounded-3xl p-5 flex items-center justify-between backdrop-blur-xl">
                 <div className="flex items-center gap-3.5">
                   <div className="p-2.5 bg-sky-500/10 border border-sky-500/20 text-sky-400 rounded-2xl">
                     <GraduationCap className="w-5 h-5" />
@@ -460,7 +460,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                 {stats.aggregatedGpaRange && (
                   <div className="text-end text-xs text-slate-400 font-bold">
                     <span>{L('GPA Range:', 'مجال المعدل:')}</span>{' '}
-                    <span className="text-cyan-400 font-black">
+                    <span className="text-[#E5A93C] font-black">
                       {stats.aggregatedGpaRange.min.toFixed(2)} - {stats.aggregatedGpaRange.max.toFixed(2)}
                     </span>
                   </div>
@@ -471,10 +471,10 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             {/* Distributions: Cognitive Level & Accessibility Modes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Cognitive Level Distribution */}
-              <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 shadow-2xl space-y-4 backdrop-blur-xl">
+              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 shadow-2xl space-y-4 backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <BarChart3 className="w-5 h-5 text-cyan-400" />
+                    <BarChart3 className="w-5 h-5 text-[#E5A93C]" />
                     <h3 className="text-sm font-black text-white uppercase tracking-wider">
                       {L('Cognitive Level Breakdown', 'توزيع المستويات الإدراكية')}
                     </h3>
@@ -522,7 +522,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                             {count} ({pct}%)
                           </span>
                         </div>
-                        <div className="w-full h-2.5 bg-[#0A0C14] border border-slate-800/60 rounded-full overflow-hidden">
+                        <div className="w-full h-2.5 bg-[#080409] border border-[#4A1224]/50 rounded-full overflow-hidden">
                           <div
                             className={`h-full ${color} rounded-full transition-all duration-500 shadow-sm`}
                             style={{ width: `${pct}%` }}
@@ -535,15 +535,15 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               </div>
 
               {/* Accessibility Modes Utilized */}
-              <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 shadow-2xl space-y-4 backdrop-blur-xl">
+              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 shadow-2xl space-y-4 backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <Accessibility className="w-5 h-5 text-indigo-400" />
+                    <Accessibility className="w-5 h-5 text-[#E5A93C]" />
                     <h3 className="text-sm font-black text-white uppercase tracking-wider">
                       {L('Accessibility Accommodations', 'تسهيلات الإتاحة المستخدمة')}
                     </h3>
                   </div>
-                  <span className="text-[10px] font-bold text-cyan-400 uppercase">
+                  <span className="text-[10px] font-bold text-[#E5A93C] uppercase">
                     {stats.accessibilityAdoptionRate}% {L('Adopted', 'مُفعّل')}
                   </span>
                 </div>
@@ -590,7 +590,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                     return (
                       <div
                         key={titleEn}
-                        className="bg-[#0A0C14] border border-slate-800 rounded-2xl p-3 flex items-center justify-between"
+                        className="bg-[#080409] border border-[#4A1224]/60 rounded-2xl p-3 flex items-center justify-between"
                       >
                         <div className="flex items-center gap-2.5">
                           <div className={`p-2 rounded-xl border ${color}`}>
@@ -614,16 +614,16 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             </div>
 
             {/* Cohort Pedagogical Intelligence & Prerequisite Diagnostics (Phase 2C) */}
-            <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl p-6 shadow-2xl space-y-6 backdrop-blur-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-800/80 pb-4">
+            <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 shadow-2xl space-y-6 backdrop-blur-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#4A1224]/60 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl">
+                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-[#E5A93C] rounded-2xl">
                     <Brain className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
                       {L('Cohort Pedagogical Intelligence & Diagnostics', 'الذكاء البيداغوجي وتشخيص المتطلبات للدفعة')}
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-[#4A1224]/60">
                         Pillar 4 & PLM
                       </span>
                     </h3>
@@ -639,7 +639,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
                     {L('Cohort Strategy Efficacy', 'متوسط فاعلية الاستراتيجيات')}
                   </span>
-                  <span className="text-lg font-black text-cyan-400 font-mono">
+                  <span className="text-lg font-black text-[#E5A93C] font-mono">
                     74.2% {L('Avg Recovery', 'متوسط التعافي')}
                   </span>
                 </div>
@@ -663,8 +663,8 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                     nameAr: 'التفكيك التدريجي المنظم',
                     winRate: 72,
                     sampleCount: 215,
-                    tone: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300',
-                    barColor: 'bg-cyan-500',
+                    tone: 'border-[#E5A93C]/30 bg-[#4A1224]/30 text-[#E5A93C]',
+                    barColor: 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600',
                     descEn: 'Default baseline with continuous formative micro-checks',
                     descAr: 'النمط المرجعي مع فحوصات تكوينية مستمرة',
                   },
@@ -673,7 +673,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                     nameAr: 'التشبيهات البصرية والواقعية',
                     winRate: 69,
                     sampleCount: 98,
-                    tone: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300',
+                    tone: 'border-[#4A1224]/60 bg-indigo-500/10 text-indigo-300',
                     barColor: 'bg-indigo-500',
                     descEn: 'Bridges abstract models before formal syntax',
                     descAr: 'يقرب النماذج المجردة قبل الرموز البرمجية المعقدة',
@@ -689,7 +689,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                     descAr: 'مثالي لتعميق فهم الطلاب المتقدمين والطلاقة العالية',
                   },
                 ].map((s) => (
-                  <div key={s.nameEn} className="p-3.5 rounded-2xl bg-[#0A0C14] border border-slate-800 space-y-2.5 shadow-inner">
+                  <div key={s.nameEn} className="p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 space-y-2.5 shadow-inner">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-slate-100 text-xs truncate max-w-[150px]">
                         {L(s.nameEn, s.nameAr)}
@@ -717,11 +717,11 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               {/* Actionable Cohort Diagnostic Insights */}
               <div className="space-y-3 pt-2">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                  <GitBranch className="w-4 h-4 text-cyan-400" />
+                  <GitBranch className="w-4 h-4 text-[#E5A93C]" />
                   {L('Actionable Diagnostic Findings', 'نتائج التشخيص البيداغوجي الموجهة للتدريس')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="p-4 rounded-2xl bg-[#0A0C14] border border-amber-500/25 space-y-2 shadow-inner">
+                  <div className="p-4 rounded-2xl bg-[#080409] border border-amber-500/25 space-y-2 shadow-inner">
                     <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
                       <AlertTriangle className="w-4 h-4 shrink-0" />
                       <span>{L('Prerequisite Gap Diagnosis', 'تشخيص فجوة المتطلب السابق')}</span>
@@ -734,8 +734,8 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#0A0C14] border border-cyan-500/25 space-y-2 shadow-inner">
-                    <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs">
+                  <div className="p-4 rounded-2xl bg-[#080409] border border-[#E5A93C]/25 space-y-2 shadow-inner">
+                    <div className="flex items-center gap-2 text-[#E5A93C] font-bold text-xs">
                       <Compass className="w-4 h-4 shrink-0" />
                       <span>{L('Response Latency & Strain Profile', 'توزيع العبء وسرعة الاستجابة')}</span>
                     </div>
@@ -747,7 +747,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#0A0C14] border border-emerald-500/25 space-y-2 shadow-inner">
+                  <div className="p-4 rounded-2xl bg-[#080409] border border-emerald-500/25 space-y-2 shadow-inner">
                     <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
                       <CheckCircle2 className="w-4 h-4 shrink-0" />
                       <span>{L('Spaced Retention Health (SM-2)', 'صحة الاستبقاء التباعدي (SM-2)')}</span>
@@ -764,10 +764,10 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             </div>
 
             {/* Student Roster / Privacy Placeholder */}
-            <div className="bg-[#121524]/90 border border-slate-800/80 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl">
-              <div className="p-6 border-b border-slate-800 flex items-center justify-between flex-wrap gap-2 bg-[#181C2E]/40">
+            <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl">
+              <div className="p-6 border-b border-[#4A1224]/60 flex items-center justify-between flex-wrap gap-2 bg-[#150917]/40">
                 <div className="flex items-center gap-2.5">
-                  <Users className="w-5 h-5 text-cyan-400" />
+                  <Users className="w-5 h-5 text-[#E5A93C]" />
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">
                     {L('Cohort Student Roster', 'سجل طلاب الدفعة')}
                   </h3>
@@ -789,7 +789,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
 
               {stats.kAnonymitySuppressed ? (
                 <div className="p-10 text-center flex flex-col items-center justify-center space-y-3">
-                  <div className="p-3 bg-[#0A0C14] border border-slate-800 rounded-2xl text-slate-500">
+                  <div className="p-3 bg-[#080409] border border-[#4A1224]/60 rounded-2xl text-slate-500">
                     <Lock className="w-8 h-8" />
                   </div>
                   <h4 className="text-sm font-black text-white">
@@ -810,7 +810,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                 <div className="overflow-x-auto">
                   <table className="w-full text-start border-collapse text-xs">
                     <thead>
-                      <tr className="bg-[#0A0C14] text-[10px] uppercase font-black tracking-wider text-slate-400 border-b border-slate-800">
+                      <tr className="bg-[#080409] text-[10px] uppercase font-black tracking-wider text-slate-400 border-b border-[#4A1224]/60">
                         <th className="p-3.5 text-start">{L('Student', 'الطالب')}</th>
                         <th className="p-3.5 text-start">{L('Masked Email', 'البريد المقنّع')}</th>
                         <th className="p-3.5 text-start">{L('Cognitive Level', 'المستوى الإدراكي')}</th>
@@ -823,17 +823,17 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                     </thead>
                     <tbody className="divide-y divide-slate-800/60 font-medium text-slate-200">
                       {stats.students.map((student) => (
-                        <tr key={student.uid} className="hover:bg-[#181C2E]/60 transition-colors">
+                        <tr key={student.uid} className="hover:bg-[#150917]/80 transition-colors">
                           <td className="p-3.5 font-bold text-white">{student.name}</td>
                           <td className="p-3.5 font-mono text-[11px] text-slate-400">{student.emailMasked}</td>
                           <td className="p-3.5">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C]">
                               {student.cognitiveLevel}
                             </span>
                           </td>
                           <td className="p-3.5 text-slate-400">{student.accessibilityMode}</td>
                           <td className="p-3.5 font-black tabular-nums text-white">{student.points}</td>
-                          <td className="p-3.5 font-black tabular-nums text-cyan-400">
+                          <td className="p-3.5 font-black tabular-nums text-[#E5A93C]">
                             {student.gpa !== null ? student.gpa.toFixed(2) : '—'}
                           </td>
                           <td className="p-3.5">

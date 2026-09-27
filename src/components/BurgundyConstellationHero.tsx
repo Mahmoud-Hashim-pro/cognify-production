@@ -136,9 +136,9 @@ export default function BurgundyConstellationHero({
       <div className="relative z-10 flex items-center justify-between pb-6 border-b border-rose-950/60 gap-3 flex-wrap">
         {/* Right side: Cognify with gold monogram + Arabic tagline */}
         <div className="flex items-center gap-3">
-          {/* Monogram Badge as seen in screenshot: gold border [NI] */}
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border-2 border-[#E5A93C] flex items-center justify-center text-[#E5A93C] font-black text-sm shadow-md shadow-amber-950/50">
-            <span className="tracking-tighter">N|</span>
+          {/* Brand Icon Badge */}
+          <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border-2 border-[#E5A93C] flex items-center justify-center text-[#E5A93C] shadow-md shadow-amber-950/50">
+            <Sparkles className="w-5 h-5 text-[#E5A93C]" />
           </div>
           <div>
             <div className="text-xl font-black text-white tracking-tight flex items-center gap-2">

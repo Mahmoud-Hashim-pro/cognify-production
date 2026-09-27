@@ -293,7 +293,7 @@ export default function CrossDisabilityOrchestrator({
       labelAr: 'أحتاج شرب ماء 💧',
       labelEn: 'Need Water 💧',
       speakText: isAr ? 'أحتاج شرب الماء لو سمحت' : 'I need water please',
-      color: 'border-cyan-500 bg-cyan-950/40 text-cyan-200',
+      color: 'border-[#E5A93C] bg-[#2D0B16] text-amber-200',
     },
     {
       id: 'tile-pain',
@@ -448,13 +448,13 @@ export default function CrossDisabilityOrchestrator({
       )}
 
       {/* ── TOP ORCHESTRATOR HEADER ── */}
-      <header className="shrink-0 px-3 py-2.5 sm:px-6 sm:py-3.5 bg-[#0e1220]/95 backdrop-blur-xl border-b border-slate-800 shadow-2xl flex flex-col gap-2.5">
+      <header className="shrink-0 px-3 py-2.5 sm:px-6 sm:py-3.5 bg-[#0e1220]/95 backdrop-blur-xl border-b border-[#4A1224]/60 shadow-2xl flex flex-col gap-2.5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={onNavigateBack}
               aria-label={localize(profile.language, 'Back', 'رجوع')}
-              className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 active:scale-95"
+              className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 active:scale-95"
             >
               <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
               <span className="hidden sm:inline text-xs font-black uppercase">
@@ -463,13 +463,13 @@ export default function CrossDisabilityOrchestrator({
             </button>
 
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-400 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
                 <h1 className="text-sm sm:text-base font-black text-white leading-tight flex items-center gap-2">
                   <span>{isAr ? 'المنسق الشامل للتواصل بين الإعاقات' : 'Universal Cross-Disability Sensory Mesh'}</span>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#4A1224]/50 text-[#E5A93C] border border-[#E5A93C]/30">
                     P2P Neural Relay
                   </span>
                 </h1>
@@ -497,7 +497,7 @@ export default function CrossDisabilityOrchestrator({
         </div>
 
         {/* ── 4 ENGINE MODE SWITCHER TABS ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 p-1 bg-slate-900/90 border border-slate-800 rounded-2xl">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 p-1 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-2xl">
           {[
             {
               id: 'blind-deaf' as const,
@@ -511,7 +511,7 @@ export default function CrossDisabilityOrchestrator({
               titleAr: 'مورس للصم-المكفوفين',
               titleEn: 'Deaf-Blind Morse',
               icon: Vibrate,
-              activeColor: 'bg-cyan-600 text-white shadow-cyan-500/30',
+              activeColor: 'bg-[#4A1224]/40 text-white shadow-[#E5A93C]/20',
             },
             {
               id: 'single-switch' as const,
@@ -569,7 +569,7 @@ export default function CrossDisabilityOrchestrator({
               {/* Relay Info Bar */}
               <div className="bg-[#121626] border border-indigo-500/30 rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+                  <div className="p-2 rounded-xl bg-[#4A1224]/40 text-[#E5A93C]">
                     <Radio className="w-5 h-5 animate-pulse" />
                   </div>
                   <div>
@@ -596,7 +596,7 @@ export default function CrossDisabilityOrchestrator({
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[360px]">
                 
                 {/* SIDE A: BLIND SPEAKER ➔ DEAF RECEIVER */}
-                <div className="bg-[#121626] rounded-2xl border border-slate-800 p-4 flex flex-col justify-between shadow-xl">
+                <div className="bg-[#121626] rounded-2xl border border-[#4A1224]/60 p-4 flex flex-col justify-between shadow-xl">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -611,7 +611,7 @@ export default function CrossDisabilityOrchestrator({
                     </div>
 
                     {/* 3D Sign Avatar Container with Suspense */}
-                    <div className="relative h-[220px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 mb-3 flex items-center justify-center">
+                    <div className="relative h-[220px] bg-[#080409] rounded-xl overflow-hidden border border-[#4A1224]/60 mb-3 flex items-center justify-center">
                       <React.Suspense fallback={<div className="text-xs text-slate-400">Loading 3D Sign Avatar...</div>}>
                         <SignAvatar3D
                           words={signSequenceForDeaf}
@@ -629,11 +629,11 @@ export default function CrossDisabilityOrchestrator({
                     </div>
 
                     {/* Transcript Card for Deaf Peer */}
-                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <div className="p-3 bg-[#150917] border border-[#4A1224]/60 rounded-xl">
                       <span className="text-[10px] text-slate-400 font-bold block mb-1">
                         {isAr ? 'النص المقروء للأصم:' : 'Real-Time Text for Deaf Peer:'}
                       </span>
-                      <p className="text-xs sm:text-sm font-black text-cyan-300 break-words leading-relaxed">
+                      <p className="text-xs sm:text-sm font-black text-[#E5A93C] break-words leading-relaxed">
                         {blindLiveText || blindFinalTranscript}
                       </p>
                     </div>
@@ -654,16 +654,16 @@ export default function CrossDisabilityOrchestrator({
                 </div>
 
                 {/* SIDE B: DEAF SENDER ➔ BLIND RECEIVER */}
-                <div className="bg-[#121626] rounded-2xl border border-slate-800 p-4 flex flex-col justify-between shadow-xl">
+                <div className="bg-[#121626] rounded-2xl border border-[#4A1224]/60 p-4 flex flex-col justify-between shadow-xl">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Ear className="w-4 h-4 text-cyan-400" />
+                        <Ear className="w-4 h-4 text-[#E5A93C]" />
                         <h4 className="text-xs sm:text-sm font-black text-white">
                           {isAr ? 'الطرف الأصم يرسل (إشارة ونصوص ➔ صوت في أذن الكفيف)' : 'Deaf Peer Sends (Signs/Text ➔ Audio to Blind)'}
                         </h4>
                       </div>
-                      <span className="text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-md">
+                      <span className="text-[10px] font-mono font-bold bg-[#4A1224]/50 text-[#E5A93C] px-2 py-0.5 rounded-md">
                         Text ➔ Voice
                       </span>
                     </div>
@@ -678,7 +678,7 @@ export default function CrossDisabilityOrchestrator({
                           <button
                             key={idx}
                             onClick={() => handleSendDeafVoiceToBlind(isAr ? p.textAr : p.textEn)}
-                            className="p-2 rounded-xl bg-slate-900 hover:bg-cyan-950/40 border border-slate-800 hover:border-cyan-500/40 text-start text-xs font-bold text-slate-200 transition-all active:scale-95 flex items-center gap-1.5 truncate"
+                            className="p-2 rounded-xl bg-[#150917] hover:bg-[#2D0B16] border border-[#4A1224]/60 hover:border-[#E5A93C]/40 text-start text-xs font-bold text-slate-200 transition-all active:scale-95 flex items-center gap-1.5 truncate"
                           >
                             <span className="text-base shrink-0">{p.icon}</span>
                             <span className="truncate">{isAr ? p.textAr : p.textEn}</span>
@@ -702,14 +702,14 @@ export default function CrossDisabilityOrchestrator({
                           }
                         }}
                         placeholder={isAr ? 'اكتب هنا واضغط Enter أو زر الإرسال...' : 'Type and press Enter or Send...'}
-                        className="w-full min-h-[90px] p-3 bg-slate-900 border border-slate-800 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-100 font-medium text-xs sm:text-sm"
+                        className="w-full min-h-[90px] p-3 bg-[#150917] border border-[#4A1224]/60 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#E5A93C]/30 text-slate-100 font-medium text-xs sm:text-sm"
                       />
                     </div>
 
                     {/* Last spoken to blind preview */}
                     {deafSpokenMessage && (
-                      <div className="p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs">
-                        <span className="text-[10px] text-cyan-400 font-bold block mb-0.5">
+                      <div className="p-2.5 rounded-xl bg-[#2D0B16] border border-[#E5A93C]/30 text-xs">
+                        <span className="text-[10px] text-[#E5A93C] font-bold block mb-0.5">
                           {isAr ? 'آخر كلام تم نطقه للكفيف:' : 'Last spoken to blind peer:'}
                         </span>
                         <p className="text-slate-200 font-bold">{deafSpokenMessage}</p>
@@ -721,7 +721,7 @@ export default function CrossDisabilityOrchestrator({
                   <button
                     onClick={() => handleSendDeafVoiceToBlind()}
                     disabled={!deafInputText.trim()}
-                    className="w-full mt-3 py-3 rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 disabled:opacity-40 text-slate-950 flex items-center justify-center gap-2 shadow-lg transition-all active:scale-98"
+                    className="w-full mt-3 py-3 rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-amber-400 to-indigo-600 hover:from-amber-400 hover:to-indigo-700 disabled:opacity-40 text-slate-950 flex items-center justify-center gap-2 shadow-lg transition-all active:scale-98"
                   >
                     {isSpeakingToBlind ? <Square className="w-4 h-4 fill-current" /> : <Volume2 className="w-4 h-4" />}
                     <span>{isAr ? 'انطق بصوت عالي في أذن الكفيف (Enter)' : 'Speak Aloud to Blind Peer (Enter)'}</span>
@@ -743,9 +743,9 @@ export default function CrossDisabilityOrchestrator({
               className="h-full flex flex-col gap-4 max-w-4xl mx-auto w-full"
             >
               {/* Engine Header Info */}
-              <div className="bg-[#121626] border border-cyan-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="bg-[#121626] border border-[#E5A93C]/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400">
+                  <div className="p-2.5 rounded-xl bg-[#4A1224]/50 text-[#E5A93C]">
                     <Vibrate className="w-6 h-6 animate-bounce" />
                   </div>
                   <div>
@@ -764,7 +764,7 @@ export default function CrossDisabilityOrchestrator({
                   <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
                     isVibratingMorse 
                       ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
-                      : 'bg-slate-900 text-slate-400 border-slate-800'
+                      : 'bg-[#150917] text-slate-400 border-[#4A1224]/60'
                   }`}>
                     {isVibratingMorse ? (isAr ? 'جاري الاهتزاز اللمسي...' : 'Vibrating...') : (isAr ? 'جاهز للاستقبال' : 'Ready')}
                   </span>
@@ -772,7 +772,7 @@ export default function CrossDisabilityOrchestrator({
               </div>
 
               {/* Morse Output & Testing Bar */}
-              <div className="bg-[#121626] border border-slate-800 rounded-2xl p-4 shadow-xl">
+              <div className="bg-[#121626] border border-[#4A1224]/60 rounded-2xl p-4 shadow-xl">
                 <h4 className="text-xs font-black text-slate-300 uppercase tracking-wider mb-2">
                   {isAr ? 'اختبار وتحويل أي نص إلى اهتزازات لمسية فورية:' : 'Test & Transmit Text to Tactile Vibrations:'}
                 </h4>
@@ -781,14 +781,14 @@ export default function CrossDisabilityOrchestrator({
                     type="text"
                     defaultValue={isAr ? 'مرحبا' : 'HELLO'}
                     id="morse-test-input"
-                    className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                    className="flex-1 px-3 py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-xs sm:text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#E5A93C]/30"
                   />
                   <button
                     onClick={() => {
                       const input = (document.getElementById('morse-test-input') as HTMLInputElement)?.value;
                       if (input) playHapticMorseForText(input);
                     }}
-                    className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all active:scale-95 shadow-lg"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 hover:bg-[#4A1224]/40 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all active:scale-95 shadow-lg"
                   >
                     <Vibrate className="w-4 h-4" />
                     <span>{isAr ? 'اهتزاز لمسي (Vibrate)' : 'Transmit Pulse'}</span>
@@ -796,15 +796,15 @@ export default function CrossDisabilityOrchestrator({
                 </div>
 
                 {currentVibratingLetter && (
-                  <div className="mt-3 p-2 bg-slate-900 border border-cyan-500/40 rounded-xl text-center">
+                  <div className="mt-3 p-2 bg-[#150917] border border-[#E5A93C]/40 rounded-xl text-center">
                     <span className="text-[10px] text-slate-400 block mb-0.5">{isAr ? 'شفرة النبض الحالية:' : 'Active Pulse Code:'}</span>
-                    <span className="font-mono text-base font-black text-cyan-400 tracking-widest">{currentVibratingLetter}</span>
+                    <span className="font-mono text-base font-black text-[#E5A93C] tracking-widest">{currentVibratingLetter}</span>
                   </div>
                 )}
               </div>
 
               {/* 2-Key Virtual Morse Paddle (Touch Input for Deaf-Blind) */}
-              <div className="bg-[#121626] border border-slate-800 rounded-2xl p-4 shadow-xl flex-1 flex flex-col justify-between">
+              <div className="bg-[#121626] border border-[#4A1224]/60 rounded-2xl p-4 shadow-xl flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-xs font-black text-white">
@@ -817,13 +817,13 @@ export default function CrossDisabilityOrchestrator({
 
                   {/* Buffer Displays */}
                   <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 min-h-[48px]">
+                    <div className="p-3 rounded-xl bg-[#150917] border border-[#4A1224]/60 min-h-[48px]">
                       <span className="text-[10px] text-slate-500 block">{isAr ? 'الحرف الجاري تركيبه:' : 'Current Morse Buffer:'}</span>
                       <span className="text-base font-mono font-black text-amber-400 tracking-widest">
                         {morseInputSequence || '---'}
                       </span>
                     </div>
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 min-h-[48px]">
+                    <div className="p-3 rounded-xl bg-[#150917] border border-[#4A1224]/60 min-h-[48px]">
                       <span className="text-[10px] text-slate-500 block">{isAr ? 'الجملة المتراكمة:' : 'Decoded Words:'}</span>
                       <span className="text-base font-bold text-emerald-400 truncate block">
                         {decodedMorseText || (isAr ? 'لا توجد كلمات بعد' : 'No text yet')}
@@ -837,13 +837,13 @@ export default function CrossDisabilityOrchestrator({
                   {/* Left Paddle: DOT */}
                   <button
                     onClick={() => handleMorseTap('.')}
-                    className="rounded-2xl bg-cyan-950/40 hover:bg-cyan-900/50 border-2 border-cyan-500/50 hover:border-cyan-400 text-cyan-300 font-black flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-lg"
+                    className="rounded-2xl bg-[#2D0B16] hover:bg-[#4A1224]/40 border-2 border-[#E5A93C]/50 hover:border-[#E5A93C] text-[#E5A93C] font-black flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-lg"
                   >
-                    <span className="w-8 h-8 rounded-full bg-cyan-400 flex items-center justify-center text-slate-950 text-xl font-black">
+                    <span className="w-8 h-8 rounded-full bg-[#E5A93C] flex items-center justify-center text-slate-950 text-xl font-black">
                       •
                     </span>
                     <span className="text-sm sm:text-base font-black">{isAr ? 'نقطة (Dot)' : 'DOT (•)'}</span>
-                    <span className="text-[10px] text-cyan-400/70">100ms Pulse</span>
+                    <span className="text-[10px] text-[#E5A93C]/70">100ms Pulse</span>
                   </button>
 
                   {/* Right Paddle: DASH */}
@@ -855,7 +855,7 @@ export default function CrossDisabilityOrchestrator({
                       —
                     </span>
                     <span className="text-sm sm:text-base font-black">{isAr ? 'شرطة (Dash)' : 'DASH (—)'}</span>
-                    <span className="text-[10px] text-indigo-400/70">300ms Pulse</span>
+                    <span className="text-[10px] text-[#E5A93C]/70">300ms Pulse</span>
                   </button>
                 </div>
 
@@ -926,7 +926,7 @@ export default function CrossDisabilityOrchestrator({
 
                 {/* Scan Speed and Switch Run Toggle */}
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-slate-900 px-2 py-1 rounded-xl border border-slate-800 text-xs">
+                  <div className="flex items-center gap-1 bg-[#150917] px-2 py-1 rounded-xl border border-[#4A1224]/60 text-xs">
                     <span className="text-[10px] text-slate-400 font-bold">{isAr ? 'سرعة المسح:' : 'Scan:'}</span>
                     {[1.0, 1.5, 2.5].map((spd) => (
                       <button
@@ -973,7 +973,7 @@ export default function CrossDisabilityOrchestrator({
                       }}
                       className={`rounded-2xl p-4 sm:p-6 text-start flex flex-col justify-between transition-all border-2 relative ${
                         isCurrent
-                          ? 'ring-4 ring-amber-400 scale-[1.03] shadow-2xl z-10 border-white bg-slate-900'
+                          ? 'ring-4 ring-amber-400 scale-[1.03] shadow-2xl z-10 border-white bg-[#150917]'
                           : `${tile.color} hover:brightness-110 opacity-80`
                       }`}
                     >
@@ -1059,9 +1059,9 @@ export default function CrossDisabilityOrchestrator({
               {/* 3 Channels Breakdown Display */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {/* 1. Visual Strobe */}
-                <div className="p-4 rounded-2xl bg-[#121626] border border-slate-800 flex flex-col justify-between">
+                <div className="p-4 rounded-2xl bg-[#121626] border border-[#4A1224]/60 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center gap-2 mb-2 text-cyan-400">
+                    <div className="flex items-center gap-2 mb-2 text-[#E5A93C]">
                       <Eye className="w-5 h-5" />
                       <h4 className="text-xs font-black uppercase">{isAr ? 'القناة البصرية (للصم)' : 'Visual Strobe (Deaf)'}</h4>
                     </div>
@@ -1072,14 +1072,14 @@ export default function CrossDisabilityOrchestrator({
                     </p>
                   </div>
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-full text-center ${
-                    isSosActive ? 'bg-cyan-500 text-slate-950 animate-pulse' : 'bg-slate-900 text-slate-500'
+                    isSosActive ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 animate-pulse' : 'bg-[#150917] text-slate-500'
                   }`}>
                     {isSosActive ? 'ACTIVE STROBE' : 'STANDBY'}
                   </span>
                 </div>
 
                 {/* 2. Acoustic Voice & Siren */}
-                <div className="p-4 rounded-2xl bg-[#121626] border border-slate-800 flex flex-col justify-between">
+                <div className="p-4 rounded-2xl bg-[#121626] border border-[#4A1224]/60 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-2 text-emerald-400">
                       <Volume2 className="w-5 h-5" />
@@ -1092,14 +1092,14 @@ export default function CrossDisabilityOrchestrator({
                     </p>
                   </div>
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-full text-center ${
-                    isSosActive ? 'bg-emerald-500 text-slate-950 animate-pulse' : 'bg-slate-900 text-slate-500'
+                    isSosActive ? 'bg-emerald-500 text-slate-950 animate-pulse' : 'bg-[#150917] text-slate-500'
                   }`}>
                     {isSosActive ? 'BROADCASTING AUDIO' : 'STANDBY'}
                   </span>
                 </div>
 
                 {/* 3. Tactile Morse Vibration */}
-                <div className="p-4 rounded-2xl bg-[#121626] border border-slate-800 flex flex-col justify-between">
+                <div className="p-4 rounded-2xl bg-[#121626] border border-[#4A1224]/60 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-2 text-purple-400">
                       <Vibrate className="w-5 h-5" />
@@ -1112,7 +1112,7 @@ export default function CrossDisabilityOrchestrator({
                     </p>
                   </div>
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-full text-center ${
-                    isSosActive ? 'bg-purple-500 text-slate-950 animate-pulse' : 'bg-slate-900 text-slate-500'
+                    isSosActive ? 'bg-purple-500 text-slate-950 animate-pulse' : 'bg-[#150917] text-slate-500'
                   }`}>
                     {isSosActive ? 'HAPTIC ACTIVE' : 'STANDBY'}
                   </span>
@@ -1120,7 +1120,7 @@ export default function CrossDisabilityOrchestrator({
               </div>
 
               {/* Location & Dispatch Bar */}
-              <div className="p-4 rounded-2xl bg-[#121626] border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="p-4 rounded-2xl bg-[#121626] border border-[#4A1224]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs">
                   <span className="font-bold text-slate-400">{isAr ? 'إحداثيات الطوارئ الحالية:' : 'Current Emergency GPS:'}</span>
                   <span className="font-mono font-bold text-amber-400">{userLocationStr}</span>
@@ -1132,7 +1132,7 @@ export default function CrossDisabilityOrchestrator({
                       navigator.clipboard.writeText(userLocationStr);
                       toast.success(isAr ? 'تم نسخ الإحداثيات' : 'Coordinates copied');
                     }}
-                    className="p-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all"
+                    className="p-2 px-3 rounded-xl bg-[#150917] hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>{isAr ? 'نسخ الإحداثيات' : 'Copy'}</span>

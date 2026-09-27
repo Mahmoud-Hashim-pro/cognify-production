@@ -1136,8 +1136,8 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
               className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
                 navGuideMode
-                  ? 'bg-cyan-500/90 border-cyan-300 text-black shadow-cyan-950/50 animate-pulse'
-                  : 'bg-black/75 border-cyan-500/40 text-white hover:bg-black/90'
+                  ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/90 border-[#E5A93C]/40 text-black shadow-[#E5A93C]/20 animate-pulse'
+                  : 'bg-black/75 border-[#E5A93C]/40 text-white hover:bg-black/90'
               }`}
               title={t(
                 'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
@@ -1145,7 +1145,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 'Canne virtuelle : obstacles et marches avec vibrations haptiques'
               )}
             >
-              <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-cyan-400'}`} />
+              <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-[#E5A93C]'}`} />
               <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
             </button>
 
@@ -1224,7 +1224,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
               )}
             >
-              <FileText className="w-4 h-4 text-indigo-400 shrink-0" />
+              <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
               <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
               <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-indigo-300 font-mono">PDF</span>
             </button>
@@ -1429,7 +1429,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-cyan-800 hover:from-purple-600 hover:to-cyan-700 border border-purple-400/40 shadow-purple-950/60',
+                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
                   title: '🇪🇬 مسح السبورة والمحاضرة',
                   subtitle: 'استخراج القوانين والشرح الأكاديمي بالصوت',
                 };
@@ -1453,7 +1453,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-cyan-600 to-teal-700 hover:from-cyan-500 hover:to-teal-600 border border-cyan-400/40 shadow-cyan-950/60 animate-pulse',
+                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
                   title: '🇪🇬 فحص المسار والعوائق',
                   subtitle: 'العصا الافتراضية مع تنبيه اهتزازي',
                 };
@@ -1496,7 +1496,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-cyan-800 hover:from-purple-600 hover:to-cyan-700 border border-purple-400/40 shadow-purple-950/60',
+                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
                   title: '🇬🇧 Scan Lecture Board & Slides',
                   subtitle: 'Extract formulas, diagrams & academic digest',
                 };
@@ -1520,7 +1520,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-cyan-600 to-teal-700 hover:from-cyan-500 hover:to-teal-600 border border-cyan-400/40 shadow-cyan-950/60 animate-pulse',
+                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
                   title: '🇬🇧 Scan Pathway & Obstacles',
                   subtitle: 'Virtual cane with haptic feedback',
                 };
@@ -1563,7 +1563,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-cyan-800 hover:from-purple-600 hover:to-cyan-700 border border-purple-400/40 shadow-purple-950/60',
+                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
                   title: '🇫🇷 Scanner Tableau & Cours',
                   subtitle: 'Formules, schémas et synthèse académique',
                 };
@@ -1587,7 +1587,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-cyan-600 to-teal-700 hover:from-cyan-500 hover:to-teal-600 border border-cyan-400/40 shadow-cyan-950/60 animate-pulse',
+                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
                   title: '🇫🇷 Scanner Chemin & Obstacles',
                   subtitle: 'Canne virtuelle avec retour haptique',
                 };
@@ -1605,7 +1605,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 };
                 return {
                   icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-500 hover:to-cyan-600 border border-blue-400/40 shadow-blue-950/60',
+                  gradient: 'bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-600 border border-blue-400/40 shadow-blue-950/60',
                   title: '🇫🇷 Que vois-je ?',
                   subtitle: 'Vocal en français',
                 };
@@ -1681,7 +1681,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                   true
                 );
               }}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-indigo-500/40 text-indigo-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95"
+              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-[#E5A93C]/30 text-[#E5A93C] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95"
               title={companionLang === 'ar' ? 'المستندات وتلخيص المحاضرات' : 'Docs & Lectures'}
             >
               <FileText className="w-4 h-4" />
@@ -1707,7 +1707,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               initial={{ y: 30, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 30, opacity: 0 }}
-              className="w-full max-w-sm bg-slate-900 rounded-3xl p-6 space-y-5 border border-slate-800 shadow-2xl text-white text-center"
+              className="w-full max-w-sm bg-[#150917] rounded-3xl p-6 space-y-5 border border-[#4A1224]/60 shadow-2xl text-white text-center"
             >
               <div className="space-y-1.5">
                 <h3 id="lang-picker-title" className="font-black text-lg">
@@ -1744,7 +1744,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     chooseLang('fr');
                     toast.success('Langue française sélectionnée 🇫🇷');
                   }}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-700 hover:from-blue-500 hover:to-cyan-600 text-white font-black text-base flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-600 text-white font-black text-base flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all"
                 >
                   <span>🇫🇷</span>
                   <span>Français</span>
@@ -1773,9 +1773,9 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-md bg-slate-900 rounded-3xl p-5 sm:p-6 space-y-4 border border-slate-800 shadow-2xl text-white"
+              className="w-full sm:max-w-md bg-[#150917] rounded-3xl p-5 sm:p-6 space-y-4 border border-[#4A1224]/60 shadow-2xl text-white"
             >
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
                 <h3 id="save-dialog-title" className="font-bold text-base text-white flex items-center gap-2">
                   <BookmarkPlus className="w-5 h-5 text-amber-400" />
                   {companionLang === 'ar' ? 'احفظ العنصر أو الشخص باسم...' : companionLang === 'fr' ? 'Enregistrer cet élément comme...' : 'Remember this as...'}
@@ -1790,7 +1790,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               </div>
 
               {/* Type Switcher: Object vs Person */}
-              <div className="flex gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800">
+              <div className="flex gap-2 p-1 bg-[#080409] rounded-xl border border-[#4A1224]/60">
                 <button
                   type="button"
                   onClick={() => setIsSavingPerson(false)}
@@ -1825,7 +1825,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     ? (companionLang === 'ar' ? 'اسم الشخص (مثلاً: "ماما"، "أحمد"، "دكتور طارق")' : companionLang === 'fr' ? 'Nom de la personne (ex. "Maman", "Ahmed")' : 'Person name (e.g. "Mom", "Ahmed")')
                     : (companionLang === 'ar' ? 'مثلاً: "دوا الضغط" أو "مفاتيحي"' : companionLang === 'fr' ? 'ex. "Mes clés", "Médicament"' : 'e.g. "My Keys", "Coffee Mug"')
                 }
-                className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary outline-none text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 focus:ring-2 focus:ring-primary outline-none text-sm"
               />
 
               <div className="flex gap-2.5">
@@ -1866,9 +1866,9 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-lg bg-slate-900 rounded-3xl p-5 sm:p-6 space-y-4 border border-slate-800 shadow-2xl text-white max-h-[85vh] flex flex-col"
+              className="w-full sm:max-w-lg bg-[#150917] rounded-3xl p-5 sm:p-6 space-y-4 border border-[#4A1224]/60 shadow-2xl text-white max-h-[85vh] flex flex-col"
             >
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-emerald-400" />
                   <h3 id="spatial-dialog-title" className="font-bold text-base text-white">
@@ -1908,7 +1908,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                         ? 'Où est la télécommande ?'
                         : 'Where is the TV remote?'
                     }
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                   <button
                     onClick={handleSearchSpatial}
@@ -1959,7 +1959,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                         setSpatialQueryResult(query.message);
                         speak(query.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
                       }}
-                      className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 flex items-center justify-between gap-3 group transition-all"
+                      className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-[#4A1224]/50 flex items-center justify-between gap-3 group transition-all"
                     >
                       <div className="space-y-0.5">
                         <div className="font-bold text-sm text-white group-hover:text-emerald-400 flex items-center gap-2">

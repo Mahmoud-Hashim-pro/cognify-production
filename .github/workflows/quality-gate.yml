@@ -29,8 +29,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci || npm install
 
-      - name: 🛡️ TypeScript Type Validation
-        run: npx tsc --noEmit
+      - name: 🛡️ TypeScript & ESLint Quality Gate
+        run: npm run lint
 
       - name: 📦 Production Build Verification
         run: npm run build

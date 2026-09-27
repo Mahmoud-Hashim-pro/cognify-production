@@ -430,9 +430,9 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 40, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-lg bg-slate-900 rounded-3xl p-5 sm:p-6 space-y-4 border border-slate-800 shadow-2xl text-white max-h-[85vh] flex flex-col"
+        className="w-full sm:max-w-lg bg-[#150917] rounded-3xl p-5 sm:p-6 space-y-4 border border-[#4A1224]/60 shadow-2xl text-white max-h-[85vh] flex flex-col"
       >
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-teal-400" />
             <h3 id="doc-reader-dialog-title" className="font-bold text-base text-white">
@@ -450,7 +450,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
 
         {/* Tool switcher */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-xl flex-1">
+          <div className="flex items-center gap-1 p-1 bg-[#080409] border border-[#4A1224]/60 rounded-xl flex-1">
             <button
               onClick={() => setTool('document')}
               aria-pressed={tool === 'document'}
@@ -480,7 +480,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
               className={`shrink-0 p-2.5 rounded-xl border transition-all ${
                 showHistory
                   ? 'bg-teal-500 border-teal-500 text-slate-950'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  : 'bg-[#080409] border-[#4A1224]/60 text-slate-400 hover:text-white'
               }`}
             >
               <History className="w-4 h-4" />
@@ -498,7 +498,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
               history.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950 border border-slate-800"
+                  className="flex items-center gap-2 p-2.5 rounded-xl bg-[#080409] border border-[#4A1224]/60"
                 >
                   <button onClick={() => openHistoryEntry(entry)} className="flex-1 min-w-0 text-start">
                     <div className="text-xs font-bold text-slate-100 truncate">{entry.fileName}</div>
@@ -533,7 +533,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
               {!fileName ? (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full flex flex-col items-center justify-center gap-2 py-10 rounded-2xl border-2 border-dashed border-slate-700 hover:border-teal-500 hover:bg-slate-800/50 transition-all"
+                  className="w-full flex flex-col items-center justify-center gap-2 py-10 rounded-2xl border-2 border-dashed border-[#4A1224]/50 hover:border-teal-500 hover:bg-[#150917]/60 transition-all"
                 >
                   <Upload className="w-7 h-7 text-teal-400" />
                   <span className="text-sm font-bold text-slate-200">
@@ -543,7 +543,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                 </button>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-[#080409] border border-[#4A1224]/60">
                     <div className="flex items-center gap-2 min-w-0">
                       <FileText className="w-4 h-4 text-teal-400 shrink-0" />
                       <span className="text-xs font-semibold text-slate-200 truncate">{fileName}</span>
@@ -575,7 +575,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                     <button
                       onClick={() => runDocumentAction('read')}
                       disabled={isProcessing}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs disabled:opacity-50 transition-all active:scale-95"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-[#4A1224]/50 text-white font-bold text-xs disabled:opacity-50 transition-all active:scale-95"
                     >
                       {isProcessing && processingAction === 'read' ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -591,12 +591,12 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                       a chosen target — independent from companionLang, so
                       e.g. an English PDF can come out as an Arabic summary
                       without switching the whole panel's language. */}
-                  <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60">
                     <select
                       value={translateTarget}
                       onChange={(e) => setTranslateTarget(e.target.value as 'ar' | 'en' | 'fr')}
                       aria-label={t('Translate to', 'ترجمة إلى', 'Traduire vers')}
-                      className="bg-slate-900 border border-slate-700 rounded-lg text-xs font-bold text-white px-2 py-2 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      className="bg-[#150917] border border-[#4A1224]/50 rounded-lg text-xs font-bold text-white px-2 py-2 focus:outline-none focus:ring-1 focus:ring-teal-500"
                     >
                       <option value="ar">{t('Arabic', 'العربية', 'Arabe')}</option>
                       <option value="en">{t('English', 'الإنجليزية', 'Anglais')}</option>
@@ -630,7 +630,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
 
                   {resultText && (
                     <div className="space-y-2">
-                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 max-h-40 overflow-y-auto">
+                      <div className="p-3 rounded-xl bg-[#080409] border border-[#4A1224]/60 max-h-40 overflow-y-auto">
                         <p className="text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">{resultText}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -639,7 +639,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                           className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-xs transition-all active:scale-95 ${
                             isSpeakingResult
                               ? 'bg-red-500/20 text-red-300 border border-red-500/40'
-                              : 'bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white'
+                              : 'bg-slate-800 hover:bg-slate-700 border border-[#4A1224]/50 text-white'
                           }`}
                         >
                           {isSpeakingResult ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -671,7 +671,7 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                   onChange={(e) => setTtsInput(e.target.value)}
                   rows={3}
                   placeholder={t('Type here…', 'اكتب هنا...', 'Écrivez ici…')}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-teal-500 resize-none"
                 />
                 <button
                   onClick={handleSpeakTts}
@@ -707,20 +707,20 @@ export default function DocumentReaderModal({ profile, companionLang, onClose }:
                 </button>
                 {sttTranscript && (
                   <div className="space-y-2">
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 max-h-32 overflow-y-auto">
+                    <div className="p-3 rounded-xl bg-[#080409] border border-[#4A1224]/60 max-h-32 overflow-y-auto">
                       <p className="text-sm text-slate-100 leading-relaxed whitespace-pre-wrap">{sttTranscript}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={handleCopyTranscript}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs transition-all active:scale-95"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-[#4A1224]/50 text-white font-bold text-xs transition-all active:scale-95"
                       >
                         {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                         {copied ? t('Copied', 'تم النسخ', 'Copié') : t('Copy', 'نسخ', 'Copier')}
                       </button>
                       <button
                         onClick={() => setSttTranscript('')}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs transition-all active:scale-95"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-[#4A1224]/50 text-white font-bold text-xs transition-all active:scale-95"
                       >
                         <RefreshCw className="w-4 h-4" />
                         {t('Clear', 'مسح', 'Effacer')}

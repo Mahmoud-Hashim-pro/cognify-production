@@ -190,7 +190,11 @@ export default async function handler(req: any, res: any) {
 
   try {
     const healthPayload = getSystemHealthReport(traceId);
-    res.status ? res.status(200).json(healthPayload) : res.end(JSON.stringify(healthPayload));
+    if (typeof res.status === 'function') {
+      res.status(200).json(healthPayload);
+    } else {
+      res.end(JSON.stringify(healthPayload));
+    }
   } catch (err: any) {
     const errorPayload = {
       status: 'unhealthy',
@@ -198,6 +202,10 @@ export default async function handler(req: any, res: any) {
       traceId,
       timestamp: new Date().toISOString(),
     };
-    res.status ? res.status(500).json(errorPayload) : res.end(JSON.stringify(errorPayload));
+    if (typeof res.status === 'function') {
+      res.status(500).json(errorPayload);
+    } else {
+      res.end(JSON.stringify(errorPayload));
+    }
   }
 }
