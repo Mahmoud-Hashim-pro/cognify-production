@@ -484,54 +484,63 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   </span>
                 </div>
 
-                <div className="space-y-4 pt-2">
-                  {(
-                    [
-                      {
-                        key: 'Basic' as CognitiveLevel,
-                        labelEn: 'Basic Cognitive Stage',
-                        labelAr: 'المستوى التأسيسي الأول',
-                        color: 'bg-blue-500',
-                        textColor: 'text-blue-400',
-                      },
-                      {
-                        key: 'Intermediate' as CognitiveLevel,
-                        labelEn: 'Intermediate Reasoning',
-                        labelAr: 'المستوى المتوسط',
-                        color: 'bg-purple-500',
-                        textColor: 'text-purple-400',
-                      },
-                      {
-                        key: 'Advanced' as CognitiveLevel,
-                        labelEn: 'Advanced Analytical Stage',
-                        labelAr: 'المستوى التحليلي المتقدم',
-                        color: 'bg-emerald-500',
-                        textColor: 'text-emerald-400',
-                      },
-                    ] as const
-                  ).map(({ key, labelEn, labelAr, color, textColor }) => {
-                    const count = stats.cognitiveLevelDistribution[key];
-                    const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
-                    return (
-                      <div key={key} className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-slate-200">
-                            {L(labelEn, labelAr)}
-                          </span>
-                          <span className={`font-black tabular-nums ${textColor}`}>
-                            {count} ({pct}%)
-                          </span>
+                {stats.kAnonymitySuppressed ? (
+                  <div className="py-6 px-4 text-center rounded-2xl bg-[#080409]/60 border border-amber-500/20 text-xs text-amber-300/80 space-y-1">
+                    <p className="font-bold">{L('Distribution Suppressed (k < 5)', 'تم حجب التوزيع لحماية الخصوصية (k < 5)')}</p>
+                    <p className="text-[11px] text-slate-400">
+                      {L('Cohort size is under 5 students to prevent student re-identification.', 'حجم الدفعة أقل من 5 طلاب لمنع استنتاج هويات الطلاب الفردية.')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 pt-2">
+                    {(
+                      [
+                        {
+                          key: 'Basic' as CognitiveLevel,
+                          labelEn: 'Basic Cognitive Stage',
+                          labelAr: 'المستوى التأسيسي الأول',
+                          color: 'bg-blue-500',
+                          textColor: 'text-blue-400',
+                        },
+                        {
+                          key: 'Intermediate' as CognitiveLevel,
+                          labelEn: 'Intermediate Reasoning',
+                          labelAr: 'المستوى المتوسط',
+                          color: 'bg-purple-500',
+                          textColor: 'text-purple-400',
+                        },
+                        {
+                          key: 'Advanced' as CognitiveLevel,
+                          labelEn: 'Advanced Analytical Stage',
+                          labelAr: 'المستوى التحليلي المتقدم',
+                          color: 'bg-emerald-500',
+                          textColor: 'text-emerald-400',
+                        },
+                      ] as const
+                    ).map(({ key, labelEn, labelAr, color, textColor }) => {
+                      const count = stats.cognitiveLevelDistribution[key];
+                      const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
+                      return (
+                        <div key={key} className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-slate-200">
+                              {L(labelEn, labelAr)}
+                            </span>
+                            <span className={`font-black tabular-nums ${textColor}`}>
+                              {count} ({pct}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-2.5 bg-[#080409] border border-[#4A1224]/50 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${color} rounded-full transition-all duration-500 shadow-sm`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full h-2.5 bg-[#080409] border border-[#4A1224]/50 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${color} rounded-full transition-all duration-500 shadow-sm`}
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Accessibility Modes Utilized */}
@@ -548,68 +557,77 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  {[
-                    {
-                      titleEn: 'Vision Mode',
-                      titleAr: 'الوضع البصري',
-                      count: stats.accessibilityModeBreakdown.Vision,
-                      Icon: Eye,
-                      color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-                    },
-                    {
-                      titleEn: 'Motor & Euphonia',
-                      titleAr: 'الحركي وإيفونيا',
-                      count: stats.accessibilityModeBreakdown.Motor,
-                      Icon: Accessibility,
-                      color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                    },
-                    {
-                      titleEn: 'Deaf & Sign',
-                      titleAr: 'الصم ولغة الإشارة',
-                      count: stats.accessibilityModeBreakdown.Deaf,
-                      Icon: Ear,
-                      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                    },
-                    {
-                      titleEn: 'Vocal / Speech',
-                      titleAr: 'الصوتي والنطق',
-                      count: stats.accessibilityModeBreakdown.Vocal,
-                      Icon: Mic,
-                      color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-                    },
-                    {
-                      titleEn: 'Standard Interface',
-                      titleAr: 'الواجهة القياسية',
-                      count: stats.accessibilityModeBreakdown.None,
-                      Icon: CheckCircle,
-                      color: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
-                    },
-                  ].map(({ titleEn, titleAr, count, Icon, color }) => {
-                    const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
-                    return (
-                      <div
-                        key={titleEn}
-                        className="bg-[#080409] border border-[#4A1224]/60 rounded-2xl p-3 flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className={`p-2 rounded-xl border ${color}`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-slate-200">
-                              {L(titleEn, titleAr)}
+                {stats.kAnonymitySuppressed ? (
+                  <div className="py-6 px-4 text-center rounded-2xl bg-[#080409]/60 border border-amber-500/20 text-xs text-amber-300/80 space-y-1">
+                    <p className="font-bold">{L('Accommodations Suppressed (k < 5)', 'تم حجب تفاصيل التسهيلات (k < 5)')}</p>
+                    <p className="text-[11px] text-slate-400">
+                      {L('Accommodations breakdown is masked in small cohorts to avoid attribute disclosure.', 'تم حجب تفاصيل التسهيلات للمجموعات الصغيرة لتفادي كشف صفات الطلاب الحساسة.')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    {[
+                      {
+                        titleEn: 'Vision Mode',
+                        titleAr: 'الوضع البصري',
+                        count: stats.accessibilityModeBreakdown.Vision,
+                        Icon: Eye,
+                        color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+                      },
+                      {
+                        titleEn: 'Motor & Euphonia',
+                        titleAr: 'الحركي وإيفونيا',
+                        count: stats.accessibilityModeBreakdown.Motor,
+                        Icon: Accessibility,
+                        color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+                      },
+                      {
+                        titleEn: 'Deaf & Sign',
+                        titleAr: 'الصم ولغة الإشارة',
+                        count: stats.accessibilityModeBreakdown.Deaf,
+                        Icon: Ear,
+                        color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                      },
+                      {
+                        titleEn: 'Vocal / Speech',
+                        titleAr: 'الصوتي والنطق',
+                        count: stats.accessibilityModeBreakdown.Vocal,
+                        Icon: Mic,
+                        color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                      },
+                      {
+                        titleEn: 'Standard Interface',
+                        titleAr: 'الواجهة القياسية',
+                        count: stats.accessibilityModeBreakdown.None,
+                        Icon: CheckCircle,
+                        color: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
+                      },
+                    ].map(({ titleEn, titleAr, count, Icon, color }) => {
+                      const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
+                      return (
+                        <div
+                          key={titleEn}
+                          className="bg-[#080409] border border-[#4A1224]/60 rounded-2xl p-3 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className={`p-2 rounded-xl border ${color}`}>
+                              <Icon className="w-4 h-4" />
                             </div>
-                            <div className="text-[10px] text-slate-500 font-semibold">{pct}%</div>
+                            <div>
+                              <div className="text-xs font-bold text-slate-200">
+                                {L(titleEn, titleAr)}
+                              </div>
+                              <div className="text-[10px] text-slate-500 font-semibold">{pct}%</div>
+                            </div>
                           </div>
+                          <span className="text-sm font-black text-white tabular-nums">
+                            {count}
+                          </span>
                         </div>
-                        <span className="text-sm font-black text-white tabular-nums">
-                          {count}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 

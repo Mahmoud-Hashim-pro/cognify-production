@@ -31,6 +31,12 @@ import {
 import { localize } from '../src/lib/translations.js';
 import { canAccessView } from '../src/lib/access.js';
 import { attendancePct, absencesRemaining, isDeprived } from '../src/lib/attendance.js';
+import { computeCohortAnalytics, K_ANONYMITY_THRESHOLD } from '../src/lib/institution.js';
+import {
+  calculateStandardizedIq,
+  COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
+  COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
+} from '../src/lib/iqAssessment.js';
 import { detectConversationalStrain } from '../src/lib/conversationalStrain.js';
 import {
   getDatabaseHealth,
@@ -150,6 +156,53 @@ async function run() {
     const zeroStudent = { id: 'sub-3', name: 'New Course', attended: 0, absent: 0, totalPlanned: 0, threshold: 75, createdAt: new Date().toISOString() };
     assert(isDeprived(zeroStudent) === false, 'Zero held sessions safely returns false');
     assert(attendancePct(zeroStudent) === 100, 'Zero held sessions defaults to 100%');
+  }
+
+  // 1c. Institutional Privacy & k-Anonymity Leakage Prevention
+  console.log('\n[1c] Institutional Privacy & k-Anonymity Leakage Prevention');
+  {
+    // Small cohort with 4 students (1 Deaf, 3 None) - MUST NOT LEAK attributes in distributions
+    const smallCohort: any[] = [
+      { uid: 's1', name: 'Alice', accessibilityMode: 'Deaf', level: 'Intermediate', points: 100, university: 'Ain Shams' },
+      { uid: 's2', name: 'Bob', accessibilityMode: 'None', level: 'Basic', points: 80, university: 'Ain Shams' },
+      { uid: 's3', name: 'Charlie', accessibilityMode: 'None', level: 'Intermediate', points: 90, university: 'Ain Shams' },
+      { uid: 's4', name: 'Diana', accessibilityMode: 'None', level: 'Advanced', points: 120, university: 'Ain Shams' },
+    ];
+
+    const statsSmall = computeCohortAnalytics(smallCohort, 'Ain Shams');
+    assert(statsSmall.kAnonymitySuppressed === true, 'Cohort with 4 students triggers kAnonymitySuppressed');
+    assert(statsSmall.students.length === 0, 'Individual student roster is suppressed (0 items)');
+    assert(statsSmall.accessibilityModeBreakdown.Deaf === 0, 'Deaf mode count is suppressed (0) to prevent quasi-identifier deduction');
+    assert(statsSmall.accessibilityModeBreakdown.None === 0, 'All accessibility breakdown counts are suppressed');
+    assert(statsSmall.cognitiveLevelDistribution.Basic === 0, 'Cognitive level distribution is suppressed');
+    assert(statsSmall.accessibilityAdoptionRate === 0, 'Accessibility adoption rate is suppressed to 0');
+    assert(statsSmall.averageGpa === null, 'Average GPA is suppressed to null');
+
+    // Valid cohort with 5 students (k >= 5) - allows aggregate distributions
+    const validCohort: any[] = [
+      ...smallCohort,
+      { uid: 's5', name: 'Edward', accessibilityMode: 'Vision', level: 'Basic', points: 70, university: 'Ain Shams' },
+    ];
+    const statsValid = computeCohortAnalytics(validCohort, 'Ain Shams');
+    assert(statsValid.kAnonymitySuppressed === false, 'Cohort with 5 students satisfies k-anonymity (k >= 5)');
+    assert(statsValid.students.length === 5, 'Individual anonymized student roster is revealed');
+    assert(statsValid.accessibilityModeBreakdown.Deaf === 1, 'Accessibility breakdown is accurately reported when k >= 5');
+    assert(statsValid.accessibilityModeBreakdown.Vision === 1, 'Vision mode accurately reported when k >= 5');
+    assert(statsValid.cognitiveLevelDistribution.Basic === 2, 'Cognitive distribution accurately reported when k >= 5');
+  }
+
+  // 1d. Cognitive Style & Ethical Disclaimers
+  console.log('\n[1d] Cognitive Style & Ethical Disclaimers');
+  {
+    assert(typeof COGNITIVE_ASSESSMENT_DISCLAIMER_EN === 'string' && COGNITIVE_ASSESSMENT_DISCLAIMER_EN.includes('NOT a clinical IQ test'), 'English ethical disclaimer clearly states non-clinical nature');
+    assert(typeof COGNITIVE_ASSESSMENT_DISCLAIMER_AR === 'string' && COGNITIVE_ASSESSMENT_DISCLAIMER_AR.includes('ليس اختبار ذكاء رسمي'), 'Arabic ethical disclaimer clearly states non-clinical nature');
+
+    // Scoring returns exploratory index and domain percentages
+    const sampleAnswers = { gf_01: 'opt_3', gf_02: 'opt_2' };
+    const res = calculateStandardizedIq(sampleAnswers, 300);
+    assert(typeof res.iqScore === 'number' && res.iqScore >= 75 && res.iqScore <= 130, 'Style index maps into exploratory 75-130 range');
+    assert(typeof res.domainScores.fluidReasoning === 'number', 'Domain scores report numeric percentages');
+    assert(res.recommendedPersona === 'Foundational' || res.recommendedPersona === 'Balanced' || res.recommendedPersona === 'Socratic', 'Recommended persona maps to valid pedagogical style');
   }
 
   // 2. Concept Graph & Root-Cause Diagnosis Tests
