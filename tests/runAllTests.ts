@@ -30,6 +30,7 @@ import {
 } from '../src/lib/spatialMemoryEngine.js';
 import { localize } from '../src/lib/translations.js';
 import { canAccessView } from '../src/lib/access.js';
+import { attendancePct, absencesRemaining, isDeprived } from '../src/lib/attendance.js';
 import { detectConversationalStrain } from '../src/lib/conversationalStrain.js';
 import {
   getDatabaseHealth,
@@ -104,6 +105,51 @@ async function run() {
 
     const g3 = calculateNormalizedGain(80, 60);
     assert(g3 < 0 && g3 >= -1.0, 'Regression properly returns negative gain');
+  }
+
+  // 1b. Attendance Tracker & Deprivation Invariant
+  console.log('\n[1b] Attendance Tracker & Deprivation Invariant');
+  {
+    // Early semester case: 0 attended, 1 absent, totalPlanned = 30, threshold = 75%
+    const earlyStudent = {
+      id: 'sub-1',
+      name: 'Algorithms',
+      attended: 0,
+      absent: 1,
+      totalPlanned: 30,
+      threshold: 75,
+      createdAt: new Date().toISOString(),
+    };
+    assert(isDeprived(earlyStudent) === false, 'Early semester single absence does not flag student as deprived');
+    assert(absencesRemaining(earlyStudent) === 6, 'absencesRemaining calculates 6 allowed absences remaining');
+
+    // Edge case: exactly at threshold limit (7 absences out of 30)
+    const atLimitStudent = { ...earlyStudent, attended: 22, absent: 7 };
+    assert(isDeprived(atLimitStudent) === false, 'Student at exact max absence limit is not yet deprived');
+    assert(absencesRemaining(atLimitStudent) === 0, 'Student at exact limit has 0 absences remaining');
+
+    // Exceeded threshold: 8 absences out of 30 (cannot reach 75%)
+    const overLimitStudent = { ...earlyStudent, attended: 21, absent: 8 };
+    assert(isDeprived(overLimitStudent) === true, 'Student exceeding max absences is correctly flagged as deprived');
+    assert(absencesRemaining(overLimitStudent) === 0, 'Deprived student has 0 absences remaining');
+
+    // Fallback when totalPlanned is 0 / unknown
+    const fallbackStudent = {
+      id: 'sub-2',
+      name: 'Data Structures',
+      attended: 8,
+      absent: 2,
+      totalPlanned: 0,
+      threshold: 75,
+      createdAt: new Date().toISOString(),
+    };
+    assert(isDeprived(fallbackStudent) === false, 'Fallback uses held sessions when totalPlanned is 0 (80% >= 75%)');
+    assert(isDeprived({ ...fallbackStudent, attended: 7, absent: 3 }) === true, 'Fallback flags deprived when held sessions drop below threshold (70% < 75%)');
+
+    // Zero sessions safety
+    const zeroStudent = { id: 'sub-3', name: 'New Course', attended: 0, absent: 0, totalPlanned: 0, threshold: 75, createdAt: new Date().toISOString() };
+    assert(isDeprived(zeroStudent) === false, 'Zero held sessions safely returns false');
+    assert(attendancePct(zeroStudent) === 100, 'Zero held sessions defaults to 100%');
   }
 
   // 2. Concept Graph & Root-Cause Diagnosis Tests
