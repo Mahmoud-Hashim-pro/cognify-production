@@ -1,8 +1,26 @@
 # Cognify 2.0 Production Master Packager
+[CmdletBinding()]
+param(
+    [string]$destZip = ""
+)
+
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Get-Item $PSScriptRoot).Parent.FullName
-$destZip = "C:\Users\Tie\.gemini\antigravity\brain\1e5ab269-1c88-4b53-ae3d-f5e6d6d81d04\Cognify_2.0_Production_Master.zip"
+
+if (-not $destZip) {
+    if ($env:COGNIFY_PACKAGE_DEST) {
+        $destZip = $env:COGNIFY_PACKAGE_DEST
+    } else {
+        $destZip = Join-Path $repoRoot "Cognify_2.0_Production_Master.zip"
+    }
+}
+
+$destDir = Split-Path -Path $destZip -Parent
+if ($destDir -and -not (Test-Path $destDir)) {
+    New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+}
+
 $tempDir = Join-Path $env:TEMP ("cognify_pkg_" + [Guid]::NewGuid().ToString("N"))
 
 Write-Host "📦 Packaging Cognify 2.0 Production Master..."

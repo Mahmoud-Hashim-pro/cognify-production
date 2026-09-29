@@ -1,7 +1,20 @@
 # Cognify 2.0 Production Master Zip Verifier
+[CmdletBinding()]
+param(
+    [string]$zipPath = ""
+)
+
 $ErrorActionPreference = "Stop"
 
-$zipPath = "C:\Users\Tie\.gemini\antigravity\brain\1e5ab269-1c88-4b53-ae3d-f5e6d6d81d04\Cognify_2.0_Production_Master.zip"
+$repoRoot = (Get-Item $PSScriptRoot).Parent.FullName
+
+if (-not $zipPath) {
+    if ($env:COGNIFY_PACKAGE_DEST) {
+        $zipPath = $env:COGNIFY_PACKAGE_DEST
+    } else {
+        $zipPath = Join-Path $repoRoot "Cognify_2.0_Production_Master.zip"
+    }
+}
 
 if (-not (Test-Path $zipPath)) {
     Write-Error "ZIP file not found at $zipPath"
