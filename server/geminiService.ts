@@ -3,8 +3,12 @@ import { GoogleGenAI } from "@google/genai";
 let aiInstance: GoogleGenAI | null = null;
 function getAi() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY || "AIzaSy_placeholder_key_replace_in_env";
-    aiInstance = new GoogleGenAI({ apiKey });
+    const raw = (process.env.GEMINI_API_KEY || '').trim();
+    const primaryKey = raw.split(/[,\s]+/)[0]?.trim();
+    if (!primaryKey) {
+      throw new Error('GEMINI_API_KEY is not configured in server environment.');
+    }
+    aiInstance = new GoogleGenAI({ apiKey: primaryKey });
   }
   return aiInstance;
 }

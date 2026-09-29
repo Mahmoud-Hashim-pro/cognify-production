@@ -9,6 +9,9 @@ import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";
 import countryHandler from "./api/geo/country";
 import emergencyDispatchHandler from "./api/emergency/dispatch";
+import learningProfileHandler from "./api/student/learningProfile";
+import proxyImageHandler from "./api/proxy-image";
+import healthHandler from "./api/system/health";
 
 async function startServer() {
   const app = express();
@@ -22,9 +25,9 @@ async function startServer() {
     next();
   });
 
-  // API Health Check
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok" });
+  // Production Observability: System Health & Uptime probe
+  app.all(["/api/system/health", "/api/health"], (req, res) => {
+    return healthHandler(req, res);
   });
 
   // Telemetry: Security Audit IP extraction
@@ -40,6 +43,16 @@ async function startServer() {
   // Emergency SOS automated server-side dispatch
   app.all("/api/emergency/dispatch", (req, res) => {
     return emergencyDispatchHandler(req, res);
+  });
+
+  // Personal Learning Profile (PLM state & recommendations)
+  app.all("/api/student/learningProfile", (req, res) => {
+    return learningProfileHandler(req, res);
+  });
+
+  // Resilient SSRF-protected Image Proxy
+  app.all("/api/proxy-image", (req, res) => {
+    return proxyImageHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);
