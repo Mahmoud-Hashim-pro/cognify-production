@@ -49,14 +49,28 @@ const isIndexedDBSupported = (): boolean => {
     if (isIframeOrRestricted()) {
       return false;
     }
-    const req = window.indexedDB.open('__firebase_probe__');
+    const idb = window.indexedDB;
+    if (typeof idb.open !== 'function') {
+      return false;
+    }
+    const req = idb.open('__firebase_probe__');
     req.onsuccess = () => {
       try {
-        req.result.close();
-        window.indexedDB.deleteDatabase('__firebase_probe__');
+        req.result?.close();
+        idb.deleteDatabase('__firebase_probe__');
       } catch {}
     };
-    req.onerror = (e) => { e.preventDefault(); };
+    req.onerror = (e) => {
+      try {
+        e.preventDefault();
+        e.stopPropagation?.();
+      } catch {}
+    };
+    req.onblocked = (e) => {
+      try {
+        e.preventDefault();
+      } catch {}
+    };
     return true;
   } catch {
     return false;

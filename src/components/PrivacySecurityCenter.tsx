@@ -159,13 +159,34 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
   // Handle Cascade Erasure
   const handleExecuteErasure = () => {
-    const manifest = executeCascadeErasure({
-      requestId: 'req_gdpr_' + Date.now(),
-      studentUid: activeStudent.uid,
-      requestedAt: Date.now(),
-      confirmedByActor: activeStudent.uid,
-      reason: 'gdpr_article_17'
-    });
+    // 1. Purge local device caches for student
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem(`cognify_student_state_${activeStudent.uid}`);
+        localStorage.removeItem(`cognify_events_${activeStudent.uid}`);
+      } catch {}
+    }
+
+    // 2. Prepare store targets for cascade wipe
+    const profileStore = new Map<string, StudentState>();
+    profileStore.set(activeStudent.uid, activeStudent);
+    const presenceStore = new Map<string, any>();
+    presenceStore.set(activeStudent.uid, { status: 'offline', lastActive: Date.now() });
+
+    const manifest = executeCascadeErasure(
+      {
+        requestId: 'req_gdpr_' + Date.now(),
+        studentUid: activeStudent.uid,
+        requestedAt: Date.now(),
+        confirmedByActor: activeStudent.uid,
+        reason: 'gdpr_article_17'
+      },
+      {
+        profileStore,
+        presenceStore,
+        auditStore: [...auditChain]
+      }
+    );
     setErasureManifest(manifest);
     setErasureConfirmed(false);
 
@@ -535,7 +556,9 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
                     <span className="text-[10px] text-slate-400 block font-bold">Profile Wiped</span>
-                    <span className="text-sm font-bold text-emerald-400">Yes</span>
+                    <span className="text-sm font-bold text-emerald-400">
+                      {erasureManifest.recordsWiped.profileState ? 'Yes' : 'No'}
+                    </span>
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
                     <span className="text-[10px] text-slate-400 block font-bold">Events Redacted</span>
@@ -547,7 +570,9 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
                     <span className="text-[10px] text-slate-400 block font-bold">Presence Cleaned</span>
-                    <span className="text-sm font-bold text-emerald-400">Yes</span>
+                    <span className="text-sm font-bold text-emerald-400">
+                      {erasureManifest.recordsWiped.presenceCleaned ? 'Yes' : 'No'}
+                    </span>
                   </div>
                 </div>
 
