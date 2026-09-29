@@ -47,6 +47,7 @@ import { speak } from '../lib/tts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import { isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
+import { restoreContactsFromCloud } from '../lib/contacts';
 import {
   loadPecsCards,
   savePecsCards,
@@ -165,6 +166,9 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
     loadPecsCards(profile.uid).then(setPecsCards);
     loadVisualSchedule(profile.uid).then(setSchedule);
     getRecentSensoryLogs(profile.uid, 15).then(setRecentLogs);
+    if (profile.uid) {
+      restoreContactsFromCloud(profile.uid).catch(() => {});
+    }
   }, [profile.uid]);
 
   // Speak PECS card
@@ -749,15 +753,21 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
                       ))}
                     </div>
                   )}
-                  {dispatchStatus.fallbackDirectCall && dispatchStatus.caregiverPhone && (
+                  {dispatchStatus.fallbackDirectCall && (
                     <div className="pt-2">
-                      <a
-                        href={`tel:${dispatchStatus.caregiverPhone}`}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md"
-                      >
-                        <PhoneCall className="w-4 h-4" />
-                        <span>{t('Call Caregiver Now', 'اتصل بالمرافق هاتفياً الآن')} ({dispatchStatus.caregiverPhone})</span>
-                      </a>
+                      {dispatchStatus.caregiverPhone ? (
+                        <a
+                          href={`tel:${dispatchStatus.caregiverPhone}`}
+                          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md"
+                        >
+                          <PhoneCall className="w-4 h-4" />
+                          <span>{t('Call Caregiver Now', 'اتصل بالمرافق هاتفياً الآن')} ({dispatchStatus.caregiverPhone})</span>
+                        </a>
+                      ) : (
+                        <div className="text-[11px] text-amber-300 bg-amber-950/60 p-2.5 rounded-xl border border-amber-500/40 leading-relaxed">
+                          ⚠️ {t('Caregiver emergency phone is not set up in contacts yet.', 'رقم هاتف المرافق غير مسجل بعد في جهات الاتصال الطارئة.')}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

@@ -45,9 +45,12 @@ export async function runNeurodiversityEngineVerification() {
   // Test 1: PECS Cards initial state
   {
     const initial = await loadPecsCards('test-user-autism-1');
-    assert(Array.isArray(initial) && initial.length >= 12, 'Default PECS cards loaded with at least 12 foundational cards');
+    assert(Array.isArray(initial) && initial.length >= 16, 'Default PECS cards loaded with at least 16 foundational cards');
     assert(initial.some((c) => c.category === 'food' && c.icon === '💧'), 'Water PECS card is present in food category');
     assert(initial.some((c) => c.category === 'feelings' && c.phraseAr.includes('صوت عالي')), 'Sensory overload PECS card is present');
+    assert(initial.some((c) => c.category === 'routine' && c.phraseAr.includes('استراحة')), 'Functional communication Break/Stop card is present');
+    assert(initial.some((c) => c.category === 'feelings' && c.labelEn === 'Yes'), 'Affirmative Yes card is present');
+    assert(initial.some((c) => c.category === 'feelings' && c.labelEn === 'No'), 'Decline No card is present');
   }
 
   // Test 2: Adding and Deleting Custom PECS Cards
