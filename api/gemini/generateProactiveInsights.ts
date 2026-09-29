@@ -1,11 +1,17 @@
 /** Short proactive study insights from recent messages. Returns { result }. */
 import { guard, readBody, generateText } from '../_lib/ai.js';
+import { applyCorsHeaders } from '../_lib/cors.js';
 
 export default async function handler(req: any, res: any) {
+  if (!applyCorsHeaders(req, res)) return;
   if (!(await guard(req, res))) return;
 
   try {
     const { profile = {}, recentMessages = [] } = await readBody(req);
+    if (Array.isArray(recentMessages) && recentMessages.length > 50) {
+      res.status(400).json({ error: 'Payload too large: recentMessages exceeds 50 items limit' });
+      return;
+    }
     const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';
 
     const convo = (Array.isArray(recentMessages) ? recentMessages : [])

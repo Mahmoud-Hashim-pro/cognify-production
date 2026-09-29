@@ -7,10 +7,14 @@
  *   x-vercel-ip-country-region → "11", "CA", ...        (region/state code)
  *   x-vercel-ip-city           → "Cairo", "New York"     (URL-encoded)
  */
+import { applyCorsHeaders } from '../_lib/cors.js';
+
 export default async function handler(req: any, res: any) {
-  let countryCode = (req.headers['x-vercel-ip-country'] as string)
-    || (req.headers['cf-ipcountry'] as string)
-    || (req.headers['x-country-code'] as string);
+  if (!applyCorsHeaders(req, res)) return;
+
+  let countryCode = (req.headers?.['x-vercel-ip-country'] as string)
+    || (req.headers?.['cf-ipcountry'] as string)
+    || (req.headers?.['x-country-code'] as string);
 
   const region = (req.headers['x-vercel-ip-country-region'] as string) || null;
   const rawCity = req.headers['x-vercel-ip-city'] as string | undefined;
@@ -49,6 +53,10 @@ export default async function handler(req: any, res: any) {
     clientIp = clientIp.replace('::ffff:', '');
   }
 
-  res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({ countryCode: countryCode || 'Unknown', region, city, ip: clientIp });
+  res.setHeader?.('Cache-Control', 'no-store');
+  if (typeof res.status === 'function') {
+    res.status(200).json({ countryCode: countryCode || 'Unknown', region, city, ip: clientIp });
+  } else {
+    res.end?.(JSON.stringify({ countryCode: countryCode || 'Unknown', region, city, ip: clientIp }));
+  }
 }
