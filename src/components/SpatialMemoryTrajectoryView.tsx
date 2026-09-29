@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Compass,
   MapPin,
@@ -255,3 +255,5 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
     </div>
   );
 };
+
+export default SpatialMemoryTrajectoryView;

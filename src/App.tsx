@@ -81,6 +81,16 @@ const CognitiveGym = lazyWithRetry(() => import("./components/CognitiveGym"));
 const IqAssessmentModal = lazyWithRetry(() => import("./components/IqAssessmentModal"));
 const FrenchTravelVoiceAssistant = lazyWithRetry(() => import("./components/FrenchTravelVoiceAssistant"));
 const ChatInterface = lazyWithRetry(() => import("./components/ChatInterface"));
+const StudentIntelligenceProfileView = lazyWithRetry(() => import("./components/StudentIntelligenceProfileView"));
+const TeacherIntelligenceView = lazyWithRetry(() => import("./components/TeacherIntelligenceView"));
+const ParentIntelligenceView = lazyWithRetry(() => import("./components/ParentIntelligenceView"));
+const RetentionLearningCenter = lazyWithRetry(() => import("./components/RetentionLearningCenter"));
+const PedagogicalEvaluationView = lazyWithRetry(() => import("./components/PedagogicalEvaluationView"));
+const BusinessTenancyView = lazyWithRetry(() => import("./components/BusinessTenancyView"));
+const DeveloperApiConsole = lazyWithRetry(() => import("./components/DeveloperApiConsole"));
+const SystemResilienceDashboard = lazyWithRetry(() => import("./components/SystemResilienceDashboard"));
+const PrivacySecurityCenter = lazyWithRetry(() => import("./components/PrivacySecurityCenter"));
+const AiQualityGuardMonitor = lazyWithRetry(() => import("./components/AiQualityGuardMonitor"));
 
 /** Every hash route the app answers to — the single source of truth for both the
  *  initial read on mount and the popstate handler, so they can't drift apart. */
@@ -88,6 +98,8 @@ const VALID_VIEWS = [
   'chat', 'learning', 'profile', 'settings', 'video', 'disability',
   'admin', 'goals', 'gpa', 'analytics', 'planner', 'support', 'memory',
   'institution', 'gym', 'iq', 'france', 'privacy', 'intelligence',
+  'teacher', 'parent', 'privacy_security', 'evaluation', 'ai_quality',
+  'resilience', 'tenancy', 'developer_api', 'retention',
 ] as const;
 
 function createGuestProfile(): UserProfile {
@@ -146,7 +158,6 @@ export default function App() {
     }
     const h = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
     if (!h || h === 'video' || h === 'disability') return 'chat';
-    if (h === 'intelligence') return 'profile';
     return (VALID_VIEWS as readonly string[]).includes(h) ? (h as any) : 'chat';
   });
   
@@ -901,7 +912,7 @@ export default function App() {
     if (!activeProfile) return null;
     // Guard academic sections that aren't available for this education level
     if (
-      (['gpa', 'analytics', 'goals', 'planner'] as const).includes(currentView as any) &&
+      (['gpa', 'analytics', 'goals', 'planner', 'retention', 'evaluation'] as const).includes(currentView as any) &&
       !canAccessSection(activeProfile.educationLevel, currentView as any)
     ) {
       return (
@@ -988,7 +999,6 @@ export default function App() {
           />
         );
       case 'profile':
-      case 'intelligence':
         return (
           <ProfilePage
             profile={activeProfile}
@@ -996,6 +1006,198 @@ export default function App() {
             onNavigateBack={() => navigateTo(homeViewFor(profile))}
             setProfile={setProfile}
           />
+        );
+      case 'intelligence':
+        return (
+          <StudentIntelligenceProfileView
+            profile={activeProfile}
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+            onNavigateBack={() => navigateTo('profile')}
+          />
+        );
+      case 'teacher':
+        return (
+          <TeacherIntelligenceView
+            lang={isArabicLocale(activeProfile.language) ? 'ar' : 'en'}
+            onBack={() => navigateTo(homeViewFor(profile))}
+          />
+        );
+      case 'parent':
+        return (
+          <ParentIntelligenceView
+            profile={activeProfile}
+            lang={isArabicLocale(activeProfile.language) ? 'ar' : 'en'}
+            onBack={() => navigateTo(homeViewFor(profile))}
+          />
+        );
+      case 'retention':
+        return (
+          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <header className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => navigateTo(homeViewFor(profile))}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </header>
+            <RetentionLearningCenter
+              schedules={activeProfile.studentState?.retentionSchedules || {}}
+              lang={isArabicLocale(activeProfile.language) ? 'ar' : 'en'}
+            />
+          </div>
+        );
+      case 'evaluation':
+        return (
+          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <header className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => navigateTo(homeViewFor(profile))}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </header>
+            <PedagogicalEvaluationView
+              isArabic={isArabicLocale(activeProfile.language)}
+            />
+          </div>
+        );
+      case 'tenancy':
+        return (
+          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <header className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => navigateTo(homeViewFor(profile))}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </header>
+            <BusinessTenancyView
+              isArabic={isArabicLocale(activeProfile.language)}
+            />
+          </div>
+        );
+      case 'developer_api':
+        return (
+          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <header className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => navigateTo(homeViewFor(profile))}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </header>
+            <DeveloperApiConsole
+              isArabic={isArabicLocale(activeProfile.language)}
+            />
+          </div>
+        );
+      case 'resilience':
+        return (
+          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <header className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => navigateTo(homeViewFor(profile))}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </header>
+            <SystemResilienceDashboard
+              isArabic={isArabicLocale(activeProfile.language)}
+            />
+          </div>
+        );
+      case 'privacy_security':
+        return (
+          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <header className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => navigateTo(homeViewFor(profile))}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </header>
+            <PrivacySecurityCenter
+              isArabic={isArabicLocale(activeProfile.language)}
+            />
+          </div>
+        );
+      case 'ai_quality':
+        return (
+          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <header className="flex items-center gap-3 mb-6">
+              <button
+                onClick={() => navigateTo(homeViewFor(profile))}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </header>
+            <AiQualityGuardMonitor
+              isArabic={isArabicLocale(activeProfile.language)}
+            />
+          </div>
         );
       case 'admin':
         return <AdminDashboard profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;

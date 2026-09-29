@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   RotateCcw,
   CheckCircle2,
@@ -27,16 +27,56 @@ import {
 import type { RetentionSchedule } from '../lib/spacedRetention';
 
 interface RetentionLearningCenterProps {
-  schedules: Record<string, RetentionSchedule>;
+  schedules?: Record<string, RetentionSchedule>;
   onScheduleUpdated?: (conceptId: string, result: MicroReviewResult) => void;
   lang?: 'en' | 'ar' | 'fr';
 }
+
+const DEFAULT_SAMPLE_SCHEDULES: Record<string, RetentionSchedule> = {
+  pointers: {
+    conceptId: 'pointers',
+    easeFactor: 2.5,
+    intervalDays: 1,
+    repetitions: 1,
+    nextReviewDate: Date.now() - 3600000,
+    lastReviewDate: Date.now() - 86400000,
+    status: 'learning',
+  },
+  recursion: {
+    conceptId: 'recursion',
+    easeFactor: 2.6,
+    intervalDays: 6,
+    repetitions: 2,
+    nextReviewDate: Date.now() + 86400000 * 3,
+    lastReviewDate: Date.now() - 86400000 * 3,
+    status: 'learning',
+  },
+  big_o_notation: {
+    conceptId: 'big_o_notation',
+    easeFactor: 2.7,
+    intervalDays: 15,
+    repetitions: 4,
+    nextReviewDate: Date.now() + 86400000 * 10,
+    lastReviewDate: Date.now() - 86400000 * 5,
+    status: 'retained',
+  },
+  asynchronous_programming: {
+    conceptId: 'asynchronous_programming',
+    easeFactor: 2.1,
+    intervalDays: 1,
+    repetitions: 1,
+    nextReviewDate: Date.now() - 86400000 * 2,
+    lastReviewDate: Date.now() - 86400000 * 3,
+    status: 'learning',
+  },
+};
 
 export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = ({
   schedules,
   onScheduleUpdated,
   lang = 'ar',
 }) => {
+  const effectiveSchedules = (schedules && Object.keys(schedules).length > 0) ? schedules : DEFAULT_SAMPLE_SCHEDULES;
   const isAr = lang === 'ar';
   const [activeTab, setActiveTab] = useState<'due_today' | 'upcoming' | 'mastered' | 'at_risk'>('due_today');
   const [dashboardData, setDashboardData] = useState<RetentionDashboardData>({
@@ -54,14 +94,14 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
   const [startTime, setStartTime] = useState<number>(0);
 
   useEffect(() => {
-    const data = categorizeRetentionState(schedules, undefined, Date.now());
+    const data = categorizeRetentionState(effectiveSchedules, undefined, Date.now());
     setDashboardData(data);
 
     // Auto-select first non-empty tab if current is empty
     if (data.dueToday.length === 0 && data.atRisk.length > 0 && activeTab === 'due_today') {
       setActiveTab('at_risk');
     }
-  }, [schedules]);
+  }, [effectiveSchedules]);
 
   const handleStartReview = (item: RetentionItem) => {
     const q = generateMicroReview(item.conceptId, lang);
@@ -435,3 +475,5 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
     </div>
   );
 };
+
+export default RetentionLearningCenter;

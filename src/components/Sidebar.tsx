@@ -1,7 +1,7 @@
 import { localize, isArabicLocale, getTranslation } from '../lib/translations';
 import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
-import { User, Settings, GraduationCap, Accessibility, LifeBuoy, MessageSquare, BarChart3, AlertCircle, LogOut, Plus, ChevronRight, X, Moon, Sun, Mic, Target, Calculator, CalendarCheck, LayoutDashboard, CalendarDays, Sparkles, Brain, Building2, Flame } from "lucide-react";
+import { User, Settings, GraduationCap, Accessibility, LifeBuoy, MessageSquare, BarChart3, AlertCircle, LogOut, Plus, ChevronRight, X, Moon, Sun, Mic, Target, Calculator, CalendarCheck, LayoutDashboard, CalendarDays, Sparkles, Brain, Building2, Flame, Layers, Heart } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { isAdminUser } from "../lib/roles";
@@ -63,7 +63,8 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
 
   const primaryItems = [
     { id: 'chat', label: getTranslation(profile.language, 'chatSession'), icon: MessageSquare },
-    { id: 'profile', label: localize(profile.language, 'Learning Profile', 'الملف المعرفي الذكي'), icon: Brain },
+    { id: 'intelligence', label: localize(profile.language, 'Student Intelligence', 'الملف المعرفي الذكي'), icon: Sparkles },
+    { id: 'profile', label: localize(profile.language, 'Account & Profile', 'حسابي والإعدادات'), icon: User },
   ] as const;
 
   // Academic sections shown depend on the user's education level (University
@@ -73,6 +74,8 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
     { id: 'gpa', label: localize(profile.language, 'GPA', 'حاسبة GPA'), icon: Calculator },
     { id: 'analytics', label: localize(profile.language, 'Analytics', 'تحليلاتي'), icon: LayoutDashboard },
     { id: 'planner', label: localize(profile.language, 'Planner', 'المخطّط'), icon: CalendarDays },
+    { id: 'retention', label: localize(profile.language, 'Flashcards Deck (SM-2)', 'بطاقات الاستذكار المتباعد'), icon: Layers },
+    { id: 'evaluation', label: localize(profile.language, 'Pedagogical Evaluation', 'تقييم الأثر التربوي'), icon: BarChart3 },
   ] as const;
   const visibleSections = visibleAcademicSections(profile.educationLevel);
   const academicItems = allAcademicItems.filter((i) => visibleSections.includes(i.id as any));
@@ -218,6 +221,30 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
           >
             <Building2 className={navIcon(currentView === 'institution')} />
             {localize(profile.language, 'Institution Cohorts', 'شؤون المؤسسة')}
+          </button>
+        )}
+
+        {/* Teacher Intelligence Dashboard */}
+        {(profile.role === 'Professional' || isAdmin || profile.isOrgManager === true) && (
+          <button
+            onClick={() => setCurrentView('teacher')}
+            className={navBtn(currentView === 'teacher')}
+            aria-current={currentView === 'teacher' ? 'page' : undefined}
+          >
+            <LayoutDashboard className={navIcon(currentView === 'teacher')} />
+            {localize(profile.language, 'Teacher Intelligence', 'لوحة المعلم الذكية')}
+          </button>
+        )}
+
+        {/* Parent Intelligence Portal */}
+        {(Boolean(profile.linkedChildUid || profile.linkedParentUid || profile.linkedCaregivers?.length || isAdmin)) && (
+          <button
+            onClick={() => setCurrentView('parent')}
+            className={navBtn(currentView === 'parent')}
+            aria-current={currentView === 'parent' ? 'page' : undefined}
+          >
+            <Heart className={navIcon(currentView === 'parent')} />
+            {localize(profile.language, 'Parent Intelligence', 'بوابة ولي الأمر')}
           </button>
         )}
 

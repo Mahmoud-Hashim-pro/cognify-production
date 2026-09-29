@@ -68,6 +68,7 @@ import { cleanVisionDescription } from '../lib/visionCleaner';
 export { exportToWordDocument, DOC_HISTORY_KEY } from './DocumentStudioModal';
 export type { SavedDocItem, DocChatMessage } from './DocumentStudioModal';
 import DocumentStudioModal from './DocumentStudioModal';
+import SpatialMemoryTrajectoryView from './SpatialMemoryTrajectoryView';
 
 export default function VisionCompanionView({ profile, setProfile }: VisionCompanionViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -354,6 +355,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
 
   // Spatial memory drawer state
   const [showSpatialMemory, setShowSpatialMemory] = useState(false);
+  const [showTrajectoryV2, setShowTrajectoryV2] = useState(false);
   const [spatialRecords, setSpatialRecords] = useState<SpatialObjectRecord[]>(() =>
     profile?.uid ? getSpatialObjects(profile.uid) : []
   );
@@ -2044,119 +2046,140 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     {companionLang === 'ar' ? 'الذاكرة المكانية للأشياء' : companionLang === 'fr' ? 'Mémoire Spatiale des Objets' : 'Spatial Memory of Objects'}
                   </h3>
                 </div>
-                <button
-                  onClick={() => setShowSpatialMemory(false)}
-                  aria-label={t('Close', 'إغلاق', 'Fermer')}
-                  className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Query Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs text-slate-400 font-semibold">
-                  {companionLang === 'ar'
-                    ? 'اسأل عن مكان أي شيء (مثلاً: "فين الريموت؟" أو "فين المفاتيح؟"):'
-                    : companionLang === 'fr'
-                    ? "Demandez où se trouve un objet (ex. 'Où est la télécommande ?') :"
-                    : "Ask where an item is located (e.g. 'Where is the remote?'):"}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={spatialQueryInput}
-                    onChange={(e) => setSpatialQueryInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSearchSpatial();
-                    }}
-                    placeholder={
-                      companionLang === 'ar'
-                        ? 'فين ريموت التلفزيون؟'
-                        : companionLang === 'fr'
-                        ? 'Où est la télécommande ?'
-                        : 'Where is the TV remote?'
-                    }
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={handleSearchSpatial}
-                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
+                    onClick={() => setShowTrajectoryV2((v) => !v)}
+                    className="text-xs px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all font-semibold"
                   >
-                    <Search className="w-4 h-4" />
-                    <span>{companionLang === 'ar' ? 'بحث' : companionLang === 'fr' ? 'Chercher' : 'Search'}</span>
+                    {showTrajectoryV2
+                      ? (companionLang === 'ar' ? 'البحث السريع' : companionLang === 'fr' ? 'Recherche rapide' : 'Quick Search')
+                      : (companionLang === 'ar' ? 'مسار الحركة (V2)' : companionLang === 'fr' ? 'Trajectoire V2' : 'Trajectory V2')}
+                  </button>
+                  <button
+                    onClick={() => setShowSpatialMemory(false)}
+                    aria-label={t('Close', 'إغلاق', 'Fermer')}
+                    className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+                  >
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              {spatialQueryResult && (
-                <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-200 text-sm leading-relaxed flex items-start gap-2.5">
-                  <Volume2 className="w-5 h-5 shrink-0 text-emerald-400 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="font-semibold">{spatialQueryResult}</p>
-                    <button
-                      onClick={() => speak(spatialQueryResult, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English')}
-                      className="mt-2 text-xs font-bold text-emerald-300 hover:text-emerald-100 underline flex items-center gap-1"
-                    >
-                      <span>{companionLang === 'ar' ? 'استمع مرة أخرى' : companionLang === 'fr' ? 'Réécouter' : 'Listen again'}</span>
-                    </button>
-                  </div>
+              {showTrajectoryV2 ? (
+                <div className="flex-1 overflow-y-auto custom-scrollbar min-h-[300px]">
+                  <SpatialMemoryTrajectoryView
+                    uid={profile?.uid || 'guest'}
+                    lang={companionLang === 'ar' ? 'ar' : companionLang === 'fr' ? 'fr' : 'en'}
+                  />
                 </div>
-              )}
-
-              {/* List of remembered items */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[140px]">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
-                  <span>{companionLang === 'ar' ? 'الأشياء المرصودة مؤخراً' : companionLang === 'fr' ? 'Objets récemment observés' : 'Recently Observed Items'}</span>
-                  <span className="text-[11px] font-mono text-emerald-400">{spatialRecords.length} items</span>
-                </div>
-
-                {spatialRecords.length === 0 ? (
-                  <div className="text-center py-6 text-slate-500 text-xs">
-                    {companionLang === 'ar'
-                      ? 'لم يتم رصد أي أشياء بعد. وجّه الكاميرا إلى الغرفة واضغط على زر الفحص لتسجيل الأماكن تلقائياً.'
-                      : companionLang === 'fr'
-                      ? 'Aucun objet observé pour le moment. Pointez la caméra et appuyez sur "Que vois-je ?" pour mémoriser les emplacements.'
-                      : 'No objects observed yet. Point the camera and tap any scan button to record locations automatically.'}
+              ) : (
+                <>
+                  {/* Query Input */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-slate-400 font-semibold">
+                      {companionLang === 'ar'
+                        ? 'اسأل عن مكان أي شيء (مثلاً: "فين الريموت؟" أو "فين المفاتيح؟"):'
+                        : companionLang === 'fr'
+                        ? "Demandez où se trouve un objet (ex. 'Où est la télécommande ?') :"
+                        : "Ask where an item is located (e.g. 'Where is the remote?'):"}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={spatialQueryInput}
+                        onChange={(e) => setSpatialQueryInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSearchSpatial();
+                        }}
+                        placeholder={
+                          companionLang === 'ar'
+                            ? 'فين ريموت التلفزيون؟'
+                            : companionLang === 'fr'
+                            ? 'Où est la télécommande ?'
+                            : 'Where is the TV remote?'
+                        }
+                        className="flex-1 px-4 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                      <button
+                        onClick={handleSearchSpatial}
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
+                      >
+                        <Search className="w-4 h-4" />
+                        <span>{companionLang === 'ar' ? 'بحث' : companionLang === 'fr' ? 'Chercher' : 'Search'}</span>
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  spatialRecords.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        const query = querySpatialMemory(profile?.uid || '', item.objectName, companionLang);
-                        setSpatialQueryResult(query.message);
-                        speak(query.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
-                      }}
-                      className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-[#4A1224]/50 flex items-center justify-between gap-3 group transition-all"
-                    >
-                      <div className="space-y-0.5">
-                        <div className="font-bold text-sm text-white group-hover:text-emerald-400 flex items-center gap-2">
-                          <span>{item.objectName}</span>
-                          {item.relativePosition?.direction && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">
-                              {item.relativePosition.direction}
+
+                  {spatialQueryResult && (
+                    <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-200 text-sm leading-relaxed flex items-start gap-2.5">
+                      <Volume2 className="w-5 h-5 shrink-0 text-emerald-400 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="font-semibold">{spatialQueryResult}</p>
+                        <button
+                          onClick={() => speak(spatialQueryResult, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English')}
+                          className="mt-2 text-xs font-bold text-emerald-300 hover:text-emerald-100 underline flex items-center gap-1"
+                        >
+                          <span>{companionLang === 'ar' ? 'استمع مرة أخرى' : companionLang === 'fr' ? 'Réécouter' : 'Listen again'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* List of remembered items */}
+                  <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[140px]">
+                    <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                      <span>{companionLang === 'ar' ? 'الأشياء المرصودة مؤخراً' : companionLang === 'fr' ? 'Objets récemment observés' : 'Recently Observed Items'}</span>
+                      <span className="text-[11px] font-mono text-emerald-400">{spatialRecords.length} items</span>
+                    </div>
+
+                    {spatialRecords.length === 0 ? (
+                      <div className="text-center py-6 text-slate-500 text-xs">
+                        {companionLang === 'ar'
+                          ? 'لم يتم رصد أي أشياء بعد. وجّه الكاميرا إلى الغرفة واضغط على زر الفحص لتسجيل الأماكن تلقائياً.'
+                          : companionLang === 'fr'
+                          ? 'Aucun objet observé pour le moment. Pointez la caméra et appuyez sur "Que vois-je ?" pour mémoriser les emplacements.'
+                          : 'No objects observed yet. Point the camera and tap any scan button to record locations automatically.'}
+                      </div>
+                    ) : (
+                      spatialRecords.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            const query = querySpatialMemory(profile?.uid || '', item.objectName, companionLang);
+                            setSpatialQueryResult(query.message);
+                            speak(query.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+                          }}
+                          className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-[#4A1224]/50 flex items-center justify-between gap-3 group transition-all"
+                        >
+                          <div className="space-y-0.5">
+                            <div className="font-bold text-sm text-white group-hover:text-emerald-400 flex items-center gap-2">
+                              <span>{item.objectName}</span>
+                              {item.relativePosition?.direction && (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">
+                                  {item.relativePosition.direction}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-slate-400">
+                              <span>{item.surface || 'Table'}</span>
+                              {item.room && <span> • {item.room}</span>}
+                            </div>
+                          </div>
+                          <div className="text-end shrink-0">
+                            <span className="text-[10px] text-slate-500 block">
+                              {new Date(item.lastSeenTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-slate-400">
-                          <span>{item.surface || 'Table'}</span>
-                          {item.room && <span> • {item.room}</span>}
-                        </div>
-                      </div>
-                      <div className="text-end shrink-0">
-                        <span className="text-[10px] text-slate-500 block">
-                          {new Date(item.lastSeenTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        <span className="text-xs text-emerald-400 font-semibold group-hover:underline flex items-center justify-end gap-1">
-                          <Volume2 className="w-3.5 h-3.5" />
-                          {companionLang === 'ar' ? 'اسمع المكان' : companionLang === 'fr' ? 'Écouter' : 'Hear'}
-                        </span>
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
+                            <span className="text-xs text-emerald-400 font-semibold group-hover:underline flex items-center justify-end gap-1">
+                              <Volume2 className="w-3.5 h-3.5" />
+                              {companionLang === 'ar' ? 'اسمع المكان' : companionLang === 'fr' ? 'Écouter' : 'Hear'}
+                            </span>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}

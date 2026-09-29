@@ -456,15 +456,26 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
         </div>
 
-        {onOpenPassport && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {onOpenPassport && (
+            <button
+              onClick={onOpenPassport}
+              className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-950/40 active:scale-95 transition-all cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4 text-slate-950" />
+              <span>{t('Accessibility Passport', 'جواز السفر الميسر', 'Passeport Accessibilité')}</span>
+            </button>
+          )}
           <button
-            onClick={onOpenPassport}
-            className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-950/40 active:scale-95 transition-all cursor-pointer"
+            onClick={() => {
+              window.location.hash = '#parent';
+            }}
+            className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#4A1224]/60 hover:bg-[#831843]/60 text-[#E5A93C] border border-[#E5A93C]/40 font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#2D0B16]/50 active:scale-95 transition-all cursor-pointer"
           >
-            <ShieldCheck className="w-4 h-4 text-slate-950" />
-            <span>{t('Accessibility Passport', 'جواز السفر الميسر', 'Passeport Accessibilité')}</span>
+            <Heart className="w-4 h-4 text-[#E5A93C]" />
+            <span>{t('Parent Intelligence & Growth', 'بوابة ولي الأمر والنمو الإدراكي', 'Portail Parental & Croissance')}</span>
           </button>
-        )}
+        </div>
       </header>
 
       {/* Main Grid Content */}
