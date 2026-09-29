@@ -38,6 +38,10 @@ import {
   COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
 } from '../src/lib/iqAssessment.js';
 import { parseNavGuidance } from '../src/lib/hapticNavEngine.js';
+import {
+  listenPendingCaregiverRequests,
+  sendCaregiverLinkRequest,
+} from '../src/lib/caregiverLinking.js';
 import { detectConversationalStrain } from '../src/lib/conversationalStrain.js';
 import {
   getDatabaseHealth,
@@ -249,6 +253,32 @@ async function run() {
 
     const enCaution = parseNavGuidance('There is a chair and backpack in front of you', 'en');
     assert(enCaution.hazardLevel === 'caution', 'English "chair" flags caution');
+  }
+
+  // 1f. Consent-Based Caregiver Linking & Query Security
+  console.log('\n[1f] Consent-Based Caregiver Linking & Query Security');
+  {
+    // Empty childUid guard
+    const unsub = listenPendingCaregiverRequests('', () => {});
+    assert(typeof unsub === 'function', 'Empty childUid safely returns no-op unsubscribe without querying Firestore');
+
+    // Self-linking prevention
+    let selfLinkCaught = false;
+    try {
+      await sendCaregiverLinkRequest('same-uid', 'Parent Name', 'parent@test.com', 'same-uid');
+    } catch (e: any) {
+      selfLinkCaught = e?.message === 'Invalid link request.';
+    }
+    assert(selfLinkCaught, 'Self-linking (parentUid === childUid) is blocked with Invalid link request.');
+
+    // Empty parameters prevention
+    let emptyIdCaught = false;
+    try {
+      await sendCaregiverLinkRequest('', 'Parent Name', 'parent@test.com', 'child-uid');
+    } catch (e: any) {
+      emptyIdCaught = e?.message === 'Invalid link request.';
+    }
+    assert(emptyIdCaught, 'Empty parentUid is blocked with Invalid link request.');
   }
 
   // 2. Concept Graph & Root-Cause Diagnosis Tests
