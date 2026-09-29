@@ -2192,6 +2192,9 @@ Keep practicing closures with higher-order functions!
 
     const instDash = compileInstitutionalDashboard('uni_cairo', 'Cairo University', { cs: uniStudents });
     assert(instDash.departments.length === 1 && instDash.kAnonymityAudit.suppressionApplied === true, 'Compiles complete institutional intelligence dashboard');
+    assert(instDash.departments[0].retentionRate === 0.7, 'Department retention rate is dynamically computed from non-dropout cohort (0.7, not static 0.94)');
+    assert(accreditation.outcomesAttainment[0].isTemplateData === false, 'SO-1 is flagged as empirical telemetry');
+    assert(accreditation.continuousImprovementLoop.isTemplateData === true, 'Continuous improvement loop flagged as template');
   }
 
   // 47. Milestone 16: Privacy & Security Intelligence
