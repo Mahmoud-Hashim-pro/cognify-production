@@ -51,6 +51,7 @@ export async function runNeurodiversityEngineVerification() {
     assert(initial.some((c) => c.category === 'routine' && c.phraseAr.includes('استراحة')), 'Functional communication Break/Stop card is present');
     assert(initial.some((c) => c.category === 'feelings' && c.labelEn === 'Yes'), 'Affirmative Yes card is present');
     assert(initial.some((c) => c.category === 'feelings' && c.labelEn === 'No'), 'Decline No card is present');
+    assert(initial.some((c) => c.category === 'feelings' && (c.labelEn === 'Scared' || c.phraseAr.includes('خائف') || c.phraseAr.includes('خايف'))), 'Emotional self-regulation Scared/Anxious card is present');
   }
 
   // Test 2: Adding and Deleting Custom PECS Cards
@@ -220,4 +221,15 @@ export async function runNeurodiversityEngineVerification() {
 
   console.log(`\n  Neurodiversity Verification: ${passed} Passed, ${failed} Failed\n`);
   return { passed, failed };
+}
+
+if (process.argv[1] && process.argv[1].includes('neurodiversityEngineVerification')) {
+  runNeurodiversityEngineVerification()
+    .then((res) => {
+      if (res.failed > 0) process.exit(1);
+    })
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
 }
