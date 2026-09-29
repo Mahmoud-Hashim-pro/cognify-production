@@ -1232,8 +1232,13 @@ async function run() {
     assert(resultRepeatErr.state.learningStrain.signals.includes('repeated_errors'), 'Detects repeated errors struggle signal');
 
     // Flush safety
-    await guestManager.flushPendingWrites();
-    assert(true, 'flushPendingWrites executes safely without throwing on guest sessions');
+    let flushError: any = null;
+    try {
+      await guestManager.flushPendingWrites();
+    } catch (e) {
+      flushError = e;
+    }
+    assert(flushError === null, 'flushPendingWrites executes safely without throwing on guest sessions');
   }
 
   // 22. Persistent Learning Event Store & State Projection

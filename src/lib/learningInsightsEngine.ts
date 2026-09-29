@@ -90,7 +90,16 @@ export function generateLearningInsights(
       const nameEn = node?.nameEn || conceptId.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
       const nameAr = node?.nameAr || conceptId;
 
-      const accuracyJump = Math.min(50, Math.round(record.accuracy * 45) + (record.consecutiveCorrect * 3));
+      let accuracyJump: number;
+      const priorAttempts = record.attempts - record.consecutiveCorrect;
+      if (priorAttempts > 0) {
+        const priorCorrect = Math.max(0, record.correct - record.consecutiveCorrect);
+        const priorAccuracy = priorCorrect / priorAttempts;
+        const jump = Math.round((record.accuracy - priorAccuracy) * 100);
+        accuracyJump = Math.max(5, jump);
+      } else {
+        accuracyJump = Math.round(record.accuracy * 100);
+      }
       const deltaStr = `+${accuracyJump}%`;
 
       insights.push({

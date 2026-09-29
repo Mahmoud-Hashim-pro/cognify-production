@@ -1,8 +1,8 @@
-import { evaluateQuizPOV, generateBenchmarkComparison, generateProactiveInsights, generateLogicResponse, translateQuiz, generateAssessment } from "./gemini";
+import { evaluateQuizPOV, translateQuiz, generateAssessment } from "./gemini";
 import { geminiService } from "./geminiService";
 import express from "express";
 
-// Chat (adaptive response) goes through the SAME handlers used on Vercel in
+// Chat (adaptive response) and AI endpoints go through the SAME handlers used on Vercel in
 // production — this is the Phase 1 Router + Telemetry + multi-provider
 // fallback chain (api/_lib/ai.ts + router.ts + telemetry.ts). There used to
 // be a second, Gemini-only implementation living in ./gemini for local dev;
@@ -12,6 +12,9 @@ import express from "express";
 import generateAdaptiveResponseHandler from "../api/gemini/generateAdaptiveResponse";
 import generateAdaptiveResponseStreamHandler from "../api/gemini/generateAdaptiveResponseStream";
 import generateContentHandler from "../api/gemini/generateContent";
+import generateBenchmarkComparisonHandler from "../api/gemini/generateBenchmarkComparison";
+import generateProactiveInsightsHandler from "../api/gemini/generateProactiveInsights";
+import generateLogicResponseHandler from "../api/gemini/generateLogicResponse";
 import { guard } from "../api/_lib/ai";
 
 export const geminiRouter = express.Router();
@@ -56,21 +59,15 @@ geminiRouter.post('/generateAssessment', wrap(async (req, res) => {
 }));
 
 geminiRouter.post('/generateBenchmarkComparison', wrap(async (req, res) => {
-  const body = req.body || {};
-  const result = await generateBenchmarkComparison(body.originalMessage, body.userMessage, body.profile);
-  res.json({ result });
+  await generateBenchmarkComparisonHandler(req, res);
 }));
 
 geminiRouter.post('/generateProactiveInsights', wrap(async (req, res) => {
-  const body = req.body || {};
-  const result = await generateProactiveInsights(body.profile, body.recentMessages);
-  res.json({ result });
+  await generateProactiveInsightsHandler(req, res);
 }));
 
 geminiRouter.post('/generateLogicResponse', wrap(async (req, res) => {
-  const body = req.body || {};
-  const result = await generateLogicResponse(body.message, body.profile, body.moduleName, body.history);
-  res.json({ result });
+  await generateLogicResponseHandler(req, res);
 }));
 
 // Both routes below delegate straight to the Vercel serverless handlers —

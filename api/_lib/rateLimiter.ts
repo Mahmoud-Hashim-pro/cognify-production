@@ -1,4 +1,4 @@
-﻿/**
+/**
  * In-Memory Sliding-Window Rate Limiter for AI Serverless Endpoints (Point 12)
  * Protects AI provider quotas from abuse and unauthorized scraping.
  */
@@ -10,7 +10,7 @@ interface RateLimitRecord {
 const clientMap = new Map<string, RateLimitRecord>();
 
 // Clean up stale entries every 5 minutes to prevent memory leaks
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now();
   const windowMs = 60 * 1000;
   for (const [key, record] of clientMap.entries()) {
@@ -20,6 +20,9 @@ setInterval(() => {
     }
   }
 }, 5 * 60 * 1000);
+if (typeof cleanupInterval.unref === 'function') {
+  cleanupInterval.unref();
+}
 
 export interface RateLimitResult {
   allowed: boolean;
