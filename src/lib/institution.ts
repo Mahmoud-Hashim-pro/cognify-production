@@ -160,7 +160,7 @@ export function computeCohortAnalytics(users: UserProfile[], orgCode?: string): 
     cognitiveLevelDistribution[level]++;
 
     // Accessibility mode mapping
-    const mode = u.accessibilityMode;
+    const mode: string = (u.accessibilityMode as string) || '';
     if (!mode || mode === 'None') {
       accessibilityModeBreakdown.None++;
     } else if (mode === 'Visual' || mode === 'Vision') {
@@ -195,7 +195,7 @@ export function computeCohortAnalytics(users: UserProfile[], orgCode?: string): 
         name: u.name || (u.email ? u.email.split('@')[0] : 'Student'),
         emailMasked: maskEmail(u.email),
         cognitiveLevel: level,
-        accessibilityMode: mode || 'None',
+        accessibilityMode: (u.accessibilityMode || 'None') as AccessibilityMode,
         points,
         gpa,
         lastActiveIso: getUserLastActiveIso(u),

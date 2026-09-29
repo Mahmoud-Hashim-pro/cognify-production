@@ -37,6 +37,7 @@ import {
   COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
   COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
 } from '../src/lib/iqAssessment.js';
+import { parseNavGuidance } from '../src/lib/hapticNavEngine.js';
 import { detectConversationalStrain } from '../src/lib/conversationalStrain.js';
 import {
   getDatabaseHealth,
@@ -203,6 +204,51 @@ async function run() {
     assert(typeof res.iqScore === 'number' && res.iqScore >= 75 && res.iqScore <= 130, 'Style index maps into exploratory 75-130 range');
     assert(typeof res.domainScores.fluidReasoning === 'number', 'Domain scores report numeric percentages');
     assert(res.recommendedPersona === 'Foundational' || res.recommendedPersona === 'Balanced' || res.recommendedPersona === 'Socratic', 'Recommended persona maps to valid pedagogical style');
+  }
+
+  // 1e. Multilingual Haptic Navigation Hazard Classification (Safety Critical)
+  console.log('\n[1e] Multilingual Haptic Navigation Hazard Classification');
+  {
+    // French Danger & Obstacle Detection
+    const frDanger1 = parseNavGuidance('Attention, il y a un escalier devant vous', 'fr');
+    assert(frDanger1.hazardLevel === 'danger', 'French "escalier" flags danger hazard level');
+    assert(frDanger1.hapticPattern === 'danger', 'French danger triggers danger haptic pulse');
+    assert(frDanger1.obstaclesDetected[0] === 'Obstacle dangereux ou dénivelé', 'French danger label is localized correctly');
+
+    const frDanger2 = parseNavGuidance('Véhicule en approche rapide sur la route', 'fr');
+    assert(frDanger2.hazardLevel === 'danger', 'French "véhicule" / "route" flags danger');
+
+    const frDangerNormalized = parseNavGuidance('Attention au trou et a la chute', 'fr');
+    assert(frDangerNormalized.hazardLevel === 'danger', 'French unaccented "chute" / "trou" flags danger');
+
+    // French Caution & Safe Detection
+    const frCaution = parseNavGuidance('Prudence, trottoir avec une chaise devant vous', 'fr');
+    assert(frCaution.hazardLevel === 'caution', 'French "trottoir" / "chaise" flags caution');
+    assert(frCaution.hapticPattern === 'warning', 'French caution triggers warning vibration');
+    assert(frCaution.obstaclesDetected[0] === 'Obstacle à proximité', 'French caution label is localized');
+
+    const frSafe = parseNavGuidance('Le passage est complètement dégagé', 'fr');
+    assert(frSafe.hazardLevel === 'safe', 'French clear path flags safe');
+    assert(frSafe.hapticPattern === 'clear', 'French safe returns clear haptic pattern');
+    assert(frSafe.obstaclesDetected.length === 0, 'French safe returns no obstacle labels');
+
+    // Arabic Extended Synonyms & Dialect Safety
+    const arDangerFemale = parseNavGuidance('احترسي، فيه عربية جاية بسرعة في الشارع', 'ar');
+    assert(arDangerFemale.hazardLevel === 'danger', 'Arabic female warning "احترسي" + "عربية" flags danger');
+
+    const arDangerHamza = parseNavGuidance('إحذر، يوجد درج وسقوط محتمل', 'ar');
+    assert(arDangerHamza.hazardLevel === 'danger', 'Arabic Hamza normalized "إحذر" + "درج" flags danger');
+
+    const arCaution = parseNavGuidance('فيه كرسي وترابيزة قدامك على بعد مترين', 'ar');
+    assert(arCaution.hazardLevel === 'caution', 'Arabic furniture "كرسي" + "ترابيزة" flags caution');
+    assert(arCaution.obstaclesDetected[0] === 'عائق محيطي', 'Arabic caution label is localized');
+
+    // English Fallback & Baseline
+    const enDanger = parseNavGuidance('Watch out! Steep drop and stairs ahead', 'en');
+    assert(enDanger.hazardLevel === 'danger', 'English "watch out" + "stairs" flags danger');
+
+    const enCaution = parseNavGuidance('There is a chair and backpack in front of you', 'en');
+    assert(enCaution.hazardLevel === 'caution', 'English "chair" flags caution');
   }
 
   // 2. Concept Graph & Root-Cause Diagnosis Tests
