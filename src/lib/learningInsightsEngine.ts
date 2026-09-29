@@ -121,27 +121,38 @@ export function generateLearningInsights(
   // 2. Cognitive Strain & Latency Warnings
   // --------------------------------------------------------------------------
   for (const [conceptId, record] of masteryEntries) {
-    const avgLatencyMs = record.avgResponseTimeMs || (record.consecutiveIncorrect >= 2 ? 18200 : 6000);
-    const hasHighLatency = avgLatencyMs > 15000;
+    const hasRealLatency = typeof record.avgResponseTimeMs === 'number' && record.avgResponseTimeMs > 0;
+    const avgLatencyMs = hasRealLatency ? record.avgResponseTimeMs! : 0;
+    const hasHighLatency = hasRealLatency && avgLatencyMs > 15000;
     const isStraining =
       record.consecutiveIncorrect >= 2 ||
-      (state.learningStrain?.possibleStruggle > 0.6 && hasHighLatency);
+      (state.learningStrain?.possibleStruggle > 0.6 && (hasHighLatency || record.consecutiveIncorrect >= 1));
 
     if (isStraining) {
       const node = getConcept(conceptId);
       const nameEn = node?.nameEn || conceptId.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
       const nameAr = node?.nameAr || conceptId;
 
-      const latencySec = (avgLatencyMs / 1000).toFixed(1);
-      const deltaStr = `${latencySec}s latency (${record.consecutiveIncorrect} errors)`;
+      const latencySec = hasRealLatency ? (avgLatencyMs / 1000).toFixed(1) : null;
+      const deltaStr = hasRealLatency
+        ? `${latencySec}s latency (${record.consecutiveIncorrect} errors)`
+        : `${record.consecutiveIncorrect} consecutive errors`;
+
+      const evidenceEn = hasRealLatency
+        ? `${nameEn} response time rose to ${latencySec}s with ${record.consecutiveIncorrect} consecutive incorrect answers.`
+        : `${nameEn} encountered ${record.consecutiveIncorrect} consecutive incorrect answers.`;
+
+      const evidenceAr = hasRealLatency
+        ? `ارتفع زمن استجابة ${nameAr} إلى ${latencySec} ثانية مع ${record.consecutiveIncorrect} أخطاء متتالية.`
+        : `سُجِّلت ${record.consecutiveIncorrect} أخطاء متتالية في مفهوم ${nameAr}.`;
 
       insights.push({
         id: `insight_strain_${conceptId}`,
         category: 'cognitive_strain',
         headlineEn: `Cognitive Strain Detected on ${nameEn}`,
         headlineAr: `رصد عبء إدراكي في ${nameAr}`,
-        evidenceEn: `${nameEn} response time rose to ${latencySec}s with ${record.consecutiveIncorrect} consecutive incorrect answers.`,
-        evidenceAr: `ارتفع زمن استجابة ${nameAr} إلى ${latencySec} ثانية مع ${record.consecutiveIncorrect} أخطاء متتالية.`,
+        evidenceEn,
+        evidenceAr,
         interpretationEn: `Abstract notation is creating cognitive friction. Visual grounding and concrete memory diagrams are required.`,
         interpretationAr: `الصياغة المجردة تولد عبئًا معرفيًا. يلزم تقديم تمثيل بصري ونموذج ذاكرة واقعي لتبسيط الفهم.`,
         action: {
