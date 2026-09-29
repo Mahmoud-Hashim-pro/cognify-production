@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Sliders,
   Lock,
@@ -302,3 +302,5 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
     </div>
   );
 };
+
+export default AccessibilityPreferencesModal;

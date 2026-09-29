@@ -306,6 +306,21 @@ async function runSuite() {
 
   assert(dashboard.institutionId === 'uni_cairo_fci', 'Embeds correct institution ID');
   assert(dashboard.departments.length === 2, 'Aggregates 2 departments (CS and IS)');
+
+  const csDept = dashboard.departments.find((d) => d.departmentId === 'cs');
+  const isDept = dashboard.departments.find((d) => d.departmentId === 'is');
+  // 3 critical students in CS cohort of 26: 23/26 = 0.88 retention
+  assert(csDept?.retentionRate === 0.88, `CS retention rate computed from cohort telemetry: ${csDept?.retentionRate} (not static 0.94)`);
+  // 0 critical students in IS cohort of 20: 20/20 = 1.0 retention
+  assert(isDept?.retentionRate === 1, `IS retention rate computed from cohort telemetry: ${isDept?.retentionRate}`);
+
+  assert(so1?.isTemplateData === false, 'SO-1 is marked as empirical telemetry (isTemplateData === false)');
+  assert(so1?.dataSource === 'empirical_student_mastery', 'SO-1 data source is empirical_student_mastery');
+  const so2 = accreditation.outcomesAttainment.find((o) => o.outcomeId === 'SO-2');
+  assert(so2?.isTemplateData === true, 'SO-2 is transparently marked as illustrative template (isTemplateData === true)');
+  assert(accreditation.continuousImprovementLoop.isTemplateData === true, 'Continuous improvement loop marked as template');
+  assert(accreditation.continuousImprovementLoop.identifiedGapEn.includes(bottlenecks[0].conceptNameEn), 'Continuous improvement gap dynamically derived from detected bottleneck');
+
   assert(dashboard.bottlenecks.length > 0, 'Embeds curricular bottlenecks');
   assert(dashboard.earlyWarningRadar.length === 4, 'Embeds 4-tier early-warning radar');
   assert(dashboard.kAnonymityAudit.minimumCohortSize === 5, 'Embeds k-anonymity audit in compiled dashboard');

@@ -57,6 +57,9 @@ export async function runLearningProfileContractVerification(
   assert(baselineProfile.displayName === 'Yousef Gamal', 'Profile displayName matches passed name');
   assert(typeof baselineProfile.overallMasteryPercentage === 'number', 'overallMasteryPercentage is numeric');
   assert(baselineProfile.overallMasteryPercentage >= 0 && baselineProfile.overallMasteryPercentage <= 100, 'overallMasteryPercentage is bounded 0-100');
+  assert(baselineProfile.overallMasteryPercentage === 0, 'baseline overallMasteryPercentage is 0 with 0 concepts');
+  assert(baselineProfile.overallConfidencePercentage === 0, 'baseline overallConfidencePercentage is 0 with 0 concepts');
+  assert(baselineProfile.isAssessed === false, 'baseline isAssessed is false with 0 concepts');
   assert(typeof baselineProfile.overallConfidencePercentage === 'number', 'overallConfidencePercentage is numeric');
   assert(Array.isArray(baselineProfile.effectiveStrategies), 'effectiveStrategies is an array');
   assert(baselineProfile.effectiveStrategies.length === 5, 'All 5 canonical pedagogy strategies are evaluated');
@@ -121,6 +124,7 @@ export async function runLearningProfileContractVerification(
   assert(pointersSummary.masteryPercentage > 0, 'Pointers mastery percentage is positive');
   assert(pointersSummary.confidencePercentage >= 0, 'Pointers confidence percentage is valid');
   assert(profileAfter3.overallMasteryPercentage > 0, 'Overall mastery percentage increases after practice');
+  assert(profileAfter3.isAssessed === true, 'isAssessed becomes true after practice');
 
   // --------------------------------------------------------------------------
   // TEST 5: Prerequisite Diagnosis in Current Learning Focus

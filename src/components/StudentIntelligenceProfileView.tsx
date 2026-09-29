@@ -204,7 +204,9 @@ export default function StudentIntelligenceProfileView({
                   )}
                 </h1>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#4A1224]/30 border border-[#E5A93C]/30 text-[#E5A93C]">
-                  {learningProfile.overallMasteryPercentage}% {localize(profile.language, 'Mastery', 'إتقان')}
+                  {learningProfile.isAssessed
+                    ? `${learningProfile.overallMasteryPercentage}% ${localize(profile.language, 'Mastery', 'إتقان')}`
+                    : localize(profile.language, 'Not Assessed Yet', 'لم يبدأ التقييم بعد')}
                 </span>
               </div>
               <p className="text-xs text-slate-400 hidden sm:block">
@@ -272,7 +274,7 @@ export default function StudentIntelligenceProfileView({
               {localize(profile.language, 'Overall Confidence', 'معدل الثقة العام')}
             </div>
             <div className="text-2xl font-bold text-[#E5A93C]">
-              {learningProfile.overallConfidencePercentage}%
+              {learningProfile.isAssessed ? `${learningProfile.overallConfidencePercentage}%` : '—'}
             </div>
           </div>
         </div>

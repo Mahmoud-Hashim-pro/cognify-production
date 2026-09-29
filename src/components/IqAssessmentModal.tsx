@@ -8,6 +8,8 @@ import {
   calculateStandardizedIq,
   checkIqCooldownEligibility,
   IqQuestion,
+  COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
+  COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
 } from '../lib/iqAssessment';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db, cleanDataForFirestore, handleFirestoreError, OperationType } from '../lib/firebase';
@@ -186,8 +188,8 @@ export default function IqAssessmentModal({
         toast.success(
           localize(
             profile.language,
-            `Cognitive calibration complete! Standardized score: ${iqScore}`,
-            `تم اكتمال المعايرة المعرفية! الدرجة المعيارية: ${iqScore}`
+            `Cognitive style calibrated! Style Index: ${iqScore}`,
+            `تم اكتمال مواءمة الأسلوب المعرفي! مؤشر الأسلوب: ${iqScore}`
           ),
           localize(profile.language, 'Assessment Recorded', 'تم حفظ التقييم')
         );
@@ -214,9 +216,9 @@ export default function IqAssessmentModal({
             </div>
             <div>
               <h2 className="font-black text-white text-base flex items-center gap-2.5 tracking-tight">
-                {localize(profile.language, 'Scientific Cognitive Assessment', 'التقييم المعرفي العلمي')}
+                {localize(profile.language, 'Cognitive Style Preview', 'استكشاف الأسلوب المعرفي والتعليمي')}
                 <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
-                  CHC Framework
+                  Adaptive
                 </span>
               </h2>
               <p className="text-xs text-slate-400 font-medium mt-0.5">
@@ -241,6 +243,11 @@ export default function IqAssessmentModal({
           {/* ─── INTRO STEP ──────────────────────────────────────────────── */}
           {step === 'intro' && (
             <div className="space-y-6">
+              {/* Ethical & Non-Clinical Disclaimer */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 leading-relaxed flex items-start gap-2.5">
+                <span className="text-base shrink-0">⚖️</span>
+                <p>{localize(profile.language, COGNITIVE_ASSESSMENT_DISCLAIMER_EN, COGNITIVE_ASSESSMENT_DISCLAIMER_AR)}</p>
+              </div>
               {/* Cooldown Lock Warning if not eligible */}
               {!cooldownInfo.isEligible ? (
                 <div className="p-5 rounded-3xl bg-amber-500/10 border border-amber-500/30 space-y-3 text-amber-200">
@@ -486,24 +493,33 @@ export default function IqAssessmentModal({
 
               <div>
                 <h3 className="text-2xl font-black text-white tracking-tight">
-                  {localize(profile.language, 'Assessment Complete', 'اكتمل التقييم المعرفي')}
+                  {localize(profile.language, 'Style Discovery Complete', 'اكتمل استكشاف الأسلوب المعرفي')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1 font-medium">
-                  {localize(profile.language, 'Standardized against normative cognitive benchmarks (Mean: 100, SD: 15).', 'معاير وفقاً للمقاييس المعرفية القياسية (المتوسط: 100، الانحراف: 15).')}
+                  {localize(profile.language, 'Informal exploratory index to personalize AI explanations and guidance pacing.', 'مؤشر استكشافي غير رسمي لتخصيص شروحات الذكاء الاصطناعي وتدرجها.')}
                 </p>
+              </div>
+
+              {/* Ethical Disclaimer Banner */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 leading-relaxed text-start flex items-start gap-2.5 max-w-lg mx-auto">
+                <span className="text-base shrink-0">⚖️</span>
+                <p>{localize(profile.language, COGNITIVE_ASSESSMENT_DISCLAIMER_EN, COGNITIVE_ASSESSMENT_DISCLAIMER_AR)}</p>
               </div>
 
               {/* Main Score Card */}
               <div className="p-8 rounded-3xl bg-[#080409] border border-[#4A1224]/60 shadow-2xl max-w-sm mx-auto">
                 <div className="text-xs text-slate-400 font-black tracking-wider uppercase mb-2">
-                  {localize(profile.language, 'Composite Cognitive Score', 'معدل الذكاء المعياري المركب')}
+                  {localize(profile.language, 'Cognitive Style Index', 'مؤشر الأسلوب المعرفي')}
                 </div>
                 <div className="text-6xl font-black text-[#E5A93C] font-mono tracking-tight">
                   {assessmentResult.iqScore}
                 </div>
                 <div className="mt-4 inline-block px-4 py-1.5 rounded-full bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] text-xs font-bold">
-                  {assessmentResult.recommendedPersona}{' '}
-                  {localize(profile.language, 'Persona Calibrated', 'نمط معاير')}
+                  {assessmentResult.recommendedPersona === 'Foundational'
+                    ? localize(profile.language, 'Scaffolded Guidance', 'توجيه تأسيسي متدرج')
+                    : assessmentResult.recommendedPersona === 'Socratic'
+                    ? localize(profile.language, 'Socratic Inquiry', 'توجيه استكشافي متقدم')
+                    : localize(profile.language, 'Balanced Adaptive', 'توجيه متوازن متكيف')}
                 </div>
               </div>
 

@@ -30,6 +30,18 @@ import {
 } from '../src/lib/spatialMemoryEngine.js';
 import { localize } from '../src/lib/translations.js';
 import { canAccessView } from '../src/lib/access.js';
+import { attendancePct, absencesRemaining, isDeprived } from '../src/lib/attendance.js';
+import { computeCohortAnalytics, K_ANONYMITY_THRESHOLD } from '../src/lib/institution.js';
+import {
+  calculateStandardizedIq,
+  COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
+  COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
+} from '../src/lib/iqAssessment.js';
+import { parseNavGuidance } from '../src/lib/hapticNavEngine.js';
+import {
+  listenPendingCaregiverRequests,
+  sendCaregiverLinkRequest,
+} from '../src/lib/caregiverLinking.js';
 import { detectConversationalStrain } from '../src/lib/conversationalStrain.js';
 import {
   getDatabaseHealth,
@@ -104,6 +116,169 @@ async function run() {
 
     const g3 = calculateNormalizedGain(80, 60);
     assert(g3 < 0 && g3 >= -1.0, 'Regression properly returns negative gain');
+  }
+
+  // 1b. Attendance Tracker & Deprivation Invariant
+  console.log('\n[1b] Attendance Tracker & Deprivation Invariant');
+  {
+    // Early semester case: 0 attended, 1 absent, totalPlanned = 30, threshold = 75%
+    const earlyStudent = {
+      id: 'sub-1',
+      name: 'Algorithms',
+      attended: 0,
+      absent: 1,
+      totalPlanned: 30,
+      threshold: 75,
+      createdAt: new Date().toISOString(),
+    };
+    assert(isDeprived(earlyStudent) === false, 'Early semester single absence does not flag student as deprived');
+    assert(absencesRemaining(earlyStudent) === 6, 'absencesRemaining calculates 6 allowed absences remaining');
+
+    // Edge case: exactly at threshold limit (7 absences out of 30)
+    const atLimitStudent = { ...earlyStudent, attended: 22, absent: 7 };
+    assert(isDeprived(atLimitStudent) === false, 'Student at exact max absence limit is not yet deprived');
+    assert(absencesRemaining(atLimitStudent) === 0, 'Student at exact limit has 0 absences remaining');
+
+    // Exceeded threshold: 8 absences out of 30 (cannot reach 75%)
+    const overLimitStudent = { ...earlyStudent, attended: 21, absent: 8 };
+    assert(isDeprived(overLimitStudent) === true, 'Student exceeding max absences is correctly flagged as deprived');
+    assert(absencesRemaining(overLimitStudent) === 0, 'Deprived student has 0 absences remaining');
+
+    // Fallback when totalPlanned is 0 / unknown
+    const fallbackStudent = {
+      id: 'sub-2',
+      name: 'Data Structures',
+      attended: 8,
+      absent: 2,
+      totalPlanned: 0,
+      threshold: 75,
+      createdAt: new Date().toISOString(),
+    };
+    assert(isDeprived(fallbackStudent) === false, 'Fallback uses held sessions when totalPlanned is 0 (80% >= 75%)');
+    assert(isDeprived({ ...fallbackStudent, attended: 7, absent: 3 }) === true, 'Fallback flags deprived when held sessions drop below threshold (70% < 75%)');
+
+    // Zero sessions safety
+    const zeroStudent = { id: 'sub-3', name: 'New Course', attended: 0, absent: 0, totalPlanned: 0, threshold: 75, createdAt: new Date().toISOString() };
+    assert(isDeprived(zeroStudent) === false, 'Zero held sessions safely returns false');
+    assert(attendancePct(zeroStudent) === 100, 'Zero held sessions defaults to 100%');
+  }
+
+  // 1c. Institutional Privacy & k-Anonymity Leakage Prevention
+  console.log('\n[1c] Institutional Privacy & k-Anonymity Leakage Prevention');
+  {
+    // Small cohort with 4 students (1 Deaf, 3 None) - MUST NOT LEAK attributes in distributions
+    const smallCohort: any[] = [
+      { uid: 's1', name: 'Alice', accessibilityMode: 'Deaf', level: 'Intermediate', points: 100, university: 'Ain Shams' },
+      { uid: 's2', name: 'Bob', accessibilityMode: 'None', level: 'Basic', points: 80, university: 'Ain Shams' },
+      { uid: 's3', name: 'Charlie', accessibilityMode: 'None', level: 'Intermediate', points: 90, university: 'Ain Shams' },
+      { uid: 's4', name: 'Diana', accessibilityMode: 'None', level: 'Advanced', points: 120, university: 'Ain Shams' },
+    ];
+
+    const statsSmall = computeCohortAnalytics(smallCohort, 'Ain Shams');
+    assert(statsSmall.kAnonymitySuppressed === true, 'Cohort with 4 students triggers kAnonymitySuppressed');
+    assert(statsSmall.students.length === 0, 'Individual student roster is suppressed (0 items)');
+    assert(statsSmall.accessibilityModeBreakdown.Deaf === 0, 'Deaf mode count is suppressed (0) to prevent quasi-identifier deduction');
+    assert(statsSmall.accessibilityModeBreakdown.None === 0, 'All accessibility breakdown counts are suppressed');
+    assert(statsSmall.cognitiveLevelDistribution.Basic === 0, 'Cognitive level distribution is suppressed');
+    assert(statsSmall.accessibilityAdoptionRate === 0, 'Accessibility adoption rate is suppressed to 0');
+    assert(statsSmall.averageGpa === null, 'Average GPA is suppressed to null');
+
+    // Valid cohort with 5 students (k >= 5) - allows aggregate distributions
+    const validCohort: any[] = [
+      ...smallCohort,
+      { uid: 's5', name: 'Edward', accessibilityMode: 'Vision', level: 'Basic', points: 70, university: 'Ain Shams' },
+    ];
+    const statsValid = computeCohortAnalytics(validCohort, 'Ain Shams');
+    assert(statsValid.kAnonymitySuppressed === false, 'Cohort with 5 students satisfies k-anonymity (k >= 5)');
+    assert(statsValid.students.length === 5, 'Individual anonymized student roster is revealed');
+    assert(statsValid.accessibilityModeBreakdown.Deaf === 1, 'Accessibility breakdown is accurately reported when k >= 5');
+    assert(statsValid.accessibilityModeBreakdown.Vision === 1, 'Vision mode accurately reported when k >= 5');
+    assert(statsValid.cognitiveLevelDistribution.Basic === 2, 'Cognitive distribution accurately reported when k >= 5');
+  }
+
+  // 1d. Cognitive Style & Ethical Disclaimers
+  console.log('\n[1d] Cognitive Style & Ethical Disclaimers');
+  {
+    assert(typeof COGNITIVE_ASSESSMENT_DISCLAIMER_EN === 'string' && COGNITIVE_ASSESSMENT_DISCLAIMER_EN.includes('NOT a clinical IQ test'), 'English ethical disclaimer clearly states non-clinical nature');
+    assert(typeof COGNITIVE_ASSESSMENT_DISCLAIMER_AR === 'string' && COGNITIVE_ASSESSMENT_DISCLAIMER_AR.includes('ليس اختبار ذكاء رسمي'), 'Arabic ethical disclaimer clearly states non-clinical nature');
+
+    // Scoring returns exploratory index and domain percentages
+    const sampleAnswers = { gf_01: 'opt_3', gf_02: 'opt_2' };
+    const res = calculateStandardizedIq(sampleAnswers, 300);
+    assert(typeof res.iqScore === 'number' && res.iqScore >= 75 && res.iqScore <= 130, 'Style index maps into exploratory 75-130 range');
+    assert(typeof res.domainScores.fluidReasoning === 'number', 'Domain scores report numeric percentages');
+    assert(res.recommendedPersona === 'Foundational' || res.recommendedPersona === 'Balanced' || res.recommendedPersona === 'Socratic', 'Recommended persona maps to valid pedagogical style');
+  }
+
+  // 1e. Multilingual Haptic Navigation Hazard Classification (Safety Critical)
+  console.log('\n[1e] Multilingual Haptic Navigation Hazard Classification');
+  {
+    // French Danger & Obstacle Detection
+    const frDanger1 = parseNavGuidance('Attention, il y a un escalier devant vous', 'fr');
+    assert(frDanger1.hazardLevel === 'danger', 'French "escalier" flags danger hazard level');
+    assert(frDanger1.hapticPattern === 'danger', 'French danger triggers danger haptic pulse');
+    assert(frDanger1.obstaclesDetected[0] === 'Obstacle dangereux ou dénivelé', 'French danger label is localized correctly');
+
+    const frDanger2 = parseNavGuidance('Véhicule en approche rapide sur la route', 'fr');
+    assert(frDanger2.hazardLevel === 'danger', 'French "véhicule" / "route" flags danger');
+
+    const frDangerNormalized = parseNavGuidance('Attention au trou et a la chute', 'fr');
+    assert(frDangerNormalized.hazardLevel === 'danger', 'French unaccented "chute" / "trou" flags danger');
+
+    // French Caution & Safe Detection
+    const frCaution = parseNavGuidance('Prudence, trottoir avec une chaise devant vous', 'fr');
+    assert(frCaution.hazardLevel === 'caution', 'French "trottoir" / "chaise" flags caution');
+    assert(frCaution.hapticPattern === 'warning', 'French caution triggers warning vibration');
+    assert(frCaution.obstaclesDetected[0] === 'Obstacle à proximité', 'French caution label is localized');
+
+    const frSafe = parseNavGuidance('Le passage est complètement dégagé', 'fr');
+    assert(frSafe.hazardLevel === 'safe', 'French clear path flags safe');
+    assert(frSafe.hapticPattern === 'clear', 'French safe returns clear haptic pattern');
+    assert(frSafe.obstaclesDetected.length === 0, 'French safe returns no obstacle labels');
+
+    // Arabic Extended Synonyms & Dialect Safety
+    const arDangerFemale = parseNavGuidance('احترسي، فيه عربية جاية بسرعة في الشارع', 'ar');
+    assert(arDangerFemale.hazardLevel === 'danger', 'Arabic female warning "احترسي" + "عربية" flags danger');
+
+    const arDangerHamza = parseNavGuidance('إحذر، يوجد درج وسقوط محتمل', 'ar');
+    assert(arDangerHamza.hazardLevel === 'danger', 'Arabic Hamza normalized "إحذر" + "درج" flags danger');
+
+    const arCaution = parseNavGuidance('فيه كرسي وترابيزة قدامك على بعد مترين', 'ar');
+    assert(arCaution.hazardLevel === 'caution', 'Arabic furniture "كرسي" + "ترابيزة" flags caution');
+    assert(arCaution.obstaclesDetected[0] === 'عائق محيطي', 'Arabic caution label is localized');
+
+    // English Fallback & Baseline
+    const enDanger = parseNavGuidance('Watch out! Steep drop and stairs ahead', 'en');
+    assert(enDanger.hazardLevel === 'danger', 'English "watch out" + "stairs" flags danger');
+
+    const enCaution = parseNavGuidance('There is a chair and backpack in front of you', 'en');
+    assert(enCaution.hazardLevel === 'caution', 'English "chair" flags caution');
+  }
+
+  // 1f. Consent-Based Caregiver Linking & Query Security
+  console.log('\n[1f] Consent-Based Caregiver Linking & Query Security');
+  {
+    // Empty childUid guard
+    const unsub = listenPendingCaregiverRequests('', () => {});
+    assert(typeof unsub === 'function', 'Empty childUid safely returns no-op unsubscribe without querying Firestore');
+
+    // Self-linking prevention
+    let selfLinkCaught = false;
+    try {
+      await sendCaregiverLinkRequest('same-uid', 'Parent Name', 'parent@test.com', 'same-uid');
+    } catch (e: any) {
+      selfLinkCaught = e?.message === 'Invalid link request.';
+    }
+    assert(selfLinkCaught, 'Self-linking (parentUid === childUid) is blocked with Invalid link request.');
+
+    // Empty parameters prevention
+    let emptyIdCaught = false;
+    try {
+      await sendCaregiverLinkRequest('', 'Parent Name', 'parent@test.com', 'child-uid');
+    } catch (e: any) {
+      emptyIdCaught = e?.message === 'Invalid link request.';
+    }
+    assert(emptyIdCaught, 'Empty parentUid is blocked with Invalid link request.');
   }
 
   // 2. Concept Graph & Root-Cause Diagnosis Tests
@@ -2017,6 +2192,9 @@ Keep practicing closures with higher-order functions!
 
     const instDash = compileInstitutionalDashboard('uni_cairo', 'Cairo University', { cs: uniStudents });
     assert(instDash.departments.length === 1 && instDash.kAnonymityAudit.suppressionApplied === true, 'Compiles complete institutional intelligence dashboard');
+    assert(instDash.departments[0].retentionRate === 0.7, 'Department retention rate is dynamically computed from non-dropout cohort (0.7, not static 0.94)');
+    assert(accreditation.outcomesAttainment[0].isTemplateData === false, 'SO-1 is flagged as empirical telemetry');
+    assert(accreditation.continuousImprovementLoop.isTemplateData === true, 'Continuous improvement loop flagged as template');
   }
 
   // 47. Milestone 16: Privacy & Security Intelligence

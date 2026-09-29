@@ -582,6 +582,15 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
                         >
                           {so.status.replace('_', ' ').toUpperCase()}
                         </span>
+                        {so.isTemplateData ? (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            {isAr ? 'قالب توضيحي' : 'Template Data'}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                            {isAr ? 'بيانات حقيقية' : 'Empirical Telemetry'}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs sm:text-sm text-slate-300">
                         {isAr ? so.descriptionAr : so.descriptionEn}
@@ -604,13 +613,20 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
 
               {/* Closing The Loop Banner */}
               <div className="p-5 rounded-2xl bg-indigo-950/40 border border-[#4A1224]/60 space-y-3">
-                <div className="flex items-center gap-2 text-indigo-300 font-bold text-sm">
-                  <Sparkles className="w-4 h-4" />
-                  <span>{isAr ? 'حلقة التحسين المستمر (Closing the Loop)' : 'Continuous Improvement Cycle'}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-indigo-300 font-bold text-sm">
+                    <Sparkles className="w-4 h-4" />
+                    <span>{isAr ? 'حلقة التحسين المستمر (Closing the Loop)' : 'Continuous Improvement Cycle'}</span>
+                  </div>
+                  {dashboardData.accreditation.continuousImprovementLoop.isTemplateData && (
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {isAr ? 'قالب استرشادي' : 'Illustrative Template'}
+                    </span>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-300">
                   <div className="space-y-1">
-                    <span className="font-bold text-amber-300">{isAr ? 'الفجوة المرصودة:' : 'Identified Gap:'}</span>
+                    <span className="font-bold text-amber-300">{isAr ? 'الفجوة المرصودة (مستخلصة من الاختناقات):' : 'Identified Gap (Derived from Bottlenecks):'}</span>
                     <p>{isAr ? dashboardData.accreditation.continuousImprovementLoop.identifiedGapAr : dashboardData.accreditation.continuousImprovementLoop.identifiedGapEn}</p>
                   </div>
                   <div className="space-y-1">
@@ -618,12 +634,17 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
                     <p>{isAr ? dashboardData.accreditation.continuousImprovementLoop.implementedPedagogicalChangeAr : dashboardData.accreditation.continuousImprovementLoop.implementedPedagogicalChangeEn}</p>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-indigo-500/20 flex items-center justify-between text-xs">
+                <div className="pt-2 border-t border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                   <span className="text-indigo-300 font-semibold">{isAr ? 'الأثر الإيجابي المقاس:' : 'Measured Impact Gain:'}</span>
                   <span className="font-extrabold text-emerald-400">
                     +{dashboardData.accreditation.continuousImprovementLoop.measuredImpactGainPercentage}% {isAr ? 'تحسن في الإتقان' : 'gain'}
                   </span>
                 </div>
+                {dashboardData.accreditation.continuousImprovementLoop.disclaimerAr && (
+                  <p className="text-[11px] text-amber-200/80 bg-amber-950/30 p-2.5 rounded-xl border border-amber-500/20">
+                    ⚠️ {isAr ? dashboardData.accreditation.continuousImprovementLoop.disclaimerAr : dashboardData.accreditation.continuousImprovementLoop.disclaimerEn}
+                  </p>
+                )}
               </div>
             </div>
           </div>

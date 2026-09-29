@@ -49,6 +49,9 @@ import {
   clearSecurityAudits,
   SecurityAuditRecord,
 } from "../lib/securityTracker";
+import BusinessTenancyView from "./BusinessTenancyView";
+import DeveloperApiConsole from "./DeveloperApiConsole";
+import SystemResilienceDashboard from "./SystemResilienceDashboard";
 
 interface AdminDashboardProps {
   profile: UserProfile;
@@ -123,7 +126,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
   const [passwordModalUser, setPasswordModalUser] = useState<UserProfile | null>(null);
   const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
   const [busyUid, setBusyUid] = useState<string | null>(null);
-  const [adminView, setAdminView] = useState<'directory' | 'accessibility' | 'analytics' | 'database' | 'security'>('directory');
+  const [adminView, setAdminView] = useState<'directory' | 'accessibility' | 'analytics' | 'database' | 'security' | 'tenancy' | 'api' | 'resilience'>('directory');
   const [copiedEmails, setCopiedEmails] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [selectedUserForModal, setSelectedUserForModal] = useState<UserProfile | null>(null);
@@ -1215,6 +1218,12 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 <Accessibility className="w-6 h-6 text-rose-400" />
               ) : adminView === 'analytics' ? (
                 <BarChart2 className="w-6 h-6 text-indigo-400" />
+              ) : adminView === 'tenancy' ? (
+                <Building2 className="w-6 h-6 text-cyan-400" />
+              ) : adminView === 'api' ? (
+                <Terminal className="w-6 h-6 text-amber-400" />
+              ) : adminView === 'resilience' ? (
+                <Activity className="w-6 h-6 text-emerald-400" />
               ) : (
                 <Users className="w-6 h-6 text-[#E5A93C]" />
               )}
@@ -1235,6 +1244,9 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                  adminView === 'security' ? 'Security & DevTools Inspect Telemetry Stream' :
                  adminView === 'accessibility' ? 'Accessibility Center · Special Needs Command' :
                  adminView === 'analytics' ? 'System Insights & Cognitive Diagnostics' :
+                 adminView === 'tenancy' ? 'Multi-Tenant Business & Organization Management' :
+                 adminView === 'api' ? 'Developer API Console, Webhooks & Token Quotas' :
+                 adminView === 'resilience' ? 'System Resilience, Circuit Breakers & Failover Hub' :
                  'Global User Directory & Access Management'}
               </p>
             </div>
@@ -1296,6 +1308,34 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                     </span>
                   )}
                 </button>
+              )}
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setAdminView('tenancy')}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                      adminView === 'tenancy' ? 'bg-cyan-600 text-white shadow-md font-extrabold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Building2 className="w-3.5 h-3.5" /> Tenancy
+                  </button>
+                  <button
+                    onClick={() => setAdminView('api')}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                      adminView === 'api' ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Terminal className="w-3.5 h-3.5" /> API
+                  </button>
+                  <button
+                    onClick={() => setAdminView('resilience')}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                      adminView === 'resilience' ? 'bg-emerald-600 text-white shadow-md font-extrabold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Activity className="w-3.5 h-3.5" /> Resilience
+                  </button>
+                </>
               )}
             </div>
 
@@ -3748,6 +3788,27 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 </div>
               </div>
             )
+          )}
+
+          {/* VIEW 6: BUSINESS TENANCY & MULTI-ORGANIZATION MANAGEMENT */}
+          {adminView === 'tenancy' && (
+            <div className="space-y-6">
+              <BusinessTenancyView isArabic={profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya'} />
+            </div>
+          )}
+
+          {/* VIEW 7: DEVELOPER API CONSOLE & WEBHOOKS */}
+          {adminView === 'api' && (
+            <div className="space-y-6">
+              <DeveloperApiConsole isArabic={profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya'} />
+            </div>
+          )}
+
+          {/* VIEW 8: SYSTEM RESILIENCE & ADAPTIVE ARCHITECTURE */}
+          {adminView === 'resilience' && (
+            <div className="space-y-6">
+              <SystemResilienceDashboard isArabic={profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya'} />
+            </div>
           )}
 
         </div>
