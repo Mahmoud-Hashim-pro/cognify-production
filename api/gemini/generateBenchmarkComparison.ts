@@ -6,14 +6,24 @@
  * wrote the original answer, so it is presented honestly as a self-review.
  */
 import { guard, readBody, generateText } from '../_lib/ai.js';
+import { applyCorsHeaders } from '../_lib/cors.js';
 
 export default async function handler(req: any, res: any) {
+  if (!applyCorsHeaders(req, res)) return;
   if (!(await guard(req, res))) return;
 
   try {
     const { originalMessage = '', userMessage = '', profile = {} } = await readBody(req);
     if (!originalMessage && !userMessage) {
       res.status(400).json({ error: 'originalMessage or userMessage is required' });
+      return;
+    }
+
+    if (
+      (typeof originalMessage === 'string' && originalMessage.length > 32000) ||
+      (typeof userMessage === 'string' && userMessage.length > 32000)
+    ) {
+      res.status(400).json({ error: 'Payload too large: input exceeds 32,000 characters limit' });
       return;
     }
     const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';

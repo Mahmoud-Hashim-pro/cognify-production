@@ -721,9 +721,15 @@ export async function readBody(req: any): Promise<any> {
 
 import { verifyRequestAuth } from './authGuard.js';
 import { checkRateLimit } from './rateLimiter.js';
+import { applyCorsHeaders } from './cors.js';
 
 /** Shared guard: POST only, authentication, provider key check, and dual-tier rate limiting (IP + User). */
 export async function guard(req: any, res: any): Promise<boolean> {
+  // 0. CORS & Preflight OPTIONS Handling
+  if (!applyCorsHeaders(req, res)) {
+    return false;
+  }
+
   // If already authenticated and guarded upstream (e.g. in Express middleware), proceed immediately
   if (req.authenticatedUid) {
     return true;

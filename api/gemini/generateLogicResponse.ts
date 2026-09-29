@@ -1,13 +1,20 @@
 /** Module-scoped helper (planner/goals/etc). Returns { result }. */
 import { guard, readBody, buildPersona, buildOpenAIMessages, buildContents, geminiFetch, fallbackChat } from '../_lib/ai.js';
+import { applyCorsHeaders } from '../_lib/cors.js';
 
 export default async function handler(req: any, res: any) {
+  if (!applyCorsHeaders(req, res)) return;
   if (!(await guard(req, res))) return;
 
   try {
     const { message, profile = {}, moduleName = '', history = [] } = await readBody(req);
     if (!message || typeof message !== 'string') {
       res.status(400).json({ error: 'message is required' });
+      return;
+    }
+
+    if (message.length > 32000) {
+      res.status(400).json({ error: 'Payload too large: message exceeds 32,000 characters limit' });
       return;
     }
 

@@ -14,8 +14,10 @@
  * be served by those text-only fallbacks, which matches the previous behaviour.
  */
 import { guard, readBody, geminiFetch, fallbackChat } from '../_lib/ai.js';
+import { applyCorsHeaders } from '../_lib/cors.js';
 
 export default async function handler(req: any, res: any) {
+  if (!applyCorsHeaders(req, res)) return;
   if (!(await guard(req, res))) return;
 
   try {
