@@ -22,7 +22,7 @@ import { isRTL, isArabicLocale, getTranslation, localize } from "./lib/translati
 import { canAccessSection } from "./lib/academics";
 import { canAccessView, homeViewFor, isAccessibilityUser, AppView } from "./lib/access";
 import { isAdminUser } from "./lib/roles";
-import { subscribeToStudentMemory, clearStudentMemory } from "./lib/memory";
+import { subscribeToStudentMemory, clearStudentMemory, getCachedStudentMemory, DEFAULT_STUDENT_MEMORY } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
 import { initSecurityTracker } from "./lib/securityTracker";
 import { getVisitorCountryCode } from "./lib/geo";
@@ -189,8 +189,19 @@ export default function App() {
   const [isIqModalOpen, setIsIqModalOpen] = useState(false);
 
   // Cognify Memory (Phase 2) state
-  const [memoryState, setMemoryState] = useState<StudentMemory | null>(null);
-  const [memoryLoading, setMemoryLoading] = useState<boolean>(true);
+  const [memoryState, setMemoryState] = useState<StudentMemory | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const lastUid = localStorage.getItem('last_known_uid');
+        if (lastUid) {
+          const cached = getCachedStudentMemory(lastUid);
+          if (cached) return cached;
+        }
+      } catch {}
+    }
+    return null;
+  });
+  const [memoryLoading, setMemoryLoading] = useState<boolean>(false);
   const [memoryError, setMemoryError] = useState<string | null>(null);
   const [memoryRetryCount, setMemoryRetryCount] = useState<number>(0);
 
@@ -205,18 +216,39 @@ export default function App() {
 
   // Subscribe to Cognify Memory snapshot from Firestore (Single Source of Truth)
   useEffect(() => {
-    if (!user?.uid) {
+    const activeUid = user?.uid || (profile?.uid === 'guest-explorer' ? 'guest-explorer' : profile?.uid);
+    if (!activeUid) {
       setMemoryState(null);
       setMemoryLoading(false);
       setMemoryError(null);
       return;
     }
 
-    setMemoryLoading(true);
+    try {
+      localStorage.setItem('last_known_uid', activeUid);
+    } catch {}
+
+    // 1. Immediately hydrate with cached memory if available
+    const cached = getCachedStudentMemory(activeUid);
+    if (cached) {
+      setMemoryState(cached);
+      setMemoryLoading(false);
+    } else {
+      setMemoryLoading(true);
+    }
     setMemoryError(null);
 
+    // 2. If guest or local demo profile, use default/cached memory immediately without remote call
+    if (activeUid === 'guest-explorer' || activeUid.startsWith('demo-')) {
+      setMemoryState(cached || DEFAULT_STUDENT_MEMORY);
+      setMemoryLoading(false);
+      setMemoryError(null);
+      return;
+    }
+
+    // 3. Subscribe to real-time updates from Firestore
     const unsubscribe = subscribeToStudentMemory(
-      user.uid,
+      activeUid,
       (mem) => {
         setMemoryState(mem);
         setMemoryLoading(false);
@@ -224,13 +256,15 @@ export default function App() {
       },
       (err) => {
         console.error('Firestore memory subscription error:', err);
-        setMemoryError('Failed to load Cognify Memory from Firestore.');
+        // Fall back gracefully to cache or default so the user is never stuck
+        setMemoryState((prev) => prev || cached || DEFAULT_STUDENT_MEMORY);
+        setMemoryError(null);
         setMemoryLoading(false);
       }
     );
 
     return () => unsubscribe();
-  }, [user?.uid, memoryRetryCount]);
+  }, [user?.uid, profile?.uid, memoryRetryCount]);
 
   // Merge memory snapshot with user profile
   const fullProfile: UserProfile | null = profile
@@ -970,17 +1004,20 @@ export default function App() {
         return (
           <StudentMemoryPage
             profile={activeProfile}
-            memory={memoryState}
+            memory={memoryState || DEFAULT_STUDENT_MEMORY}
             loading={memoryLoading}
             error={memoryError}
             onMenuClick={() => setIsMobileMenuOpen(true)}
             onNavigateBack={() => navigateTo(homeViewFor(profile))}
             onRetry={() => {
-              if (user?.uid) {
-                setMemoryLoading(true);
-                setMemoryError(null);
-                setMemoryRetryCount((c) => c + 1);
-              }
+              setMemoryLoading(true);
+              setMemoryError(null);
+              setMemoryRetryCount((c) => c + 1);
+            }}
+            onUseFallbackMemory={() => {
+              setMemoryState((prev) => prev || DEFAULT_STUDENT_MEMORY);
+              setMemoryLoading(false);
+              setMemoryError(null);
             }}
           />
         );

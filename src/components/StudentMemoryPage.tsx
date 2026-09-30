@@ -7,6 +7,7 @@ import {
   addMemoryItem,
   deleteMemoryItem,
   toggleMemoryEnabled,
+  DEFAULT_STUDENT_MEMORY,
 } from '../lib/memory';
 import {
   Brain,
@@ -46,6 +47,7 @@ interface StudentMemoryPageProps {
   onRetry: () => void;
   onMenuClick?: () => void;
   onNavigateBack?: () => void;
+  onUseFallbackMemory?: () => void;
 }
 
 export default function StudentMemoryPage({
@@ -56,6 +58,7 @@ export default function StudentMemoryPage({
   onRetry,
   onMenuClick,
   onNavigateBack,
+  onUseFallbackMemory,
 }: StudentMemoryPageProps) {
   const isAr = isArabicLocale(profile.language);
   const isMountedRef = useRef(true);
@@ -89,47 +92,211 @@ export default function StudentMemoryPage({
     'Socratic question-guided learning',
   ];
 
-  if (loading) {
+  // If loading and completely without memory, render within the full accessible page shell
+  if (loading && !memory) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-text-muted">
-        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-4" />
-        <p className="text-sm font-medium">
-          {localize(profile.language, 'Loading your memory profile from Firestore...', 'جاري تحميل ملف الذاكرة من فايراستور...')}
-        </p>
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10 max-w-5xl mx-auto space-y-6 bg-[#080409] text-slate-100 relative selection:bg-[#E5A93C]/30 selection:text-[#E5A93C] min-h-screen font-sans">
+        {/* Ambient Lighting Orbs */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px]" />
+          <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-[#4A1224]/30 rounded-full blur-[140px]" />
+          <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[140px]" />
+        </div>
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4A1224]/60 pb-5">
+          <div className="flex items-center gap-3.5">
+            {onNavigateBack && (
+              <button
+                onClick={onNavigateBack}
+                className="p-2.5 text-slate-400 hover:text-white bg-[#0E0610]/90 hover:bg-[#150917]/90 border border-[#4A1224]/60 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0 shadow-md"
+                title={localize(profile.language, 'Back to Assistant', 'العودة للمساعد')}
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(profile.language, 'Back', 'رجوع')}</span>
+              </button>
+            )}
+            {onMenuClick && (
+              <button
+                onClick={onMenuClick}
+                className="p-2.5 text-slate-400 hover:text-white bg-[#0E0610]/90 hover:bg-[#150917]/90 border border-[#4A1224]/60 rounded-xl active:scale-95 transition-all shrink-0 shadow-md"
+                aria-label={localize(profile.language, 'Toggle menu', 'القائمة')}
+                title={localize(profile.language, 'Open Menu', 'فتح القائمة')}
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
+            <div className="w-12 h-12 rounded-2xl bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] flex items-center justify-center shrink-0 shadow-inner">
+              <Brain className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+                {localize(profile.language, 'Cognify Memory', 'ذاكرة كوجنيفي')}
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+                  Phase 2
+                </span>
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                {localize(
+                  profile.language,
+                  'Transparent, privacy-first memory profile stored securely in Firestore.',
+                  'ذاكرة شفافة وخصوصية أولاً مخزنة بأمان في فايراستور.'
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading Card with actions */}
+        <div className="flex flex-col items-center justify-center p-12 text-center my-12 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl shadow-2xl max-w-lg mx-auto space-y-4">
+          <div className="w-12 h-12 rounded-full border-4 border-[#E5A93C]/20 border-t-[#E5A93C] animate-spin mb-2" />
+          <h3 className="text-base font-bold text-white">
+            {localize(profile.language, 'Loading your memory profile from Firestore...', 'جاري تحميل ملف الذاكرة من فايراستور...')}
+          </h3>
+          <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+            {localize(
+              profile.language,
+              'Connecting securely to sync your goals, preferences, and personalized learning style.',
+              'جاري الاتصال السحابي الآمن لمزامنة أهدافك وتفضيلاتك وأسلوب التعلم المخصص.'
+            )}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+            {onUseFallbackMemory && (
+              <button
+                onClick={onUseFallbackMemory}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#4A1224] to-[#831843] hover:from-[#60172F] hover:to-[#9D174D] border border-[#E5A93C]/40 text-[#E5A93C] hover:text-white text-xs font-bold transition-all shadow-md active:scale-95"
+              >
+                {localize(profile.language, 'Continue with Offline Memory', 'متابعة بالذاكرة المحلية')}
+              </button>
+            )}
+            {onNavigateBack && (
+              <button
+                onClick={onNavigateBack}
+                className="px-4 py-2.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-white text-xs font-bold transition-all active:scale-95"
+              >
+                {localize(profile.language, 'Back to Assistant', 'العودة للمساعد')}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (error || !memory) {
+  // If error and completely without memory, render friendly error with retry and offline buttons
+  if (error && !memory) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 max-w-lg mx-auto text-center">
-        <div className="w-14 h-14 rounded-2xl bg-danger/10 text-danger flex items-center justify-center mb-4">
-          <ShieldAlert className="w-7 h-7" />
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10 max-w-5xl mx-auto space-y-6 bg-[#080409] text-slate-100 relative selection:bg-[#E5A93C]/30 selection:text-[#E5A93C] min-h-screen font-sans">
+        {/* Ambient Lighting Orbs */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px]" />
+          <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-[#4A1224]/30 rounded-full blur-[140px]" />
+          <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[140px]" />
         </div>
-        <h3 className="text-lg font-bold text-text-main mb-2">
-          {localize(profile.language, 'Unable to Load Cognify Memory', 'تعذر تحميل ذاكرة كوجنيفي')}
-        </h3>
-        <p className="text-sm text-text-muted mb-6">
-          {error || localize(profile.language, 'Firestore connection is offline or unavailable. Cognify Memory requires an active cloud connection and will not fall back to unverified local memory.', 'الاتصال بفايراستور غير متاح حالياً. تتطلب الذاكرة اتصالاً سحابياً نشطاً.')}
-        </p>
-        <button
-          onClick={onRetry}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-press transition-colors shadow-sm"
-        >
-          <RefreshCw className="w-4 h-4" />
-          {localize(profile.language, 'Retry Connection', 'إعادة المحاولة')}
-        </button>
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4A1224]/60 pb-5">
+          <div className="flex items-center gap-3.5">
+            {onNavigateBack && (
+              <button
+                onClick={onNavigateBack}
+                className="p-2.5 text-slate-400 hover:text-white bg-[#0E0610]/90 hover:bg-[#150917]/90 border border-[#4A1224]/60 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0 shadow-md"
+                title={localize(profile.language, 'Back to Assistant', 'العودة للمساعد')}
+              >
+                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+                <span className="text-xs font-bold hidden sm:inline">{localize(profile.language, 'Back', 'رجوع')}</span>
+              </button>
+            )}
+            {onMenuClick && (
+              <button
+                onClick={onMenuClick}
+                className="p-2.5 text-slate-400 hover:text-white bg-[#0E0610]/90 hover:bg-[#150917]/90 border border-[#4A1224]/60 rounded-xl active:scale-95 transition-all shrink-0 shadow-md"
+                aria-label={localize(profile.language, 'Toggle menu', 'القائمة')}
+                title={localize(profile.language, 'Open Menu', 'فتح القائمة')}
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
+            <div className="w-12 h-12 rounded-2xl bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] flex items-center justify-center shrink-0 shadow-inner">
+              <Brain className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+                {localize(profile.language, 'Cognify Memory', 'ذاكرة كوجنيفي')}
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+                  Phase 2
+                </span>
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                {localize(
+                  profile.language,
+                  'Transparent, privacy-first memory profile stored securely in Firestore.',
+                  'ذاكرة شفافة وخصوصية أولاً مخزنة بأمان في فايراستور.'
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Error Card */}
+        <div className="flex flex-col items-center justify-center p-10 max-w-lg mx-auto text-center my-12 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl shadow-2xl space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mb-1">
+            <ShieldAlert className="w-7 h-7" />
+          </div>
+          <h3 className="text-lg font-bold text-white">
+            {localize(profile.language, 'Unable to Load Cognify Memory', 'تعذر تحميل ذاكرة كوجنيفي')}
+          </h3>
+          <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+            {error || localize(profile.language, 'Firestore connection is offline or unavailable. You can retry connection or use local memory.', 'الاتصال بفايراستور غير متاح حالياً. يمكنك إعادة المحاولة أو استخدام الذاكرة المحلية.')}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+            <button
+              onClick={onRetry}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold hover:brightness-110 transition-all shadow-md active:scale-95"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>{localize(profile.language, 'Retry Connection', 'إعادة المحاولة')}</span>
+            </button>
+            {onUseFallbackMemory && (
+              <button
+                onClick={onUseFallbackMemory}
+                className="px-4 py-2.5 bg-[#4A1224]/40 hover:bg-[#4A1224]/70 border border-[#E5A93C]/40 text-[#E5A93C] rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
+              >
+                {localize(profile.language, 'Use Offline Memory', 'استخدام الذاكرة المحلية')}
+              </button>
+            )}
+            {onNavigateBack && (
+              <button
+                onClick={onNavigateBack}
+                className="px-4 py-2.5 bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all active:scale-95"
+              >
+                {localize(profile.language, 'Back', 'رجوع')}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
+
+  // Fallback to default memory if memory is null so page renders properly
+  const safeMemory = memory || {
+    enabled: false,
+    preferredLanguage: 'English',
+    explanationStyle: 'Practical examples first',
+    learningGoals: [],
+    knownPreferences: [],
+    explicitConfirmedInfo: [],
+    updatedAt: new Date().toISOString(),
+  };
 
   const handleToggle = async () => {
-    if (!profile?.uid || !memory) return;
+    if (!profile?.uid) return;
     try {
       setIsSubmitting(true);
-      await toggleMemoryEnabled(profile.uid, !memory.enabled);
+      await toggleMemoryEnabled(profile.uid, !safeMemory.enabled);
       toast.success(
-        !memory.enabled
+        !safeMemory.enabled
           ? localize(profile.language, 'Cognify Memory enabled.', 'تم تفعيل ذاكرة كوجنيفي.')
           : localize(profile.language, 'Cognify Memory disabled.', 'تم تعطيل ذاكرة كوجنيفي.'),
         localize(profile.language, 'Memory Updated', 'تم تحديث الذاكرة')
@@ -184,10 +351,10 @@ export default function StudentMemoryPage({
     value: string,
     resetFn: () => void
   ) => {
-    if (!profile?.uid || !value.trim() || !memory) return;
+    if (!profile?.uid || !value.trim()) return;
     try {
       setIsSubmitting(true);
-      await addMemoryItem(profile.uid, memory, category, value);
+      await addMemoryItem(profile.uid, safeMemory, category, value);
       resetFn();
       toast.success(
         localize(profile.language, 'Item added to memory.', 'تمت إضافة العنصر إلى الذاكرة.'),
@@ -208,9 +375,9 @@ export default function StudentMemoryPage({
     category: 'learningGoals' | 'knownPreferences' | 'explicitConfirmedInfo',
     index: number
   ) => {
-    if (!profile?.uid || !memory) return;
+    if (!profile?.uid) return;
     try {
-      await deleteMemoryItem(profile.uid, memory, category, index);
+      await deleteMemoryItem(profile.uid, safeMemory, category, index);
       toast.success(
         localize(profile.language, 'Item forgotten.', 'تم نسيان العنصر.'),
         localize(profile.language, 'Deleted', 'تم الحذف')
@@ -265,6 +432,12 @@ export default function StudentMemoryPage({
               <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
                 Phase 2
               </span>
+              {loading && (
+                <span className="text-[11px] font-bold text-[#E5A93C] flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4A1224]/50 border border-[#E5A93C]/40 animate-pulse">
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  {localize(profile.language, 'Syncing...', 'مزامنة...')}
+                </span>
+              )}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               {localize(
@@ -283,12 +456,12 @@ export default function StudentMemoryPage({
           <div className="flex items-start gap-3">
             <div
               className={`p-3 rounded-2xl shrink-0 ${
-                memory.enabled
+                safeMemory.enabled
                   ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400'
                   : 'bg-slate-800 border border-[#4A1224]/50 text-slate-400'
               }`}
             >
-              {memory.enabled ? <ShieldCheck className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
+              {safeMemory.enabled ? <ShieldCheck className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -297,12 +470,12 @@ export default function StudentMemoryPage({
                 </h3>
                 <span
                   className={`text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                    memory.enabled
+                    safeMemory.enabled
                       ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                       : 'bg-slate-800 text-slate-400 border border-[#4A1224]/50'
                   }`}
                 >
-                  {memory.enabled
+                  {safeMemory.enabled
                     ? localize(profile.language, 'Active (Opted In)', 'مفعّل (بموافقتك)')
                     : localize(profile.language, 'Disabled (Privacy Default)', 'معطّل (الافتراضي للخصوصية)')}
                 </span>
@@ -321,12 +494,12 @@ export default function StudentMemoryPage({
             onClick={handleToggle}
             disabled={isSubmitting}
             className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              memory.enabled ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600' : 'bg-slate-800'
+              safeMemory.enabled ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600' : 'bg-slate-800'
             }`}
           >
             <span
               className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                memory.enabled ? (isAr ? '-translate-x-5' : 'translate-x-5') : 'translate-x-0'
+                safeMemory.enabled ? (isAr ? '-translate-x-5' : 'translate-x-5') : 'translate-x-0'
               }`}
             />
           </button>
@@ -342,9 +515,9 @@ export default function StudentMemoryPage({
             {localize(profile.language, 'Preferred Explanation Language', 'لغة الشرح المفضلة')}
           </div>
           <select
-            value={memory.preferredLanguage || 'English'}
+            value={safeMemory.preferredLanguage || 'English'}
             onChange={(e) => handleLanguageChange(e.target.value)}
-            disabled={!memory.enabled}
+            disabled={!safeMemory.enabled}
             className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white text-xs font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {languageOptions.map((lang) => (
@@ -362,9 +535,9 @@ export default function StudentMemoryPage({
             {localize(profile.language, 'Explanation Style Preference', 'أسلوب الشرح المفضل')}
           </div>
           <select
-            value={memory.explanationStyle || 'Practical examples first'}
+            value={safeMemory.explanationStyle || 'Practical examples first'}
             onChange={(e) => handleStyleChange(e.target.value)}
-            disabled={!memory.enabled}
+            disabled={!safeMemory.enabled}
             className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white text-xs font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {styleOptions.map((style) => (
@@ -386,18 +559,18 @@ export default function StudentMemoryPage({
             </h3>
           </div>
           <span className="text-xs font-mono font-bold text-[#E5A93C] px-2.5 py-0.5 rounded-full bg-[#4A1224]/30 border border-[#E5A93C]/20">
-            {memory.learningGoals?.length || 0} {localize(profile.language, 'goals', 'أهداف')}
+            {safeMemory.learningGoals?.length || 0} {localize(profile.language, 'goals', 'أهداف')}
           </span>
         </div>
 
         {/* List of goals */}
         <div className="space-y-2">
-          {(!memory.learningGoals || memory.learningGoals.length === 0) ? (
+          {(!safeMemory.learningGoals || safeMemory.learningGoals.length === 0) ? (
             <p className="text-xs text-slate-500 italic py-2">
               {localize(profile.language, 'No learning goals specified yet.', 'لم يتم تحديد أهداف تعلم بعد.')}
             </p>
           ) : (
-            memory.learningGoals.map((goal, idx) => (
+            safeMemory.learningGoals.map((goal, idx) => (
               <div
                 key={idx}
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs font-semibold text-slate-200 shadow-inner group"
@@ -455,18 +628,18 @@ export default function StudentMemoryPage({
             </h3>
           </div>
           <span className="text-xs font-mono font-bold text-[#E5A93C] px-2.5 py-0.5 rounded-full bg-[#4A1224]/30 border border-[#E5A93C]/20">
-            {memory.knownPreferences?.length || 0} {localize(profile.language, 'items', 'عناصر')}
+            {safeMemory.knownPreferences?.length || 0} {localize(profile.language, 'items', 'عناصر')}
           </span>
         </div>
 
         {/* List of preferences */}
         <div className="space-y-2">
-          {(!memory.knownPreferences || memory.knownPreferences.length === 0) ? (
+          {(!safeMemory.knownPreferences || safeMemory.knownPreferences.length === 0) ? (
             <p className="text-xs text-slate-500 italic py-2">
               {localize(profile.language, 'No study preferences added yet.', 'لم يتم إضافة تفضيلات دراسية بعد.')}
             </p>
           ) : (
-            memory.knownPreferences.map((pref, idx) => (
+            safeMemory.knownPreferences.map((pref, idx) => (
               <div
                 key={idx}
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs font-semibold text-slate-200 shadow-inner group"
@@ -527,18 +700,18 @@ export default function StudentMemoryPage({
             </h3>
           </div>
           <span className="text-xs font-mono font-bold text-emerald-400 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            {memory.explicitConfirmedInfo?.length || 0} {localize(profile.language, 'facts', 'حقائق')}
+            {safeMemory.explicitConfirmedInfo?.length || 0} {localize(profile.language, 'facts', 'حقائق')}
           </span>
         </div>
 
         {/* List of confirmed info */}
         <div className="space-y-2">
-          {(!memory.explicitConfirmedInfo || memory.explicitConfirmedInfo.length === 0) ? (
+          {(!safeMemory.explicitConfirmedInfo || safeMemory.explicitConfirmedInfo.length === 0) ? (
             <p className="text-xs text-slate-500 italic py-2">
               {localize(profile.language, 'No confirmed student facts added yet.', 'لم يتم إضافة معلومات مؤكدة بعد.')}
             </p>
           ) : (
-            memory.explicitConfirmedInfo.map((info, idx) => (
+            safeMemory.explicitConfirmedInfo.map((info, idx) => (
               <div
                 key={idx}
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs font-semibold text-slate-200 shadow-inner group"
@@ -592,7 +765,7 @@ export default function StudentMemoryPage({
       {/* Footer Timestamp Notice */}
       <div className="text-center text-xs text-slate-500 pt-2 pb-6">
         {localize(profile.language, 'Last updated in Firestore:', 'آخر تحديث في فايراستور:')}{' '}
-        <span className="font-mono text-[#E5A93C]">{memory.updatedAt ? new Date(memory.updatedAt).toLocaleString() : 'N/A'}</span>
+        <span className="font-mono text-[#E5A93C]">{safeMemory.updatedAt ? new Date(safeMemory.updatedAt).toLocaleString() : 'N/A'}</span>
       </div>
     </div>
   );
