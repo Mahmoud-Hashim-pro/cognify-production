@@ -72,10 +72,7 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
   const allAcademicItems = [
     { id: 'goals', label: localize(profile.language, 'Goals', 'الأهداف'), icon: Target },
     { id: 'gpa', label: localize(profile.language, 'GPA', 'حاسبة GPA'), icon: Calculator },
-    { id: 'analytics', label: localize(profile.language, 'Analytics', 'تحليلاتي'), icon: LayoutDashboard },
     { id: 'planner', label: localize(profile.language, 'Planner', 'المخطّط'), icon: CalendarDays },
-    { id: 'retention', label: localize(profile.language, 'Flashcards Deck (SM-2)', 'بطاقات الاستذكار المتباعد'), icon: Layers },
-    { id: 'evaluation', label: localize(profile.language, 'Pedagogical Evaluation', 'تقييم الأثر التربوي'), icon: BarChart3 },
   ] as const;
   const visibleSections = visibleAcademicSections(profile.educationLevel);
   const academicItems = allAcademicItems.filter((i) => visibleSections.includes(i.id as any));
@@ -224,17 +221,7 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
           </button>
         )}
 
-        {/* Teacher Intelligence Dashboard */}
-        {(profile.role === 'Professional' || isAdmin || profile.isOrgManager === true) && (
-          <button
-            onClick={() => setCurrentView('teacher')}
-            className={navBtn(currentView === 'teacher')}
-            aria-current={currentView === 'teacher' ? 'page' : undefined}
-          >
-            <LayoutDashboard className={navIcon(currentView === 'teacher')} />
-            {localize(profile.language, 'Teacher Intelligence', 'لوحة المعلم الذكية')}
-          </button>
-        )}
+
 
         {/* Parent Intelligence Portal */}
         {(Boolean(profile.linkedChildUid || profile.linkedParentUid || profile.linkedCaregivers?.length || isAdmin)) && (

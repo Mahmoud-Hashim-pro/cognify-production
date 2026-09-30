@@ -11,13 +11,12 @@ export type AcademicSection = 'goals' | 'gpa' | 'analytics' | 'planner' | 'reten
 export function visibleAcademicSections(level?: EducationLevel): AcademicSection[] {
   switch (level) {
     case 'University':
-      return ['goals', 'gpa', 'analytics', 'planner', 'retention', 'evaluation'];
+      return ['goals', 'gpa', 'planner'];
     case 'Professional':
     case 'Secondary':
-      return ['goals', 'planner', 'retention', 'evaluation'];
     case 'Primary':
     default:
-      return ['goals', 'planner', 'retention'];
+      return ['goals', 'planner'];
   }
 }
 

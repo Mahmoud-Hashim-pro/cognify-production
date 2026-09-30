@@ -3,14 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { UserProfile, PlannerTask, PlannerTaskType } from '../types';
 import { 
   Menu, Plus, Trash2, CalendarDays, CheckCircle2, Circle, ArrowLeft,
-  RotateCcw, Award, Layers, Mic, BookMarked
+  RotateCcw, Layers, Mic
 } from 'lucide-react';
 import { daysUntilDue, isOverdue, subscribeToTasks, saveTask, deleteTask, parseLocalDate } from '../lib/planner';
-import MockExamSimulator from './academic/MockExamSimulator';
 import DynamicScheduleView from './academic/DynamicScheduleView';
 import LectureDigester from './academic/LectureDigester';
 import SocraticStudyBuddy from './academic/SocraticStudyBuddy';
-import ResearchCitationCopilot from './academic/ResearchCitationCopilot';
 
 interface AcademicPlannerProps {
   profile: UserProfile;
@@ -31,15 +29,13 @@ const TYPE_META: Record<PlannerTaskType, { en: string; ar: string; color: string
 // crashing the planner with `undefined.color`.
 const metaOf = (type?: string) => TYPE_META[(type as PlannerTaskType)] || TYPE_META.other;
 
-export type AcademicTab = 'tasks' | 'schedule' | 'mock-exam' | 'digester' | 'socratic' | 'research';
+export type AcademicTab = 'tasks' | 'schedule' | 'digester' | 'socratic';
 
 const ACADEMIC_TABS: { id: AcademicTab; en: string; ar: string; icon: any }[] = [
   { id: 'tasks', en: 'Tasks & Deadlines', ar: 'المهام والمواعيد', icon: CalendarDays },
   { id: 'schedule', en: 'Smart Schedule & Rebalance', ar: 'جدول المذاكرة وإعادة الموازنة', icon: RotateCcw },
-  { id: 'mock-exam', en: 'AI Mock Exams', ar: 'محاكي الامتحانات وتصحيح المقالي', icon: Award },
   { id: 'digester', en: 'Lecture Digester', ar: 'كبسولة ومحلل المحاضرات', icon: Layers },
   { id: 'socratic', en: 'Socratic Oral Buddy', ar: 'رفيق "سمّعلي" الصوتي', icon: Mic },
-  { id: 'research', en: 'Research & Citations', ar: 'مساعد الأبحاث والمراجع', icon: BookMarked },
 ];
 
 export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }: AcademicPlannerProps) {
@@ -173,7 +169,7 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
             {t('Academic Planner & OS', 'المخطّط ومنظومة التعلّم الأكاديمية')}
           </h1>
           <p className="text-xs md:text-sm text-slate-400 font-medium italic mt-1.5">
-            {t('Smart schedules, AI mock exams, lecture capsules, Feynman voice coach & citations.', 'جداول ذكية، محاكي امتحانات، كبسولة المحاضرات، رفيق المذاكرة الصوتي وتوثيق المراجع.')}
+            {t('Smart schedules, task tracking, lecture capsules & Feynman voice coach.', 'جداول ذكية، متابعة المهام، كبسولة المحاضرات ورفيق المذاكرة الصوتي.')}
           </p>
         </div>
       </header>
@@ -273,20 +269,12 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
         </div>
       )}
 
-      {/* TAB CONTENT: AI MOCK EXAM & ESSAY GRADER */}
-      {activeTab === 'mock-exam' && (
-        <div className="max-w-5xl w-full">
-          <MockExamSimulator profile={profile} isAr={isAr} />
-        </div>
-      )}
-
       {/* TAB CONTENT: LECTURE & SLIDE DIGESTER */}
       {activeTab === 'digester' && (
         <div className="max-w-5xl w-full">
           <LectureDigester 
             profile={profile} 
             isAr={isAr} 
-            onSendToExam={() => setActiveTab('mock-exam')} 
           />
         </div>
       )}
@@ -295,13 +283,6 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
       {activeTab === 'socratic' && (
         <div className="max-w-5xl w-full">
           <SocraticStudyBuddy profile={profile} isAr={isAr} />
-        </div>
-      )}
-
-      {/* TAB CONTENT: RESEARCH & CITATION COPILOT */}
-      {activeTab === 'research' && (
-        <div className="max-w-5xl w-full">
-          <ResearchCitationCopilot profile={profile} isAr={isAr} />
         </div>
       )}
     </div>

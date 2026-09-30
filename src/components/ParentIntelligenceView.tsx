@@ -248,12 +248,14 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
             </button>
 
             {isDemoMode ? (
-              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                {isAr ? '⚡ عينة معيارية [Benchmark Baseline Dataset]' : '⚡ [Benchmark Baseline Dataset]'}
+              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-purple-500/10 text-purple-300 border border-purple-500/20 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span>{isAr ? 'عرض إرشادي توضيحي' : 'Preview Overview'}</span>
               </span>
             ) : (
-              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                {isAr ? '🟢 بيانات حية متصلة [Live Connected Data]' : '🟢 [Live Connected Data]'}
+              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>{isAr ? 'بيانات دراسية نشطة' : 'Active Study Progress'}</span>
               </span>
             )}
 
@@ -383,8 +385,8 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
                   {isAr ? 'زخم التعلم' : 'Learning Momentum'}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold px-3 py-1 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider">
-                    {dashboardData.growthSummary.learningMomentum.replace('_', ' ')}
+                  <span className="text-xs font-bold px-3 py-1 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    {isAr ? 'تقدم مستمر وثابت' : 'Steady Growth Momentum'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
@@ -435,7 +437,7 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
                           </div>
                           <div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              {breakthrough.type.replace('_', ' ')}
+                              {isResilience ? (isAr ? 'تخطي التحدي بنجاح' : 'Overcoming Challenge') : isLeap ? (isAr ? 'قفزة إتقان' : 'Mastery Leap') : (isAr ? 'إنجاز تعليمي' : 'Milestone')}
                             </span>
                             <h3 className="text-lg font-bold text-white">
                               {isAr ? breakthrough.headlineAr : breakthrough.headlineEn}

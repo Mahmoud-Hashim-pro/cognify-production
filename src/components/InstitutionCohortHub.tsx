@@ -4,7 +4,6 @@ import {
   InstitutionCohortStats,
   computeCohortAnalytics,
   exportCohortCsv,
-  K_ANONYMITY_THRESHOLD,
 } from '../lib/institution';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, onSnapshot, query, where, limit } from 'firebase/firestore';
@@ -18,14 +17,12 @@ import {
   Accessibility,
   Download,
   ShieldCheck,
-  ShieldAlert,
   Eye,
   Ear,
   Mic,
   CheckCircle,
   BarChart3,
   GraduationCap,
-  Lock,
   Menu,
   FileSpreadsheet,
   AlertTriangle,
@@ -34,12 +31,10 @@ import {
   Layers,
   ArrowLeft,
   Brain,
-  GitBranch,
   Compass,
   HelpCircle,
   CheckCircle2,
 } from 'lucide-react';
-import { InstitutionalIntelligenceView } from './InstitutionalIntelligenceView';
 import type { StudentState } from '../types/studentState';
 
 interface InstitutionCohortHubProps {
@@ -52,7 +47,6 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
-  const [activeSection, setActiveSection] = useState<'roster' | 'intelligence'>('roster');
 
   const isAdmin = isAdminUser(profile) || profile.isAdmin === true;
   const isOrgManager = profile.isOrgManager === true;
@@ -228,8 +222,8 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               </div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">
                 {L(
-                  'Cohort Intelligence & Privacy-Preserving Academic Aggregation',
-                  'ذكاء الدفعات ومؤشرات الأداء الأكاديمي مع حماية الخصوصية'
+                  'Cohort Intelligence & Student Progress Overview',
+                  'تحليلات الدفعة ومتابعة تقدم الطلاب'
                 )}
               </p>
             </div>
@@ -264,98 +258,6 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
             </button>
           </div>
         </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 p-1.5 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-2xl backdrop-blur-xl w-fit">
-          <button
-            onClick={() => setActiveSection('roster')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
-              activeSection === 'roster'
-                ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-white shadow-lg shadow-[#E5A93C]/20'
-                : 'text-slate-400 hover:text-white hover:bg-[#150917]/60'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>{L('Cohort Analytics & Roster', 'تحليلات الدفعة وقوائم الطلاب')}</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('intelligence')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
-              activeSection === 'intelligence'
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-[#150917]/60'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>{L('Deep Academic & ABET Intelligence', 'الذكاء الأكاديمي والاعتماد البرامجي')}</span>
-          </button>
-        </div>
-
-        {activeSection === 'intelligence' ? (
-          <div className="mt-2">
-            <InstitutionalIntelligenceView
-              institutionId={stats.orgCode || 'institution'}
-              institutionName={activeOrgDisplay}
-              studentCohortsByDept={studentCohortsByDept}
-              lang={profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya' ? 'ar' : profile.language === 'French' ? 'fr' : 'en'}
-            />
-          </div>
-        ) : (
-          <>
-        {/* k-Anonymity Privacy Notice Banner */}
-        {stats.kAnonymitySuppressed ? (
-          <div
-            className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 text-amber-200 shadow-xl backdrop-blur-xl"
-            role="alert"
-          >
-            <div className="p-3 bg-amber-500/20 rounded-2xl text-amber-400 shrink-0 border border-amber-500/30">
-              <ShieldAlert className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  {L(`k-Anonymity Active (k < ${K_ANONYMITY_THRESHOLD})`, `حماية إخفاء الهوية نشطة (k < ${K_ANONYMITY_THRESHOLD})`)}
-                </span>
-                <span className="text-xs font-bold text-amber-300/80">
-                  {L('FERPA / GDPR Protected', 'متوافق مع حماية خصوصية الطلاب')}
-                </span>
-              </div>
-              <p className="text-xs font-medium mt-1 leading-relaxed text-slate-300">
-                {L(
-                  `Cohort size is under ${K_ANONYMITY_THRESHOLD} students. Individual breakdown and personal identifiers are suppressed to prevent student re-identification. Only aggregated metrics and ranges are reported.`,
-                  `حجم هذه المجموعة أقل من ${K_ANONYMITY_THRESHOLD} طلاب. تم حجب السجل الفردي للمحافظة على خصوصية الطلاب ومنع تحديد الهويات، ويتم عرض الإحصائيات والمجالات المجمعة فقط.`
-                )}
-              </p>
-            </div>
-            <div className="text-end shrink-0 hidden sm:block">
-              <span className="text-[11px] font-black text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl">
-                {stats.totalStudents} / {K_ANONYMITY_THRESHOLD} {L('Students', 'طلاب')}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-3xl p-4 flex items-center justify-between gap-4 text-emerald-200 shadow-xl backdrop-blur-xl">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400 border border-emerald-500/30">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
-                  {L(`k-Anonymity Standard Satisfied (k ≥ ${K_ANONYMITY_THRESHOLD})`, `معيار إخفاء الهوية مستوفى (k ≥ ${K_ANONYMITY_THRESHOLD})`)}
-                </span>
-                <p className="text-[11px] font-medium text-slate-300 mt-0.5">
-                  {L(
-                    'Cohort population meets privacy-preserving threshold. Comprehensive cohort analysis and anonymized rosters are active.',
-                    'حجم الدفعة يستوفي معايير الخصوصية. تحليلات الأداء الشاملة والسجل المجهول الهوية متاحان للاطلاع.'
-                  )}
-                </p>
-              </div>
-            </div>
-            <span className="text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-xl shrink-0">
-              {stats.totalStudents} {L('Enrolled', 'مسجل')}
-            </span>
-          </div>
-        )}
 
         {/* Loading Indicator */}
         {loading ? (
@@ -484,63 +386,54 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   </span>
                 </div>
 
-                {stats.kAnonymitySuppressed ? (
-                  <div className="py-6 px-4 text-center rounded-2xl bg-[#080409]/60 border border-amber-500/20 text-xs text-amber-300/80 space-y-1">
-                    <p className="font-bold">{L('Distribution Suppressed (k < 5)', 'تم حجب التوزيع لحماية الخصوصية (k < 5)')}</p>
-                    <p className="text-[11px] text-slate-400">
-                      {L('Cohort size is under 5 students to prevent student re-identification.', 'حجم الدفعة أقل من 5 طلاب لمنع استنتاج هويات الطلاب الفردية.')}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4 pt-2">
-                    {(
-                      [
-                        {
-                          key: 'Basic' as CognitiveLevel,
-                          labelEn: 'Basic Cognitive Stage',
-                          labelAr: 'المستوى التأسيسي الأول',
-                          color: 'bg-blue-500',
-                          textColor: 'text-blue-400',
-                        },
-                        {
-                          key: 'Intermediate' as CognitiveLevel,
-                          labelEn: 'Intermediate Reasoning',
-                          labelAr: 'المستوى المتوسط',
-                          color: 'bg-purple-500',
-                          textColor: 'text-purple-400',
-                        },
-                        {
-                          key: 'Advanced' as CognitiveLevel,
-                          labelEn: 'Advanced Analytical Stage',
-                          labelAr: 'المستوى التحليلي المتقدم',
-                          color: 'bg-emerald-500',
-                          textColor: 'text-emerald-400',
-                        },
-                      ] as const
-                    ).map(({ key, labelEn, labelAr, color, textColor }) => {
-                      const count = stats.cognitiveLevelDistribution[key];
-                      const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
-                      return (
-                        <div key={key} className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-slate-200">
-                              {L(labelEn, labelAr)}
-                            </span>
-                            <span className={`font-black tabular-nums ${textColor}`}>
-                              {count} ({pct}%)
-                            </span>
-                          </div>
-                          <div className="w-full h-2.5 bg-[#080409] border border-[#4A1224]/50 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full ${color} rounded-full transition-all duration-500 shadow-sm`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
+                <div className="space-y-4 pt-2">
+                  {(
+                    [
+                      {
+                        key: 'Basic' as CognitiveLevel,
+                        labelEn: 'Basic Cognitive Stage',
+                        labelAr: 'المستوى التأسيسي الأول',
+                        color: 'bg-blue-500',
+                        textColor: 'text-blue-400',
+                      },
+                      {
+                        key: 'Intermediate' as CognitiveLevel,
+                        labelEn: 'Intermediate Reasoning',
+                        labelAr: 'المستوى المتوسط',
+                        color: 'bg-purple-500',
+                        textColor: 'text-purple-400',
+                      },
+                      {
+                        key: 'Advanced' as CognitiveLevel,
+                        labelEn: 'Advanced Analytical Stage',
+                        labelAr: 'المستوى التحليلي المتقدم',
+                        color: 'bg-emerald-500',
+                        textColor: 'text-emerald-400',
+                      },
+                    ] as const
+                  ).map(({ key, labelEn, labelAr, color, textColor }) => {
+                    const count = stats.cognitiveLevelDistribution[key];
+                    const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
+                    return (
+                      <div key={key} className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-slate-200">
+                            {L(labelEn, labelAr)}
+                          </span>
+                          <span className={`font-black tabular-nums ${textColor}`}>
+                            {count} ({pct}%)
+                          </span>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                        <div className="w-full h-2.5 bg-[#080409] border border-[#4A1224]/50 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${color} rounded-full transition-all duration-500 shadow-sm`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Accessibility Modes Utilized */}
@@ -557,231 +450,72 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   </span>
                 </div>
 
-                {stats.kAnonymitySuppressed ? (
-                  <div className="py-6 px-4 text-center rounded-2xl bg-[#080409]/60 border border-amber-500/20 text-xs text-amber-300/80 space-y-1">
-                    <p className="font-bold">{L('Accommodations Suppressed (k < 5)', 'تم حجب تفاصيل التسهيلات (k < 5)')}</p>
-                    <p className="text-[11px] text-slate-400">
-                      {L('Accommodations breakdown is masked in small cohorts to avoid attribute disclosure.', 'تم حجب تفاصيل التسهيلات للمجموعات الصغيرة لتفادي كشف صفات الطلاب الحساسة.')}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    {[
-                      {
-                        titleEn: 'Vision Mode',
-                        titleAr: 'الوضع البصري',
-                        count: stats.accessibilityModeBreakdown.Vision,
-                        Icon: Eye,
-                        color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-                      },
-                      {
-                        titleEn: 'Motor & Euphonia',
-                        titleAr: 'الحركي وإيفونيا',
-                        count: stats.accessibilityModeBreakdown.Motor,
-                        Icon: Accessibility,
-                        color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                      },
-                      {
-                        titleEn: 'Deaf & Sign',
-                        titleAr: 'الصم ولغة الإشارة',
-                        count: stats.accessibilityModeBreakdown.Deaf,
-                        Icon: Ear,
-                        color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                      },
-                      {
-                        titleEn: 'Vocal / Speech',
-                        titleAr: 'الصوتي والنطق',
-                        count: stats.accessibilityModeBreakdown.Vocal,
-                        Icon: Mic,
-                        color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-                      },
-                      {
-                        titleEn: 'Standard Interface',
-                        titleAr: 'الواجهة القياسية',
-                        count: stats.accessibilityModeBreakdown.None,
-                        Icon: CheckCircle,
-                        color: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
-                      },
-                    ].map(({ titleEn, titleAr, count, Icon, color }) => {
-                      const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
-                      return (
-                        <div
-                          key={titleEn}
-                          className="bg-[#080409] border border-[#4A1224]/60 rounded-2xl p-3 flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <div className={`p-2 rounded-xl border ${color}`}>
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-slate-200">
-                                {L(titleEn, titleAr)}
-                              </div>
-                              <div className="text-[10px] text-slate-500 font-semibold">{pct}%</div>
-                            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {[
+                    {
+                      titleEn: 'Vision Mode',
+                      titleAr: 'الوضع البصري',
+                      count: stats.accessibilityModeBreakdown.Vision,
+                      Icon: Eye,
+                      color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+                    },
+                    {
+                      titleEn: 'Motor & Euphonia',
+                      titleAr: 'الحركي وإيفونيا',
+                      count: stats.accessibilityModeBreakdown.Motor,
+                      Icon: Accessibility,
+                      color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+                    },
+                    {
+                      titleEn: 'Deaf & Sign',
+                      titleAr: 'الصم ولغة الإشارة',
+                      count: stats.accessibilityModeBreakdown.Deaf,
+                      Icon: Ear,
+                      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                    },
+                    {
+                      titleEn: 'Vocal / Speech',
+                      titleAr: 'الصوتي والنطق',
+                      count: stats.accessibilityModeBreakdown.Vocal,
+                      Icon: Mic,
+                      color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                    },
+                    {
+                      titleEn: 'Standard Interface',
+                      titleAr: 'الواجهة القياسية',
+                      count: stats.accessibilityModeBreakdown.None,
+                      Icon: CheckCircle,
+                      color: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
+                    },
+                  ].map(({ titleEn, titleAr, count, Icon, color }) => {
+                    const pct = stats.totalStudents > 0 ? Math.round((count / stats.totalStudents) * 100) : 0;
+                    return (
+                      <div
+                        key={titleEn}
+                        className="bg-[#080409] border border-[#4A1224]/60 rounded-2xl p-3 flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`p-2 rounded-xl border ${color}`}>
+                            <Icon className="w-4 h-4" />
                           </div>
-                          <span className="text-sm font-black text-white tabular-nums">
-                            {count}
-                          </span>
+                          <div>
+                            <div className="text-xs font-bold text-slate-200">
+                              {L(titleEn, titleAr)}
+                            </div>
+                            <div className="text-[10px] text-slate-500 font-semibold">{pct}%</div>
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Cohort Pedagogical Intelligence & Prerequisite Diagnostics (Phase 2C) */}
-            <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 shadow-2xl space-y-6 backdrop-blur-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#4A1224]/60 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-[#E5A93C] rounded-2xl">
-                    <Brain className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                      {L('Cohort Pedagogical Intelligence & Diagnostics', 'الذكاء البيداغوجي وتشخيص المتطلبات للدفعة')}
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-[#4A1224]/60">
-                        Pillar 4 & PLM
-                      </span>
-                    </h3>
-                    <p className="text-xs text-slate-400 font-medium mt-0.5">
-                      {L(
-                        'Empirical strategy recovery rates and prerequisite bottleneck diagnoses aggregated across enrolled learners.',
-                        'معدلات تعافي الطلاب عبر استراتيجيات التدريس وتشخيص الاختناقات في المتطلبات السابقة.'
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-end shrink-0">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                    {L('Cohort Strategy Efficacy', 'متوسط فاعلية الاستراتيجيات')}
-                  </span>
-                  <span className="text-lg font-black text-[#E5A93C] font-mono">
-                    74.2% {L('Avg Recovery', 'متوسط التعافي')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Strategy Recovery Breakdown */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {[
-                  {
-                    nameEn: 'Worked Examples',
-                    nameAr: 'المسائل النموذجية المحلولة',
-                    winRate: 78,
-                    sampleCount: 142,
-                    tone: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-                    barColor: 'bg-emerald-500',
-                    descEn: 'Highest recovery for high-latency struggling students',
-                    descAr: 'الأعلى تعافياً للطلاب ذوي أزمنة الاستجابة المرتفعة',
-                  },
-                  {
-                    nameEn: 'Step-by-Step Scaffolding',
-                    nameAr: 'التفكيك التدريجي المنظم',
-                    winRate: 72,
-                    sampleCount: 215,
-                    tone: 'border-[#E5A93C]/30 bg-[#4A1224]/30 text-[#E5A93C]',
-                    barColor: 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600',
-                    descEn: 'Default baseline with continuous formative micro-checks',
-                    descAr: 'النمط المرجعي مع فحوصات تكوينية مستمرة',
-                  },
-                  {
-                    nameEn: 'Visual Analogies',
-                    nameAr: 'التشبيهات البصرية والواقعية',
-                    winRate: 69,
-                    sampleCount: 98,
-                    tone: 'border-[#4A1224]/60 bg-indigo-500/10 text-indigo-300',
-                    barColor: 'bg-indigo-500',
-                    descEn: 'Bridges abstract models before formal syntax',
-                    descAr: 'يقرب النماذج المجردة قبل الرموز البرمجية المعقدة',
-                  },
-                  {
-                    nameEn: 'Socratic Inquiry',
-                    nameAr: 'الحوار الاستنتاجي السقراطي',
-                    winRate: 64,
-                    sampleCount: 86,
-                    tone: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-                    barColor: 'bg-amber-500',
-                    descEn: 'Ideal for advancing fluent learners toward mastery',
-                    descAr: 'مثالي لتعميق فهم الطلاب المتقدمين والطلاقة العالية',
-                  },
-                ].map((s) => (
-                  <div key={s.nameEn} className="p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 space-y-2.5 shadow-inner">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-100 text-xs truncate max-w-[150px]">
-                        {L(s.nameEn, s.nameAr)}
-                      </span>
-                      <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-md border ${s.tone}`}>
-                        {s.winRate}%
-                      </span>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div className={`h-full ${s.barColor} rounded-full`} style={{ width: `${s.winRate}%` }} />
+                        <span className="text-sm font-black text-white tabular-nums">
+                          {count}
+                        </span>
                       </div>
-                      <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                        <span>{s.sampleCount} {L('trials', 'جلسات')}</span>
-                        <span>{L('Efficacy', 'الفاعلية')}</span>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-slate-400 font-medium leading-tight line-clamp-2">
-                      {L(s.descEn, s.descAr)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Actionable Cohort Diagnostic Insights */}
-              <div className="space-y-3 pt-2">
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                  <GitBranch className="w-4 h-4 text-[#E5A93C]" />
-                  {L('Actionable Diagnostic Findings', 'نتائج التشخيص البيداغوجي الموجهة للتدريس')}
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="p-4 rounded-2xl bg-[#080409] border border-amber-500/25 space-y-2 shadow-inner">
-                    <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                      <AlertTriangle className="w-4 h-4 shrink-0" />
-                      <span>{L('Prerequisite Gap Diagnosis', 'تشخيص فجوة المتطلب السابق')}</span>
-                    </div>
-                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                      {L(
-                        'Cohort observation: 68% of students struggling with Dynamic Memory Allocation lack prerequisite mastery in Pointers & Dereferencing. Automated remediation with Worked Examples yielded a 78% recovery rate.',
-                        'ملاحظة الدفعة: ٦٨٪ من الطلاب المتعثرين في تخصيص الذاكرة الديناميكية يعانون من فجوة في مفهوم المؤشرات السابق. أدى العلاج التلقائي بالمسائل المحلولة إلى تعافي ٧٨٪ منهم.'
-                      )}
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-[#080409] border border-[#E5A93C]/25 space-y-2 shadow-inner">
-                    <div className="flex items-center gap-2 text-[#E5A93C] font-bold text-xs">
-                      <Compass className="w-4 h-4 shrink-0" />
-                      <span>{L('Response Latency & Strain Profile', 'توزيع العبء وسرعة الاستجابة')}</span>
-                    </div>
-                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                      {L(
-                        'Fluency observation: 62% of cohort responses demonstrate high fluency (<8s latency), 28% show balanced latency, and 10% show high processing strain (>15s) which Cognify proactively mitigates via step scaffolding.',
-                        'ملاحظة الطلاقة: ٦٢٪ من استجابات الدفعة تظهر طلاقة سريعة (<٨ ثوانٍ)، و٢٨٪ في النطاق المتوازن، بينما يواجه ١٠٪ عبئاً إدراكياً مرتفعاً يتم تخفيفه تلقائياً بالتجزئة المتدرجة.'
-                      )}
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-[#080409] border border-emerald-500/25 space-y-2 shadow-inner">
-                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
-                      <CheckCircle2 className="w-4 h-4 shrink-0" />
-                      <span>{L('Spaced Retention Health (SM-2)', 'صحة الاستبقاء التباعدي (SM-2)')}</span>
-                    </div>
-                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                      {L(
-                        'Memory consolidation: 84% of practiced concepts maintain long-term memory stability under SM-2 schedules, with 16% automatically targeted for 30-second proactive retrieval warm-ups.',
-                        'استقرار الذاكرة: ٨٤٪ من المفاهيم التي تمت ممارستها تحتفظ باستقرار طويل المدى وفق SM-2، مع جدولة ١٦٪ تلقائياً لجلسات تنشيط سريعة مدتها ٣٠ ثانية قبل بدء الموضوعات الجديدة.'
-                      )}
-                    </p>
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            {/* Student Roster / Privacy Placeholder */}
+            {/* Student Roster */}
             <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl">
               <div className="p-6 border-b border-[#4A1224]/60 flex items-center justify-between flex-wrap gap-2 bg-[#150917]/40">
                 <div className="flex items-center gap-2.5">
@@ -791,36 +525,14 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   </h3>
                 </div>
                 <div className="text-xs font-bold text-slate-400">
-                  {stats.kAnonymitySuppressed ? (
-                    <span className="inline-flex items-center gap-1.5 text-amber-400">
-                      <Lock className="w-3.5 h-3.5" />
-                      {L('Suppressed for Privacy (k < 5)', 'محجوب للخصوصية (k < 5)')}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 text-emerald-400">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      {stats.students.length} {L('Verified Records', 'سجل موثق')}
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1.5 text-emerald-400">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {stats.students.length} {L('Verified Records', 'سجل موثق')}
+                  </span>
                 </div>
               </div>
 
-              {stats.kAnonymitySuppressed ? (
-                <div className="p-10 text-center flex flex-col items-center justify-center space-y-3">
-                  <div className="p-3 bg-[#080409] border border-[#4A1224]/60 rounded-2xl text-slate-500">
-                    <Lock className="w-8 h-8" />
-                  </div>
-                  <h4 className="text-sm font-black text-white">
-                    {L('Individual Student Breakdown Suppressed', 'تم حجب بيانات الطلاب الفردية')}
-                  </h4>
-                  <p className="text-xs text-slate-400 max-w-md leading-relaxed">
-                    {L(
-                      `In compliance with k-anonymity privacy safeguards, cohorts with fewer than ${K_ANONYMITY_THRESHOLD} enrolled learners do not expose individual student identities or performance rows. Summary distributions and aggregate ranges above protect student privacy.`,
-                      `توافقاً مع معايير الأمان وحماية الخصوصية k-anonymity، فإن المجموعات التي تحتوي على أقل من ${K_ANONYMITY_THRESHOLD} طلاب لا تعرض بيانات فردية لتجنب إعادة تحديد الهويات. تم الاكتفاء بالمؤشرات والمجالات المجمعة أعلاه.`
-                    )}
-                  </p>
-                </div>
-              ) : stats.students.length === 0 ? (
+              {stats.students.length === 0 ? (
                 <div className="p-10 text-center text-xs font-bold text-slate-500">
                   {L('No students found for this institution cohort.', 'لم يتم العثور على طلاب مسجلين في هذه الدفعة.')}
                 </div>
@@ -877,8 +589,6 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
               )}
             </div>
           </>
-        )}
-        </>
         )}
       </div>
     </div>

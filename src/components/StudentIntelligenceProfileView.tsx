@@ -336,22 +336,6 @@ export default function StudentIntelligenceProfileView({
                     <span>{localize(profile.language, 'Current Focus', 'محور التركيز الحالي')}</span>
                   </div>
 
-                  {focusRationale && (
-                    <button
-                      type="button"
-                      onClick={() => setShowFocusExplain(!showFocusExplain)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 border ${
-                        showFocusExplain
-                          ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/25 border-[#E5A93C] text-amber-200 shadow-sm shadow-[#E5A93C]/20'
-                          : 'bg-[#0E0610]/90 hover:bg-slate-800 border-[#4A1224]/50 text-slate-300 hover:text-white'
-                      }`}
-                      title={localize(profile.language, 'Pedagogical reasoning behind this recommendation', 'التعليل التربوي لاختيار هذا المفهوم')}
-                    >
-                      <Sparkles className="w-3 h-3 text-amber-400" />
-                      <span>{localize(profile.language, 'Why this focus?', 'لماذا هذا التركيز؟')}</span>
-                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showFocusExplain ? 'rotate-180 text-[#E5A93C]' : 'text-slate-400'}`} />
-                    </button>
-                  )}
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white">
                   {isAr
@@ -381,71 +365,6 @@ export default function StudentIntelligenceProfileView({
                 </div>
               </div>
             </div>
-
-            {/* Explainable Intelligence Rationale Panel */}
-            {showFocusExplain && focusRationale && (
-              <div className="mt-4 p-5 rounded-2xl bg-[#0d111f]/95 border border-[#E5A93C]/40 backdrop-blur-xl shadow-xl space-y-3">
-                <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#4A1224]/50 border border-[#E5A93C]/30 flex items-center justify-center text-[#E5A93C]">
-                      <Sparkles className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="text-xs font-bold text-[#E5A93C] uppercase tracking-wider">
-                      {localize(profile.language, 'Explainable Intelligence Rationale', 'التعليل التربوي لاختيار هذا التركيز')}
-                    </span>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                    focusRationale.isPrerequisiteGap
-                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                      : 'bg-[#4A1224]/40 border-[#E5A93C]/30 text-[#E5A93C]'
-                  }`}>
-                    {focusRationale.isPrerequisiteGap
-                      ? localize(profile.language, 'Prerequisite Root Gap', 'فجوة متطلب تأسيسي')
-                      : localize(profile.language, 'Direct Concept Mastery', 'تثبيت مباشر للمفهوم')}
-                  </span>
-                </div>
-
-                {/* Prerequisite Chain visualization if gap exists */}
-                {focusRationale.isPrerequisiteGap && focusRationale.prerequisiteChain && (
-                  <div className="p-3 rounded-xl bg-[#0E0610]/90 border border-[#4A1224]/60 flex items-center gap-2 text-xs flex-wrap">
-                    <span className="text-slate-400 font-medium">
-                      {localize(profile.language, 'Dependency Chain:', 'مسار التبعية:')}
-                    </span>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {focusRationale.prerequisiteChain.map((cid, cidx) => {
-                        const isLast = cidx === focusRationale.prerequisiteChain!.length - 1;
-                        const isRoot = cidx === 0;
-                        return (
-                          <React.Fragment key={cid}>
-                            <span className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border ${
-                              isRoot
-                                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                                : isLast
-                                ? 'bg-indigo-500/20 border-[#E5A93C]/30 text-indigo-300'
-                                : 'bg-slate-800 border-[#4A1224]/50 text-slate-300'
-                            }`}>
-                              {cid}
-                            </span>
-                            {!isLast && <span className="text-slate-500 text-xs">➔</span>}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                  {isAr ? focusRationale.rationaleAr : focusRationale.rationaleEn}
-                </p>
-
-                <div className="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1 border-t border-[#4A1224]/50">
-                  <Info className="w-3.5 h-3.5 text-[#E5A93C] shrink-0" />
-                  <span>
-                    {isAr ? focusRationale.diagnosisSummaryAr : focusRationale.diagnosisSummaryEn}
-                  </span>
-                </div>
-              </div>
-            )}
 
             {/* Prerequisite Alert Callout */}
             {learningProfile.currentFocus.prerequisiteToReview && (
@@ -520,9 +439,6 @@ export default function StudentIntelligenceProfileView({
                       <div>
                         <div className="text-xs font-bold text-white">
                           {isAr ? item.conceptNameAr : item.conceptNameEn}
-                        </div>
-                        <div className="text-[10px] text-slate-400 capitalize">
-                          {item.conceptId}
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -605,13 +521,10 @@ export default function StudentIntelligenceProfileView({
                         <div className="text-xs font-bold text-white">
                           {isAr ? item.conceptNameAr : item.conceptNameEn}
                         </div>
-                        <div className="text-[10px] text-slate-400 capitalize">
-                          {item.conceptId}
-                        </div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         {item.commonError && (
-                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300 font-mono">
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300">
                             {item.commonError}
                           </span>
                         )}
@@ -634,13 +547,13 @@ export default function StudentIntelligenceProfileView({
                         <AlertTriangle className="w-3 h-3 text-amber-400" />
                         {localize(
                           profile.language,
-                          `Latency: ${item.latencyProfile}`,
-                          `زمن الاستجابة: ${item.latencyProfile === 'high' ? 'مرتفع (>15ث)' : 'متوسط'}`
+                          item.latencyProfile === 'high' ? 'Needs more practice' : 'In progress',
+                          item.latencyProfile === 'high' ? 'يحتاج تدريباً أكثر' : 'قيد التدريب'
                         )}
                       </span>
                       {item.bestStrategy && (
                         <span className="text-[#E5A93C] font-medium">
-                          {localize(profile.language, 'Remedy:', 'العلاج:')} {STRATEGY_METADATA[item.bestStrategy]?.nameEn || item.bestStrategy}
+                          {localize(profile.language, 'Suggested Style:', 'الأسلوب المقترح:')} {isAr ? (STRATEGY_METADATA[item.bestStrategy]?.nameAr || item.bestStrategy) : (STRATEGY_METADATA[item.bestStrategy]?.nameEn || item.bestStrategy)}
                         </span>
                       )}
                     </div>
@@ -707,9 +620,6 @@ export default function StudentIntelligenceProfileView({
                         <div className="text-sm font-bold text-white">
                           {isAr ? mistake.nameAr : mistake.nameEn}
                         </div>
-                        <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-rose-500/10 border border-rose-500/30 text-rose-300">
-                          {mistake.id}
-                        </span>
                       </div>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0">
                         {mistake.count} {localize(profile.language, 'times', 'مرات')}
@@ -728,9 +638,9 @@ export default function StudentIntelligenceProfileView({
                         {mistake.conceptsInvolved.map((cid) => (
                           <span
                             key={cid}
-                            className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300"
+                            className="px-2 py-0.5 rounded-lg bg-slate-800 text-[10px] text-slate-300 font-medium capitalize"
                           >
-                            {cid}
+                            {cid.replace(/_/g, ' ')}
                           </span>
                         ))}
                       </div>
@@ -813,9 +723,6 @@ export default function StudentIntelligenceProfileView({
                       <div>
                         <div className="text-sm font-bold text-white">
                           {isAr ? item.conceptNameAr : item.conceptNameEn}
-                        </div>
-                        <div className="text-[11px] text-slate-400 capitalize">
-                          {item.conceptId}
                         </div>
                       </div>
                       <span
@@ -943,11 +850,6 @@ export default function StudentIntelligenceProfileView({
                     </div>
                     <div className="text-[10px] text-slate-400 mt-1 flex justify-between items-center">
                       <span>{isAr ? item.sampleSizeNoteAr : item.sampleSizeNoteEn}</span>
-                      {calibratedStrategiesMap[item.strategy]?.calibrationStage === 'calibrated' && (
-                        <span className="text-[#E5A93C] font-medium text-[10px]">
-                          Wilson: {Math.round((calibratedStrategiesMap[item.strategy]?.wilsonLowerBound || 0) * 100)}%
-                        </span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -955,19 +857,21 @@ export default function StudentIntelligenceProfileView({
             })}
           </div>
 
-          {/* Anti-Overclaiming Situational Efficacy Disclaimer */}
-          <div className="p-4 rounded-2xl bg-[#0e1222] border border-[#E5A93C]/20 text-xs text-slate-300 flex items-start gap-3">
+          {/* Adaptive Learning Note */}
+          <div className="p-4 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 text-xs text-slate-300 flex items-start gap-3">
             <Brain className="w-5 h-5 text-[#E5A93C] shrink-0 mt-0.5" />
             <div className="space-y-1">
               <div className="font-bold text-[#E5A93C] text-xs">
                 {localize(
                   profile.language,
-                  'Scientific Anti-Overclaiming Principle (Situational Strategy Efficacy)',
-                  'مبدأ الموضوعية العلمية (فاعلية الأساليب السياقية)'
+                  'Personalized Adaptive Learning',
+                  'التعلم التكيفي المخصص لك'
                 )}
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                {isAr ? ANTI_OVERCLAIMING_DISCLAIMER_AR : ANTI_OVERCLAIMING_DISCLAIMER_EN}
+                {isAr
+                  ? 'يتكيف كوجنيفاي تلقائيًا مع أسلوب التعلم الذي يناسبك في كل موضوع لضمان فهم المفاهيم بأسرع وقت وأعلى دقة.'
+                  : 'Cognify automatically adapts its explanation style to whatever helps you understand each subject best.'}
               </p>
             </div>
           </div>

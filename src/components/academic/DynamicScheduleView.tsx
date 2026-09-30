@@ -23,11 +23,7 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
 
   // Creation form state
   const [targetCourse, setTargetCourse] = useState('');
-  const [topics, setTopics] = useState<DynamicStudyTopic[]>([
-    { id: 't1', course: '', title: 'Chapter 1: Foundations & Core Theorems', difficulty: 2, estimatedHours: 2, completed: false },
-    { id: 't2', course: '', title: 'Chapter 2: Intermediate Algorithms & Data Models', difficulty: 3, estimatedHours: 3, completed: false },
-    { id: 't3', course: '', title: 'Chapter 3: Advanced Architectures & Systems', difficulty: 5, estimatedHours: 4, completed: false },
-  ]);
+  const [topics, setTopics] = useState<DynamicStudyTopic[]>([]);
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [newDifficulty, setNewDifficulty] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [newHours, setNewHours] = useState(2);
