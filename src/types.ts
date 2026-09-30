@@ -540,7 +540,7 @@ export interface DynamicStudySlot {
 
 export interface DynamicStudyPlan {
   id: string;
-  examDate: string;
+  examDate?: string;
   targetCourses: string[];
   topics: DynamicStudyTopic[];
   dailySlots: DynamicStudySlot[];

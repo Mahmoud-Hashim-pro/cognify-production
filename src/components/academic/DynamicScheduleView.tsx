@@ -22,11 +22,6 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
   const [isCreating, setIsCreating] = useState(false);
 
   // Creation form state
-  const [examDate, setExamDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 14); // default 2 weeks out
-    return formatDateIso(d);
-  });
   const [targetCourse, setTargetCourse] = useState('');
   const [topics, setTopics] = useState<DynamicStudyTopic[]>([
     { id: 't1', course: '', title: 'Chapter 1: Foundations & Core Theorems', difficulty: 2, estimatedHours: 2, completed: false },
@@ -68,7 +63,7 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
       return;
     }
     const finalTopics = topics.map((t) => ({ ...t, course: t.course || targetCourse || 'General' }));
-    const newPlan = createDynamicStudyPlan(examDate, finalTopics, [targetCourse || 'General'], 4);
+    const newPlan = createDynamicStudyPlan(undefined, finalTopics, [targetCourse || 'General'], 4);
     setPlan(newPlan);
     persistPlan(newPlan);
     setIsCreating(false);
@@ -151,30 +146,17 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
         </div>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                {isAr ? 'المادة الدراسية (Course Name)' : 'Course Name'}
-              </label>
-              <input
-                type="text"
-                value={targetCourse}
-                onChange={(e) => setTargetCourse(e.target.value)}
-                placeholder={isAr ? 'مثال: فيزياء كهربية، مبادئ الإدارة...' : 'e.g. Physics II, Microeconomics...'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-300 block mb-1.5">
-                {isAr ? 'موعد الامتحان النهائي أو الفاينال (Exam Date) *' : 'Target Exam Date *'}
-              </label>
-              <input
-                type="date"
-                value={examDate}
-                onChange={(e) => setExamDate(e.target.value)}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-all font-mono"
-              />
-            </div>
+          <div>
+            <label className="text-xs font-bold text-slate-300 block mb-1.5">
+              {isAr ? 'المادة الدراسية (Course Name)' : 'Course Name'}
+            </label>
+            <input
+              type="text"
+              value={targetCourse}
+              onChange={(e) => setTargetCourse(e.target.value)}
+              placeholder={isAr ? 'مثال: فيزياء كهربية، مبادئ الإدارة...' : 'e.g. Physics II, Microeconomics...'}
+              className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-all"
+            />
           </div>
 
           {/* Topics List Builder */}
@@ -278,9 +260,11 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
               <span className="text-xs font-black uppercase tracking-wider text-[#E5A93C] bg-[#831843]/20 border border-[#E5A93C]/30 px-3 py-1 rounded-xl">
                 {isAr ? 'جدول المذاكرة التفاعلي الذكي' : 'Dynamic AI Study Schedule'}
               </span>
-              <span className="text-xs text-slate-400 font-bold">
-                {isAr ? `موعد الامتحان: ${plan.examDate}` : `Target Exam: ${plan.examDate}`}
-              </span>
+              {plan.examDate && (
+                <span className="text-xs text-slate-400 font-bold">
+                  {isAr ? `تاريخ الإنجاز المقدر: ${plan.examDate}` : `Target Completion: ${plan.examDate}`}
+                </span>
+              )}
             </div>
             <h2 className="text-xl md:text-2xl font-black text-white pt-1">
               {plan.targetCourses[0] || (isAr ? 'الخطة الأكاديمية' : 'Academic Master Plan')}
