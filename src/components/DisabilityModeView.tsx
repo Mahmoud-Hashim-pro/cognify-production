@@ -156,7 +156,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   const handleSelectTab = React.useCallback((tab: DisabilityTab) => {
     setActiveTab(tab);
     onTabChange?.(tab);
-    if (tab === 'vision' || tab === 'deaf' || tab === 'motor' || tab === 'neurodiversity') {
+    if (tab === 'vision' || tab === 'deaf' || tab === 'motor' || tab === 'neurodiversity' || tab === 'hub') {
       try {
         localStorage.setItem('cognify_default_disability_tab', tab);
       } catch {}
@@ -180,12 +180,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, [profile, setProfile, onTabChange]);
 
   const handleNavigateBack = React.useCallback(() => {
-    if (onNavigate) {
+    if (activeTab !== 'hub') {
+      setActiveTab('hub');
+    } else if (onNavigate) {
       onNavigate('chat');
     } else {
       onMenuClick();
     }
-  }, [onNavigate, onMenuClick]);
+  }, [activeTab, onNavigate, onMenuClick]);
 
   const SUPPORTED_LANGUAGES: { id: LanguagePreference; label: string; flag: string; nativeName: string }[] = [
     { id: 'French', label: 'French', flag: '🇫🇷', nativeName: 'Français' },
@@ -561,148 +563,147 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     return MODULES.filter((m) => m.category === selectedCategory || (m.id === 'orchestrator' && (selectedCategory === 'vision' || selectedCategory === 'hearing' || selectedCategory === 'motor')));
   }, [selectedCategory, MODULES]);
 
-  // Current active module metadata for sibling bar
-  const currentModule = MODULES.find((m) => m.id === activeTab);
-  const siblingModules = useMemo(() => {
-    if (!currentModule || currentModule.category === 'caregiver') return [];
-    return MODULES.filter((m) => m.category === currentModule.category);
-  }, [currentModule, MODULES]);
-
   const isAr = profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya';
-  const isDeafActive = activeTab === 'deaf' || activeTab === 'radar' || activeTab === 'bridge';
+  const isDeafActive = activeTab === 'deaf' || activeTab === 'radar' || activeTab === 'bridge' || activeTab === 'studio' || activeTab === 'video';
+
+  // Current active module metadata for sibling bar
+  const currentModule = MODULES.find((m) => m.id === (isDeafActive ? 'deaf' : activeTab));
+  const siblingModules = useMemo(() => {
+    if (isDeafActive || !currentModule || currentModule.category === 'caregiver') return [];
+    return MODULES.filter((m) => m.category === currentModule.category);
+  }, [isDeafActive, currentModule, MODULES]);
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="flex-1 flex flex-col h-full bg-[#080409] text-slate-100 overflow-hidden relative select-none">
       
-      {/* ── TOP NAVIGATION BAR ── */}
-      {!isDeafActive && (
-        <header className="relative z-[9995] px-4 py-2.5 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-[#4A1224]/60 bg-[#0E0610]/95 backdrop-blur-xl shadow-lg">
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
-            {/* Main App Menu Drawer Button */}
-            <AriaButton
-              onPress={() => {
-                if (isAccessibilityUser(profile) || !onNavigate) onMenuClick();
-                else onNavigate('chat');
-              }}
-              aria-label={isAccessibilityUser(profile)
-                ? localize(profile.language, 'Open menu', 'افتح القائمة')
-                : getTranslation(profile.language, 'back')}
-              className="p-2 text-slate-400 bg-[#150917] border border-[#4A1224]/60 hover:text-white hover:bg-slate-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C] cursor-pointer"
-            >
+      {/* ── TOP NAVIGATION BAR (Always visible for seamless cross-disability jumping) ── */}
+      <header className="relative z-[9995] px-3 py-2 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-[#4A1224]/60 bg-[#0E0610]/95 backdrop-blur-xl shadow-lg">
+        <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
+          {/* Main App Menu Drawer Button */}
+          <AriaButton
+            onPress={() => {
+              if (isAccessibilityUser(profile) || !onNavigate) onMenuClick();
+              else onNavigate('chat');
+            }}
+            aria-label={isAccessibilityUser(profile)
+              ? localize(profile.language, 'Open menu', 'افتح القائمة')
+              : getTranslation(profile.language, 'back')}
+            className="p-2 text-slate-400 bg-[#150917] border border-[#4A1224]/60 hover:text-white hover:bg-slate-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C] cursor-pointer shrink-0"
+          >
+            {isAccessibilityUser(profile)
+              ? <Menu className="w-4 h-4" />
+              : <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />}
+            <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
               {isAccessibilityUser(profile)
-                ? <Menu className="w-4 h-4" />
-                : <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />}
-              <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
-                {isAccessibilityUser(profile)
-                  ? localize(profile.language, 'Menu', 'القائمة')
-                  : getTranslation(profile.language, 'back')}
-              </span>
-            </AriaButton>
+                ? localize(profile.language, 'Menu', 'القائمة')
+                : getTranslation(profile.language, 'back')}
+            </span>
+          </AriaButton>
 
-            {/* Primary Disability Mode Switcher: Instant, Uncluttered, Accessible */}
+          {/* Primary Disability Mode Switcher: Instant, Uncluttered, Accessible Across All Suites */}
+          <AriaRadioGroup
+            value={isDeafActive ? 'deaf' : (activeTab as string)}
+            onChange={(suiteId) => handleSelectTab(suiteId as DisabilityTab)}
+            aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
+            orientation="horizontal"
+            className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-2xl shadow-inner gap-1 outline-none overflow-x-auto custom-scrollbar"
+          >
+            {[
+              { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', Icon: LayoutGrid },
+              { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
+              { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
+              { id: 'motor' as const, labelAr: 'حركية', labelEn: 'Motor', Icon: Activity },
+              { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', Icon: Brain },
+            ].map((suite) => (
+              <AriaRadio
+                key={suite.id}
+                value={suite.id}
+                className={({ isSelected, isFocusVisible }) =>
+                  `px-2 sm:px-3 min-h-[38px] sm:min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
+                    isSelected
+                      ? 'bg-amber-400 text-slate-950 font-black shadow-md'
+                      : 'text-slate-300 hover:text-white hover:bg-[#150917]/70'
+                  } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                }
+              >
+                <suite.Icon className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
+              </AriaRadio>
+            ))}
+          </AriaRadioGroup>
+        </div>
+
+        {/* Right Header Status / Sibling Switcher */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Sibling module pills when inside a suite */}
+          {activeTab !== 'hub' && siblingModules.length > 1 ? (
             <AriaRadioGroup
-              value={((activeTab as string) === 'bridge' || (activeTab as string) === 'radar') ? 'deaf' : (activeTab as string)}
-              onChange={(suiteId) => handleSelectTab(suiteId as DisabilityTab)}
-              aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
+              value={activeTab as string}
+              onChange={(mId) => setActiveTab(mId as DisabilityTab)}
+              aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
               orientation="horizontal"
-              className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-2xl shadow-inner gap-1 outline-none"
+              className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none"
             >
-              {[
-                { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
-                { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
-                { id: 'motor' as const, labelAr: 'حركية', labelEn: 'Motor', Icon: Activity },
-                { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', Icon: Brain },
-              ].map((suite) => (
+              {siblingModules.map((m) => (
                 <AriaRadio
-                  key={suite.id}
-                  value={suite.id}
+                  key={m.id}
+                  value={m.id}
                   className={({ isSelected, isFocusVisible }) =>
-                    `px-2.5 sm:px-3 min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none ${
+                    `px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
                       isSelected
-                        ? 'bg-amber-400 text-slate-950 font-black shadow-md'
-                        : 'text-slate-300 hover:text-white hover:bg-[#150917]/70'
-                    } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900' : ''}`
+                        ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                        : 'text-slate-300 hover:text-white'
+                    } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-slate-900' : ''}`
                   }
                 >
-                  <suite.Icon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
+                  <span
+                    title={localize(profile.language, m.titleEn, m.titleAr)}
+                    className="flex items-center gap-1.5"
+                  >
+                    <m.Icon className="w-3.5 h-3.5" />
+                    <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
+                  </span>
                 </AriaRadio>
               ))}
             </AriaRadioGroup>
-          </div>
-
-          {/* Right Header Status / Sibling Switcher */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Sibling module pills when inside a suite */}
-            {activeTab !== 'hub' && siblingModules.length > 1 ? (
-              <AriaRadioGroup
-                value={activeTab as string}
-                onChange={(mId) => setActiveTab(mId as DisabilityTab)}
-                aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
-                orientation="horizontal"
-                className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none"
+          ) : (
+            /* Standard accessibility utilities: Visual Comfort, Passport, AI Preferences & Settings */
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <AriaButton
+                onPress={() => setShowVisualComfortModal(true)}
+                aria-label={localize(profile.language, 'Visual Comfort & Dyslexia Tools', 'أدوات الراحة البصرية وتيسير القراءة')}
+                className="px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
               >
-                {siblingModules.map((m) => (
-                  <AriaRadio
-                    key={m.id}
-                    value={m.id}
-                    className={({ isSelected, isFocusVisible }) =>
-                      `px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
-                        isSelected
-                          ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
-                          : 'text-slate-300 hover:text-white'
-                      } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-slate-900' : ''}`
-                    }
-                  >
-                    <span
-                      title={localize(profile.language, m.titleEn, m.titleAr)}
-                      className="flex items-center gap-1.5"
-                    >
-                      <m.Icon className="w-3.5 h-3.5" />
-                      <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
-                    </span>
-                  </AriaRadio>
-                ))}
-              </AriaRadioGroup>
-            ) : (
-              /* On Hub: show visual comfort button, passport button & settings */
-              <div className="flex items-center gap-2">
-                <AriaButton
-                  onPress={() => setShowVisualComfortModal(true)}
-                  aria-label={localize(profile.language, 'Visual Comfort & Dyslexia Tools', 'أدوات الراحة البصرية وتيسير القراءة')}
-                  className="px-3.5 min-h-[44px] py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
-                >
-                  <BookOpen className="w-4 h-4 text-amber-400" />
-                  <span>{localize(profile.language, 'Visual Comfort', 'الراحة البصرية')}</span>
-                </AriaButton>
-                <AriaButton
-                  onPress={() => setShowPassportModal(true)}
-                  aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
-                  className="px-3.5 min-h-[44px] py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/40 text-amber-200 hover:text-white hover:bg-amber-500/30 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
-                >
-                  <ShieldCheck className="w-4 h-4 text-amber-300" />
-                  <span>{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
-                </AriaButton>
-                <AriaButton
-                  onPress={() => setShowA11yPrefsModal(true)}
-                  aria-label={localize(profile.language, 'Adaptive Communication Preferences', 'تفضيلات التواصل والذكاء المكيّف')}
-                  className="px-3.5 min-h-[44px] py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
-                >
-                  <SlidersHorizontal className="w-4 h-4 text-emerald-400" />
-                  <span>{localize(profile.language, 'AI Adaptation', 'التكيف الذكي')}</span>
-                </AriaButton>
-                <AriaButton
-                  onPress={() => setActiveTab('settings')}
-                  aria-label={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
-                  className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
-                >
-                  <Settings className="w-4 h-4" />
-                </AriaButton>
-              </div>
-            )}
-          </div>
-        </header>
-      )}
+                <BookOpen className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="hidden xl:inline">{localize(profile.language, 'Visual Comfort', 'الراحة البصرية')}</span>
+              </AriaButton>
+              <AriaButton
+                onPress={() => setShowPassportModal(true)}
+                aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
+                className="px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/40 text-amber-200 hover:text-white hover:bg-amber-500/30 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                <span className="hidden xl:inline">{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
+              </AriaButton>
+              <AriaButton
+                onPress={() => setShowA11yPrefsModal(true)}
+                aria-label={localize(profile.language, 'Adaptive Communication Preferences', 'تفضيلات التواصل والذكاء المكيّف')}
+                className="px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="hidden xl:inline">{localize(profile.language, 'AI Adaptation', 'التكيف الذكي')}</span>
+              </AriaButton>
+              <AriaButton
+                onPress={() => setActiveTab('settings')}
+                aria-label={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
+                className="p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer shrink-0"
+              >
+                <Settings className="w-4 h-4" />
+              </AriaButton>
+            </div>
+          )}
+        </div>
+      </header>
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
@@ -844,8 +845,12 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   onNavigateBack={handleNavigateBack}
                   onMenuClick={onMenuClick}
                   onTabChange={(tool) => {
-                    setActiveTab(tool);
-                    onTabChange?.(tool);
+                    if (tool === 'vision' || tool === 'motor' || tool === 'neurodiversity' || tool === 'hub') {
+                      handleSelectTab(tool);
+                    } else {
+                      setActiveTab(tool);
+                      onTabChange?.(tool);
+                    }
                   }}
                 />
               </React.Suspense>
