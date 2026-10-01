@@ -460,13 +460,6 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                       color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
                     },
                     {
-                      titleEn: 'Motor & Euphonia',
-                      titleAr: 'الحركي وإيفونيا',
-                      count: stats.accessibilityModeBreakdown.Motor,
-                      Icon: Accessibility,
-                      color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                    },
-                    {
                       titleEn: 'Deaf & Sign',
                       titleAr: 'الصم ولغة الإشارة',
                       count: stats.accessibilityModeBreakdown.Deaf,

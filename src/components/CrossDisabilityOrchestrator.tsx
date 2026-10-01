@@ -9,7 +9,6 @@ import {
   Accessibility,
   Eye,
   Ear,
-  Activity,
   AlertTriangle,
   Radio,
   Volume2,
@@ -43,7 +42,7 @@ interface CrossDisabilityOrchestratorProps {
   onMenuClick?: () => void;
 }
 
-export type CrossEngineMode = 'blind-deaf' | 'deaf-blind-morse' | 'single-switch' | 'omni-sos';
+export type CrossEngineMode = 'blind-deaf' | 'deaf-blind-morse' | 'omni-sos';
 
 // Morse Code Standard Table (English & Arabic)
 const MORSE_ENCODE_MAP: Record<string, string> = {
@@ -281,91 +280,7 @@ export default function CrossDisabilityOrchestrator({
   };
 
   // ─────────────────────────────────────────────────────────────
-  // 3. UNIVERSAL SINGLE-SWITCH SCANNER (ALS & QUADRIPLEGIA)
-  // ─────────────────────────────────────────────────────────────
-  const [scanSpeedSeconds, setScanSpeedSeconds] = useState<number>(1.5);
-  const [isScannerRunning, setIsScannerRunning] = useState<boolean>(false);
-  const [activeScanIndex, setActiveScanIndex] = useState<number>(0);
-
-  const SCAN_TILES = useMemo(() => [
-    {
-      id: 'tile-water',
-      labelAr: 'أحتاج شرب ماء 💧',
-      labelEn: 'Need Water 💧',
-      speakText: isAr ? 'أحتاج شرب الماء لو سمحت' : 'I need water please',
-      color: 'border-[#E5A93C] bg-[#2D0B16] text-amber-200',
-    },
-    {
-      id: 'tile-pain',
-      labelAr: 'أشعر بألم شديد ⚠️',
-      labelEn: 'In Pain ⚠️',
-      speakText: isAr ? 'أشعر بألم شديد هنا، أحتاج مساعدة' : 'I am in severe pain, need help',
-      color: 'border-red-500 bg-red-950/40 text-red-200',
-    },
-    {
-      id: 'tile-pos',
-      labelAr: 'عدل وضعية السرير / الكرسي 🛏️',
-      labelEn: 'Adjust Bed / Chair 🛏️',
-      speakText: isAr ? 'لو سمحت ساعدني في تعديل وضعيتي' : 'Please adjust my position',
-      color: 'border-amber-500 bg-amber-950/40 text-amber-200',
-    },
-    {
-      id: 'tile-yes',
-      labelAr: 'نعم / أوافق ✅',
-      labelEn: 'Yes / Agree ✅',
-      speakText: isAr ? 'نعم، تمام وموافق' : 'Yes, I agree',
-      color: 'border-emerald-500 bg-emerald-950/40 text-emerald-200',
-    },
-    {
-      id: 'tile-no',
-      labelAr: 'لا / لا أريد ❌',
-      labelEn: 'No / Disagree ❌',
-      speakText: isAr ? 'لا، لست موافقاً ولا أريد' : 'No, I disagree',
-      color: 'border-rose-500 bg-rose-950/40 text-rose-200',
-    },
-    {
-      id: 'tile-family',
-      labelAr: 'نادي المرافق أو الطبيب 🔔',
-      labelEn: 'Call Nurse / Caregiver 🔔',
-      speakText: isAr ? 'رجاءً نادوا المرافق أو الطبيب فوراً' : 'Please call the caregiver or doctor',
-      color: 'border-purple-500 bg-purple-950/40 text-purple-200',
-    },
-  ], [isAr]);
-
-  // Single-Switch Cycling Timer
-  useEffect(() => {
-    if (!isScannerRunning) return;
-    const interval = setInterval(() => {
-      setActiveScanIndex((prev) => (prev + 1) % SCAN_TILES.length);
-    }, scanSpeedSeconds * 1000);
-    return () => clearInterval(interval);
-  }, [isScannerRunning, scanSpeedSeconds, SCAN_TILES.length]);
-
-  // Trigger selection on Switch Press
-  const handleTriggerSwitch = useCallback(() => {
-    const selected = SCAN_TILES[activeScanIndex];
-    if (selected) {
-      triggerHapticAlert('double-pulse');
-      speak(selected.speakText, profile.language || 'Egyptian Ammiya');
-      toast.success(selected.speakText);
-    }
-  }, [activeScanIndex, SCAN_TILES, profile.language]);
-
-  // Keyboard Space / Enter as physical hardware switch
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (activeEngine !== 'single-switch' || !isScannerRunning) return;
-      if (e.code === 'Space' || e.code === 'Enter') {
-        e.preventDefault();
-        handleTriggerSwitch();
-      }
-    };
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [activeEngine, isScannerRunning, handleTriggerSwitch]);
-
-  // ─────────────────────────────────────────────────────────────
-  // 4. MULTI-SENSORY EMERGENCY SOS BEACON
+  // 3. MULTI-SENSORY EMERGENCY SOS BEACON
   // ─────────────────────────────────────────────────────────────
   const [isSosActive, setIsSosActive] = useState<boolean>(false);
   const [strobeColor, setStrobeColor] = useState<'red' | 'white'>('red');
@@ -475,8 +390,8 @@ export default function CrossDisabilityOrchestrator({
                 </h1>
                 <p className="text-[11px] text-slate-400 hidden sm:block">
                   {isAr 
-                    ? 'جسر التخاطب بين الكفيف والأصم، مصفوفة مورس اللمسية، والمسح الذكي بالمفتاح الفردي'
-                    : 'Bilateral blind-deaf bridge, deaf-blind tactile morse matrix, and single-switch ALS scanner'}
+                    ? 'جسر التخاطب بين الكفيف والأصم، مصفوفة مورس اللمسية، واستغاثة طوارئ الحواس'
+                    : 'Bilateral blind-deaf bridge, deaf-blind tactile morse matrix, and omni-sensory emergency beacon'}
                 </p>
               </div>
             </div>
@@ -496,8 +411,8 @@ export default function CrossDisabilityOrchestrator({
           </button>
         </div>
 
-        {/* ── 4 ENGINE MODE SWITCHER TABS ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 p-1 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-2xl">
+        {/* ── 3 ENGINE MODE SWITCHER TABS ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 p-1 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-2xl">
           {[
             {
               id: 'blind-deaf' as const,
@@ -512,13 +427,6 @@ export default function CrossDisabilityOrchestrator({
               titleEn: 'Deaf-Blind Morse',
               icon: Vibrate,
               activeColor: 'bg-[#4A1224]/40 text-white shadow-[#E5A93C]/20',
-            },
-            {
-              id: 'single-switch' as const,
-              titleAr: 'مسح المفتاح الفردي (ALS)',
-              titleEn: 'Single-Switch Scan',
-              icon: Activity,
-              activeColor: 'bg-amber-600 text-slate-950 font-black shadow-amber-500/30',
             },
             {
               id: 'omni-sos' as const,
@@ -896,127 +804,7 @@ export default function CrossDisabilityOrchestrator({
           )}
 
           {/* ══════════════════════════════════════════════════════════════
-              ENGINE 3: UNIVERSAL SINGLE-SWITCH SCANNER (ALS & MOTOR)
-             ══════════════════════════════════════════════════════════════ */}
-          {activeEngine === 'single-switch' && (
-            <motion.div
-              key="engine-single-switch"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="h-full flex flex-col gap-4 max-w-4xl mx-auto w-full"
-            >
-              {/* Scanner Control Bar */}
-              <div className="bg-[#121626] border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xl">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400">
-                    <Activity className="w-6 h-6 animate-pulse" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-black text-white">
-                      {isAr ? 'نظام المسح الذكي بالمفتاح الفردي (Single-Switch Scanning)' : 'Universal Single-Switch Autonomic Scanner'}
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      {isAr 
-                        ? 'مخصص لمرضى التصلب ALS والشلل التام: المؤشر يتنقل آلياً، ونقرة واحدة على المسافة أو الشاشة تنطق الطلب.'
-                        : 'Designed for ALS & quadriplegia: Cursor cycles automatically; any single tap/spacebar speaks selection.'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Scan Speed and Switch Run Toggle */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-[#150917] px-2 py-1 rounded-xl border border-[#4A1224]/60 text-xs">
-                    <span className="text-[10px] text-slate-400 font-bold">{isAr ? 'سرعة المسح:' : 'Scan:'}</span>
-                    {[1.0, 1.5, 2.5].map((spd) => (
-                      <button
-                        key={spd}
-                        onClick={() => setScanSpeedSeconds(spd)}
-                        className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                          scanSpeedSeconds === spd ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-400'
-                        }`}
-                      >
-                        {spd}s
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      const next = !isScannerRunning;
-                      setIsScannerRunning(next);
-                      if (next) triggerHapticAlert('single-pulse');
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all shadow-lg active:scale-95 ${
-                      isScannerRunning
-                        ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse'
-                        : 'bg-amber-500 hover:bg-amber-600 text-slate-950'
-                    }`}
-                  >
-                    {isScannerRunning ? (isAr ? 'إيقاف المسح' : 'Pause Scan') : (isAr ? 'تشغيل المسح الآلي' : 'Start Auto Scan')}
-                  </button>
-                </div>
-              </div>
-
-              {/* Scanner Grid Tiles */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 flex-1 min-h-0">
-                {SCAN_TILES.map((tile, idx) => {
-                  const isCurrent = isScannerRunning && activeScanIndex === idx;
-                  return (
-                    <button
-                      key={tile.id}
-                      onClick={() => {
-                        setActiveScanIndex(idx);
-                        triggerHapticAlert('double-pulse');
-                        speak(tile.speakText, profile.language || 'Egyptian Ammiya');
-                        toast.success(tile.speakText);
-                      }}
-                      className={`rounded-2xl p-4 sm:p-6 text-start flex flex-col justify-between transition-all border-2 relative ${
-                        isCurrent
-                          ? 'ring-4 ring-amber-400 scale-[1.03] shadow-2xl z-10 border-white bg-[#150917]'
-                          : `${tile.color} hover:brightness-110 opacity-80`
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/40 text-slate-300 font-black">
-                          #{idx + 1}
-                        </span>
-                        {isCurrent && (
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 animate-bounce">
-                            {isAr ? 'المحدد الآن' : 'ACTIVE'}
-                          </span>
-                        )}
-                      </div>
-
-                      <h4 className="text-sm sm:text-base font-black text-white mb-2 leading-snug">
-                        {isAr ? tile.labelAr : tile.labelEn}
-                      </h4>
-
-                      <p className="text-[11px] text-slate-300 line-clamp-2">
-                        "{tile.speakText}"
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Big Hardware Switch Trigger Zone for Foot / Head Click */}
-              <button
-                onClick={handleTriggerSwitch}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:brightness-110 text-slate-950 font-black text-sm sm:text-base shadow-2xl flex items-center justify-center gap-2 active:scale-98 border-2 border-white/20"
-              >
-                <Zap className="w-5 h-5 fill-current" />
-                <span>
-                  {isAr 
-                    ? `اضغط هنا أو اضغط زر المسافة (Spacebar) لاختيار: ${SCAN_TILES[activeScanIndex]?.labelAr}`
-                    : `Tap here or press Spacebar to activate: ${SCAN_TILES[activeScanIndex]?.labelEn}`}
-                </span>
-              </button>
-            </motion.div>
-          )}
-
-          {/* ══════════════════════════════════════════════════════════════
-              ENGINE 4: OMNI-SENSORY EMERGENCY SOS BEACON
+              ENGINE 3: OMNI-SENSORY EMERGENCY SOS BEACON
              ══════════════════════════════════════════════════════════════ */}
           {activeEngine === 'omni-sos' && (
             <motion.div

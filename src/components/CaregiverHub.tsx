@@ -155,8 +155,6 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       accessibilityMode: profile.accessibilityMode,
       accessibilityPassport: profile.accessibilityPassport,
       visionMemories: profile.visionMemories,
-      headTrackingConfig: profile.headTrackingConfig,
-      vocalTriggers: profile.vocalTriggers,
       contacts: loadContacts(),
       sensoryLogs: sensoryLogs,
       exportedAt: new Date().toISOString(),
@@ -571,17 +569,6 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             <div>
               <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Visual Memories', 'ذاكرة الأشخاص والأشياء')}</div>
               <div className="text-xl font-black text-white">{profile.visionMemories?.length || 0} {t('Items', 'عنصر')}</div>
-            </div>
-          </div>
-
-          {/* Euphonia Telemetry */}
-          <div className="p-4 rounded-3xl bg-[#150917] border border-[#4A1224]/50 flex items-center gap-3.5 shadow-lg">
-            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-              <Mic className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Vocal Triggers', 'محفزات النطق (إيفونيا)')}</div>
-              <div className="text-xl font-black text-white">{profile.vocalTriggers?.length || 3} {t('Tuned', 'مضبوط')}</div>
             </div>
           </div>
 

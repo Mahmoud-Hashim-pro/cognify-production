@@ -18,7 +18,7 @@ type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
 // 'Neurodiversity' instead of 'Hearing' / 'Motor' / 'Cognitive'). DISABILITY_MODE_MAP
 // below is the single place that translates between the two — every option here
 // MUST have an entry there, or that user silently ends up with accessibilityMode 'None'.
-type DisabilityOption = 'Visual' | 'Hearing' | 'Motor' | 'Speech' | 'Cognitive';
+type DisabilityOption = 'Visual' | 'Hearing' | 'Speech' | 'Cognitive';
 
 // The one source of truth for turning a picker chip into the real, canonical
 // AccessibilityMode value used everywhere else in the app (DisabilityModeView's
@@ -27,7 +27,6 @@ type DisabilityOption = 'Visual' | 'Hearing' | 'Motor' | 'Speech' | 'Cognitive';
 const DISABILITY_MODE_MAP: Record<DisabilityOption, AccessibilityMode> = {
   'Visual': 'Visual',
   'Hearing': 'Vocal-Deaf',
-  'Motor': 'Motor-Euphonia',
   'Speech': 'Speech',
   'Cognitive': 'Neurodiversity',
 };
@@ -38,7 +37,6 @@ const DISABILITY_MODE_MAP: Record<DisabilityOption, AccessibilityMode> = {
 const DISABILITY_LABEL_MAP: Record<DisabilityOption, string> = {
   'Visual': 'Visual Impairment',
   'Hearing': 'Hearing Impairment',
-  'Motor': 'Motor Impairment',
   'Speech': 'Speech Impairment',
   'Cognitive': 'Cognitive/Learning Disability',
 };
@@ -69,13 +67,6 @@ const SPECIAL_NEEDS_FEATURES: {
     title: { en: 'Deaf & Hard of Hearing Suite (All-in-One)', ar: 'منظومة الصم وضعاف السمع الشاملة (الكل في واحد)' },
     description: { en: '3D sign language studio, sound & hazard radar, and a live two-way communication bridge', ar: 'استوديو لغة إشارة ثلاثي الأبعاد، رادار للأصوات والمخاطر، وجسر تواصل مباشر ثنائي الاتجاه' },
     matches: ['Hearing'],
-  },
-  {
-    key: 'motor-voice',
-    Icon: Check,
-    title: { en: 'Motor & Euphonia Control', ar: 'التحكم الحركي وإيفونيا' },
-    description: { en: 'Head-tracking pointer, eye-gaze keyboard, and hands-free vocal triggers', ar: 'مؤشر بحركة الرأس، لوحة مفاتيح بالعين، وأوامر صوتية بدون لمس' },
-    matches: ['Motor', 'Speech'],
   },
   {
     key: 'cognitive-scaffolding',
@@ -555,8 +546,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                                     "ذكاء اصطناعي يفهم مقررات كليتك وتخصصك بدقة. يدعم صياغة الرسالة، توثيق المراجع، ومتابعة تسليمات مشروعك."
                                   )}
                                   {activePreviewPath === 'Special Needs' && t(
-                                    "Assistive multi-modal suite for visual, hearing, motor, and neurodiversity needs with 3D sign avatar, Vision OCR, and vocal controls.",
-                                    "منظومة إتاحة شاملة للإعاقات البصرية والسمعية والحركية والتوحد مع أفاتار 3D، كاميرا ذكية، وأوامر صوتية."
+                                    "Assistive multi-modal suite for visual, hearing, and neurodiversity needs with 3D sign avatar, Vision OCR, and spoken tools.",
+                                    "منظومة إتاحة شاملة للإعاقات البصرية والسمعية والتوحد مع أفاتار 3D، كاميرا ذكية، وأدوات صوتية."
                                   )}
                                 </p>
                               </div>
@@ -700,7 +691,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         <span className="text-slate-300 font-semibold text-[11px] sm:text-xs">
                           {activePreviewPath === 'Normal' && t("Adaptive AI Chat · GPA Engine · Spaced Retention · Cognitive Tests", "دردشة تكيّفية · حاسبة GPA · تكرار متباعد · اختبارات ذهنية")}
                           {activePreviewPath === 'Graduation Project' && t("All Normal Features + Faculty Context + Thesis AI + Citations", "كل مميزات العادي + ربط الكلية + إرشاد الرسالة + توثيق المراجع")}
-                          {activePreviewPath === 'Special Needs' && t("All Normal Features + 3D Sign Language + Vision AI Eyes + Motor Euphonia + Autism Oasis", "كل مميزات العادي + لغة إشارة 3D + رفيق بصري + تحكم حركي + واحة التوحد")}
+                          {activePreviewPath === 'Special Needs' && t("All Normal Features + 3D Sign Language + Vision AI Eyes + Autism Oasis", "كل مميزات العادي + لغة إشارة 3D + رفيق بصري + واحة التوحد")}
                         </span>
                       </div>
                     </div>
@@ -877,11 +868,11 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                                         ? 'bg-[#E5A93C]/20 text-[#E5A93C] border-[#E5A93C]/40'
                                         : 'bg-[#1A0C1D] text-slate-400 border-[#4A1224]/50'
                                     }`}>
-                                      {t("5 Assistive Modes", "5 مسارات داعمة")}
+                                      {t("4 Assistive Modes", "4 مسارات داعمة")}
                                     </span>
                                   </div>
                                   <p className="text-[11px] text-slate-300 font-medium mt-0.5 leading-snug">
-                                    {t("Assistive suite: 3D sign avatar, Vision eyes, vocal motor & neuro tools.", "منظومة الدعم الشامل: لغة إشارة 3D، رفيق بصري، تحكم حركي، وأدوات توحد.")}
+                                    {t("Assistive suite: 3D sign avatar, Vision eyes, and neuro tools.", "منظومة الدعم الشامل: لغة إشارة 3D، رفيق بصري، وأدوات توحد.")}
                                   </p>
                                 </div>
                                 <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
@@ -909,7 +900,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                                   {t("Focus Modality:", "نظام التركيز الأساسي:")}
                                 </span>
                                 <span className="text-slate-400 font-normal text-[9px]">
-                                  {t("All 5 suites active", "كافة الأنظمة متاحة")}
+                                  {t("All 4 suites active", "كافة الأنظمة متاحة")}
                                 </span>
                               </div>
                               <RadioGroup
@@ -917,12 +908,11 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                                 onChange={(val) => setSelectedDisability(val as DisabilityOption)}
                                 aria-label={t("Accessibility focus", "نوع الإتاحة المطلوب")}
                                 orientation="horizontal"
-                                className="grid grid-cols-4 gap-1 outline-none"
+                                className="grid grid-cols-3 gap-1 outline-none"
                               >
                                 {[
                                   { id: 'Visual' as const, label: t('Visual', 'بصري') },
                                   { id: 'Hearing' as const, label: t('Sign 3D', 'إشارة 3D') },
-                                  { id: 'Motor' as const, label: t('Motor', 'حركي') },
                                   { id: 'Cognitive' as const, label: t('Autism', 'توحد') },
                                 ].map((item) => (
                                   <Radio

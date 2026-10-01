@@ -6,7 +6,6 @@ import {
   Check,
   Eye,
   Ear,
-  Activity,
   Brain,
   Sparkles,
   Volume2,
@@ -63,11 +62,6 @@ export default function AccessibilityPassportModal({
       reverseSignToSpeech: true,
       flashingAlerts: true,
     },
-    motorSupport: {
-      trackingMode: profile.headTrackingConfig?.trackingMode || 'iris',
-      dwellDurationMs: profile.headTrackingConfig?.dwellTimeMs || 1200,
-      emergencySosEnabled: true,
-    },
     neurodiversitySupport: {
       dyslexiaFont: false,
       readingRuler: false,
@@ -97,11 +91,6 @@ export default function AccessibilityPassportModal({
           allowCameraTriggers: true,
           visualSupport: { highContrast: false, autoSpeechReadout: true, hapticAssistance: true },
           hearingSupport: { visualAcousticRadar: true, reverseSignToSpeech: true, flashingAlerts: true },
-          motorSupport: {
-            trackingMode: profile.headTrackingConfig?.trackingMode || 'iris',
-            dwellDurationMs: profile.headTrackingConfig?.dwellTimeMs || 1200,
-            emergencySosEnabled: true,
-          },
           neurodiversitySupport: { dyslexiaFont: false, readingRuler: false, sensoryRegulation: true },
         }
       );
@@ -119,16 +108,14 @@ export default function AccessibilityPassportModal({
     setIsSaving(true);
     let cat = passport.primaryCategory as string;
     let resolvedMode: AccessibilityMode = profile.accessibilityMode;
-    if (cat === 'Motor') resolvedMode = 'Motor-Euphonia';
-    else if (cat === 'Deaf') resolvedMode = 'Vocal-Deaf';
+    if (cat === 'Deaf') resolvedMode = 'Vocal-Deaf';
     else if (cat === 'Visual') resolvedMode = 'Visual';
     else if (cat === 'Neurodiversity') resolvedMode = 'Neurodiversity';
     else if (cat === 'None') resolvedMode = 'None';
     else if (passport.primaryMode && passport.primaryMode !== 'None') resolvedMode = passport.primaryMode;
 
     try {
-      const mappedTab = resolvedMode === 'Motor-Euphonia' ? 'motor' :
-                        resolvedMode === 'Neurodiversity' ? 'neurodiversity' :
+      const mappedTab = resolvedMode === 'Neurodiversity' ? 'neurodiversity' :
                         resolvedMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
       localStorage.setItem('cognify_default_disability_tab', mappedTab);
       localStorage.setItem('cognify_font_scale', passport.fontSizeScale || 'normal');
@@ -400,31 +387,7 @@ export default function AccessibilityPassportModal({
             </div>
           </div>
 
-          {/* 4. Motor Accommodations */}
-          <div className="p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 space-y-2.5">
-            <div className="flex items-center gap-2 font-bold text-xs text-amber-400">
-              <Activity className="w-4 h-4" />
-              <span>{t('Motor & Eye-Gaze Accommodations', 'تسهيلات الحركة وتتبع العين')}</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <label className="flex items-center gap-2 p-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={passport.motorSupport?.emergencySosEnabled ?? true}
-                  onChange={(e) =>
-                    setPassport({
-                      ...passport,
-                      motorSupport: { ...passport.motorSupport, emergencySosEnabled: e.target.checked },
-                    })
-                  }
-                  className="rounded text-indigo-600 w-4 h-4"
-                />
-                <span>{t('4s Eye-Closure Emergency SOS', 'استغاثة الطوارئ بغمض العين 4 ثوانٍ')}</span>
-              </label>
-            </div>
-          </div>
-
-          {/* 5. Neurodiversity Accommodations */}
+          {/* 4. Neurodiversity Accommodations */}
           <div className="p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 space-y-2.5">
             <div className="flex items-center gap-2 font-bold text-xs text-indigo-400">
               <Brain className="w-4 h-4" />

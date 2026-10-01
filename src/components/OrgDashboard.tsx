@@ -20,7 +20,6 @@ const DIS_ICON: Record<string, typeof Eye> = {
   'Visual Impairment': Eye,
   'Hearing Impairment': Ear,
   'Speech Impairment': Mic,
-  'Motor Impairment': Accessibility,
   'Cognitive/Learning Disability': Brain,
   'Other': UserIcon,
 };

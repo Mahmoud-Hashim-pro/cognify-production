@@ -72,7 +72,6 @@ const DISABILITY_META: Record<string, { label: string; Icon: typeof Eye; bar: st
   'Visual Impairment': { label: 'Visual', Icon: Eye, bar: 'bg-indigo-500' },
   'Hearing Impairment': { label: 'Hearing', Icon: Ear, bar: 'bg-rose-500' },
   'Speech Impairment': { label: 'Speech', Icon: Mic, bar: 'bg-emerald-500' },
-  'Motor Impairment': { label: 'Motor', Icon: Accessibility, bar: 'bg-amber-500' },
   'Cognitive/Learning Disability': { label: 'Cognitive', Icon: Brain, bar: 'bg-purple-500' },
   'Other': { label: 'Other', Icon: UserIcon, bar: 'bg-slate-400' },
 };
@@ -83,7 +82,6 @@ const MODE_META: Record<AccessibilityMode, { label: string; cls: string }> = {
   'Speech': { label: 'Speech', cls: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' },
   'Vocal-Deaf': { label: 'Vocal-Deaf', cls: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' },
   'Sign-Only': { label: 'Sign-Only', cls: 'bg-purple-500/20 text-purple-300 border border-purple-500/30' },
-  'Motor-Euphonia': { label: 'Motor & Euphonia', cls: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' },
   'Neurodiversity': { label: 'Neurodiversity', cls: 'bg-teal-500/20 text-teal-300 border border-teal-500/30' },
   'None': { label: 'Standard', cls: 'bg-slate-800 text-slate-400 border border-[#4A1224]/50' },
 };

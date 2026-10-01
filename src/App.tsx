@@ -60,7 +60,6 @@ function lazyWithRetry<T extends React.ComponentType<any>>(
 // bundle. They load on demand the first time a user opens that screen, which
 // keeps the app fast to start (important on mobile / slow connections).
 const VisionCompanionView = lazyWithRetry(() => import("./components/VisionCompanionView"));
-const MotorEuphoniaView = lazyWithRetry(() => import("./components/MotorEuphoniaView"));
 const DisabilityModeView = lazyWithRetry(() => import("./components/DisabilityModeView"));
 import type { DisabilityTab } from "./components/DisabilityModeView";
 const Login = lazyWithRetry(() => import("./components/Login"));
@@ -521,8 +520,7 @@ export default function App() {
           data.accessibilityMode = preLoginMode as AccessibilityMode;
           if (preLoginDis) data.disabilityType = preLoginDis;
           try {
-            const mappedTab = preLoginMode === 'Motor-Euphonia' ? 'motor' :
-                              preLoginMode === 'Neurodiversity' ? 'neurodiversity' :
+            const mappedTab = preLoginMode === 'Neurodiversity' ? 'neurodiversity' :
                               preLoginMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
             localStorage.setItem('cognify_default_disability_tab', mappedTab);
           } catch {}
@@ -612,16 +610,13 @@ export default function App() {
               accessibilityMode = 'Vocal-Deaf';
             } else if (disabilityType === 'Speech Impairment') {
               accessibilityMode = 'Speech';
-            } else if (disabilityType === 'Motor Impairment') {
-              accessibilityMode = 'Motor-Euphonia';
             } else if (disabilityType === 'Cognitive/Learning Disability') {
               accessibilityMode = 'Neurodiversity';
             }
           }
 
           try {
-            const mappedTab = accessibilityMode === 'Motor-Euphonia' ? 'motor' :
-                              accessibilityMode === 'Neurodiversity' ? 'neurodiversity' :
+            const mappedTab = accessibilityMode === 'Neurodiversity' ? 'neurodiversity' :
                               accessibilityMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
             localStorage.setItem('cognify_default_disability_tab', mappedTab);
           } catch {}

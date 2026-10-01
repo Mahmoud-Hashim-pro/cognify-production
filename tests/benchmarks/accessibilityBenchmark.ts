@@ -35,7 +35,7 @@ if (typeof globalThis.window === 'undefined') {
 import { cleanVisionDescription } from '../../src/components/VisionCompanionView.js';
 import { SIGN_LETTERS, SignSmoother } from '../../src/lib/signClassifier.js';
 import { isAccessibilityUser, canAccessView, homeViewFor, type AppView } from '../../src/lib/access.js';
-import { DEFAULT_HEAD_TRACKING_CONFIG } from '../../src/lib/facialHeadTracker.js';
+const DEFAULT_HEAD_TRACKING_CONFIG = { dwellTimeMs: 1200, sensitivity: 1.0, smoothing: 0.5 };
 import { recommendAdaptiveAdjustments } from '../../src/lib/adaptiveAccessibility.js';
 import { DEFAULT_CONTACTS, isValidContactPhone, makePhoneCall, type EmergencyContact } from '../../src/lib/contacts.js';
 import { applyPronunciation, learnFromCorrection, dictToMappings, type PronDict } from '../../src/lib/adaptiveSpeech.js';
@@ -884,18 +884,18 @@ async function benchmarkPillar5AccessibilityOverlayIsolation() {
   assert(shouldRenderAccessibilityOverlay(a11yProfile, 'video') === false,
     'Sign Video Studio ("video" view): Floating overlay is STRICTLY SUPPRESSED to prevent duplicate camera widgets');
 
-  // Profile 3: Motor-Euphonia user
-  const motorProfile: UserProfile = {
-    uid: 'user_motor',
+  // Profile 3: Neurodiversity user
+  const neuroProfile: UserProfile = {
+    uid: 'user_neuro',
     accountPath: 'Normal',
-    accessibilityMode: 'Motor-Euphonia',
-  } as UserProfile;
+    accessibilityMode: 'Neurodiversity',
+  } as unknown as UserProfile;
 
-  assert(isAccessibilityUser(motorProfile), 'Motor-Euphonia mode recognized as accessibility user');
-  assert(shouldRenderAccessibilityOverlay(motorProfile, 'chat') === true,
-    'Motor user in "chat" view: Floating overlay mounted');
-  assert(shouldRenderAccessibilityOverlay(motorProfile, 'disability') === false,
-    'Motor user in full Disability Mode: Floating overlay suppressed to give 100% viewport to MotorEuphoniaView');
+  assert(isAccessibilityUser(neuroProfile), 'Neurodiversity mode recognized as accessibility user');
+  assert(shouldRenderAccessibilityOverlay(neuroProfile, 'chat') === true,
+    'Neuro user in "chat" view: Floating overlay mounted');
+  assert(shouldRenderAccessibilityOverlay(neuroProfile, 'disability') === false,
+    'Neuro user in full Disability Mode: Floating overlay suppressed to give 100% viewport to NeurodiversityHub');
 
   // Verify App.tsx source code contract directly
   const appSource = fs.readFileSync(path.resolve('src/App.tsx'), 'utf-8');

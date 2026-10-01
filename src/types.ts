@@ -3,7 +3,7 @@ export type UserRole = 'Student' | 'Professional';
 export type EducationLevel = 'Primary' | 'Secondary' | 'University' | 'Professional';
 export type Field = 'Medicine' | 'Engineering' | 'Business' | 'General' | 'Other';
 import type { StudentState } from './types/studentState';
-export type AccessibilityMode = 'None' | 'Speech' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Motor-Euphonia' | 'Neurodiversity';
+export type AccessibilityMode = 'None' | 'Speech' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Neurodiversity';
 export type LanguagePreference = 'English' | 'Arabic' | 'Egyptian Ammiya' | 'French' | 'Spanish' | 'German' | 'Italian' | 'Portuguese' | 'Russian' | 'Chinese' | 'Japanese';
 export type AccountPath = 'Graduation Project' | 'Special Needs' | 'Normal';
 
@@ -201,25 +201,6 @@ export interface UserProfile {
    * Phase 5: Empirical Evaluation Engine
    */
   evaluationRecords?: EvaluationRecord[];
-  /**
-   * Eye-tracking / auto-scan tuning, synced so it follows the student.
-   *
-   * This used to live only in localStorage, which meant a student who had their
-   * sensitivity, dwell time and scan speed tuned on one tablet got the raw
-   * defaults on any other device — and lost the tuning entirely if the browser
-   * data was cleared. For someone who needs the settings calibrated to their own
-   * motor range, re-tuning from scratch is not a minor inconvenience.
-   */
-  headTrackingConfig?: HeadTrackingConfig;
-  /**
-   * Vocal sound triggers, tuned to this student's own voice.
-   *
-   * The pitch a student can actually produce is personal — a breathy 140Hz hum
-   * never matches a target fixed at 220Hz, and for a student who cannot blink
-   * reliably these triggers are their click. Synced for the same reason as the
-   * head config: the calibration has to follow them between devices.
-   */
-  vocalTriggers?: VocalSoundTriggerConfig[];
   // Granted via the Admin Dashboard. Permanent "owner" admins are defined by
   // email in the code; this flag is for admins promoted at runtime.
   isAdmin?: boolean;
@@ -311,11 +292,6 @@ export interface AccessibilityPassport {
     visualAcousticRadar?: boolean;
     reverseSignToSpeech?: boolean;
     flashingAlerts?: boolean;
-  };
-  motorSupport?: {
-    trackingMode?: string;
-    dwellDurationMs?: number;
-    emergencySosEnabled?: boolean;
   };
   neurodiversitySupport?: {
     dyslexiaFont?: boolean;
@@ -416,57 +392,6 @@ export interface PlannerTask {
   dueDate: string;         // ISO date string (YYYY-MM-DD)
   completed: boolean;
   createdAt: string;
-}
-
-// ─── Motor & Euphonia (Quadriplegia Assistive System) ─────────────────────────
-export type VocalTriggerAction =
-  | 'select'
-  | 'next'
-  | 'previous'
-  | 'back'
-  | 'ask-ai'
-  | 'speak-aloud'
-  | 'emergency'
-  | 'clear';
-
-export interface VocalSoundTriggerConfig {
-  id: string;
-  name: string;
-  nameAr: string;
-  targetFrequencyHz: number; // Center frequency (e.g. 250Hz for low hum, 1200Hz for high tone)
-  minEnergyThreshold: number; // Volume threshold 0-1
-  action: VocalTriggerAction;
-  enabled: boolean;
-}
-
-export interface HeadTrackingConfig {
-  sensitivity: number; // 0.5 to 3.0
-  dwellTimeMs: number; // 800ms to 3000ms
-  smoothing: number; // 0.1 to 0.9
-  trackingMode?: 'iris' | 'nose' | 'hybrid'; // Eye Iris Gaze vs Head Nose vs Hybrid
-  facialTriggersEnabled: boolean; // Smile / mouth open triggers click
-  smileThreshold: number; // 0.3 to 0.9
-  mouthOpenThreshold: number; // 0.3 to 0.9
-  // Single-switch auto scanning: the app walks the selectable targets itself
-  // and the student makes ONE action to choose. The fallback for users who
-  // cannot drive the gaze pointer at all.
-  autoScanEnabled: boolean;
-  autoScanIntervalMs: number; // 600ms to 5000ms
-  /** row-column asks for a row first, then an item in it: two choices instead
-   *  of walking all ~40 keys. linear walks every target in order. */
-  autoScanMode?: 'linear' | 'row-column';
-}
-
-export interface AACCardItem {
-  id: string;
-  category: 'quick' | 'study' | 'needs' | 'ai' | 'navigation' | 'contacts';
-  labelEn: string;
-  labelAr: string;
-  icon: string;
-  phraseEn: string;
-  phraseAr: string;
-  actionPayload?: string;
-  isAiAction?: boolean;
 }
 
 export interface LoginHistoryRecord {

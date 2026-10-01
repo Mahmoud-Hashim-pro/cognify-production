@@ -350,7 +350,7 @@ export default function ProfilePage({ profile, onMenuClick, setProfile, onNaviga
                 isEditing={isEditing} 
                 onChange={(v) => handleChange('accessibilityMode', v)} 
                 type="select"
-                options={['None', 'Motor-Euphonia', 'Sign-Only', 'Speech', 'Visual', 'Vocal-Deaf']}
+                options={['None', 'Sign-Only', 'Speech', 'Visual', 'Vocal-Deaf', 'Neurodiversity']}
               />
             </div>
           </div>

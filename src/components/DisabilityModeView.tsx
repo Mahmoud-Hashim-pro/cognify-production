@@ -5,7 +5,7 @@ import { AriaButton } from './ui/AriaButton';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
-  ArrowLeft, ArrowRight, MessageSquare, Activity, Globe, Check, 
+  ArrowLeft, ArrowRight, MessageSquare, Globe, Check, 
   LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
   SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck
 } from 'lucide-react';
@@ -14,7 +14,6 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
 import { toast } from './Toast';
 import type { ChatInterfaceRef } from './ChatInterface';
-const MotorEuphoniaView = React.lazy(() => import('./MotorEuphoniaView'));
 const VisionCompanionView = React.lazy(() => import('./VisionCompanionView'));
 const ChatInterface = React.lazy(() => import('./ChatInterface'));
 const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
@@ -40,7 +39,6 @@ export type DisabilityTab =
   | 'studio'
   | 'bridge'
   | 'org'
-  | 'motor'
   | 'vision'
   | 'radar'
   | 'neurodiversity'
@@ -49,7 +47,7 @@ export type DisabilityTab =
   | 'deaf'
   | 'orchestrator';
 
-export type ModuleCategory = 'all' | 'vision' | 'hearing' | 'motor' | 'neuro' | 'caregiver';
+export type ModuleCategory = 'all' | 'vision' | 'hearing' | 'neuro' | 'caregiver';
 
 interface DisabilityModeViewProps {
   profile: UserProfile;
@@ -77,19 +75,17 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
   // 1. If user explicitly clicked and chose a tab before, honor that manual choice!
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
-    if (saved === 'hub' || saved === 'motor' || saved === 'neurodiversity' || saved === 'deaf' || saved === 'vision') {
+    if (saved === 'hub' || saved === 'neurodiversity' || saved === 'deaf' || saved === 'vision') {
       return saved as DisabilityTab;
     }
   } catch {}
 
   const mode = String(profile?.accessibilityMode || '').toLowerCase().trim();
-  if (mode.includes('motor') || mode === 'speech') return 'motor';
   if (mode.includes('neuro') || mode.includes('cognitiv') || mode.includes('autis')) return 'neurodiversity';
   if (mode.includes('deaf') || mode.includes('sign') || mode.includes('hearing') || mode.includes('vocal')) return 'deaf';
   if (mode.includes('visu') || mode.includes('blind')) return 'vision';
 
   const freeText = String(profile?.disabilityType || '').toLowerCase().trim();
-  if (/motor|euphonia|paraly|quadr|speech|als/.test(freeText)) return 'motor';
   if (/adhd|autis|dyslex|cognitiv|neurodiv|learning/.test(freeText)) return 'neurodiversity';
   if (/deaf|hearing|vocal|sign/.test(freeText)) return 'deaf';
   if (/visual|blind|vision|sight/.test(freeText)) return 'vision';
@@ -104,7 +100,6 @@ function categoryForTab(tab: DisabilityTab): ModuleCategory {
   switch (tab) {
     case 'vision': return 'vision';
     case 'deaf': return 'hearing';
-    case 'motor': return 'motor';
     case 'neurodiversity':
     case 'learning': return 'neuro';
     case 'caregiver': return 'caregiver';
@@ -156,7 +151,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   const handleSelectTab = React.useCallback((tab: DisabilityTab) => {
     setActiveTab(tab);
     onTabChange?.(tab);
-    if (tab === 'vision' || tab === 'deaf' || tab === 'motor' || tab === 'neurodiversity' || tab === 'hub') {
+    if (tab === 'vision' || tab === 'deaf' || tab === 'neurodiversity' || tab === 'hub') {
       try {
         localStorage.setItem('cognify_default_disability_tab', tab);
       } catch {}
@@ -164,7 +159,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       let newType: string | null = null;
       if (tab === 'vision') { newMode = 'Visual'; newType = 'Visual Impairment'; }
       else if (tab === 'deaf') { newMode = 'Vocal-Deaf'; newType = 'Hearing Impairment'; }
-      else if (tab === 'motor') { newMode = 'Motor-Euphonia'; newType = 'Motor Impairment'; }
       else if (tab === 'neurodiversity') { newMode = 'Neurodiversity'; newType = 'Cognitive/Learning Disability'; }
 
       if (newMode) {
@@ -295,17 +289,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       descEn: '3D sign language avatar, ambient sound & hazard radar, and live human communication bridge',
     },
     {
-      id: 'motor' as const,
-      titleEn: 'Motor, ALS & Mobility',
-      titleAr: 'الحركة والشلل والتصلب',
-      emoji: '🦾',
-      icon: Activity,
-      color: 'text-amber-400',
-      activeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
-      descAr: 'حركة الرأس، لوحة العين والرمش، عبارات AAC السريعة، واستغاثة الطوارئ SOS بالعين 4 ثوانٍ',
-      descEn: 'Head pointer, eye-gaze virtual keyboard, contextual AAC, and 4-second eye-closure SOS',
-    },
-    {
       id: 'neuro' as const,
       titleEn: 'Neurodiversity & Autism',
       titleAr: 'التوحد وصعوبات التعلم',
@@ -398,27 +381,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       bgGlow: 'bg-[#4A1224]/40 text-[#E5A93C] border-[#E5A93C]/40',
       buttonCls: 'bg-gradient-to-r from-amber-400 via-indigo-500 to-purple-600 text-white shadow-[#E5A93C]/20',
       matchingMode: 'Multiple',
-    },
-    // 4. MOTOR & ALS
-    {
-      id: 'motor' as const,
-      category: 'motor' as const,
-      titleEn: 'Motor & Euphonia Control',
-      titleAr: 'التحكم الحركي وإيفونيا',
-      shortEn: 'Motor Control',
-      shortAr: 'التحكم الحركي',
-      badgeEn: 'Quadriplegia & ALS',
-      badgeAr: 'الشلل والتصلب الجانبي',
-      descEn: 'Full hands-free interaction. Head-pointer cursor, eye-blink virtual keyboard, contextual predictive AAC quick bar, and 4-second continuous eye-closure SOS dispatch.',
-      descAr: 'تحكم متكامل بدون لمس عبر حركة الرأس، لوحة العين والرمش، شريط العبارات السريعة التنبؤية، ونداء استغاثة الطوارئ SOS بالعين 4 ثوانٍ مع GPS.',
-      quickFeaturesAr: ['قيادة المؤشر بحركة الرأس', 'لوحة افتراضية بالعين والرمش', 'شريط عبارات تنبؤية حسب الوقت', 'استغاثة SOS بالعين 4 ثوانٍ و GPS', 'تأكيدات همهمات إيفونيا'],
-      quickFeaturesEn: ['Head-Tracking Pointer', 'Eye-Gaze Keyboard', 'Predictive AAC Quick Bar', '4-sec Eye Closure GPS SOS', 'Euphonia Vocal Triggers'],
-      Icon: Activity,
-      accentColor: 'text-amber-400',
-      borderGlow: 'hover:border-amber-500/60 border-[#4A1224]/60',
-      bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-      buttonCls: 'bg-gradient-to-r from-amber-400 via-amber-500 to-rose-400 text-slate-950 shadow-amber-500/20',
-      matchingMode: 'Motor-Euphonia',
     },
     // 4. NEURODIVERSITY & AUTISM
     {
@@ -546,21 +508,19 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   ];
 
   // Whether a module card is the one the user's accessibilityMode actually lands them
-  // in — kept in sync with detectDirectDisabilityTab's mapping (Speech -> motor,
-  // Vocal-Deaf/Sign-Only -> deaf) so the "Active Mode" badge and quick-launch card
-  // never point at a different suite than the one Speech/Deaf users are auto-routed to.
+  // in — kept in sync with detectDirectDisabilityTab's mapping (Vocal-Deaf/Sign-Only -> deaf)
+  // so the "Active Mode" badge and quick-launch card never point at a different suite.
   const isModuleActiveForProfile = (m: (typeof MODULES)[number]) => {
     if (!profile.accessibilityMode || profile.accessibilityMode === 'None') return false;
     if (m.matchingMode === profile.accessibilityMode) return true;
     if (m.id === 'deaf' && (profile.accessibilityMode === 'Sign-Only' || profile.accessibilityMode === 'Vocal-Deaf')) return true;
-    if (m.id === 'motor' && profile.accessibilityMode === 'Speech') return true;
     return false;
   };
 
   // Filter modules based on selectedCategory
   const filteredModules = useMemo(() => {
     if (selectedCategory === 'all') return MODULES;
-    return MODULES.filter((m) => m.category === selectedCategory || (m.id === 'orchestrator' && (selectedCategory === 'vision' || selectedCategory === 'hearing' || selectedCategory === 'motor')));
+    return MODULES.filter((m) => m.category === selectedCategory || (m.id === 'orchestrator' && (selectedCategory === 'vision' || selectedCategory === 'hearing')));
   }, [selectedCategory, MODULES]);
 
   const isAr = profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya';
@@ -612,7 +572,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', Icon: LayoutGrid },
               { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
               { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
-              { id: 'motor' as const, labelAr: 'حركية', labelEn: 'Motor', Icon: Activity },
               { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', Icon: Brain },
             ].map((suite) => (
               <AriaRadio
@@ -760,7 +719,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {[
                       { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
                       { id: 'deaf' as const, labelAr: 'منظومة الصم المتكاملة', labelEn: 'Deaf Ecosystem', Icon: Ear, descAr: 'استوديو الإشارة 3D، رادار الأصوات، وجسر التواصل', descEn: '3D Sign Avatar, Sound Sentinel & Live Bridge', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
-                      { id: 'motor' as const, labelAr: 'التحكم الحركي وإيفونيا', labelEn: 'Motor & Euphonia', Icon: Activity, descAr: 'تتبع الرأس والعين، لوحة الرمش، و SOS الطوارئ', descEn: 'Head pointer, eye-blink AAC & 4s GPS SOS', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-300', iconBg: 'bg-amber-500/15 border-amber-500/30' },
                       { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي والتوحد', labelEn: 'Neurodiversity Hub', Icon: Brain, descAr: 'بطاقات PECS الناطقة، الروتين، ومسطرة القراءة', descEn: 'Spoken PECS cards, routines & calm bubble', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/40', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
                     ].map((s) => (
                       <button
@@ -790,23 +748,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           {/* ═════════════════════════════════════════════════════════════════════
               ACTIVE MODULE VIEWS (CLEAN & DEDICATED)
              ═════════════════════════════════════════════════════════════════════ */}
-          {activeTab === 'motor' && (
-            <motion.div
-              key="motor-view"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="w-full h-full min-h-0"
-            >
-              <React.Suspense fallback={
-                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
-                  <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                </div>
-              }>
-                <MotorEuphoniaView profile={profile} />
-              </React.Suspense>
-            </motion.div>
-          )}
 
           {activeTab === 'vision' && (
             <motion.div
@@ -845,7 +786,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   onNavigateBack={handleNavigateBack}
                   onMenuClick={onMenuClick}
                   onTabChange={(tool) => {
-                    if (tool === 'vision' || tool === 'motor' || tool === 'neurodiversity' || tool === 'hub') {
+                    if (tool === 'vision' || tool === 'neurodiversity' || tool === 'hub') {
                       handleSelectTab(tool);
                     } else {
                       setActiveTab(tool);
@@ -1074,7 +1015,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       { mode: 'Visual' as const, labelEn: 'Visual & Screen Adaptation', labelAr: 'التكيف البصري وضعاف البصر', icon: Eye },
                       { mode: 'Vocal-Deaf' as const, labelEn: 'Vocal-Deaf Bridge', labelAr: 'الصم المتحدثين وجسر السمع', icon: Ear },
                       { mode: 'Sign-Only' as const, labelEn: 'Sign Language', labelAr: 'لغة الإشارة التفاعلية', icon: Accessibility },
-                      { mode: 'Motor-Euphonia' as const, labelEn: 'Motor & Hands-Free', labelAr: 'التحكم الحركي وبدون لمس', icon: Activity },
                       { mode: 'Neurodiversity' as const, labelEn: 'Neurodiversity & Autism', labelAr: 'التنوع العصبي والتوحد', icon: Brain },
                     ].map(({ mode, labelEn, labelAr, icon: ModeIcon }) => {
                       const isSelected = profile.accessibilityMode === mode;
@@ -1102,7 +1042,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               {mode === 'Visual' && localize(profile.language, 'Spoken scene description, currency reader, and haptic white cane.', 'وصف بصري فوري، قارئ عملات، ونبضات لمسية.')}
                               {mode === 'Vocal-Deaf' && localize(profile.language, 'High-contrast text captions and direct two-way bridge.', 'نصوص متباينة وتواصل مباشر.')}
                               {mode === 'Sign-Only' && localize(profile.language, '3D sign avatar, reverse sign-to-speech, and sign lexicons.', 'أفاتار إشارة ونطق الإشارة لصوت.')}
-                              {mode === 'Motor-Euphonia' && localize(profile.language, 'Hands-free head tracking, eye-blink keyboard, and 4s eye SOS.', 'حركة الرأس، لوحة العين، واستغاثة 4 ثوانٍ.')}
                               {mode === 'Neurodiversity' && localize(profile.language, 'PECS visual cards, visual daily schedule, and calming bubble.', 'بطاقات PECS، جدول بصري، وفقاعة تنفس.')}
                             </p>
                           </div>
