@@ -22,7 +22,7 @@ export interface UserProfile {
   level: 'Basic' | 'Intermediate' | 'Advanced';
   field: string;               // e.g. "Computer Science", "Medicine", "Engineering"
   language: string;            // e.g. "English", "Arabic", "Egyptian Ammiya", "French"
-  accessibilityMode: 'None' | 'Visual' | 'Motor' | 'Vocal-Deaf' | 'Sign-Only' | 'Speech';
+  accessibilityMode: 'None' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Speech' | 'Neurodiversity';
   iqScore?: number;            // Scientifically evaluated IQ score (Decoupled from level)
   preferredPedagogyStyle?: string;
   createdAt: number;           // Millisecond epoch

@@ -36,7 +36,7 @@ flowchart TD
 * **Key Deliverables**:
   - Dynamic **Graceful Degradation Engine**: Automatically drops canvas resolution or skips frames if camera pipeline falls below 20 FPS.
   - Cross-browser parity across Chromium, WebKit (iOS Safari), and Firefox (speech synthesis/recognition fallbacks).
-* **Success Metric**: Continuous, stable head-pointer and eye-blink tracking on standard 720p webcams with CPU usage $< 35\%$.
+* **Success Metric**: Continuous, stable hand sign recognition and visual assistance on standard 720p webcams with CPU usage $< 35\%$.
 
 ---
 
@@ -46,7 +46,7 @@ flowchart TD
 * **Key Deliverables**:
   - **Automated WCAG 2.2 AA CI Assertion Gate**: Automated regression tests on color contrast, focus rings, ARIA landmarks, and keyboard traps.
   - **Penetration Testing**: Independent validation of rate limiters, auth guards, and non-PII Firestore audit logs on `/api/emergency/dispatch`.
-  - Usability testing sessions with 5–10 real users across Visual, Deaf, Motor, and Neurodiversity profiles.
+  - Usability testing sessions with 5–10 real users across Visual, Deaf/Hard of Hearing, Speech-Impaired, and Neurodiversity profiles.
 * **Success Metric**: 0 Critical Security Vulnerabilities + Official WCAG 2.2 AA Compliance Audit Certificate attached to the Proof Pack.
 
 ---
@@ -57,7 +57,7 @@ flowchart TD
 * **Cohort**: 15–20 real students across 1 disability center or inclusive university faculty.
 * **Empirical Telemetry Tracked**:
   1. **SOS Dispatch Delivery Rate**: Verified delivery percentage via Multi-Channel fallback.
-  2. **Hands-Free Motor Autonomy**: Dwell clicks and eye-blink typing efficiency.
+  2. **Sensory Meltdown Alert Delivery & AAC Communication Rate**: Caregiver alert delivery speed and PECS / daily routine task completion.
   3. **Visual Reader Accuracy**: Egyptian Pound banknote recognition success rate.
 * **Success Metric**: Documented, verifiable incident and interaction logs demonstrating $> 90\%$ task fulfillment.
 

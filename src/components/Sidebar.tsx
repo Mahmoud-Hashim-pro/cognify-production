@@ -16,6 +16,7 @@ interface SidebarProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
   openLiveCaptions: () => void;
+  onClose?: () => void;
 }
 
 // Cognify "constellation" logomark (from Cognify Redesign v2).
@@ -28,7 +29,7 @@ const Logo = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
-export default function Sidebar({ profile, setProfile, currentView, setCurrentView, isDarkMode, toggleTheme, openLiveCaptions }: SidebarProps) {
+export default function Sidebar({ profile, setProfile, currentView, setCurrentView, isDarkMode, toggleTheme, openLiveCaptions, onClose }: SidebarProps) {
   const handleChange = (key: keyof UserProfile, value: string) => {
     const updated = { ...profile, [key]: value };
     setProfile(updated);
@@ -45,6 +46,7 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
   const isAr = isArabicLocale(profile.language);
 
   const startNewChat = () => {
+    onClose?.();
     const existingNewChat = profile.chatThreads?.find((t) => t.title === 'New Chat' && !t.lastMessageSnippet);
     if (existingNewChat) {
       setProfile({ ...profile, activeThreadId: existingNewChat.id });
@@ -57,6 +59,7 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
   };
 
   const switchThread = (threadId: string) => {
+    onClose?.();
     setProfile({ ...profile, activeThreadId: threadId });
     setCurrentView('chat');
   };
@@ -102,19 +105,30 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
   const userInitial = (profile.name || profile.email || 'U').trim().charAt(0).toUpperCase();
 
   return (
-    <div className="w-[284px] h-full shrink-0 bg-[#0E0610]/95 text-slate-200 border-e border-[#4A1224]/40 backdrop-blur-2xl flex flex-col px-[18px] py-[22px]">
-      {/* Brand */}
-      <div className="flex items-center gap-3 px-1.5 pb-1">
-        <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-[#E5A93C] shrink-0 shadow-lg shadow-[#4A1224]/40 ring-1 ring-[#E5A93C]/30 border border-[#E5A93C]/30" style={{ background: 'linear-gradient(135deg,#4A1224,#831843,#E5A93C)' }}>
-          <Logo className="w-[20px] h-[20px]" />
-        </div>
-        <div className="leading-none">
-          <div className="font-serif text-[23px] font-bold text-white tracking-tight flex items-center gap-1.5">
-            <span>Cognify</span>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/40">2.0</span>
+    <div className="w-[284px] max-w-[85vw] h-full shrink-0 bg-[#0E0610]/95 text-slate-200 border-e border-[#4A1224]/40 backdrop-blur-2xl flex flex-col px-[18px] py-[22px]">
+      {/* Brand & Mobile Close Button */}
+      <div className="flex items-center justify-between px-1.5 pb-1">
+        <div className="flex items-center gap-3">
+          <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-[#E5A93C] shrink-0 shadow-lg shadow-[#4A1224]/40 ring-1 ring-[#E5A93C]/30 border border-[#E5A93C]/30" style={{ background: 'linear-gradient(135deg,#4A1224,#831843,#E5A93C)' }}>
+            <Logo className="w-[20px] h-[20px]" />
           </div>
-          <div className="text-[11px] text-[#E5A93C]/80 font-medium mt-0.5">{localize(profile.language, 'AI study mentor', 'مدرّسك الذكي')}</div>
+          <div className="leading-none">
+            <div className="font-serif text-[23px] font-bold text-white tracking-tight flex items-center gap-1.5">
+              <span>Cognify</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/40">2.0</span>
+            </div>
+            <div className="text-[11px] text-[#E5A93C]/80 font-medium mt-0.5">{localize(profile.language, 'AI study mentor', 'مدرّسك الذكي')}</div>
+          </div>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#4A1224]/40 transition-colors shrink-0"
+            aria-label={localize(profile.language, 'Close menu', 'إغلاق القائمة')}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* New chat — hidden for accessibility-only users (their chat lives inside the Accessibility Center) */}

@@ -14,7 +14,7 @@ Cognify 2.0 is structured as a **Layered Clean Architecture** enforcing **Unidir
 flowchart TD
     subgraph Presentation_Layer ["1. Presentation Layer (React 19 + Tailwind v4 Obsidian)"]
         UI_Chat["Chat & Adaptive Mentorship"]
-        UI_Disability["Disability Hub (Vision / Motor / Sign / Bridge)"]
+        UI_Disability["Disability Hub (Vision / Deaf / Neurodiversity / Caregiver)"]
         UI_Academic["Academic Command Center (GPA / Planner / Goals)"]
         UI_Admin["Super Admin & Database Hub"]
     end
@@ -83,7 +83,7 @@ flowchart TD
 - **Design System**: Dark Obsidian Glassmorphic palette (`#0A0C14`, `#121524`, frosted slate borders, and subtle cyan/indigo glows).
 - **Core Views**:
   - `ChatInterface.tsx`: Central conversational hub with markdown, LaTeX math, code highlighting, and `:::micro-check` interactive components.
-  - `DisabilityModeView.tsx`: Sub-hub switching between Vision Companion, Motor Euphonia, and Sign Studio with hardware lifecycle isolation.
+  - `DisabilityModeView.tsx`: Sub-hub switching between Vision Companion, Deaf Ecosystem, and Neurodiversity Hub with hardware lifecycle isolation.
   - `AcademicCommandCenter.tsx`: Unified container for GPA calculator, semester planner, goal tracker, and cognitive gym.
   - `AdminDashboard.tsx`: High-privilege control center for system diagnostics, database health, and security telemetry.
 

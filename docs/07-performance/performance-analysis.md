@@ -18,27 +18,27 @@ pie title Production JavaScript Chunk Distribution (Gzip kB)
     "Three.js 3D Avatar (Lazy)" : 134.2
     "BarChart (Lazy)" : 107.6
     "Chat Interface" : 78.7
-    "Motor Euphonia" : 51.7
+    "Vision Companion" : 41.0
     "Vendor Motion" : 42.2
     "Admin Dashboard" : 35.3
     "Remaining Small Chunks" : 88.5
 ```
 
 ### Key Bundle Optimizations:
-1. **Heavy Assistive Modules are 100% Lazy**: The Three.js 3D Avatar (`520.58 kB`) and the TensorFlow.js Sign Classifier (`879.59 kB`) are only fetched if the user explicitly enters the Sign Studio, ensuring non-disabled students do not download unnecessary ML weights.
-2. **Icons Isolated**: `lucide-react` is isolated into `vendor-icons` (`16.5 kB gzip`), enabling clean browser caching across version releases.
-3. **Shell Payload**: The initial `index.html` is **2.28 kB** (0.94 kB gzip).
+1. **Heavy Assistive Modules are 100% Lazy**: The Three.js 3D Avatar (`521 kB`) and the TensorFlow.js Sign Classifier (`875 kB`) are only fetched if the user explicitly enters the Sign Studio, ensuring non-disabled students do not download unnecessary ML weights.
+2. **Icons & MediaPipe Isolated**: `lucide-react` is isolated into `vendor-icons`, and `@mediapipe` is isolated into `vendor-mediapipe`, enabling clean browser caching across version releases.
+3. **Shell Payload**: The initial `index.html` is **2.7 kB** (1.05 kB gzip).
 
 ---
 
-## 2. Real-Time Hardware Throttling (33ms Render Interval) [VERIFIED]
+## 2. Real-Time Hardware Throttling (Sampling Interval) [VERIFIED]
 
-In [`src/components/MotorEuphoniaView.tsx:596`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/components/MotorEuphoniaView.tsx):
-- **Problem**: MediaPipe FaceMesh callbacks arrive at display refresh rate ($60\text{Hz}$ to $120\text{Hz}$). Triggering React `setState` on every frame caused severe virtual DOM thrashing, high CPU temperatures, and sluggish dwell detection.
-- **Solution**: Decoupled the high-frequency physics loop from the React render loop:
-  - `checkHoverTargetRef.current(pos)` executes at **100% raw hardware frame rate** (0ms delay for magnetic latching).
-  - `setCursorPos(pos)` is throttled to **33ms (~30fps)**.
-  - Scientific debug modal metrics are only published when the modal is open (`showScientificArchitectureModalRef.current`).
+In camera and edge-ML views (`VisionCompanionView.tsx` and `SignVideoStudio.tsx`):
+- **Problem**: Raw video capture arrives at camera refresh rate ($30\text{Hz}$ to $60\text{Hz}$). Triggering generative AI inference or heavy matrix operations on every frame would cause severe thermal throttling, high GPU temperatures, and battery drain.
+- **Solution**: Decoupled the camera capture loop from the inference evaluation loop:
+  - Raw camera viewfinder runs smoothly at full display frame rate.
+  - Scene snapshots and token queries are throttled to dedicated sampling windows (or user-triggered snapshots).
+  - Web Audio FFT analyzers use dedicated `requestAnimationFrame` polling with cleanup on unmount.
 
 ---
 

@@ -12,7 +12,6 @@
 | :--- | :--- | :--- | :--- |
 | **Emergency SOS Dispatch** | ✅ Live Multi-Channel (SMS, Webhook, Direct Dialer Fallback) | Requires active device cellular/network connectivity | Hardware IoT SOS Button integration via Bluetooth |
 | **Vision Companion (AI Eyes)** | ✅ Ephemeral zero-knowledge camera scene analysis & currency reader | Dependent on camera lens focus & ambient illumination | Offline Mobile OCR & Edge-TensorFlow Lite model |
-| **Motor Euphonia Control** | ✅ MediaPipe Head tracking + 4-second Eye closure SOS | Calibrated for standard webcams (30fps) | High-speed IR eye-gaze sensor support |
 | **3D Sign Avatar (Deaf)** | ⚠️ Experimental Prototype (HamNoSys Rig & Thematic Lexicon) | Internal lookup table with 24 thematic categories & fingerspelling fallback | Formal accreditation & validation with Egyptian Deaf Associations |
 | **ArSL ML Recognizer (Camera)** | ⚠️ Architectural PoC (Trained on Synthetic Vectors Only) | In-browser sliding window pipeline; 0.0% real-world accuracy on humans | Ingesting authenticated human video datasets (e.g., KArSL) with Deaf partners |
 | **Sound & Hazard Radar** | ✅ Client-side Web Audio DSP spectral analysis + frequency tracking | DSP heuristic & pattern matching (not black-box classifier) | ML Sound Event Detection (YAMNet on Edge) |
@@ -93,14 +92,13 @@ Each lexical sign incorporates:
 
 ### Objectives & Cohort:
 - **Location**: 1 Specialized Disability Center / Inclusive University Faculty.
-- **Participants**: 15–20 Users across Visual, Deaf, Motor, and Neurodiversity profiles.
+- **Participants**: 15–20 Users across Visual, Deaf, and Neurodiversity profiles.
 - **Duration**: 14 Days.
 
 ### Empirical KPI Tracking Framework:
 | Metric Category | Key Indicator | Target Benchmark | Verification Mechanism |
 | :--- | :--- | :--- | :--- |
 | **Emergency Reliability** | SOS Dispatch Delivery Rate | 100% across primary/fallback channels | Verified telemetry incident logs with GPS coordinates |
-| **Motor Efficiency** | Head-Pointer & Eye-Blink Task Completion | > 85% tasks completed hands-free | Interaction session timestamps and dwell triggers |
 | **Visual Autonomy** | Currency & Text Audio Reading Accuracy | > 90% instant recognition | Double-blind test on genuine Egyptian banknotes |
 | **Deaf Usability** | 2-Way Human Bridge Daily Turns | > 20 conversational turns / user / day | Anonymous local interaction counters |
 | **Cognitive Scaffolding** | Learning Hub Retention Drill Success | > 75% error reduction over 3 cycles | Spaced retention error-queue delta |

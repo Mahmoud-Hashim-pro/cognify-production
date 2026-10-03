@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-**Cognify 2.0** is an intelligent, privacy-first, adaptive learning and assistive platform engineered by **The Cognify Development Team** as an elite graduation project. The platform combines modern edge computing, cognitive neuroscience, and real-time generative AI to deliver personalized education while breaking down physical barriers for people of determination (individuals with visual, vocal, motor, or auditory impairments).
+**Cognify 2.0** is an intelligent, privacy-first, adaptive learning and assistive platform engineered by **The Cognify Development Team** as an elite graduation project. The platform combines modern edge computing, cognitive neuroscience, and real-time generative AI to deliver personalized education while breaking down physical barriers for people of determination (individuals with visual, hearing, or neurodiverse needs).
 
 Unlike conventional ed-tech platforms that offer static content catalogs or generic chatbot wrappers, Cognify implements a **mathematically modeled closed-loop adaptive pedagogical cycle**: it continuously diagnoses student comprehension, detects cognitive strain, diagnoses missing prerequisites via a recursive knowledge graph, and dynamically forces the AI mentor into specific pedagogical styles (e.g. physical analogies, worked examples with RAM-level memory reasoning, and 1-click micro-checks).
 
@@ -30,8 +30,8 @@ mindmap
     Universal Assistive Tech
       Vision Companion OCR & Hazards
       Spatial Memory Tracking
-      Motor Euphonia Head & Gaze Tracking
-      Vocal Sound Triggers 120-250Hz FFT
+      Neurodiversity & Autism Hub
+      PECS & Sensory Regulation
       Sign Video Studio 3D Avatar
       Two-Way Hearing Bridge
 ```
@@ -44,7 +44,7 @@ mindmap
 
 ### Pillar 2: Universal Assistive Technology [VERIFIED]
 - **Vision Companion**: 30fps camera frame ingestion, hazards-first audio triage, OCR text extraction, and persistent spatial tracking of physical objects (`SpatialObjectRecord`).
-- **Motor Euphonia**: Hands-free computing for users with ALS, quadriplegia, or cerebral palsy using MediaPipe FaceMesh (468 facial landmarks), nose-tip vector tracking, 800ms dwell click, eye blink triggering, and WebAudio FFT pitch autocorrelation (120–250 Hz humming).
+- **Neurodiversity & Autism Hub**: Spoken PECS symbol communication cards, visual routine schedules, and calming 5-level emotion tracking with server-side meltdown alert escalation to caregivers.
 - **Sign Video Studio & 3D Avatar**: Real-time sign language recognition using MediaPipe Hands (21 3D points) and local WebGL TensorFlow.js models, coupled with a Three.js skeletal avatar translating spoken/written words into sign language.
 - **Two-Way Hearing Bridge**: Bidirectional real-time translation allowing a deaf student and a hearing teacher/peer to converse naturally.
 
@@ -64,7 +64,7 @@ The IQ test assesses baseline cognitive dimensions (Spatial, Numerical, Verbal, 
 | Persona / Role | Target User | Entrypoint & Experience | Key Architectural Features |
 | :--- | :--- | :--- | :--- |
 | **Student** | High school and university students | `/` (Adaptive Chat & Academic Command Center) | Concept mastery tracking, SM-2 retention warmup, GPA calculator, Academic planner. |
-| **People of Determination** | Individuals with visual, motor, or hearing disabilities | `/disability` (Disability Hub) | Isolated camera/mic lifecycle, hands-free dwell navigation, OCR verbatim, 3D avatar. |
+| **People of Determination** | Individuals with visual, hearing, or neurodiverse needs | `/disability` (Disability Hub) | Isolated camera/mic lifecycle, OCR verbatim, 3D avatar, visual routines & PECS. |
 | **Faculty & Mentors** | Academic advisors & teachers | `/cohort` (Institution Cohort Hub) | Aggregated cohort metrics, Bloom distribution, struggle heatmaps (Zero access to private chat text). |
 | **System Administrator** | Platform operators | `/admin` (Super Admin & Database Hub) | Frankfurt latency monitor, Firestore Spark quota guard, security audit logs, user management. |
 | **Guest** | First-time visitors / evaluation reviewers | Instant temporary session | Pure in-memory / LocalStorage state, 0% cloud writes, non-persistent telemetry. |

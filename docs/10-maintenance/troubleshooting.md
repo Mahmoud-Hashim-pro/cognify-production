@@ -37,12 +37,12 @@ window.addEventListener('error', (event) => {
   2. Confirm that previous module unmounted cleanly via `stream.getTracks().forEach(t => t.stop())`.
   3. Reload the browser tab to force the browser media layer to release dangling hardware locks.
 
-### Issue: Pointer Drift or Jitter in Motor Euphonia
-- **Cause**: Uneven lighting on the user's face, or the camera is angled from below/above.
+### Issue: Jitter or Tracking Loss in Hand Sign Recognition / Camera Modules
+- **Cause**: Uneven ambient lighting, hands partially obscured or out of camera viewport, or low frame rate on budget webcams.
 - **Resolution**:
-  1. Ensure consistent, front-facing lighting on the face.
-  2. Open the **Eye Calibration** modal in `MotorEuphoniaView.tsx` and calibrate the center rest position.
-  3. Increase the **Anti-Tremor Deadband Filter** slider from `Normal` to `High` to absorb hand tremors or ambient camera noise.
+  1. Ensure consistent, front-facing ambient lighting and keep hands within the center third of the webcam field of view.
+  2. Verify that the dynamic throttle in `AccessibilityOverlay.tsx` has reduced frame processing frequency to prevent CPU contention.
+  3. For mobile devices, ensure the device is on a stable surface or stand to avoid camera shaking during two-handed sign articulation.
 
 ---
 
@@ -56,7 +56,7 @@ window.addEventListener('error', (event) => {
   4. Ensure guest sessions (`isGuestUser(uid)`) are not writing to remote Firestore.
 
 ### Checking Latency to Frankfurt (`europe-west1`):
-In [`src/lib/databaseHub.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/lib/databaseHub.ts):
+In [`src/lib/databaseHub.ts`](file:///C:/Users/bebawy/.gemini/antigravity/scratch/cognify-production/src/lib/databaseHub.ts):
 - Click **"Measure Ping to Datacenter"**.
 - Standard healthy latency: $60\text{ms} - 120\text{ms}$ from Egypt and Southern Europe.
 - If latency exceeds $500\text{ms}$, inspect network VPNs or mobile carrier packet routing.

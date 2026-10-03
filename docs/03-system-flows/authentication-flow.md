@@ -70,7 +70,7 @@ Located in [`src/lib/roles.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch
 | Role | Default Home View | Accessible Views | Special Permissions |
 | :--- | :--- | :--- | :--- |
 | **Student** | `'chat'` | `chat`, `planner`, `gpa`, `goals`, `gym`, `french`, `profile`, `memory` | Standard learning & adaptive cycle. |
-| **Special Needs** | `'disability'` | `disability`, `chat`, `profile`, `memory`, `french` | Direct launch into Vision/Motor/Sign Hub. |
+| **Special Needs** | `'disability'` | `disability`, `chat`, `profile`, `memory`, `french` | Direct launch into Vision/Deaf/Neurodiversity Hub. |
 | **Graduation Project** | `'chat'` | All student views + `disability` | Evaluation sandbox with access to all modules. |
 | **Org Manager** | `'cohort'` | `cohort`, `profile` | View aggregated analytics across student cohorts (Zero raw chat text access). |
 | **Admin** | `'admin'` | `admin`, `cohort`, `profile`, `chat` | System management and quota monitoring. |

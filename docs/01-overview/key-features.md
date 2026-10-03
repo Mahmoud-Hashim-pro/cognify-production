@@ -23,8 +23,8 @@ graph TD
 
     D --> D1["Vision Companion (Hazards & OCR)"]
     D --> D2["Spatial Object Memory"]
-    D --> D3["Motor Euphonia (FaceMesh & Dwell)"]
-    D --> D4["Vocal Pitch Triggers (FFT)"]
+    D --> D3["Neurodiversity & Autism Oasis"]
+    D --> D4["PECS & Sensory Regulation"]
     D --> D5["Sign Video Studio & 3D Avatar"]
     D --> D6["Two-Way Hearing Bridge"]
 
@@ -79,13 +79,12 @@ Designed with **Strict Hardware Lifecycle Isolation** to prevent camera/mic reso
    - **Hazards-First Safety Triage**: The AI system prompt mandates announcing physical threats (steps, obstacles, vehicles, hot surfaces, spills) before any descriptive aesthetic details.
    - **OCR Verbatim**: Reads price tags, expiration dates, medicine dosages, and street signs with literal precision.
    - **Spatial Physical Memory (`SpatialObjectRecord`)**: Remembers where the user set down physical belongings (keys, prescription glasses, medication) with timestamp and room coordinates.
-2. **Motor Euphonia View (`MotorEuphoniaView.tsx`)**:
-   - Designed for users with ALS, quadriplegia, or tremor disorders.
-   - **Face Tracking**: MediaPipe FaceMesh tracks 468 landmarks; nose-tip vector translates to mouse cursor coordinates.
-   - **Dwell Clicking**: Hovering over a card or key for 800ms triggers selection automatically.
-   - **Blink & Smile Gestures**: Deliberate eye blinks and smiles serve as alternative physical switches.
-   - **Vocal Sound Triggers**: WebAudio AnalyserNode computes real-time FFT pitch autocorrelation (120–250 Hz humming tones) for hands-free audio selection.
-   - **Single-Switch Auto-Scanning**: Row-column scanning over Arabic/English virtual keyboards for users with limited head mobility.
+2. **Neurodiversity & Autism Hub (`NeurodiversityHub.tsx`)**:
+   - Designed for autistic learners and students with cognitive/sensory processing needs.
+   - **Spoken PECS Cards**: Visual sentence strip builder with AAC speech synthesis across essential functional categories.
+   - **Visual Daily Schedule**: Step-by-step visual routine tracker with progress cues and task completion celebration.
+   - **Sensory Regulation**: 5-level emotion tracking scale with calming 4-4-4 breathing exercises.
+   - **Caregiver Alert Escalation**: Direct server-side SMS/Webhook notification for severe sensory meltdowns.
 3. **Sign Video Studio & 3D Avatar (`SignVideoStudio.tsx`, `SignAvatar3D.tsx`)**:
    - Tracks 21 3D hand joints with MediaPipe Hands.
    - Local TensorFlow.js classifier runs on WebGL, identifying alphabet letters and gestures locally with 0 video transmission.

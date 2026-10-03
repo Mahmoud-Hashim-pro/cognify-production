@@ -57,7 +57,7 @@ Implement a dual-tier persistence model:
 ## ADR-004: Zero-Knowledge Media Processing for Assistive Tech
 
 ### Context
-Assistive tools for blind students (Vision Companion) and motor-impaired students (Motor Euphonia) ingest video streams and microphone audio. Transmitting video or audio to cloud databases introduces severe privacy risks and regulatory liabilities (GDPR/FERPA).
+Assistive tools for blind students (Vision Companion) and deaf students (Sign Video Studio) ingest video streams and microphone audio. Transmitting video or audio to cloud databases introduces severe privacy risks and regulatory liabilities (GDPR/FERPA).
 
 ### Decision
 Cognify mandates **Zero-Knowledge Edge Processing**: All video frames and microphone audio streams are computed in volatile RAM on the user's device and immediately discarded. No media stream is ever stored on disk or in cloud databases.
@@ -71,7 +71,7 @@ Cognify mandates **Zero-Knowledge Edge Processing**: All video frames and microp
 ## ADR-005: Strict Hardware Lifecycle Isolation
 
 ### Context
-When switching between different assistive modules (e.g. from Vision Companion to Motor Euphonia, or back to the Hub), leaving camera tracks open creates hardware lockups, "Camera in use" errors, and severe memory leaks.
+When switching between different assistive modules (e.g. from Vision Companion to Sign Video Studio, or back to the Hub), leaving camera tracks open creates hardware lockups, "Camera in use" errors, and severe memory leaks.
 
 ### Decision
 Every assistive component must implement strict resource cleanup upon component unmount:

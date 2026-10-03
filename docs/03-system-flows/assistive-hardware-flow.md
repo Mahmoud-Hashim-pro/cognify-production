@@ -1,7 +1,7 @@
 # Assistive Hardware & Edge AI Perception Flow
 
 > **Status**: [VERIFIED]  
-> **Source Baseline**: `src/lib/facialHeadTracker.ts`, `src/lib/vocalSoundTrigger.ts`, `src/components/VisionCompanionView.tsx`, `src/components/MotorEuphoniaView.tsx`, `src/components/SignVideoStudio.tsx`  
+> **Source Baseline**: `src/components/VisionCompanionView.tsx`, `src/components/SignVideoStudio.tsx`, `src/components/DeafEcosystemView.tsx`  
 > **Audience**: Computer Vision Engineers, Accessibility Engineers, and Embedded ML Developers  
 
 ---
@@ -104,4 +104,4 @@ useEffect(() => {
 }, []);
 ```
 
-This guarantees zero camera conflict when switching between the Vision Companion and Motor Euphonia, and eliminates battery drain and memory leaks.
+This guarantees zero camera conflict when switching between the Vision Companion and Sign Video Studio, and eliminates battery drain and memory leaks.

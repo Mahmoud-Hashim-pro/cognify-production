@@ -10,7 +10,7 @@
 
 Modern educational technology predominantly suffers from two architectural pathologies:
 1. **The Chatbot Anti-Pattern**: Most "AI tutors" are stateless wrappers around public LLM endpoints with static system prompts. When a student expresses confusion, the model either repeats the exact same explanation using slightly different synonyms or hallucinates irrelevant advanced syntax. It possesses no persistent model of what the student knows, which foundational prerequisites are missing, or whether the student is experiencing cognitive overload.
-2. **The Accessibility Void**: Specialized assistive technologies (e.g. eye-gaze communication boards, head-tracking mouse emulators, sign language translators) are historically packaged as proprietary, closed-source hardware accessories costing thousands of dollars, completely isolating students with motor or sensory disabilities from modern digital classrooms.
+2. **The Accessibility Void**: Specialized assistive technologies (e.g. sign language translation systems, augmentative and alternative communication (AAC) tools, and visual perception aids) are historically packaged as proprietary, closed-source software or expensive peripherals costing thousands of dollars, completely isolating students with sensory, speech, and neurodivergent differences from modern digital classrooms.
 
 **Cognify 2.0** was engineered by **The Cognify Development Team** to resolve both pathologies within a unified, web-native platform running on standard consumer laptops and smartphones.
 
@@ -77,7 +77,7 @@ Incomplete model streams that leave unclosed code blocks (`` ``` ``) or dangling
 
 ## 5. Engineering Challenges & Lessons Learned
 
-1. **Garbage Collection Pressure in High-Frequency Perception**: Running MediaPipe FaceMesh at 60Hz and drawing Picture-in-Picture canvas overlays allocated hundreds of throwaway arrays per second. Rewriting bounding box computations into single-pass `for` loops eliminated GC stutters entirely.
+1. **Garbage Collection Pressure in High-Frequency Perception**: Running MediaPipe hand tracking and camera perception pipelines at high frequency allocated hundreds of throwaway arrays per second. Rewriting bounding box and landmark vector computations into single-pass `for` loops eliminated GC stutters entirely.
 2. **Prompt Directive Compliance**: Large language models often ignore soft conversational guidelines like "try to be encouraging." To reliably force models to ground explanations in physical analogies and numbered steps, Cognify elevated pedagogical interventions into **unmissable mandatory system prompt headers** with explicit operational constraints.
 
 ---

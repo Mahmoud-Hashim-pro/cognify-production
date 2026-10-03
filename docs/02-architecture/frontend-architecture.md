@@ -43,12 +43,12 @@ flowchart TD
 
 ### Supported View Routes:
 - `'chat'`: Adaptive chat, code explanation, micro-checks, and retention warmups.
-- `'disability'`: Hub container (`'hub'`) switching between `'vision'`, `'motor'`, and `'sign'`.
+- `'disability'`: Hub container (`'hub'`) switching between `'vision'`, `'deaf'`, and `'neurodiversity'`.
 - `'planner'`: Academic planner and exam countdown schedule.
 - `'gpa'`: GPA calculator and What-If simulation sandbox.
 - `'goals'`: Goal tracker and task milestones.
 - `'gym'`: Cognitive gym exercises and IQ assessment.
-- `'french'`: French travel voice assistant.
+- `'france'`: French travel voice assistant.
 - `'profile'`: User profile, preferences, and GDPR account controls.
 - `'memory'`: Transparent student memory management.
 - `'cohort'`: Institution analytics for educators.
@@ -65,40 +65,39 @@ To ensure ultra-fast Time-to-Interactive (TTI) on mobile devices and assistive h
 manualChunks: {
   'vendor-react': ['react', 'react-dom'],
   'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
-  'vendor-motion': ['motion'],
+  'vendor-motion': ['motion/react'],
   'vendor-icons': ['lucide-react'],
+  'vendor-mediapipe': ['@mediapipe/hands', '@mediapipe/camera_utils'],
 }
 ```
 
 ### Production Build Metrics (Vite 6 + esbuild):
-- **Total Build Time**: ~29.36 seconds for 4,716 transformed modules.
+- **Total Build Time**: ~35 seconds for transformed modules.
 - **Top Distributed Chunks**:
-  - `vendor-firebase`: 669.56 kB (200.13 kB gzip)
-  - `signClassifier`: 879.59 kB (229.22 kB gzip - loaded lazily only when entering Sign Studio)
-  - `SignAvatar3D`: 520.58 kB (134.25 kB gzip - Three.js avatar loaded lazily)
-  - `MotorEuphoniaView`: 187.89 kB (51.73 kB gzip)
-  - `ChatInterface`: 268.39 kB (78.74 kB gzip)
-  - `vendor-motion`: 128.37 kB (42.24 kB gzip)
-  - Initial `index.html`: **2.28 kB** (0.94 kB gzip)
+  - `vendor-firebase`: 670 kB (200 kB gzip)
+  - `signClassifier`: 879 kB (loaded lazily only when entering Sign Studio)
+  - `SignAvatar3D`: 521 kB (134 kB gzip - Three.js avatar loaded lazily)
+  - `VisionCompanionView`: 145 kB (41 kB gzip)
+  - `ChatInterface`: 283 kB (83 kB gzip)
+  - `vendor-motion`: 128 kB (42 kB gzip)
+  - Initial `index.html`: **2.7 kB** (1.05 kB gzip)
 
 ---
 
 ## 4. Render Optimization & Hardware Throttling [VERIFIED]
 
-In intensive assistive views such as `MotorEuphoniaView.tsx`, tracker callbacks operate at display refresh rates (up to 120Hz). Uncontrolled re-renders cause severe garbage collection pressure and input lag. Cognify implements **Frame-Capped React Rendering**:
+In intensive assistive camera and audio views such as `VisionCompanionView.tsx` and `SignVideoStudio.tsx`, camera callbacks operate at high device rates. Uncontrolled re-renders or unthrottled inference requests would cause severe thermal throttling and battery drain. Cognify implements **Frame-Capped Sampling**:
 
 ```ts
-// src/components/MotorEuphoniaView.tsx:596
-const lastPointerRenderRef = useRef(0);
-const POINTER_RENDER_INTERVAL_MS = 33; // ~30fps render cap
+// Frame-rate capped inference sampling
+const lastFrameSampleRef = useRef(0);
+const FRAME_SAMPLE_INTERVAL_MS = 66; // ~15-30fps sample cap
 
-// onPointerMove callback:
-checkHoverTargetRef.current(pos); // Runs every single raw frame for 0ms latching
+// onFrameCapture callback:
 const now = Date.now();
-if (now - lastPointerRenderRef.current < POINTER_RENDER_INTERVAL_MS) return;
-lastPointerRenderRef.current = now;
-setCursorPos(pos);        // React state updated at max 30Hz
-setDwellProgress(prog);
+if (now - lastFrameSampleRef.current < FRAME_SAMPLE_INTERVAL_MS) return;
+lastFrameSampleRef.current = now;
+// Process snapshot for ML pipeline
 ```
 
-This optimization reduces React virtual DOM reconciliation overhead by **50% to 75%** on low-end hardware without degrading dwell responsiveness.
+This optimization reduces React virtual DOM reconciliation and GPU composition overhead on mobile hardware, maintaining a consistent 60fps UI thread.

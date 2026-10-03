@@ -6,7 +6,7 @@
 [![TypeScript Validated](https://img.shields.io/badge/TypeScript-Validated%20(Zero%20Errors)-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Security Standard](https://img.shields.io/badge/Security-OWASP%20Top%2010%20Hardened-8B5CF6?logo=googlecloud&logoColor=white)](ARCHITECTURE.md)
 
-Cognify is an **Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform** developed by the **Cognify Development Team** to empower students, self-learners, and people of determination (individuals with visual, hearing, or motor disabilities).
+Cognify is an **Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform** developed by the **Cognify Development Team** to empower students, self-learners, and people of determination (individuals with visual, hearing, or neurodiverse needs).
 
 Unlike conventional LLM wrappers that treat every query as a stateless prompt, Cognify maintains a **continuous, evidence-based pedagogical state**. It detects learning strain in real time, diagnoses root-cause prerequisite gaps, optimizes instructional strategies dynamically across 5 modalities, and guards against memory decay using active spaced micro-retrieval.
 
@@ -16,7 +16,7 @@ Unlike conventional LLM wrappers that treat every query as a stateless prompt, C
 Most AI educational tools and chatbots suffer from four fundamental flaws:
 1. **Stateless Instruction**: The model does not learn *how* the student learns; every session restarts from scratch.
 2. **Cognitive & Jargon Mismatch**: Beginners are overwhelmed by abstract jargon, while advanced students receive superficial answers.
-3. **Fragile Accessibility**: Standard interfaces exclude students with visual, hearing, motor, or speech impairments.
+3. **Fragile Accessibility**: Standard interfaces exclude students with visual, hearing, speech, or neurodiverse impairments.
 4. **Longitudinal Forgetting**: Students learn a concept today but experience memory decay over weeks without structured micro-retrieval.
 
 ---
@@ -83,7 +83,7 @@ Student Interaction (Chat / Formative Check / Video / Speech)
 - **Spatial Memory Engine**: Localizes and tracks physical objects (keys, eyeglasses, canes) across rooms with chronological surface history (last 10 surfaces) and epistemic honesty (never hallucinates an unobserved item).
 - **Sign Avatar 3D (Deaf & Hard of Hearing)**: Real-time 3D signing avatar powered by Three.js. **Note:** Current gesture poses are ASL-based approximations pending review by a certified Arabic Sign Language (ArSL) linguist. A disclaimer is displayed in-app. Certified ArSL integration is on the roadmap (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - **Two-Way Hearing Bridge**: Live bilingual speech-to-text transcription with adjustable font sizes and high-contrast styling.
-- **Motor Euphonia & Switch Access**: Minimal-motor single-switch interface, dwell clickers, emergency SOS dispatch (server-side via Telegram/SMS), and high-contrast navigation for motor-impaired learners.
+- **Neurodiversity & Autism Hub**: Spoken PECS symbol communication cards, visual routine schedules, and calming sensory emotion tracking with caregiver alert escalation.
 - **Speech Sanitizer**: Natural voice filtering in TTS engine (`cleanForSpeech`), removing markdown noise, asterisks, and robotic labels before audio synthesis.
 
 ### 3. Academic Command Center & Analytics
@@ -191,10 +191,10 @@ npm run build
     - **Pedagogical Effectiveness**: 500-trial simulation, longitudinal Hake $g$, Welch $t$-test ($p < 0.05$), Cohen's $d$, 30-day retention decay mitigation (`tests/benchmarks/interventionEffectivenessBenchmark.ts`).
     - **AI Providers & Costs**: 4-tier cascade, circuit breaker fast-bypass, formatting preservation, token and monthly cost modeling (< $0.06/student/mo), 80%/100% quota alerts (`tests/benchmarks/aiProviderBenchmark.ts`, `tests/benchmarks/costBenchmark.ts`).
     - **French & Multilingual**: Zero English/robotic leak, France travel rules, emergency dispatch (15, 17, 18, 112, 114), spatial queries in French (`tests/benchmarks/frenchLanguageBenchmark.ts`).
-    - **Accessibility Suite**: Vision 0% storage volatile invariant, 3D sign avatar 24 letters & word gestures, hearing bridge live captions & phoneme alternatives, motor switch 350ms debounce & dwell thresholds (`tests/benchmarks/accessibilityBenchmark.ts`).
+    - **Accessibility Suite**: Vision 0% storage volatile invariant, 3D sign avatar 24 letters & word gestures, hearing bridge live captions & phoneme alternatives, sign recognition & sensory escalation thresholds (`tests/benchmarks/accessibilityBenchmark.ts`).
     - **AI Safety & Adversarial**: 42 adversarial attacks across OWASP LLM Top 10 (DAN, system leak, exfiltration, fake keys) with 100% defense rate (`tests/benchmarks/promptInjectionBenchmark.ts`).
   - `[Phase C — Production Observability & Tracing]` (102 assertions): `x-cognify-trace-id` correlation, AI token telemetry, real-time cost estimation, PII-safe log redaction, security telemetry anomaly alerts, edge health check (`tests/productionObservabilityVerification.ts`).
-  - `[Phase D — Real-World Persona Simulation & Pilot Testbed]` (281 assertions): 30-day fast/struggling/inconsistent student simulation, blind/deaf/motor accessibility personas, native French immersion, Teacher cohort heatmap, Parent weekly digest with psychological safety privacy shield, institutional multi-tenant seat caps & Merkle-linked cryptographic audit ledger (`tests/validation/`).
+  - `[Phase D — Real-World Persona Simulation & Pilot Testbed]` (281 assertions): 30-day fast/struggling/inconsistent student simulation, blind/deaf/neurodiverse accessibility personas, native French immersion, Teacher cohort heatmap, Parent weekly digest with psychological safety privacy shield, institutional multi-tenant seat caps & Merkle-linked cryptographic audit ledger (`tests/validation/`).
   - `[E2E Full Cycle Suite]` Full 12-step student lifecycle simulation from onboarding through prerequisite remediation to retention consolidation (`tests/e2eFullUserCycle.ts`).
 
 ---
