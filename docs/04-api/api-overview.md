@@ -1,4 +1,4 @@
-# API Architecture Overview
+﻿# API Architecture Overview
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `api/_lib/`, `api/gemini/`, `api/telemetry/`  
@@ -20,7 +20,7 @@ Every API request must present a cryptographically signed Firebase ID token in t
 ```http
 Authorization: Bearer <FIREBASE_ID_TOKEN>
 ```
-The token is decoded and validated via RS256 public key verification in [`api/_lib/authGuard.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/api/_lib/authGuard.ts).
+The token is decoded and validated via RS256 public key verification in [`api/_lib/authGuard.ts`](../../api/_lib/authGuard.ts).
 
 ### C. Rate Limiting Headers
 The gateway attaches diagnostic rate limiting headers to every HTTP response:

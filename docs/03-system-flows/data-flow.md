@@ -1,7 +1,7 @@
 # Data Flow & Persistence Lifecycle
 
 > **Status**: [VERIFIED]  
-> **Source Baseline**: `src/lib/studentStateEngine.ts`, `src/lib/cryptoShield.ts`, `src/components/StudentPrivacyCenter.tsx`  
+> **Source Baseline**: `src/lib/studentStateEngine.ts`, `src/lib/cryptoShield.ts`, `src/components/PrivacySecurityCenter.tsx`  
 > **Audience**: Full-Stack Developers, Database Engineers, and Privacy Officers  
 
 ---
@@ -29,7 +29,7 @@ flowchart TD
 
 ## 2. Conversational Message Pipeline [VERIFIED]
 
-1. **Optimistic Dispatch**: When a student enters a query in [`ChatInterface.tsx`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/components/ChatInterface.tsx), an optimistic user message is immediately injected into the local chat thread array with a temporary ID.
+1. **Optimistic Dispatch**: When a student enters a query in [`ChatInterface.tsx`](../../src/components/ChatInterface.tsx), an optimistic user message is immediately injected into the local chat thread array with a temporary ID.
 2. **Context Compilation**:
    - Compiles the last 12 historical messages (`safeHistory.slice(-12)`).
    - Encodes any image/PDF attachments as clean base64 data.
@@ -69,7 +69,7 @@ sequenceDiagram
 
 ## 4. GDPR & FERPA Right to Forget & Data Export [VERIFIED]
 
-In [`src/components/StudentPrivacyCenter.tsx`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/components/StudentPrivacyCenter.tsx):
+In [`src/components/PrivacySecurityCenter.tsx`](../../src/components/PrivacySecurityCenter.tsx):
 
 ### A. Full Data Export (`exportUserDataAsJson`)
 Compiles a complete, portable JSON archive including:
@@ -79,9 +79,9 @@ Compiles a complete, portable JSON archive including:
 - All historical chat threads and summaries.
 - Spatial object tracking memory.
 
-### B. Cascade Account Deletion (`deleteUserDataCascade`)
+### B. Cascade Account Deletion (`handleExecuteErasure`)
 When a student requests account termination:
-1. Deletes all documents in subcollections (`studentState`, `chatThreads`, `spatialMemories`, `courses`, `goals`).
+1. Deletes all documents across all 11 subcollections (`threads`, `goals`, `learningEvents`, `learningProfile`, `exerciseHistory`, `loginHistory`, `neurodiversity`, `sensoryLogs`, `studentState`, `spatialMemories`, `caregiverLinks`) in parallel.
 2. Deletes the root user document in `users/{uid}`.
-3. Clears all browser `LocalStorage` and `SessionStorage` encryption keys.
-4. Terminates the Firebase Auth account permanently.
+3. Clears all browser `LocalStorage`, `SessionStorage`, and IndexedDB encryption keys and persistent caches.
+4. Terminates the Firebase Auth session and logs out permanently.

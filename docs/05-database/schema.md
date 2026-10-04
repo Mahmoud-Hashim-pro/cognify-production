@@ -10,23 +10,46 @@
 
 ### Path: `users/{uid}`
 
-Stores student identity, academic specialization, and accessibility settings:
+Stores student identity, academic specialization, accessibility settings, and verified parental consent records:
 
 ```typescript
 export interface UserProfile {
   uid: string;
   email: string;
-  displayName: string;
+  displayName?: string;
+  name?: string;
   photoURL?: string;
   role: 'Student' | 'Special Needs' | 'Graduation Project' | 'Org Manager' | 'Admin' | 'Super Admin';
   level: 'Basic' | 'Intermediate' | 'Advanced';
   field: string;               // e.g. "Computer Science", "Medicine", "Engineering"
-  language: string;            // e.g. "English", "Arabic", "Egyptian Ammiya", "French"
+  language?: string;           // e.g. "English", "Arabic", "Egyptian Ammiya", "French"
   accessibilityMode: 'None' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Speech' | 'Neurodiversity';
   iqScore?: number;            // Scientifically evaluated IQ score (Decoupled from level)
   preferredPedagogyStyle?: string;
+  points: number;
+  onboardingComplete: boolean;
+  
+  // Minor protection & parental governance (COPPA / GDPR Art. 8)
+  age?: number;
+  isMinor?: boolean;
+  parentEmail?: string;
+  parentalConsent?: ParentalConsentRecord;
+  linkedParentUid?: string;
+  authorizedParentUids?: string[];
+  linkedCaregivers?: { uid: string; name: string; email: string; linkedAt: number }[];
+
   createdAt: number;           // Millisecond epoch
   lastLogin: number;
+}
+
+export interface ParentalConsentRecord {
+  verified: boolean;
+  verifiedAt: string;          // ISO 8601 string
+  parentEmail: string;
+  parentName: string;
+  relationship: 'parent' | 'legal_guardian' | 'specialist';
+  grantedScopes: ('camera' | 'microphone' | 'eye_tracking' | 'facial_gestures' | 'ai_tutoring')[];
+  method: 'guardian_signature' | 'email_verification' | 'caregiver_link';
 }
 ```
 
@@ -158,3 +181,26 @@ export interface SecurityAudit {
   details: Record<string, any>;
 }
 ```
+
+---
+
+## 5. Canonical 11-Subcollections Directory (`users/{uid}/*`) [VERIFIED]
+
+To guarantee strict multi-tenant isolation, user sovereignty, and comprehensive GDPR Article 17 cascade purging, all user-generated records reside strictly within one of 11 canonical subcollections under `users/{uid}`:
+
+| # | Subcollection Path | Purpose & Data Contract | Access Control & Retention |
+| :--- | :--- | :--- | :--- |
+| **1** | `users/{uid}/threads/{threadId}` | Conversational message history, model selection tags, and latency metadata. | Owner-only read/write (`isOwner`). Wiped on user purge. |
+| **2** | `users/{uid}/goals/{goalId}` | Student academic goals, target mastery levels, and milestone target dates. | Owner-only read/write. |
+| **3** | `users/{uid}/learningEvents/{eventId}` | Append-only event stream powering the reactive pedagogical event bus. | Owner-only write/read. Drives student state re-hydration. |
+| **4** | `users/{uid}/learningProfile/{profileId}` | Longitudinal concept mastery records, cognitive strengths, and struggle logs. | Owner-only read/write. Sanitized via non-diagnostic guard. |
+| **5** | `users/{uid}/exerciseHistory/{exerciseId}` | Daily practice questions, pre/post quiz scores, and formative micro-check results. | Owner-only read/write. Used for Hake $g$ calculations. |
+| **6** | `users/{uid}/loginHistory/{loginId}` | User authentication records, client IP fingerprints, and browser user-agent audits. | Owner-only write; Super Admin review in security audits. |
+| **7** | `users/{uid}/neurodiversity/{docId}` | Assistive configurations (PECS decks, visual daily routines, calming color palettes). | Owner-only read/write. Zero clinical diagnostic labels permitted. |
+| **8** | `users/{uid}/sensoryLogs/{logId}` | Sensory escalation records, 4-4-4 breathing completions, and meltdown alerts. | Owner & authorized caregivers (`isVerifiedParent`). |
+| **9** | `users/{uid}/studentState/current` | The single source of truth for the adaptive tutoring loop & SM-2 schedules. | Owner-only read/write (`studentStateEngine.ts`). |
+| **10** | `users/{uid}/spatialMemories/{memoryId}` | Ephemeral household object coordinates recognized by Vision Companion. | Owner-only read/write. Never synced with remote cloud media. |
+| **11** | `users/{uid}/caregiverLinks/{linkId}` | Formal guardian link relationships, authorization scopes, and approval status. | Shared between student and verified guardian. |
+
+### Cascade Deletion Guarantee:
+Both client-initiated erasure ([`PrivacySecurityCenter.tsx`](../../src/components/PrivacySecurityCenter.tsx)) and administrative deletion ([`AdminDashboard.tsx`](../../src/components/AdminDashboard.tsx)) query and delete documents across all 11 subcollections in parallel before deleting the parent `users/{uid}` document, guaranteeing **zero orphaned artifacts**.

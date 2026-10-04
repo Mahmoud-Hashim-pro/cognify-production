@@ -1,7 +1,7 @@
 # Database Relationships & Multi-Tenant Isolation
 
 > **Status**: [VERIFIED]  
-> **Source Baseline**: `firestore.rules`, `src/lib/firebase.ts`, `src/components/StudentPrivacyCenter.tsx`  
+> **Source Baseline**: `firestore.rules`, `src/lib/firebase.ts`, `src/components/PrivacySecurityCenter.tsx`  
 > **Audience**: Cloud Architects, Database Administrators, and Compliance Officers  
 
 ---
@@ -14,6 +14,9 @@ classDiagram
         +string uid PK
         +string email
         +string role
+        +number age
+        +boolean isMinor
+        +ParentalConsentRecord parentalConsent
     }
 
     class StudentState {
@@ -65,7 +68,7 @@ Cognify enforces strict multi-tenant boundaries at the database layer via **Fire
 
 ## 3. Data Cleansing & Sanitization (`cleanDataForFirestore`) [VERIFIED]
 
-Firestore throws runtime exceptions if an object payload contains `undefined` values. Cognify implements a recursive pre-write sanitizer [`src/lib/firebase.ts:46`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/lib/firebase.ts):
+Firestore throws runtime exceptions if an object payload contains `undefined` values. Cognify implements a recursive pre-write sanitizer [`src/lib/firebase.ts:46`](../../src/lib/firebase.ts):
 
 ```typescript
 export function cleanDataForFirestore(obj: any): any {
@@ -91,22 +94,29 @@ export function cleanDataForFirestore(obj: any): any {
 
 ## 4. Cascade Account Deletion Flow [VERIFIED]
 
-To guarantee full GDPR and FERPA compliance when a user requests the **Right to be Forgotten**, [`src/components/StudentPrivacyCenter.tsx`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/components/StudentPrivacyCenter.tsx) executes a deterministic batch deletion sequence:
+To guarantee full GDPR and FERPA compliance when a user requests the **Right to be Forgotten**, [`src/components/PrivacySecurityCenter.tsx`](../../src/components/PrivacySecurityCenter.tsx) executes a deterministic parallel cascade deletion sequence across all 11 subcollections:
 
 ```mermaid
 flowchart TD
     Req["Student Clicks 'Delete My Account'"] --> Confirm{"Explicit Confirmation Modal"}
-    Confirm -->|Confirmed| Batch["Start Firestore WriteBatch"]
+    Confirm -->|Confirmed| Cascade["Query & Delete all 11 Subcollections"]
     
-    Batch --> DelState["Delete users/{uid}/studentState/current"]
-    Batch --> DelThreads["Query & Delete all users/{uid}/chatThreads/*"]
-    Batch --> DelSpatial["Query & Delete all users/{uid}/spatialMemories/*"]
-    Batch --> DelCourses["Query & Delete all users/{uid}/courses/*"]
-    Batch --> DelGoals["Query & Delete all users/{uid}/goals/*"]
-    Batch --> DelUser["Delete users/{uid} root document"]
+    subgraph Subcollections ["11 User Subcollections"]
+        Cascade --> S1["threads"]
+        Cascade --> S2["goals"]
+        Cascade --> S3["learningEvents"]
+        Cascade --> S4["learningProfile"]
+        Cascade --> S5["exerciseHistory"]
+        Cascade --> S6["loginHistory"]
+        Cascade --> S7["neurodiversity"]
+        Cascade --> S8["sensoryLogs"]
+        Cascade --> S9["studentState"]
+        Cascade --> S10["spatialMemories"]
+        Cascade --> S11["caregiverLinks"]
+    end
     
-    DelUser --> Commit["Commit WriteBatch"]
-    Commit --> ClearLocal["localStorage.clear() & sessionStorage.clear()"]
+    Subcollections --> DelUser["Delete users/{uid} root document"]
+    DelUser --> ClearLocal["localStorage.clear() & sessionStorage.clear()"]
     ClearLocal --> TermAuth["deleteUser(auth.currentUser)"]
     TermAuth --> Redirect["Redirect to Login with Session Terminated"]
 ```

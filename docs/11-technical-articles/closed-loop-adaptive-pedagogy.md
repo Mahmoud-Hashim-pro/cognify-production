@@ -1,4 +1,4 @@
-# Closed-Loop Adaptive Pedagogy: Mathematical Foundations & Architecture
+﻿# Closed-Loop Adaptive Pedagogy: Mathematical Foundations & Architecture
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `src/lib/studentStateEngine.ts`, `src/lib/conceptGraph.ts`, `src/lib/interventionEngine.ts`, `tests/goldenAdaptiveScenario.ts`  
@@ -111,7 +111,7 @@ When an intervention fires, generic polite suggestions are insufficient to chang
 
 ## 4. Empirical Validation: The Golden Scenario [VERIFIED]
 
-The entire 9-phase lifecycle is verified by automated test suite [`tests/goldenAdaptiveScenario.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/tests/goldenAdaptiveScenario.ts):
+The entire 9-phase lifecycle is verified by automated test suite [`tests/goldenAdaptiveScenario.ts`](../../tests/goldenAdaptiveScenario.ts):
 1. **Phase 1**: Initial student baseline initialization.
 2. **Phase 2**: Successful first attempt ($100\%$ accuracy, streak $= 1$).
 3. **Phase 3**: First struggle with latency ($17.5\text{s}$) elevates strain.

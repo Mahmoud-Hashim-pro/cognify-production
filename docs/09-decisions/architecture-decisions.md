@@ -12,7 +12,7 @@
 When selecting between different LLM models (e.g. Gemini 2.5 Flash for speed vs NVIDIA GLM-5.2 / DeepSeek-R1 for complex code), early systems frequently use an LLM "router" to inspect the prompt and return a routing tag.
 
 ### Decision
-Cognify strictly prohibits calling a model to route requests. Routing is implemented as a **Pure Deterministic Function** in [`api/_lib/router.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/api/_lib/router.ts):
+Cognify strictly prohibits calling a model to route requests. Routing is implemented as a **Pure Deterministic Function** in [`api/_lib/router.ts`](../../api/_lib/router.ts):
 - Regex pattern matching for code fences, stacktraces, and syntax errors.
 - Character length threshold ($>500\text{ chars}$).
 - Student state strain metric ($S \ge 0.7$).
@@ -82,3 +82,53 @@ Every assistive component must implement strict resource cleanup upon component 
 ### Consequences
 - **Positive**: Clean transitions without camera conflicts or browser crashes.
 - **Negative**: Re-mounting a module requires re-requesting media streams, introducing a brief $200\text{ms}$ hardware initialization delay.
+
+---
+
+## ADR-006: Ethical Non-Diagnostic Invariant Guard
+
+### Context
+Educational AI systems run the risk of creating permanent, stigmatizing deficit labels on students (e.g., tagging a student as "autistic" or "slow learner" in database records based on response times or behavior).
+
+### Decision
+Implement the **Non-Diagnostic Invariant Guard** in [`src/lib/accessibilityIntelligenceEngine.ts`](../../src/lib/accessibilityIntelligenceEngine.ts) and [`src/lib/studentStateEngine.ts`](../../src/lib/studentStateEngine.ts):
+1. Prohibit any clinical deficit terms (`autism`, `adhd`, `retarded`, `disorder`, etc.) from being stored in user identity or preference state.
+2. Maintain an explicit whitelist (`ALLOWED_FUNCTIONAL_IDENTIFIERS`) for UI feature toggles (`autism_hub`, `opendyslexic`, `visual_schedule`, etc.).
+3. Intercept every state flush before dispatching to Cloud Firestore, stripping violating keys.
+
+### Consequences
+- **Positive**: Eliminates institutional and legal liability for unauthorized diagnostic labeling; upholds a growth-mindset ethical baseline.
+- **Negative**: Feature keys must be carefully designed to reflect functional tools rather than diagnostic conditions.
+
+---
+
+## ADR-007: Minor Camera & Sensor Consent Gate (COPPA / GDPR Art. 8)
+
+### Context
+Assistive vision features require real-time camera ingestion. Ingesting biometric or camera streams from minors (under 18) without verifiable parental consent violates COPPA and GDPR Article 8 regulations.
+
+### Decision
+Implement a mandatory hardware gate via [`src/components/ParentalConsentModal.tsx`](../../src/components/ParentalConsentModal.tsx):
+1. Detect whether the active profile represents a minor (`profile.isMinor || (profile.age && profile.age < 18)`).
+2. Intercept camera activation in `VisionCompanionView.tsx` with a non-dismissible parental consent modal.
+3. Record verifiable guardian approval (`parentEmail`, `verifiedAt`, `relationship`, `grantedScopes`) in Firestore before granting camera stream access.
+
+### Consequences
+- **Positive**: Full compliance with global child safety laws; transparent guardian supervision.
+- **Negative**: Minors cannot immediately activate camera companion until guardian confirmation is completed.
+
+---
+
+## ADR-008: Super Admin Escalation & Parallel 11-Subcollection Cascade Purge
+
+### Context
+Allowing standard administrators to download full database dumps creates massive PII leakage risk. Furthermore, deleting a user document in Firestore leaves orphaned subcollections behind, violating GDPR Article 17 ("Right to be Forgotten").
+
+### Decision
+Implement strict authorization gates and parallel cascade deletion in [`src/components/AdminDashboard.tsx`](../../src/components/AdminDashboard.tsx) and [`src/components/PrivacySecurityCenter.tsx`](../../src/components/PrivacySecurityCenter.tsx):
+1. Gate full database JSON backup export (`handleDownloadFullBackup`), manual point modifications, and cognitive stage overrides strictly to `canManageAdmins` (Super Admin).
+2. Execute user account deletion across all 11 canonical subcollections in parallel using `getDocs` and batch `deleteDoc` calls before purging the root user document.
+
+### Consequences
+- **Positive**: Complete compliance with GDPR Article 17 with zero data residues; prevents unauthorized mass data exfiltration by lower-tier admins.
+- **Negative**: Deletion requires querying 11 subcollection paths, resulting in multiple concurrent Firestore operations per deletion.

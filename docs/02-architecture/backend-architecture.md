@@ -1,4 +1,4 @@
-# Backend Architecture & Serverless Gateway
+﻿# Backend Architecture & Serverless Gateway
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `api/_lib/`, `api/gemini/`, `server.ts`, `server/routes.ts`  
@@ -54,7 +54,7 @@ sequenceDiagram
 
 ## 2. The Gateway Security Envelope (`guard()`) [VERIFIED]
 
-All requests entering `/api/gemini/*` must pass through the shared `guard(req, res)` pipeline defined in [`api/_lib/ai.ts:616`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/api/_lib/ai.ts):
+All requests entering `/api/gemini/*` must pass through the shared `guard(req, res)` pipeline defined in [`api/_lib/ai.ts:616`](../../api/_lib/ai.ts):
 
 ### Step 1: Method Gating
 Rejects non-POST requests with HTTP 405 Method Not Allowed.
@@ -112,7 +112,7 @@ During a request, the server rotates through all keys in the pool upon receiving
 
 ## 4. Response Sanitization & Quality Guard [VERIFIED]
 
-Located in [`api/_lib/qualityGuard.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/api/_lib/qualityGuard.ts), this layer intercepts and repairs model output:
+Located in [`api/_lib/qualityGuard.ts`](../../api/_lib/qualityGuard.ts), this layer intercepts and repairs model output:
 - **Code Block Repair**: Counts occurrences of triple-backticks (`` ``` ``). If odd, appends ``\n``` `` to prevent UI distortion.
 - **LaTeX Math Repair**: Counts occurrences of display math delimiters (`$$`). If odd, appends `$$` to prevent KaTeX rendering crashes.
 - **Screen Reader Sanitation**:

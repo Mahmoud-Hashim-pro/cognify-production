@@ -1,4 +1,4 @@
-# Authentication & Access Control Flow
+﻿# Authentication & Access Control Flow
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `src/lib/access.ts`, `src/lib/roles.ts`, `api/_lib/authGuard.ts`, `src/components/Login.tsx`  
@@ -63,7 +63,7 @@ export const isGuestUser = (uid?: string): boolean => {
 
 ## 3. Role-Based Access Control (RBAC) [VERIFIED]
 
-Located in [`src/lib/roles.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/lib/roles.ts) and [`src/lib/access.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/lib/access.ts):
+Located in [`src/lib/roles.ts`](../../src/lib/roles.ts) and [`src/lib/access.ts`](../../src/lib/access.ts):
 
 ### Role Hierarchy & Permissions Matrix:
 

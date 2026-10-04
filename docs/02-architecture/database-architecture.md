@@ -1,4 +1,4 @@
-# Database Architecture & Persistence Strategy
+﻿# Database Architecture & Persistence Strategy
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `src/lib/firebase.ts`, `src/lib/studentStateEngine.ts`, `src/lib/databaseHub.ts`, `firestore.rules`  
@@ -62,20 +62,20 @@ Firestore uses nested subcollections under each user document to enforce **Stric
 
 ```
 firestore-root/
-├── users/
-│   └── {uid}/                                    [User Profile Document]
-│       ├── studentState/
-│       │   └── current                           [Canonical Student State Document]
-│       ├── chatThreads/
-│       │   └── {threadId}                        [Individual Conversation Threads]
-│       ├── spatialMemories/
-│       │   └── {memoryId}                        [Physical Object Locations]
-│       ├── courses/
-│       │   └── {courseId}                        [Academic Transcript & Grades]
-│       └── goals/
-│           └── {goalId}                          [Personal Academic Goals]
-└── securityAudits/
-    └── {auditId}                                 [Global Security Telemetry Collection]
+â”œâ”€â”€ users/
+â”‚   â””â”€â”€ {uid}/                                    [User Profile Document]
+â”‚       â”œâ”€â”€ studentState/
+â”‚       â”‚   â””â”€â”€ current                           [Canonical Student State Document]
+â”‚       â”œâ”€â”€ chatThreads/
+â”‚       â”‚   â””â”€â”€ {threadId}                        [Individual Conversation Threads]
+â”‚       â”œâ”€â”€ spatialMemories/
+â”‚       â”‚   â””â”€â”€ {memoryId}                        [Physical Object Locations]
+â”‚       â”œâ”€â”€ courses/
+â”‚       â”‚   â””â”€â”€ {courseId}                        [Academic Transcript & Grades]
+â”‚       â””â”€â”€ goals/
+â”‚           â””â”€â”€ {goalId}                          [Personal Academic Goals]
+â””â”€â”€ securityAudits/
+    â””â”€â”€ {auditId}                                 [Global Security Telemetry Collection]
 ```
 
 ---
@@ -85,7 +85,7 @@ firestore-root/
 To operate sustainably within the **Firebase Spark Free Tier** (50,000 reads/day, 20,000 writes/day), Cognify eliminates naive write-on-click patterns.
 
 ### The Debounced Update Mechanism:
-In [`src/lib/studentStateEngine.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/lib/studentStateEngine.ts), when an exercise is answered or a concept is tested:
+In [`src/lib/studentStateEngine.ts`](../../src/lib/studentStateEngine.ts), when an exercise is answered or a concept is tested:
 
 1. **Local Cache Save (0ms)**: The state is immediately committed to synchronous in-memory state and persisted to `LocalStorage` (encrypted via Web Crypto AES-GCM 256-bit). The UI renders immediately without waiting for a cloud roundtrip.
 2. **Concept Dirty Tracking**: The concept ID is appended to `pendingConcepts: Set<string>`.

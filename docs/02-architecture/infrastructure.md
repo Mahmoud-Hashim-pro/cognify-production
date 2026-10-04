@@ -1,4 +1,4 @@
-# Infrastructure & Deployment Architecture
+﻿# Infrastructure & Deployment Architecture
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `vercel.json`, `public/manifest.webmanifest`, `public/sw.js`, `package.json`  
@@ -40,7 +40,7 @@ flowchart LR
 
 ## 2. Serverless Routing Configuration (`vercel.json`) [VERIFIED]
 
-[`vercel.json`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/vercel.json) orchestrates routing between static frontend assets and serverless functions:
+[`vercel.json`](../../vercel.json) orchestrates routing between static frontend assets and serverless functions:
 
 ```json
 {

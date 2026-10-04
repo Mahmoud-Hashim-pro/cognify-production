@@ -1,4 +1,4 @@
-# The Closed-Loop Adaptive Learning Flow
+﻿# The Closed-Loop Adaptive Learning Flow
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `src/lib/studentStateEngine.ts`, `src/lib/conceptGraph.ts`, `src/lib/interventionEngine.ts`, `api/_lib/ai.ts`, `tests/goldenAdaptiveScenario.ts`  
@@ -66,7 +66,7 @@ $$g = \frac{\text{PostScore} - \text{PreScore}}{100 - \text{PreScore}}$$
 
 ## 3. Mandatory Prompt Directives [VERIFIED]
 
-When an intervention fires, [`formatStudentStateBlock`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/api/_lib/ai.ts:270) injects the following unmissable directives into the AI system instructions:
+When an intervention fires, [`formatStudentStateBlock`](../../api/_lib/ai.ts:270) injects the following unmissable directives into the AI system instructions:
 
 ```markdown
 ## MANDATORY PEDAGOGICAL INTERVENTION (HIGHEST OVERRIDE PRIORITY)

@@ -1,4 +1,4 @@
-# Frontend Architecture
+﻿# Frontend Architecture
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `src/App.tsx`, `vite.config.ts`, `package.json`, `src/components/`  
@@ -22,7 +22,7 @@
 
 ## 2. Dynamic View Routing & Access Control [VERIFIED]
 
-Routing is managed via declarative application view state in [`src/App.tsx`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/App.tsx) and guarded by [`src/lib/access.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/src/lib/access.ts):
+Routing is managed via declarative application view state in [`src/App.tsx`](../../src/App.tsx) and guarded by [`src/lib/access.ts`](../../src/lib/access.ts):
 
 ```mermaid
 flowchart TD
@@ -58,7 +58,7 @@ flowchart TD
 
 ## 3. Bundle Splitting & Production Chunking [VERIFIED]
 
-To ensure ultra-fast Time-to-Interactive (TTI) on mobile devices and assistive hardware, [`vite.config.ts`](file:///C:/Users/Tie/.gemini/antigravity/scratch/AI-Powered-Adaptive-Personal-Assistant/AI-Powered-Adaptive-Personal-Assistant-main/vite.config.ts) defines explicit manual vendor splitting:
+To ensure ultra-fast Time-to-Interactive (TTI) on mobile devices and assistive hardware, [`vite.config.ts`](../../vite.config.ts) defines explicit manual vendor splitting:
 
 ```ts
 // vite.config.ts manualChunks configuration

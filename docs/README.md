@@ -8,6 +8,11 @@ Welcome to the official, evidence-based technical documentation suite for **Cogn
 
 ```
 docs/
+├── PROOF_PACK_EXECUTIVE_DOSSIER.md # Executive proof pack & go-to-market dossier
+├── ABA_CLINICAL_VALIDATION_PROTOCOL.md # Clinical validation protocol and SLP rubric for Autism & AAC
+├── CLINICAL_SIGN_LANGUAGE_VALIDATION.md # Clinical validation protocol for Egyptian Sign Language (ArSL)
+├── GO_TO_MARKET_ROADMAP.md         # Commercial & institutional adoption roadmap
+│
 ├── 01-overview/
 │   ├── system-overview.md          # Platform vision, dual core pillars, user personas
 │   ├── system-context.md           # External integrations, third-party services, trust boundaries
@@ -23,7 +28,7 @@ docs/
 ├── 03-system-flows/
 │   ├── authentication-flow.md      # Firebase Auth, JWT verification, guest mode, RBAC
 │   ├── adaptive-learning-flow.md   # Event-sourced loop, mathematical strain, prompt mandates
-│   ├── assistive-hardware-flow.md  # WebRTC, MediaPipe, WebAudio FFT, hardware isolation
+│   ├── assistive-hardware-flow.md  # WebRTC, MediaPipe Hands, WebAudio FFT, hardware isolation
 │   └── data-flow.md                # End-to-end data lifecycle, spatial memory, GDPR erasure
 │
 ├── 04-api/
@@ -31,12 +36,12 @@ docs/
 │   └── endpoints.md                # Endpoint-by-endpoint payload, SSE streaming, error codes
 │
 ├── 05-database/
-│   ├── schema.md                   # Document schemas (StudentState, UserProfile, Audits)
-│   └── relationships.md            # Subcollections, multi-tenant boundaries, cascade deletion
+│   ├── schema.md                   # Document schemas (StudentState, UserProfile, Audits, Subcollections)
+│   └── relationships.md            # 11 Subcollections, multi-tenant boundaries, cascade deletion
 │
 ├── 06-security/
-│   ├── security-analysis.md        # Threat model, DevTools interception, security rules
-│   └── privacy-specification.md    # Zero-Knowledge media processing, GDPR/FERPA compliance
+│   ├── security-analysis.md        # Threat model, DevTools interception, security rules, RBAC
+│   └── privacy-specification.md    # Zero-Knowledge media, Minor Consent gate, Non-Diagnostic guard
 │
 ├── 07-performance/
 │   ├── performance-analysis.md     # Bundle splitting, 33ms frame throttle, memory GC audit
@@ -45,11 +50,11 @@ docs/
 │   ├── deployment.md               # Environment variables, Vercel & Node server deployment
 │
 ├── 09-decisions/
-│   ├── architecture-decisions.md   # Architectural Decision Records (ADR-001 to ADR-005)
+│   ├── architecture-decisions.md   # Architectural Decision Records (ADR-001 to ADR-008)
 │
 ├── 10-maintenance/
 │   ├── troubleshooting.md          # Diagnostics for benign errors, hardware, quotas, failover
-│   └── developer-guide.md          # Quickstart commands, the 762 automated tests, 5 core laws
+│   └── developer-guide.md          # Quickstart commands, automated test suites, 5 core laws
 │
 └── 11-technical-articles/
     ├── system-deep-dive.md         # Full engineering whitepaper on Cognify 2.0
