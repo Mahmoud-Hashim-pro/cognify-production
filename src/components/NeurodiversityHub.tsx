@@ -69,6 +69,7 @@ interface NeurodiversityHubProps {
   profile: UserProfile;
   onNavigateBack?: () => void;
   onOpenCognitiveGym?: () => void;
+  onOpenLearningStudio?: () => void;
 }
 
 function RenderAccessibleCardIcon({ icon, className = "w-6 h-6" }: { icon?: string; className?: string }) {
@@ -106,7 +107,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   needs: 'bg-indigo-500/20 border-[#E5A93C]/30 text-indigo-300',
 };
 
-export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCognitiveGym }: NeurodiversityHubProps) {
+export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCognitiveGym, onOpenLearningStudio }: NeurodiversityHubProps) {
   const lang = profile.language || 'Arabic';
   const isAr = isArabicLocale(lang);
   const isFr = lang === 'French';
@@ -480,6 +481,17 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCogni
             >
               <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>{t('Cognitive Gym (ADHD & Math)', 'الجيم المعرفي (ADHD وحساب)')}</span>
+            </button>
+          )}
+
+          {onOpenLearningStudio && (
+            <button
+              onClick={onOpenLearningStudio}
+              className="px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-purple-500/20 text-amber-300 border border-amber-500/40 hover:border-amber-400 hover:text-white font-bold cursor-pointer shadow-sm"
+              title={t('Open Dyslexia & Learning Disabilities Studio: Bionic reading, focus ruler, voice essay scaffold', 'استوديو صعوبات التعلم: قارئ القراءة التوجيهية Bionic، مسطرة التركيز، وهيكل المقالات الصوتي')}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>{t('Learning Studio (Dyslexia & Writing)', 'صعوبات التعلم (قراءة وكتابة)')}</span>
             </button>
           )}
         </div>

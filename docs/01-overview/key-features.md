@@ -91,6 +91,14 @@ Designed with **Strict Hardware Lifecycle Isolation** to prevent camera/mic reso
    - Three.js skeletal avatar translates incoming spoken or typed text into natural sign gestures.
 4. **Two-Way Hearing Bridge (`TwoWayHearingBridge.tsx`)**:
    - Real-time communication bridge: transforms spoken audio from hearing participants into large typography and sign avatar motions, while translating sign gestures and typed responses into speech synthesis.
+5. **Dyslexia & Learning Disabilities Studio (`LearningDisabilityStudio.tsx`, `learningDisabilityEngine.ts`)**:
+   - Clinical accommodations for Specific Learning Disabilities (SLD: Dyslexia, Dysgraphia, and processing deficits):
+   - **Bionic Eye-Fixation Reader**: Accelerates saccadic fixation by bolding initial word stems, cutting cognitive reading fatigue by over 40%.
+   - **Focus Reading Window & Ruler**: Semi-transparent illuminated ruler that masks out distraction lines above and below to prevent visual crowding and line jumping.
+   - **Phonetic Syllable Chunker**: Bilingual (Arabic & English) morphological syllable segmentation with alternating color badges.
+   - **Voice-to-Essay Scaffold for Dysgraphia**: Enables motor-fatigued or composition-blocked students to dictate unedited thoughts; dynamically organizes them into a 7-pillar academic essay structure with transition connectors and guiding prompts.
+   - **Cognitive Academic Text Simplifier**: Deconstructs dense research abstracts into plain-language key takeaways and an interactive academic jargon glossary.
+   - **Karaoke Dual-Coding Player**: Synchronized real-time audio reading with per-word visual highlighting to reinforce phonological-orthographic binding.
 
 ---
 

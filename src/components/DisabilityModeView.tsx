@@ -19,6 +19,7 @@ const ChatInterface = React.lazy(() => import('./ChatInterface'));
 const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
 const NeurodiversityHub = React.lazy(() => import('./NeurodiversityHub'));
 const CognitiveGym = React.lazy(() => import('./CognitiveGym'));
+const LearningDisabilityStudio = React.lazy(() => import('./LearningDisabilityStudio'));
 const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
 const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
 const VisualComfortModal = React.lazy(() => import('./VisualComfortModal'));
@@ -43,6 +44,7 @@ export type DisabilityTab =
   | 'radar'
   | 'neurodiversity'
   | 'gym'
+  | 'learning-studio'
   | 'caregiver'
   | 'deaf'
   | 'orchestrator';
@@ -101,7 +103,8 @@ function categoryForTab(tab: DisabilityTab): ModuleCategory {
     case 'vision': return 'vision';
     case 'deaf': return 'hearing';
     case 'neurodiversity':
-    case 'gym': return 'neuro';
+    case 'gym':
+    case 'learning-studio': return 'neuro';
     case 'caregiver': return 'caregiver';
     default: return 'all';
   }
@@ -422,6 +425,27 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       borderGlow: 'hover:border-amber-500/60 border-[#4A1224]/60',
       bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
       buttonCls: 'bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-amber-500/20',
+      matchingMode: 'Neurodiversity',
+    },
+    // 6. DYSLEXIA & LEARNING DISABILITIES ACCOMMODATION STUDIO
+    {
+      id: 'learning-studio' as const,
+      category: 'neuro' as const,
+      titleEn: 'Dyslexia & Learning Disabilities Studio',
+      titleAr: 'استوديو تيسير التعلم والقراءة والكتابة',
+      shortEn: 'Learning Studio',
+      shortAr: 'صعوبات التعلم',
+      badgeEn: 'Dyslexia & Dysgraphia Accommodations',
+      badgeAr: 'عسر القراءة والكتابة والفهم',
+      descEn: 'Bionic eye fixation, focus reading ruler, syllable chunking, voice-to-essay scaffold, and academic text simplifier.',
+      descAr: 'قارئ القراءة التوجيهية Bionic، مسطرة التركيز البؤرية، تفكيك المقاطع، هيكل المقالات الصوتي لعسر الكتابة، ومبسّط النصوص الأكاديمية.',
+      quickFeaturesAr: ['قارئ القراءة التوجيهية Bionic Fixation', 'مسطرة التركيز البصرية لمنع تشتت الأسطر', 'هيكل المقالات الصوتي لعسر الكتابة', 'تفكيك وتبسيط النصوص الأكاديمية'],
+      quickFeaturesEn: ['Bionic Eye-Fixation Reader', 'Focus Reading Window & Ruler', 'Voice-to-Essay Scaffold for Dysgraphia', 'Academic Text Simplifier & Glossary'],
+      Icon: BookOpen,
+      accentColor: 'text-amber-400',
+      borderGlow: 'hover:border-amber-500/60 border-[#4A1224]/60',
+      bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+      buttonCls: 'bg-gradient-to-r from-amber-500 via-orange-500 to-purple-600 text-slate-950 shadow-amber-500/20',
       matchingMode: 'Neurodiversity',
     },
     // 5. CAREGIVER & UNIVERSAL
@@ -815,6 +839,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   profile={profile}
                   onNavigateBack={handleNavigateBack}
                   onOpenCognitiveGym={() => handleSelectTab('gym')}
+                  onOpenLearningStudio={() => handleSelectTab('learning-studio')}
                 />
               </React.Suspense>
             </motion.div>
@@ -825,7 +850,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               key="gym-view"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -8 }}
               className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
             >
               <React.Suspense fallback={
@@ -837,6 +862,29 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   profile={profile}
                   onMenuClick={onMenuClick}
                   onNavigateBack={() => handleSelectTab('neurodiversity')}
+                />
+              </React.Suspense>
+            </motion.div>
+          )}
+
+          {activeTab === 'learning-studio' && (
+            <motion.div
+              key="learning-studio-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
+            >
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <LearningDisabilityStudio
+                  profile={profile}
+                  onMenuClick={onMenuClick}
+                  onNavigateBack={() => handleSelectTab('neurodiversity')}
+                  onOpenCognitiveGym={() => handleSelectTab('gym')}
                 />
               </React.Suspense>
             </motion.div>

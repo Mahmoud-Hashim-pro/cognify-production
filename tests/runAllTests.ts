@@ -89,6 +89,7 @@ import { runLearningHubComprehensiveVerification } from './learningHubComprehens
 import { runNeurodiversityEngineVerification } from './neurodiversityEngineVerification.js';
 import { runArslCurriculumAndModelVerification } from './arslCurriculumAndModelVerification.js';
 import { runCognitiveEngineVerification } from './cognitiveEngineVerification.js';
+import { runLearningDisabilityEngineVerification } from './learningDisabilityEngineVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2278,6 +2279,13 @@ Keep practicing closures with higher-order functions!
     const m26Res = await runCognitiveEngineVerification();
     totalPassed += m26Res.passed;
     totalFailed += m26Res.failed;
+  }
+
+  // 58. Milestone 27: Specific Learning Disabilities (SLD) & Assistive Accommodations Engine
+  {
+    const m27Res = await runLearningDisabilityEngineVerification();
+    totalPassed += m27Res.passed;
+    totalFailed += m27Res.failed;
   }
 
   console.log(`\n========================================`);
