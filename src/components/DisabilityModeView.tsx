@@ -23,13 +23,10 @@ const LearningDisabilityStudio = React.lazy(() => import('./LearningDisabilitySt
 const UnifiedCognitiveCenter = React.lazy(() => import('./UnifiedCognitiveCenter'));
 const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
 const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
-const VisualComfortModal = React.lazy(() => import('./VisualComfortModal'));
-const AccessibilityPreferencesModal = React.lazy(() => import('./AccessibilityPreferencesModal'));
 const DeafEcosystemView = React.lazy(() => import('./DeafEcosystemView'));
 const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation, isArabicLocale } from '../lib/translations';
-import { createInitialA11yProfile } from '../lib/accessibilityIntelligenceEngine';
 
 import BurgundyConstellationHero from './BurgundyConstellationHero';
 
@@ -127,9 +124,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 }, ref) {
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => detectDirectDisabilityTab(profile));
   const [showPassportModal, setShowPassportModal] = useState(false);
-  const [showVisualComfortModal, setShowVisualComfortModal] = useState(false);
-  const [showA11yPrefsModal, setShowA11yPrefsModal] = useState(false);
-  const [a11yCommProfile, setA11yCommProfile] = useState(() => createInitialA11yProfile(profile?.uid || 'local'));
   const [selectedCategory, setSelectedCategory] = useState<ModuleCategory>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
@@ -609,31 +603,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               ))}
             </AriaRadioGroup>
           ) : (
-            /* Standard accessibility utilities: Visual Comfort, Passport, AI Preferences & Settings */
+            /* Standard accessibility utilities: Passport & Settings */
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <AriaButton
-                onPress={() => setShowVisualComfortModal(true)}
-                aria-label={localize(profile.language, 'Visual Comfort & Dyslexia Tools', 'أدوات الراحة البصرية وتيسير القراءة')}
-                className="px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
-              >
-                <BookOpen className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="hidden xl:inline">{localize(profile.language, 'Visual Comfort', 'الراحة البصرية')}</span>
-              </AriaButton>
               <AriaButton
                 onPress={() => setShowPassportModal(true)}
                 aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
                 className="px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/40 text-amber-200 hover:text-white hover:bg-amber-500/30 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
-                <span className="hidden xl:inline">{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
-              </AriaButton>
-              <AriaButton
-                onPress={() => setShowA11yPrefsModal(true)}
-                aria-label={localize(profile.language, 'Adaptive Communication Preferences', 'تفضيلات التواصل والذكاء المكيّف')}
-                className="px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
-              >
-                <SlidersHorizontal className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="hidden xl:inline">{localize(profile.language, 'AI Adaptation', 'التكيف الذكي')}</span>
+                <span className="hidden sm:inline">{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
               </AriaButton>
               <AriaButton
                 onPress={() => setActiveTab('settings')}
@@ -1072,26 +1050,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         profile={profile}
         setProfile={setProfile}
       />
-
-      {/* Universal Visual Comfort & Dyslexia Modal */}
-      <VisualComfortModal
-        isOpen={showVisualComfortModal}
-        onClose={() => setShowVisualComfortModal(false)}
-        language={profile.language}
-      />
-
-      {/* Adaptive Accessibility Communication Preferences Modal */}
-      <React.Suspense fallback={null}>
-        {showA11yPrefsModal && (
-          <AccessibilityPreferencesModal
-            isOpen={showA11yPrefsModal}
-            onClose={() => setShowA11yPrefsModal(false)}
-            profile={a11yCommProfile}
-            onProfileUpdated={setA11yCommProfile}
-            lang={isArabicLocale(profile.language) ? 'ar' : 'en'}
-          />
-        )}
-      </React.Suspense>
     </div>
   );
 });
