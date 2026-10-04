@@ -88,6 +88,7 @@ import { runSecurityThreatModelVerification } from './securityThreatModelVerific
 import { runLearningHubComprehensiveVerification } from './learningHubComprehensiveVerification.js';
 import { runNeurodiversityEngineVerification } from './neurodiversityEngineVerification.js';
 import { runArslCurriculumAndModelVerification } from './arslCurriculumAndModelVerification.js';
+import { runCognitiveEngineVerification } from './cognitiveEngineVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2270,6 +2271,13 @@ Keep practicing closures with higher-order functions!
     const m25Res = await runArslCurriculumAndModelVerification();
     totalPassed += m25Res.passed;
     totalFailed += m25Res.failed;
+  }
+
+  // 57. Milestone 26: Cognitive & Executive Function Engine 2.0 (Go/No-Go, Memory Grid, Rule Switching, ADHD Slicer, Dyscalculia)
+  {
+    const m26Res = await runCognitiveEngineVerification();
+    totalPassed += m26Res.passed;
+    totalFailed += m26Res.failed;
   }
 
   console.log(`\n========================================`);

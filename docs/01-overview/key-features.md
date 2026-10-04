@@ -104,9 +104,11 @@ Designed with **Strict Hardware Lifecycle Isolation** to prevent camera/mic reso
    - Prerequisite dependency trees preventing course registration before foundational credits are fulfilled.
 3. **Goal Tracker (`Goaltracker.tsx`)**:
    - Breaks long-term academic milestones into measurable subtasks with progress bars and milestone rewards.
-4. **Cognitive Gym & Decoupled IQ (`CognitiveGym.tsx`, `IqAssessmentModal.tsx`)**:
-   - Daily cognitive exercises targeting logic, arithmetic, spatial orientation, memory, and linguistic agility with streak mechanics.
-   - Scientifically modeled IQ assessment across 5 cognitive subdomains, strictly decoupled from classroom curriculum difficulty.
+4. **Cognitive & Executive Hub 2.0 (`CognitiveGym.tsx`, `cognitiveEngine.ts`)**:
+   - **Executive Function Drills**: Real interactive training tasks including Go/No-Go (Inhibitory control & impulse resistance for ADHD), Spatial Working Memory Grid (Forward & Reverse span), Cognitive Set-Shifting (Wisconsin-style rule adaptation for Autism), and Stroop attention filtering.
+   - **ADHD Neuro-Toolkit**: Executive Task Slicer (decomposing intimidating goals into <= 3-minute dopamine steps), Micro-Sprint focus timer (5/10/15 mins), and 100% in-browser Web Audio Brown/Pink/White Noise synthesis to soothe ADHD restlessness.
+   - **Dyscalculia Concrete Modeler**: Interactive Ten-Frames (1-20 dots), Cuisenaire proportional rods, and visual arithmetic ten-decomposition logic to break math phobia.
+   - **Low-Arousal Sensory Mode & Compassionate Streaks**: Minimalist sensory calming mode for autistic learners, visual predictability session timelines, and Grace Day Shields protecting ADHD users from streak reset trauma.
 
 ---
 
