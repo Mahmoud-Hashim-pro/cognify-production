@@ -4,7 +4,7 @@ import { RadioGroup as AriaRadioGroup, Radio as AriaRadio } from 'react-aria-com
 import { AriaButton } from './ui/AriaButton';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
-  Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, 
+  Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, Flame,
   ArrowLeft, ArrowRight, MessageSquare, Globe, Check, 
   LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
   SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck
@@ -18,6 +18,7 @@ const VisionCompanionView = React.lazy(() => import('./VisionCompanionView'));
 const ChatInterface = React.lazy(() => import('./ChatInterface'));
 const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
 const NeurodiversityHub = React.lazy(() => import('./NeurodiversityHub'));
+const CognitiveGym = React.lazy(() => import('./CognitiveGym'));
 const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
 const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
 const VisualComfortModal = React.lazy(() => import('./VisualComfortModal'));
@@ -42,6 +43,7 @@ export type DisabilityTab =
   | 'vision'
   | 'radar'
   | 'neurodiversity'
+  | 'gym'
   | 'learning'
   | 'caregiver'
   | 'deaf'
@@ -101,6 +103,7 @@ function categoryForTab(tab: DisabilityTab): ModuleCategory {
     case 'vision': return 'vision';
     case 'deaf': return 'hearing';
     case 'neurodiversity':
+    case 'gym':
     case 'learning': return 'neuro';
     case 'caregiver': return 'caregiver';
     default: return 'all';
@@ -403,7 +406,28 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white shadow-purple-500/20',
       matchingMode: 'Neurodiversity',
     },
-    // 5. ADAPTIVE LEARNING HUB & CURRICULUM
+    // 5. COGNITIVE & EXECUTIVE GYM (ADHD, AUTISM, DYSCALCULIA)
+    {
+      id: 'gym' as const,
+      category: 'neuro' as const,
+      titleEn: 'Cognitive & Executive Gym',
+      titleAr: 'الجيم المعرفي والوظائف التنفيذية',
+      shortEn: 'Cognitive Gym',
+      shortAr: 'الجيم المعرفي',
+      badgeEn: 'ADHD, Autism & Dyscalculia',
+      badgeAr: 'ADHD، التوحد، وعسر الحساب',
+      descEn: 'Interactive drills for ADHD executive function, task slicing, ambient soundscapes, Autism set-shifting, and dyscalculia concrete math.',
+      descAr: 'تمارين تفاعلية للوظائف التنفيذية، تجزئة مهام الـ ADHD، أصوات التركيز البنية، مرونة التفكير للتوحد، وحساب ملموس لعسر الحساب.',
+      quickFeaturesAr: ['مشتت مهام الـ ADHD ومؤقت السبرنت', 'مولد الضوضاء البنية والوردية', 'التحكم بالاندفاع Go/No-Go والمرونة المعرفية', 'قضبان كويزنير والـ Ten-Frames لعسر الحساب'],
+      quickFeaturesEn: ['ADHD Task Slicer & Micro-Sprints', 'Brown & Pink Soundscapes', 'Go/No-Go & Cognitive Set-Shifting', 'Cuisenaire & Ten-Frames Math'],
+      Icon: Flame,
+      accentColor: 'text-amber-400',
+      borderGlow: 'hover:border-amber-500/60 border-[#4A1224]/60',
+      bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+      buttonCls: 'bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-amber-500/20',
+      matchingMode: 'Neurodiversity',
+    },
+    // 6. ADAPTIVE LEARNING HUB & CURRICULUM
     {
       id: 'learning' as const,
       category: 'neuro' as const,
@@ -815,6 +839,29 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   profile={profile}
                   onNavigateBack={handleNavigateBack}
                   onOpenLearningHub={() => handleSelectTab('learning')}
+                  onOpenCognitiveGym={() => handleSelectTab('gym')}
+                />
+              </React.Suspense>
+            </motion.div>
+          )}
+
+          {activeTab === 'gym' && (
+            <motion.div
+              key="gym-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
+            >
+              <React.Suspense fallback={
+                <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
+                  <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <CognitiveGym
+                  profile={profile}
+                  onMenuClick={onMenuClick}
+                  onNavigateBack={() => handleSelectTab('neurodiversity')}
                 />
               </React.Suspense>
             </motion.div>
