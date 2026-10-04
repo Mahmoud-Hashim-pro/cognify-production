@@ -1037,6 +1037,7 @@ export default function App() {
             onMenuClick={() => setIsMobileMenuOpen(true)}
             onNavigateBack={() => navigateTo(homeViewFor(profile))}
             setProfile={setProfile}
+            onNavigate={(v) => navigateTo(v)}
           />
         );
       case 'intelligence':
@@ -1203,6 +1204,7 @@ export default function App() {
               </button>
             </header>
             <PrivacySecurityCenter
+              currentStudent={activeProfile.studentState}
               isArabic={isArabicLocale(activeProfile.language)}
             />
           </div>

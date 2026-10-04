@@ -1,7 +1,7 @@
 # Assistive Hardware & Edge AI Perception Flow
 
 > **Status**: [VERIFIED]  
-> **Source Baseline**: `src/components/VisionCompanionView.tsx`, `src/components/SignVideoStudio.tsx`, `src/components/DeafEcosystemView.tsx`  
+> **Source Baseline**: `src/components/VisionCompanionView.tsx`, `src/components/SignVideoStudio.tsx`, `src/components/AccessibilityOverlay.tsx`  
 > **Audience**: Computer Vision Engineers, Accessibility Engineers, and Embedded ML Developers  
 
 ---
@@ -14,68 +14,57 @@ sequenceDiagram
     participant UI as Assistive Component (Mount)
     participant Device as Browser MediaDevices (WebRTC)
     participant Worker as MediaPipe Wasm Runtime
-    participant Audio as WebAudio AnalyserNode
-    participant Engine as Hardware Engine
+    participant VisionAI as Edge Vision & OCR Engine
+    participant Audio as WebAudio & Speech Synthesis
     participant UI_Teardown as Assistive Component (Unmount)
 
-    UI->>Device: navigator.mediaDevices.getUserMedia({ video: 30fps, audio: 44.1kHz })
-    Device-->>Engine: MediaStream (VideoTrack + AudioTrack)
+    UI->>Device: navigator.mediaDevices.getUserMedia({ video: 30fps })
+    Device-->>UI: MediaStream (VideoTrack)
     
-    par Vision / Gaze Tracking Loop (30-60Hz)
-        Engine->>Worker: send({ image: videoElement })
-        Worker-->>Engine: 468 FaceMesh / 21 Hand Landmarks
-        Engine->>Engine: Compute Nose-Tip Vector / Dwell Filter / Snap Target
-        Engine-->>UI: onPointerMove (Capped at 33ms / 30fps render)
-    and Audio Pitch Autocorrelation Loop
-        Engine->>Audio: AnalyserNode.getFloatTimeDomainData()
-        Audio->>Engine: Raw PCM Buffer (2048 samples)
-        Engine->>Engine: Compute Normalized Square Difference (120-250Hz Humming)
-        Engine-->>UI: onVocalTrigger (Sound Activated Action)
+    par Real-Time Hand Landmark Tracking Loop (30Hz)
+        UI->>Worker: send({ image: videoElement })
+        Worker-->>UI: 21 3D Hand Landmarks (Bilateral)
+        UI->>UI: Normalize relative to wrist origin (0, 0, 0)
+        UI-->>UI: Classify Sign & Drive 3D Avatar (Capped at 33ms)
+    and Multimodal Vision & OCR Capture
+        UI->>VisionAI: captureFrame(Canvas Snapshot)
+        VisionAI-->>Audio: Detected Objects, Banknotes, Text
+        Audio-->>UI: Local TTS Audio Narration
     end
 
     Note over UI,UI_Teardown: User Navigates Back to Hub / Swaps Module
     
-    UI_Teardown->>Engine: tracker.stop() / soundEngine.stop()
-    Engine->>Device: stream.getTracks().forEach(t => t.stop())
-    Engine->>Engine: cancelAnimationFrame(animId)
-    Engine->>Audio: audioContext.close()
-    Note over Engine: 100% Resource Cleanup (Zero Ghost Cameras / Zero Leaks)
+    UI_Teardown->>Device: stream.getTracks().forEach(t => t.stop())
+    UI_Teardown->>UI: cancelAnimationFrame(animId)
+    UI_Teardown->>Audio: window.speechSynthesis.cancel()
+    Note over UI_Teardown: 100% Resource Cleanup (Zero Ghost Cameras / Zero Leaks)
 ```
 
 ---
 
-## 2. Head-Tracking & Eye-Gaze Mechanics (`facialHeadTracker.ts`) [VERIFIED]
+## 2. Hand Gesture & ArSL Articulation Pipeline (`AccessibilityOverlay.tsx`, `SignVideoStudio.tsx`) [VERIFIED]
 
-The `FacialHeadTracker` provides hands-free mouse emulation calibrated for users with ALS, muscular dystrophy, or quadriplegia:
+The `AccessibilityOverlay` and `SignVideoStudio` modules provide real-time perception for Arabic and Egyptian Sign Language (ArSL) communication:
 
-### A. Coordinate Mapping & Tremor Suppression
-1. **Nose-Tip Vector Tracking**: Index `1` in MediaPipe FaceMesh represents the tip of the nose. Its relative $X/Y$ coordinates inside the face bounding box drive the normalized cursor:
-   $$X_{\text{norm}} = \frac{x_{\text{nose}} - x_{\text{boxMin}}}{x_{\text{boxMax}} - x_{\text{boxMin}}}$$
-2. **Anti-Tremor Deadband Filter**: Minor involuntary tremors below a calibrated threshold ($< 0.004$ normalized units) are filtered out, preventing jitter on small buttons.
-3. **Magnetic Snapping (Snap-to-Target)**: If the cursor enters the attraction radius of an active button or keyboard key, it gently locks to the element center to make clicking effortless.
-4. **Dwell Click Timer**: When the pointer remains within a target card's bounding box for **800ms to 1200ms**, the target triggers automatically without requiring a physical tap.
-
-### B. Eye Blink & Smile Gestures
-- **Eye Aspect Ratio (EAR)**: Computed from upper/lower eyelid landmarks. A drop below the calibrated threshold for $150\text{ms}$ to $400\text{ms}$ registers a deliberate blink-click while ignoring involuntary micro-blinks ($<100\text{ms}$).
-- **Lip Corner Delta**: Measures the distance between landmarks 61 and 291 (lip corners). An upward elevation above the baseline registers a smile gesture, which can double as a switch input.
+### A. Coordinate Mapping & Landmark Normalization
+1. **21 3D Hand Landmarks**: Detected via MediaPipe Hands Wasm runtime running completely in browser memory.
+2. **Wrist-Origin Invariant**: Raw coordinate values are translated so that landmark 0 (the wrist joint) is placed at the Euclidean origin $(0, 0, 0)$:
+   $$\vec{P}'_i = \vec{P}_i - \vec{P}_{\text{wrist}}$$
+   This makes gesture classification invariant to where the student sits relative to the webcam.
+3. **Adaptive Throttling**: The video processing loop dynamically monitors processing latency; if frame duration exceeds $33\text{ms}$, frame analysis is throttled to prevent CPU/GPU contention on budget hardware.
+4. **Zero-Allocation Hot Path**: Bounding box and landmark vector computations avoid temporary array allocations, keeping heap churn at $0\text{ bytes}$ per frame.
 
 ---
 
-## 3. Vocal Sound Triggers & FFT Pitch Autocorrelation (`vocalSoundTrigger.ts`) [VERIFIED]
+## 3. Computer Vision & Spatial Object Scanning Pipeline (`VisionCompanionView.tsx`) [VERIFIED]
 
-For users who cannot move their head or blink reliably, Cognify provides sound-activated switching based on **vocal humming**:
+For blind and visually impaired students, Cognify provides an ergonomic, full-screen edge vision assistant:
 
-```ts
-// src/lib/vocalSoundTrigger.ts:182
-// Real-time pitch extraction via time-domain autocorrelation:
-const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-const analyser = audioContext.createAnalyser();
-analyser.fftSize = 2048;
-```
-
-1. **Autocorrelation Algorithm**: Evaluates raw audio frames using normalized square difference to detect the fundamental frequency ($F_0$).
-2. **Target Band (120 Hz – 250 Hz)**: Calibrated to detect steady vowel humming tones (e.g. *"Mmmmm"* or *"Aaaaa"*).
-3. **Noise Immunity**: Ambient background chatter, coughs, and sharp clicks are rejected because they lack a sustained fundamental periodic waveform over the $300\text{ms}$ duration window.
+### A. Capabilities & Processing
+1. **Multimodal Scene Perception**: High-resolution camera snapshots are analyzed for physical obstacles, spatial room layouts, and academic classroom board notes.
+2. **Banknote Reader**: Dedicated Egyptian Pound (EGP) currency classifier recognizing banknotes and denominations.
+3. **Document & Text Reader**: Verbatim and summary text extraction with automatic instant speech synthesis readout.
+4. **Minor Privacy Gate**: In compliance with child privacy regulations (COPPA / GDPR Art. 8), minor students are gated by `ParentalConsentModal.tsx` requiring verified guardian consent prior to camera stream initialization.
 
 ---
 
@@ -97,8 +86,8 @@ useEffect(() => {
     if (animFrameIdRef.current) {
       cancelAnimationFrame(animFrameIdRef.current);
     }
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
     }
   };
 }, []);

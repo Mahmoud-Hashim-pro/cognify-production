@@ -1,7 +1,7 @@
 import { localize, isArabicLocale, getTranslation } from '../lib/translations';
 import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
-import { User, Settings, GraduationCap, Accessibility, LifeBuoy, MessageSquare, BarChart3, AlertCircle, LogOut, Plus, ChevronRight, X, Moon, Sun, Mic, Target, Calculator, CalendarCheck, LayoutDashboard, CalendarDays, Sparkles, Brain, Building2, Flame, Layers, Heart } from "lucide-react";
+import { User, Settings, GraduationCap, Accessibility, LifeBuoy, MessageSquare, BarChart3, AlertCircle, LogOut, Plus, ChevronRight, X, Moon, Sun, Mic, Target, Calculator, CalendarCheck, LayoutDashboard, CalendarDays, Sparkles, Brain, Building2, Flame, Layers, Heart, ShieldCheck } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { isAdminUser } from "../lib/roles";
@@ -272,6 +272,16 @@ export default function Sidebar({ profile, setProfile, currentView, setCurrentVi
         >
           <LifeBuoy className={navIcon(currentView === 'support')} />
           {localize(profile.language, 'Support', 'الدعم')}
+        </button>
+
+        {/* Privacy & Compliance Center */}
+        <button
+          onClick={() => setCurrentView('privacy_security')}
+          className={navBtn(currentView === 'privacy_security')}
+          aria-current={currentView === 'privacy_security' ? 'page' : undefined}
+        >
+          <ShieldCheck className={navIcon(currentView === 'privacy_security')} />
+          {localize(profile.language, 'Privacy & Security', 'الخصوصية والأمان')}
         </button>
 
         {/* Admin */}
