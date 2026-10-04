@@ -68,7 +68,6 @@ import VisualComfortModal from './VisualComfortModal';
 interface NeurodiversityHubProps {
   profile: UserProfile;
   onNavigateBack?: () => void;
-  onOpenLearningHub?: () => void;
   onOpenCognitiveGym?: () => void;
 }
 
@@ -107,7 +106,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   needs: 'bg-indigo-500/20 border-[#E5A93C]/30 text-indigo-300',
 };
 
-export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearningHub, onOpenCognitiveGym }: NeurodiversityHubProps) {
+export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCognitiveGym }: NeurodiversityHubProps) {
   const lang = profile.language || 'Arabic';
   const isAr = isArabicLocale(lang);
   const isFr = lang === 'French';
@@ -481,16 +480,6 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenLearn
             >
               <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>{t('Cognitive Gym (ADHD & Math)', 'الجيم المعرفي (ADHD وحساب)')}</span>
-            </button>
-          )}
-
-          {onOpenLearningHub && (
-            <button
-              onClick={onOpenLearningHub}
-              className="px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 border border-amber-500/40 hover:border-amber-400 hover:text-white"
-            >
-              <span>🎓</span>
-              <span>{t('Learning Hub', 'المناهج الميسرة', 'Curriculum')}</span>
             </button>
           )}
         </div>
