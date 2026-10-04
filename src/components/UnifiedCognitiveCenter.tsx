@@ -85,7 +85,7 @@ export default function UnifiedCognitiveCenter({
       ambientNoise.stop();
       setIsNoisePlaying(false);
     } else {
-      ambientNoise.start(noiseType, 0.4);
+      ambientNoise.play(noiseType, 0.4);
       setIsNoisePlaying(true);
       toast.success(localize(profile.language, 'Brown noise started to soothe ADHD restlessness', 'تم تشغيل الضوضاء البنية لتحسين التركيز وتهدئة التشتت'));
     }
@@ -97,10 +97,10 @@ export default function UnifiedCognitiveCenter({
       toast.error(localize(profile.language, 'Please enter a task to slice', 'يرجى كتابة مهمة لتفكيكها'));
       return;
     }
-    const steps = sliceTaskIntoMicroSteps(taskInput);
-    setSlicedSteps(steps.map((s) => ({ text: s.instruction, done: false, minutes: s.durationMinutes })));
+    const decomp = sliceTaskIntoMicroSteps(taskInput);
+    setSlicedSteps(decomp.steps.map((s) => ({ text: isAr ? s.titleAr : s.titleEn, done: false, minutes: s.estMinutes })));
     setTaskInput('');
-    toast.success(localize(profile.language, 'Task broken into <=3 minute micro-steps!', 'تم تفكيك المهمة إلى خطوات مجهرية $\\le$ 3 دقائق!'));
+    toast.success(localize(profile.language, 'Task broken into <=3 minute micro-steps!', 'تم تفكيك المهمة إلى خطوات مجهرية ≤ 3 دقائق!'));
   };
 
   const toggleStepDone = (index: number) => {
