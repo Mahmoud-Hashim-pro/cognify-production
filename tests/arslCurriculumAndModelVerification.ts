@@ -5,7 +5,11 @@
 import {
   ARSL_LECTURES_CATALOG,
   ARSL_DICTIONARY,
+  ARSL_OFFICIAL_BOOK_CHAPTERS,
+  ARSL_OFFICIAL_BOOK_CATALOG,
+  ARSL_OFFICIAL_SIGNS,
   lookupArslSign,
+  searchArslDictionary,
   hamnosysToThreePose,
 } from '../src/lib/arslDictionary.js';
 import {
@@ -80,6 +84,40 @@ export async function runArslCurriculumAndModelVerification() {
 
     const fromFingerspelling = lookupArslSign('غير_موجود_في_المعجم');
     assert(fromFingerspelling === null, 'Unknown phrases return null to trigger letter fingerspelling fallback');
+  }
+
+  // Test 3b: Official Unified Arabic Sign Language Dictionary (1,418 Pages, 28 Chapters, 1,413 Signs)
+  {
+    assert(ARSL_OFFICIAL_BOOK_CHAPTERS.length === 28, 'All 28 official chapters from the ArSL dictionary are cataloged');
+    assert(ARSL_OFFICIAL_BOOK_CATALOG.length === 28, 'Book catalog defines 28 structured chapters with Arabic/English metadata');
+    assert(ARSL_OFFICIAL_SIGNS.length === 1413, 'Extracted exactly 1,413 official signs from the 1,418-page dictionary');
+    assert(ARSL_DICTIONARY.length >= 1413, 'Master dictionary integrates all 1,413 official signs with conversational vocabulary');
+
+    // Page boundaries validation
+    const firstChapter = ARSL_OFFICIAL_BOOK_CHAPTERS[0];
+    const lastChapter = ARSL_OFFICIAL_BOOK_CHAPTERS[27];
+    assert(firstChapter.start === 6, 'First chapter starts at page 6 (following front matter)');
+    assert(lastChapter.end === 1418, 'Last chapter covers up to page 1418');
+
+    // Every chapter has vocabulary
+    const allChaptersPopulated = ARSL_OFFICIAL_BOOK_CHAPTERS.every((ch) => ch.vocabCount > 0);
+    assert(allChaptersPopulated, 'Every one of the 28 chapters contains valid lexical vocabulary signs');
+
+    // Look up signs from different chapters
+    const familySign = lookupArslSign('أب');
+    assert(familySign !== null, 'Looked up family sign (أب) successfully');
+
+    const techSign = lookupArslSign('حاسوب') || lookupArslSign('كمبيوتر');
+    assert(techSign !== null, 'Looked up IT / computer sign from chapter 26');
+
+    // Search dictionary function
+    const searchResults = searchArslDictionary('صلاة');
+    assert(searchResults.length > 0, 'Full-text search finds Islamic religious terms (صلاة)');
+
+    // 3D pose verification for official sign
+    const officialPose = hamnosysToThreePose(familySign!.hamnosys);
+    assert(officialPose.f.length === 5, 'Converts official book sign HamNoSys into 3D finger pose curls');
+    assert(officialPose.pos.length === 3, 'Calculates 3D world coordinates for official book sign');
   }
 
   // Test 4: Invariant 3D Landmark Normalization
