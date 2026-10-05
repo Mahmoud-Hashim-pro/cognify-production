@@ -35,11 +35,8 @@ export function setTestCertProvider(provider: CertProvider | null): void {
  */
 export function getExpectedProjectId(): string {
   const envProjectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
-  if (process.env.NODE_ENV === 'production') {
-    if (!envProjectId) {
-      throw new Error('[authGuard] CRITICAL CONFIGURATION ERROR: FIREBASE_PROJECT_ID must be set in production.');
-    }
-    return envProjectId;
+  if (!envProjectId && process.env.NODE_ENV === 'production') {
+    console.warn('[authGuard] WARNING: FIREBASE_PROJECT_ID not set in production env, falling back to gen-lang-client-0347404066');
   }
   return envProjectId || 'gen-lang-client-0347404066';
 }

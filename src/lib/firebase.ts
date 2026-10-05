@@ -138,19 +138,48 @@ const isLocalStorageSupported = (): boolean => {
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
+// Determine active Firestore database ID.
+const getEnvDatabaseId = (): string | undefined => {
+  if (typeof process !== 'undefined' && process.env?.VITE_FIREBASE_DATABASE_ID) {
+    return process.env.VITE_FIREBASE_DATABASE_ID;
+  }
+  try {
+    const meta = (new Function('return import.meta'))();
+    return meta?.env?.VITE_FIREBASE_DATABASE_ID;
+  } catch {
+    return undefined;
+  }
+};
+const configuredDatabaseId = getEnvDatabaseId() || (firebaseConfig as any).firestoreDatabaseId || 'ai-studio-c1720b7c-bffb-4282-b9a9-7c611643d7c2';
+const targetDatabaseId = configuredDatabaseId && configuredDatabaseId !== '(default)'
+  ? configuredDatabaseId
+  : undefined;
+
+const initDb = (settings: any) => {
+  return targetDatabaseId
+    ? initializeFirestore(app, settings, targetDatabaseId)
+    : initializeFirestore(app, settings);
+};
+
+const getFallbackDb = () => {
+  return targetDatabaseId
+    ? getFirestore(app, targetDatabaseId)
+    : getFirestore(app);
+};
+
 // Initialize Firestore safely with IndexedDB support checks
 let safeDb;
 try {
   if (isIndexedDBSupported() && isLocalStorageSupported()) {
-    safeDb = initializeFirestore(app, {
+    safeDb = initDb({
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-      experimentalForceLongPolling: true,
-    }, firebaseConfig.firestoreDatabaseId);
+      experimentalAutoDetectLongPolling: true,
+    });
   } else {
-    safeDb = initializeFirestore(app, {
+    safeDb = initDb({
       localCache: memoryLocalCache(),
-      experimentalForceLongPolling: true,
-    }, firebaseConfig.firestoreDatabaseId);
+      experimentalAutoDetectLongPolling: true,
+    });
   }
 } catch (error) {
   console.warn("Firestore custom initialization failed, falling back to memory cache", error);
@@ -160,12 +189,12 @@ try {
     }
   } catch {}
   try {
-    safeDb = initializeFirestore(app, {
+    safeDb = initDb({
       localCache: memoryLocalCache(),
-      experimentalForceLongPolling: true,
-    }, firebaseConfig.firestoreDatabaseId);
+      experimentalAutoDetectLongPolling: true,
+    });
   } catch {
-    safeDb = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+    safeDb = getFallbackDb();
   }
 }
 
