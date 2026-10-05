@@ -378,6 +378,30 @@ function buildRig(scene: THREE.Scene): Rig {
   eyeR.position.x = 0.05;
   head.add(eyeL, eyeR);
 
+  /* ---- Non-manual facial markers: eyebrows & articulated mouth ---- */
+  const browMat = new THREE.MeshStandardMaterial({
+    color: ACCENT,
+    emissive: ACCENT,
+    emissiveIntensity: 1.8,
+  });
+  const browGeo = new THREE.BoxGeometry(0.038, 0.007, 0.01);
+  const browL = new THREE.Mesh(browGeo, browMat);
+  browL.position.set(-0.05, 0.055, 0.152);
+  const browR = new THREE.Mesh(browGeo, browMat);
+  browR.position.set(0.05, 0.055, 0.152);
+  head.add(browL, browR);
+
+  const mouthMat = new THREE.MeshStandardMaterial({
+    color: ACCENT_SOFT,
+    emissive: ACCENT_SOFT,
+    emissiveIntensity: 1.6,
+  });
+  const mouthGeo = new THREE.CapsuleGeometry(0.008, 0.034, 4, 10);
+  const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+  mouth.rotation.z = Math.PI / 2;
+  mouth.position.set(0, -0.055, 0.152);
+  head.add(mouth);
+
   /* ---- shoulders + idle left arm ---- */
   const shoulderGeo = new THREE.SphereGeometry(0.085, 16, 14);
   const shoulderR = new THREE.Mesh(shoulderGeo, bodyMat);
@@ -442,6 +466,7 @@ function buildRig(scene: THREE.Scene): Rig {
     rings: [ring1, ring2], chestCore,
     leftHandRoot: left.handRoot, leftWrist: left.wrist, leftFingers: left.fingers,
     leftThumbBase: left.thumbBase, leftForearm, leftElbow,
+    eyeL, eyeR, browL, browR, mouth,
   };
 }
 
@@ -477,6 +502,13 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
   const onDoneRef = useRef(onDone);
   onProgressRef.current = onProgress;
   onDoneRef.current = onDone;
+
+  const isPlayingRef = useRef(playing);
+  isPlayingRef.current = playing;
+
+  const currentNonManualRef = useRef<
+    'question_eyebrows' | 'happy_smile' | 'concern_furrow' | 'head_nod' | 'head_shake' | 'neutral'
+  >('neutral');
 
   const applyPose = (p: HandPose) => {
     const t = target.current;
@@ -641,14 +673,93 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
         H.forearm.quaternion.setFromUnitVectors(up, dirV.clone().normalize());
       }
 
-      // life: breathing, head, rings, chest pulse
+      // life: breathing, head, rings, chest pulse, eye blinking, eyebrows, mouth mouthing
       rig.root.position.y = Math.sin(now / 1600) * 0.006;
-      rig.head.rotation.y = Math.sin(now / 2300) * 0.08;
-      rig.head.rotation.x = Math.sin(now / 2900) * 0.04;
       rig.rings[0].rotation.z += dt * 0.4;
       rig.rings[1].rotation.z -= dt * 0.25;
       const pulse = 1.1 + Math.sin(now / 500) * 0.35;
       (rig.chestCore.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse;
+
+      // 1. Natural Autonomic Blinking (Every ~3.6 seconds)
+      const blinkCycle = now % 3600;
+      let eyeScaleY = 1.0;
+      if (blinkCycle < 140) {
+        eyeScaleY = Math.max(0.08, Math.sin((blinkCycle / 140) * Math.PI) * 0.1);
+      }
+
+      // 2. Non-Manual Facial & Head Expression Targets
+      let targetBrowLY = 0.055;
+      let targetBrowRY = 0.055;
+      let targetBrowRotZ_L = 0;
+      let targetBrowRotZ_R = 0;
+      let targetMouthScaleX = 1.0;
+      let targetMouthScaleY = 1.0;
+      let targetMouthY = -0.055;
+      let headNod = Math.sin(now / 2900) * 0.04;
+      let headYaw = Math.sin(now / 2300) * 0.08;
+      let headRoll = 0;
+
+      const nm = currentNonManualRef.current;
+      if (nm === 'question_eyebrows') {
+        // Raised eyebrows + curious head tilt (Standard ArSL Question Marker)
+        targetBrowLY = 0.075;
+        targetBrowRY = 0.075;
+        targetBrowRotZ_L = 0.16;
+        targetBrowRotZ_R = -0.16;
+        headRoll = 0.10;
+        headNod = -0.06;
+        targetMouthScaleX = 0.85;
+        targetMouthScaleY = 1.35;
+      } else if (nm === 'happy_smile') {
+        // Welcoming smile: lifted brows, soft eye squint, friendly head nod
+        targetBrowLY = 0.064;
+        targetBrowRY = 0.064;
+        targetMouthScaleX = 1.45;
+        targetMouthScaleY = 0.75;
+        targetMouthY = -0.048;
+        eyeScaleY *= 0.85;
+        headNod = Math.sin(now / 220) * 0.09;
+      } else if (nm === 'head_nod') {
+        // Affirmative head nod (Yes / agreement)
+        headNod = Math.sin(now / 160) * 0.18;
+        targetBrowLY = 0.06;
+        targetBrowRY = 0.06;
+      } else if (nm === 'head_shake') {
+        // Negative head shake (No / negation)
+        headYaw = Math.sin(now / 150) * 0.22;
+        targetBrowRotZ_L = -0.12;
+        targetBrowRotZ_R = 0.12;
+      } else if (nm === 'concern_furrow') {
+        // Furrowed brow for intense thought or concern
+        targetBrowLY = 0.044;
+        targetBrowRY = 0.044;
+        targetBrowRotZ_L = -0.20;
+        targetBrowRotZ_R = 0.20;
+      }
+
+      // 3. Dynamic Syllabic Mouthing during active signing
+      if (isPlayingRef.current) {
+        const mouthOpen = 0.8 + Math.sin(now / 110) * 0.5 + Math.cos(now / 75) * 0.25;
+        targetMouthScaleY = Math.max(0.65, mouthOpen);
+        targetMouthScaleX = 1.0 + Math.sin(now / 190) * 0.2;
+      }
+
+      // Lerp Eyes, Eyebrows & Mouth
+      rig.eyeL.scale.y = THREE.MathUtils.lerp(rig.eyeL.scale.y, eyeScaleY, 0.25);
+      rig.eyeR.scale.y = THREE.MathUtils.lerp(rig.eyeR.scale.y, eyeScaleY, 0.25);
+
+      rig.browL.position.y = THREE.MathUtils.lerp(rig.browL.position.y, targetBrowLY, 0.15);
+      rig.browR.position.y = THREE.MathUtils.lerp(rig.browR.position.y, targetBrowRY, 0.15);
+      rig.browL.rotation.z = THREE.MathUtils.lerp(rig.browL.rotation.z, targetBrowRotZ_L, 0.15);
+      rig.browR.rotation.z = THREE.MathUtils.lerp(rig.browR.rotation.z, targetBrowRotZ_R, 0.15);
+
+      rig.mouth.scale.x = THREE.MathUtils.lerp(rig.mouth.scale.x, targetMouthScaleX, 0.2);
+      rig.mouth.scale.y = THREE.MathUtils.lerp(rig.mouth.scale.y, targetMouthScaleY, 0.2);
+      rig.mouth.position.y = THREE.MathUtils.lerp(rig.mouth.position.y, targetMouthY, 0.15);
+
+      rig.head.rotation.x = THREE.MathUtils.lerp(rig.head.rotation.x, headNod, 0.15);
+      rig.head.rotation.y = THREE.MathUtils.lerp(rig.head.rotation.y, headYaw, 0.15);
+      rig.head.rotation.z = THREE.MathUtils.lerp(rig.head.rotation.z, headRoll, 0.15);
 
       renderer.render(scene, camera);
     };
@@ -725,6 +836,26 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
           arslEntry = lookupArslSign(raw);
         }
 
+        // Set non-manual facial and head expression for current sign
+        let nonManual: 'question_eyebrows' | 'happy_smile' | 'concern_furrow' | 'head_nod' | 'head_shake' | 'neutral' = 'neutral';
+        if (arslEntry?.hamnosys?.nonManual) {
+          nonManual = arslEntry.hamnosys.nonManual;
+        } else {
+          const w = raw.toLowerCase();
+          if (/[?؟]/.test(words[i]) || /^(هل|ما|ماذا|اين|أين|كيف|كم|لماذا|ليه|مين|what|where|how|why|who)\b/i.test(w)) {
+            nonManual = 'question_eyebrows';
+          } else if (/^(اهل|أهل|اهلا|أهلاً|مرحب|شكرا|شكراً|نعم|تمام|موافق|حب|سعيد|فرح|hello|thanks|yes|love)\b/i.test(w)) {
+            nonManual = 'happy_smile';
+          } else if (/^(لا|كلا|مش|غير|مافيش|مفيش|no|not|stop)\b/i.test(w)) {
+            nonManual = 'head_shake';
+          } else if (/^(الم|ألم|وجع|تعب|طبيب|دكتور|اسعاف|إسعاف|خطر|pain|hurt|sick)\b/i.test(w)) {
+            nonManual = 'concern_furrow';
+          } else if (/^(نعم|حاضر|صح|ايوة|أيوة|yes|ok|sure)\b/i.test(w)) {
+            nonManual = 'head_nod';
+          }
+        }
+        currentNonManualRef.current = nonManual;
+
         if (arslEntry) {
           setGlyph("");
           const threePose = hamnosysToThreePose(arslEntry.hamnosys);
@@ -779,12 +910,14 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
       }
       if (!cancelled) {
         applyPose(NEUTRAL);
+        currentNonManualRef.current = 'neutral';
         onDoneRef.current?.();
       }
     })();
 
     return () => {
       cancelled = true;
+      currentNonManualRef.current = 'neutral';
       timers.forEach(clearTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -49,6 +49,12 @@ export default function UnifiedHearingCenter({
   const isAr = isArabicLocale(dialect);
   const isEgyptian = dialect === 'Egyptian Ammiya';
 
+  // Helper for 100% dialect-responsive localization
+  const loc = useCallback(
+    (en: string, ar: string) => (dialect === 'English' ? en : ar),
+    [dialect]
+  );
+
   // ───────────────────────────────────────────────────────────────────────────
   // HALF 1: 3D SIGN AVATAR & AI TUTOR STATE
   // ───────────────────────────────────────────────────────────────────────────
@@ -101,13 +107,26 @@ export default function UnifiedHearingCenter({
     triggerHapticAlert('single-pulse');
 
     const prompt = `You are Cognify's specialized Deaf & Hard of Hearing AI Sign Companion.
-Explain this concept or answer this question clearly, visually, and concisely in 2 short sentences in the requested language/dialect: "${dialect}".
+Explain this concept or answer this question clearly, visually, and concisely in 1 to 2 short sentences in the requested language/dialect: "${dialect}".
+CRITICAL: Do NOT use any English placeholders or system terms like "Other", "N/A", or "esraahosni". If the dialect is Arabic or Egyptian Ammiya, answer purely in Arabic.
 Keep it simple, clear, and direct so it can be signed by a 3D Sign Avatar and read easily by a deaf student:
 Question: "${q}"`;
 
     try {
       const response = await generateAdaptiveResponse(prompt, profile, []);
-      const cleanAnswer = response.trim();
+      let cleanAnswer = response
+        .replace(/\bOther\b/gi, '')
+        .replace(/\besraahosni\b/gi, '')
+        .replace(/\bN\/A\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!cleanAnswer) {
+        cleanAnswer = isEgyptian
+          ? 'تمام، فهمت سؤالك وسأشرحه لك بالإشارة والصوت.'
+          : isAr
+          ? 'حسناً، فهمت سؤالك وسأشرحه لك بالإشارة والصوت.'
+          : 'Understood, I will explain this in sign language.';
+      }
       setAiAnswer(cleanAnswer);
 
       // 1. Speak aloud
@@ -122,11 +141,11 @@ Question: "${q}"`;
       // 2. Animate 3D Sign Avatar
       triggerAvatarSign(cleanAnswer);
       toast.success(
-        localize(profile.language, 'Answer generated & signed in 3D', 'تمت الإجابة والترجمة للغة الإشارة 3D')
+        loc('Answer generated & signed in 3D', 'تمت الإجابة والترجمة للغة الإشارة 3D')
       );
     } catch (e) {
       console.error('[AI Tutor] Request failed:', e);
-      toast.error(localize(profile.language, 'Failed to get AI answer', 'تعذر استحضار الإجابة، يرجى المحاولة ثانية'));
+      toast.error(loc('Failed to get AI answer', 'تعذر استحضار الإجابة، يرجى المحاولة ثانية'));
     } finally {
       setIsAiLoading(false);
       if (!overridePrompt) setAiQuestion('');
@@ -137,7 +156,7 @@ Question: "${q}"`;
   const toggleQuestionVoice = () => {
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRec) {
-      toast.error(localize(profile.language, 'Speech recognition not supported', 'التعرف الصوتي غير مدعوم في هذا المتصفح'));
+      toast.error(loc('Speech recognition not supported', 'التعرف الصوتي غير مدعوم في هذا المتصفح'));
       return;
     }
 
@@ -301,7 +320,7 @@ Question: "${q}"`;
   // Start Camera handler
   const handleStartCamera = async () => {
     try {
-      setCameraStatus(localize(profile.language, 'Opening camera…', 'جاري تشغيل الكاميرا…'));
+      setCameraStatus(loc('Opening camera…', 'جاري تشغيل الكاميرا…'));
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480, facingMode: 'user' },
@@ -342,11 +361,11 @@ Question: "${q}"`;
       }
 
       setIsCameraActive(true);
-      setCameraStatus(localize(profile.language, 'Live Camera Tracking', 'الكاميرا متصلة وترصد الإشارات'));
+      setCameraStatus(loc('Live Camera Tracking', 'الكاميرا متصلة وترصد الإشارات'));
       triggerHapticAlert('single-pulse');
     } catch (err) {
       console.error('[SignCamera] Failed to open camera:', err);
-      toast.error(localize(profile.language, 'Camera access denied or unavailable', 'تعذر فتح الكاميرا، يرجى السماح بالإذن'));
+      toast.error(loc('Camera access denied or unavailable', 'تعذر فتح الكاميرا، يرجى السماح بالإذن'));
       setCameraStatus('');
       setIsCameraActive(false);
     }
@@ -397,20 +416,41 @@ Question: "${q}"`;
     if (!accumulatedText.trim()) return;
     setAiQuestion(accumulatedText.trim());
     handleAskAi(accumulatedText.trim());
-    toast.success(localize(profile.language, 'Sent to AI Avatar Tutor', 'تم إرسال السؤال للأفاتار 3D'));
+    toast.success(loc('Sent to AI Avatar Tutor', 'تم إرسال السؤال للأفاتار 3D'));
   };
 
   // Quick gesture chips as manual additions
-  const QUICK_GESTURE_CHIPS = useMemo(() => [
-    { label: 'أهلاً 👋', text: 'أهلاً وسهلاً' },
+  const QUICK_GESTURE_CHIPS = useMemo(() => isAr ? [
+    { label: 'أهلاً 👋', text: isEgyptian ? 'أهلاً وسهلاً' : 'السلام عليكم' },
     { label: 'شكراً 🙏', text: 'شكراً جزيلاً' },
-    { label: 'نعم 👍', text: 'نعم وموافق' },
+    { label: 'نعم 👍', text: isEgyptian ? 'تمام وموافق' : 'نعم أوافق' },
     { label: 'لا 👎', text: 'لا أوافق' },
     { label: 'أنا أصم 🤟', text: 'أنا أصم وأتحدث بالإشارة' },
-    { label: 'مساعدة 🆘', text: 'أحتاج مساعدة عاجلة' },
-    { label: 'طبيب 🩺', text: 'أريد زيارة الطبيب' },
-    { label: 'ماء 💧', text: 'أحتاج ماء للشرب' },
-  ], []);
+    { label: 'مساعدة 🆘', text: isEgyptian ? 'أنا محتاج مساعدة' : 'أحتاج مساعدة' },
+    { label: 'طبيب 🩺', text: isEgyptian ? 'عايز دكتور' : 'أريد زيارة الطبيب' },
+    { label: 'ماء 💧', text: isEgyptian ? 'عايز مية' : 'أحتاج ماء للشرب' },
+  ] : [
+    { label: 'Hello 👋', text: 'Hello' },
+    { label: 'Thanks 🙏', text: 'Thank you' },
+    { label: 'Yes 👍', text: 'Yes, I agree' },
+    { label: 'No 👎', text: 'No, thank you' },
+    { label: 'I am deaf 🤟', text: 'I am deaf' },
+    { label: 'Help 🆘', text: 'I need help' },
+    { label: 'Doctor 🩺', text: 'I need a doctor' },
+    { label: 'Water 💧', text: 'Water please' },
+  ], [isAr, isEgyptian]);
+
+  const sampleQuestions = useMemo(() => isAr ? [
+    'كيف يعمل القلب؟',
+    'ما هي المجموعة الشمسية؟',
+    'ما هي لغة الإشارة؟',
+    'كيف أتعامل في المقابلة؟',
+  ] : [
+    'How does the heart work?',
+    'What is the solar system?',
+    'What is sign language?',
+    'Job interview tips',
+  ], [isAr]);
 
   const handleAddQuickGesture = (text: string) => {
     setAccumulatedText((prev) => {
@@ -436,7 +476,7 @@ Question: "${q}"`;
             <button
               onClick={onNavigateBack}
               className="p-1.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
-              title={localize(profile.language, 'Back to Hub', 'رجوع للرئيسية')}
+              title={loc('Back to Hub', 'رجوع للرئيسية')}
             >
               <ArrowRight className={`w-4 h-4 ${isAr ? '' : 'rotate-180'}`} />
             </button>
@@ -446,14 +486,13 @@ Question: "${q}"`;
           </div>
           <div>
             <h1 className="font-black text-sm text-white leading-tight flex items-center gap-2">
-              <span>{localize(profile.language, 'Bilateral Sign Language Station', 'محطة لغة الإشارة التبادلية (شاشة واحدة مقسومة نصفين)')}</span>
+              <span>{loc('Bilateral Sign Language Station', 'محطة لغة الإشارة التبادلية (شاشة واحدة مقسومة نصفين)')}</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">
-                {localize(profile.language, '50 / 50 Split', 'شاشة مقسومة نصفين')}
+                {loc('50 / 50 Split', 'شاشة مقسومة نصفين')}
               </span>
             </h1>
             <p className="text-[10px] text-slate-400">
-              {localize(
-                profile.language,
+              {loc(
                 'Side 1: AI Avatar explains in 3D Sign & Voice | Side 2: Camera translates your signs into voice & text',
                 'النصف الأول: الأفاتار يشرح بالذكاء الاصطناعي والإشارة 3D | النصف الثاني: الكاميرا تقرأ إشاراتك وتحولها لصوت أو نص'
               )}
@@ -494,11 +533,14 @@ Question: "${q}"`;
                   <Bot className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
-                    <span>{localize(profile.language, '3D Sign Avatar & AI Tutor', 'أفاتار الذكاء الاصطناعي بلغة الإشارة 3D')}</span>
+                  <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 flex-wrap">
+                    <span>{loc('3D Sign Avatar & AI Tutor', 'أفاتار الذكاء الاصطناعي بلغة الإشارة 3D')}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-bold flex items-center gap-1">
+                      ✨ {loc('Facial & Head Gestures Active', 'تعبيرات الوجه وإيماءات الرأس: نشطة')}
+                    </span>
                   </h2>
                   <p className="text-[10px] text-slate-400">
-                    {localize(profile.language, 'Ask any question -> AI explains it in 3D Sign & Audio', 'اسأله أي سؤال ويشرحه لك بلغة الإشارة 3D وبالصوت')}
+                    {loc('Ask any question -> AI explains it in 3D Sign & Audio', 'اسأله أي سؤال ويشرحه لك بلغة الإشارة 3D وبالصوت')}
                   </p>
                 </div>
               </div>
@@ -508,14 +550,14 @@ Question: "${q}"`;
                 <button
                   onClick={() => setIsAvatarPlaying(!isAvatarPlaying)}
                   className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-white transition-colors cursor-pointer"
-                  title={isAvatarPlaying ? 'إيقاف مؤقت' : 'تشغيل'}
+                  title={isAvatarPlaying ? loc('Pause', 'إيقاف مؤقت') : loc('Play', 'تشغيل')}
                 >
                   {isAvatarPlaying ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                 </button>
                 <button
                   onClick={handleReplayAvatar}
                   className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
-                  title={localize(profile.language, 'Replay Sign Sequence', 'إعادة الحركة الإشارية')}
+                  title={loc('Replay Sign Sequence', 'إعادة الحركة الإشارية')}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
@@ -528,7 +570,7 @@ Question: "${q}"`;
                 fallback={
                   <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
                     <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                    <span className="text-xs font-bold">جاري تشغيل الأفاتار 3D...</span>
+                    <span className="text-xs font-bold">{loc('Loading 3D Avatar…', 'جاري تشغيل الأفاتار 3D...')}</span>
                   </div>
                 }
               >
@@ -544,7 +586,7 @@ Question: "${q}"`;
               {/* Active Sign Ticker */}
               <div className="absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#0E0610]/85 backdrop-blur-md border border-[#4A1224]/60 text-xs">
                 <span className="text-[10px] text-slate-400 font-bold">
-                  {localize(profile.language, 'Signing Word:', 'الكلمة المشارة:')}
+                  {loc('Signing Word:', 'الكلمة المشارة:')}
                 </span>
                 <span className="font-black text-amber-400 text-xs tracking-wide">
                   {currentSigningWord || avatarWords[0] || '---'}
@@ -558,7 +600,7 @@ Question: "${q}"`;
                 {isAiLoading ? (
                   <span className="text-amber-400 flex items-center gap-1.5 animate-pulse">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>جاري توليد الإجابة وترجمتها للإشارة 3D...</span>
+                    <span>{loc('Generating answer & translating to 3D Sign...', 'جاري توليد الإجابة وترجمتها للإشارة 3D...')}</span>
                   </span>
                 ) : (
                   aiAnswer
@@ -566,12 +608,12 @@ Question: "${q}"`;
               </p>
               {!isAiLoading && (
                 <div className="flex items-center justify-between pt-1 text-[10px] text-slate-500 border-t border-slate-900 mt-1">
-                  <span>{isAiSpeaking ? '🔊 جاري النطق الصوتي...' : '✅ جاهز'}</span>
+                  <span>{isAiSpeaking ? loc('🔊 Speaking aloud…', '🔊 جاري النطق الصوتي...') : loc('✅ Ready', '✅ جاهز')}</span>
                   <button
                     onClick={() => speak(aiAnswer, dialect)}
                     className="text-amber-400 hover:text-amber-300 font-bold cursor-pointer"
                   >
-                    إعادة النطق 🔊
+                    {loc('Replay Audio 🔊', 'إعادة النطق 🔊')}
                   </button>
                 </div>
               )}
@@ -585,8 +627,7 @@ Question: "${q}"`;
                   value={aiQuestion}
                   onChange={(e) => setAiQuestion(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAskAi()}
-                  placeholder={localize(
-                    profile.language,
+                  placeholder={loc(
                     'Ask AI any academic, scientific, or general question…',
                     'اسأل الذكاء الاصطناعي أي سؤال ليشرحه بلغة الإشارة...'
                   )}
@@ -601,7 +642,7 @@ Question: "${q}"`;
                       ? 'bg-rose-500 text-white border-rose-400 animate-pulse'
                       : 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:text-white'
                   }`}
-                  title={localize(profile.language, 'Ask by Voice', 'اسأل بالصوت')}
+                  title={loc('Ask by Voice', 'اسأل بالصوت')}
                 >
                   {isQuestionVoiceActive ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </button>
@@ -613,18 +654,13 @@ Question: "${q}"`;
                   className="p-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-40 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-md shadow-indigo-500/20 active:scale-[0.98] cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{localize(profile.language, 'Ask & Sign', 'اسأل واشرح')}</span>
+                  <span className="hidden sm:inline">{loc('Ask & Sign', 'اسأل واشرح')}</span>
                 </button>
               </div>
 
               {/* Sample Question Chips */}
               <div className="flex flex-wrap gap-1 pt-0.5">
-                {[
-                  'كيف يعمل القلب؟',
-                  'ما هي المجموعة الشمسية؟',
-                  'ما هي لغة الإشارة؟',
-                  'كيف أتعامل في المقابلة؟',
-                ].map((q, idx) => (
+                {sampleQuestions.map((q, idx) => (
                   <button
                     key={idx}
                     onClick={() => {
@@ -654,13 +690,13 @@ Question: "${q}"`;
                 </div>
                 <div>
                   <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
-                    <span>{localize(profile.language, 'Live Camera Sign-to-Speech', 'كاميرا قراءة لغة الإشارة الذكية')}</span>
+                    <span>{loc('Live Camera Sign-to-Speech', 'كاميرا قراءة لغة الإشارة الذكية')}</span>
                     {isCameraActive && (
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     )}
                   </h2>
                   <p className="text-[10px] text-slate-400">
-                    {localize(profile.language, 'Open camera & sign with hands -> converts to speech & text below', 'افتح الكاميرا وتكلم بلغة الإشارة -> تتحول فوراً لصوت مسموع أو نص')}
+                    {loc('Open camera & sign with hands -> converts to speech & text below', 'افتح الكاميرا وتكلم بلغة الإشارة -> تتحول فوراً لصوت مسموع أو نص')}
                   </p>
                 </div>
               </div>
@@ -677,12 +713,12 @@ Question: "${q}"`;
                 {isCameraActive ? (
                   <>
                     <CameraOff className="w-3.5 h-3.5" />
-                    <span>{localize(profile.language, 'Stop Camera', 'إيقاف الكاميرا')}</span>
+                    <span>{loc('Stop Camera', 'إيقاف الكاميرا')}</span>
                   </>
                 ) : (
                   <>
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{localize(profile.language, 'Start Camera (Open)', 'تشغيل الكاميرا')}</span>
+                    <span>{loc('Start Camera', 'تشغيل الكاميرا')}</span>
                   </>
                 )}
               </button>
@@ -712,11 +748,10 @@ Question: "${q}"`;
                   </div>
                   <div>
                     <p className="text-xs font-black text-slate-200">
-                      {localize(profile.language, 'Camera is ready', 'الكاميرا جاهزة للتشغيل')}
+                      {loc('Camera is ready', 'الكاميرا جاهزة للتشغيل')}
                     </p>
                     <p className="text-[11px] text-slate-400 mt-1 max-w-[280px]">
-                      {localize(
-                        profile.language,
+                      {loc(
                         'Click "Start Camera" above and sign with your hands to convert into text and voice.',
                         'اضغط على زر "تشغيل الكاميرا" أعلاه وتكلم بإشارات يدك لتتحول مباشرةً لصوت ونص.'
                       )}
@@ -729,10 +764,10 @@ Question: "${q}"`;
               {isCameraActive && (
                 <div className="absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#0E0610]/85 backdrop-blur-md border border-[#4A1224]/60 text-xs">
                   <span className="text-[10px] text-slate-400 font-bold">
-                    {cameraStatus || localize(profile.language, 'Tracking Hands…', 'جاري رصد حركة اليدين…')}
+                    {cameraStatus || loc('Tracking Hands…', 'جاري رصد حركة اليدين…')}
                   </span>
                   <span className="font-black text-emerald-400 text-xs tracking-wide">
-                    {detectedSign ? `🤟 رُصدت: ${detectedSign}` : 'لوح بيدك أمام الكاميرا'}
+                    {detectedSign ? (isAr ? `🤟 رُصدت: ${detectedSign}` : `🤟 Detected: ${detectedSign}`) : loc('Wave hand in front of camera', 'لوح بيدك أمام الكاميرا')}
                   </span>
                 </div>
               )}
@@ -747,8 +782,7 @@ Question: "${q}"`;
                     accumulatedText
                   ) : (
                     <span className="text-slate-500 font-normal text-xs">
-                      {localize(
-                        profile.language,
+                      {loc(
                         'Recognized words from your camera signs will appear here…',
                         'الكلام المترجم من إشارات يدك سيظهر هنا في الوقت الفعلي…'
                       )}
@@ -758,13 +792,13 @@ Question: "${q}"`;
 
                 {accumulatedText.trim() && (
                   <div className="flex items-center justify-between pt-1 border-t border-slate-900 text-[10px] text-slate-400">
-                    <span>{isSpeakingCameraText ? '🔊 جاري النطق الصوتي للغرفة...' : 'جاهز للنطق'}</span>
+                    <span>{isSpeakingCameraText ? loc('🔊 Speaking to room…', '🔊 جاري النطق الصوتي للغرفة...') : loc('Ready to speak', 'جاهز للنطق')}</span>
                     <button
                       onClick={() => setAccumulatedText('')}
                       className="text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
-                      <span>مسح</span>
+                      <span>{loc('Clear', 'مسح')}</span>
                     </button>
                   </div>
                 )}
@@ -779,7 +813,7 @@ Question: "${q}"`;
                   className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 active:scale-[0.98] cursor-pointer"
                 >
                   <Volume2 className="w-3.5 h-3.5" />
-                  <span>{localize(profile.language, 'Speak to Room 🔊', 'انطق بالصوت للغرفة 🔊')}</span>
+                  <span>{loc('Speak to Room 🔊', 'انطق بالصوت للغرفة 🔊')}</span>
                 </button>
 
                 {/* 2. Send as Question to AI Avatar */}
@@ -789,14 +823,14 @@ Question: "${q}"`;
                   className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-40 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-indigo-500/20 active:scale-[0.98] cursor-pointer"
                 >
                   <Bot className="w-3.5 h-3.5" />
-                  <span>{localize(profile.language, 'Ask AI this Sign 🤖', 'اسأل الـ AI هذا السؤال 🤖')}</span>
+                  <span>{loc('Ask AI this Sign 🤖', 'اسأل الـ AI هذا السؤال 🤖')}</span>
                 </button>
               </div>
 
               {/* Quick Gesture Shortcuts & Auto-Speak Switch */}
               <div className="flex items-center justify-between pt-0.5">
                 <span className="text-[10px] text-slate-400 font-bold">
-                  {localize(profile.language, 'Quick Gesture Add:', 'إشارات سريعة بنقرة واحدة:')}
+                  {loc('Quick Gesture Add:', 'إشارات سريعة بنقرة واحدة:')}
                 </span>
 
                 <button
@@ -806,10 +840,10 @@ Question: "${q}"`;
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                       : 'bg-[#150917] text-slate-400 border-[#4A1224]/50'
                   }`}
-                  title="نطق الكلمة المرصودة صوتياً فور التقاطها"
+                  title={loc('Automatically speak recognized signs aloud', 'نطق الكلمة المرصودة صوتياً فور التقاطها')}
                 >
                   <Volume2 className="w-3 h-3" />
-                  <span>نطق تلقائي: {autoSpeakEnabled ? 'ON' : 'OFF'}</span>
+                  <span>{isAr ? `نطق تلقائي: ${autoSpeakEnabled ? 'مفعل' : 'معطل'}` : `Auto-Speak: ${autoSpeakEnabled ? 'ON' : 'OFF'}`}</span>
                 </button>
               </div>
 
