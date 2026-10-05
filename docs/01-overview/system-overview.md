@@ -52,10 +52,10 @@ mindmap
 
 ## 3. The Decoupling Invariant [VERIFIED]
 
-A foundational architectural rule governing Cognify is the **Strict IQ Decoupling Law**:
-> **Invariant**: A student's scientific IQ assessment score (`iqScore`) is strictly decoupled from their academic grade level (`profile.level`) and curriculum track.
+A foundational architectural rule governing Cognify is the **Strict Cognitive Profile Decoupling Law**:
+> **Invariant**: A student's baseline cognitive style assessment (`iqScore` / cognitive profile) is strictly decoupled from their academic grade level (`profile.level`) and curriculum track.
 
-The IQ test assesses baseline cognitive dimensions (Spatial, Numerical, Verbal, Memory, Logic), while academic progression is managed entirely dynamically through the event-sourced `StudentState` engine based on observed mastery, retention intervals, and performance. A student is never gated or restricted from advanced materials by an immutable score.
+The cognitive preview assesses multidimensional cognitive styles (Spatial, Numerical, Verbal, Memory, Logic), while academic progression is driven strictly and dynamically through the event-sourced `StudentState` engine based on observed concept mastery, retention intervals, and empirical exercise performance. A student is never gated, categorized, or restricted from advanced materials by an immutable score.
 
 ---
 

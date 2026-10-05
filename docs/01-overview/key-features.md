@@ -32,7 +32,7 @@ graph TD
     A --> A2["What-If Simulation Sandbox"]
     A --> A3["Academic Planner & Exam Countdown"]
     A --> A4["Goal Tracker & Subtasks"]
-    A --> A5["Cognitive Gym & Decoupled IQ"]
+    A --> A5["Cognitive Gym & Style Index"]
 
     F --> F1["French Cultural Etiquette Prompting"]
     F --> F2["Arabic & English Transliteration"]

@@ -12,6 +12,7 @@ import emergencyDispatchHandler from "./api/emergency/dispatch";
 import learningProfileHandler from "./api/student/learningProfile";
 import proxyImageHandler from "./api/proxy-image";
 import healthHandler from "./api/system/health";
+import deleteUserHandler from "./api/admin/deleteUser";
 
 async function startServer() {
   const app = express();
@@ -53,6 +54,11 @@ async function startServer() {
   // Resilient SSRF-protected Image Proxy
   app.all("/api/proxy-image", (req, res) => {
     return proxyImageHandler(req, res);
+  });
+
+  // Super Admin: Permanent Server-Side User & Data Purge
+  app.all("/api/admin/deleteUser", (req, res) => {
+    return deleteUserHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);

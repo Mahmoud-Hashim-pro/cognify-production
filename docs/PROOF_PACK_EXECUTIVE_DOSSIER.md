@@ -112,13 +112,21 @@ Each lexical sign incorporates:
 ## 5. 🧩 Appendix C: Autism & AAC Clinical Governance Protocol (الميثاق الإكلينيكي للتوحد والتواصل البديل)
 
 Complete clinical governance rubric, operant baseline specifications, and pilot evaluation frameworks are documented in:  
-👉 [**ABA Clinical Validation Protocol & SLP Rubric**](docs/ABA_CLINICAL_VALIDATION_PROTOCOL.md)
+---
 
-### Key Clinical Pillars:
-- **Foundational PECS Operants**: 12 core visual vocabulary items classified by behavioral function (Mands vs. Tacts vs. Intraverbals) to scaffold spontaneous functional communication.
-- **Antecedent-Behavior-Consequence (ABC) Meltdown Pipeline**: Time-of-day clustering (Morning/Afternoon/Evening) and schedule routine correlation to recommend proactive sensory diet adjustments before acute dysregulation.
-- **Fail-Closed Caregiver Escalation**: Server-side dispatch pipeline guarantees that severe meltdown alarms bypass client popups and deliver directly to primary caregivers via SMS/Webhook telemetry.
-- **SLP / BCBA Session Reporting**: One-click printable clinical summary enabling behavioral analysts to review weekly dysregulation trends and track functional AAC acquisition.
+## 6. 📖 Appendix D: Unified Arabic Sign Language (ArSL) Lexical Corpus & Accreditation Protocol (ملحق اعتماد القاموس الإشاري العربي الموحد)
+
+Cognify has ingested and structured the **Unified Arabic Sign Language Dictionary for the Deaf (القاموس الإشاري العربي الموحد للصم)**, encompassing **1,413 authenticated lexical signs across 28 functional chapters** published under the auspices of the Arab League Educational, Cultural and Scientific Organization (ALECSO) and the Council of Arab Ministers of Social Affairs.
+
+### Verified Lexical Architecture:
+- **Corpus Coverage**: 1,413 official signs across 28 structured chapters (Family, Islamic Religion, Healthcare, Education, Home & Furniture, Nutrition, Civic Services, Computer & Technology, etc.).
+- **Anatomical HamNoSys Encoding**: Dual-hand orientation, location, and non-manual facial/head markers (Eyebrow question raise, affirmative nod, negation headshake, and syllabic mouthing).
+- **Phonological Landmark Verification**: 21-landmark normalized coordinate mapping anchored at wrist origin $(0, 0, 0)$.
+
+### 3-Stage Interpreter Accreditation Roadmap:
+1. **Stage 1 (Internal Verification — Complete)**: Verification of semantic integrity, HamNoSys 3D joint transformations, and chapter taxonomy against the 1,418-page ALECSO source.
+2. **Stage 2 (Linguistic Review by Certified Interpreters — Active Protocol)**: Double-blind review with certified deaf educators and ArSL interpreters from the Egyptian Association for the Deaf to evaluate regional dialect nuances (Egyptian vs. Levantine vs. Gulf variations).
+3. **Stage 3 (Progressive Disclaimer Sunsetting)**: The honest UI disclaimer (`⚠️ إشارات تجريبية — تحت المراجعة اللغوية`) remains visibly active in `SignAvatar3D` until verified interpreter sign-offs are documented for each thematic chapter.
 
 ---
 **Official Repository**: `github.com/Mahmoud-Hashim-pro/cognify-production`  

@@ -179,7 +179,7 @@ npm run build
 | `server.ts` | Express entry (port 3000): Vite middleware in dev, static `dist` in prod, mounts the Gemini router. |
 | `server/routes.ts` | Registers all `/api/gemini/*` POST routes. |
 | `server/gemini.ts` | Core AI: adaptive system prompt, chat SSE stream, image generation, `generateAssessment`, `translateQuiz`, `withRetry`. |
-| `server/geminiService.ts` | Accessibility AI: sign translation, caption enhancement, dysarthria/Euphonia decoding, `correctTranscript`. |
+| `server/geminiService.ts` | Accessibility AI: sign translation, caption enhancement, ArSL sign lookup, `correctTranscript`. |
 
 ### Frontend entry & libraries (`src/`, `src/lib/`)
 | File | Purpose |
@@ -240,7 +240,7 @@ npm run build
 4. **Spatial Memory Engine**: Localizes and tracks physical objects (keys, eyeglasses, canes) across rooms with chronological surface history (last 10 surfaces) and epistemic honesty (never hallucinates an unobserved item).
 5. **Multi-Tenant User Isolation**: Strict BOLA/IDOR prevention in API endpoints and Firestore rules; User A cannot access or tamper with User B's state, profile, or spatial memory.
 6. **French Language Support**: Native trilingual core supporting English, Arabic (Egyptian & MSA), and French across all AI reasoning, vision companion narration, and spatial queries.
-7. **Accessibility Suite**: Vision Companion (0% disk / 0% cloud volatile camera frames), Sign Avatar 3D (procedural fingerspelling and word gestures), Two-Way Hearing Bridge (live captions with confidence alternatives), and Motor Euphonia switch access.
+7. **Accessibility Suite**: Vision Companion (0% disk / 0% cloud volatile camera frames), Sign Avatar 3D with Non-Manual Facial & Head Gestures, Bilateral Sign Language Station (50/50 split camera & avatar), and Two-Way Hearing Bridge (live captions with confidence alternatives).
 8. **Privacy, Export & Erasure**: Full GDPR/FERPA JSON export (v2.0.0), cascading account deletion, and AES-GCM 256-bit client-side CryptoShield.
 9. **Deterministic AI Routing & Quality Guard**: Zero-token request categorization, circuit breaker with multi-provider fallback (Gemini -> Groq -> NVIDIA -> xAI), self-healing code/LaTeX math delimiters, and sensitive secret redaction.
 10. **Automated Verification Suite**: Master test suite encompassing **3,546 automated assertions** covering unit, contract, resilience, security, multi-provider benchmarks, production observability, and end-to-end user journeys with 100% pass rate. Single-source-of-truth reporting generated via `scripts/generateTestReport.ts` (`npm run report`).
@@ -270,7 +270,7 @@ Cognify is hardened against OWASP Top 10: 2025, OWASP API Security Top 10: 2023,
   - `tests/benchmarks/interventionEffectivenessBenchmark.ts`: 500-trial simulation runner (`src/lib/pedagogicalBenchmarkRunner.ts`), longitudinal Hake $g > 0.60$, Welch $t$-test ($p < 0.05$), Cohen's $d$, 30-day retention decay mitigation.
   - `tests/benchmarks/aiProviderBenchmark.ts` & `costBenchmark.ts`: Multi-provider performance & economic models (`src/lib/aiProviderBenchmark.ts`), circuit breaker fast-bypass, LaTeX/markdown preservation, token and monthly cost modeling (< $0.06/student/mo on Flash), 80%/100% quota alerts.
   - `tests/benchmarks/frenchLanguageBenchmark.ts`: Trilingual dataset (`src/lib/multilingualBenchmarkData.ts`), zero English/robotic leak, France travel rules, emergency hotkeys (15, 17, 18, 112, 114), French spatial queries.
-  - `tests/benchmarks/accessibilityBenchmark.ts`: Vision 0% storage volatile memory invariant, 3D sign avatar 24 letters & word gestures, hearing bridge live captions & phoneme alternatives, motor switch 350ms debounce & dwell thresholds.
+  - `tests/benchmarks/accessibilityBenchmark.ts`: Vision 0% storage volatile memory invariant, 3D sign avatar 24 letters & ArSL word gestures, hearing bridge live captions & phoneme alternatives.
   - `tests/benchmarks/promptInjectionBenchmark.ts`: 42 adversarial attacks across OWASP LLM Top 10 with 100% defense rate.
 - **Phase C: Production Observability & Tracing**:
   - `api/_lib/tracing.ts`: Distributed correlation tracing via `x-cognify-trace-id` (UUIDv4/nano-timestamp) and hierarchical span lifecycles.
@@ -281,7 +281,7 @@ Cognify is hardened against OWASP Top 10: 2025, OWASP API Security Top 10: 2023,
   - `api/system/health.ts`: Production edge health check returning uptime, memory RSS/heap, circuit breaker statuses, and provider health.
 - **Phase D: Real-World Persona Simulation & Pilot Testbed**:
   - `tests/validation/studentSimulation.ts`: Longitudinal 30-day cohort simulation across Fast Learner, Struggling Learner, and Inconsistent Student personas.
-  - `tests/validation/accessibilityPersonas.ts`: Blind, Deaf, and Motor-impaired end-to-end task completion validation.
+  - `tests/validation/accessibilityPersonas.ts`: Blind, Deaf/Hard-of-Hearing, and Neurodivergent end-to-end task completion validation.
   - `tests/validation/frenchNativeValidation.ts`: Native French immersion, curriculum navigation, and travel assistant validation.
   - `tests/validation/teacherWorkflowValidation.ts`: Cohort mastery heatmap, automated prerequisite alerts, and curriculum pacing advisor.
   - `tests/validation/parentCompanionValidation.ts`: Weekly digest synthesis, psychological safety privacy shield, screen-time balance analysis.

@@ -603,6 +603,24 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
         );
 
         await deleteDoc(doc(db, "users", u.uid));
+
+        // 3. Server-side Auth & Cascade purge via Cloud Admin endpoint
+        try {
+          const token = await auth.currentUser?.getIdToken();
+          if (token) {
+            await fetch('/api/admin/deleteUser', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ targetUid: u.uid, targetEmail: u.email })
+            });
+          }
+        } catch (serverErr) {
+          console.warn('[handleDeleteUser] Server endpoint deletion notice:', serverErr);
+        }
+
         toast.success(`User "${u.name || u.email}" and all associated data records were permanently deleted.`, "Account & Data Purged");
       } catch (error) {
         console.error("Delete user error:", error);

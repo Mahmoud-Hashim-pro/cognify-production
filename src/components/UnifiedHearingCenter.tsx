@@ -24,6 +24,7 @@ import { generateAdaptiveResponse } from '../services/gemini';
 import { Hands, Results } from '@mediapipe/hands';
 import { Camera as MediaPipeCamera } from '@mediapipe/camera_utils';
 import { toast } from './Toast';
+import ParentalConsentModal from './ParentalConsentModal';
 
 const SignAvatar3D = React.lazy(() => import('./SignAvatar3D'));
 
@@ -48,6 +49,10 @@ export default function UnifiedHearingCenter({
 
   const isAr = isArabicLocale(dialect);
   const isEgyptian = dialect === 'Egyptian Ammiya';
+
+  // Minor student parental consent gate
+  const isMinorStudent = Boolean((profile.age && profile.age < 18) || (profile as any).isMinor);
+  const [showConsentModal, setShowConsentModal] = useState<boolean>(false);
 
   // Helper for 100% dialect-responsive localization
   const loc = useCallback(
@@ -319,6 +324,12 @@ Question: "${q}"`;
 
   // Start Camera handler
   const handleStartCamera = async () => {
+    if (isMinorStudent && !profile.parentalConsent?.verified) {
+      setShowConsentModal(true);
+      toast.error(loc('Parental consent is legally required before camera activation for minors.', 'موافقة ولي الأمر مطلوبة قانونياً قبل تشغيل الكاميرا للطلاب القاصرين.'));
+      return;
+    }
+
     try {
       setCameraStatus(loc('Opening camera…', 'جاري تشغيل الكاميرا…'));
 
@@ -864,6 +875,21 @@ Question: "${q}"`;
         </div>
 
       </main>
+
+      {/* Minor Student Parental Consent Gate Modal */}
+      <ParentalConsentModal
+        isOpen={showConsentModal}
+        studentName={profile.name || 'Student'}
+        studentEmail={profile.email}
+        onConsentGranted={(consent) => {
+          setShowConsentModal(false);
+          if (profile) {
+            profile.parentalConsent = consent;
+          }
+          handleStartCamera();
+        }}
+        onClose={() => setShowConsentModal(false)}
+      />
     </div>
   );
 }

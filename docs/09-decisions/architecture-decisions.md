@@ -24,17 +24,17 @@ Cognify strictly prohibits calling a model to route requests. Routing is impleme
 
 ---
 
-## ADR-002: Strict Decoupling of Scientific IQ from Academic Progression
+## ADR-002: Strict Decoupling of Baseline Cognitive Assessment from Academic Progression
 
 ### Context
 Standard educational software often uses baseline aptitude or IQ tests to restrict access to curriculum levels or categorize students into rigid performance tracks.
 
 ### Decision
-Cognify establishes the **Decoupling Invariant**: A student's scientific IQ test score (`iqScore`) is strictly decoupled from their academic grade level and curriculum track.
+Cognify establishes the **Decoupling Invariant**: A student's baseline cognitive style preview (`iqScore`) is strictly decoupled from their academic grade level and curriculum track.
 
 ### Consequences
-- **Positive**: Prevents harmful academic stigmatization; aligns with neurodiversity and growth mindset pedagogy. A student with an average IQ score can achieve high concept mastery through adaptive scaffolding, while a student with a high score who struggles with a specific topic receives targeted prerequisite remediation.
-- **Negative**: Requires maintaining separate models for baseline cognitive aptitude vs. observed concept mastery.
+- **Positive**: Prevents harmful academic stigmatization; aligns with neurodiversity and growth mindset pedagogy. A student with any cognitive style preview can achieve high concept mastery through adaptive scaffolding, while a student who struggles with a specific topic receives targeted prerequisite remediation.
+- **Negative**: Requires maintaining separate models for baseline cognitive style dimensions vs. observed empirical concept mastery.
 
 ---
 

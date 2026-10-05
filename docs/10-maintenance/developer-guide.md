@@ -81,8 +81,8 @@ graph TD
 
 Every pull request submitted to the repository must adhere to the following rules:
 
-### Law 1: Maintain the IQ Decoupling Invariant
-Never link a student's classroom grade level (`profile.level`) to their scientific IQ score (`iqScore`). Academic scaffolding is determined exclusively by dynamic concept mastery in `StudentState`.
+### Law 1: Maintain the Cognitive Profile Decoupling Invariant
+Never link a student's classroom grade level (`profile.level`) to their baseline cognitive style index (`iqScore`). Academic scaffolding is determined exclusively by dynamic concept mastery in `StudentState`.
 
 ### Law 2: Hardware Isolation is Mandatory
 Every React component that interacts with WebRTC cameras or microphones must cleanly release all tracks upon unmount:
