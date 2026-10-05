@@ -307,7 +307,8 @@ export async function runAiProviderBenchmark(): Promise<{ passed: number; failed
   assert(greetingRoute.meetsLatencySLA === true, `Execution meets < 5ms SLA (${greetingRoute.executionTimeMs}ms)`);
   assert(greetingRoute.executionTimeMs < 5.0, 'Measured execution time strictly < 5.0ms');
 
-  // 2. Simple arithmetic
+  // 2. Simple arithmetic (warmup once to prime V8 JIT compiler)
+  evaluateDeterministicRouting('1 + 1');
   const mathRoute = evaluateDeterministicRouting('42 + 58');
   assert(mathRoute.isDeterministic === true, 'Simple arithmetic is routed deterministically');
   assert(mathRoute.intent === 'simple_math', 'Intent recognized as simple_math');
