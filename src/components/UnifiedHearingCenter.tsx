@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import {
   Ear,
   Camera,
   CameraOff,
   Volume2,
-  VolumeX,
   Play,
   Square,
   RotateCcw,
@@ -13,18 +11,10 @@ import {
   ArrowRight,
   Send,
   Trash2,
-  Copy,
-  Check,
   Bot,
-  Video,
   Hand,
-  CornerDownLeft,
-  Share2,
   Mic,
-  MicOff,
-  Radio,
-  HelpCircle,
-  Activity
+  MicOff
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
@@ -68,9 +58,9 @@ export default function UnifiedHearingCenter({
   const [aiQuestion, setAiQuestion] = useState<string>('');
   const [aiAnswer, setAiAnswer] = useState<string>(
     isEgyptian
-      ? 'أهلاً بك! اسألني أي سؤال وسأشرحه لك فوراً بلغة الإشارة 3D وبالصوت والنص.'
+      ? 'أهلاً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D وبالصوت والنص.'
       : isAr
-      ? 'مرحباً بك! اسألني أي سؤال وسأشرحه لك فوراً بلغة الإشارة 3D وبالصوت والنص.'
+      ? 'مرحباً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D وبالصوت والنص.'
       : 'Welcome! Ask me any question and I will explain it in 3D Sign Language, voice, and text.'
   );
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
@@ -179,7 +169,7 @@ Question: "${q}"`;
   };
 
   // ───────────────────────────────────────────────────────────────────────────
-  // HALF 2: CAMERA SIGN RECOGNITION TO TEXT & SPEECH
+  // HALF 2: CAMERA SIGN RECOGNITION (IN PLACE OF THE MICROPHONE) TO TEXT & SPEECH
   // ───────────────────────────────────────────────────────────────────────────
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [cameraStatus, setCameraStatus] = useState<string>('');
@@ -195,14 +185,11 @@ Question: "${q}"`;
   const cameraRef = useRef<MediaPipeCamera | null>(null);
   const lastDetectedSignRef = useRef<string>('');
   const lastSignTimeRef = useRef<number>(0);
-  const animFrameRef = useRef<number | null>(null);
 
   // Gesture heuristic analyzer based on 21 MediaPipe hand landmarks
   const analyzeLandmarksGesture = useCallback((landmarks: Array<{ x: number; y: number; z: number }>): string | null => {
     if (!landmarks || landmarks.length < 21) return null;
 
-    // Wrist: 0
-    // Thumb: 4, Index: 8, Middle: 12, Ring: 16, Pinky: 20
     const thumbTip = landmarks[4];
     const thumbBase = landmarks[2];
     const indexTip = landmarks[8];
@@ -214,7 +201,6 @@ Question: "${q}"`;
     const pinkyTip = landmarks[20];
     const pinkyPip = landmarks[18];
 
-    // Boolean states: finger extended if tip is higher (lower y) than PIP
     const isIndexExtended = indexTip.y < indexPip.y;
     const isMiddleExtended = middleTip.y < middlePip.y;
     const isRingExtended = ringTip.y < ringPip.y;
@@ -460,7 +446,7 @@ Question: "${q}"`;
           </div>
           <div>
             <h1 className="font-black text-sm text-white leading-tight flex items-center gap-2">
-              <span>{localize(profile.language, 'Bilateral Sign Language Station', 'محطة لغة الإشارة التبادلية الذكية')}</span>
+              <span>{localize(profile.language, 'Bilateral Sign Language Station', 'محطة لغة الإشارة التبادلية (شاشة واحدة مقسومة نصفين)')}</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">
                 {localize(profile.language, '50 / 50 Split', 'شاشة مقسومة نصفين')}
               </span>
@@ -468,8 +454,8 @@ Question: "${q}"`;
             <p className="text-[10px] text-slate-400">
               {localize(
                 profile.language,
-                'Side 1: AI Avatar signs answers in 3D | Side 2: Camera translates your signs into voice & text',
-                'النصف الأول: الأفاتار يشرح بالذكاء الاصطناعي والإشارة 3D | النصف الثاني: الكاميرا تقرأ إشاراتك وتحولها لصوت ونص'
+                'Side 1: AI Avatar explains in 3D Sign & Voice | Side 2: Camera translates your signs into voice & text',
+                'النصف الأول: الأفاتار يشرح بالذكاء الاصطناعي والإشارة 3D | النصف الثاني: الكاميرا تقرأ إشاراتك وتحولها لصوت أو نص'
               )}
             </p>
           </div>
@@ -493,14 +479,14 @@ Question: "${q}"`;
         </div>
       </header>
 
-      {/* ── 50/50 SPLIT SCREEN CONTAINER ── */}
+      {/* ── 50/50 SPLIT SCREEN: TWO HALVES ONLY (NO LOUD SOUND SENTINEL, NO MIC REPLACING CAMERA) ── */}
       <main className="flex-1 min-h-0 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar">
 
         {/* ══════════════════════════════════════════════════════════════════════
-            HALF 1: THE 3D AVATAR & AI TUTOR (اسأل الذكاء الاصطناعي ويرد بالإشارة)
+            HALF 1 (50%): THE 3D AVATAR & AI TUTOR (اسأل الذكاء الاصطناعي ويرد بالإشارة)
            ══════════════════════════════════════════════════════════════════════ */}
         <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group">
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full justify-between">
             {/* Header */}
             <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
               <div className="flex items-center gap-2">
@@ -537,7 +523,7 @@ Question: "${q}"`;
             </div>
 
             {/* 3D Avatar Canvas */}
-            <div className="w-full h-[220px] sm:h-[250px] my-2.5 rounded-xl bg-gradient-to-b from-[#09030B] to-[#140616] border border-[#4A1224]/50 relative overflow-hidden flex items-center justify-center">
+            <div className="w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl bg-gradient-to-b from-[#09030B] to-[#140616] border border-[#4A1224]/50 relative overflow-hidden flex items-center justify-center">
               <React.Suspense
                 fallback={
                   <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
@@ -567,7 +553,7 @@ Question: "${q}"`;
             </div>
 
             {/* AI Subtitles / Explanation Box */}
-            <div className="p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 mb-2 min-h-[70px] max-h-[100px] overflow-y-auto custom-scrollbar flex flex-col justify-between">
+            <div className="p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 mb-2 min-h-[75px] max-h-[110px] overflow-y-auto custom-scrollbar flex flex-col justify-between">
               <p className="text-xs text-slate-200 leading-relaxed font-medium">
                 {isAiLoading ? (
                   <span className="text-amber-400 flex items-center gap-1.5 animate-pulse">
@@ -656,10 +642,10 @@ Question: "${q}"`;
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            HALF 2: CAMERA SIGN RECOGNITION (يفتح الكاميرا ويتكلم بالإشارة وتحتها صوت أو نص)
+            HALF 2 (50%): THE CAMERA (مكان الميكرفون) TO CONVERT SIGNS TO VOICE & TEXT
            ══════════════════════════════════════════════════════════════════════ */}
         <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group">
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full justify-between">
             {/* Header */}
             <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
               <div className="flex items-center gap-2">
@@ -668,13 +654,13 @@ Question: "${q}"`;
                 </div>
                 <div>
                   <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
-                    <span>{localize(profile.language, 'Live Camera Sign-to-Speech', 'كاميرا قراءة الإشارة الذكية')}</span>
+                    <span>{localize(profile.language, 'Live Camera Sign-to-Speech', 'كاميرا قراءة لغة الإشارة الذكية')}</span>
                     {isCameraActive && (
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     )}
                   </h2>
                   <p className="text-[10px] text-slate-400">
-                    {localize(profile.language, 'Sign in front of camera -> converts to voice & text below', 'تكلم بلغة الإشارة أمام الكاميرا وتتحول فوراً لصوت مقروء ومسموع')}
+                    {localize(profile.language, 'Open camera & sign with hands -> converts to speech & text below', 'افتح الكاميرا وتكلم بلغة الإشارة -> تتحول فوراً لصوت مسموع أو نص')}
                   </p>
                 </div>
               </div>
@@ -682,10 +668,10 @@ Question: "${q}"`;
               {/* Start / Stop Camera Button */}
               <button
                 onClick={isCameraActive ? handleStopCamera : handleStartCamera}
-                className={`py-1.5 px-3 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-[0.98] cursor-pointer ${
+                className={`py-1.5 px-3.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-[0.98] cursor-pointer ${
                   isCameraActive
                     ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20'
-                    : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black shadow-amber-500/20'
+                    : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-amber-500/20'
                 }`}
               >
                 {isCameraActive ? (
@@ -696,14 +682,14 @@ Question: "${q}"`;
                 ) : (
                   <>
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{localize(profile.language, 'Start Camera', 'تشغيل الكاميرا')}</span>
+                    <span>{localize(profile.language, 'Start Camera (Open)', 'تشغيل الكاميرا')}</span>
                   </>
                 )}
               </button>
             </div>
 
             {/* Video Viewfinder Container */}
-            <div className="w-full h-[220px] sm:h-[250px] my-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/50 relative overflow-hidden flex items-center justify-center">
+            <div className="w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl bg-[#09030B] border border-[#4A1224]/50 relative overflow-hidden flex items-center justify-center">
               {/* Actual Video Element */}
               <video
                 ref={videoRef}
@@ -721,15 +707,19 @@ Question: "${q}"`;
               {/* Placeholder when camera is off */}
               {!isCameraActive && (
                 <div className="flex flex-col items-center justify-center text-center p-4 text-slate-500 gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-[#150917] border border-[#4A1224]/60 flex items-center justify-center text-slate-400">
-                    <Hand className="w-6 h-6" />
+                  <div className="w-14 h-14 rounded-2xl bg-[#150917] border border-[#4A1224]/60 flex items-center justify-center text-slate-400">
+                    <Hand className="w-7 h-7 text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-300">
-                      {localize(profile.language, 'Camera is currently off', 'الكاميرا متوقفة حالياً')}
+                    <p className="text-xs font-black text-slate-200">
+                      {localize(profile.language, 'Camera is ready', 'الكاميرا جاهزة للتشغيل')}
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
-                      {localize(profile.language, 'Click "Start Camera" to sign with your hands', 'اضغط "تشغيل الكاميرا" لتتكلم بيدك وتترجم لصوت ونص')}
+                    <p className="text-[11px] text-slate-400 mt-1 max-w-[280px]">
+                      {localize(
+                        profile.language,
+                        'Click "Start Camera" above and sign with your hands to convert into text and voice.',
+                        'اضغط على زر "تشغيل الكاميرا" أعلاه وتكلم بإشارات يدك لتتحول مباشرةً لصوت ونص.'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -749,9 +739,9 @@ Question: "${q}"`;
             </div>
 
             {/* ── CONVERTED TEXT & AUDIO OUTPUT (تحتها يتحول الكلام لصوت أو نص) ── */}
-            <div className="flex-1 flex flex-col justify-between gap-2">
+            <div className="flex flex-col gap-2">
               {/* Text Box */}
-              <div className="p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 min-h-[60px] max-h-[85px] overflow-y-auto custom-scrollbar flex flex-col justify-between">
+              <div className="p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 min-h-[65px] max-h-[90px] overflow-y-auto custom-scrollbar flex flex-col justify-between">
                 <p className="text-xs sm:text-sm font-black text-amber-300 leading-relaxed">
                   {accumulatedText.trim() ? (
                     accumulatedText
@@ -804,7 +794,7 @@ Question: "${q}"`;
               </div>
 
               {/* Quick Gesture Shortcuts & Auto-Speak Switch */}
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center justify-between pt-0.5">
                 <span className="text-[10px] text-slate-400 font-bold">
                   {localize(profile.language, 'Quick Gesture Add:', 'إشارات سريعة بنقرة واحدة:')}
                 </span>
@@ -824,7 +814,7 @@ Question: "${q}"`;
               </div>
 
               {/* Quick Sign Shortcut Buttons */}
-              <div className="flex flex-wrap gap-1 max-h-[52px] overflow-y-auto custom-scrollbar">
+              <div className="flex flex-wrap gap-1 max-h-[50px] overflow-y-auto custom-scrollbar">
                 {QUICK_GESTURE_CHIPS.map((chip, idx) => (
                   <button
                     key={idx}
