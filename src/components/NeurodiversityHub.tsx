@@ -63,13 +63,11 @@ import {
   getRecentSensoryLogs,
   dispatchMeltdownCaregiverAlert,
 } from '../lib/neurodiversityEngine';
-import VisualComfortModal from './VisualComfortModal';
 
 interface NeurodiversityHubProps {
   profile: UserProfile;
   onNavigateBack?: () => void;
   onOpenCognitiveGym?: () => void;
-  onOpenLearningStudio?: () => void;
 }
 
 function RenderAccessibleCardIcon({ icon, className = "w-6 h-6" }: { icon?: string; className?: string }) {
@@ -107,13 +105,12 @@ const CATEGORY_COLORS: Record<string, string> = {
   needs: 'bg-indigo-500/20 border-[#E5A93C]/30 text-indigo-300',
 };
 
-export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCognitiveGym, onOpenLearningStudio }: NeurodiversityHubProps) {
+export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCognitiveGym }: NeurodiversityHubProps) {
   const lang = profile.language || 'Arabic';
   const isAr = isArabicLocale(lang);
   const isFr = lang === 'French';
 
   const [activeSubTab, setActiveSubTab] = useState<'pecs' | 'schedule' | 'emotions'>('pecs');
-  const [showVisualComfortModal, setShowVisualComfortModal] = useState(false);
   
   // ── 1. PERSISTENT PECS CARDS ──
   const [pecsCards, setPecsCards] = useState<PECSCard[]>([]);
@@ -375,13 +372,6 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCogni
       }`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
-      {/* Universal Visual Comfort Modal */}
-      <VisualComfortModal
-        isOpen={showVisualComfortModal}
-        onClose={() => setShowVisualComfortModal(false)}
-        language={lang}
-      />
-
       {/* Visual Ambient Beacon Notification for Nearby Caregiver */}
       {showCaregiverBeacon && (
         <div className="bg-amber-500/20 border-b border-amber-500/40 text-amber-200 text-xs px-4 py-2 flex items-center justify-between animate-pulse z-30">
@@ -463,16 +453,6 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCogni
             <span>{t('Sensory & Early Alerts', 'المشاعر والإنذار المبكر', 'Émotions')}</span>
           </button>
           
-          {/* Universal Visual Comfort Tool Button */}
-          <button
-            onClick={() => setShowVisualComfortModal(true)}
-            className="px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-[#4A1224]/50 hover:border-slate-500"
-            title={t('Open Visual Comfort & Dyslexia Settings', 'فتح أدوات الراحة البصرية وتيسير القراءة')}
-          >
-            <span>📖</span>
-            <span>{t('Visual Comfort', 'أدوات القراءة والراحة البصرية')}</span>
-          </button>
-
           {onOpenCognitiveGym && (
             <button
               onClick={onOpenCognitiveGym}
@@ -481,17 +461,6 @@ export default function NeurodiversityHub({ profile, onNavigateBack, onOpenCogni
             >
               <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>{t('Cognitive Gym (ADHD & Math)', 'الجيم المعرفي (ADHD وحساب)')}</span>
-            </button>
-          )}
-
-          {onOpenLearningStudio && (
-            <button
-              onClick={onOpenLearningStudio}
-              className="px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-purple-500/20 text-amber-300 border border-amber-500/40 hover:border-amber-400 hover:text-white font-bold cursor-pointer shadow-sm"
-              title={t('Open Dyslexia & Learning Disabilities Studio: Bionic reading, focus ruler, voice essay scaffold', 'استوديو صعوبات التعلم: قارئ القراءة التوجيهية Bionic، مسطرة التركيز، وهيكل المقالات الصوتي')}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>{t('Learning Studio (Dyslexia & Writing)', 'صعوبات التعلم (قراءة وكتابة)')}</span>
             </button>
           )}
         </div>
