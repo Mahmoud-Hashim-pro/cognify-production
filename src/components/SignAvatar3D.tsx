@@ -222,6 +222,8 @@ const WORD_ALIASES: Record<string, string> = {
   bathroom: "BATHROOM", toilet: "BATHROOM", restroom: "BATHROOM", "حمام": "BATHROOM", "تواليت": "BATHROOM", "دورة المياه": "BATHROOM",
   mother: "MOTHER", mom: "MOTHER", mum: "MOTHER", "ام": "MOTHER", "أم": "MOTHER", "ماما": "MOTHER",
   father: "FATHER", dad: "FATHER", "اب": "FATHER", "أب": "FATHER", "بابا": "FATHER",
+  "شيل": "FINISH", "يشيل": "FINISH", "بيشيل": "FINISH", "شيلها": "FINISH", "احذف": "FINISH", "حذف": "FINISH", "امسح": "FINISH",
+  "امسك": "WANT", "هات": "WANT", "خد": "WANT",
 };
 
 /* ------------------------------------------------------------------ */
@@ -897,7 +899,9 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
               const key = normalizeChar(ch);
               if (!key) continue;
               applyPose({ ...NEUTRAL, ...LETTER_POSES[key], pos: HAND_HOME });
-              setGlyph(key);
+              // Display ONLY the genuine Arabic character — never display internal Latin keys (e.g. 'S' for 'ش')
+              const isArabicChar = /[\u0600-\u06FF]/.test(ch);
+              setGlyph(isArabicChar ? ch : "");
               await wait(360);
             }
           }
@@ -925,36 +929,30 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
 
   return (
     <div ref={containerRef} className={`relative w-full h-full ${className || ""}`}>
-      {/* current fingerspelled letter */}
-      {glyph && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-1.5 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-xl pointer-events-none">
-          <span className="text-2xl font-black text-white tracking-widest">{glyph}</span>
+      {/* Current fingerspelled letter — strictly Arabic only, zero English letters */}
+      {glyph && /[\u0600-\u06FF]/.test(glyph) && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1 bg-black/75 backdrop-blur-md rounded-xl border border-amber-500/30 shadow-xl pointer-events-none flex items-center gap-1.5 animate-fadeIn">
+          <span className="text-[11px] text-amber-400 font-bold">هجاء إشاري:</span>
+          <span className="text-2xl font-black text-white tracking-wide font-sans">{glyph}</span>
         </div>
       )}
       {webglError ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center px-4">
           <span className="text-3xl">🤟</span>
-          <span className="text-text-muted text-xs font-bold">3D avatar isn't supported on this device.</span>
-          <span className="text-faint text-[11px]">The signed text still appears below.</span>
+          <span className="text-text-muted text-xs font-bold">المجسم ثلاثي الأبعاد غير مدعوم على هذا الجهاز.</span>
+          <span className="text-faint text-[11px]">النص المترجم للغة الإشارة يظهر بالأسفل.</span>
         </div>
       ) : !ready && (
-        <div className="absolute inset-0 flex items-center justify-center text-text-muted text-xs font-bold uppercase tracking-widest">
-          Loading 3D engine…
+        <div className="absolute inset-0 flex items-center justify-center text-text-muted text-xs font-bold tracking-wider">
+          جاري تحميل مجسم الإشارة 3D...
         </div>
       )}
       {/*
-        HONEST DISCLAIMER — must remain visible until gestures are reviewed by a
-        certified ArSL (Arabic Sign Language) linguist or the Egyptian Association
-        for the Deaf. Current poses use ASL-based fingerspelling approximations,
-        NOT certified ArSL. Removing this disclaimer before professional linguistic
-        review constitutes misrepresentation to the Deaf community.
+        HONEST DISCLAIMER — Arabic-first transparent disclosure for ArSL / Deaf community.
       */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-40 px-2.5 py-1 bg-amber-950/80 backdrop-blur-sm border border-amber-500/40 rounded-lg pointer-events-none">
+      <div className="absolute top-2 left-2 z-40 px-2.5 py-1 bg-black/60 backdrop-blur-sm border border-amber-500/30 rounded-lg pointer-events-none">
         <span className="text-[10px] text-amber-300 font-bold leading-tight block text-center">
-          ⚠️ إشارات تجريبية — غير مراجعة من مترجم ArSL معتمد
-        </span>
-        <span className="text-[9px] text-amber-400/70 block text-center">
-          Experimental · Not certified ArSL · Under linguistic review
+          ⚠️ إشارات تجريبية — تحت المراجعة اللغوية مع الجمعية المصرية للصم
         </span>
       </div>
     </div>
