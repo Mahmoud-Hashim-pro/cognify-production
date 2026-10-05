@@ -6,14 +6,11 @@ import {
   MicOff,
   Volume2,
   VolumeX,
-  Send,
   Copy,
   Trash2,
-  AlertTriangle,
   Bell,
   Sparkles,
   ArrowRight,
-  Activity,
   Check,
   RotateCcw,
   ShieldAlert,
@@ -23,13 +20,17 @@ import {
   MessageSquare,
   Radio,
   Type,
-  Maximize2
+  Play,
+  Square,
+  Hand
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import { toast } from './Toast';
+
+const SignAvatar3D = React.lazy(() => import('./SignAvatar3D'));
 
 interface UnifiedHearingCenterProps {
   profile: UserProfile;
@@ -57,11 +58,56 @@ export default function UnifiedHearingCenter({
     return 'Egyptian Ammiya';
   });
 
-  const isAr = dialect === 'Arabic' || dialect === 'Egyptian Ammiya';
+  const isAr = isArabicLocale(dialect);
   const isEgyptian = dialect === 'Egyptian Ammiya';
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 1. LIVE SPEECH-TO-TEXT (PARTNER CAPTIONS) STATE
+  // 1. 3D SIGN AVATAR STATE & SYNCHRONIZATION
+  // ───────────────────────────────────────────────────────────────────────────
+  const [avatarWords, setAvatarWords] = useState<string[]>(['أهلا', 'بك']);
+  const [isAvatarPlaying, setIsAvatarPlaying] = useState<boolean>(true);
+  const [currentSigningWord, setCurrentSigningWord] = useState<string>('أهلا');
+
+  const triggerAvatarSign = useCallback((text: string) => {
+    if (!text.trim()) return;
+    const words = text
+      .replace(/[^\w\u0600-\u06FF\s]/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (words.length > 0) {
+      setAvatarWords(words);
+      setCurrentSigningWord(words[0]);
+      setIsAvatarPlaying(true);
+    }
+  }, []);
+
+  const handleReplayAvatar = () => {
+    setIsAvatarPlaying(false);
+    setTimeout(() => {
+      setIsAvatarPlaying(true);
+      if (avatarWords.length > 0) {
+        setCurrentSigningWord(avatarWords[0]);
+      }
+    }, 100);
+  };
+
+  // Quick Sign Trigger Words
+  const QUICK_SIGN_WORDS = useMemo(() => [
+    { label: 'أهلاً', word: 'أهلا' },
+    { label: 'شكراً', word: 'شكرا' },
+    { label: 'نعم', word: 'نعم' },
+    { label: 'لا', word: 'لا' },
+    { label: 'مساعدة', word: 'مساعدة' },
+    { label: 'ماء', word: 'ماء' },
+    { label: 'طبيب', word: 'طبيب' },
+    { label: 'دواء', word: 'دواء' },
+    { label: 'ألم', word: 'ألم' },
+    { label: 'لحظة', word: 'لحظة' },
+  ], []);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // 2. LIVE SPEECH-TO-TEXT (PARTNER CAPTIONS) STATE
   // ───────────────────────────────────────────────────────────────────────────
   const [isListeningPartner, setIsListeningPartner] = useState(false);
   const [interimText, setInterimText] = useState('');
@@ -134,6 +180,8 @@ export default function UnifiedHearingCenter({
           setCaptionsHistory((prev) => [...prev, finalized.trim()]);
           setInterimText('');
           triggerHapticAlert('single-pulse');
+          // Automatically animate 3D avatar for finalized speech
+          triggerAvatarSign(finalized.trim());
         }
       };
 
@@ -144,7 +192,6 @@ export default function UnifiedHearingCenter({
       };
 
       rec.onend = () => {
-        // Auto-restart if user still wants listening active
         if (recognitionRef.current === rec && isListeningPartner) {
           try {
             rec.start();
@@ -162,7 +209,7 @@ export default function UnifiedHearingCenter({
       console.error('[SpeechRec] Launch failed:', e);
       setIsListeningPartner(false);
     }
-  }, [isListeningPartner, speechLocale, profile.language]);
+  }, [isListeningPartner, speechLocale, profile.language, triggerAvatarSign]);
 
   // Auto-scroll captions
   useEffect(() => {
@@ -196,7 +243,7 @@ export default function UnifiedHearingCenter({
   };
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 2. TEXT-TO-SPEECH (MY VOICE TO THE ROOM) STATE
+  // 3. TEXT-TO-SPEECH (MY VOICE TO THE ROOM) STATE
   // ───────────────────────────────────────────────────────────────────────────
   const [myText, setMyText] = useState('');
   const [isSpeakingOut, setIsSpeakingOut] = useState(false);
@@ -204,13 +251,17 @@ export default function UnifiedHearingCenter({
     isEgyptian ? 'أهلاً بك، أنا أستخدم التطبيق للتحدث' : isAr ? 'مرحباً، أنا أستخدم التطبيق للتحدث' : 'Hello, I use this app to speak'
   ]);
 
-  const handleSpeakText = (override?: string) => {
+  const handleSpeakText = (override?: string, shouldSign = true) => {
     const textToSpeak = (override || myText).trim();
     if (!textToSpeak) return;
 
     cancelSpeech();
     setIsSpeakingOut(true);
     triggerHapticAlert('single-pulse');
+
+    if (shouldSign) {
+      triggerAvatarSign(textToSpeak);
+    }
 
     speak(textToSpeak, dialect, {
       rate: 1.0,
@@ -230,7 +281,7 @@ export default function UnifiedHearingCenter({
   };
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 3. INSTANT EXPRESS AAC CARDS STATE
+  // 4. INSTANT EXPRESS AAC CARDS STATE
   // ───────────────────────────────────────────────────────────────────────────
   const [activeAacCategory, setActiveAacCategory] = useState<AACCategory>('general');
   const [activeDisplayPhrase, setActiveDisplayPhrase] = useState<{ text: string; icon: string } | null>(null);
@@ -351,12 +402,12 @@ export default function UnifiedHearingCenter({
 
   const handleTapAacPhrase = (phrase: { text: string; icon: string }) => {
     setActiveDisplayPhrase(phrase);
-    handleSpeakText(phrase.text);
+    handleSpeakText(phrase.text, true);
     triggerHapticAlert('single-pulse');
   };
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 4. REAL LOUD SOUND SENTINEL & VISUAL STROBE STATE
+  // 5. REAL LOUD SOUND SENTINEL & VISUAL STROBE STATE
   // ───────────────────────────────────────────────────────────────────────────
   const [isSentinelActive, setIsSentinelActive] = useState(false);
   const [currentDb, setCurrentDb] = useState(0);
@@ -418,18 +469,15 @@ export default function UnifiedHearingCenter({
         if (!analyserRef.current) return;
         analyserRef.current.getByteTimeDomainData(dataArray);
 
-        // Compute Root Mean Square (RMS) volume
         let sum = 0;
         for (let i = 0; i < dataArray.length; i++) {
           const val = (dataArray[i] - 128) / 128;
           sum += val * val;
         }
         const rms = Math.sqrt(sum / dataArray.length);
-        // Map to estimated decibels (30 to 100 dB)
         const computedDb = Math.min(100, Math.max(30, Math.round(20 * Math.log10(rms + 0.0001) + 95)));
         setCurrentDb(computedDb);
 
-        // Check for sudden loud sound alert
         const now = Date.now();
         if (computedDb >= thresholdDb && now - lastAlertTimeRef.current > 3000) {
           lastAlertTimeRef.current = now;
@@ -453,7 +501,9 @@ export default function UnifiedHearingCenter({
       loop();
     } catch (err) {
       console.error('[SoundSentinel] Mic access denied:', err);
-      toast.error(localize(profile.language, 'Microphone access required for Sound Sentinel', 'يتطلب تشغيل المستشعر الإذن باستخدام الميكروفون'));
+      toast.error(
+        localize(profile.language, 'Microphone access required for Sound Sentinel', 'يتطلب تشغيل المستشعر الإذن باستخدام الميكروفون')
+      );
       setIsSentinelActive(false);
     }
   }, [thresholdDb, profile.language]);
@@ -498,7 +548,7 @@ export default function UnifiedHearingCenter({
             </div>
             <button
               onClick={() => setIsFlashing(false)}
-              className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-bold"
+              className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-bold cursor-pointer"
             >
               {localize(profile.language, 'Dismiss', 'تجاهل')}
             </button>
@@ -523,7 +573,7 @@ export default function UnifiedHearingCenter({
           </div>
           <div>
             <h1 className="font-black text-sm text-white leading-tight flex items-center gap-2">
-              <span>{localize(profile.language, 'Unified Hearing Center', 'المركز السمعي الموحد')}</span>
+              <span>{localize(profile.language, 'Unified Hearing Center & 3D Avatar', 'المركز السمعي الموحد وأفاتار الإشارة 3D')}</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">
                 {localize(profile.language, '1 Screen', 'شاشة واحدة')}
               </span>
@@ -531,8 +581,8 @@ export default function UnifiedHearingCenter({
             <p className="text-[10px] text-slate-400">
               {localize(
                 profile.language,
-                'Live speech captions, vocal speaker, express cards & loud sound sentinel',
-                'تفريغ فوري لكلام المتحدث، نطق صوتي، بطاقات سريعة، ومستشعر أصوات حقيقي'
+                'Interactive 3D sign avatar, live captions, voice speaker & sound sentinel',
+                'أفاتار إشارة 3D تفاعلي، تفريغ كلام مباشر، نطق صوتي، ومستشعر أصوات حقيقي'
               )}
             </p>
           </div>
@@ -544,7 +594,7 @@ export default function UnifiedHearingCenter({
             <button
               key={d}
               onClick={() => setDialect(d)}
-              className={`px-2 py-1 rounded-lg font-bold transition-all text-[11px] ${
+              className={`px-2 py-1 rounded-lg font-bold transition-all text-[11px] cursor-pointer ${
                 dialect === d
                   ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
@@ -556,396 +606,192 @@ export default function UnifiedHearingCenter({
         </div>
       </header>
 
-      {/* ── 4 COMPACT FUNCTIONAL WIDGETS GRID (ONE SCREEN) ── */}
-      <main className="flex-1 min-h-0 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar">
+      {/* ── 1-SCREEN UNIFIED DASHBOARD WITH 3D SIGN AVATAR ── */}
+      <main className="flex-1 min-h-0 p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar">
 
         {/* ══════════════════════════════════════════════════════════════════════
-            CARD 1: LIVE SPEECH-TO-TEXT (CAPTIONS FOR THE HEARING PARTNER)
+            COLUMN 1 (LG: 5 COLS): 3D SIGN AVATAR + SOUND SENTINEL
            ══════════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
-          <div className="flex flex-col h-full">
-            {/* Header */}
+        <div className="lg:col-span-5 flex flex-col gap-3 sm:gap-4">
+
+          {/* ── 3D SIGN AVATAR CARD ── */}
+          <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3 sm:p-3.5 flex flex-col shadow-lg relative overflow-hidden group">
             <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
-                  <Mic className="w-3.5 h-3.5" />
+                  <Hand className="w-3.5 h-3.5" />
                 </div>
                 <div>
                   <h2 className="text-xs font-black text-white flex items-center gap-1.5">
-                    <span>{localize(profile.language, 'Live Speech Captions', 'تفريغ كلام المتحدث فورياً')}</span>
-                    {isListeningPartner && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    )}
+                    <span>{localize(profile.language, '3D Sign Language Avatar', 'أفاتار لغة الإشارة 3D التفاعلي')}</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">
+                      {isAvatarPlaying ? 'يوقع الآن...' : 'جاهز'}
+                    </span>
                   </h2>
                   <p className="text-[10px] text-slate-400">
-                    {localize(profile.language, 'Real-time text transcript of whoever speaks to you', 'يحول صوت الطرف الآخر لنص مقروء كبير فورياً')}
+                    {localize(profile.language, 'Signs words in 3D in real-time from speech or cards', 'يترجم الكلمات لإشارات 3D فورية من الصوت أو البطاقات')}
                   </p>
                 </div>
               </div>
 
-              {/* Controls */}
+              {/* Avatar Controls */}
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setIsLargeCaptions(!isLargeCaptions)}
-                  className={`p-1.5 rounded-lg border text-xs transition-colors ${
-                    isLargeCaptions
-                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold'
-                      : 'bg-[#150917] border-[#4A1224]/60 text-slate-400 hover:text-white'
-                  }`}
-                  title={localize(profile.language, 'Toggle Extra Large Font', 'تكبير حجم الخط')}
+                  onClick={() => setIsAvatarPlaying(!isAvatarPlaying)}
+                  className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  title={isAvatarPlaying ? 'إيقاف مؤقت' : 'تشغيل'}
                 >
-                  <Type className="w-3.5 h-3.5" />
+                  {isAvatarPlaying ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                 </button>
                 <button
-                  onClick={handleCopyCaptions}
-                  disabled={captionsHistory.length === 0}
-                  className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-400 hover:text-white disabled:opacity-30 transition-colors"
-                  title={localize(profile.language, 'Copy Captions', 'نسخ النص')}
+                  onClick={handleReplayAvatar}
+                  className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+                  title={localize(profile.language, 'Replay Sign Sequence', 'إعادة الحركة الإشارية')}
                 >
-                  {copiedCaptions ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-                <button
-                  onClick={handleClearCaptions}
-                  disabled={captionsHistory.length === 0 && !interimText}
-                  className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-400 hover:text-rose-400 disabled:opacity-30 transition-colors"
-                  title={localize(profile.language, 'Clear Captions', 'مسح التفريغ')}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Captions Display Box */}
-            <div className="flex-1 min-h-[140px] max-h-[220px] my-2.5 p-3 rounded-xl bg-[#09030B] border border-[#4A1224]/40 overflow-y-auto custom-scrollbar flex flex-col justify-between">
-              {captionsHistory.length === 0 && !interimText ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center p-3 text-slate-500">
-                  <Mic className="w-6 h-6 mb-1 text-slate-600" />
-                  <p className="text-xs font-bold text-slate-400">
-                    {speechSupported
-                      ? localize(profile.language, 'Tap "Listen to Partner" to start transcribing speech', 'اضغط على "استمع للمتحدث" لبدء التفريغ الفوري')
-                      : localize(profile.language, 'Speech recognition not supported in this browser', 'التعرف الصوتي غير مدعوم في هذا المتصفح')}
-                  </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">
-                    {localize(profile.language, 'Works in real meetings, doctor visits, and conversations', 'مفيد في المقابلات، العيادة، والدراسة')}
-                  </p>
+            {/* 3D Canvas Stage */}
+            <div className="w-full h-[220px] sm:h-[240px] my-2 rounded-xl bg-gradient-to-b from-[#09030B] to-[#140616] border border-[#4A1224]/50 relative overflow-hidden flex items-center justify-center">
+              <React.Suspense
+                fallback={
+                  <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
+                    <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                    <span className="text-xs font-bold">جاري تحميل الأفاتار 3D...</span>
+                  </div>
+                }
+              >
+                <SignAvatar3D
+                  words={avatarWords}
+                  playing={isAvatarPlaying}
+                  onProgress={(idx) => setCurrentSigningWord(avatarWords[idx] || '')}
+                  onDone={() => setIsAvatarPlaying(false)}
+                  className="w-full h-full"
+                />
+              </React.Suspense>
+
+              {/* Current Word Ticker Badge */}
+              <div className="absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#0E0610]/85 backdrop-blur-md border border-[#4A1224]/60 text-xs">
+                <span className="text-[10px] text-slate-400 font-bold">
+                  {localize(profile.language, 'Current Sign:', 'الإشارة المعروضة:')}
+                </span>
+                <span className="font-black text-amber-400 text-xs tracking-wide">
+                  {currentSigningWord || avatarWords[0] || '---'}
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Word Triggers */}
+            <div className="pt-1">
+              <span className="text-[10px] text-slate-400 block mb-1 font-bold">
+                {localize(profile.language, 'Quick Sign Dictionary (Tap to test):', 'قاموس إشاري فوري (اضغط للتجربة):')}
+              </span>
+              <div className="flex flex-wrap gap-1 max-h-[60px] overflow-y-auto custom-scrollbar">
+                {QUICK_SIGN_WORDS.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => triggerAvatarSign(item.word)}
+                    className="px-2 py-0.5 rounded-md bg-[#150917] hover:bg-[#230f27] border border-[#4A1224]/50 text-slate-300 hover:text-amber-300 text-[10px] font-bold transition-colors cursor-pointer"
+                  >
+                    🤟 {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── LOUD SOUND SENTINEL CARD ── */}
+          <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-300 flex items-center justify-center">
+                    <Radio className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xs font-black text-white flex items-center gap-1.5">
+                      <span>{localize(profile.language, 'Loud Sound Sentinel', 'كاشف الأصوات المرتفعة والمخاطر')}</span>
+                      {isSentinelActive && (
+                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                      )}
+                    </h2>
+                    <p className="text-[10px] text-slate-400">
+                      {localize(profile.language, 'Decibel meter triggers screen strobe & haptics for alarms', 'يقيس الديسيبل الحقيقي وينبه بوميض واهتزاز عند حدوث إنذار أو خبط')}
+                    </p>
+                  </div>
                 </div>
-              ) : (
-                <div className={`space-y-2 text-start ${isLargeCaptions ? 'text-base font-bold' : 'text-xs'}`}>
-                  {captionsHistory.map((phrase, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2 rounded-lg bg-[#150917]/80 border border-slate-800 text-slate-200 leading-relaxed"
+
+                {/* Sensitivity Selector */}
+                <div className="flex items-center gap-1 bg-[#150917] p-0.5 rounded-lg border border-[#4A1224]/50 text-[10px]">
+                  {(['high', 'normal', 'low'] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setStrobeSensitivity(s)}
+                      className={`px-1.5 py-0.5 rounded font-bold transition-all cursor-pointer ${
+                        strobeSensitivity === s
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
                     >
-                      {phrase}
+                      {s === 'high' ? 'عالية (68dB)' : s === 'normal' ? 'عادية (78dB)' : 'منخفضة (88dB)'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Decibel Meter & Live Bar */}
+              <div className="my-2 p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-400">
+                    {localize(profile.language, 'Ambient Noise Level:', 'مستوى الصوت المحيط:')}
+                  </span>
+                  <span className={`font-mono text-xs font-black ${
+                    currentDb >= thresholdDb ? 'text-rose-400 animate-pulse' : currentDb >= 65 ? 'text-amber-400' : 'text-emerald-400'
+                  }`}>
+                    {isSentinelActive ? `${currentDb} dB` : '-- dB'}
+                  </span>
+                </div>
+
+                <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                  <div
+                    className={`h-full rounded-full transition-all duration-150 ${
+                      currentDb >= thresholdDb
+                        ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-md shadow-rose-500/50'
+                        : currentDb >= 60
+                        ? 'bg-gradient-to-r from-emerald-500 to-amber-500'
+                        : 'bg-emerald-500'
+                    }`}
+                    style={{ width: `${isSentinelActive ? Math.min(100, Math.max(5, ((currentDb - 30) / 70) * 100)) : 0}%` }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-[9px] text-slate-500">
+                  <span>30 dB (هدوء)</span>
+                  <span className="text-rose-400 font-bold">⚠️ عتبة التنبيه: {thresholdDb} dB</span>
+                  <span>100 dB (صاخب)</span>
+                </div>
+              </div>
+
+              {/* Recent Alerts Log */}
+              {soundAlerts.length > 0 && (
+                <div className="mb-2 space-y-1 max-h-[50px] overflow-y-auto custom-scrollbar">
+                  {soundAlerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[10px] flex items-center justify-between font-bold"
+                    >
+                      <span>🚨 تم رصد صوت مرتفع ({alert.db} dB)</span>
+                      <span className="font-mono text-slate-400">{alert.time}</span>
                     </div>
                   ))}
-                  {interimText && (
-                    <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 italic animate-pulse">
-                      {interimText}...
-                    </div>
-                  )}
-                  <div ref={captionsBottomRef} />
                 </div>
               )}
             </div>
 
-            {/* Listen Button Trigger */}
-            <button
-              onClick={togglePartnerListening}
-              className={`w-full py-2.5 px-4 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md cursor-pointer ${
-                isListeningPartner
-                  ? 'bg-rose-500 hover:bg-rose-600 text-white animate-pulse shadow-rose-500/20'
-                  : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-400 hover:to-purple-500 text-white shadow-indigo-500/25'
-              }`}
-            >
-              {isListeningPartner ? (
-                <>
-                  <MicOff className="w-4 h-4" />
-                  <span>{localize(profile.language, 'Stop Listening', 'إيقاف استماع المايك')}</span>
-                </>
-              ) : (
-                <>
-                  <Mic className="w-4 h-4" />
-                  <span>{localize(profile.language, 'Listen to Partner (Start Mic)', 'استمع للمتحدث (تشغيل المايك)')}</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════════
-            CARD 2: TEXT-TO-SPEECH (MY VOICE SPEAKING TO THE ROOM)
-           ══════════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center">
-                  <Volume2 className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h2 className="text-xs font-black text-white flex items-center gap-1.5">
-                    <span>{localize(profile.language, 'My Voice (Text-to-Speech)', 'أنا أتحدث (نطق فوري للغرفة)')}</span>
-                    {isSpeakingOut && (
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold animate-pulse">
-                        {localize(profile.language, 'Speaking...', 'ينطق الآن...')}
-                      </span>
-                    )}
-                  </h2>
-                  <p className="text-[10px] text-slate-400">
-                    {localize(profile.language, 'Type anything to speak out loud naturally to others', 'اكتب ما تريد قوله وسينطقه النظام بصوت واضح وبشري')}
-                  </p>
-                </div>
-              </div>
-
-              {isSpeakingOut && (
-                <button
-                  onClick={() => {
-                    cancelSpeech();
-                    setIsSpeakingOut(false);
-                  }}
-                  className="p-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold flex items-center gap-1"
-                >
-                  <VolumeX className="w-3 h-3" />
-                  <span>{localize(profile.language, 'Stop', 'إيقاف')}</span>
-                </button>
-              )}
-            </div>
-
-            {/* Input Form */}
-            <div className="flex-1 my-2.5 flex flex-col gap-2">
-              <div className="relative flex-1 min-h-[90px]">
-                <textarea
-                  value={myText}
-                  onChange={(e) => setMyText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSpeakText();
-                    }
-                  }}
-                  placeholder={localize(
-                    profile.language,
-                    'Type what you want to say and press Enter to speak to the room...',
-                    'اكتب ما تريد قوله واضغط Enter للنطق للغرفة بصوت مسموع...'
-                  )}
-                  className="w-full h-full p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/50 text-slate-100 placeholder:text-slate-500 text-xs focus:outline-none focus:border-amber-400/80 resize-none transition-all leading-relaxed"
-                />
-              </div>
-
-              {/* Speak Button */}
-              <button
-                onClick={() => handleSpeakText()}
-                disabled={!myText.trim()}
-                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-40 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-amber-500/20 active:scale-[0.98] cursor-pointer"
-              >
-                <Volume2 className="w-4 h-4" />
-                <span>{localize(profile.language, 'Speak Aloud to Room (Enter)', 'انطق بصوت واضح للغرفة (Enter)')}</span>
-              </button>
-
-              {/* Quick Spoken Chips */}
-              {recentSpoken.length > 0 && (
-                <div className="pt-1">
-                  <span className="text-[10px] text-slate-400 block mb-1 font-bold">
-                    {localize(profile.language, 'Quick replay:', 'إعادة نطق سريعة:')}
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {recentSpoken.map((phrase, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleSpeakText(phrase)}
-                        className="px-2 py-1 rounded-lg bg-[#150917] hover:bg-[#1f0e22] border border-[#4A1224]/50 text-slate-300 hover:text-amber-300 text-[10px] truncate max-w-[200px] transition-colors"
-                        title={phrase}
-                      >
-                        🗣️ {phrase}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════════
-            CARD 3: INSTANT EXPRESS AAC CARDS (TALK & DISPLAY TOGETHER)
-           ══════════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h2 className="text-xs font-black text-white">
-                    {localize(profile.language, 'Instant Express AAC Cards', 'بطاقات التواصل والمواقف السريعة')}
-                  </h2>
-                  <p className="text-[10px] text-slate-400">
-                    {localize(profile.language, 'One tap speaks out loud and shows big on screen', 'ضغطة واحدة تنطق الجملة فوراً وتظهرها بخط كبير')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Category Pills */}
-              <div className="flex items-center gap-1 bg-[#150917] p-0.5 rounded-lg border border-[#4A1224]/50">
-                {(['general', 'medical', 'daily', 'emergency'] as AACCategory[]).map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveAacCategory(cat)}
-                    className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
-                      activeAacCategory === cat
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    {cat === 'general' ? 'عام' : cat === 'medical' ? 'طبي' : cat === 'daily' ? 'يومي' : '🚨 طوارئ'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Active Display Banner if tapped */}
-            <AnimatePresence>
-              {activeDisplayPhrase && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="mt-2 p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 flex items-center justify-between gap-2 shadow-inner"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xl shrink-0">{activeDisplayPhrase.icon}</span>
-                    <span className="text-xs sm:text-sm font-black truncate">{activeDisplayPhrase.text}</span>
-                  </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-100 font-bold shrink-0">
-                    {localize(profile.language, 'Spoken & Displayed', 'تم النطق والعرض')}
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Cards Grid */}
-            <div className="flex-1 my-2 grid grid-cols-2 gap-1.5 overflow-y-auto max-h-[170px] custom-scrollbar p-0.5">
-              {AAC_DATA[activeAacCategory].phrases.map((phrase, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleTapAacPhrase(phrase)}
-                  className="p-2 rounded-xl bg-[#09030B] hover:bg-[#180a1c] border border-[#4A1224]/50 hover:border-emerald-500/50 text-start transition-all active:scale-[0.98] group/btn flex items-center gap-2 cursor-pointer shadow-sm"
-                >
-                  <span className="text-lg shrink-0 group-hover/btn:scale-110 transition-transform">
-                    {phrase.icon}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-200 group-hover/btn:text-white leading-tight line-clamp-2">
-                    {phrase.text}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════════
-            CARD 4: LOUD SOUND SENTINEL & REAL VISUAL HAZARD STROBE
-           ══════════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-300 flex items-center justify-center">
-                  <Radio className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h2 className="text-xs font-black text-white flex items-center gap-1.5">
-                    <span>{localize(profile.language, 'Loud Sound Sentinel', 'كاشف الأصوات المرتفعة والمخاطر')}</span>
-                    {isSentinelActive && (
-                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                    )}
-                  </h2>
-                  <p className="text-[10px] text-slate-400">
-                    {localize(profile.language, 'Real decibel meter triggers screen flash and vibration for alarms', 'يقيس شدة الصوت الحقيقية وينبهك بوميض واهتزاز فور حدوث إنذار أو خبط')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Sensitivity Selector */}
-              <div className="flex items-center gap-1 bg-[#150917] p-0.5 rounded-lg border border-[#4A1224]/50 text-[10px]">
-                {(['high', 'normal', 'low'] as const).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setStrobeSensitivity(s)}
-                    className={`px-1.5 py-0.5 rounded font-bold transition-all ${
-                      strobeSensitivity === s
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    {s === 'high' ? 'عالية (68dB)' : s === 'normal' ? 'عادية (78dB)' : 'منخفضة (88dB)'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Decibel Meter & Live Bar */}
-            <div className="my-2.5 p-3 rounded-xl bg-[#09030B] border border-[#4A1224]/40 flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-400">
-                  {localize(profile.language, 'Current Ambient Volume:', 'مستوى الصوت الحالي:')}
-                </span>
-                <span className={`font-mono text-sm font-black ${
-                  currentDb >= thresholdDb ? 'text-rose-400 animate-pulse' : currentDb >= 65 ? 'text-amber-400' : 'text-emerald-400'
-                }`}>
-                  {isSentinelActive ? `${currentDb} dB` : '-- dB'}
-                </span>
-              </div>
-
-              {/* Dynamic Reactive Sound Bar */}
-              <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
-                <div
-                  className={`h-full rounded-full transition-all duration-150 ${
-                    currentDb >= thresholdDb
-                      ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-md shadow-rose-500/50'
-                      : currentDb >= 60
-                      ? 'bg-gradient-to-r from-emerald-500 to-amber-500'
-                      : 'bg-emerald-500'
-                  }`}
-                  style={{ width: `${isSentinelActive ? Math.min(100, Math.max(5, ((currentDb - 30) / 70) * 100)) : 0}%` }}
-                />
-              </div>
-
-              {/* Threshold Marker Indicator */}
-              <div className="flex items-center justify-between text-[10px] text-slate-500">
-                <span>30 dB (هدوء)</span>
-                <span className="text-rose-400 font-bold">⚠️ عتبة التنبيه: {thresholdDb} dB</span>
-                <span>100 dB (صاخب)</span>
-              </div>
-            </div>
-
-            {/* Recent Sound Alerts Log */}
-            <div className="flex-1 min-h-[60px] max-h-[85px] overflow-y-auto custom-scrollbar mb-2 space-y-1">
-              {soundAlerts.length === 0 ? (
-                <div className="text-center text-[10px] text-slate-500 py-2">
-                  {isSentinelActive
-                    ? localize(profile.language, 'Sentinel active: Watching for loud knocks, alarms, or shouts...', 'المستشعر متيقظ: يرصد الأصوات المفاجئة، الإنذار والخبط...')
-                    : localize(profile.language, 'Turn on sentinel to begin sound surveillance', 'شغّل المستشعر لبدء الرصد الصوتي للمكان')}
-                </div>
-              ) : (
-                soundAlerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className="px-2 py-1 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[10px] flex items-center justify-between font-bold"
-                  >
-                    <span>🚨 {localize(profile.language, `Loud spike detected (${alert.db} dB)`, `تم رصد صوت مرتفع (${alert.db} ديسيبل)`)}</span>
-                    <span className="font-mono text-slate-400">{alert.time}</span>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Toggle Sentinel Button */}
+            {/* Sentinel Toggle Button */}
             <button
               onClick={toggleSentinel}
               className={`w-full py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-[0.98] cursor-pointer ${
@@ -958,10 +804,307 @@ export default function UnifiedHearingCenter({
               <span>
                 {isSentinelActive
                   ? localize(profile.language, 'Stop Sound Sentinel', 'إيقاف مستشعر الأصوات')
-                  : localize(profile.language, 'Activate Sound Sentinel (Mic)', 'تفعيل مستشعر الأصوات والمخاطر (المايك)')}
+                  : localize(profile.language, 'Activate Sound Sentinel (Mic)', 'تشغيل مستشعر الأصوات والمخاطر (المايك)')}
               </span>
             </button>
           </div>
+
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            COLUMN 2 (LG: 7 COLS): CAPTIONS + MY VOICE + AAC CARDS
+           ══════════════════════════════════════════════════════════════════════ */}
+        <div className="lg:col-span-7 flex flex-col gap-3 sm:gap-4">
+
+          {/* ── CARD 1: LIVE SPEECH-TO-TEXT & SPEECH-TO-SIGN ── */}
+          <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
+                    <Mic className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xs font-black text-white flex items-center gap-1.5">
+                      <span>{localize(profile.language, 'Live Speech Captions & Sign', 'تفريغ كلام المتحدث وتحويله لإشارة 3D')}</span>
+                      {isListeningPartner && (
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      )}
+                    </h2>
+                    <p className="text-[10px] text-slate-400">
+                      {localize(profile.language, 'Transcribes speech into text and triggers the 3D Avatar automatically', 'يفرغ صوت الطرف الآخر لنص كبير ويحركه على الأفاتار 3D فوراً')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setIsLargeCaptions(!isLargeCaptions)}
+                    className={`p-1.5 rounded-lg border text-xs transition-colors cursor-pointer ${
+                      isLargeCaptions
+                        ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold'
+                        : 'bg-[#150917] border-[#4A1224]/60 text-slate-400 hover:text-white'
+                    }`}
+                    title={localize(profile.language, 'Toggle Extra Large Font', 'تكبير حجم الخط')}
+                  >
+                    <Type className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={handleCopyCaptions}
+                    disabled={captionsHistory.length === 0}
+                    className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
+                    title={localize(profile.language, 'Copy Captions', 'نسخ النص')}
+                  >
+                    {copiedCaptions ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                  <button
+                    onClick={handleClearCaptions}
+                    disabled={captionsHistory.length === 0 && !interimText}
+                    className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-400 hover:text-rose-400 disabled:opacity-30 transition-colors cursor-pointer"
+                    title={localize(profile.language, 'Clear Captions', 'مسح التفريغ')}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Captions Display Box */}
+              <div className="flex-1 min-h-[120px] max-h-[160px] my-2 p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 overflow-y-auto custom-scrollbar flex flex-col justify-between">
+                {captionsHistory.length === 0 && !interimText ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center p-2 text-slate-500">
+                    <Mic className="w-5 h-5 mb-1 text-slate-600" />
+                    <p className="text-xs font-bold text-slate-400">
+                      {speechSupported
+                        ? localize(profile.language, 'Tap "Listen to Partner" to begin real-time captions', 'اضغط "استمع للمتحدث" لبدء تحويل الكلام لنص وإشارة')
+                        : localize(profile.language, 'Speech recognition not supported in this browser', 'التعرف الصوتي غير مدعوم في هذا المتصفح')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className={`space-y-1.5 text-start ${isLargeCaptions ? 'text-base font-bold' : 'text-xs'}`}>
+                    {captionsHistory.map((phrase, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => triggerAvatarSign(phrase)}
+                        className="p-1.5 rounded-lg bg-[#150917]/80 hover:bg-[#200e23] border border-slate-800 text-slate-200 leading-relaxed cursor-pointer transition-colors"
+                        title="اضغط لإعادة محاكاة الإشارة على الأفاتار"
+                      >
+                        {phrase}
+                      </div>
+                    ))}
+                    {interimText && (
+                      <div className="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 italic animate-pulse">
+                        {interimText}...
+                      </div>
+                    )}
+                    <div ref={captionsBottomRef} />
+                  </div>
+                )}
+              </div>
+
+              {/* Listen Button Trigger */}
+              <button
+                onClick={togglePartnerListening}
+                className={`w-full py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md cursor-pointer ${
+                  isListeningPartner
+                    ? 'bg-rose-500 hover:bg-rose-600 text-white animate-pulse shadow-rose-500/20'
+                    : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-400 hover:to-purple-500 text-white shadow-indigo-500/25'
+                }`}
+              >
+                {isListeningPartner ? (
+                  <>
+                    <MicOff className="w-4 h-4" />
+                    <span>{localize(profile.language, 'Stop Listening', 'إيقاف استماع المايك')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-4 h-4" />
+                    <span>{localize(profile.language, 'Listen to Partner (Start Mic)', 'استمع للمتحدث (تشغيل المايك والترجمة للإشارة)')}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* ── CARD 2: TEXT-TO-SPEECH (MY VOICE SPEAKING TO THE ROOM) ── */}
+          <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                    <Volume2 className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xs font-black text-white flex items-center gap-1.5">
+                      <span>{localize(profile.language, 'My Voice (Text-to-Speech)', 'أنا أتحدث (نطق فوري للغرفة)')}</span>
+                      {isSpeakingOut && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold animate-pulse">
+                          {localize(profile.language, 'Speaking...', 'ينطق الآن...')}
+                        </span>
+                      )}
+                    </h2>
+                    <p className="text-[10px] text-slate-400">
+                      {localize(profile.language, 'Type anything to speak out loud and sign on avatar', 'اكتب ما تريد قوله وسينطقه النظام بالصوت ويشير به الأفاتار')}
+                    </p>
+                  </div>
+                </div>
+
+                {isSpeakingOut && (
+                  <button
+                    onClick={() => {
+                      cancelSpeech();
+                      setIsSpeakingOut(false);
+                    }}
+                    className="p-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <VolumeX className="w-3 h-3" />
+                    <span>{localize(profile.language, 'Stop', 'إيقاف')}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Input Form */}
+              <div className="my-2 flex flex-col gap-1.5">
+                <div className="relative min-h-[70px]">
+                  <textarea
+                    value={myText}
+                    onChange={(e) => setMyText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSpeakText();
+                      }
+                    }}
+                    placeholder={localize(
+                      profile.language,
+                      'Type what you want to say and press Enter...',
+                      'اكتب ما تريد قوله واضغط Enter للنطق والمحاكاة بالإشارة...'
+                    )}
+                    className="w-full h-full p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/50 text-slate-100 placeholder:text-slate-500 text-xs focus:outline-none focus:border-amber-400/80 resize-none transition-all leading-relaxed"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleSpeakText()}
+                    disabled={!myText.trim()}
+                    className="py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-40 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-amber-500/20 active:scale-[0.98] cursor-pointer"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                    <span>{localize(profile.language, 'Speak to Room (Enter)', 'انطق للغرفة (Enter)')}</span>
+                  </button>
+                  <button
+                    onClick={() => triggerAvatarSign(myText)}
+                    disabled={!myText.trim()}
+                    className="py-2 px-3 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-300 hover:text-white disabled:opacity-40 font-black text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Hand className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>{localize(profile.language, 'Sign on 3D Avatar', 'محاكاة بالإشارة 3D')}</span>
+                  </button>
+                </div>
+
+                {/* Quick Spoken Chips */}
+                {recentSpoken.length > 0 && (
+                  <div className="pt-1 flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+                    <span className="text-[10px] text-slate-400 shrink-0 font-bold">
+                      {localize(profile.language, 'Replay:', 'إعادة:')}
+                    </span>
+                    {recentSpoken.map((phrase, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSpeakText(phrase)}
+                        className="px-2 py-0.5 rounded-lg bg-[#150917] hover:bg-[#1f0e22] border border-[#4A1224]/50 text-slate-300 hover:text-amber-300 text-[10px] truncate max-w-[160px] shrink-0 transition-colors cursor-pointer"
+                        title={phrase}
+                      >
+                        🗣️ {phrase}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ── CARD 3: INSTANT EXPRESS AAC CARDS ── */}
+          <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-lg relative overflow-hidden group">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xs font-black text-white">
+                      {localize(profile.language, 'Instant Express AAC Cards', 'بطاقات التواصل والمواقف السريعة')}
+                    </h2>
+                    <p className="text-[10px] text-slate-400">
+                      {localize(profile.language, 'Speaks aloud, signs on 3D avatar & shows large on screen', 'تنطق فوراً بالصوت وتتحرك على الأفاتار وتظهر بخط كبير')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Category Pills */}
+                <div className="flex items-center gap-1 bg-[#150917] p-0.5 rounded-lg border border-[#4A1224]/50">
+                  {(['general', 'medical', 'daily', 'emergency'] as AACCategory[]).map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveAacCategory(cat)}
+                      className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                        activeAacCategory === cat
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {cat === 'general' ? 'عام' : cat === 'medical' ? 'طبي' : cat === 'daily' ? 'يومي' : '🚨 طوارئ'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Display Banner */}
+              <AnimatePresence>
+                {activeDisplayPhrase && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="mt-1.5 p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 flex items-center justify-between gap-2 shadow-inner"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xl shrink-0">{activeDisplayPhrase.icon}</span>
+                      <span className="text-xs sm:text-sm font-black truncate">{activeDisplayPhrase.text}</span>
+                    </div>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-100 font-bold shrink-0">
+                      {localize(profile.language, 'Voice & 3D Sign Active', 'صوت + إشارة 3D')}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Cards Grid */}
+              <div className="my-1.5 grid grid-cols-2 gap-1.5 overflow-y-auto max-h-[140px] custom-scrollbar p-0.5">
+                {AAC_DATA[activeAacCategory].phrases.map((phrase, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleTapAacPhrase(phrase)}
+                    className="p-2 rounded-xl bg-[#09030B] hover:bg-[#180a1c] border border-[#4A1224]/50 hover:border-emerald-500/50 text-start transition-all active:scale-[0.98] group/btn flex items-center gap-2 cursor-pointer shadow-sm"
+                  >
+                    <span className="text-lg shrink-0 group-hover/btn:scale-110 transition-transform">
+                      {phrase.icon}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-200 group-hover/btn:text-white leading-tight line-clamp-2">
+                      {phrase.text}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </main>
