@@ -22,6 +22,7 @@ const CognitiveGym = React.lazy(() => import('./CognitiveGym'));
 const UnifiedCognitiveCenter = React.lazy(() => import('./UnifiedCognitiveCenter'));
 const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
 const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
+const UnifiedHearingCenter = React.lazy(() => import('./UnifiedHearingCenter'));
 const DeafEcosystemView = React.lazy(() => import('./DeafEcosystemView'));
 const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
 import { isAccessibilityUser } from '../lib/access';
@@ -280,8 +281,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       icon: Ear,
       color: 'text-[#E5A93C]',
       activeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50',
-      descAr: 'استوديو الإشارة ثلاثي الأبعاد، رادار الأصوات والمخاطر، وجسر التخاطب المباشر',
-      descEn: '3D sign language avatar, ambient sound & hazard radar, and live human communication bridge',
+      descAr: 'تفريغ فوري لكلام المتحدث، نطق صوتي للغرفة، بطاقات تواصل سريعة، ومستشعر أصوات حقيقي في شاشة واحدة',
+      descEn: 'Live speech captions, vocal speaker, express AAC cards, and loud sound sentinel in one screen',
     },
     {
       id: 'neuro' as const,
@@ -330,26 +331,21 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 shadow-teal-500/20',
       matchingMode: 'Visual',
     },
-    // 2. HEARING (Deaf Ecosystem - All-in-One Suite)
+    // 2. HEARING (Unified Deaf & Hearing Center)
     {
       id: 'deaf' as const,
       category: 'hearing' as const,
-      titleEn: 'Deaf & Hard of Hearing Suite (All-in-One)',
-      titleAr: 'منظومة الصم وضعاف السمع الشاملة (الكل في واحد)',
-      shortEn: 'Deaf Suite',
-      shortAr: 'منظومة الصم',
+      titleEn: 'Unified Deaf & Hearing Center',
+      titleAr: 'المركز السمعي الموحد (الصم وضعاف السمع)',
+      shortEn: 'Hearing Center',
+      shortAr: 'المركز السمعي',
       badgeEn: 'Deaf & Hard of Hearing',
       badgeAr: 'الصم وضعاف السمع',
-      descEn: 'All-in-one unified deaf ecosystem: 3D Sign Language Studio, Ambient Sound & Hazard Radar, and Two-Way Live Human Bridge with instant toggles.',
-      descAr: 'منظومة متكاملة تجمع كل أدوات التيسير السمعي في شاشة واحدة مع التبديل الفوري: استوديو الإشارة 3D، رادار الأصوات والمخاطر، وجسر التخاطب المباشر.',
-      quickFeaturesAr: ['🤟 استوديو إشارة 3D', '📡 رادار مخاطر وأصوات', '💬 جسر تواصل مباشر', '⚡ تبديل فوري بنفس الشاشة', '🚨 وميض واهتزاز لمسي'],
-      quickFeaturesEn: ['🤟 3D Sign Studio', '📡 Sound & Hazard Radar', '💬 2-Way Human Bridge', '⚡ 1-Screen Instant Toggles', '🚨 Strobe & Haptics'],
-      subPills: [
-        { tab: 'video' as const, labelEn: '3D Sign', labelAr: 'لغة الإشارة', icon: Accessibility },
-        { tab: 'radar' as const, labelEn: 'Sound Radar', labelAr: 'رادار الأصوات', icon: Radio },
-        { tab: 'bridge' as const, labelEn: 'Live Bridge', labelAr: 'جسر التواصل', icon: Ear },
-      ],
-      Icon: Accessibility,
+      descEn: 'Unified 1-screen deaf assistive center: Live speech-to-text captions, instant voice speaker, express AAC cards, and real loud sound hazard sentinel.',
+      descAr: 'مركز تيسير سمعي موحد في شاشة واحدة: تفريغ كلام فوري، نطق صوتي للغرفة، بطاقات تواصل سريعة، ومستشعر أصوات مرتفعة ومخاطر حقيقي.',
+      quickFeaturesAr: ['🎙️ تفريغ كلام المتحدث فورياً', '🔊 تحدث بالصوت للغرفة', '⚡ بطاقات تواصل ومواقف ناطقة', '🚨 كاشف أصوات مرتفعة ووميض حقيقي'],
+      quickFeaturesEn: ['🎙️ Live Speech Captions', '🔊 Text-to-Speech Voice', '⚡ Express AAC Cards', '🚨 Real Loud Sound Strobe'],
+      Icon: Ear,
       accentColor: 'text-[#E5A93C]',
       borderGlow: 'hover:border-indigo-500/80 border-[#E5A93C]/30 ring-1 ring-indigo-500/20',
       bgGlow: 'bg-indigo-500/15 text-[#E5A93C] border-[#E5A93C]/30',
@@ -359,7 +355,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     // 3. CROSS-DISABILITY SENSORY BRIDGE (UNIVERSAL MESH)
     {
       id: 'orchestrator' as const,
-      category: 'hearing' as const,
+      category: 'caregiver' as const,
       titleEn: 'Cross-Disability Sensory Bridge (Universal Mesh)',
       titleAr: 'جسر التواصل التبادلي بين الإعاقات (شبكة الحواس الشاملة)',
       shortEn: 'Sensory Bridge',
@@ -676,7 +672,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-start">
                     {[
                       { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
-                      { id: 'deaf' as const, labelAr: 'منظومة الصم المتكاملة', labelEn: 'Deaf Ecosystem', Icon: Ear, descAr: 'استوديو الإشارة 3D، رادار الأصوات، وجسر التواصل', descEn: '3D Sign Avatar, Sound Sentinel & Live Bridge', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
+                      { id: 'deaf' as const, labelAr: 'المركز السمعي الموحد', labelEn: 'Unified Hearing Center', Icon: Ear, descAr: 'تفريغ فوري، نطق صوتي، بطاقات سريعة، ومستشعر مخاطر', descEn: 'Live captions, voice speaker, express AAC & strobe alert', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
                       { id: 'neurodiversity' as const, labelAr: 'التنوع العصبي والتوحد', labelEn: 'Neurodiversity Hub', Icon: Brain, descAr: 'بطاقات PECS الناطقة، الروتين، ومسطرة القراءة', descEn: 'Spoken PECS cards, routines & calm bubble', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/40', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
                     ].map((s) => (
                       <button
@@ -727,7 +723,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
           {isDeafActive && (
             <motion.div
-              key="deaf-unified-ecosystem"
+              key="deaf-unified-view"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -738,19 +734,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               }>
-                <DeafEcosystemView
+                <UnifiedHearingCenter
                   profile={profile}
-                  initialTab={activeTab === 'deaf' ? 'bridge' : (activeTab as any)}
                   onNavigateBack={handleNavigateBack}
                   onMenuClick={onMenuClick}
-                  onTabChange={(tool) => {
-                    if (tool === 'vision' || tool === 'neurodiversity' || tool === 'hub') {
-                      handleSelectTab(tool);
-                    } else {
-                      setActiveTab(tool);
-                      onTabChange?.(tool);
-                    }
-                  }}
                 />
               </React.Suspense>
             </motion.div>
