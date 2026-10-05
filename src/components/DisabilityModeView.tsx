@@ -19,6 +19,7 @@ const ChatInterface = React.lazy(() => import('./ChatInterface'));
 const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
 const NeurodiversityHub = React.lazy(() => import('./NeurodiversityHub'));
 const CognitiveGym = React.lazy(() => import('./CognitiveGym'));
+const UnifiedCognitiveCenter = React.lazy(() => import('./UnifiedCognitiveCenter'));
 const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
 const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
 const DeafEcosystemView = React.lazy(() => import('./DeafEcosystemView'));
@@ -284,14 +285,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     },
     {
       id: 'neuro' as const,
-      titleEn: 'Neurodiversity & Autism',
-      titleAr: 'التوحد والضبط الحسي',
+      titleEn: 'Cognitive & Neurodiversity',
+      titleAr: 'المركز المعرفي والذهني',
       emoji: '🧩',
       icon: Brain,
       color: 'text-purple-400',
       activeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/50',
-      descAr: 'بطاقات PECS المصورة المنطوقة، الجدول اليومي، فقاعة التنفس المهدئة، والجيم المعرفي',
-      descEn: 'Interactive PECS cards, visual routine, calming breathing bubble, and cognitive gym',
+      descAr: 'تجزئة مهام ADHD، قارئ Bionic، تنظيم التوحد، وبطاقات التعبير الفوري في شاشة واحدة',
+      descEn: 'ADHD task slicer, bionic reader, autism regulation, and instant AAC in one screen',
     },
     {
       id: 'caregiver' as const,
@@ -376,46 +377,25 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-amber-400 via-indigo-500 to-purple-600 text-white shadow-[#E5A93C]/20',
       matchingMode: 'Multiple',
     },
-    // 4. NEURODIVERSITY & AUTISM
+    // 4. COGNITIVE & NEURODIVERSITY (UNIFIED CENTER - 1 SCREEN)
     {
       id: 'neurodiversity' as const,
       category: 'neuro' as const,
-      titleEn: 'Neurodiversity & Autism Hub',
-      titleAr: 'واحة التوحد والاضطرابات النمائية',
-      shortEn: 'Autism & Sensory',
-      shortAr: 'التوحد والضبط الحسي',
-      badgeEn: 'Autism Spectrum & Sensory Regulation',
-      badgeAr: 'طيف التوحد والضبط الحسي',
-      descEn: 'Visual PECS communication cards with speech synthesis, predictable daily routine schedules, and sensory regulation meter with automated server-side meltdown alerts.',
-      descAr: 'بطاقات بيكس (PECS) للتواصل البصري المنطوق، جدول الروتين اليومي المنظم لتقليل القلق، ومقياس الضغط الحسي مع إشعار المرافق التلقائي عبر الخادم.',
-      quickFeaturesAr: ['بطاقات PECS ناطقة ومخصصة', 'جدول الروتين اليومي المنظم', 'مقياس المشاعر وفقاعة التنفس 4-4-4', 'إشعار مبكر للأزمات لمقدم الرعاية'],
-      quickFeaturesEn: ['Custom Spoken PECS Cards', 'Daily Predictability Routine', '4-4-4 Calming Breathing Bubble', 'Server Meltdown Caregiver Alert'],
+      titleEn: 'Unified Cognitive Center',
+      titleAr: 'المركز المعرفي الموحد (شاشة موجزة متكاملة)',
+      shortEn: 'Cognitive Center',
+      shortAr: 'المركز المعرفي',
+      badgeEn: 'ADHD, Autism & Learning Disabilities',
+      badgeAr: 'ADHD، التوحد وصعوبات التعلم',
+      descEn: 'Unified, uncluttered 1-screen workspace: ADHD Task Slicer with brown noise, Dyslexia Bionic Reader & Focus Ruler, Autism Calm Breathing & Spoken AAC cards, and Executive Impulse Control.',
+      descAr: 'شاشة معرفية موحدة وموجزة لمنع التشتت: تجزئة مهام ADHD وضوضاء بنية، قارئ عسر القراءة الموجه Bionic ومسطرة التركيز، تهدئة التوحد وبطاقات التواصل الفورية، والتحكم بالاندفاع التنفيذي.',
+      quickFeaturesAr: ['⚡ تجزئة مهام ADHD وضوضاء بنية', '📖 قارئ Bionic ومسطرة التركيز', '🧘 تنفس 4-4-4 وبطاقات AAC صوتية', '🎮 تمرين التحكم بالاندفاع التنفيذي', '🌿 تصميم مريح مانع للتشتت'],
+      quickFeaturesEn: ['⚡ ADHD Task Slicer & Brown Noise', '📖 Bionic Reader & Focus Ruler', '🧘 Calm Breathing & Spoken AAC', '🎮 Executive Impulse Drill', '🌿 Low-Arousal Sensory Space'],
       Icon: Brain,
       accentColor: 'text-purple-400',
       borderGlow: 'hover:border-purple-500/60 border-[#4A1224]/60',
       bgGlow: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
       buttonCls: 'bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white shadow-purple-500/20',
-      matchingMode: 'Neurodiversity',
-    },
-    // 5. COGNITIVE & EXECUTIVE GYM (ADHD, AUTISM, DYSCALCULIA)
-    {
-      id: 'gym' as const,
-      category: 'neuro' as const,
-      titleEn: 'Cognitive & Executive Gym',
-      titleAr: 'الجيم المعرفي والوظائف التنفيذية',
-      shortEn: 'Cognitive Gym',
-      shortAr: 'الجيم المعرفي',
-      badgeEn: 'ADHD, Autism & Dyscalculia',
-      badgeAr: 'ADHD، التوحد، وعسر الحساب',
-      descEn: 'Interactive drills for ADHD executive function, task slicing, ambient soundscapes, Autism set-shifting, and dyscalculia concrete math.',
-      descAr: 'تمارين تفاعلية للوظائف التنفيذية، تجزئة مهام الـ ADHD، أصوات التركيز البنية، مرونة التفكير للتوحد، وحساب ملموس لعسر الحساب.',
-      quickFeaturesAr: ['مشتت مهام الـ ADHD ومؤقت السبرنت', 'مولد الضوضاء البنية والوردية', 'التحكم بالاندفاع Go/No-Go والمرونة المعرفية', 'قضبان كويزنير والـ Ten-Frames لعسر الحساب'],
-      quickFeaturesEn: ['ADHD Task Slicer & Micro-Sprints', 'Brown & Pink Soundscapes', 'Go/No-Go & Cognitive Set-Shifting', 'Cuisenaire & Ten-Frames Math'],
-      Icon: Flame,
-      accentColor: 'text-amber-400',
-      borderGlow: 'hover:border-amber-500/60 border-[#4A1224]/60',
-      bgGlow: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-      buttonCls: 'bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-amber-500/20',
       matchingMode: 'Neurodiversity',
     },
     // 5. CAREGIVER & UNIVERSAL
@@ -778,7 +758,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
           {activeTab === 'neurodiversity' && (
             <motion.div
-              key="neurodiversity-view"
+              key="neurodiversity-unified-view"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -789,10 +769,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               }>
-                <NeurodiversityHub
+                <UnifiedCognitiveCenter
                   profile={profile}
+                  onMenuClick={onMenuClick}
                   onNavigateBack={handleNavigateBack}
-                  onOpenCognitiveGym={() => handleSelectTab('gym')}
                 />
               </React.Suspense>
             </motion.div>
