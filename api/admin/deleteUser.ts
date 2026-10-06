@@ -47,8 +47,10 @@ export default async function deleteUserHandler(req: any, res: any) {
   }
 
   // 2. Rate Limiting (10 deletions per minute max)
-  const isLimited = checkRateLimit(req, 'admin_delete_user', 10, 60000);
-  if (isLimited) {
+  const clientIp = (req.headers && req.headers['x-forwarded-for']) || req.socket?.remoteAddress || auth.uid;
+  const rateLimitKey = `admin_delete_user_${auth.uid || clientIp}`;
+  const rateResult = checkRateLimit(rateLimitKey, 10);
+  if (!rateResult.allowed) {
     return res.status(429).json({ error: 'Too Many Requests: Rate limit exceeded' });
   }
 

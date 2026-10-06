@@ -66,6 +66,8 @@ export function cleanForSpeech(text: string): string {
     .replace(/Textes?( visibles?)?:\s*(Aucun[^\n.]*)[.]?/gi, "")
     .replace(/\*\*(Description de la scène|Description):\*\*/gi, "")
     .replace(/(Description de la scène|Description):/gi, "")
+    // Strip bullet list prefixes (- , * , • ) at line starts
+    .replace(/^\s*[-*•]\s+/gm, "")
     // Strip spoken symbol words (asterisk / star / استريك / نجمة)
     .replace(/(?:^|\s+)(asterisk|استريك|استريسك|نجمة|بوليت)[.,!?:؛،]?(?=\s+|$)/giu, " ")
     // Strip markdown formatting symbols (*, #, _, `, ~, [], (), <>)

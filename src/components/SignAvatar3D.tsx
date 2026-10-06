@@ -257,6 +257,11 @@ interface Rig {
   leftThumbBase: THREE.Group;
   leftForearm: THREE.Mesh;
   leftElbow: THREE.Vector3;
+  eyeL: THREE.Mesh;
+  eyeR: THREE.Mesh;
+  browL: THREE.Mesh;
+  browR: THREE.Mesh;
+  mouth: THREE.Mesh;
 }
 
 const CURL_MAX = [1.45, 1.55, 1.05]; // per joint

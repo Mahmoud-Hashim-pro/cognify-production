@@ -879,8 +879,8 @@ Question: "${q}"`;
       {/* Minor Student Parental Consent Gate Modal */}
       <ParentalConsentModal
         isOpen={showConsentModal}
-        studentName={profile.name || 'Student'}
-        studentEmail={profile.email}
+        profile={profile}
+        requiredScope="camera"
         onConsentGranted={(consent) => {
           setShowConsentModal(false);
           if (profile) {
@@ -888,7 +888,7 @@ Question: "${q}"`;
           }
           handleStartCamera();
         }}
-        onClose={() => setShowConsentModal(false)}
+        onCancel={() => setShowConsentModal(false)}
       />
     </div>
   );
