@@ -3,6 +3,7 @@ import {
   Ear,
   Camera,
   CameraOff,
+  Volume2,
   Play,
   Square,
   RotateCcw,
@@ -187,6 +188,7 @@ Question: "${q}"`;
   const [cameraStatus, setCameraStatus] = useState<string>('');
   const [detectedSign, setDetectedSign] = useState<string>('');
   const [accumulatedText, setAccumulatedText] = useState<string>('');
+  const [isSpeakingCameraText, setIsSpeakingCameraText] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -387,6 +389,20 @@ Question: "${q}"`;
       cancelSpeech();
     };
   }, []);
+
+  // Speak accumulated camera text aloud in Live Audio
+  const handleSpeakAccumulatedText = () => {
+    if (!accumulatedText.trim()) return;
+    setIsSpeakingCameraText(true);
+    triggerHapticAlert('single-pulse');
+
+    speak(accumulatedText.trim(), dialect, {
+      rate: 1.0,
+      onStart: () => setIsSpeakingCameraText(true),
+      onEnd: () => setIsSpeakingCameraText(false),
+      onError: () => setIsSpeakingCameraText(false),
+    });
+  };
 
   // Send accumulated camera text to the AI half
   const handleSendToAiTutor = () => {
@@ -707,14 +723,34 @@ Question: "${q}"`;
                 )}
               </div>
 
-              {/* Action Button: Send Question to AI Avatar */}
-              <div>
+              {/* Action Buttons: Live Audio + Send Question to AI */}
+              <div className="grid grid-cols-2 gap-2">
+                {/* 1. Live Audio Output */}
+                <button
+                  onClick={handleSpeakAccumulatedText}
+                  disabled={!accumulatedText.trim()}
+                  className={`py-2.5 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-[0.98] cursor-pointer ${
+                    isSpeakingCameraText
+                      ? 'bg-emerald-400 text-slate-950 animate-pulse shadow-emerald-400/40 ring-2 ring-emerald-300'
+                      : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 text-slate-950 shadow-emerald-500/20'
+                  }`}
+                  title={loc('Live audio playback of recognized signs', 'نطق الكلمات المترجمة بصوت حي مباشر')}
+                >
+                  <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {isSpeakingCameraText
+                      ? loc('Speaking… 🔊', 'جاري النطق… 🔊')
+                      : loc('Live Audio 🔊', 'صوت مباشر 🔊')}
+                  </span>
+                </button>
+
+                {/* 2. Send Question to AI Avatar */}
                 <button
                   onClick={handleSendToAiTutor}
                   disabled={!accumulatedText.trim() || isAiLoading}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-40 text-white font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-500/20 active:scale-[0.98] cursor-pointer"
+                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-40 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-indigo-500/20 active:scale-[0.98] cursor-pointer"
                 >
-                  <Bot className="w-4 h-4" />
+                  <Bot className="w-3.5 h-3.5 shrink-0" />
                   <span>{loc('Ask AI this Sign 🤖', 'اسأل الـ AI هذا السؤال 🤖')}</span>
                 </button>
               </div>
