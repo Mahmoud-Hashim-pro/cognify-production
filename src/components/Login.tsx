@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RadioGroup, Radio } from 'react-aria-components';
+import { RadioGroup, Radio } from 'react-aria-components/RadioGroup';
 import { AriaButton } from './ui/AriaButton';
 import { signInWithGoogle, signInWithGoogleRedirect, loginWithEmail, registerWithEmail, auth, clearPreLoginState } from '../lib/firebase';
 import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';

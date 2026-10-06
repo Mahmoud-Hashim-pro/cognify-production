@@ -1,0 +1,7 @@
+# Prevent Vercel from treating backend endpoints as serverless functions.
+# All /api/* traffic is proxied via rewrites in vercel.json to Google Cloud Run.
+api
+server.ts
+tests
+scripts
+.github

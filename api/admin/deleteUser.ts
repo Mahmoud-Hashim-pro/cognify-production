@@ -34,7 +34,7 @@ const SUBCOLLECTIONS_TO_PURGE = [
 ];
 
 export default async function deleteUserHandler(req: any, res: any) {
-  if (applyCorsHeaders(req, res)) return;
+  if (!applyCorsHeaders(req, res)) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
