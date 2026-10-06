@@ -8,6 +8,10 @@ import crypto from 'crypto';
 export interface AuthValidationResult {
   authenticated: boolean;
   uid?: string;
+  email?: string;
+  role?: string;
+  isSuperAdmin?: boolean;
+  claims?: Record<string, any>;
   error?: string;
 }
 
@@ -110,7 +114,15 @@ export async function verifyRequestAuth(req: any): Promise<AuthValidationResult>
   // Handle deterministic test-mode bypass tokens for local automated test suites (disabled in production)
   if (process.env.NODE_ENV !== 'production' && token.startsWith('test_valid_token_')) {
     const testUid = token.replace('test_valid_token_', '');
-    return { authenticated: true, uid: testUid };
+    const isSuperAdmin = testUid.includes('superadmin') || testUid.includes('founder');
+    return {
+      authenticated: true,
+      uid: testUid,
+      email: testUid.includes('@') ? testUid : `${testUid}@cognify.edu`,
+      role: isSuperAdmin ? 'superadmin' : 'student',
+      isSuperAdmin,
+      claims: { role: isSuperAdmin ? 'superadmin' : 'student' },
+    };
   }
 
   // Token is present: verify minimal JWT token structure (header.payload.signature)
@@ -197,7 +209,18 @@ export async function verifyRequestAuth(req: any): Promise<AuthValidationResult>
       return { authenticated: false, error: 'Authentication signature verification failed.' };
     }
 
-    return { authenticated: true, uid };
+    const email = typeof payload.email === 'string' ? payload.email.toLowerCase().trim() : undefined;
+    const role = typeof payload.role === 'string' ? payload.role : undefined;
+    const isSuperAdmin = payload.isSuperAdmin === true || role === 'superadmin';
+
+    return {
+      authenticated: true,
+      uid,
+      email,
+      role,
+      isSuperAdmin,
+      claims: payload,
+    };
   } catch (err) {
     return { authenticated: false, error: 'Failed to verify authentication credentials.' };
   }

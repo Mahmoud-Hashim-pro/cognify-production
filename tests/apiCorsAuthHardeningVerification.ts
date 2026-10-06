@@ -17,6 +17,7 @@ import securityAuditHandler from '../api/telemetry/securityAudit.js';
 import generateAdaptiveResponseHandler from '../api/gemini/generateAdaptiveResponse.js';
 import generateAdaptiveResponseStreamHandler from '../api/gemini/generateAdaptiveResponseStream.js';
 import emergencyDispatchHandler from '../api/emergency/dispatch.js';
+import deleteUserHandler from '../api/admin/deleteUser.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -539,6 +540,119 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
       }
     }
     assert(hitRateLimit === true, 'emergencyDispatch enforces 5 req/min sliding-window rate limit per UID');
+  }
+
+  // ====================================================================
+  // Group 8: Super Admin User Deletion Security & BOLA Prevention (api/admin/deleteUser.ts)
+  // ====================================================================
+  console.log('\nGroup 8: Super Admin User Deletion Security & BOLA Prevention (api/admin/deleteUser.ts)');
+  {
+    const makeRes = () => {
+      let code = 200;
+      let body: any = null;
+      return {
+        res: {
+          setHeader: () => {},
+          status: (c: number) => {
+            code = c;
+            return {
+              json: (b: any) => { body = b; return b; },
+              end: () => {},
+            };
+          },
+        },
+        getCode: () => code,
+        getBody: () => body,
+      };
+    };
+
+    // 1. Rejects unauthenticated caller (HTTP 401)
+    const unauthDelReq = {
+      method: 'POST',
+      body: { targetUid: 'student_999' },
+      headers: { 'content-type': 'application/json' },
+    };
+    const mDel1 = makeRes();
+    await deleteUserHandler(unauthDelReq, mDel1.res);
+    assert(mDel1.getCode() === 401, 'deleteUser rejects unauthenticated caller with HTTP 401');
+    assert(mDel1.getBody()?.error?.includes('Unauthorized'), 'deleteUser 401 error cites unauthorized');
+
+    // 2. CRITICAL BOLA DEFENSE: Rejects authenticated normal student caller (HTTP 403 Forbidden)
+    const studentDelReq = {
+      method: 'POST',
+      body: { targetUid: 'victim_student_user' },
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test_valid_token_normal_student_123',
+      },
+    };
+    const mDel2 = makeRes();
+    await deleteUserHandler(studentDelReq, mDel2.res);
+    assert(mDel2.getCode() === 403, 'deleteUser strictly blocks normal student from deleting users (HTTP 403)');
+    assert(mDel2.getBody()?.error?.includes('Super Admin privileges required'), 'deleteUser 403 error explicitly cites Super Admin privileges required');
+
+    // 3. Rejects self-deletion attempt via admin endpoint (HTTP 400)
+    const selfDelReq = {
+      method: 'POST',
+      body: { targetUid: 'superadmin_operator_1' },
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test_valid_token_superadmin_operator_1',
+      },
+    };
+    const mDel3 = makeRes();
+    await deleteUserHandler(selfDelReq, mDel3.res);
+    assert(mDel3.getCode() === 400, 'deleteUser rejects self-deletion via admin endpoint with HTTP 400');
+    assert(mDel3.getBody()?.error?.includes('Self-deletion'), 'deleteUser error cites self-deletion forbidden');
+
+    // 4. Rejects deletion of protected accounts (HTTP 403)
+    const protectedDelReq = {
+      method: 'POST',
+      body: { targetUid: 'target_protected_admin', targetEmail: 'admin@cognify.com' },
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test_valid_token_superadmin_master',
+      },
+    };
+    const mDel4 = makeRes();
+    await deleteUserHandler(protectedDelReq, mDel4.res);
+    assert(mDel4.getCode() === 403, 'deleteUser rejects deletion of protected permanent super admin account (HTTP 403)');
+    assert(mDel4.getBody()?.error?.includes('Protected Account'), 'deleteUser error cites Protected Account');
+
+    // 5. Missing targetUid rejected (HTTP 400)
+    const missingTargetReq = {
+      method: 'POST',
+      body: {},
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test_valid_token_superadmin_master',
+      },
+    };
+    const mDel5 = makeRes();
+    await deleteUserHandler(missingTargetReq, mDel5.res);
+    assert(mDel5.getCode() === 400, 'deleteUser rejects missing targetUid with HTTP 400');
+
+    // 6. Authorized Super Admin caller processes successfully (HTTP 200)
+    const validSuperAdminReq = {
+      method: 'POST',
+      body: { targetUid: 'student_graduated_to_purge', targetEmail: 'student_old@example.com' },
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer test_valid_token_superadmin_master',
+      },
+    };
+    const mDel6 = makeRes();
+    await deleteUserHandler(validSuperAdminReq, mDel6.res);
+    assert(mDel6.getCode() === 200, 'deleteUser processes authorized superadmin request with HTTP 200');
+    assert(mDel6.getBody()?.success === true, 'deleteUser returns success: true for verified superadmin');
+    assert(mDel6.getBody()?.operatorUid === 'superadmin_master', 'deleteUser audit manifest records operatorUid');
+
+    // 7. Security Invariant: Ensure zero personal emails are hardcoded in deleteUser.ts
+    const deleteUserCode = fs.readFileSync(path.resolve(process.cwd(), 'api/admin/deleteUser.ts'), 'utf-8');
+    assert(!/esraahosni|modyhashim|alkhateeb/i.test(deleteUserCode), 'api/admin/deleteUser.ts contains ZERO hardcoded personal emails');
+
+    // 8. Security Invariant: Ensure all Firestore calls pass Authorization headers
+    assert(deleteUserCode.includes("'Authorization': `Bearer ${bearerToken}`"), 'api/admin/deleteUser.ts attaches Authorization header to Firestore REST calls');
   }
 
   console.log(`\n====================================================================`);
