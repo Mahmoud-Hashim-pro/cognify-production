@@ -99,20 +99,19 @@ To guarantee full GDPR and FERPA compliance when a user requests the **Right to 
 ```mermaid
 flowchart TD
     Req["Student Clicks 'Delete My Account'"] --> Confirm{"Explicit Confirmation Modal"}
-    Confirm -->|Confirmed| Cascade["Query & Delete all 11 Subcollections"]
+    Confirm -->|Confirmed| Cascade["Query & Delete all User Subcollections"]
     
-    subgraph Subcollections ["11 User Subcollections"]
+    subgraph Subcollections ["Active & Legacy Subcollections"]
         Cascade --> S1["threads"]
         Cascade --> S2["goals"]
         Cascade --> S3["learningEvents"]
         Cascade --> S4["learningProfile"]
         Cascade --> S5["exerciseHistory"]
         Cascade --> S6["loginHistory"]
-        Cascade --> S7["neurodiversity"]
-        Cascade --> S8["sensoryLogs"]
-        Cascade --> S9["studentState"]
-        Cascade --> S10["spatialMemories"]
-        Cascade --> S11["caregiverLinks"]
+        Cascade --> S7["studentState"]
+        Cascade --> S8["spatialMemories"]
+        Cascade --> S9["caregiverLinks"]
+        Cascade --> S10["legacyPurgePaths"]
     end
     
     Subcollections --> DelUser["Delete users/{uid} root document"]

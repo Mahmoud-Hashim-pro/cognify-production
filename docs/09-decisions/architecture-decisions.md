@@ -33,7 +33,7 @@ Standard educational software often uses baseline aptitude or IQ tests to restri
 Cognify establishes the **Decoupling Invariant**: A student's baseline cognitive style preview (`iqScore`) is strictly decoupled from their academic grade level and curriculum track.
 
 ### Consequences
-- **Positive**: Prevents harmful academic stigmatization; aligns with neurodiversity and growth mindset pedagogy. A student with any cognitive style preview can achieve high concept mastery through adaptive scaffolding, while a student who struggles with a specific topic receives targeted prerequisite remediation.
+- **Positive**: Prevents harmful academic stigmatization; aligns with inclusive education and growth mindset pedagogy. A student with any cognitive style preview can achieve high concept mastery through adaptive scaffolding, while a student who struggles with a specific topic receives targeted prerequisite remediation.
 - **Negative**: Requires maintaining separate models for baseline cognitive style dimensions vs. observed empirical concept mastery.
 
 ---

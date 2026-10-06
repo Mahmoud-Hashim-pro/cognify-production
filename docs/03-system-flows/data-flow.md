@@ -81,7 +81,7 @@ Compiles a complete, portable JSON archive including:
 
 ### B. Cascade Account Deletion (`handleExecuteErasure`)
 When a student requests account termination:
-1. Deletes all documents across all 11 subcollections (`threads`, `goals`, `learningEvents`, `learningProfile`, `exerciseHistory`, `loginHistory`, `neurodiversity`, `sensoryLogs`, `studentState`, `spatialMemories`, `caregiverLinks`) in parallel.
+1. Deletes all documents across all user subcollections (`threads`, `goals`, `learningEvents`, `learningProfile`, `exerciseHistory`, `loginHistory`, `studentState`, `spatialMemories`, `caregiverLinks`, plus legacy purge paths) in parallel.
 2. Deletes the root user document in `users/{uid}`.
 3. Clears all browser `LocalStorage`, `SessionStorage`, and IndexedDB encryption keys and persistent caches.
 4. Terminates the Firebase Auth session and logs out permanently.

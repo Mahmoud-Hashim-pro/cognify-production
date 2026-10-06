@@ -126,18 +126,17 @@ When a student executes account deletion in [`src/components/PrivacySecurityCent
 flowchart TD
     Req["User / Super Admin requests Erasure"] --> Purge["Execute Cascade Erasure"]
     
-    subgraph Subcollections ["11 Remote Firestore Subcollections"]
+    subgraph Subcollections ["Active & Legacy Subcollections Purged"]
         Purge --> S1["threads"]
         Purge --> S2["goals"]
         Purge --> S3["learningEvents"]
         Purge --> S4["learningProfile"]
         Purge --> S5["exerciseHistory"]
         Purge --> S6["loginHistory"]
-        Purge --> S7["neurodiversity"]
-        Purge --> S8["sensoryLogs"]
-        Purge --> S9["studentState"]
-        Purge --> S10["spatialMemories"]
-        Purge --> S11["caregiverLinks"]
+        Purge --> S7["studentState"]
+        Purge --> S8["spatialMemories"]
+        Purge --> S9["caregiverLinks"]
+        Purge --> S10["legacyPurgePaths"]
     end
     
     Purge --> Doc["Parent Document users/{uid}"]

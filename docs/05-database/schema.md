@@ -196,11 +196,9 @@ To guarantee strict multi-tenant isolation, user sovereignty, and comprehensive 
 | **4** | `users/{uid}/learningProfile/{profileId}` | Longitudinal concept mastery records, cognitive strengths, and struggle logs. | Owner-only read/write. Sanitized via non-diagnostic guard. |
 | **5** | `users/{uid}/exerciseHistory/{exerciseId}` | Daily practice questions, pre/post quiz scores, and formative micro-check results. | Owner-only read/write. Used for Hake $g$ calculations. |
 | **6** | `users/{uid}/loginHistory/{loginId}` | User authentication records, client IP fingerprints, and browser user-agent audits. | Owner-only write; Super Admin review in security audits. |
-| **7** | `users/{uid}/neurodiversity/{docId}` | (Legacy) Archived assistive configurations. Permanently purged during account cascade erasure. | Legacy owner-only read/write. |
-| **8** | `users/{uid}/sensoryLogs/{logId}` | (Legacy) Archived escalation logs. Permanently purged during account cascade erasure. | Legacy owner & authorized caregivers. |
-| **9** | `users/{uid}/studentState/current` | The single source of truth for the adaptive tutoring loop & SM-2 schedules. | Owner-only read/write (`studentStateEngine.ts`). |
-| **10** | `users/{uid}/spatialMemories/{memoryId}` | Ephemeral household object coordinates recognized by Vision Companion. | Owner-only read/write. Never synced with remote cloud media. |
-| **11** | `users/{uid}/caregiverLinks/{linkId}` | Formal guardian link relationships, authorization scopes, and approval status. | Shared between student and verified guardian. |
+| **7** | `users/{uid}/studentState/current` | The single source of truth for the adaptive tutoring loop & SM-2 schedules. | Owner-only read/write (`studentStateEngine.ts`). |
+| **8** | `users/{uid}/spatialMemories/{memoryId}` | Ephemeral household object coordinates recognized by Vision Companion. | Owner-only read/write. Never synced with remote cloud media. |
+| **9** | `users/{uid}/caregiverLinks/{linkId}` | Formal guardian link relationships, authorization scopes, and approval status. | Shared between student and verified guardian. |
 
 ### Cascade Deletion Guarantee:
-Both client-initiated erasure ([`PrivacySecurityCenter.tsx`](../../src/components/PrivacySecurityCenter.tsx)) and administrative deletion ([`AdminDashboard.tsx`](../../src/components/AdminDashboard.tsx)) query and delete documents across all 11 subcollections in parallel before deleting the parent `users/{uid}` document, guaranteeing **zero orphaned artifacts**.
+Both client-initiated erasure ([`PrivacySecurityCenter.tsx`](../../src/components/PrivacySecurityCenter.tsx)) and administrative deletion ([`AdminDashboard.tsx`](../../src/components/AdminDashboard.tsx), [`api/admin/deleteUser.ts`](../../api/admin/deleteUser.ts)) query and delete documents across all active subcollections as well as legacy/archived collections in parallel before deleting the parent `users/{uid}` document, guaranteeing **zero orphaned artifacts**.
