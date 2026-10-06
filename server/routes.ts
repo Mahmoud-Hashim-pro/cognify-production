@@ -12,9 +12,11 @@ import express from "express";
 import generateAdaptiveResponseHandler from "../api/gemini/generateAdaptiveResponse";
 import generateAdaptiveResponseStreamHandler from "../api/gemini/generateAdaptiveResponseStream";
 import generateContentHandler from "../api/gemini/generateContent";
-import generateBenchmarkComparisonHandler from "../api/gemini/generateBenchmarkComparison";
-import generateProactiveInsightsHandler from "../api/gemini/generateProactiveInsights";
-import generateLogicResponseHandler from "../api/gemini/generateLogicResponse";
+import {
+  benchmarkComparisonHandler as generateBenchmarkComparisonHandler,
+  proactiveInsightsHandler as generateProactiveInsightsHandler,
+  logicResponseHandler as generateLogicResponseHandler,
+} from "../api/gemini/auxiliary";
 import { guard } from "../api/_lib/ai";
 
 export const geminiRouter = express.Router();
