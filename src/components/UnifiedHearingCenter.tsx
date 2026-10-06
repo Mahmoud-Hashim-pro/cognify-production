@@ -69,13 +69,12 @@ export default function UnifiedHearingCenter({
   const [aiQuestion, setAiQuestion] = useState<string>('');
   const [aiAnswer, setAiAnswer] = useState<string>(
     isEgyptian
-      ? 'أهلاً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D وبالصوت والنص.'
+      ? 'أهلاً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
       : isAr
-      ? 'مرحباً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D وبالصوت والنص.'
-      : 'Welcome! Ask me any question and I will explain it in 3D Sign Language, voice, and text.'
+      ? 'مرحباً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
+      : 'Welcome! Ask me any question and I will explain it in 3D Sign Language and text.'
   );
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
-  const [isAiSpeaking, setIsAiSpeaking] = useState<boolean>(false);
   const [isQuestionVoiceActive, setIsQuestionVoiceActive] = useState<boolean>(false);
 
   const triggerAvatarSign = useCallback((text: string) => {
@@ -108,7 +107,6 @@ export default function UnifiedHearingCenter({
 
     cancelSpeech();
     setIsAiLoading(true);
-    setIsAiSpeaking(false);
     triggerHapticAlert('single-pulse');
 
     const prompt = `You are Cognify's specialized Deaf & Hard of Hearing AI Sign Companion.
@@ -127,23 +125,14 @@ Question: "${q}"`;
         .trim();
       if (!cleanAnswer) {
         cleanAnswer = isEgyptian
-          ? 'تمام، فهمت سؤالك وسأشرحه لك بالإشارة والصوت.'
+          ? 'تمام، فهمت سؤالك وسأشرحه لك بلغة الإشارة.'
           : isAr
-          ? 'حسناً، فهمت سؤالك وسأشرحه لك بالإشارة والصوت.'
+          ? 'حسناً، فهمت سؤالك وسأشرحه لك بلغة الإشارة.'
           : 'Understood, I will explain this in sign language.';
       }
       setAiAnswer(cleanAnswer);
 
-      // 1. Speak aloud
-      setIsAiSpeaking(true);
-      speak(cleanAnswer, dialect, {
-        rate: 1.0,
-        onStart: () => setIsAiSpeaking(true),
-        onEnd: () => setIsAiSpeaking(false),
-        onError: () => setIsAiSpeaking(false),
-      });
-
-      // 2. Animate 3D Sign Avatar
+      // Animate 3D Sign Avatar
       triggerAvatarSign(cleanAnswer);
       toast.success(
         loc('Answer generated & signed in 3D', 'تمت الإجابة والترجمة للغة الإشارة 3D')
@@ -451,18 +440,6 @@ Question: "${q}"`;
     { label: 'Water 💧', text: 'Water please' },
   ], [isAr, isEgyptian]);
 
-  const sampleQuestions = useMemo(() => isAr ? [
-    'كيف يعمل القلب؟',
-    'ما هي المجموعة الشمسية؟',
-    'ما هي لغة الإشارة؟',
-    'كيف أتعامل في المقابلة؟',
-  ] : [
-    'How does the heart work?',
-    'What is the solar system?',
-    'What is sign language?',
-    'Job interview tips',
-  ], [isAr]);
-
   const handleAddQuickGesture = (text: string) => {
     setAccumulatedText((prev) => {
       const sep = prev.trim() ? ' ' : '';
@@ -497,15 +474,12 @@ Question: "${q}"`;
           </div>
           <div>
             <h1 className="font-black text-sm text-white leading-tight flex items-center gap-2">
-              <span>{loc('Bilateral Sign Language Station', 'محطة لغة الإشارة التبادلية (شاشة واحدة مقسومة نصفين)')}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">
-                {loc('50 / 50 Split', 'شاشة مقسومة نصفين')}
-              </span>
+              <span>{loc('Bilateral Sign Language Station', 'محطة لغة الإشارة التبادلية')}</span>
             </h1>
             <p className="text-[10px] text-slate-400">
               {loc(
-                'Side 1: AI Avatar explains in 3D Sign & Voice | Side 2: Camera translates your signs into voice & text',
-                'النصف الأول: الأفاتار يشرح بالذكاء الاصطناعي والإشارة 3D | النصف الثاني: الكاميرا تقرأ إشاراتك وتحولها لصوت أو نص'
+                'AI Avatar explains in 3D Sign | Camera translates your signs into voice & text',
+                'الأفاتار يشرح بالذكاء الاصطناعي والإشارة 3D | الكاميرا تقرأ إشاراتك وتحولها لصوت أو نص'
               )}
             </p>
           </div>
@@ -529,11 +503,11 @@ Question: "${q}"`;
         </div>
       </header>
 
-      {/* ── 50/50 SPLIT SCREEN: TWO HALVES ONLY (NO LOUD SOUND SENTINEL, NO MIC REPLACING CAMERA) ── */}
+      {/* ── BILATERAL SIGN LANGUAGE STATION: TWO CARDS ── */}
       <main className="flex-1 min-h-0 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar">
 
         {/* ══════════════════════════════════════════════════════════════════════
-            HALF 1 (50%): THE 3D AVATAR & AI TUTOR (اسأل الذكاء الاصطناعي ويرد بالإشارة)
+            CARD 1: THE 3D AVATAR & AI TUTOR (اسأل الذكاء الاصطناعي ويرد بالإشارة)
            ══════════════════════════════════════════════════════════════════════ */}
         <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group">
           <div className="flex flex-col h-full justify-between">
@@ -546,12 +520,9 @@ Question: "${q}"`;
                 <div>
                   <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 flex-wrap">
                     <span>{loc('3D Sign Avatar & AI Tutor', 'أفاتار الذكاء الاصطناعي بلغة الإشارة 3D')}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-bold flex items-center gap-1">
-                      ✨ {loc('Facial & Head Gestures Active', 'تعبيرات الوجه وإيماءات الرأس: نشطة')}
-                    </span>
                   </h2>
                   <p className="text-[10px] text-slate-400">
-                    {loc('Ask any question -> AI explains it in 3D Sign & Audio', 'اسأله أي سؤال ويشرحه لك بلغة الإشارة 3D وبالصوت')}
+                    {loc('Ask any question -> AI explains it in 3D Sign Language', 'اسأله أي سؤال ويشرحه لك بلغة الإشارة 3D')}
                   </p>
                 </div>
               </div>
@@ -619,13 +590,7 @@ Question: "${q}"`;
               </p>
               {!isAiLoading && (
                 <div className="flex items-center justify-between pt-1 text-[10px] text-slate-500 border-t border-slate-900 mt-1">
-                  <span>{isAiSpeaking ? loc('🔊 Speaking aloud…', '🔊 جاري النطق الصوتي...') : loc('✅ Ready', '✅ جاهز')}</span>
-                  <button
-                    onClick={() => speak(aiAnswer, dialect)}
-                    className="text-amber-400 hover:text-amber-300 font-bold cursor-pointer"
-                  >
-                    {loc('Replay Audio 🔊', 'إعادة النطق 🔊')}
-                  </button>
+                  <span>{loc('✅ Ready', '✅ جاهز')}</span>
                 </div>
               )}
             </div>
@@ -667,22 +632,6 @@ Question: "${q}"`;
                   <Send className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{loc('Ask & Sign', 'اسأل واشرح')}</span>
                 </button>
-              </div>
-
-              {/* Sample Question Chips */}
-              <div className="flex flex-wrap gap-1 pt-0.5">
-                {sampleQuestions.map((q, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setAiQuestion(q);
-                      handleAskAi(q);
-                    }}
-                    className="px-2 py-0.5 rounded-md bg-[#150917] hover:bg-[#200e23] border border-[#4A1224]/50 text-slate-400 hover:text-indigo-300 text-[10px] font-bold transition-colors cursor-pointer"
-                  >
-                    💡 {q}
-                  </button>
-                ))}
               </div>
             </div>
           </div>
