@@ -83,7 +83,6 @@ Student Interaction (Chat / Formative Check / Video / Speech)
 - **Spatial Memory Engine**: Localizes and tracks physical objects (keys, eyeglasses, canes) across rooms with chronological surface history (last 10 surfaces) and epistemic honesty (never hallucinates an unobserved item).
 - **Sign Avatar 3D (Deaf & Hard of Hearing)**: Real-time 3D signing avatar powered by Three.js. **Note:** Current gesture poses are ASL-based approximations pending review by a certified Arabic Sign Language (ArSL) linguist. A disclaimer is displayed in-app. Certified ArSL integration is on the roadmap (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - **Two-Way Hearing Bridge**: Live bilingual speech-to-text transcription with adjustable font sizes and high-contrast styling.
-- **Neurodiversity & Autism Hub**: Spoken PECS symbol communication cards, visual routine schedules, and calming sensory emotion tracking with caregiver alert escalation.
 - **Speech Sanitizer**: Natural voice filtering in TTS engine (`cleanForSpeech`), removing markdown noise, asterisks, and robotic labels before audio synthesis.
 
 ### 3. Academic Command Center & Analytics

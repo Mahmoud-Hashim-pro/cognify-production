@@ -23,7 +23,7 @@ export interface UserProfile {
   level: 'Basic' | 'Intermediate' | 'Advanced';
   field: string;               // e.g. "Computer Science", "Medicine", "Engineering"
   language?: string;           // e.g. "English", "Arabic", "Egyptian Ammiya", "French"
-  accessibilityMode: 'None' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Speech' | 'Neurodiversity';
+  accessibilityMode: 'None' | 'Visual' | 'Vocal-Deaf' | 'Sign-Only' | 'Speech';
   iqScore?: number;            // Scientifically evaluated IQ score (Decoupled from level)
   preferredPedagogyStyle?: string;
   points: number;
@@ -196,8 +196,8 @@ To guarantee strict multi-tenant isolation, user sovereignty, and comprehensive 
 | **4** | `users/{uid}/learningProfile/{profileId}` | Longitudinal concept mastery records, cognitive strengths, and struggle logs. | Owner-only read/write. Sanitized via non-diagnostic guard. |
 | **5** | `users/{uid}/exerciseHistory/{exerciseId}` | Daily practice questions, pre/post quiz scores, and formative micro-check results. | Owner-only read/write. Used for Hake $g$ calculations. |
 | **6** | `users/{uid}/loginHistory/{loginId}` | User authentication records, client IP fingerprints, and browser user-agent audits. | Owner-only write; Super Admin review in security audits. |
-| **7** | `users/{uid}/neurodiversity/{docId}` | Assistive configurations (PECS decks, visual daily routines, calming color palettes). | Owner-only read/write. Zero clinical diagnostic labels permitted. |
-| **8** | `users/{uid}/sensoryLogs/{logId}` | Sensory escalation records, 4-4-4 breathing completions, and meltdown alerts. | Owner & authorized caregivers (`isVerifiedParent`). |
+| **7** | `users/{uid}/neurodiversity/{docId}` | (Legacy) Archived assistive configurations. Permanently purged during account cascade erasure. | Legacy owner-only read/write. |
+| **8** | `users/{uid}/sensoryLogs/{logId}` | (Legacy) Archived escalation logs. Permanently purged during account cascade erasure. | Legacy owner & authorized caregivers. |
 | **9** | `users/{uid}/studentState/current` | The single source of truth for the adaptive tutoring loop & SM-2 schedules. | Owner-only read/write (`studentStateEngine.ts`). |
 | **10** | `users/{uid}/spatialMemories/{memoryId}` | Ephemeral household object coordinates recognized by Vision Companion. | Owner-only read/write. Never synced with remote cloud media. |
 | **11** | `users/{uid}/caregiverLinks/{linkId}` | Formal guardian link relationships, authorization scopes, and approval status. | Shared between student and verified guardian. |

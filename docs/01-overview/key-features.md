@@ -23,10 +23,9 @@ graph TD
 
     D --> D1["Vision Companion (Hazards & OCR)"]
     D --> D2["Spatial Object Memory"]
-    D --> D3["Neurodiversity & Autism Oasis"]
-    D --> D4["PECS & Sensory Regulation"]
-    D --> D5["Sign Video Studio & 3D Avatar"]
-    D --> D6["Two-Way Hearing Bridge"]
+    D --> D3["Sign Video Studio & 3D Avatar"]
+    D --> D4["Two-Way Hearing Bridge"]
+    D --> D5["Dyslexia & Learning Studio"]
 
     A --> A1["GPA Calculator (4.0 & 5.0 scales)"]
     A --> A2["What-If Simulation Sandbox"]
@@ -79,19 +78,13 @@ Designed with **Strict Hardware Lifecycle Isolation** to prevent camera/mic reso
    - **Hazards-First Safety Triage**: The AI system prompt mandates announcing physical threats (steps, obstacles, vehicles, hot surfaces, spills) before any descriptive aesthetic details.
    - **OCR Verbatim**: Reads price tags, expiration dates, medicine dosages, and street signs with literal precision.
    - **Spatial Physical Memory (`SpatialObjectRecord`)**: Remembers where the user set down physical belongings (keys, prescription glasses, medication) with timestamp and room coordinates.
-2. **Neurodiversity & Autism Hub (`NeurodiversityHub.tsx`)**:
-   - Designed for autistic learners and students with cognitive/sensory processing needs.
-   - **Spoken PECS Cards**: Visual sentence strip builder with AAC speech synthesis across essential functional categories.
-   - **Visual Daily Schedule**: Step-by-step visual routine tracker with progress cues and task completion celebration.
-   - **Sensory Regulation**: 5-level emotion tracking scale with calming 4-4-4 breathing exercises.
-   - **Caregiver Alert Escalation**: Direct server-side SMS/Webhook notification for severe sensory meltdowns.
-3. **Sign Video Studio & 3D Avatar (`SignVideoStudio.tsx`, `SignAvatar3D.tsx`)**:
+2. **Sign Video Studio & 3D Avatar (`SignVideoStudio.tsx`, `SignAvatar3D.tsx`)**:
    - Tracks 21 3D hand joints with MediaPipe Hands.
    - Local TensorFlow.js classifier runs on WebGL, identifying alphabet letters and gestures locally with 0 video transmission.
    - Three.js skeletal avatar translates incoming spoken or typed text into natural sign gestures.
-4. **Two-Way Hearing Bridge (`TwoWayHearingBridge.tsx`)**:
+3. **Two-Way Hearing Bridge (`TwoWayHearingBridge.tsx`)**:
    - Real-time communication bridge: transforms spoken audio from hearing participants into large typography and sign avatar motions, while translating sign gestures and typed responses into speech synthesis.
-5. **Dyslexia & Learning Disabilities Studio (`LearningDisabilityStudio.tsx`, `learningDisabilityEngine.ts`)**:
+4. **Dyslexia & Learning Disabilities Studio (`LearningDisabilityStudio.tsx`, `learningDisabilityEngine.ts`)**:
    - Clinical accommodations for Specific Learning Disabilities (SLD: Dyslexia, Dysgraphia, and processing deficits):
    - **Bionic Eye-Fixation Reader**: Accelerates saccadic fixation by bolding initial word stems, cutting cognitive reading fatigue by over 40%.
    - **Focus Reading Window & Ruler**: Semi-transparent illuminated ruler that masks out distraction lines above and below to prevent visual crowding and line jumping.
@@ -113,10 +106,10 @@ Designed with **Strict Hardware Lifecycle Isolation** to prevent camera/mic reso
 3. **Goal Tracker (`Goaltracker.tsx`)**:
    - Breaks long-term academic milestones into measurable subtasks with progress bars and milestone rewards.
 4. **Cognitive & Executive Hub 2.0 (`CognitiveGym.tsx`, `cognitiveEngine.ts`)**:
-   - **Executive Function Drills**: Real interactive training tasks including Go/No-Go (Inhibitory control & impulse resistance for ADHD), Spatial Working Memory Grid (Forward & Reverse span), Cognitive Set-Shifting (Wisconsin-style rule adaptation for Autism), and Stroop attention filtering.
+   - **Executive Function Drills**: Real interactive training tasks including Go/No-Go (Inhibitory control & impulse resistance for ADHD), Spatial Working Memory Grid (Forward & Reverse span), Cognitive Set-Shifting (Wisconsin-style rule adaptation & mental flexibility), and Stroop attention filtering.
    - **ADHD Neuro-Toolkit**: Executive Task Slicer (decomposing intimidating goals into <= 3-minute dopamine steps), Micro-Sprint focus timer (5/10/15 mins), and 100% in-browser Web Audio Brown/Pink/White Noise synthesis to soothe ADHD restlessness.
    - **Dyscalculia Concrete Modeler**: Interactive Ten-Frames (1-20 dots), Cuisenaire proportional rods, and visual arithmetic ten-decomposition logic to break math phobia.
-   - **Low-Arousal Sensory Mode & Compassionate Streaks**: Minimalist sensory calming mode for autistic learners, visual predictability session timelines, and Grace Day Shields protecting ADHD users from streak reset trauma.
+   - **Low-Arousal Sensory Mode & Compassionate Streaks**: Minimalist sensory calming mode, visual predictability session timelines, and Grace Day Shields protecting users from streak reset trauma.
 
 ---
 

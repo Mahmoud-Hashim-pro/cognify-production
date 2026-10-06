@@ -107,7 +107,7 @@ Cognify strictly adheres to an ethical non-medical invariant: **Educational soft
 Implemented in [`src/lib/accessibilityIntelligenceEngine.ts`](../../src/lib/accessibilityIntelligenceEngine.ts) and enforced in [`src/lib/studentStateEngine.ts`](../../src/lib/studentStateEngine.ts):
 
 1. **Deficit Label Blocklist**: Words such as `autism`, `autistic`, `adhd`, `bipolar`, `retarded`, `handicapped`, `disabled`, and `clinical_disorder` are categorically rejected from student preference, pedagogy, and attribute fields.
-2. **Functional Whitelist (`ALLOWED_FUNCTIONAL_IDENTIFIERS`)**: Legitimate assistive UI configurations (e.g. `autism_hub`, `opendyslexic`, `dyslexia_font`, `visual_schedule`, `sensory_soothe`) are explicitly whitelisted to allow feature toggling without labeling the human learner.
+2. **Functional Whitelist (`ALLOWED_FUNCTIONAL_IDENTIFIERS`)**: Legitimate assistive UI configurations (e.g. `opendyslexic`, `dyslexia_font`, `visual_comfort`, `dyslexia_ruler`) are explicitly whitelisted to allow feature toggling without labeling the human learner.
 3. **Automated State Flush Sanitization**: Every state flush to Cloud Firestore passes through `enforceNonDiagnosticInvariant(patch)`, which strips or sanitizes violating keys before network dispatch.
 
 ---

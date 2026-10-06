@@ -9,7 +9,6 @@ Welcome to the official, evidence-based technical documentation suite for **Cogn
 ```
 docs/
 ├── PROOF_PACK_EXECUTIVE_DOSSIER.md # Executive proof pack & go-to-market dossier
-├── ABA_CLINICAL_VALIDATION_PROTOCOL.md # Clinical validation protocol and SLP rubric for Autism & AAC
 ├── CLINICAL_SIGN_LANGUAGE_VALIDATION.md # Clinical validation protocol for Egyptian Sign Language (ArSL)
 ├── GO_TO_MARKET_ROADMAP.md         # Commercial & institutional adoption roadmap
 │

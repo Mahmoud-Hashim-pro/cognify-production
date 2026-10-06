@@ -15,7 +15,6 @@
 | **3D Sign Avatar (Deaf)** | ⚠️ Experimental Prototype (HamNoSys Rig & Thematic Lexicon) | Internal lookup table with 24 thematic categories & fingerspelling fallback | Formal accreditation & validation with Egyptian Deaf Associations |
 | **ArSL ML Recognizer (Camera)** | ⚠️ Architectural PoC (Trained on Synthetic Vectors Only) | In-browser sliding window pipeline; 0.0% real-world accuracy on humans | Ingesting authenticated human video datasets (e.g., KArSL) with Deaf partners |
 | **Sound & Hazard Radar** | ✅ Client-side Web Audio DSP spectral analysis + frequency tracking | DSP heuristic & pattern matching (not black-box classifier) | ML Sound Event Detection (YAMNet on Edge) |
-| **Autism & Sensory Regulation** | ✅ Persistent PECS, Visual Routine, 4-4-4 Breathing Bubble & Server Meltdown Dispatch | Non-clinical digital scaffold (not a medical diagnostic or therapist replacement) | **ABA & SLP Clinical Protocol** (See Appendix C: `docs/ABA_CLINICAL_VALIDATION_PROTOCOL.md`) |
 | **Data Privacy & Minor Protection** | ✅ COPPA/GDPR-K Verified Consent, FERPA compliant, 0% cloud storage of video/mic buffers | Ephemeral in-memory inference with client-side redaction | SOC-2 Type II External Compliance Audit |
 | **Ethical Non-Diagnostic Invariant** | ✅ Automated clinical label stripper & functional UI whitelist | Strictly prohibits deficit labeling while supporting assistive UI toggles | Joint clinical audit with inclusive education boards |
 
@@ -96,7 +95,7 @@ Each lexical sign incorporates:
 
 ### Objectives & Cohort:
 - **Location**: 1 Specialized Disability Center / Inclusive University Faculty.
-- **Participants**: 15–20 Users across Visual, Deaf, and Neurodiversity profiles.
+- **Participants**: 15–20 Users across Visual and Deaf profiles.
 - **Duration**: 14 Days.
 
 ### Empirical KPI Tracking Framework:
@@ -109,12 +108,7 @@ Each lexical sign incorporates:
 
 ---
 
-## 5. 🧩 Appendix C: Autism & AAC Clinical Governance Protocol (الميثاق الإكلينيكي للتوحد والتواصل البديل)
-
-Complete clinical governance rubric, operant baseline specifications, and pilot evaluation frameworks are documented in:  
----
-
-## 6. 📖 Appendix D: Unified Arabic Sign Language (ArSL) Lexical Corpus & Accreditation Protocol (ملحق اعتماد القاموس الإشاري العربي الموحد)
+## 5. 📖 Appendix C: Unified Arabic Sign Language (ArSL) Lexical Corpus & Accreditation Protocol (ملحق اعتماد القاموس الإشاري العربي الموحد)
 
 Cognify has ingested and structured the **Unified Arabic Sign Language Dictionary for the Deaf (القاموس الإشاري العربي الموحد للصم)**, encompassing **1,413 authenticated lexical signs across 28 functional chapters** published under the auspices of the Arab League Educational, Cultural and Scientific Organization (ALECSO) and the Council of Arab Ministers of Social Affairs.
 

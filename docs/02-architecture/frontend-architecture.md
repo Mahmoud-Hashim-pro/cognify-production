@@ -1,4 +1,4 @@
-﻿# Frontend Architecture
+# Frontend Architecture
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `src/App.tsx`, `vite.config.ts`, `package.json`, `src/components/`  
@@ -43,7 +43,7 @@ flowchart TD
 
 ### Supported View Routes:
 - `'chat'`: Adaptive chat, code explanation, micro-checks, and retention warmups.
-- `'disability'`: Hub container (`'hub'`) switching between `'vision'`, `'deaf'`, and `'neurodiversity'`.
+- `'disability'`: Hub container (`'hub'`) switching between `'vision'` and `'deaf'` (with caregiver linking).
 - `'planner'`: Academic planner and exam countdown schedule.
 - `'gpa'`: GPA calculator and What-If simulation sandbox.
 - `'goals'`: Goal tracker and task milestones.

@@ -93,7 +93,7 @@ Educational AI systems run the risk of creating permanent, stigmatizing deficit 
 ### Decision
 Implement the **Non-Diagnostic Invariant Guard** in [`src/lib/accessibilityIntelligenceEngine.ts`](../../src/lib/accessibilityIntelligenceEngine.ts) and [`src/lib/studentStateEngine.ts`](../../src/lib/studentStateEngine.ts):
 1. Prohibit any clinical deficit terms (`autism`, `adhd`, `retarded`, `disorder`, etc.) from being stored in user identity or preference state.
-2. Maintain an explicit whitelist (`ALLOWED_FUNCTIONAL_IDENTIFIERS`) for UI feature toggles (`autism_hub`, `opendyslexic`, `visual_schedule`, etc.).
+2. Maintain an explicit whitelist (`ALLOWED_FUNCTIONAL_IDENTIFIERS`) for UI feature toggles (`opendyslexic`, `dyslexia_font`, `visual_comfort`, etc.).
 3. Intercept every state flush before dispatching to Cloud Firestore, stripping violating keys.
 
 ### Consequences

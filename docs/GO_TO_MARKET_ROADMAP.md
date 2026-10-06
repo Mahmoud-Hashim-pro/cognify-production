@@ -46,7 +46,7 @@ flowchart TD
 * **Key Deliverables**:
   - **Automated WCAG 2.2 AA CI Assertion Gate**: Automated regression tests on color contrast, focus rings, ARIA landmarks, and keyboard traps.
   - **Penetration Testing**: Independent validation of rate limiters, auth guards, and non-PII Firestore audit logs on `/api/emergency/dispatch`.
-  - Usability testing sessions with 5–10 real users across Visual, Deaf/Hard of Hearing, Speech-Impaired, and Neurodiversity profiles.
+  - Usability testing sessions with 5–10 real users across Visual, Deaf/Hard of Hearing, and Speech-Impaired profiles.
 * **Success Metric**: 0 Critical Security Vulnerabilities + Official WCAG 2.2 AA Compliance Audit Certificate attached to the Proof Pack.
 
 ---
@@ -57,7 +57,7 @@ flowchart TD
 * **Cohort**: 15–20 real students across 1 disability center or inclusive university faculty.
 * **Empirical Telemetry Tracked**:
   1. **SOS Dispatch Delivery Rate**: Verified delivery percentage via Multi-Channel fallback.
-  2. **Sensory Meltdown Alert Delivery & AAC Communication Rate**: Caregiver alert delivery speed and PECS / daily routine task completion.
+  2. **Hearing Bridge Transcription Latency**: Real-time speech-to-text response rate for deaf learners.
   3. **Visual Reader Accuracy**: Egyptian Pound banknote recognition success rate.
 * **Success Metric**: Documented, verifiable incident and interaction logs demonstrating $> 90\%$ task fulfillment.
 
@@ -67,7 +67,7 @@ flowchart TD
 * **Duration**: Parallel with Phases 3 & 4
 * **Objective**: Deliver a cohesive B2B/B2G sales package for institutional decision-makers.
 * **Deliverables**:
-  - 2-Minute High-Impact Walkthrough Videos for each of the 4 assistive suites.
+  - 2-Minute High-Impact Walkthrough Videos for each of the core assistive suites.
   - **The Cognify Proof Pack Dossier**: Official audit sheet + WCAG report + Telemetry certificate.
   - Institutional SaaS Tier Pricing Model (Annual per-seat licenses for schools, universities, and rehabilitation centers).
 

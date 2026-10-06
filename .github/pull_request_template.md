@@ -9,3 +9,4 @@
 - [ ] `npm run build` passes (Production web assets & Node server bundle)
 - [ ] `npm test` passes (Invariant tests & verification suites)
 - [ ] Tested the change in the app where relevant
+- [ ] Documentation sync: If a feature was modified or removed, searched `docs/` and `README.md` to ensure zero stale or contradictory references remain

@@ -1,4 +1,4 @@
-﻿# Authentication & Access Control Flow
+# Authentication & Access Control Flow
 
 > **Status**: [VERIFIED]  
 > **Source Baseline**: `src/lib/access.ts`, `src/lib/roles.ts`, `api/_lib/authGuard.ts`, `src/components/Login.tsx`  
@@ -70,7 +70,7 @@ Located in [`src/lib/roles.ts`](../../src/lib/roles.ts) and [`src/lib/access.ts`
 | Role | Default Home View | Accessible Views | Special Permissions |
 | :--- | :--- | :--- | :--- |
 | **Student** | `'chat'` | `chat`, `planner`, `gpa`, `goals`, `gym`, `french`, `profile`, `memory` | Standard learning & adaptive cycle. |
-| **Special Needs** | `'disability'` | `disability`, `chat`, `profile`, `memory`, `french` | Direct launch into Vision/Deaf/Neurodiversity Hub. |
+| **Special Needs** | `'disability'` | `disability`, `chat`, `profile`, `memory`, `french` | Direct launch into Vision/Deaf/Caregiver Hub. |
 | **Graduation Project** | `'chat'` | All student views + `disability` | Evaluation sandbox with access to all modules. |
 | **Org Manager** | `'cohort'` | `cohort`, `profile` | View aggregated analytics across student cohorts (Zero raw chat text access). |
 | **Admin** | `'admin'` | `admin`, `cohort`, `profile`, `chat` | System management and quota monitoring. |
