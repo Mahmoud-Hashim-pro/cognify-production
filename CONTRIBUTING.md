@@ -44,6 +44,13 @@ npm run lint    # tsc --noEmit
 npm run build   # vite build + server bundle
 ```
 
+## Atomic Documentation Rule
+If your change removes, deprecates, or fundamentally modifies a feature:
+- Search `docs/` and `README.md` for the feature name, components, and related keywords.
+- Permanently remove stale or dedicated protocol documents (`git rm`).
+- Update all relevant architecture diagrams, dossiers, schemas, and PR templates.
+- A PR with stale or contradictory documentation will not be approved.
+
 ## Deployment (Vercel)
 
 `main` auto-deploys to Vercel as a **static** site (config in `vercel.json`:

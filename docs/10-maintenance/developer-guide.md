@@ -77,7 +77,7 @@ graph TD
 
 ---
 
-## 3. Five Non-Negotiable Engineering Laws [VERIFIED]
+## 3. Six Non-Negotiable Engineering Laws [VERIFIED]
 
 Every pull request submitted to the repository must adhere to the following rules:
 
@@ -100,3 +100,10 @@ Never write directly to Firestore inside high-frequency button clicks. Always ut
 
 ### Law 5: Zero Tolerance for Broken Tests
 Never merge code that breaks any assertion in the **520-test suite**. Always execute `npm run lint && npm test` prior to pushing commits.
+
+### Law 6: Atomic Documentation Synchronization (Zero Stale Docs)
+Whenever a feature, module, or user journey is deleted, deprecated, or refactored in the codebase, you must atomically update all documentation. A PR is incomplete until:
+1. A global search across `docs/` and `README.md` is executed for the feature name, components, and related keywords.
+2. Any obsolete dedicated protocol, guide, or validation documents are permanently removed (`git rm`).
+3. Executive dossiers, roadmaps, architectural diagrams, schemas, and PR templates are updated to reflect the exact current code state.
+Code without synchronized documentation is considered broken code.
