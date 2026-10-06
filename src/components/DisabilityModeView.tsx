@@ -4,7 +4,7 @@ import { RadioGroup as AriaRadioGroup, Radio as AriaRadio } from 'react-aria-com
 import { AriaButton } from './ui/AriaButton';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
-  Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Brain, Flame,
+  Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Flame,
   ArrowLeft, ArrowRight, MessageSquare, Globe, Check, 
   LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
   SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck
@@ -69,7 +69,11 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
   // 1. If user explicitly clicked and chose a tab before, honor that manual choice!
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
-    if (saved === 'hub' || saved === 'neurodiversity' || saved === 'deaf' || saved === 'vision') {
+    if (saved === 'neurodiversity') {
+      try { localStorage.setItem('cognify_default_disability_tab', 'deaf'); } catch {}
+      return 'deaf';
+    }
+    if (saved === 'hub' || saved === 'deaf' || saved === 'vision') {
       return saved as DisabilityTab;
     }
   } catch {}
@@ -500,7 +504,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', Icon: LayoutGrid },
               { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
               { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
-              { id: 'neurodiversity' as const, labelAr: 'ذهنية', labelEn: 'Cognitive', Icon: Brain },
             ].map((suite) => (
               <AriaRadio
                 key={suite.id}

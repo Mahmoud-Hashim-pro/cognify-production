@@ -520,8 +520,7 @@ export default function App() {
           data.accessibilityMode = preLoginMode as AccessibilityMode;
           if (preLoginDis) data.disabilityType = preLoginDis;
           try {
-            const mappedTab = preLoginMode === 'Neurodiversity' ? 'neurodiversity' :
-                              preLoginMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
+            const mappedTab = preLoginMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
             localStorage.setItem('cognify_default_disability_tab', mappedTab);
           } catch {}
           setDoc(doc(db, path), cleanDataForFirestore({ 
