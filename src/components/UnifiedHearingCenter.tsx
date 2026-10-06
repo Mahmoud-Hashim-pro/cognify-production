@@ -3,7 +3,6 @@ import {
   Ear,
   Camera,
   CameraOff,
-  Volume2,
   Play,
   Square,
   RotateCcw,
@@ -188,8 +187,6 @@ Question: "${q}"`;
   const [cameraStatus, setCameraStatus] = useState<string>('');
   const [detectedSign, setDetectedSign] = useState<string>('');
   const [accumulatedText, setAccumulatedText] = useState<string>('');
-  const [autoSpeakEnabled, setAutoSpeakEnabled] = useState<boolean>(true);
-  const [isSpeakingCameraText, setIsSpeakingCameraText] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -296,20 +293,14 @@ Question: "${q}"`;
           // Append to recognized text
           setAccumulatedText((prev) => {
             const separator = prev.trim() ? ' ' : '';
-            const next = prev + separator + recognized;
-
-            // Auto-speak aloud if enabled
-            if (autoSpeakEnabled) {
-              speak(recognized, dialect);
-            }
-            return next;
+            return prev + separator + recognized;
           });
         }
       }
     } else {
       setDetectedSign('');
     }
-  }, [analyzeLandmarksGesture, autoSpeakEnabled, dialect]);
+  }, [analyzeLandmarksGesture]);
 
   // Start Camera handler
   const handleStartCamera = async () => {
@@ -397,59 +388,12 @@ Question: "${q}"`;
     };
   }, []);
 
-  // Speak accumulated camera text aloud
-  const handleSpeakAccumulatedText = () => {
-    if (!accumulatedText.trim()) return;
-    setIsSpeakingCameraText(true);
-    triggerHapticAlert('single-pulse');
-
-    speak(accumulatedText.trim(), dialect, {
-      rate: 1.0,
-      onStart: () => setIsSpeakingCameraText(true),
-      onEnd: () => setIsSpeakingCameraText(false),
-      onError: () => setIsSpeakingCameraText(false),
-    });
-  };
-
   // Send accumulated camera text to the AI half
   const handleSendToAiTutor = () => {
     if (!accumulatedText.trim()) return;
     setAiQuestion(accumulatedText.trim());
     handleAskAi(accumulatedText.trim());
     toast.success(loc('Sent to AI Avatar Tutor', 'تم إرسال السؤال للأفاتار 3D'));
-  };
-
-  // Quick gesture chips as manual additions
-  const QUICK_GESTURE_CHIPS = useMemo(() => isAr ? [
-    { label: 'أهلاً 👋', text: isEgyptian ? 'أهلاً وسهلاً' : 'السلام عليكم' },
-    { label: 'شكراً 🙏', text: 'شكراً جزيلاً' },
-    { label: 'نعم 👍', text: isEgyptian ? 'تمام وموافق' : 'نعم أوافق' },
-    { label: 'لا 👎', text: 'لا أوافق' },
-    { label: 'أنا أصم 🤟', text: 'أنا أصم وأتحدث بالإشارة' },
-    { label: 'مساعدة 🆘', text: isEgyptian ? 'أنا محتاج مساعدة' : 'أحتاج مساعدة' },
-    { label: 'طبيب 🩺', text: isEgyptian ? 'عايز دكتور' : 'أريد زيارة الطبيب' },
-    { label: 'ماء 💧', text: isEgyptian ? 'عايز مية' : 'أحتاج ماء للشرب' },
-  ] : [
-    { label: 'Hello 👋', text: 'Hello' },
-    { label: 'Thanks 🙏', text: 'Thank you' },
-    { label: 'Yes 👍', text: 'Yes, I agree' },
-    { label: 'No 👎', text: 'No, thank you' },
-    { label: 'I am deaf 🤟', text: 'I am deaf' },
-    { label: 'Help 🆘', text: 'I need help' },
-    { label: 'Doctor 🩺', text: 'I need a doctor' },
-    { label: 'Water 💧', text: 'Water please' },
-  ], [isAr, isEgyptian]);
-
-  const handleAddQuickGesture = (text: string) => {
-    setAccumulatedText((prev) => {
-      const sep = prev.trim() ? ' ' : '';
-      const next = prev + sep + text;
-      if (autoSpeakEnabled) {
-        speak(text, dialect);
-      }
-      return next;
-    });
-    triggerHapticAlert('single-pulse');
   };
 
   return (
@@ -650,13 +594,13 @@ Question: "${q}"`;
                 </div>
                 <div>
                   <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
-                    <span>{loc('Live Camera Sign-to-Speech', 'كاميرا قراءة لغة الإشارة الذكية')}</span>
+                    <span>{loc('Live Camera Sign Recognition', 'كاميرا قراءة لغة الإشارة الذكية')}</span>
                     {isCameraActive && (
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     )}
                   </h2>
                   <p className="text-[10px] text-slate-400">
-                    {loc('Open camera & sign with hands -> converts to speech & text below', 'افتح الكاميرا وتكلم بلغة الإشارة -> تتحول فوراً لصوت مسموع أو نص')}
+                    {loc('Open camera & sign with hands -> converts to text for AI', 'افتح الكاميرا وتكلم بلغة الإشارة -> تتحول فوراً لنص يُرسل للذكاء الاصطناعي')}
                   </p>
                 </div>
               </div>
@@ -712,8 +656,8 @@ Question: "${q}"`;
                     </p>
                     <p className="text-[11px] text-slate-400 mt-1 max-w-[280px]">
                       {loc(
-                        'Click "Start Camera" above and sign with your hands to convert into text and voice.',
-                        'اضغط على زر "تشغيل الكاميرا" أعلاه وتكلم بإشارات يدك لتتحول مباشرةً لصوت ونص.'
+                        'Click "Start Camera" above and sign with your hands to convert into text for AI.',
+                        'اضغط على زر "تشغيل الكاميرا" أعلاه وتكلم بإشارات يدك لتتحول مباشرةً لنص وتُرسل للذكاء الاصطناعي.'
                       )}
                     </p>
                   </div>
@@ -751,8 +695,7 @@ Question: "${q}"`;
                 </p>
 
                 {accumulatedText.trim() && (
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-900 text-[10px] text-slate-400">
-                    <span>{isSpeakingCameraText ? loc('🔊 Speaking to room…', '🔊 جاري النطق الصوتي للغرفة...') : loc('Ready to speak', 'جاهز للنطق')}</span>
+                  <div className="flex items-center justify-end pt-1 border-t border-slate-900 text-[10px] text-slate-400">
                     <button
                       onClick={() => setAccumulatedText('')}
                       className="text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
@@ -764,60 +707,16 @@ Question: "${q}"`;
                 )}
               </div>
 
-              {/* Action Buttons: Speak to Room + Send to AI */}
-              <div className="grid grid-cols-2 gap-2">
-                {/* 1. Speak aloud to room */}
-                <button
-                  onClick={handleSpeakAccumulatedText}
-                  disabled={!accumulatedText.trim()}
-                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 active:scale-[0.98] cursor-pointer"
-                >
-                  <Volume2 className="w-3.5 h-3.5" />
-                  <span>{loc('Speak to Room 🔊', 'انطق بالصوت للغرفة 🔊')}</span>
-                </button>
-
-                {/* 2. Send as Question to AI Avatar */}
+              {/* Action Button: Send Question to AI Avatar */}
+              <div>
                 <button
                   onClick={handleSendToAiTutor}
                   disabled={!accumulatedText.trim() || isAiLoading}
-                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-40 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-indigo-500/20 active:scale-[0.98] cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-40 text-white font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-500/20 active:scale-[0.98] cursor-pointer"
                 >
-                  <Bot className="w-3.5 h-3.5" />
+                  <Bot className="w-4 h-4" />
                   <span>{loc('Ask AI this Sign 🤖', 'اسأل الـ AI هذا السؤال 🤖')}</span>
                 </button>
-              </div>
-
-              {/* Quick Gesture Shortcuts & Auto-Speak Switch */}
-              <div className="flex items-center justify-between pt-0.5">
-                <span className="text-[10px] text-slate-400 font-bold">
-                  {loc('Quick Gesture Add:', 'إشارات سريعة بنقرة واحدة:')}
-                </span>
-
-                <button
-                  onClick={() => setAutoSpeakEnabled(!autoSpeakEnabled)}
-                  className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors ${
-                    autoSpeakEnabled
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                      : 'bg-[#150917] text-slate-400 border-[#4A1224]/50'
-                  }`}
-                  title={loc('Automatically speak recognized signs aloud', 'نطق الكلمة المرصودة صوتياً فور التقاطها')}
-                >
-                  <Volume2 className="w-3 h-3" />
-                  <span>{isAr ? `نطق تلقائي: ${autoSpeakEnabled ? 'مفعل' : 'معطل'}` : `Auto-Speak: ${autoSpeakEnabled ? 'ON' : 'OFF'}`}</span>
-                </button>
-              </div>
-
-              {/* Quick Sign Shortcut Buttons */}
-              <div className="flex flex-wrap gap-1 max-h-[50px] overflow-y-auto custom-scrollbar">
-                {QUICK_GESTURE_CHIPS.map((chip, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleAddQuickGesture(chip.text)}
-                    className="px-2 py-0.5 rounded-md bg-[#150917] hover:bg-[#200e23] border border-[#4A1224]/50 text-slate-300 hover:text-amber-300 text-[10px] font-bold transition-colors cursor-pointer"
-                  >
-                    {chip.label}
-                  </button>
-                ))}
               </div>
             </div>
           </div>
