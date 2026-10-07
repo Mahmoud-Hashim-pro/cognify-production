@@ -100,3 +100,50 @@ export function validateAndSanitizeResponse(
     warnings,
   };
 }
+
+/**
+ * Sanitize a cumulative streaming prefix before it is emitted to the client.
+ * Structural repairs are intentionally skipped while streaming because the
+ * prefix is incomplete by design. Security-sensitive redaction and accessibility
+ * sanitation still run on every emitted prefix. The complete response MUST still
+ * pass validateAndSanitizeResponse() at the end.
+ */
+export function sanitizeStreamingResponse(
+  rawText: string,
+  options: QualityCheckOptions = {},
+): QualityValidationResult {
+  if (!rawText || typeof rawText !== 'string') {
+    return { text: '', isValid: false, warnings: [] };
+  }
+
+  const warnings: string[] = [];
+  let sanitized = rawText;
+  const a11y = options.accessibilityMode;
+  if (a11y === 'Visual') {
+    sanitized = sanitized
+      .replace(/\|[-:\s|]+\|/g, '')
+      .replace(/_{3,}/g, '')
+      .replace(/={3,}/g, '');
+  } else if (a11y === 'Vocal-Deaf' || a11y === 'Sign-Only') {
+    sanitized = sanitized.replace(/\[\s*(?:sign|hand|gesture|emoji)[\w\s-]*\]/gi, '');
+  }
+
+  const secretPatterns = [
+    { regex: /AIza[0-9A-Za-z-_]{30,}/g, name: 'GOOGLE_API_KEY_LEAK' },
+    { regex: /gsk_[0-9A-Za-z]{30,}/g, name: 'GROQ_API_KEY_LEAK' },
+    { regex: /nvapi-[0-9A-Za-z-_]{30,}/g, name: 'NVIDIA_API_KEY_LEAK' },
+    { regex: /xai-[0-9A-Za-z-_]{30,}/g, name: 'XAI_API_KEY_LEAK' },
+    { regex: /-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----[\s\S]*?-----END\s+(?:RSA\s+)?PRIVATE\s+KEY-----/g, name: 'PRIVATE_KEY_LEAK' },
+  ];
+
+  for (const sp of secretPatterns) {
+    sp.regex.lastIndex = 0;
+    if (sp.regex.test(sanitized)) {
+      warnings.push('LEAKED_SECRET_REDACTED:' + sp.name);
+      sp.regex.lastIndex = 0;
+      sanitized = sanitized.replace(sp.regex, '[REDACTED_SECRET]');
+    }
+  }
+
+  return { text: sanitized, isValid: true, warnings };
+}
