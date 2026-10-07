@@ -185,7 +185,7 @@ export class SignClassifier {
 
     // grayscale + normalize + predict
     const { letter, confidence } = tf.tidy(() => {
-      const rgb = tf.browser.fromPixels(this.crop28, 3).toFloat();
+      const rgb = tf.cast(tf.browser.fromPixels(this.crop28, 3), 'float32');
       // luminance grayscale, matching dataset preprocessing
       const gray = rgb
         .mul(tf.tensor1d([0.299, 0.587, 0.114]))
