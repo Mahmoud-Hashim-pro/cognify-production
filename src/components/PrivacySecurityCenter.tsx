@@ -22,8 +22,9 @@ import {
   GENESIS_PREV_HASH,
   sha256
 } from '../lib/privacySecurityEngine';
-import { doc, deleteDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { doc, deleteDoc, collection, getDocs } from 'firebase/firestore';
+import { db, auth } from '../lib/firebase';
+import { deleteUser, signOut } from 'firebase/auth';
 import type { AuditLogEntry, CascadeErasureManifest } from '../types/privacySecurity';
 
 interface PrivacySecurityCenterProps {
@@ -161,24 +162,52 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
   // Handle Cascade Erasure
   const handleExecuteErasure = async () => {
+    const isRealUser = activeStudent.uid && !activeStudent.uid.startsWith('student_demo') && activeStudent.uid !== 'student_48291';
+
     // 1. Purge local device caches for student
     if (typeof localStorage !== 'undefined') {
       try {
-        localStorage.removeItem(`cognify_student_state_${activeStudent.uid}`);
-        localStorage.removeItem(`cognify_events_${activeStudent.uid}`);
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('cognify_') || k.startsWith('firebase:') || k.includes(activeStudent.uid))) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
       } catch {}
     }
-
-    // 2. Remote Firestore state wipe if student is registered
-    try {
-      if (activeStudent.uid && !activeStudent.uid.startsWith('student_demo') && activeStudent.uid !== 'student_48291') {
-        await deleteDoc(doc(db, 'users', activeStudent.uid, 'studentState', 'current'));
-      }
-    } catch (err) {
-      console.warn('[handleExecuteErasure] Remote Firestore purge notice:', err);
+    if (typeof sessionStorage !== 'undefined') {
+      try { sessionStorage.clear(); } catch {}
     }
 
-    // 3. Prepare store targets for cascade wipe
+    // 2. Real Remote Firestore Cascade Purge across all subcollections and root doc
+    if (isRealUser) {
+      try {
+        const subcollections = [
+          'learningEvents', 'threads', 'studentState', 'goals', 'courses',
+          'notes', 'attendance', 'planner', 'spatialMemories', 'caregiverLinks',
+          'exerciseHistory', 'loginHistory', 'learningProfile'
+        ];
+        for (const sub of subcollections) {
+          try {
+            const colRef = collection(db, 'users', activeStudent.uid, sub);
+            const snap = await getDocs(colRef);
+            const deletes = snap.docs.map((d) => deleteDoc(d.ref));
+            await Promise.all(deletes);
+          } catch (e) {
+            console.warn(`[handleExecuteErasure] Could not clear subcollection ${sub}:`, e);
+          }
+        }
+
+        // Delete parent user document
+        await deleteDoc(doc(db, 'users', activeStudent.uid));
+      } catch (err) {
+        console.warn('[handleExecuteErasure] Remote Firestore cascade purge error:', err);
+      }
+    }
+
+    // 3. Compute signed cryptographic cascade manifest & audit record
     const profileStore = new Map<string, StudentState>();
     profileStore.set(activeStudent.uid, activeStudent);
     const presenceStore = new Map<string, any>();
@@ -212,6 +241,24 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
       prevH
     );
     setAuditChain(prev => [...prev, auditEntry]);
+
+    // 4. If current auth user is the purged student, execute Firebase Auth account deletion
+    if (isRealUser && auth?.currentUser && auth.currentUser.uid === activeStudent.uid) {
+      try {
+        await deleteUser(auth.currentUser);
+      } catch (authErr: any) {
+        if (authErr?.code === 'auth/requires-recent-login') {
+          await signOut(auth);
+          window.location.reload();
+          return;
+        }
+        console.warn('[handleExecuteErasure] Firebase Auth deleteUser warning:', authErr);
+      }
+      try {
+        await signOut(auth);
+      } catch {}
+      window.location.reload();
+    }
   };
 
   // Tamper verification
