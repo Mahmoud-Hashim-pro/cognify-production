@@ -3,7 +3,7 @@
  * Used by Cognify's Security Tracker for DevTools / Element Inspect tracking.
  */
 import { applyCorsHeaders } from '../_lib/cors.js';
-import { checkRateLimit } from '../_lib/rateLimiter.js';
+import { checkDistributedRateLimit } from '../_lib/rateLimiter.js';
 
 export function extractClientIp(req: any): string {
   const forwarded = req.headers?.['x-forwarded-for'];
@@ -112,7 +112,7 @@ export default async function handler(req: any, res: any) {
 
     // 3. Rate limiting per IP using checkRateLimit (max 15 requests/min per IP, returning 429 if exceeded)
     const ip = extractClientIp(req);
-    const rateLimit = checkRateLimit(`security_audit:${ip}`, 15);
+    const rateLimit = await checkDistributedRateLimit(`security_audit:${ip}`, 15);
     if (typeof res.setHeader === 'function') {
       res.setHeader('X-RateLimit-Limit', '15');
       res.setHeader('X-RateLimit-Remaining', String(rateLimit.remaining));
