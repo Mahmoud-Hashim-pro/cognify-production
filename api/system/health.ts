@@ -14,6 +14,7 @@
 
 import { applyCorsHeaders } from '../_lib/cors.js';
 import { getOrGenerateTraceId, attachTraceId, X_COGNIFY_TRACE_ID } from '../_lib/tracing.js';
+import { verifyRequestAuth } from '../_lib/authGuard.js';
 
 export interface MemoryStats {
   rss: number;
@@ -191,35 +192,23 @@ export default async function handler(req: any, res: any) {
   try {
     const healthPayload = getSystemHealthReport(traceId);
     const isProd = process.env.NODE_ENV === 'production';
-    const authHeader = req.headers?.authorization || req.headers?.['x-admin-key'];
-    const isAuthorized = authHeader && (authHeader.startsWith('Bearer ') || authHeader.length > 10);
 
-    // In production without admin authorization, sanitize sensitive operational specifics (exact model rotation names, detailed provider mapping)
+    // Detailed operational health is restricted to a cryptographically verified
+    // authenticated admin/super-admin. An arbitrary Authorization header is not
+    // treated as proof of identity.
+    const auth = await verifyRequestAuth(req);
+    const isPrivileged = auth.authenticated &&
+      (auth.isSuperAdmin === true || auth.role === 'admin' || auth.role === 'superadmin');
+
     let finalPayload: any = healthPayload;
-    if (isProd && !isAuthorized) {
+    if (isProd && !isPrivileged) {
+      // Public health stays intentionally minimal: no memory metrics, provider
+      // availability, model names, circuit internals, or environment details.
       finalPayload = {
         status: healthPayload.status,
         uptimeSeconds: healthPayload.uptimeSeconds,
-        uptime: healthPayload.uptime,
         timestamp: healthPayload.timestamp,
         traceId: healthPayload.traceId,
-        circuitBreakerStatus: healthPayload.circuitBreakerStatus,
-        memory: {
-          rss: healthPayload.memory.rss,
-          heapTotal: healthPayload.memory.heapTotal,
-          heapUsed: healthPayload.memory.heapUsed,
-          external: healthPayload.memory.external,
-          rssMb: healthPayload.memory.rssMb,
-          heapUsedMb: healthPayload.memory.heapUsedMb,
-        },
-        providers: {
-          aiGateway: {
-            status: healthPayload.circuitBreakerStatus === 'OPEN' ? 'degraded' : 'healthy',
-            available: healthPayload.activeProviderHealth.gemini?.available || healthPayload.activeProviderHealth.nvidia?.available || healthPayload.activeProviderHealth.groq?.available || false,
-          },
-        },
-        environment: 'production',
-        version: healthPayload.version,
       };
     }
 
