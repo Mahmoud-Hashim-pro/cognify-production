@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { lookupArslSign, hamnosysToThreePose } from "../lib/arslDictionary";
+import {
+  ASL_FINGERSPELLING_POSES,
+  AVATAR_HAND_HOME,
+  AVATAR_NEUTRAL,
+  resolveAslAvatarSign,
+  resolveAslFingerspellingCharacter,
+  type AvatarHandPose,
+} from "../lib/aslAvatarDictionary";
 
 /**
  * SignAvatar3D — procedural 3D signing avatar for Cognify.
@@ -21,9 +29,9 @@ import { lookupArslSign, hamnosysToThreePose } from "../lib/arslDictionary";
  *     onDone={() => setIsPlaying(false)}
  *   />
  *
- * All pose values live in LETTER_POSES / WORD_SIGNS below — they are
- * deliberately plain numbers (0 = open finger, 1 = fully curled) so they
- * can be tuned without touching the engine.
+ * The curated ASL Core vocabulary and fingerspelling poses live in
+ * `lib/aslAvatarDictionary.ts`; the older compatibility signs below remain
+ * available while they are migrated and reviewed.
  */
 
 export interface SignAvatar3DProps {
@@ -42,7 +50,7 @@ export interface SignAvatar3DProps {
 /* Pose data                                                           */
 /* ------------------------------------------------------------------ */
 
-interface HandPose {
+interface HandPose extends AvatarHandPose {
   /** Finger curls 0..1 in order: [thumb, index, middle, ring, pinky] */
   f: [number, number, number, number, number];
   /** Thumb sticking out sideways (L / Y / open hand). 0..1 */
@@ -59,56 +67,12 @@ interface HandPose {
   hold?: number;
 }
 
-const HAND_HOME: [number, number, number] = [0.2, 1.17, 0.42];
+const HAND_HOME = AVATAR_HAND_HOME;
 
-const NEUTRAL: HandPose = {
-  f: [0.18, 0.22, 0.22, 0.22, 0.25],
-  out: 0.15,
-  spread: 0.1,
-  wrist: [0, 0, 0],
-  pos: HAND_HOME,
-  motion: null,
-};
+const NEUTRAL: HandPose = AVATAR_NEUTRAL;
 
-/** ASL alphabet + digits — pragmatic approximations, tune freely. */
-const LETTER_POSES: Record<string, HandPose> = {
-  A: { f: [0.15, 1, 1, 1, 1], out: 0.25 },
-  B: { f: [0.95, 0, 0, 0, 0], spread: 0.05 },
-  C: { f: [0.45, 0.5, 0.5, 0.5, 0.5], out: 0.3 },
-  D: { f: [0.55, 0, 0.85, 0.9, 0.9] },
-  E: { f: [0.85, 0.8, 0.8, 0.8, 0.8] },
-  F: { f: [0.5, 0.55, 0, 0, 0], spread: 0.4 },
-  G: { f: [0.25, 0, 1, 1, 1], out: 0.6, wrist: [0, 0, -1.4] },
-  H: { f: [0.6, 0, 0, 1, 1], wrist: [0, 0, -1.4] },
-  I: { f: [0.8, 1, 1, 1, 0] },
-  J: { f: [0.8, 1, 1, 1, 0], motion: "j" },
-  K: { f: [0.45, 0, 0, 1, 1], spread: 0.55 },
-  L: { f: [0, 0, 1, 1, 1], out: 1 },
-  M: { f: [1, 0.78, 0.78, 0.78, 1] },
-  N: { f: [1, 0.78, 0.78, 1, 1] },
-  O: { f: [0.55, 0.6, 0.6, 0.6, 0.6] },
-  P: { f: [0.45, 0, 0.35, 1, 1], spread: 0.4, wrist: [1.7, 0, 0] },
-  Q: { f: [0.3, 0, 1, 1, 1], out: 0.5, wrist: [1.7, 0, 0] },
-  R: { f: [0.85, 0.05, 0.14, 1, 1] },
-  S: { f: [0.7, 1, 1, 1, 1] },
-  T: { f: [0.75, 0.9, 1, 1, 1] },
-  U: { f: [0.85, 0, 0, 1, 1] },
-  V: { f: [0.85, 0, 0, 1, 1], spread: 0.8 },
-  W: { f: [0.85, 0, 0, 0, 1], spread: 0.6 },
-  X: { f: [0.8, 0.5, 1, 1, 1] },
-  Y: { f: [0, 1, 1, 1, 0], out: 1 },
-  Z: { f: [0.8, 0, 1, 1, 1], motion: "z" },
-  "0": { f: [0.55, 0.6, 0.6, 0.6, 0.6] },
-  "1": { f: [0.8, 0, 1, 1, 1] },
-  "2": { f: [0.85, 0, 0, 1, 1], spread: 0.8 },
-  "3": { f: [0, 0, 0, 1, 1], out: 1, spread: 0.6 },
-  "4": { f: [0.9, 0, 0, 0, 0], spread: 0.7 },
-  "5": { f: [0, 0, 0, 0, 0], out: 1, spread: 0.8 },
-  "6": { f: [0.5, 0, 0, 0, 0.6] },
-  "7": { f: [0.5, 0, 0, 0.6, 0] },
-  "8": { f: [0.5, 0, 0.6, 0, 0] },
-  "9": { f: [0.5, 0.6, 0, 0, 0] },
-};
+// Kept as a local alias only because the rig's Arabic fallback uses it too.
+const LETTER_POSES: Record<string, HandPose> = ASL_FINGERSPELLING_POSES;
 
 /** Arabic letters -> nearest fingerspelling pose key. */
 const AR_MAP: Record<string, string> = {
@@ -503,6 +467,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
     pos: [...HAND_HOME] as number[],
     motion: null as HandPose["motion"],
     motionStart: 0,
+    leftActive: true,
   });
 
   const onProgressRef = useRef(onProgress);
@@ -517,7 +482,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
     'question_eyebrows' | 'happy_smile' | 'concern_furrow' | 'head_nod' | 'head_shake' | 'neutral'
   >('neutral');
 
-  const applyPose = (p: HandPose) => {
+  const applyPose = (p: HandPose, hands: "right" | "both" = "both") => {
     const t = target.current;
     t.curls = [...p.f];
     t.out = p.out ?? 0;
@@ -526,6 +491,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
     t.pos = p.pos ? [...p.pos] : [...HAND_HOME];
     t.motion = p.motion ?? null;
     t.motionStart = performance.now();
+    t.leftActive = hands === "both";
   };
 
   /* ---- three.js scene ---- */
@@ -633,13 +599,19 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
       // scale.x = -1, so identical finger/thumb/wrist values render as a true
       // mirror; only the hand's world X position is negated (mirrorX = -1).
       const hands = [
-        { fingers: rig.fingers, thumbBase: rig.thumbBase, wrist: rig.wrist, pos: rig.handRoot.position, forearm: rig.forearm, elbow: rig.elbow, mirrorX: 1 },
-        { fingers: rig.leftFingers, thumbBase: rig.leftThumbBase, wrist: rig.leftWrist, pos: rig.leftHandRoot.position, forearm: rig.leftForearm, elbow: rig.leftElbow, mirrorX: -1 },
+        { fingers: rig.fingers, thumbBase: rig.thumbBase, wrist: rig.wrist, pos: rig.handRoot.position, forearm: rig.forearm, elbow: rig.elbow, mirrorX: 1, isLeft: false },
+        { fingers: rig.leftFingers, thumbBase: rig.leftThumbBase, wrist: rig.leftWrist, pos: rig.leftHandRoot.position, forearm: rig.leftForearm, elbow: rig.leftElbow, mirrorX: -1, isLeft: true },
       ];
       for (const H of hands) {
+        const idleLeftHand = H.isLeft && !t.leftActive;
+        const handCurls = idleLeftHand ? NEUTRAL.f : t.curls;
+        const handOut = idleLeftHand ? (NEUTRAL.out ?? 0) : t.out;
+        const handSpread = idleLeftHand ? (NEUTRAL.spread ?? 0) : t.spread;
+        const handWrist = idleLeftHand ? (NEUTRAL.wrist ?? [0, 0, 0]) : t.wrist;
+        const handPosition = idleLeftHand ? (NEUTRAL.pos ?? HAND_HOME) : t.pos;
         // fingers
         for (let fi = 0; fi < 5; fi++) {
-          const curl = THREE.MathUtils.clamp(t.curls[fi] + curlAdd[fi], 0, 1.15);
+          const curl = THREE.MathUtils.clamp(handCurls[fi] + (idleLeftHand ? 0 : curlAdd[fi]), 0, 1.15);
           const rigF = H.fingers[fi];
           for (let ji = 0; ji < 3; ji++) {
             const j = rigF.joints[ji];
@@ -647,29 +619,29 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
             const goal = curl * CURL_MAX[ji] * (fi === 0 ? 0.8 : 1);
             j.rotation.x += (goal - j.rotation.x) * kFinger;
             if (ji === 0 && fi > 0) {
-              const spreadGoal = t.spread * 0.32 * rigF.spreadDir;
+              const spreadGoal = handSpread * 0.32 * rigF.spreadDir;
               j.rotation.z += (spreadGoal - j.rotation.z) * kFinger;
             }
           }
         }
         // thumb base: out + wrap across palm as it curls
         const tb = H.thumbBase.rotation;
-        const outGoal = -0.9 - t.out * 0.55 + t.curls[0] * 0.7;
-        const wrapGoal = 0.2 + t.curls[0] * 0.9;
+        const outGoal = -0.9 - handOut * 0.55 + handCurls[0] * 0.7;
+        const wrapGoal = 0.2 + handCurls[0] * 0.9;
         tb.z += (outGoal - tb.z) * kFinger;
         tb.y += (wrapGoal - tb.y) * kFinger;
 
         // wrist
         const w = H.wrist.rotation;
-        w.x += (-0.12 + t.wrist[0] + wristAdd[0] - w.x) * kBody;
-        w.y += (t.wrist[1] + wristAdd[1] - w.y) * kBody;
-        w.z += (0.06 + t.wrist[2] + wristAdd[2] - w.z) * kBody;
+        w.x += (-0.12 + handWrist[0] + (idleLeftHand ? 0 : wristAdd[0]) - w.x) * kBody;
+        w.y += (handWrist[1] + (idleLeftHand ? 0 : wristAdd[1]) - w.y) * kBody;
+        w.z += (0.06 + handWrist[2] + (idleLeftHand ? 0 : wristAdd[2]) - w.z) * kBody;
 
         // hand position (X mirrored for the left hand)
         const p = H.pos;
-        p.x += ((t.pos[0] + posAdd[0]) * H.mirrorX - p.x) * kBody;
-        p.y += (t.pos[1] + posAdd[1] + idle - p.y) * kBody;
-        p.z += (t.pos[2] + posAdd[2] - p.z) * kBody;
+        p.x += ((handPosition[0] + (idleLeftHand ? 0 : posAdd[0])) * H.mirrorX - p.x) * kBody;
+        p.y += (handPosition[1] + (idleLeftHand ? 0 : posAdd[1]) + idle - p.y) * kBody;
+        p.z += (handPosition[2] + (idleLeftHand ? 0 : posAdd[2]) - p.z) * kBody;
 
         // forearm follows this hand
         fromV.copy(H.elbow);
@@ -820,6 +792,10 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
             .replace(/[*_#~`]/g, "")
             .trim();
         const raw = clean(words[i]);
+        // English ASL vocabulary is intentionally resolved before the Arabic
+        // dictionary.  These are separate signed languages: an English token
+        // must never be silently replaced by an Arabic-sign approximation.
+        const aslMatch = resolveAslAvatarSign(words.map(clean), i);
 
         // Try a 2-word phrase first (e.g. "لو سمحت", "مع السلامة") — several
         // WORD_ALIASES entries are multi-word, but `words` has already been
@@ -831,7 +807,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
         let arslEntry = null;
 
         // 1. Check if two words form an authenticated ArSL dictionary sign
-        if (i + 1 < words.length) {
+        if (!aslMatch && i + 1 < words.length) {
           const twoWord = `${raw} ${clean(words[i + 1])}`;
           arslEntry = lookupArslSign(twoWord);
           if (arslEntry) {
@@ -839,13 +815,23 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
           }
         }
         // 2. Check if single word is an authenticated ArSL dictionary sign
-        if (!arslEntry) {
+        if (!aslMatch && !arslEntry) {
           arslEntry = lookupArslSign(raw);
         }
 
         // Set non-manual facial and head expression for current sign
         let nonManual: 'question_eyebrows' | 'happy_smile' | 'concern_furrow' | 'head_nod' | 'head_shake' | 'neutral' = 'neutral';
-        if (arslEntry?.hamnosys?.nonManual) {
+        if (aslMatch?.sign.id === "QUESTION") {
+          nonManual = 'question_eyebrows';
+        } else if (aslMatch?.sign.id === "YES") {
+          nonManual = 'head_nod';
+        } else if (aslMatch?.sign.id === "NO") {
+          nonManual = 'head_shake';
+        } else if (aslMatch?.sign.id === "EMERGENCY") {
+          nonManual = 'concern_furrow';
+        } else if (aslMatch?.sign.id === "HELLO" || aslMatch?.sign.id === "THANK-YOU") {
+          nonManual = 'happy_smile';
+        } else if (arslEntry?.hamnosys?.nonManual) {
           nonManual = arslEntry.hamnosys.nonManual;
         } else {
           const w = raw.toLowerCase();
@@ -863,7 +849,15 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
         }
         currentNonManualRef.current = nonManual;
 
-        if (arslEntry) {
+        if (aslMatch) {
+          consumed = aslMatch.consumed;
+          setGlyph("");
+          for (const step of aslMatch.sign.steps) {
+            if (cancelled) return;
+            applyPose(step, aslMatch.sign.hands);
+            await wait(step.hold ?? 500);
+          }
+        } else if (arslEntry) {
           setGlyph("");
           const threePose = hamnosysToThreePose(arslEntry.hamnosys);
           applyPose({
@@ -901,7 +895,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
           } else {
             for (const ch of Array.from(raw)) {
               if (cancelled) return;
-              const key = normalizeChar(ch);
+              const key = resolveAslFingerspellingCharacter(ch) || normalizeChar(ch);
               if (!key) continue;
               applyPose({ ...NEUTRAL, ...LETTER_POSES[key], pos: HAND_HOME });
               // Display ONLY the genuine Arabic character — never display internal Latin keys (e.g. 'S' for 'ش')

@@ -37,6 +37,7 @@
     "test:learning-hub": "npx tsx tests/learningHubComprehensiveVerification.ts",
     "test:neurodiversity": "npx tsx tests/neurodiversityEngineVerification.ts",
     "test:arsl": "npx tsx tests/arslCurriculumAndModelVerification.ts",
+    "test:asl-avatar": "npx tsx tests/aslAvatarDictionaryVerification.ts",
     "test:benchmark:adaptive": "npx tsx tests/benchmarks/adaptiveLearningBenchmark.ts",
     "test:benchmark:pedagogical": "npx tsx tests/benchmarks/interventionEffectivenessBenchmark.ts",
     "test:benchmark:provider": "npx tsx tests/benchmarks/aiProviderBenchmark.ts",
