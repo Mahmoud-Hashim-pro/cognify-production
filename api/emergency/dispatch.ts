@@ -13,7 +13,7 @@
  */
 import { applyCorsHeaders } from '../_lib/cors.js';
 import { verifyRequestAuth, extractBearerToken } from '../_lib/authGuard.js';
-import { checkRateLimit } from '../_lib/rateLimiter.js';
+import { checkDistributedRateLimit } from '../_lib/rateLimiter.js';
 
 export interface EmergencyDispatchPayload {
   uid?: string;
@@ -115,8 +115,8 @@ export default async function handler(req: any, res: any) {
 
   // 3. Sliding-Window Rate Limiting (5 requests/minute per UID, 15 per IP)
   const clientIp = req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
-  const userRate = checkRateLimit(`sos:uid:${authenticatedUid}`, 5);
-  const ipRate = checkRateLimit(`sos:ip:${clientIp}`, 15);
+  const userRate = await checkDistributedRateLimit(`sos:uid:${authenticatedUid}`, 5);
+  const ipRate = await checkDistributedRateLimit(`sos:ip:${clientIp}`, 15);
 
   if (!userRate.allowed || !ipRate.allowed) {
     console.warn(`[SOS Rate Limit Exceeded]: UID=${authenticatedUid} IP=${clientIp}`);
