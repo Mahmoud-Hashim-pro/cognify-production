@@ -21,7 +21,11 @@
  *   clf.smoother.handLost();
  */
 
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-core';
+import * as tfLayers from '@tensorflow/tfjs-layers';
+import '@tensorflow/tfjs-backend-cpu';
+import '@tensorflow/tfjs-backend-webgl';
+import type { LayersModel } from '@tensorflow/tfjs-layers';
 
 export const SIGN_LETTERS = 'ABCDEFGHIKLMNOPQRSTUVWXY'; // 24 static letters, no J/Z
 
@@ -110,7 +114,7 @@ export class SignSmoother {
 /* Classifier                                                          */
 /* ------------------------------------------------------------------ */
 export class SignClassifier {
-  private model: tf.LayersModel | null = null;
+  private model: LayersModel | null = null;
   private crop28: HTMLCanvasElement;
   public smoother = new SignSmoother();
 
@@ -124,7 +128,7 @@ export class SignClassifier {
 
   async load(modelUrl = '/models/sign/model.json'): Promise<boolean> {
     try {
-      this.model = await tf.loadLayersModel(modelUrl);
+      this.model = await tfLayers.loadLayersModel(modelUrl);
       // warm-up so the first real frame isn't slow
       tf.tidy(() => {
         const out = this.model!.predict(tf.zeros([1, 28, 28, 1])) as tf.Tensor;

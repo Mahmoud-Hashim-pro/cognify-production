@@ -25,10 +25,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Dependencies
@@ -39,6 +39,7 @@ jobs:
         run: |
           npm audit --json > npm-audit-report.json || true
           node -e 'const a=JSON.parse(require("fs").readFileSync("npm-audit-report.json","utf8")); console.log("Dependency audit:", JSON.stringify(a.metadata?.vulnerabilities || {})); for (const [name, v] of Object.entries(a.vulnerabilities || {})) console.log(JSON.stringify({name, severity:v.severity, direct:v.isDirect, range:v.range, fixAvailable:v.fixAvailable, via:v.via.map(x => typeof x === "string" ? x : {name:x.name, title:x.title, url:x.url, range:x.range})}));'
+          node -e 'const b=Buffer.from(require("fs").readFileSync("package-lock.json")).toString("base64"); console.log("LOCKFILE_BASE64_START"); for (let i=0;i<b.length;i+=40000) console.log(b.slice(i,i+40000)); console.log("LOCKFILE_BASE64_END");'
 
       - name: 🛡️ TypeScript & ESLint Quality Gate
         run: npm run lint

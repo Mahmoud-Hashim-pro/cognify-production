@@ -68,10 +68,10 @@
     "@mediapipe/hands": "^0.4.1675469240",
     "@sentry/react": "^10.61.0",
     "@tailwindcss/vite": "^4.1.14",
-    "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-backend-webgl": "^4.22.0",
     "@tensorflow/tfjs-converter": "^4.22.0",
     "@tensorflow/tfjs-core": "^4.22.0",
+    "@tensorflow/tfjs-layers": "^4.22.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "@vitejs/plugin-react": "^5.0.4",
@@ -107,5 +107,12 @@
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.70.1",
     "vite": "^6.2.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.13.6",
+    "esbuild": "$esbuild",
+    "proxy-addr": "^2.0.8",
+    "qs": "^6.16.0",
+    "source-map-js": "^1.2.2"
   }
 }
