@@ -2,7 +2,7 @@
 *An Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform*
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://my-cognify-app.vercel.app)
-[![Tests Passing](https://img.shields.io/badge/Tests-3546%20Passed%2C%200%20Failed-10B981?logo=vitest&logoColor=white)](test-report.json)
+[![Automated Verification](https://img.shields.io/badge/Automated%20Verification-3500%2B%20Cases-10B981?logo=githubactions&logoColor=white)](.github/workflows/quality-gate.yml)
 [![TypeScript Validated](https://img.shields.io/badge/TypeScript-Validated%20(Zero%20Errors)-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Security Standard](https://img.shields.io/badge/Security-OWASP%20Top%2010%20Hardened-8B5CF6?logo=googlecloud&logoColor=white)](ARCHITECTURE.md)
 
@@ -121,6 +121,13 @@ GEMINI_API_KEY=AIzaSy_your_gemini_api_key_here
 GROQ_API_KEY=gsk_your_groq_key_here
 NVIDIA_API_KEY=nvapi-your_nvidia_key_here
 XAI_API_KEY=xai-your_xai_key_here
+
+# ── Distributed Production Rate Limiting (required in production) ─────────────
+# Upstash Redis REST credentials. These are server-only and must NOT use VITE_.
+# Without them, production API requests fail closed instead of falling back to
+# an unsafe per-instance in-memory limiter.
+UPSTASH_REDIS_REST_URL=https://your-database.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_upstash_rest_token
 
 # ── Client-Side Variables (Publicly Inlined by Vite) ───────────────────────────
 # Optional error monitoring
