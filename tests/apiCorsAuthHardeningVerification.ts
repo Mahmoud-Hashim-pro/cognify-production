@@ -644,7 +644,33 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
       },
     };
     const mDel6 = makeRes();
-    await deleteUserHandler(validSuperAdminReq, mDel6.res);
+    const originalFetch = globalThis.fetch;
+    const previousAdminToken = process.env.FIREBASE_ADMIN_TOKEN;
+    process.env.FIREBASE_ADMIN_TOKEN = 'test-admin-token';
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = new URL(String(input));
+      if (url.hostname === 'firestore.googleapis.com') {
+        if (!init?.method && url.pathname.endsWith('/documents/users/student_graduated_to_purge')) {
+          return new Response(null, { status: 404 });
+        }
+        if (init?.method === 'DELETE') {
+          return new Response(null, { status: 200 });
+        }
+        return Response.json({ documents: [] }, { status: 200 });
+      }
+      if (url.hostname === 'identitytoolkit.googleapis.com') {
+        return Response.json({}, { status: 200 });
+      }
+      return originalFetch(input, init);
+    }) as typeof fetch;
+
+    try {
+      await deleteUserHandler(validSuperAdminReq, mDel6.res);
+    } finally {
+      globalThis.fetch = originalFetch;
+      if (previousAdminToken === undefined) delete process.env.FIREBASE_ADMIN_TOKEN;
+      else process.env.FIREBASE_ADMIN_TOKEN = previousAdminToken;
+    }
     assert(mDel6.getCode() === 200, 'deleteUser processes authorized superadmin request with HTTP 200');
     assert(mDel6.getBody()?.success === true, 'deleteUser returns success: true for verified superadmin');
     assert(mDel6.getBody()?.operatorUid === 'superadmin_master', 'deleteUser audit manifest records operatorUid');
