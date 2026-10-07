@@ -726,7 +726,7 @@ export async function readBody(req: any): Promise<any> {
 }
 
 import { verifyRequestAuth } from './authGuard.js';
-import { checkDistributedRateLimit } from './rateLimiter.js;
+import { checkDistributedRateLimit } from './rateLimiter.js';
 import { applyCorsHeaders } from './cors.js';
 
 /** Shared guard: POST only, authentication, provider key check, and dual-tier rate limiting (IP + User). */
