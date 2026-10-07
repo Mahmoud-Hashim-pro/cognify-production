@@ -46,8 +46,29 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
   // --------------------------------------------------------------------------
   console.log('\nGroup 1: CORS & Origin Validation (api/_lib/cors.ts)');
   {
-    // Canonical production origin
-    assert(isAllowedOrigin('https://my-cognify-app.vercel.app') === true, 'Allows canonical production origin');
+    // Production origins are explicit configuration; no preview/default host is trusted implicitly.
+    const prevCanonicalOrigin = process.env.PRODUCTION_ORIGIN;
+    const prevCanonicalAllowlist = process.env.ALLOWED_ORIGINS;
+    const prevCanonicalVercelUrl = process.env.VERCEL_URL;
+    const prevCanonicalVercelEnv = process.env.VERCEL_ENV;
+    try {
+      delete process.env.PRODUCTION_ORIGIN;
+      delete process.env.ALLOWED_ORIGINS;
+      delete process.env.VERCEL_URL;
+      process.env.VERCEL_ENV = 'production';
+      assert(isAllowedOrigin('https://my-cognify-app.vercel.app') === false, 'Requires explicit production origin configuration');
+      process.env.PRODUCTION_ORIGIN = 'https://my-cognify-app.vercel.app';
+      assert(isAllowedOrigin('https://my-cognify-app.vercel.app') === true, 'Allows configured production origin');
+    } finally {
+      if (prevCanonicalOrigin !== undefined) process.env.PRODUCTION_ORIGIN = prevCanonicalOrigin;
+      else delete process.env.PRODUCTION_ORIGIN;
+      if (prevCanonicalAllowlist !== undefined) process.env.ALLOWED_ORIGINS = prevCanonicalAllowlist;
+      else delete process.env.ALLOWED_ORIGINS;
+      if (prevCanonicalVercelUrl !== undefined) process.env.VERCEL_URL = prevCanonicalVercelUrl;
+      else delete process.env.VERCEL_URL;
+      if (prevCanonicalVercelEnv !== undefined) process.env.VERCEL_ENV = prevCanonicalVercelEnv;
+      else delete process.env.VERCEL_ENV;
+    }
 
     // Non-production localhost / dev origins
     assert(isAllowedOrigin('http://localhost:5173') === true, 'Allows http://localhost:5173 in non-production');
@@ -73,25 +94,37 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
 
     // Dynamic VERCEL_URL env variable (with & without https://)
     const prevVercel = process.env.VERCEL_URL;
+    const prevVercelEnv = process.env.VERCEL_ENV;
     try {
+      process.env.VERCEL_ENV = 'preview';
       process.env.VERCEL_URL = 'preview-branch-abc.vercel.app';
-      assert(isAllowedOrigin('https://preview-branch-abc.vercel.app') === true, 'Allows VERCEL_URL with prepended https://');
+      assert(isAllowedOrigin('https://preview-branch-abc.vercel.app') === true, 'Allows VERCEL_URL with prepended https:// in preview');
 
       process.env.VERCEL_URL = 'https://explicit-preview.vercel.app';
-      assert(isAllowedOrigin('https://explicit-preview.vercel.app') === true, 'Allows explicit https:// VERCEL_URL');
+      assert(isAllowedOrigin('https://explicit-preview.vercel.app') === true, 'Allows explicit https:// VERCEL_URL in preview');
+
+      process.env.VERCEL_ENV = 'production';
+      assert(isAllowedOrigin('https://explicit-preview.vercel.app') === false, 'Does not trust VERCEL_URL as a production origin');
     } finally {
       if (prevVercel !== undefined) process.env.VERCEL_URL = prevVercel;
       else delete process.env.VERCEL_URL;
+      if (prevVercelEnv !== undefined) process.env.VERCEL_ENV = prevVercelEnv;
+      else delete process.env.VERCEL_ENV;
     }
 
     // In production mode, non-prod origins must NOT be allowed
     const prevNodeEnv = process.env.NODE_ENV;
+    const prevProductionOrigin = process.env.PRODUCTION_ORIGIN;
     try {
       (process.env as any).NODE_ENV = 'production';
+      process.env.PRODUCTION_ORIGIN = 'https://my-cognify-app.vercel.app';
       assert(isAllowedOrigin('http://localhost:5173') === false, 'Rejects localhost in production NODE_ENV');
-      assert(isAllowedOrigin('https://my-cognify-app.vercel.app') === true, 'Still allows canonical origin in production');
+      assert(isAllowedOrigin('https://my-cognify-app.vercel.app') === true, 'Allows configured canonical origin in production');
     } finally {
-      (process.env as any).NODE_ENV = prevNodeEnv;
+      if (prevNodeEnv !== undefined) process.env.NODE_ENV = prevNodeEnv;
+      else delete process.env.NODE_ENV;
+      if (prevProductionOrigin !== undefined) process.env.PRODUCTION_ORIGIN = prevProductionOrigin;
+      else delete process.env.PRODUCTION_ORIGIN;
     }
 
     // applyCorsHeaders behavior: Preflight OPTIONS
@@ -644,7 +677,33 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
       },
     };
     const mDel6 = makeRes();
-    await deleteUserHandler(validSuperAdminReq, mDel6.res);
+    const originalFetch = globalThis.fetch;
+    const previousAdminToken = process.env.FIREBASE_ADMIN_TOKEN;
+    process.env.FIREBASE_ADMIN_TOKEN = 'test-admin-token';
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = new URL(String(input));
+      if (url.hostname === 'firestore.googleapis.com') {
+        if (!init?.method && url.pathname.endsWith('/documents/users/student_graduated_to_purge')) {
+          return new Response(null, { status: 404 });
+        }
+        if (init?.method === 'DELETE') {
+          return new Response(null, { status: 200 });
+        }
+        return Response.json({ documents: [] }, { status: 200 });
+      }
+      if (url.hostname === 'identitytoolkit.googleapis.com') {
+        return Response.json({}, { status: 200 });
+      }
+      return originalFetch(input, init);
+    }) as typeof fetch;
+
+    try {
+      await deleteUserHandler(validSuperAdminReq, mDel6.res);
+    } finally {
+      globalThis.fetch = originalFetch;
+      if (previousAdminToken === undefined) delete process.env.FIREBASE_ADMIN_TOKEN;
+      else process.env.FIREBASE_ADMIN_TOKEN = previousAdminToken;
+    }
     assert(mDel6.getCode() === 200, 'deleteUser processes authorized superadmin request with HTTP 200');
     assert(mDel6.getBody()?.success === true, 'deleteUser returns success: true for verified superadmin');
     assert(mDel6.getBody()?.operatorUid === 'superadmin_master', 'deleteUser audit manifest records operatorUid');

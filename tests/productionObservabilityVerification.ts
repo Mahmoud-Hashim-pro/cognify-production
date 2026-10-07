@@ -448,15 +448,22 @@ export async function runProductionObservabilityVerification(): Promise<{ passed
     },
   };
 
-  await handler(mockHealthReq, mockHealthRes);
-  assert(responseStatusCode === 200, 'Health endpoint returns HTTP 200 OK');
-  assert(
-    mockHealthRes.headers[X_COGNIFY_TRACE_ID.toLowerCase()] === '77777777-8888-4999-a000-bbbbbbbbbbbb-123456789',
-    'Health endpoint echoes distributed trace ID in response headers'
-  );
-  assert(responsePayload.status === 'healthy', 'Health response payload confirms healthy system status');
-  assert(responsePayload.uptimeSeconds >= 0, 'Health response includes uptime in seconds');
-  assert(responsePayload.memory.heapUsedMb >= 0, 'Health response includes memory breakdown in MB');
+  const prevProductionOrigin = process.env.PRODUCTION_ORIGIN;
+  try {
+    process.env.PRODUCTION_ORIGIN = 'https://my-cognify-app.vercel.app';
+    await handler(mockHealthReq, mockHealthRes);
+    assert(responseStatusCode === 200, 'Health endpoint returns HTTP 200 OK');
+    assert(
+      mockHealthRes.headers[X_COGNIFY_TRACE_ID.toLowerCase()] === '77777777-8888-4999-a000-bbbbbbbbbbbb-123456789',
+      'Health endpoint echoes distributed trace ID in response headers'
+    );
+    assert(responsePayload.status === 'healthy', 'Health response payload confirms healthy system status');
+    assert(responsePayload.uptimeSeconds >= 0, 'Health response includes uptime in seconds');
+    assert(responsePayload.memory.heapUsedMb >= 0, 'Health response includes memory breakdown in MB');
+  } finally {
+    if (prevProductionOrigin !== undefined) process.env.PRODUCTION_ORIGIN = prevProductionOrigin;
+    else delete process.env.PRODUCTION_ORIGIN;
+  }
 
   // 3. Circuit breaker degradation verification
   setCircuitBreakerHealth('aiGateway', { state: 'OPEN', consecutiveFailures: 5, totalTrippedCount: 1 });

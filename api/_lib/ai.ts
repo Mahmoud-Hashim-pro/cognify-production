@@ -726,7 +726,7 @@ export async function readBody(req: any): Promise<any> {
 }
 
 import { verifyRequestAuth } from './authGuard.js';
-import { checkRateLimit } from './rateLimiter.js';
+import { checkDistributedRateLimit } from './rateLimiter.js';
 import { applyCorsHeaders } from './cors.js';
 
 /** Shared guard: POST only, authentication, provider key check, and dual-tier rate limiting (IP + User). */
@@ -764,7 +764,7 @@ export async function guard(req: any, res: any): Promise<boolean> {
 
   // 3. IP Rate Limiting (DDoS & Scraper Defense: 100 requests/minute)
   const clientIp = req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown_ip';
-  const ipRateLimit = checkRateLimit(`ip:${clientIp}`, 100);
+  const ipRateLimit = await checkDistributedRateLimit(`ip:${clientIp}`, 100);
   if (typeof res.setHeader === 'function') {
     res.setHeader('X-RateLimit-Limit-IP', '100');
     res.setHeader('X-RateLimit-Remaining-IP', String(ipRateLimit.remaining));
@@ -778,7 +778,7 @@ export async function guard(req: any, res: any): Promise<boolean> {
   }
 
   // 4. User-Level Rate Limiting (Account Quota Defense: 60 requests/minute)
-  const userRateLimit = checkRateLimit(`user:${auth.uid}`, 60);
+  const userRateLimit = await checkDistributedRateLimit(`user:${auth.uid}`, 60);
   if (typeof res.setHeader === 'function') {
     res.setHeader('X-RateLimit-Limit-User', '60');
     res.setHeader('X-RateLimit-Remaining-User', String(userRateLimit.remaining));

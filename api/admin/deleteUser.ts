@@ -12,7 +12,7 @@
  */
 import { applyCorsHeaders } from '../_lib/cors.js';
 import { verifyRequestAuth, extractBearerToken } from '../_lib/authGuard.js';
-import { checkRateLimit } from '../_lib/rateLimiter.js';
+import { checkDistributedRateLimit } from '../_lib/rateLimiter.js';
 
 // Parses comma-separated email lists from environment variables
 function parseEnvEmails(...keys: string[]): string[] {
@@ -142,7 +142,7 @@ export default async function deleteUserHandler(req: any, res: any) {
   // 3. Rate Limiting (10 deletions per minute per operator UID / IP)
   const clientIp = (req.headers && req.headers['x-forwarded-for']) || req.socket?.remoteAddress || auth.uid;
   const rateLimitKey = `admin_delete_user_${auth.uid || clientIp}`;
-  const rateResult = checkRateLimit(rateLimitKey, 10);
+  const rateResult = await checkDistributedRateLimit(rateLimitKey, 10);
   if (!rateResult.allowed) {
     return res.status(429).json({ error: 'Too Many Requests: Rate limit exceeded (maximum 10 deletions per minute)' });
   }

@@ -2,7 +2,7 @@
 *An Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform*
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://my-cognify-app.vercel.app)
-[![Tests Passing](https://img.shields.io/badge/Tests-3546%20Passed%2C%200%20Failed-10B981?logo=vitest&logoColor=white)](test-report.json)
+[![Automated Verification](https://img.shields.io/badge/Automated%20Verification-3500%2B%20Cases-10B981?logo=githubactions&logoColor=white)](.github/workflows/quality-gate.yml)
 [![TypeScript Validated](https://img.shields.io/badge/TypeScript-Validated%20(Zero%20Errors)-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Security Standard](https://img.shields.io/badge/Security-OWASP%20Top%2010%20Hardened-8B5CF6?logo=googlecloud&logoColor=white)](ARCHITECTURE.md)
 
@@ -122,6 +122,13 @@ GROQ_API_KEY=gsk_your_groq_key_here
 NVIDIA_API_KEY=nvapi-your_nvidia_key_here
 XAI_API_KEY=xai-your_xai_key_here
 
+# ── Distributed Production Rate Limiting (required in production) ─────────────
+# Upstash Redis REST credentials. These are server-only and must NOT use VITE_.
+# Without them, production API requests fail closed instead of falling back to
+# an unsafe per-instance in-memory limiter.
+UPSTASH_REDIS_REST_URL=https://your-database.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_upstash_rest_token
+
 # ── Client-Side Variables (Publicly Inlined by Vite) ───────────────────────────
 # Optional error monitoring
 VITE_SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
@@ -200,10 +207,14 @@ npm run build
 
 ## 🚢 Deployment
 
-Cognify is optimized for deployment on **Vercel** with zero configuration:
+Cognify can be deployed on **Vercel**, but production API security depends on configuring its server-side environment variables:
 1. Connect your repository to Vercel.
-2. In **Project Settings → Environment Variables**, add your `GEMINI_API_KEY` (and optional `GROQ_API_KEY` / `NVIDIA_API_KEY`).
-3. Deploy! Vercel automatically deploys the frontend static assets and provisions the serverless endpoints under `/api`.
+2. In **Project Settings → Environment Variables**, set `GEMINI_API_KEY`, `FIREBASE_PROJECT_ID`, and `PRODUCTION_ORIGIN` to the exact production app origin.
+3. Configure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for shared production rate limiting. Production API requests fail closed when Upstash is not configured.
+4. Optionally set `ALLOWED_ORIGINS` for additional approved origins and `GROQ_API_KEY`, `NVIDIA_API_KEY`, or `XAI_API_KEY` for AI-provider fallback.
+5. Deploy. Vercel serves the frontend assets and provisions the serverless endpoints under `/api`.
+
+Do not put server credentials in `VITE_*` variables; Vite includes those values in the public browser bundle.
 
 ---
 
