@@ -109,6 +109,8 @@
     "vite": "^6.2.0"
   },
   "overrides": {
+    "@grpc/grpc-js": "^1.13.6",
+    "qs": "^6.16.0",
     "tsx": {
       "esbuild": "$esbuild"
     }
