@@ -17,7 +17,7 @@ export function isAllowedOrigin(origin?: string): boolean {
     return false;
   }
 
-  const allowedOrigins: string[] = ['https://my-cognify-app.vercel.app'];
+  const allowedOrigins: string[] = [];
 
   // Primary production domain from environment
   if (process.env.PRODUCTION_ORIGIN) {
@@ -32,8 +32,8 @@ export function isAllowedOrigin(origin?: string): boolean {
     allowedOrigins.push(...custom);
   }
 
-  // 2. Vercel deployment URL (with https://)
-  if (process.env.VERCEL_URL) {
+  // 2. Vercel deployment URL (preview/development only; production uses PRODUCTION_ORIGIN)
+  if (process.env.VERCEL_URL && process.env.VERCEL_ENV !== 'production') {
     const rawVercel = process.env.VERCEL_URL.trim();
     const vercelOrigin = rawVercel.startsWith('http://') || rawVercel.startsWith('https://')
       ? rawVercel
@@ -90,8 +90,9 @@ export function applyCorsHeaders(req: any, res: any): boolean {
     // Non-browser / same-origin / internal test requests without Origin header
     if (process.env.NODE_ENV !== 'production') {
       res.setHeader?.('Access-Control-Allow-Origin', '*');
-    } else {
-      res.setHeader?.('Access-Control-Allow-Origin', 'https://my-cognify-app.vercel.app');
+    } else if (process.env.PRODUCTION_ORIGIN) {
+      res.setHeader?.('Access-Control-Allow-Origin', process.env.PRODUCTION_ORIGIN.trim().replace(/\/$/, ''));
+      res.setHeader?.('Vary', 'Origin');
     }
   }
 
