@@ -187,12 +187,11 @@ export class SignClassifier {
     const { letter, confidence } = tf.tidy(() => {
       const rgb = tf.cast(tf.browser.fromPixels(this.crop28, 3), 'float32');
       // luminance grayscale, matching dataset preprocessing
-      const gray = rgb
-        .mul(tf.tensor1d([0.299, 0.587, 0.114]))
-        .sum(2)
-        .expandDims(2)              // [28,28,1]
-        .div(255)
-        .expandDims(0);             // [1,28,28,1]
+      const luminance = tf.sum(tf.mul(rgb, tf.tensor1d([0.299, 0.587, 0.114])), 2);
+      const gray = tf.expandDims(
+        tf.div(tf.expandDims(luminance, 2), 255),
+        0
+      );
       const probs = (this.model!.predict(gray) as tf.Tensor).dataSync();
       let bi = 0;
       for (let i = 1; i < probs.length; i++) if (probs[i] > probs[bi]) bi = i;
