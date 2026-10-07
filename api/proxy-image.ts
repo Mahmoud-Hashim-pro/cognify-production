@@ -11,7 +11,7 @@
 
 import dns from 'node:dns/promises';
 import net from 'node:net';
-import { checkRateLimit } from './_lib/rateLimiter.js';
+import { checkDistributedRateLimit } from './_lib/rateLimiter.js';
 import { getOrGenerateTraceId, attachTraceId } from './_lib/tracing.js';
 
 // Trusted image provider allowlist — bypasses ad-hoc DNS queries for known CDNs
@@ -182,7 +182,7 @@ export default async function handler(req: any, res: any) {
     }
   };
 
-  const rateCheck = checkRateLimit(`img_proxy:${clientIp}`, 120);
+  const rateCheck = await checkDistributedRateLimit(`img_proxy:${clientIp}`, 120);
   if (!rateCheck.allowed) {
     res.setHeader?.('Retry-After', Math.ceil(rateCheck.resetMs / 1000).toString());
     sendJsonResponse(429, { error: 'Image proxy rate limit exceeded' });
