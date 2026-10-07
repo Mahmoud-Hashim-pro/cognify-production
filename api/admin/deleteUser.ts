@@ -196,41 +196,65 @@ export default async function deleteUserHandler(req: any, res: any) {
   let userDocDeleted = false;
   let authPurged = false;
   let subcollectionsPurgedCount = 0;
+  const deletionFailures: string[] = [];
 
   // 7. Server-Side Cascade Delete of Firestore Data with Authorization Headers & Pagination Loop
   try {
     for (const sub of USER_SUBCOLLECTIONS) {
       try {
-        let pageToken: string | undefined = undefined;
+        let pageToken: string | undefined;
         let subCollectionHadDocs = false;
+
         do {
           const pageTokenParam = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '';
           const listUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${targetUid}/${sub}?pageSize=100${pageTokenParam}`;
           const listRes = await fetch(listUrl, { headers: firestoreHeaders });
-          if (!listRes.ok) break;
+
+          if (!listRes.ok) {
+            deletionFailures.push(`${sub}: list failed with HTTP ${listRes.status}`);
+            break;
+          }
+
           const data = await listRes.json();
           if (data.documents && Array.isArray(data.documents) && data.documents.length > 0) {
             subCollectionHadDocs = true;
-            await Promise.all(
-              data.documents.map((docItem: any) =>
-                fetch(`https://firestore.googleapis.com/v1/${docItem.name}`, {
-                  method: 'DELETE',
-                  headers: firestoreHeaders,
-                }).catch(() => null)
-              )
+
+            const results = await Promise.all(
+              data.documents.map(async (docItem: any) => {
+                try {
+                  const deleteRes = await fetch(`https://firestore.googleapis.com/v1/${docItem.name}`, {
+                    method: 'DELETE',
+                    headers: firestoreHeaders,
+                  });
+                  if (!deleteRes.ok && deleteRes.status !== 404) {
+                    return `${docItem.name}: HTTP ${deleteRes.status}`;
+                  }
+                  return null;
+                } catch (deleteErr: any) {
+                  return `${docItem.name}: ${deleteErr?.message || 'delete request failed'}`;
+                }
+              })
             );
+
+            const failedDocs = results.filter(Boolean) as string[];
+            if (failedDocs.length > 0) {
+              deletionFailures.push(...failedDocs);
+            }
           }
+
           pageToken = data.nextPageToken;
         } while (pageToken);
-        if (subCollectionHadDocs) {
+
+        if (subCollectionHadDocs && !deletionFailures.some((failure) => failure.startsWith(`${sub}:`))) {
           subcollectionsPurgedCount++;
         }
-      } catch (subErr) {
+      } catch (subErr: any) {
+        deletionFailures.push(`${sub}: ${subErr?.message || 'unexpected deletion error'}`);
         console.warn(`[adminDeleteUser] Subcollection ${sub} wipe warning:`, subErr);
       }
     }
 
-    // Delete root user document with Authorization header
+    // Delete root user document only after attempting every subcollection.
     const userDocUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${targetUid}`;
     const userDelRes = await fetch(userDocUrl, {
       method: 'DELETE',
@@ -239,15 +263,17 @@ export default async function deleteUserHandler(req: any, res: any) {
 
     if (userDelRes.ok || userDelRes.status === 404) {
       userDocDeleted = true;
-      firestorePurged = true;
     } else {
-      console.warn(`[adminDeleteUser] User doc deletion returned status ${userDelRes.status}`);
+      deletionFailures.push(`users/${targetUid}: HTTP ${userDelRes.status}`);
     }
-  } catch (fsErr) {
+
+    firestorePurged = userDocDeleted && deletionFailures.length === 0;
+  } catch (fsErr: any) {
+    deletionFailures.push(`firestore: ${fsErr?.message || 'unexpected Firestore purge error'}`);
     console.warn('[adminDeleteUser] Firestore purge notice:', fsErr);
   }
 
-  // 8. Attempt Firebase Auth Deletion via Identity Toolkit when Service Account exists
+  // 8. Firebase Auth deletion requires explicit server credentials.
   if (serviceToken) {
     try {
       const deleteAuthUrl = `https://identitytoolkit.googleapis.com/v1/projects/${projectId}/accounts:delete`;
@@ -261,17 +287,23 @@ export default async function deleteUserHandler(req: any, res: any) {
       });
       if (authDelRes.ok) {
         authPurged = true;
+      } else {
+        deletionFailures.push(`firebaseAuth: HTTP ${authDelRes.status}`);
       }
-    } catch (authErr) {
+    } catch (authErr: any) {
+      deletionFailures.push(`firebaseAuth: ${authErr?.message || 'Auth deletion failed'}`);
       console.warn('[adminDeleteUser] Auth purge warning:', authErr);
     }
+  } else {
+    deletionFailures.push('firebaseAuth: service credentials are not configured');
   }
 
   const fullyPurged = firestorePurged && userDocDeleted && authPurged;
   const partialDeletion = !fullyPurged;
+  const statusCode = fullyPurged ? 200 : 500;
 
-  return res.status(200).json({
-    success: true,
+  return res.status(statusCode).json({
+    success: fullyPurged,
     targetUid,
     firestorePurged,
     userDocDeleted,
@@ -281,9 +313,9 @@ export default async function deleteUserHandler(req: any, res: any) {
     partialDeletion,
     operatorUid: auth.uid,
     timestamp: new Date().toISOString(),
-    warning: !authPurged ? 'Firestore records and subcollections purged successfully, but Firebase Auth account deletion requires FIREBASE_ADMIN_TOKEN / GOOGLE_OAUTH_ACCESS_TOKEN service credentials.' : undefined,
+    failures: deletionFailures.slice(0, 20),
     message: fullyPurged
       ? `User ${targetUid} records, subcollections, and Firebase Auth account permanently purged from system.`
-      : `User ${targetUid} records and subcollections permanently purged from Firestore (Firebase Auth requires service token).`
+      : `User ${targetUid} deletion is incomplete. Review failures and retry the purge after fixing the reported configuration or deletion errors.`
   });
 }
