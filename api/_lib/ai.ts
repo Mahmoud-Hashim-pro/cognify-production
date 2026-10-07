@@ -599,7 +599,12 @@ export async function geminiFetch(
       const t0 = Date.now();
       let r: Response;
       try {
-        r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+        r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          signal: AbortSignal.timeout(15000),
+        });
       } catch (err) {
         lastStatus = 0;
         logTelemetry({ provider: 'gemini', model, category: opts.category, latencyMs: Date.now() - t0, inputChars: body.length, success: false, error: String(err) });
@@ -644,6 +649,7 @@ export async function fallbackChat(messages: any[], category: TaskCategory = 'fa
             ...(params?.max_tokens ? { max_tokens: params.max_tokens } : {}),
             ...(params?.seed ? { seed: params.seed } : {}),
           }),
+          signal: AbortSignal.timeout(15000),
         });
         if (!r.ok) {
           logTelemetry({

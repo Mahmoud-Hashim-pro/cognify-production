@@ -20,9 +20,29 @@ async function startServer() {
 
   app.use(express.json({ limit: '2mb' }));
 
-  // Set COOP header to permit Firebase Auth Google popup communication
+  // Comprehensive Security Headers Middleware
   app.use((_req, res, next) => {
+    // Permit Firebase Auth Google popup communication
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    res.setHeader("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(), interest-cohort=()");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com; " +
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+      "font-src 'self' https://fonts.gstatic.com data:; " +
+      "img-src 'self' data: blob: https:; " +
+      "media-src 'self' blob: data: https:; " +
+      "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://api.telegram.org https://api.twilio.com; " +
+      "worker-src 'self' blob:; " +
+      "frame-src 'self' https://*.firebaseapp.com; " +
+      "object-src 'none'; " +
+      "base-uri 'self';"
+    );
     next();
   });
 
@@ -67,7 +87,10 @@ async function startServer() {
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('[Server Error Handler]:', err);
     if (res.headersSent) return;
-    res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+    const isProd = process.env.NODE_ENV === 'production';
+    const status = typeof err.status === 'number' ? err.status : 500;
+    const message = isProd && status >= 500 ? 'Internal Server Error' : (err.message || 'Internal Server Error');
+    res.status(status).json({ error: message });
   });
 
   // Vite middleware for development

@@ -50,6 +50,7 @@ async function streamFallback(
             ...(params?.seed ? { seed: params.seed } : {}),
             stream: true,
           }),
+          signal: AbortSignal.timeout(15000),
         });
       } catch (err) {
         logTelemetry({ provider, model, category, latencyMs: Date.now() - t0, success: false, error: String(err) });
