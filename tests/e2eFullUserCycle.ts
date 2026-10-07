@@ -5,6 +5,8 @@
  * and PWA readiness.
  */
 
+process.env.ALLOW_TEST_AUTH = 'true';
+
 import { StudentStateManager, createInitialStudentState } from '../src/lib/studentStateEngine.js';
 import { getConcept, diagnosePrerequisiteGap } from '../src/lib/conceptGraph.js';
 import { decideIntervention } from '../src/lib/interventionEngine.js';

@@ -12,7 +12,7 @@
  * 5. Deterministic fallback direct call if zero channels deliver.
  */
 import { applyCorsHeaders } from '../_lib/cors.js';
-import { verifyRequestAuth } from '../_lib/authGuard.js';
+import { verifyRequestAuth, extractBearerToken } from '../_lib/authGuard.js';
 import { checkRateLimit } from '../_lib/rateLimiter.js';
 
 export interface EmergencyDispatchPayload {
@@ -29,6 +29,14 @@ export interface EmergencyDispatchPayload {
   timestamp?: string;
 }
 
+function escapeHtml(str: string): string {
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function sanitizeAndValidatePhone(phone?: string): string | null {
   if (!phone || typeof phone !== 'string') return null;
   const cleaned = phone.replace(/[\s\-\(\)\.]/g, '').trim();
@@ -40,22 +48,30 @@ function sanitizeAndValidatePhone(phone?: string): string | null {
 }
 
 // Store metadata-only incident audit trail in Firestore (Zero audio/video PII)
-async function recordIncidentAuditLog(incidentData: {
-  incidentId: string;
-  uid: string;
-  timestamp: string;
-  source: string;
-  channelsNotified: string[];
-  channelErrors: string[];
-  fallbackDirectCall: boolean;
-  hasLocation: boolean;
-}) {
+async function recordIncidentAuditLog(
+  incidentData: {
+    incidentId: string;
+    uid: string;
+    timestamp: string;
+    source: string;
+    channelsNotified: string[];
+    channelErrors: string[];
+    fallbackDirectCall: boolean;
+    hasLocation: boolean;
+  },
+  bearerToken?: string | null
+) {
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0347404066';
   const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/emergency_incidents?documentId=${incidentData.incidentId}`;
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (bearerToken) {
+      headers['Authorization'] = `Bearer ${bearerToken}`;
+    }
     await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
+      signal: AbortSignal.timeout(5000),
       body: JSON.stringify({
         fields: {
           incidentId: { stringValue: incidentData.incidentId },
@@ -179,10 +195,20 @@ Time: ${timestamp}`;
     const tgChatId = process.env.TELEGRAM_CHAT_ID;
     if (tgToken && tgChatId) {
       try {
+        const escapedTelegramText = `<b>${escapeHtml(alertTitle)}</b>\n` +
+          `Incident ID: <code>${escapeHtml(incidentId)}</code>\n` +
+          `Student: ${escapeHtml(student)} (UID: <code>${escapeHtml(authenticatedUid)}</code>)\n` +
+          `Severity: ${escapeHtml(payload.severity || (isMeltdown ? 'moderate' : 'critical'))}\n` +
+          `Trigger Source: ${escapeHtml(payload.source || (isMeltdown ? 'sensory_meltdown' : 'eye_closure'))}\n` +
+          `Caregiver Contact: ${escapeHtml(payload.caregiverName || 'Primary Caregiver')}\n` +
+          `Live Map: ${escapeHtml(locationStr)}\n` +
+          `Time: ${escapeHtml(timestamp)}`;
+
         const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: tgChatId, text: alertMessage, parse_mode: 'HTML' }),
+          body: JSON.stringify({ chat_id: tgChatId, text: escapedTelegramText, parse_mode: 'HTML' }),
+          signal: AbortSignal.timeout(5000),
         });
         if (tgRes.ok) {
           channelsNotified.push('telegram_instant_push');
@@ -207,7 +233,9 @@ Time: ${timestamp}`;
         const smsParams = new URLSearchParams();
         smsParams.append('To', validCaregiverPhone);
         smsParams.append('From', twilioFrom);
-        smsParams.append('Body', alertMessage);
+        // Fixed immutable safety template prevents arbitrary SMS text injection / open-relay abuse
+        const fixedSmsBody = `[Cognify SOS Alert] Student "${student}" (UID: ${authenticatedUid}) triggered an emergency alert. Incident ID: ${incidentId}. Location: ${locationStr}. Time: ${timestamp}. Immediate caregiver assistance requested.`;
+        smsParams.append('Body', fixedSmsBody);
 
         const smsRes = await fetch(
           `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`,
@@ -215,6 +243,7 @@ Time: ${timestamp}`;
             method: 'POST',
             headers: { Authorization: authHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
             body: smsParams.toString(),
+            signal: AbortSignal.timeout(5000),
           }
         );
         if (smsRes.ok) {
@@ -242,6 +271,7 @@ Time: ${timestamp}`;
     const fallbackDirectCall = noRealChannelsConfigured || allConfiguredChannelsFailed;
 
     // Asynchronously record immutable audit trail (metadata only)
+    const bearerToken = extractBearerToken(req);
     recordIncidentAuditLog({
       incidentId,
       uid: authenticatedUid,
@@ -250,8 +280,8 @@ Time: ${timestamp}`;
       channelsNotified,
       channelErrors,
       fallbackDirectCall,
-      hasLocation: !!(payload.location?.lat && payload.location?.lng),
-    });
+      hasLocation: Boolean(payload.location?.lat && payload.location?.lng),
+    }, bearerToken);
 
     if (fallbackDirectCall) {
       console.error('[SOS CRITICAL]: No real-world channels delivered the emergency. Returning fallback flag.', {

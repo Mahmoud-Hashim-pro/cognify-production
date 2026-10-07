@@ -132,37 +132,3 @@ geminiRouter.post('/generateQuickReplies', wrap(async (req, res) => {
   res.json({ result });
 }));
 
-geminiRouter.post('/decodeDysarthria', wrap(async (req, res) => {
-  const body = req.body || {};
-  const result = await geminiService.decodeDysarthria(
-    body.text, 
-    body.profile, 
-    body.language, 
-    body.customMappings || []
-  );
-  res.json({ result });
-}));
-
-geminiRouter.post('/correctTranscript', wrap(async (req, res) => {
-  const body = req.body || {};
-  const result = await geminiService.correctTranscript(
-    body.text,
-    body.language,
-    body.profile,
-    body.customMappings || [],
-    body.context || []
-  );
-  res.json({ result });
-}));
-
-geminiRouter.post('/decodeEuphoniaAudio', wrap(async (req, res) => {
-  const body = req.body || {};
-  const result = await geminiService.decodeEuphoniaAudio(
-    body.audioData, 
-    body.profile, 
-    body.language, 
-    body.customMappings || [],
-    body.mimeType || 'audio/webm'
-  );
-  res.json({ result });
-}));

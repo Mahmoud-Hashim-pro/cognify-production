@@ -10,6 +10,8 @@
  * 6. Rate Limiting & DoS Defense (OWASP API4)
  */
 
+process.env.ALLOW_TEST_AUTH = 'true';
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

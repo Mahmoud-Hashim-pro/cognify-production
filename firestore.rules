@@ -35,15 +35,20 @@ service cloud.firestore {
     function isFounderSuperAdmin() {
       // .lower() so a differently-cased token email can't miss the allowlist
       // (the stored side in isFounderTarget/protectedEmails already lowercases).
-      return isAuthenticated() && request.auth.token.email.lower() in [
-        "modyhashim2006@gmail.com",
-        "pro.mahmoud.h@gmail.com"
-      ];
+      // STRICT REQUIREMENT: email_verified must be true to prevent unverified email spoofing.
+      return isAuthenticated() &&
+             request.auth.token.get('email_verified', false) == true &&
+             request.auth.token.email.lower() in [
+               "modyhashim2006@gmail.com",
+               "pro.mahmoud.h@gmail.com"
+             ];
     }
 
     // Security & DevTools telemetry stream is strictly restricted to modyhashim2006@gmail.com
     function isSecurityAuditsOwner() {
-      return isAuthenticated() && request.auth.token.email.lower() == "modyhashim2006@gmail.com";
+      return isAuthenticated() &&
+             request.auth.token.get('email_verified', false) == true &&
+             request.auth.token.email.lower() == "modyhashim2006@gmail.com";
     }
 
     // Super admin = Custom Claims role check (primary: request.auth.token.role == 'superadmin')
@@ -75,11 +80,13 @@ service cloud.firestore {
 
     // Permanent email-based admins (below super admins, bootstrap fallback).
     function isPermanentAdmin() {
-      return isAuthenticated() && request.auth.token.email.lower() in [
-        "its.alkhateeb@gmail.com",
-        "esraahosni8@gmail.com",
-        "audit.test.student2026@gmail.com"
-      ];
+      return isAuthenticated() &&
+             request.auth.token.get('email_verified', false) == true &&
+             request.auth.token.email.lower() in [
+               "its.alkhateeb@gmail.com",
+               "esraahosni8@gmail.com",
+               "audit.test.student2026@gmail.com"
+             ];
     }
 
     // Admin = Custom Claims role check (primary: request.auth.token.role in ['admin', 'superadmin'])
@@ -170,7 +177,7 @@ service cloud.firestore {
           && exists(/databases/$(database)/documents/users/$(userId))
           && (
             get(/databases/$(database)/documents/users/$(userId)).data.get('linkedParentUid', '') == request.auth.uid ||
-            (request.auth.token.email != '' && get(/databases/$(database)/documents/users/$(userId)).data.get('parentEmail', '').lower() == request.auth.token.email.lower()) ||
+            (request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '') != '' && get(/databases/$(database)/documents/users/$(userId)).data.get('parentEmail', '').lower() == request.auth.token.email.lower()) ||
             request.auth.uid in get(/databases/$(database)/documents/users/$(userId)).data.get('authorizedParentUids', [])
           );
     }
@@ -303,6 +310,15 @@ service cloud.firestore {
 
     match /system/{docId} {
       allow read: if true; // Connection test path
+    }
+
+    // ── Emergency Incidents Persistent Audit Log ───────────────────────────
+    match /emergency_incidents/{incidentId} {
+      // Must be authenticated and the record UID must match the caller's auth UID
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      // Read allowed for super admin or the student owner
+      allow read: if isSuperAdmin() || (isAuthenticated() && resource.data.uid == request.auth.uid);
+      allow update, delete: if false; // Immutable audit trail
     }
 
     // ── Consent-based Caregiver/Parent Linking ──────────────────────────────

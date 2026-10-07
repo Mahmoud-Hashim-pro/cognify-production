@@ -10,6 +10,8 @@
  * 6. api/gemini/generateAdaptiveResponse & Stream payload validation (32k char cap & 5 attachments cap)
  */
 
+process.env.ALLOW_TEST_AUTH = 'true';
+
 import { isAllowedOrigin, applyCorsHeaders } from '../api/_lib/cors.js';
 import { getExpectedProjectId } from '../api/_lib/authGuard.js';
 import learningProfileHandler from '../api/student/learningProfile.js';

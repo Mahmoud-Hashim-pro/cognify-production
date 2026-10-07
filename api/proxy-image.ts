@@ -225,12 +225,36 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    const contentType = upstreamRes.headers.get('content-type') || 'image/jpeg';
+    const rawContentType = upstreamRes.headers.get('content-type') || '';
+    const cleanContentType = rawContentType.split(';')[0].trim().toLowerCase();
+
+    // Strict MIME-type enforcement: MUST be an image type (e.g. image/jpeg, image/png, image/webp, image/gif, image/avif, image/svg+xml)
+    // Prevents text/html, application/javascript, or other attacker-controlled content from rendering on this origin.
+    if (!cleanContentType.startsWith('image/')) {
+      sendJsonResponse(415, { error: 'Upstream response is not a valid image format', traceId });
+      return;
+    }
+
+    // Response size cap: 10MB limit prevents memory exhaustion attacks
+    const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+    const contentLengthHeader = upstreamRes.headers.get('content-length');
+    if (contentLengthHeader && parseInt(contentLengthHeader, 10) > MAX_IMAGE_BYTES) {
+      sendJsonResponse(413, { error: 'Image exceeds maximum allowable size (10MB)', traceId });
+      return;
+    }
+
     const arrayBuf = await upstreamRes.arrayBuffer();
+    if (arrayBuf.byteLength > MAX_IMAGE_BYTES) {
+      sendJsonResponse(413, { error: 'Image exceeds maximum allowable size (10MB)', traceId });
+      return;
+    }
     const buffer = Buffer.from(arrayBuf);
 
-    res.setHeader?.('Content-Type', contentType);
+    // Strict security headers: sandbox prevents script execution; nosniff prevents MIME sniffing
+    res.setHeader?.('Content-Type', cleanContentType);
     res.setHeader?.('Content-Length', buffer.length.toString());
+    res.setHeader?.('Content-Security-Policy', "default-src 'none'; sandbox; base-uri 'none'; form-action 'none';");
+    res.setHeader?.('X-Content-Type-Options', 'nosniff');
     res.setHeader?.('Cache-Control', 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800');
     res.setHeader?.('Cross-Origin-Resource-Policy', 'cross-origin');
 
@@ -240,6 +264,6 @@ export default async function handler(req: any, res: any) {
       res.end?.(buffer);
     }
   } catch (err: any) {
-    sendJsonResponse(504, { error: 'Failed to retrieve image from upstream provider', details: err?.message, traceId });
+    sendJsonResponse(504, { error: 'Failed to retrieve image from upstream provider', traceId });
   }
 }

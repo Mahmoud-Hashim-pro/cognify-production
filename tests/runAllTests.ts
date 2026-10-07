@@ -3,6 +3,8 @@
  * Tests core pedagogical, mathematical, and architectural engines.
  */
 
+process.env.ALLOW_TEST_AUTH = 'true';
+
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';

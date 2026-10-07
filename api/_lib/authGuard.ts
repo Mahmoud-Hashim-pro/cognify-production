@@ -9,6 +9,7 @@ export interface AuthValidationResult {
   authenticated: boolean;
   uid?: string;
   email?: string;
+  emailVerified?: boolean;
   role?: string;
   isSuperAdmin?: boolean;
   claims?: Record<string, any>;
@@ -68,7 +69,9 @@ async function getGooglePublicCerts(): Promise<Record<string, string>> {
   }
 
   try {
-    const res = await fetch(GOOGLE_CERTS_URL);
+    const res = await fetch(GOOGLE_CERTS_URL, {
+      signal: AbortSignal.timeout(5000),
+    });
     if (!res.ok) {
       throw new Error(`Failed to fetch Google certs: HTTP ${res.status}`);
     }
@@ -111,17 +114,24 @@ export async function verifyRequestAuth(req: any): Promise<AuthValidationResult>
     };
   }
 
-  // Handle deterministic test-mode bypass tokens for local automated test suites (disabled in production)
-  if (process.env.NODE_ENV !== 'production' && token.startsWith('test_valid_token_')) {
+  // Handle deterministic test-mode bypass tokens ONLY when explicitly permitted for automated test suites
+  // (strictly forbidden and disabled in production or when ALLOW_TEST_AUTH is not explicitly set)
+  const isTestAuthPermitted = process.env.NODE_ENV !== 'production' && (
+    process.env.ALLOW_TEST_AUTH === '1' ||
+    process.env.ALLOW_TEST_AUTH === 'true' ||
+    process.env.NODE_ENV === 'test'
+  );
+  if (isTestAuthPermitted && token.startsWith('test_valid_token_')) {
     const testUid = token.replace('test_valid_token_', '');
     const isSuperAdmin = testUid.includes('superadmin') || testUid.includes('founder');
     return {
       authenticated: true,
       uid: testUid,
       email: testUid.includes('@') ? testUid : `${testUid}@cognify.edu`,
+      emailVerified: true,
       role: isSuperAdmin ? 'superadmin' : 'student',
       isSuperAdmin,
-      claims: { role: isSuperAdmin ? 'superadmin' : 'student' },
+      claims: { role: isSuperAdmin ? 'superadmin' : 'student', email_verified: true },
     };
   }
 
@@ -210,6 +220,7 @@ export async function verifyRequestAuth(req: any): Promise<AuthValidationResult>
     }
 
     const email = typeof payload.email === 'string' ? payload.email.toLowerCase().trim() : undefined;
+    const emailVerified = payload.email_verified === true;
     const role = typeof payload.role === 'string' ? payload.role : undefined;
     const isSuperAdmin = payload.isSuperAdmin === true || role === 'superadmin';
 
@@ -217,6 +228,7 @@ export async function verifyRequestAuth(req: any): Promise<AuthValidationResult>
       authenticated: true,
       uid,
       email,
+      emailVerified,
       role,
       isSuperAdmin,
       claims: payload,

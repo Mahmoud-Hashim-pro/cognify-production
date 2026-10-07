@@ -29,8 +29,12 @@ function parseEnvEmails(...keys: string[]): string[] {
 export function getProtectedSuperAdmins(): string[] {
   const envList = parseEnvEmails('FOUNDER_SUPERADMIN_EMAILS', 'VITE_FOUNDER_SUPERADMIN_EMAILS');
   if (envList.length > 0) return envList;
-  // Default to generic placeholder addresses only — NEVER hardcode personal emails
-  return ['admin@cognify.com', 'superadmin@cognify.edu'];
+  // In non-production test mode, fallback to standard fixture emails.
+  // In production, strictly fail-closed with empty list to prevent unconfigured placeholder takeovers.
+  if (process.env.NODE_ENV !== 'production') {
+    return ['admin@cognify.com', 'superadmin@cognify.edu'];
+  }
+  return [];
 }
 
 export function getProtectedAdmins(): string[] {
@@ -60,7 +64,7 @@ const SUBCOLLECTIONS_TO_PURGE = [
  * Checks Custom Claims, Environment Variable allowlists, and caller's Firestore document.
  */
 export async function verifySuperAdminPrivileges(
-  auth: { uid?: string; email?: string; role?: string; isSuperAdmin?: boolean; claims?: any },
+  auth: { uid?: string; email?: string; emailVerified?: boolean; role?: string; isSuperAdmin?: boolean; claims?: any },
   bearerToken: string,
   projectId: string
 ): Promise<boolean> {
@@ -78,14 +82,19 @@ export async function verifySuperAdminPrivileges(
     return true;
   }
 
-  // 3. Environment Variable Super Admin allowlist check
+  // 3. Environment Variable Super Admin allowlist check — STRICT REQUIREMENT: email MUST be verified!
   const founderSuperAdmins = getProtectedSuperAdmins();
-  if (callerEmail && founderSuperAdmins.includes(callerEmail)) {
+  if (auth.emailVerified === true && callerEmail && founderSuperAdmins.includes(callerEmail)) {
     return true;
   }
 
-  // 4. Test mode deterministic bypass for local test suites (disabled in production)
-  if (process.env.NODE_ENV !== 'production' && (auth.uid.includes('superadmin') || auth.uid.includes('founder'))) {
+  // 4. Test mode deterministic bypass for local test suites (ONLY when explicitly permitted)
+  const isTestAuthPermitted = process.env.NODE_ENV !== 'production' && (
+    process.env.ALLOW_TEST_AUTH === '1' ||
+    process.env.ALLOW_TEST_AUTH === 'true' ||
+    process.env.NODE_ENV === 'test'
+  );
+  if (isTestAuthPermitted && (auth.uid.includes('superadmin') || auth.uid.includes('founder'))) {
     return true;
   }
 
@@ -97,6 +106,7 @@ export async function verifySuperAdminPrivileges(
       headers: {
         'Authorization': `Bearer ${bearerToken}`,
       },
+      signal: AbortSignal.timeout(5000),
     });
 
     if (callerRes.ok) {
@@ -106,7 +116,7 @@ export async function verifySuperAdminPrivileges(
       if (docEmail && blocked.includes(docEmail)) {
         return false;
       }
-      if (isSuper || (docEmail && founderSuperAdmins.includes(docEmail))) {
+      if (isSuper || (auth.emailVerified === true && docEmail && founderSuperAdmins.includes(docEmail))) {
         return true;
       }
     }
