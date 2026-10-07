@@ -22,6 +22,7 @@ import { classifyRequest, type TaskCategory } from '../_lib/router.js';
 import { logTelemetry } from '../_lib/telemetry.js';
 import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
 import { applyCorsHeaders } from '../_lib/cors.js';
+import { validateAndSanitizeResponse } from '../_lib/qualityGuard.js';
 
 /** Streams from the OpenAI-compatible fallback chain. Returns the final text ("" if all failed). */
 async function streamFallback(
@@ -244,6 +245,15 @@ export default async function handler(req: any, res: any) {
         ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني بعد لحظات 🙏'
         : '⚠️ The AI is busy right now. Please try again in a moment 🙏';
     }
+
+    // Shared Output Quality Guard: sanitize output, redact sensitive secrets, repair markdown & latex
+    const validated = validateAndSanitizeResponse(full, {
+      accessibilityMode: profile?.accessibilityMode,
+      language: profile?.language,
+      cognitiveStage: profile?.level,
+    });
+    full = validated.text;
+
     // Phase 1 / Chat Enhancement: Fulfill image generation if requested by user or promised by model
     const imageResult = ensureImageInResponse(message, full, safeHistory);
     full = imageResult.text;
@@ -251,6 +261,7 @@ export default async function handler(req: any, res: any) {
     send({
       text: full,
       done: true,
+      warnings: validated.warnings,
       ...(imageResult.attachment ? { attachments: [imageResult.attachment] } : {}),
     });
   } catch (err) {

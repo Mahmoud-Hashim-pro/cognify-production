@@ -190,10 +190,43 @@ export default async function handler(req: any, res: any) {
 
   try {
     const healthPayload = getSystemHealthReport(traceId);
+    const isProd = process.env.NODE_ENV === 'production';
+    const authHeader = req.headers?.authorization || req.headers?.['x-admin-key'];
+    const isAuthorized = authHeader && (authHeader.startsWith('Bearer ') || authHeader.length > 10);
+
+    // In production without admin authorization, sanitize sensitive operational specifics (exact model rotation names, detailed provider mapping)
+    let finalPayload: any = healthPayload;
+    if (isProd && !isAuthorized) {
+      finalPayload = {
+        status: healthPayload.status,
+        uptimeSeconds: healthPayload.uptimeSeconds,
+        uptime: healthPayload.uptime,
+        timestamp: healthPayload.timestamp,
+        traceId: healthPayload.traceId,
+        circuitBreakerStatus: healthPayload.circuitBreakerStatus,
+        memory: {
+          rss: healthPayload.memory.rss,
+          heapTotal: healthPayload.memory.heapTotal,
+          heapUsed: healthPayload.memory.heapUsed,
+          external: healthPayload.memory.external,
+          rssMb: healthPayload.memory.rssMb,
+          heapUsedMb: healthPayload.memory.heapUsedMb,
+        },
+        providers: {
+          aiGateway: {
+            status: healthPayload.circuitBreakerStatus === 'OPEN' ? 'degraded' : 'healthy',
+            available: healthPayload.activeProviderHealth.gemini?.available || healthPayload.activeProviderHealth.nvidia?.available || healthPayload.activeProviderHealth.groq?.available || false,
+          },
+        },
+        environment: 'production',
+        version: healthPayload.version,
+      };
+    }
+
     if (typeof res.status === 'function') {
-      res.status(200).json(healthPayload);
+      res.status(200).json(finalPayload);
     } else {
-      res.end(JSON.stringify(healthPayload));
+      res.end(JSON.stringify(finalPayload));
     }
   } catch (err: any) {
     const errorPayload = {

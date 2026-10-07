@@ -138,16 +138,32 @@ export default async function handler(req: any, res: any) {
     const channelsNotified: string[] = [];
     const channelErrors: string[] = [];
 
-    const student = payload.studentName || 'Cognify Student';
+    const student = typeof payload.studentName === 'string' && payload.studentName.trim()
+      ? payload.studentName.trim().slice(0, 100)
+      : 'Cognify Student';
+    const caregiverName = typeof payload.caregiverName === 'string' && payload.caregiverName.trim()
+      ? payload.caregiverName.trim().slice(0, 100)
+      : 'Primary Caregiver';
+    const sanitizedTrigger = typeof payload.trigger === 'string'
+      ? payload.trigger.trim().slice(0, 500)
+      : '';
+    const customText = typeof payload.text === 'string'
+      ? payload.text.trim().slice(0, 1000)
+      : '';
+
     const validCaregiverPhone = sanitizeAndValidatePhone(payload.caregiverPhone);
 
-    const locationStr = payload.location?.lat && payload.location?.lng
-      ? `https://maps.google.com/?q=${payload.location.lat},${payload.location.lng}`
+    const lat = typeof payload.location?.lat === 'number' && Number.isFinite(payload.location.lat) && payload.location.lat >= -90 && payload.location.lat <= 90 ? payload.location.lat : null;
+    const lng = typeof payload.location?.lng === 'number' && Number.isFinite(payload.location.lng) && payload.location.lng >= -180 && payload.location.lng <= 180 ? payload.location.lng : null;
+    const validLocation = lat !== null && lng !== null ? { lat, lng } : undefined;
+
+    const locationStr = validLocation
+      ? `https://maps.google.com/?q=${validLocation.lat},${validLocation.lng}`
       : 'Location unavailable';
 
     const alertTitle = isMeltdown ? '⚠️ [SENSORY MELTDOWN ALERT - COGNIFY]' : '🚨 [CRITICAL EMERGENCY SOS]';
     const defaultText = isMeltdown
-      ? `Student is experiencing an acute sensory meltdown / overload.${payload.trigger ? ` Trigger: ${payload.trigger}` : ''} Immediate caregiver de-escalation & environmental calming needed.`
+      ? `Student is experiencing an acute sensory meltdown / overload.${sanitizedTrigger ? ` Trigger: ${sanitizedTrigger}` : ''} Immediate caregiver de-escalation & environmental calming needed.`
       : 'Immediate medical/caregiver assistance requested!';
 
     const alertMessage = `${alertTitle}
@@ -155,8 +171,8 @@ Incident ID: ${incidentId}
 Student: ${student} (UID: ${authenticatedUid})
 Severity: ${payload.severity || (isMeltdown ? 'moderate' : 'critical')}
 Trigger Source: ${payload.source || (isMeltdown ? 'sensory_meltdown' : 'eye_closure')}
-Caregiver Contact: ${payload.caregiverName || 'Primary Caregiver'} (${validCaregiverPhone || 'Not set or unverified'})
-Message: ${payload.text || defaultText}
+Caregiver Contact: ${caregiverName} (${validCaregiverPhone || 'Not set or unverified'})
+Message: ${customText || defaultText}
 Live Map: ${locationStr}
 Time: ${timestamp}`;
 
@@ -200,7 +216,8 @@ Time: ${timestamp}`;
           `Student: ${escapeHtml(student)} (UID: <code>${escapeHtml(authenticatedUid)}</code>)\n` +
           `Severity: ${escapeHtml(payload.severity || (isMeltdown ? 'moderate' : 'critical'))}\n` +
           `Trigger Source: ${escapeHtml(payload.source || (isMeltdown ? 'sensory_meltdown' : 'eye_closure'))}\n` +
-          `Caregiver Contact: ${escapeHtml(payload.caregiverName || 'Primary Caregiver')}\n` +
+          `Caregiver Contact: ${escapeHtml(caregiverName)}\n` +
+          `Message: ${escapeHtml(customText || defaultText)}\n` +
           `Live Map: ${escapeHtml(locationStr)}\n` +
           `Time: ${escapeHtml(timestamp)}`;
 

@@ -45,19 +45,8 @@ export function getBlockedSuperAdmins(): string[] {
   return parseEnvEmails('BLOCKED_SUPERADMIN_EMAILS', 'VITE_BLOCKED_SUPERADMIN_EMAILS');
 }
 
-const SUBCOLLECTIONS_TO_PURGE = [
-  'threads',
-  'goals',
-  'learningEvents',
-  'learningProfile',
-  'exerciseHistory',
-  'loginHistory',
-  'neurodiversity',
-  'sensoryLogs',
-  'studentState',
-  'spatialMemories',
-  'caregiverLinks'
-];
+import { USER_SUBCOLLECTIONS } from '../../src/types/privacySecurity.js';
+export { USER_SUBCOLLECTIONS };
 
 /**
  * Validates whether the caller has Super Admin privileges.
@@ -208,15 +197,20 @@ export default async function deleteUserHandler(req: any, res: any) {
   let authPurged = false;
   let subcollectionsPurgedCount = 0;
 
-  // 7. Server-Side Cascade Delete of Firestore Data with Authorization Headers
+  // 7. Server-Side Cascade Delete of Firestore Data with Authorization Headers & Pagination Loop
   try {
-    for (const sub of SUBCOLLECTIONS_TO_PURGE) {
+    for (const sub of USER_SUBCOLLECTIONS) {
       try {
-        const listUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${targetUid}/${sub}?pageSize=100`;
-        const listRes = await fetch(listUrl, { headers: firestoreHeaders });
-        if (listRes.ok) {
+        let pageToken: string | undefined = undefined;
+        let subCollectionHadDocs = false;
+        do {
+          const pageTokenParam = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '';
+          const listUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${targetUid}/${sub}?pageSize=100${pageTokenParam}`;
+          const listRes = await fetch(listUrl, { headers: firestoreHeaders });
+          if (!listRes.ok) break;
           const data = await listRes.json();
           if (data.documents && Array.isArray(data.documents) && data.documents.length > 0) {
+            subCollectionHadDocs = true;
             await Promise.all(
               data.documents.map((docItem: any) =>
                 fetch(`https://firestore.googleapis.com/v1/${docItem.name}`, {
@@ -225,8 +219,11 @@ export default async function deleteUserHandler(req: any, res: any) {
                 }).catch(() => null)
               )
             );
-            subcollectionsPurgedCount++;
           }
+          pageToken = data.nextPageToken;
+        } while (pageToken);
+        if (subCollectionHadDocs) {
+          subcollectionsPurgedCount++;
         }
       } catch (subErr) {
         console.warn(`[adminDeleteUser] Subcollection ${sub} wipe warning:`, subErr);
@@ -270,6 +267,9 @@ export default async function deleteUserHandler(req: any, res: any) {
     }
   }
 
+  const fullyPurged = firestorePurged && userDocDeleted && authPurged;
+  const partialDeletion = !fullyPurged;
+
   return res.status(200).json({
     success: true,
     targetUid,
@@ -277,8 +277,13 @@ export default async function deleteUserHandler(req: any, res: any) {
     userDocDeleted,
     subcollectionsPurgedCount,
     authPurged,
+    fullyPurged,
+    partialDeletion,
     operatorUid: auth.uid,
     timestamp: new Date().toISOString(),
-    message: `User ${targetUid} records and subcollections permanently purged from system.`
+    warning: !authPurged ? 'Firestore records and subcollections purged successfully, but Firebase Auth account deletion requires FIREBASE_ADMIN_TOKEN / GOOGLE_OAUTH_ACCESS_TOKEN service credentials.' : undefined,
+    message: fullyPurged
+      ? `User ${targetUid} records, subcollections, and Firebase Auth account permanently purged from system.`
+      : `User ${targetUid} records and subcollections permanently purged from Firestore (Firebase Auth requires service token).`
   });
 }

@@ -19,6 +19,11 @@ export function isAllowedOrigin(origin?: string): boolean {
 
   const allowedOrigins: string[] = ['https://my-cognify-app.vercel.app'];
 
+  // Primary production domain from environment
+  if (process.env.PRODUCTION_ORIGIN) {
+    allowedOrigins.push(process.env.PRODUCTION_ORIGIN.trim().replace(/\/$/, ''));
+  }
+
   // 1. Configured custom origins (comma-separated)
   if (process.env.ALLOWED_ORIGINS) {
     const custom = process.env.ALLOWED_ORIGINS.split(',')

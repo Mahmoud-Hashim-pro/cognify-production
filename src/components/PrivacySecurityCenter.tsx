@@ -25,7 +25,7 @@ import {
 import { doc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { deleteUser, signOut } from 'firebase/auth';
-import type { AuditLogEntry, CascadeErasureManifest } from '../types/privacySecurity';
+import { USER_SUBCOLLECTIONS, type AuditLogEntry, type CascadeErasureManifest } from '../types/privacySecurity';
 
 interface PrivacySecurityCenterProps {
   currentStudent?: StudentState;
@@ -184,12 +184,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
     // 2. Real Remote Firestore Cascade Purge across all subcollections and root doc
     if (isRealUser) {
       try {
-        const subcollections = [
-          'learningEvents', 'threads', 'studentState', 'goals', 'courses',
-          'notes', 'attendance', 'planner', 'spatialMemories', 'caregiverLinks',
-          'exerciseHistory', 'loginHistory', 'learningProfile'
-        ];
-        for (const sub of subcollections) {
+        for (const sub of USER_SUBCOLLECTIONS) {
           try {
             const colRef = collection(db, 'users', activeStudent.uid, sub);
             const snap = await getDocs(colRef);
