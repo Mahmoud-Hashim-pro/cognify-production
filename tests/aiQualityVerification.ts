@@ -12,6 +12,7 @@ import {
   evaluateEpistemicGrounding,
   runQualityGuardPipeline
 } from '../src/lib/aiQualityGuard2';
+import { sanitizeStreamingResponse, validateAndSanitizeResponse } from '../api/_lib/qualityGuard';
 
 let passed = 0;
 let failed = 0;
@@ -136,6 +137,22 @@ export async function runAiQualityVerification(): Promise<{ passed: number; fail
   assert(pristineRes.isClean === true, 'Clean response is verified isClean = true');
   assert(pristineRes.repairs.length === 0, 'Zero repairs executed on clean response');
 
+  // ==========================================================================
+  // Test Group 7: Streaming Output Security
+  // ==========================================================================
+  console.log('Group 7: Streaming Output Security');
+  const streamedSecret = 'The key is nvapi-' + 'A'.repeat(40);
+  const streamSafe = sanitizeStreamingResponse(streamedSecret);
+  assert(!streamSafe.text.includes('nvapi-'), 'Streaming prefix redacts provider API keys before emission');
+  assert(streamSafe.text.includes('[REDACTED_SECRET]'), 'Streaming prefix replaces leaked secrets with a safe marker');
+  assert(streamSafe.warnings.some(w => w.includes('NVIDIA_API_KEY_LEAK')), 'Streaming prefix reports the redaction warning');
+
+  const partialMarkdown = 'Here is code:\n```ts\nconst value = 1;';
+  const streamMarkdown = sanitizeStreamingResponse(partialMarkdown);
+  assert(streamMarkdown.text === partialMarkdown, 'Streaming sanitizer does not mutate incomplete markdown fences');
+
+  const finalGuard = validateAndSanitizeResponse(partialMarkdown);
+  assert(finalGuard.text.endsWith('\n```'), 'Final guard still repairs the incomplete markdown fence');
   console.log(`\nMilestone 18 Verification Finished: ${passed} passed, ${failed} failed.`);
   return { passed, failed };
 }
