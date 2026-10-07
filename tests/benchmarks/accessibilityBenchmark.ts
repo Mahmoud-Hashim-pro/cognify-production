@@ -258,17 +258,25 @@ async function benchmarkPillar1VisionCompanion() {
 async function benchmarkPillar2SignAvatarAndStudio() {
   console.log('\n--- 2.1: ASL Letter Mapping (24 Static Alphabet Letters A-Y) ---');
 
-  // Read SignAvatar3D source to inspect exact LETTER_POSES and AR_MAP
+  // Pose data now lives in the shared dictionary, while SignAvatar3D keeps
+  // a compatibility alias. Read both files so this benchmark checks the public source of truth.
   const signAvatarSource = fs.readFileSync(path.resolve('src/components/SignAvatar3D.tsx'), 'utf-8');
+  const avatarDictionarySource = fs.readFileSync(path.resolve('src/lib/aslAvatarDictionary.ts'), 'utf-8');
 
   // Validate SIGN_LETTERS contains 24 static letters
   assert(SIGN_LETTERS.length === 24, `SIGN_LETTERS contains exactly 24 static alphabet letters (Length: ${SIGN_LETTERS.length})`);
   assert(SIGN_LETTERS === 'ABCDEFGHIKLMNOPQRSTUVWXY', 'SIGN_LETTERS covers A–Y excluding dynamic trajectory letters J and Z');
   assert(!SIGN_LETTERS.includes('J') && !SIGN_LETTERS.includes('Z'), 'Motion-required letters J and Z are excluded from static classifier');
 
-  // Extract LETTER_POSES from SignAvatar3D
-  const letterPosesMatch = signAvatarSource.match(/const LETTER_POSES: Record<string, HandPose> = ({[\s\S]*?\n};)/);
-  assert(letterPosesMatch !== null, 'Found LETTER_POSES definition in SignAvatar3D.tsx');
+  // Extract the canonical pose table from its shared dictionary module.
+  const letterPosesMatch = avatarDictionarySource.match(
+    /export const ASL_FINGERSPELLING_POSES: Record<string, AvatarHandPose> = ({[\s\S]*?\n};)/
+  );
+  assert(letterPosesMatch !== null, 'Found ASL_FINGERSPELLING_POSES definition in aslAvatarDictionary.ts');
+  assert(
+    /const LETTER_POSES: Record<string, HandPose> = ASL_FINGERSPELLING_POSES/.test(signAvatarSource),
+    'SignAvatar3D consumes the shared fingerspelling pose dictionary'
+  );
 
   // Parse letter poses keys
   const poseKeys = Array.from(letterPosesMatch![1].matchAll(/\s+([A-Z0-9"']+): \{/g)).map(m => m[1].replace(/["']/g, ''));
