@@ -726,6 +726,5 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
 if (import.meta.url.endsWith(process.argv[1]) || process.argv[1]?.includes('apiCorsAuthHardeningVerification')) {
   runApiCorsAuthHardeningVerification().then(({ failed }) => {
     if (failed > 0) process.exit(1);
-    else process.exit(0);
   });
 }

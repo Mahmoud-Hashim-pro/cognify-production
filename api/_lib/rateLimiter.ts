@@ -92,7 +92,7 @@ export async function checkDistributedRateLimit(
   const token = UPSTASH_TOKEN();
 
   if (!url || !token) {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD !== 'true') {
       return {
         allowed: false,
         limit: maxPerMinute,
@@ -142,6 +142,9 @@ export async function checkDistributedRateLimit(
     };
   } catch (error) {
     console.error('[rateLimiter] Distributed limiter unavailable:', error);
+    if (process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD === 'true') {
+      return localRateLimit(identifier, maxPerMinute);
+    }
     // Fail closed in production: availability is preferable to silently
     // reverting to a per-instance security control.
     return {
