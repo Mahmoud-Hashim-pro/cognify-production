@@ -140,28 +140,6 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
     clear: localize(voiceLang, "Clear", "مسح"),
   };
 
-  const DYNAMIC_AAC_PHRASES = isEgyptian ? [
-    { text: "عندي سؤال يا باشا", icon: "🙋‍♂️" },
-    { text: "ممكن تعيد الشرح تاني؟", icon: "🔄" },
-    { text: "محتاج توضيح أبسط شوية", icon: "💡" },
-    { text: "تمام جداً فهمت، تسلم!", icon: "✅" },
-  ] : isArabic ? [
-    { text: "عندي سؤال لو سمحت", icon: "🙋‍♂️" },
-    { text: "ممكن إعادة الشرح من فضلك؟", icon: "🔄" },
-    { text: "محتاج توضيح بطريقة أبسط", icon: "💡" },
-    { text: "تمام جداً فهمت، شكراً!", icon: "✅" },
-  ] : isFrench ? [
-    { text: "J'ai une question s'il vous plaît", icon: "🙋‍♂️" },
-    { text: "Pouvez-vous répéter le point ?", icon: "🔄" },
-    { text: "Pouvez-vous expliquer plus simplement ?", icon: "💡" },
-    { text: "Très bien compris, merci !", icon: "✅" },
-  ] : [
-    { text: "I have a question please", icon: "🙋‍♂️" },
-    { text: "Could you repeat that please?", icon: "🔄" },
-    { text: "Can you explain simpler?", icon: "💡" },
-    { text: "Understood clearly, thank you!", icon: "✅" },
-  ];
-
   /** Speak any text aloud and remember WHICH box it came from.
    *  - 'input'  → the app becomes the student's VOICE: they type or fingerspell
    *               and the person in front of them hears it.
@@ -694,68 +672,65 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
   const activeWord = playbackProgress < sequence.length ? sequence[playbackProgress] : '';
 
   return (
-    <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 relative overflow-hidden h-full font-sans custom-scrollbar">
+    <div className="flex-1 flex flex-col bg-[#0E1416] text-stone-100 relative overflow-hidden h-full font-sans custom-scrollbar">
       {/* Ambient Lighting Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-[#4A1224]/30 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[140px]" />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-teal-700/15 rounded-full blur-[140px]" />
+        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px]" />
       </div>
 
       {!isEmbedded && (
-        <header className="p-6 md:p-10 shrink-0 flex items-center justify-between z-10 relative bg-[#080409]/90 backdrop-blur-xl border-b border-[#4A1224]/60">
+        <header className="p-4 md:p-6 shrink-0 flex items-center justify-between z-10 relative bg-[#0E1416]/95 backdrop-blur-xl border-b border-stone-800">
            <div className="flex items-center gap-4">
              {onNavigateBack && (
                <button
                  onClick={onNavigateBack}
-                 className="p-2.5 text-slate-300 hover:text-white bg-[#0E0610] hover:bg-[#150917] shadow-md border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-                 title="Back to Assistant / العودة للمساعد"
-                 aria-label="Back to Assistant / العودة للمساعد"
+                 className="p-2 text-stone-300 hover:text-white bg-[#162327] hover:bg-stone-800 shadow-sm border border-stone-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+                 title="Back to Hub / الرجوع"
+                 aria-label="Back to Hub / الرجوع"
                >
-                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                 <span className="text-xs font-bold hidden sm:inline">Back</span>
+                 <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+                 <span className="text-xs font-bold hidden sm:inline">رجوع</span>
                </button>
              )}
              <button
               onClick={onMenuClick}
               aria-label="Toggle menu"
               title="Open Menu"
-              className="p-2.5 text-slate-300 hover:text-white bg-[#0E0610] hover:bg-[#150917] shadow-md border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 shrink-0"
+              className="p-2 text-stone-300 hover:text-white bg-[#162327] hover:bg-stone-800 shadow-sm border border-stone-800 rounded-xl active:scale-95 shrink-0"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
              <div>
-               <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
-                 Sign Video Studio
-                 <div className="px-2.5 py-1 bg-[#4A1224]/40 text-[#E5A93C] rounded-xl text-xs font-black uppercase tracking-widest border border-[#E5A93C]/30">Beta</div>
+               <h1 className="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2.5">
+                 {isArabic ? "استوديو لغة الإشارة 3D" : "3D Sign Language Studio"}
+                 <div className="px-2 py-0.5 bg-teal-950/60 text-teal-400 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-teal-800">AI 3D</div>
                </h1>
-               <p className="text-sm text-slate-400 font-medium mt-1">Generate AI Sign Language videos from speech or text input.</p>
+               <p className="text-xs text-stone-400 font-medium mt-0.5">
+                 {isArabic ? "ترجمة فورية للنصوص والأصوات إلى لغة إشارة ثلاثية الأبعاد." : "Real-time 3D sign translation for custom scripts & speech."}
+               </p>
              </div>
            </div>
 
            <div className="hidden md:flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-[#0E0610] px-3.5 py-1.5 rounded-2xl border border-[#4A1224]/60">
-                <div className={`w-2 h-2 rounded-full ${is3DActive ? 'bg-[#E5A93C] animate-pulse' : 'bg-slate-600'}`} />
-                <span className="text-[10px] font-extrabold text-slate-300 uppercase tracking-wider">3D Avatar Engine</span>
+              <div className="flex items-center gap-2 bg-[#162327] px-3 py-1.5 rounded-xl border border-stone-800">
+                <div className={`w-2 h-2 rounded-full ${is3DActive ? 'bg-teal-400 animate-pulse' : 'bg-stone-600'}`} />
+                <span className="text-[10px] font-bold text-stone-300 uppercase tracking-wider">3D Avatar Engine</span>
               </div>
            </div>
         </header>
       )}
 
-      <div className="bg-[#4A1224]/40 border-b border-[#E5A93C]/20 text-[#E5A93C] text-[10px] sm:text-xs font-mono py-2 px-4 text-center flex justify-center items-center gap-2 z-20 relative w-full font-bold">
-         <div className="w-2 h-2 rounded-full bg-[#E5A93C] animate-pulse drop-shadow-md" />
-         FINGERSPELLING ENGINE (A–Z, 0–9, ARABIC MAPPING) + WORD GESTURES — RENDERED IN REAL-TIME WEBGL.
-      </div>
-
-      <div className={`flex-1 min-h-0 overflow-y-auto z-10 relative flex flex-col items-center ${isEmbedded ? 'p-3 md:p-5' : 'p-6 md:p-10'}`}>
-         <div className={`w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 ${isEmbedded ? 'gap-4' : 'gap-8 h-full'}`}>
+      <div className={`flex-1 min-h-0 overflow-y-auto z-10 relative flex flex-col items-center ${isEmbedded ? 'p-3 md:p-5' : 'p-4 md:p-6'}`}>
+         <div className={`w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 ${isEmbedded ? 'gap-4' : 'gap-6 h-full'}`}>
 
             {/* Input Section */}
-            <div className="flex flex-col gap-6 w-full h-full">
-               <div className={`bg-[#0E0610]/95 rounded-3xl shadow-2xl border border-[#4A1224]/60 backdrop-blur-xl flex-1 flex flex-col ${isEmbedded ? 'p-4' : 'p-6'}`}>
-                  <div className="flex items-center justify-between mb-4">
-                     <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                       <FileText className="w-5 h-5 text-[#E5A93C]" />
+            <div className="flex flex-col gap-4 w-full h-full">
+               <div className={`bg-[#121B1E] rounded-2xl shadow-xl border border-stone-800 backdrop-blur-xl flex-1 flex flex-col ${isEmbedded ? 'p-4' : 'p-5'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                     <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                       <FileText className="w-4 h-4 text-teal-400" />
                        {t.scriptInput}
                      </h2>
 
@@ -840,30 +815,6 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
                     </div>
                   </div>
 
-                  {/* Quick Communication Bridge AAC Cards */}
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
-                        ⚡ {isArabic ? "عبارات سريعة بنقرة واحدة (Bridge Phrases):" : "Quick 1-Tap Bridge Phrases:"}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {DYNAMIC_AAC_PHRASES.map((card, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            setInputText(card.text);
-                            handleAskAI(card.text);
-                          }}
-                          className="px-2.5 py-1.5 bg-[#080409] hover:bg-[#4A1224]/40 hover:text-[#E5A93C] hover:border-[#E5A93C]/40 text-slate-300 text-[11px] font-semibold rounded-xl border border-[#4A1224]/60 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm"
-                        >
-                          <span>{card.icon}</span>
-                          <span>{card.text}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
                   {/* SIGN camera panel — on-device live fingerspelling */}
                   {inputMode === 'sign' && (

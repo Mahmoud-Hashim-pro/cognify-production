@@ -976,7 +976,24 @@ export default function App() {
           </>
         );
       case 'video':
-        return <SignVideoStudio profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo('disability')} />;
+        return (
+          <DisabilityModeView
+            ref={chatRef}
+            profile={activeProfile}
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+            onNavigate={navigateTo}
+            onQuestionEvaluated={updateQuestionHistory}
+            syncMessages={syncActiveThread}
+            externalMessage={externalMessage}
+            onStreamingUpdate={(text) => setCurrentAIResponse(text)}
+            onSTTStateChange={setIsSTTActive}
+            currentTab="deaf"
+            onTabChange={setDisabilityTab}
+            setProfile={setProfile}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
+          />
+        );
       case 'disability':
         return <DisabilityModeView
           ref={chatRef}
