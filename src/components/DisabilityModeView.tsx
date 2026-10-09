@@ -69,7 +69,7 @@ function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
   // 1. If user explicitly clicked and chose a tab before, honor that manual choice!
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
-    if (saved === 'neurodiversity') {
+    if (saved === 'neurodiversity' || saved === 'orchestrator') {
       try { localStorage.setItem('cognify_default_disability_tab', 'deaf'); } catch {}
       return 'deaf';
     }
@@ -280,8 +280,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     },
     {
       id: 'caregiver' as const,
-      titleEn: 'Caregiver & Universal',
-      titleAr: 'المرافق والتيسيرات',
+      titleEn: 'Caregiver & Support',
+      titleAr: 'المرافق والدعم',
       emoji: '🛡️',
       icon: Shield,
       color: 'text-rose-400',
@@ -335,28 +335,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-600 text-white shadow-indigo-500/25',
       matchingMode: 'Sign-Only',
     },
-    // 3. CROSS-DISABILITY SENSORY BRIDGE (UNIVERSAL MESH)
-    {
-      id: 'orchestrator' as const,
-      category: 'caregiver' as const,
-      titleEn: 'Cross-Disability Sensory Bridge (Universal Mesh)',
-      titleAr: 'جسر التواصل التبادلي بين الإعاقات (شبكة الحواس الشاملة)',
-      shortEn: 'Sensory Bridge',
-      shortAr: 'جسر الإعاقات',
-      badgeEn: 'Blind ⇄ Deaf ⇄ Motor ⇄ Deaf-Blind',
-      badgeAr: 'كفيف ⇄ أصم ⇄ شلل ⇄ كفيف-أصم',
-      descEn: 'Direct bilateral peer-to-peer relay connecting blind & deaf students without human interpreters, tactile Morse haptic matrix for deaf-blind, and single-switch autonomic scanner for ALS.',
-      descAr: 'جسر ثنائي مباشر للتواصل بين الكفيف والأصم بدون مترجم بشري، مصفوفة مورس بالاهتزاز اللمسي للصم-المكفوفين، والمسح الذكي بالمفتاح الفردي لمرضى التصلب والشلل ALS.',
-      quickFeaturesAr: ['جسر كفيف ⇄ أصم فوري', 'مصفوفة مورس اللمسية بالاهتزاز', 'مسح المفتاح الفردي لشلل ALS', 'استغاثة SOS شاملة متعددة الحواس'],
-      quickFeaturesEn: ['Blind ⇄ Deaf Bilateral Relay', 'Tactile Morse Haptics', 'Single-Switch ALS Scanner', 'Omni-Sensory SOS Beacon'],
-      Icon: Sparkles,
-      accentColor: 'text-[#E5A93C]',
-      borderGlow: 'hover:border-[#E5A93C]/80 border-[#E5A93C]/40 ring-1 ring-[#E5A93C]/30',
-      bgGlow: 'bg-[#4A1224]/40 text-[#E5A93C] border-[#E5A93C]/40',
-      buttonCls: 'bg-gradient-to-r from-amber-400 via-indigo-500 to-purple-600 text-white shadow-[#E5A93C]/20',
-      matchingMode: 'Multiple',
-    },
-    // 3. CAREGIVER & UNIVERSAL
+    // 3. CAREGIVER & SUPPORT
     {
       id: 'caregiver' as const,
       category: 'caregiver' as const,
@@ -452,7 +431,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   // Filter modules based on selectedCategory
   const filteredModules = useMemo(() => {
     if (selectedCategory === 'all') return MODULES;
-    return MODULES.filter((m) => m.category === selectedCategory || (m.id === 'orchestrator' && (selectedCategory === 'vision' || selectedCategory === 'hearing')));
+    return MODULES.filter((m) => m.category === selectedCategory);
   }, [selectedCategory, MODULES]);
 
   const isAr = profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya';

@@ -13,20 +13,16 @@ import {
 import type { AccessibilityMode } from '../types';
 
 type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
-type DisabilityOption = 'Visual' | 'Hearing' | 'Speech' | 'Universal';
+type DisabilityOption = 'Visual' | 'Hearing';
 
 const DISABILITY_MODE_MAP: Record<DisabilityOption, AccessibilityMode> = {
   'Visual': 'Visual',
   'Hearing': 'Vocal-Deaf',
-  'Speech': 'Speech',
-  'Universal': 'Visual',
 };
 
 const DISABILITY_LABEL_MAP: Record<DisabilityOption, string> = {
   'Visual': 'Visual Impairment',
   'Hearing': 'Hearing Impairment',
-  'Speech': 'Speech & Motor Impairment',
-  'Universal': 'Cross-Disability & Sensory Bridge',
 };
 
 // Each Special Needs accessibility feature, tagged with which disability chip(s) it's the primary match for.
@@ -64,39 +60,25 @@ const SPECIAL_NEEDS_FEATURES: {
     matches: ['Hearing'],
   },
   {
-    key: 'motor',
-    Icon: Activity,
-    title: { en: 'Speech Euphonia & Switch Control', ar: 'تحسين النطق والتحكم الحركي الذكي' },
-    description: { en: 'Voice synthesis for speech difficulties, dwell auto-clicker, and switch scanning for ALS', ar: 'توليف صوتي لمن يعانون من صعوبات النطق، نقر تلقائي عند التوقف، ومسح للمفاتيح البديلة' },
-    matches: ['Speech'],
-  },
-  {
-    key: 'orchestrator',
-    Icon: Zap,
-    title: { en: 'Cross-Disability Sensory Bridge', ar: 'جسر الحواس والتواصل متعدد الإعاقات' },
-    description: { en: 'Direct peer-to-peer sensory relay between Blind (Audio) and Deaf (Text/Sign) users', ar: 'جسر مباشر للتواصل التبادلي بين الكفيف والأصم بدون وسيط بشري' },
-    matches: ['Universal'],
-  },
-  {
     key: 'caregiver',
     Icon: Heart,
     title: { en: 'Caregiver & Specialist SOS Hub', ar: 'لوحة المرافق والمختص ونداء الاستغاثة SOS' },
     description: { en: 'Emergency SOS alerts, real-time location sharing, and clinical care logs', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، وتتبع الرعاية' },
-    matches: ['Universal'],
+    matches: [],
   },
   {
     key: 'chat',
     Icon: Brain,
     title: { en: 'Accessible AI Tutor', ar: 'المساعد التعليمي المهيأ للإتاحة' },
     description: { en: 'Adaptive tutor tailored to your pace, with high contrast & screen-reader support', ar: 'مساعد تعليمي ذكي مهيأ بالكامل لقارئات الشاشة، تباين لوني فائق، وتدرج معرفي مرن' },
-    matches: ['Universal'],
+    matches: [],
   },
   {
     key: 'settings',
     Icon: Globe,
     title: { en: 'Accessibility Passport & Dialects', ar: 'جواز الإتاحة واللغات' },
     description: { en: '11 languages & dialects including Egyptian Ammiya, plus sensory profiles', ar: '11 لغة ولهجة ومنها المصري، مع ضبط جواز الإتاحة وملفات الحواس الشخصية' },
-    matches: ['Universal'],
+    matches: [],
   },
 ];
 
@@ -150,30 +132,6 @@ const DISABILITY_MODALITIES: {
     icon: Ear,
     focusTagEn: '3D Sign · Captions · Radar · Studio',
     focusTagAr: 'إشارة 3D · كابشن فوري · رادار مخاطر · استوديو',
-  },
-  {
-    id: 'Speech',
-    titleEn: 'Speech & Motor Support',
-    titleAr: 'صعوبات النطق والحركة',
-    badgeEn: 'Euphonia & Switch',
-    badgeAr: 'توليف صوت ومفاتيح',
-    descEn: 'Custom voice synthesis for non-standard speech, dwell auto-clicker, single-switch scanning, and accessible inputs.',
-    descAr: 'توليف نطق صوتي مخصص، نقر تلقائي عند التوقف، ومسح للمفاتيح البديلة لمرضى التصلب والشلل الحركي.',
-    icon: Activity,
-    focusTagEn: 'Voice Euphonia · Switch · Dwell Click',
-    focusTagAr: 'توليف النطق · مسح المفاتيح · النقر التلقائي',
-  },
-  {
-    id: 'Universal',
-    titleEn: 'Cross-Disability & Caregiver',
-    titleAr: 'جسر الحواس ومرافقي الهمم',
-    badgeEn: 'Sensory Mesh & SOS',
-    badgeAr: 'جسر حواس وطوارئ SOS',
-    descEn: 'Peer-to-peer blind/deaf sensory bridge, emergency SOS dispatch, accessible tutor, and caregiver clinical dashboard.',
-    descAr: 'جسر تواصل تبادلي فوري بين الكفيف والأصم، إرسال استغاثة SOS، ومتابعة المختصين والمرافقين.',
-    icon: Heart,
-    focusTagEn: 'Sensory Bridge · SOS Alert · Caregiver Hub',
-    focusTagAr: 'جسر الحواس · نداء استغاثة SOS · لوحة المرافق',
   },
 ];
 
@@ -501,8 +459,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
                 <p className="text-xs sm:text-[13px] text-slate-300 font-medium leading-relaxed">
                   {t(
-                    "Empowering blind, deaf, non-verbal, and motor-impaired individuals with AI vision, 3D sign avatar, sound radar, and sensory bridging.",
-                    "تمكين ذوي الإعاقات البصرية والسمعية والحركية والنطقية بأحدث تقنيات الرؤية الحاسوبية، لغة الإشارة 3D، رادار المخاطر، وجسر الحواس."
+                    "Empowering blind and deaf individuals with AI vision, 3D sign avatar, sound radar, and assistive learning.",
+                    "تمكين ذوي الإعاقات البصرية والسمعية بأحدث تقنيات الرؤية الحاسوبية، لغة الإشارة 3D، ورادار الأصوات والمخاطر."
                   )}
                 </p>
               </div>
@@ -622,7 +580,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                           {t("Select Assistive Focus", "اختر المسار المساند الأساسي")}
                         </h2>
                         <p className="text-[10px] sm:text-[11px] text-[#E5A93C]/80 font-medium">
-                          {t("All 7 assistive modules remain unlocked and accessible.", "كافة الوحدات والأدوات المساندة تظل مفتوحة ومتاحة لك.")}
+                          {t("All assistive modules remain unlocked and accessible.", "كافة الوحدات والأدوات المساندة تظل مفتوحة ومتاحة لك.")}
                         </p>
                       </div>
 

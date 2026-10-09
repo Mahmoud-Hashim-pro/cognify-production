@@ -118,15 +118,6 @@ export default function Sidebar({
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     },
     {
-      id: 'orchestrator',
-      label: localize(profile.language, 'Sensory Bridge', 'جسر التواصل بين الإعاقات'),
-      icon: Sparkles,
-      action: () => navigateToDisabilityTab('orchestrator'),
-      active: false,
-      badge: '🤝',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-    },
-    {
       id: 'caregiver',
       label: localize(profile.language, 'Caregiver & SOS Hub', 'لوحة المرافق والاستغاثة SOS'),
       icon: Shield,
