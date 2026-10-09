@@ -66,28 +66,16 @@ interface DisabilityModeViewProps {
  * Returns 'hub' (the card overview) when nothing maps cleanly — never guess
  * a suite the user didn't actually indicate.
  */
-function detectDirectDisabilityTab(profile: UserProfile): DisabilityTab {
-  // 1. If user explicitly clicked and chose a tab before, honor that manual choice!
+function detectDirectDisabilityTab(_profile: UserProfile): DisabilityTab {
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
-    if (saved === 'neurodiversity' || saved === 'orchestrator') {
-      try { localStorage.setItem('cognify_default_disability_tab', 'deaf'); } catch {}
-      return 'deaf';
-    }
     if (saved === 'hub' || saved === 'deaf' || saved === 'vision') {
       return saved as DisabilityTab;
     }
   } catch {}
 
-  const mode = String(profile?.accessibilityMode || '').toLowerCase().trim();
-  if (mode.includes('deaf') || mode.includes('sign') || mode.includes('hearing') || mode.includes('vocal')) return 'deaf';
-  if (mode.includes('visu') || mode.includes('blind')) return 'vision';
-
-  const freeText = String(profile?.disabilityType || '').toLowerCase().trim();
-  if (/deaf|hearing|vocal|sign/.test(freeText)) return 'deaf';
-  if (/visual|blind|vision|sight/.test(freeText)) return 'vision';
-
-  return 'deaf';
+  // Default to student cockpit hub as the primary home
+  return 'hub';
 }
 
 // Maps a suite tab to its category filter chip, so "Back to Hub" can re-open the
