@@ -9,14 +9,17 @@ export type AppView =
   | 'teacher' | 'parent' | 'evaluation' | 'ai_quality'
   | 'resilience' | 'tenancy' | 'developer_api' | 'retention';
 
-/** In the dedicated Assistive Platform, every user belongs to the accessibility ecosystem. */
-export function isAccessibilityUser(_profile: UserProfile | null | undefined): boolean {
-  return true;
+/** A user counts as an accessibility user if they picked the Special Needs path
+ *  OR have a real accessibility mode enabled. */
+export function isAccessibilityUser(profile: UserProfile | null | undefined): boolean {
+  if (!profile) return false;
+  return profile.accountPath === 'Special Needs'
+    || (!!profile.accessibilityMode && profile.accessibilityMode !== 'None');
 }
 
 /** The section label for a user (used by the admin directory). */
-export function sectionOf(_profile: Pick<UserProfile, 'accountPath'>): AccountPath {
-  return 'Special Needs';
+export function sectionOf(profile: Pick<UserProfile, 'accountPath'>): AccountPath {
+  return profile.accountPath || 'Special Needs';
 }
 
 /**
