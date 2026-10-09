@@ -116,6 +116,7 @@ export default function App() {
   
   const [isGuestPreview, setIsGuestPreview] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
+    if (sessionStorage.getItem('cognify_exit_preview') === 'true') return false;
     const isExplicit = sessionStorage.getItem('cognify_guest_preview') === 'disability';
     const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     return isExplicit || isLocalDev;
@@ -123,6 +124,7 @@ export default function App() {
 
   const handleEnterGuestPreview = () => {
     try {
+      sessionStorage.removeItem('cognify_exit_preview');
       sessionStorage.setItem('cognify_guest_preview', 'disability');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('cognify_default_disability_tab', 'hub');
@@ -132,6 +134,26 @@ export default function App() {
     setProfile(createGuestProfile());
     setProfileLoading(false);
     setCurrentView('disability');
+  };
+
+  const handleLogout = async () => {
+    setIsMobileMenuOpen(false);
+    try {
+      sessionStorage.removeItem('cognify_guest_preview');
+      sessionStorage.setItem('cognify_exit_preview', 'true');
+      await logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+    setIsGuestPreview(false);
+    setProfile(null);
+    setProfileLoading(false);
+    setCurrentView('chat');
+    window.location.hash = '';
+    toast.success(
+      direction === 'rtl' ? 'تم تسجيل الخروج بنجاح' : 'Signed out successfully',
+      direction === 'rtl' ? 'تسجيل الخروج' : 'Sign Out'
+    );
   };
 
   // Seed from the URL hash so deep links and F5 land on the right screen (default: disability)
@@ -145,6 +167,7 @@ export default function App() {
   
   const [profile, setProfile] = useState<UserProfile | null>(() => {
     if (typeof window !== 'undefined') {
+      if (sessionStorage.getItem('cognify_exit_preview') === 'true') return null;
       const isExplicit = sessionStorage.getItem('cognify_guest_preview') === 'disability';
       const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       if (isExplicit || isLocalDev) {
@@ -1291,13 +1314,7 @@ export default function App() {
             </span>
           </div>
           <button
-            onClick={() => {
-              sessionStorage.removeItem('cognify_guest_preview');
-              setIsGuestPreview(false);
-              setProfile(null);
-              window.location.hash = '';
-              window.location.reload();
-            }}
+            onClick={handleLogout}
             className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] sm:text-[11px] transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             {direction === 'rtl' ? 'تسجيل الدخول / خروج من المعاينة' : 'Sign in / Exit Preview'}
@@ -1389,6 +1406,7 @@ export default function App() {
               toggleTheme={toggleTheme}
               openLiveCaptions={() => setIsLiveCaptionsOpen(true)}
               onClose={() => setIsMobileMenuOpen(false)}
+              onLogout={handleLogout}
             />
         </div>
 

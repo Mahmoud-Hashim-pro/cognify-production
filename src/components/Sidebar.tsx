@@ -22,6 +22,7 @@ interface SidebarProps {
   toggleTheme: () => void;
   openLiveCaptions: () => void;
   onClose?: () => void;
+  onLogout?: () => void;
 }
 
 // Cognify Assistive "constellation" logomark
@@ -44,7 +45,8 @@ export default function Sidebar({
   isDarkMode, 
   toggleTheme, 
   openLiveCaptions, 
-  onClose 
+  onClose,
+  onLogout,
 }: SidebarProps) {
   const handleChange = (key: keyof UserProfile, value: string) => {
     const updated = { ...profile, [key]: value };
@@ -400,12 +402,19 @@ export default function Sidebar({
             <Mic className={`w-4 h-4 ${isDarkMode ? 'text-[#E5A93C]' : 'text-amber-600'}`} /> {localize(profile.language, 'Captions', 'الكابشن')}
           </button>
           <button 
-            onClick={() => logout()} 
+            onClick={async () => {
+              onClose?.();
+              if (onLogout) {
+                onLogout();
+              } else {
+                await logout();
+              }
+            }} 
             className={`flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] px-3.5 py-2.5 rounded-xl border ${
               isDarkMode 
                 ? 'border-[#4A1224]/50 bg-[#150917] text-rose-400 hover:bg-rose-950/40 hover:border-rose-700/60' 
                 : 'border-rose-200 bg-white text-rose-600 hover:bg-rose-50 hover:border-rose-400'
-            } text-xs font-semibold transition-all`} 
+            } text-xs font-semibold transition-all cursor-pointer`} 
             title={getTranslation(profile.language, 'logout')} 
             aria-label={getTranslation(profile.language, 'logout')}
           >

@@ -200,6 +200,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   const handleContinuePath = () => {
     clearPreLoginState();
     try {
+      sessionStorage.removeItem('cognify_exit_preview');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
       localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
@@ -212,6 +213,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
   const handleDirectPreview = () => {
     try {
+      sessionStorage.removeItem('cognify_exit_preview');
       sessionStorage.setItem('cognify_guest_preview', 'disability');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
