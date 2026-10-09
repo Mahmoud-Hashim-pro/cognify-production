@@ -43,12 +43,12 @@
   --color-brand-accent-glow: #FDE68A;
   --color-brand-calm: #10B981;
 
-  /* Royal Burgundy & Gold Identity (Cognify Inclusion Mesh) */
-  --color-brand-burgundy: #2D0B16;
-  --color-brand-wine: #4A1224;
-  --color-brand-ruby: #831843;
-  --color-brand-gold: #E5A93C;
-  --color-brand-gold-glow: #FDE68A;
+  /* Serene Teal & Warm Earth Identity */
+  --color-brand-burgundy: #0F766E;
+  --color-brand-wine: #0D9488;
+  --color-brand-ruby: #14B8A6;
+  --color-brand-gold: #0D9488;
+  --color-brand-gold-glow: #99F6E4;
 }
 
 @layer base {
@@ -76,73 +76,73 @@
   }
 }
 
-/* Premium Obsidian & Frosted Glass Design Tokens - Royal Burgundy & Champagne Gold */
+/* Premium Obsidian & Frosted Glass Design Tokens - Serene Teal & Warm Ambient */
 .cognify-aurora-bg {
-  background-color: #080409;
+  background-color: #0E1416;
   background-image: 
-    radial-gradient(at 15% 15%, rgba(131, 24, 67, 0.22) 0px, transparent 55%),
-    radial-gradient(at 85% 20%, rgba(229, 169, 60, 0.12) 0px, transparent 50%),
-    radial-gradient(at 50% 85%, rgba(74, 18, 36, 0.28) 0px, transparent 55%);
+    radial-gradient(at 15% 15%, rgba(13, 148, 136, 0.18) 0px, transparent 55%),
+    radial-gradient(at 85% 20%, rgba(217, 119, 6, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 85%, rgba(15, 118, 110, 0.2) 0px, transparent 55%);
 }
 
 .aurora-card-glow {
   position: relative;
-  background: rgba(22, 10, 24, 0.82);
+  background: rgba(18, 27, 30, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(74, 18, 36, 0.45);
-  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(229, 169, 60, 0.15);
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(13, 148, 136, 0.15);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cognify-burgundy-hero {
   position: relative;
-  background: radial-gradient(circle at 50% 15%, rgba(131, 24, 67, 0.45) 0%, rgba(45, 11, 22, 0.95) 45%, rgba(14, 4, 8, 0.98) 100%);
-  border: 1px solid rgba(229, 169, 60, 0.25);
-  box-shadow: 0 30px 60px -15px rgba(45, 11, 22, 0.6), inset 0 1px 0 rgba(229, 169, 60, 0.25);
+  background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.3) 0%, rgba(14, 20, 22, 0.95) 45%, rgba(11, 16, 18, 0.98) 100%);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.25);
 }
 
 .aurora-card-glow:hover {
-  border-color: rgba(229, 169, 60, 0.45);
-  box-shadow: 0 25px 60px -15px rgba(131, 24, 67, 0.35), inset 0 1px 0 rgba(229, 169, 60, 0.25);
+  border-color: rgba(13, 148, 136, 0.5);
+  box-shadow: 0 25px 60px -15px rgba(13, 148, 136, 0.25), inset 0 1px 0 rgba(13, 148, 136, 0.25);
   transform: translateY(-3px);
 }
 
 .obsidian-card {
-  background: rgba(18, 9, 21, 0.85);
-  border: 1px solid rgba(74, 18, 36, 0.4);
+  background: rgba(18, 27, 30, 0.85);
+  border: 1px solid rgba(13, 148, 136, 0.3);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 1.5rem;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(229, 169, 60, 0.1);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.1);
 }
 
 .obsidian-card-interactive {
-  background: rgba(18, 9, 21, 0.85);
-  border: 1px solid rgba(74, 18, 36, 0.4);
+  background: rgba(18, 27, 30, 0.85);
+  border: 1px solid rgba(13, 148, 136, 0.3);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 1.5rem;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(229, 169, 60, 0.1);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.1);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .obsidian-card-interactive:hover {
-  border-color: rgba(229, 169, 60, 0.4);
+  border-color: rgba(13, 148, 136, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px -15px rgba(45, 11, 22, 0.6), inset 0 1px 0 rgba(229, 169, 60, 0.2);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.2);
 }
 
 .glass-pill {
-  background: rgba(74, 18, 36, 0.25);
-  border: 1px solid rgba(229, 169, 60, 0.2);
+  background: rgba(13, 148, 136, 0.15);
+  border: 1px solid rgba(13, 148, 136, 0.25);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .glass-pill:hover {
-  background: rgba(131, 24, 67, 0.35);
-  border-color: rgba(229, 169, 60, 0.4);
+  background: rgba(13, 148, 136, 0.25);
+  border-color: rgba(13, 148, 136, 0.45);
 }
 
 /* Universal WCAG 2.4.7 Interactive Focus Visible Indicator */
@@ -213,29 +213,41 @@ html.high-contrast button:focus-visible {
   box-shadow: 0 0 0 6px rgba(255, 255, 0, 0.6) !important;
 }
 
+/* Universal Accessible Focus Rings (WCAG 2.2 AA) */
+:focus-visible {
+  outline: 2px solid #E5A93C !important;
+  outline-offset: 2px !important;
+}
+
+/* Accessible Interactive Touch Target (WCAG 2.2 AA SC 2.5.8) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(8, 4, 9, 0.5);
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4A1224;
+  background: #0D9488;
   border-radius: 9999px;
-  border: 1px solid rgba(229, 169, 60, 0.15);
+  border: 1px solid rgba(20, 184, 166, 0.2);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #831843;
-  border-color: rgba(229, 169, 60, 0.4);
+  background: #0F766E;
+  border-color: rgba(20, 184, 166, 0.4);
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #4A1224 rgba(8, 4, 9, 0.5);
+  scrollbar-color: #0D9488 transparent;
 }
 
 /* Hide scrollbar completely while maintaining scroll functionality */
@@ -377,6 +389,14 @@ html.high-contrast button:focus-visible {
 
 :root:not(.dark) .border-slate-800,
 :root:not(.dark) .border-slate-800\/80,
+/* Light Mode Comprehensive Global Theme Adapters */
+:root:not(.dark) {
+  --color-bg-main: #FAF8F5;
+  --color-bg-card: #FFFFFF;
+  --color-text-main: #0F172A;
+  color-scheme: light;
+}
+
 :root:not(.dark) .border-slate-700,
 :root:not(.dark) .border-slate-700\/50,
 :root:not(.dark) .border-slate-700\/60,
@@ -395,10 +415,106 @@ html.high-contrast button:focus-visible {
   color: #475569 !important;
 }
 
+:root:not(.dark) h1.text-white,
+:root:not(.dark) h2.text-white,
+:root:not(.dark) h3.text-white,
+:root:not(.dark) h4.text-white {
+  color: #0F172A !important;
+}
+
 :root:not(.dark) .obsidian-card,
 :root:not(.dark) .obsidian-card-interactive {
-  background-color: rgba(255, 255, 255, 0.92) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   Systemic Neutralization of Legacy Burgundy / Wine Palette in Both Modes
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── DARK MODE OVERRIDES ─────────────────────────────────────────────────── */
+.dark .bg-\[\#080409\],
+.dark .bg-\[\#080409\]\/90,
+.dark .bg-\[\#080409\]\/95 {
+  background-color: #0E1416 !important;
+}
+
+.dark .bg-\[\#0E0610\],
+.dark .bg-\[\#0E0610\]\/95,
+.dark .bg-\[\#0E0610\]\/90,
+.dark .bg-\[\#0D0610\],
+.dark .bg-\[\#0D0610\]\/90,
+.dark .bg-\[\#111622\],
+.dark .bg-\[\#150917\],
+.dark .bg-\[\#150917\]\/90,
+.dark .bg-\[\#120614\],
+.dark .bg-\[\#120614\]\/90,
+.dark .bg-\[\#18050E\],
+.dark .bg-\[\#18050E\]\/80,
+.dark .bg-\[\#1A0713\],
+.dark .bg-\[\#1C060F\],
+.dark .bg-\[\#1F0D22\] {
+  background-color: #121B1E !important;
+}
+
+.dark [class*="border-\[\#4A1224\]"],
+.dark [class*="border-\[\#831843\]"],
+.dark [class*="border-\[\#2D0B16\]"] {
+  border-color: rgba(20, 184, 166, 0.25) !important;
+}
+
+.dark [class*="bg-\[\#4A1224\]"],
+.dark [class*="bg-\[\#831843\]"],
+.dark [class*="bg-\[\#2D0B16\]"] {
+  background-color: rgba(15, 118, 110, 0.25) !important;
+}
+
+.dark [class*="text-\[\#4A1224\]"],
+.dark [class*="text-\[\#831843\]"] {
+  color: #2DD4BF !important;
+}
+
+/* ── LIGHT MODE OVERRIDES ────────────────────────────────────────────────── */
+:root:not(.dark) .bg-\[\#080409\],
+:root:not(.dark) .bg-\[\#080409\]\/90,
+:root:not(.dark) .bg-\[\#080409\]\/95 {
+  background-color: #FAF8F5 !important;
+}
+
+:root:not(.dark) .bg-\[\#0E0610\],
+:root:not(.dark) .bg-\[\#0E0610\]\/95,
+:root:not(.dark) .bg-\[\#0E0610\]\/90,
+:root:not(.dark) .bg-\[\#0D0610\],
+:root:not(.dark) .bg-\[\#0D0610\]\/90,
+:root:not(.dark) .bg-\[\#111622\],
+:root:not(.dark) .bg-\[\#150917\],
+:root:not(.dark) .bg-\[\#150917\]\/90,
+:root:not(.dark) .bg-\[\#120614\],
+:root:not(.dark) .bg-\[\#120614\]\/90,
+:root:not(.dark) .bg-\[\#18050E\],
+:root:not(.dark) .bg-\[\#18050E\]\/80,
+:root:not(.dark) .bg-\[\#1A0713\],
+:root:not(.dark) .bg-\[\#1C060F\],
+:root:not(.dark) .bg-\[\#1F0D22\] {
+  background-color: #FFFFFF !important;
+}
+
+:root:not(.dark) [class*="border-\[\#4A1224\]"],
+:root:not(.dark) [class*="border-\[\#831843\]"],
+:root:not(.dark) [class*="border-\[\#2D0B16\]"] {
+  border-color: #E7E5E4 !important;
+}
+
+:root:not(.dark) [class*="bg-\[\#4A1224\]"],
+:root:not(.dark) [class*="bg-\[\#831843\]"],
+:root:not(.dark) [class*="bg-\[\#2D0B16\]"] {
+  background-color: rgba(15, 118, 110, 0.08) !important;
+}
+
+:root:not(.dark) [class*="text-\[\#4A1224\]"],
+:root:not(.dark) [class*="text-\[\#831843\]"] {
+  color: #0F766E !important;
 }
 
 

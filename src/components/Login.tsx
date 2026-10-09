@@ -13,20 +13,16 @@ import {
 import type { AccessibilityMode } from '../types';
 
 type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
-type DisabilityOption = 'Visual' | 'Hearing' | 'Speech' | 'Universal';
+type DisabilityOption = 'Visual' | 'Hearing';
 
 const DISABILITY_MODE_MAP: Record<DisabilityOption, AccessibilityMode> = {
   'Visual': 'Visual',
   'Hearing': 'Vocal-Deaf',
-  'Speech': 'Speech',
-  'Universal': 'Visual',
 };
 
 const DISABILITY_LABEL_MAP: Record<DisabilityOption, string> = {
   'Visual': 'Visual Impairment',
   'Hearing': 'Hearing Impairment',
-  'Speech': 'Speech & Motor Impairment',
-  'Universal': 'Cross-Disability & Sensory Bridge',
 };
 
 // Each Special Needs accessibility feature, tagged with which disability chip(s) it's the primary match for.
@@ -50,6 +46,13 @@ const SPECIAL_NEEDS_FEATURES: {
     matches: ['Visual'],
   },
   {
+    key: 'chat',
+    Icon: Brain,
+    title: { en: 'Accessible AI Tutor', ar: 'المساعد التعليمي المهيأ للإتاحة' },
+    description: { en: 'Adaptive multi-modal tutor tailored to your pace, with high contrast & screen-reader support', ar: 'مساعد تعليمي ذكي مهيأ بالكامل لقارئات الشاشة، تباين لوني فائق، وتدرج معرفي مرن' },
+    matches: ['Visual', 'Hearing'],
+  },
+  {
     key: 'sign-language',
     Icon: Ear,
     title: { en: 'Unified Deaf & Hearing Center', ar: 'منظومة الصم وضعاف السمع الشاملة' },
@@ -64,39 +67,11 @@ const SPECIAL_NEEDS_FEATURES: {
     matches: ['Hearing'],
   },
   {
-    key: 'motor',
-    Icon: Activity,
-    title: { en: 'Speech Euphonia & Switch Control', ar: 'تحسين النطق والتحكم الحركي الذكي' },
-    description: { en: 'Voice synthesis for speech difficulties, dwell auto-clicker, and switch scanning for ALS', ar: 'توليف صوتي لمن يعانون من صعوبات النطق، نقر تلقائي عند التوقف، ومسح للمفاتيح البديلة' },
-    matches: ['Speech'],
-  },
-  {
-    key: 'orchestrator',
-    Icon: Zap,
-    title: { en: 'Cross-Disability Sensory Bridge', ar: 'جسر الحواس والتواصل متعدد الإعاقات' },
-    description: { en: 'Direct peer-to-peer sensory relay between Blind (Audio) and Deaf (Text/Sign) users', ar: 'جسر مباشر للتواصل التبادلي بين الكفيف والأصم بدون وسيط بشري' },
-    matches: ['Universal'],
-  },
-  {
-    key: 'caregiver',
-    Icon: Heart,
-    title: { en: 'Caregiver & Specialist SOS Hub', ar: 'لوحة المرافق والمختص ونداء الاستغاثة SOS' },
-    description: { en: 'Emergency SOS alerts, real-time location sharing, and clinical care logs', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، وتتبع الرعاية' },
-    matches: ['Universal'],
-  },
-  {
-    key: 'chat',
-    Icon: Brain,
-    title: { en: 'Accessible AI Tutor', ar: 'المساعد التعليمي المهيأ للإتاحة' },
-    description: { en: 'Adaptive tutor tailored to your pace, with high contrast & screen-reader support', ar: 'مساعد تعليمي ذكي مهيأ بالكامل لقارئات الشاشة، تباين لوني فائق، وتدرج معرفي مرن' },
-    matches: ['Universal'],
-  },
-  {
     key: 'settings',
     Icon: Globe,
     title: { en: 'Accessibility Passport & Dialects', ar: 'جواز الإتاحة واللغات' },
     description: { en: '11 languages & dialects including Egyptian Ammiya, plus sensory profiles', ar: '11 لغة ولهجة ومنها المصري، مع ضبط جواز الإتاحة وملفات الحواس الشخصية' },
-    matches: ['Universal'],
+    matches: [],
   },
 ];
 
@@ -150,30 +125,6 @@ const DISABILITY_MODALITIES: {
     icon: Ear,
     focusTagEn: '3D Sign · Captions · Radar · Studio',
     focusTagAr: 'إشارة 3D · كابشن فوري · رادار مخاطر · استوديو',
-  },
-  {
-    id: 'Speech',
-    titleEn: 'Speech & Motor Support',
-    titleAr: 'صعوبات النطق والحركة',
-    badgeEn: 'Euphonia & Switch',
-    badgeAr: 'توليف صوت ومفاتيح',
-    descEn: 'Custom voice synthesis for non-standard speech, dwell auto-clicker, single-switch scanning, and accessible inputs.',
-    descAr: 'توليف نطق صوتي مخصص، نقر تلقائي عند التوقف، ومسح للمفاتيح البديلة لمرضى التصلب والشلل الحركي.',
-    icon: Activity,
-    focusTagEn: 'Voice Euphonia · Switch · Dwell Click',
-    focusTagAr: 'توليف النطق · مسح المفاتيح · النقر التلقائي',
-  },
-  {
-    id: 'Universal',
-    titleEn: 'Cross-Disability & Caregiver',
-    titleAr: 'جسر الحواس ومرافقي الهمم',
-    badgeEn: 'Sensory Mesh & SOS',
-    badgeAr: 'جسر حواس وطوارئ SOS',
-    descEn: 'Peer-to-peer blind/deaf sensory bridge, emergency SOS dispatch, accessible tutor, and caregiver clinical dashboard.',
-    descAr: 'جسر تواصل تبادلي فوري بين الكفيف والأصم، إرسال استغاثة SOS، ومتابعة المختصين والمرافقين.',
-    icon: Heart,
-    focusTagEn: 'Sensory Bridge · SOS Alert · Caregiver Hub',
-    focusTagAr: 'جسر الحواس · نداء استغاثة SOS · لوحة المرافق',
   },
 ];
 
@@ -249,11 +200,11 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   const handleContinuePath = () => {
     clearPreLoginState();
     try {
+      sessionStorage.removeItem('cognify_exit_preview');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
       localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
-      const tab = selectedDisability === 'Hearing' ? 'deaf' : selectedDisability === 'Visual' ? 'vision' : 'hub';
-      localStorage.setItem('cognify_default_disability_tab', tab);
+      localStorage.setItem('cognify_default_disability_tab', 'hub');
     } catch (err) {
       console.warn("LocalStorage unavailable in current context:", err);
     }
@@ -262,12 +213,12 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
   const handleDirectPreview = () => {
     try {
+      sessionStorage.removeItem('cognify_exit_preview');
       sessionStorage.setItem('cognify_guest_preview', 'disability');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
       localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
-      const tab = selectedDisability === 'Hearing' ? 'deaf' : selectedDisability === 'Visual' ? 'vision' : 'hub';
-      localStorage.setItem('cognify_default_disability_tab', tab);
+      localStorage.setItem('cognify_default_disability_tab', 'hub');
       window.location.hash = '#disability';
     } catch (err) {
       console.warn("Direct preview error:", err);
@@ -427,46 +378,44 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   };
 
   return (
-    <div className="min-h-screen bg-[#080409] text-slate-100 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8 font-sans relative overflow-x-hidden selection:bg-[#E5A93C]/30 selection:text-white" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Background ambient lighting - Royal Burgundy & Gold nebulae */}
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0E1416] text-stone-900 dark:text-stone-100 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8 font-sans relative overflow-x-hidden selection:bg-teal-500/30 selection:text-teal-950 dark:selection:text-teal-100 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Background ambient lighting - Warm serene glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden hidden md:block">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#4A1224]/25 rounded-full blur-[140px]" />
-        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-[#E5A93C]/12 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-[#831843]/18 rounded-full blur-[140px]" />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-teal-500/10 dark:bg-teal-500/5 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-teal-400/10 dark:bg-teal-400/5 rounded-full blur-[140px]" />
+        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-teal-600/10 dark:bg-teal-600/5 rounded-full blur-[140px]" />
       </div>
 
       {/* Top Navbar */}
       <header className="max-w-5xl mx-auto w-full flex items-center justify-between z-10 py-3 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#4A1224] via-[#831843] to-[#E5A93C] p-0.5 shadow-xl shadow-[#4A1224]/35 flex items-center justify-center">
-            <div className="w-full h-full bg-[#0E0610] rounded-[14px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-[#E5A93C]" />
-            </div>
+          <div className="w-11 h-11 rounded-2xl bg-teal-700 dark:bg-teal-600 text-white p-0.5 shadow-md flex items-center justify-center">
+            <Sparkles className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-black text-white tracking-tight font-serif">Cognify A11y</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/40">
-                A11y Edition
+              <span className="text-xl font-black text-stone-900 dark:text-white tracking-tight">Cognify</span>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60">
+                {t("Inclusive Platform", "منصة التعلّم الشامل")}
               </span>
             </div>
-            <span className="text-[11px] text-[#E5A93C]/80 font-medium">
-              {t("Assistive Technology for People of Determination", "منظومة التقنيات المساعدة لأصحاب الهمم وذوي الإعاقة")}
+            <span className="text-[11px] text-stone-600 dark:text-stone-400 font-medium">
+              {t("Empowering autonomous & accessible learning", "تعلّم ذكي يتكيف مع قدراتك وأسلوبك المعرفي")}
             </span>
           </div>
         </div>
 
         {/* Language Switcher */}
-        <div className="flex items-center gap-1 p-1 bg-[#150917]/90 border border-[#4A1224]/60 rounded-full shadow-inner">
+        <div className="flex items-center gap-1 p-1 bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 rounded-full shadow-sm">
           <button
             onClick={() => setLang('en')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'en' ? 'bg-[#4A1224]/80 text-[#E5A93C] border border-[#E5A93C]/40 shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'en' ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
           >
             EN
           </button>
           <button
             onClick={() => setLang('ar')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'ar' ? 'bg-[#4A1224]/80 text-[#E5A93C] border border-[#E5A93C]/40 shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'ar' ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
           >
             AR
           </button>
@@ -486,31 +435,31 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             >
               {/* Hero Title Header */}
               <div className="space-y-2 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-[#2D0B16] via-[#4A1224] to-[#2D0B16] border border-[#E5A93C]/40 text-[#E5A93C] shadow-sm">
-                  <Accessibility className="w-3.5 h-3.5 text-[#E5A93C]" />
-                  <span>{t("Dedicated Assistive Ecosystem · For People of Determination", "المنظومة المتخصصة للإتاحة والتقنيات المساعدة · لأصحاب الهمم")}</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-teal-50 dark:bg-teal-950/40 border border-teal-200/70 dark:border-teal-800/60 text-teal-800 dark:text-teal-300 shadow-sm">
+                  <Accessibility className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                  <span>{t("Adaptive Learning Ecosystem · Inclusive Design", "بيئة التعلّم التكيفية الشاملة · استقلالية كاملة")}</span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-stone-900 dark:text-white tracking-tight leading-tight">
                   {isRtl ? (
-                    <>منظومة <span className="text-[#E5A93C]">كوجنيفاي</span> المتخصصة <span className="text-amber-300">لذوي الإعاقة</span> والتقنيات المساعدة.</>
+                    <>أهلاً بك في <span className="text-teal-700 dark:text-teal-400">كوجنيفاي</span> — تعلّم بأسلوبك ووفق وتيرتك الخاصة.</>
                   ) : (
-                    <>Cognify <span className="text-[#E5A93C]">Assistive Ecosystem</span> for <span className="text-amber-300">People of Determination</span>.</>
+                    <>Welcome to <span className="text-teal-700 dark:text-teal-400">Cognify</span> — Learn independently, your way.</>
                   )}
                 </h1>
 
-                <p className="text-xs sm:text-[13px] text-slate-300 font-medium leading-relaxed">
+                <p className="text-xs sm:text-[13px] text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                   {t(
-                    "Empowering blind, deaf, non-verbal, and motor-impaired individuals with AI vision, 3D sign avatar, sound radar, and sensory bridging.",
-                    "تمكين ذوي الإعاقات البصرية والسمعية والحركية والنطقية بأحدث تقنيات الرؤية الحاسوبية، لغة الإشارة 3D، رادار المخاطر، وجسر الحواس."
+                    "An inclusive, humane digital platform designed around your strengths, pacing, and sensory preferences.",
+                    "منصة تعليمية إنسانية مصممة لتلائم وتيرتك واحتياجاتك المعرفية، وتضع أدوات الإتاحة والراحة في متناولك من أول نظرة."
                   )}
                 </p>
               </div>
 
               {/* Main Interactive Modality Card - Split View */}
-              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-[28px] overflow-hidden shadow-2xl backdrop-blur-2xl ring-1 ring-[#E5A93C]/20">
-                {/* Top Royal Burgundy & Gold Strip */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-[#2D0B16] via-[#831843] via-[#E5A93C] to-[#2D0B16]" />
+              <div className="bg-white dark:bg-[#121B1E] border border-stone-200/90 dark:border-stone-800 rounded-[28px] overflow-hidden shadow-xl dark:shadow-2xl">
+                {/* Top Strip */}
+                <div className="h-1.5 w-full bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700" />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-4 sm:p-5 lg:p-6">
                   {/* Left Column: LIVE MODALITY OVERVIEW */}
@@ -518,18 +467,18 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full animate-pulse bg-[#E5A93C]" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]">
-                            {t("LIVE MODALITY OVERVIEW", "معاينة إمكانيات المسار المختار")}
+                          <span className="w-2 h-2 rounded-full animate-pulse bg-teal-500" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-stone-700 dark:text-stone-300">
+                            {t("INCLUSIVE LEARNING SUITE", "معاينة إمكانيات المسار المختار")}
                           </span>
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border bg-[#4A1224]/80 text-[#E5A93C] border-[#E5A93C]/40 shadow-sm">
-                          {t("Assistive Technology Suite", "منظومة التقنيات المساعدة")}
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border-teal-200/70 dark:border-teal-800/60">
+                          {t("Assistive Suite Unlocked", "منظومة التقنيات المفتوحة")}
                         </span>
                       </div>
 
                       {/* Dynamic Summary Card */}
-                      <div className="bg-[#140816]/95 border border-[#4A1224]/60 rounded-2xl p-3.5 sm:p-4 space-y-3 shadow-xl backdrop-blur-md">
+                      <div className="bg-stone-50/80 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 rounded-2xl p-3.5 sm:p-4 space-y-3">
                         <AnimatePresence mode="wait">
                           {(() => {
                             const currentModality = DISABILITY_MODALITIES.find((m) => m.id === activePreviewDisability) || DISABILITY_MODALITIES[0];
@@ -545,51 +494,53 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                               >
                                 {/* Modality Title & Header Badge */}
                                 <div className="flex items-start gap-3">
-                                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all shadow-md bg-gradient-to-br from-[#831843] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/50 shadow-rose-950/40">
-                                    <ModalityIcon className="w-5 h-5 text-[#E5A93C]" />
+                                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all shadow-sm bg-teal-700 text-white font-black">
+                                    <ModalityIcon className="w-5 h-5" />
                                   </div>
 
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-sm sm:text-base font-black text-white tracking-tight leading-snug flex items-center gap-2 flex-wrap">
+                                    <h3 className="text-sm sm:text-base font-black text-stone-900 dark:text-white tracking-tight leading-snug flex items-center gap-2 flex-wrap">
                                       <span>{t(currentModality.titleEn, currentModality.titleAr)}</span>
-                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-[#E5A93C]/20 text-[#E5A93C] border border-[#E5A93C]/40 shrink-0">
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60 shrink-0">
                                         {t(currentModality.badgeEn, currentModality.badgeAr)}
                                       </span>
                                     </h3>
-                                    <p className="text-[11px] sm:text-xs text-slate-300 font-medium mt-0.5 leading-relaxed">
+                                    <p className="text-[11px] sm:text-xs text-stone-600 dark:text-stone-300 font-medium mt-0.5 leading-relaxed">
                                       {t(currentModality.descEn, currentModality.descAr)}
                                     </p>
                                   </div>
                                 </div>
 
-                                <div className="h-px bg-[#4A1224]/50 w-full" />
+                                <div className="h-px bg-stone-200 dark:bg-stone-800 w-full" />
 
                                 {/* Eye-catching Feature Highlights */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                   {getSpecialNeedsFeatures(activePreviewDisability, t).slice(0, 4).map((feature) => (
                                     <div
                                       key={feature.key}
-                                      className={`p-2.5 sm:p-3 rounded-xl border flex items-start gap-2.5 transition-all shadow-md ${
+                                      className={`p-2.5 sm:p-3 rounded-xl border flex items-start gap-2.5 transition-all ${
                                         feature.isPrimary
-                                          ? 'bg-[#2D0B16]/80 border-[#E5A93C]/50 ring-1 ring-[#E5A93C]/30'
-                                          : 'bg-[#160A18]/80 border-[#4A1224]/50 hover:border-[#E5A93C]/30'
+                                          ? 'bg-teal-50/80 dark:bg-teal-950/30 border-teal-300/60 dark:border-teal-700/60'
+                                          : 'bg-white dark:bg-[#121B1E] border-stone-200 dark:border-stone-800/80'
                                       }`}
                                     >
                                       <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                                        feature.isPrimary ? 'bg-[#4A1224] border border-[#E5A93C]/60 text-[#E5A93C]' : 'bg-[#2D0B16] border border-[#4A1224] text-[#E5A93C]/80'
+                                        feature.isPrimary ? 'bg-teal-700 text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
                                       }`}>
                                         <feature.Icon className="w-3.5 h-3.5" />
                                       </div>
                                       <div className="min-w-0">
-                                        <div className="text-xs font-bold text-white flex items-center gap-1.5 leading-snug">
+                                        <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5 leading-snug">
                                           <span className="truncate">{feature.title}</span>
                                           {feature.isPrimary && (
-                                            <span className="px-1.5 py-0.2 rounded-full text-[8px] font-black tracking-wider bg-[#E5A93C]/20 text-[#E5A93C] border border-[#E5A93C]/40 shrink-0">
+                                            <span className="px-1.5 py-0.2 rounded-full text-[8px] font-black tracking-wider bg-teal-700 text-white shrink-0">
                                               {t('ACTIVE', 'نشط')}
                                             </span>
                                           )}
                                         </div>
-                                        <div className="text-[10px] sm:text-[11px] text-slate-300 leading-tight mt-0.5 line-clamp-2">{feature.description}</div>
+                                        {feature.isPrimary && (
+                                          <div className="text-[10px] sm:text-[11px] text-stone-600 dark:text-stone-300 leading-tight mt-0.5 line-clamp-2">{feature.description}</div>
+                                        )}
                                       </div>
                                     </div>
                                   ))}
@@ -604,25 +555,25 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                     {/* Bottom Feature Pill Indicator */}
                     <div className="space-y-1.5 pt-0.5">
                       <div className="flex items-center gap-2 text-xs font-bold">
-                        <span className="inline-flex items-center gap-1.5 text-[#E5A93C]">
-                          <Check className="w-3.5 h-3.5" /> {t("Universal Access:", "إتاحة قياسية شاملة:")}
+                        <span className="inline-flex items-center gap-1.5 text-teal-700 dark:text-teal-400">
+                          <Check className="w-3.5 h-3.5" /> {t("Accessibility Standard:", "معايير الإتاحة:")}
                         </span>
-                        <span className="text-slate-300 font-semibold text-[11px] sm:text-xs">
-                          {t("WCAG 2.2 AAA Compliant · Screen Reader Compatible · Zero Ads · Free Forever", "معايير WCAG 2.2 AAA العالمية · توافق تام مع قارئات الشاشة · بدون إعلانات")}
+                        <span className="text-stone-600 dark:text-stone-400 font-semibold text-[11px] sm:text-xs">
+                          {t("WCAG 2.2 AA Compliant · Keyboard Navigable · Screen Reader Optimized", "معايير WCAG 2.2 AA العالمية · تنقل كامل بلوحة المفاتيح · متوافق مع قارئات الشاشة")}
                         </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Right Column: CHOOSE YOUR ASSISTIVE FOCUS */}
-                  <div className="lg:col-span-5 flex flex-col justify-between space-y-4 lg:border-s lg:border-[#4A1224]/50 lg:ps-6">
+                  <div className="lg:col-span-5 flex flex-col justify-between space-y-4 lg:border-s lg:border-stone-200 dark:lg:border-stone-800 lg:ps-6">
                     <div className="space-y-3">
                       <div>
-                        <h2 className="text-base sm:text-lg font-black text-white tracking-tight">
-                          {t("Select Assistive Focus", "اختر المسار المساند الأساسي")}
+                        <h2 className="text-base sm:text-lg font-black text-stone-900 dark:text-white tracking-tight">
+                          {t("Select Learning Focus", "اختر المسار المساند الأساسي")}
                         </h2>
-                        <p className="text-[10px] sm:text-[11px] text-[#E5A93C]/80 font-medium">
-                          {t("All 7 assistive modules remain unlocked and accessible.", "كافة الوحدات والأدوات المساندة تظل مفتوحة ومتاحة لك.")}
+                        <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-medium">
+                          {t("All assistive modules remain unlocked and accessible.", "كافة الأدوات المساندة تظل مفتوحة ومتاحة لك دائماً.")}
                         </p>
                       </div>
 
@@ -644,41 +595,41 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                               className={({ isSelected, isFocusVisible }) =>
                                 `relative z-10 w-full flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-200 outline-none ${
                                   isSelected
-                                    ? 'bg-gradient-to-r from-[#2D0B16] via-[#4A1224]/90 to-[#120715]/95 border-[#E5A93C] shadow-xl shadow-[#4A1224]/40 ring-1 ring-[#E5A93C]/50 scale-[1.01]'
-                                    : 'bg-[#140916]/70 border-[#4A1224]/40 hover:bg-[#2D0B16]/40 hover:border-[#E5A93C]/40 shadow-sm'
-                                } ${isFocusVisible ? 'ring-2 ring-[#E5A93C] ring-offset-2 ring-offset-slate-950' : ''}`
+                                    ? 'bg-teal-50/80 dark:bg-teal-950/40 border-teal-600 dark:border-teal-500 ring-2 ring-teal-600/30 shadow-sm scale-[1.01]'
+                                    : 'bg-white dark:bg-[#121B1E] border-stone-200 dark:border-stone-800 hover:border-teal-300 dark:hover:border-teal-700'
+                                } ${isFocusVisible ? 'ring-2 ring-teal-600 ring-offset-2 ring-offset-white dark:ring-offset-[#0E1416]' : ''}`
                               }
                             >
                               {({ isSelected }) => (
                                 <>
                                   <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                                     isSelected
-                                      ? 'bg-gradient-to-br from-[#831843] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/60 shadow-md shadow-rose-950/50'
-                                      : 'bg-[#1A0C1D] text-[#E5A93C]/70 border border-[#4A1224]/60'
+                                      ? 'bg-teal-700 text-white font-black'
+                                      : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
                                   }`}>
                                     <ModalityIcon className="w-5 h-5" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-1.5">
-                                      <span className={`text-xs sm:text-sm font-black transition-colors ${isSelected ? 'text-[#E5A93C]' : 'text-white'}`}>
+                                      <span className={`text-xs sm:text-sm font-black transition-colors ${isSelected ? 'text-teal-800 dark:text-teal-300' : 'text-stone-900 dark:text-white'}`}>
                                         {t(modality.titleEn, modality.titleAr)}
                                       </span>
                                       <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${
                                         isSelected
-                                          ? 'bg-[#E5A93C]/20 text-[#E5A93C] border-[#E5A93C]/40'
-                                          : 'bg-[#1A0C1D] text-slate-400 border-[#4A1224]/50'
+                                          ? 'bg-teal-700 text-white border-teal-700'
+                                          : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700'
                                       }`}>
                                         {t(modality.badgeEn, modality.badgeAr)}
                                       </span>
                                     </div>
-                                    <p className="text-[11px] text-slate-300 font-medium mt-0.5 leading-snug">
+                                    <p className="text-[11px] text-stone-600 dark:text-stone-400 font-medium mt-0.5 leading-snug">
                                       {t(modality.focusTagEn, modality.focusTagAr)}
                                     </p>
                                   </div>
                                   <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
                                     isSelected
-                                      ? 'bg-[#E5A93C] text-slate-950 shadow-sm ring-4 ring-[#E5A93C]/20'
-                                      : 'border border-[#4A1224]/60 bg-[#140916]/50'
+                                      ? 'bg-teal-700 text-white ring-2 ring-teal-700/30'
+                                      : 'border border-stone-300 dark:border-stone-700'
                                   }`}>
                                     {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                                   </div>
@@ -695,17 +646,17 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       <button
                         type="button"
                         onClick={handleDirectPreview}
-                        className="w-full py-2.5 px-4 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 bg-gradient-to-r from-[#2D0B16] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/50 hover:brightness-125 shadow-lg active:scale-[0.98] transition-all"
+                        className="w-full py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-md shadow-teal-700/20 active:scale-[0.98] transition-all cursor-pointer"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-[#E5A93C] animate-pulse" />
-                        <span>{t("Direct Hub Preview (No Sign-In Needed) ✦", "استكشاف المنظومة كزائر (بدون تسجيل) ✦")}</span>
+                        <Sparkles className="w-4 h-4" />
+                        <span>{t("Direct Student Access (No Sign-In Needed) ✦", "دخول فوري كطالب (بدون تسجيل) ✦")}</span>
                       </button>
 
                       <AriaButton
                         onPress={handleContinuePath}
-                        className="w-full py-3 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition-all active:scale-[0.98] outline-none bg-gradient-to-r from-[#E5A93C] via-amber-400 to-[#E5A93C] text-slate-950 hover:brightness-110 shadow-[#E5A93C]/30 ring-1 ring-[#E5A93C]/50"
+                        className="w-full py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.98] outline-none bg-stone-100 hover:bg-stone-200 dark:bg-stone-800/80 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 cursor-pointer"
                       >
-                        <span>{t("Continue to Sign In / Create Account", "المتابعة للتسجيل / تسجيل الدخول")}</span>
+                        <span>{t("Sign In / Create Account", "تسجيل الدخول / إنشاء حساب")}</span>
                         <ArrowRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
                       </AriaButton>
                     </div>
@@ -720,21 +671,21 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              className="max-w-md mx-auto w-full bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-[28px] p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-5 ring-1 ring-[#E5A93C]/20"
+              className="max-w-md mx-auto w-full bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 rounded-[28px] p-6 sm:p-8 shadow-xl space-y-5"
             >
               {/* Header with Selected Path & Back Button */}
               <div className="flex items-center justify-between pb-1">
                 <button
                   onClick={() => { setMode('path-selection'); setError(null); }}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-[#E5A93C] transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-stone-500 hover:text-stone-900 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <ArrowLeft className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
                   <span>{t("Back", "رجوع")}</span>
                 </button>
 
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#150917] border border-[#4A1224]/60 text-slate-300">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-stone-100 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300">
                   <span>{t("Assistive Suite:", "نوع الإتاحة:")}</span>
-                  <strong className="text-[#E5A93C]">
+                  <strong className="text-teal-700 dark:text-teal-400">
                     {DISABILITY_LABEL_MAP[selectedDisability] || selectedDisability}
                   </strong>
                 </div>
@@ -744,16 +695,16 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                 /* Reset Password View */
                 <div className="space-y-4 text-start">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-black text-white tracking-tight">{t("Reset Password", "إعادة تعيين كلمة المرور")}</h2>
-                    <p className="text-xs text-slate-400">{t("Enter your email to receive recovery instructions.", "أدخل بريدك الإلكتروني لإرسال رابط الاستعادة.")}</p>
+                    <h2 className="text-xl font-black text-stone-900 dark:text-white tracking-tight">{t("Reset Password", "إعادة تعيين كلمة المرور")}</h2>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{t("Enter your email to receive recovery instructions.", "أدخل بريدك الإلكتروني لإرسال رابط الاستعادة.")}</p>
                   </div>
 
                   {resetSuccess ? (
-                    <div className="p-4 bg-[#4A1224]/30 border border-[#E5A93C]/40 rounded-2xl text-[#E5A93C] text-xs font-bold space-y-2">
+                    <div className="p-4 bg-teal-50 dark:bg-teal-950/30 border border-teal-300 dark:border-teal-700 rounded-2xl text-teal-800 dark:text-teal-300 text-xs font-bold space-y-2">
                       <p>{t("Reset link sent! Please check your inbox.", "تم إرسال رابط إعادة التعيين! يرجى التحقق من بريدك.")}</p>
                       <button
                         onClick={() => { setMode('email-login'); setResetSuccess(false); setError(null); }}
-                        className="block text-[#E5A93C] hover:underline pt-2 font-black"
+                        className="block text-teal-700 dark:text-teal-400 hover:underline pt-2 font-black cursor-pointer"
                       >
                         {t("Return to Sign In", "العودة لتسجيل الدخول")}
                       </button>
@@ -761,19 +712,19 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   ) : (
                     <form onSubmit={handleResetPassword} className="space-y-4">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">{t("Email Address", "البريد الإلكتروني")}</label>
+                        <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Email Address", "البريد الإلكتروني")}</label>
                         <input
                           type="email"
                           required
                           placeholder="name@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs rounded-xl py-3 px-4 outline-none focus:border-[#E5A93C]"
+                          className="w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-3 px-4 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327]"
                         />
                       </div>
 
                       {error && (
-                        <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-xs font-bold flex items-center gap-2">
+                        <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-500 text-xs font-bold flex items-center gap-2">
                           <AlertCircle className="w-4 h-4 shrink-0" />
                           <span>{error}</span>
                         </div>
@@ -782,9 +733,9 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl hover:opacity-95 transition-all shadow-lg shadow-[#E5A93C]/25 disabled:opacity-50"
+                        className="w-full py-3.5 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-teal-700/20 disabled:opacity-50 cursor-pointer"
                       >
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t("Send Reset Link", "إرسال رابط الاستعادة")}
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto text-white" /> : t("Send Reset Link", "إرسال رابط الاستعادة")}
                       </button>
                     </form>
                   )}
@@ -793,10 +744,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                 /* Unified Tabs (Sign In / Create Account) */
                 <div className="space-y-4 text-start">
                   <div className="space-y-1 text-center">
-                    <h2 className="text-xl font-black text-white tracking-tight">
+                    <h2 className="text-xl font-black text-stone-900 dark:text-white tracking-tight">
                       {mode === 'email-login' ? t("Welcome Back", "أهلاً بك مجدداً") : t("Create Your Profile", "إنشاء حسابك الجديد")}
                     </h2>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
                       {mode === 'email-login'
                         ? t("Sign in to access your personalized mentor.", "سجّل دخولك للوصول إلى مساعدك الدراسي المخصص.")
                         : t("Get started with your tailored learning calibration.", "ابدأ رحلتك التعليمية المخصصة لمعايرتك.")}
@@ -804,14 +755,14 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   </div>
 
                   {/* Tab Selector */}
-                  <div className="grid grid-cols-2 gap-1 p-1 bg-[#150917] border border-[#4A1224]/60 rounded-xl">
+                  <div className="grid grid-cols-2 gap-1 p-1 bg-stone-100 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 rounded-xl">
                     <button
                       type="button"
                       onClick={() => { setMode('email-login'); setError(null); }}
-                      className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
+                      className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                         mode === 'email-login'
-                          ? 'bg-gradient-to-r from-[#4A1224] to-[#831843] text-white shadow-sm border border-[#E5A93C]/40'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm font-black'
+                          : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                       }`}
                     >
                       {t("Sign In", "تسجيل الدخول")}
@@ -819,10 +770,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                     <button
                       type="button"
                       onClick={() => { setMode('email-register'); setError(null); }}
-                      className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all ${
+                      className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                         mode === 'email-register'
-                          ? 'bg-gradient-to-r from-[#4A1224] to-[#831843] text-white shadow-sm border border-[#E5A93C]/40'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm font-black'
+                          : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
                       }`}
                     >
                       {t("Create Account", "إنشاء حساب")}
@@ -832,36 +783,36 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   {/* Form */}
                   <form onSubmit={handleManualAuth} className="space-y-3.5">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">{t("Email Address", "البريد الإلكتروني")}</label>
+                      <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Email Address", "البريد الإلكتروني")}</label>
                       <div className="relative">
-                        <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 ${isRtl ? 'right-3' : 'left-3'}`} />
+                        <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 ${isRtl ? 'right-3' : 'left-3'}`} />
                         <input
                           type="email"
                           required
                           placeholder="name@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className={`w-full bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-[#E5A93C] ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
+                          className={`w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-2.5 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327] ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">{t("Password", "كلمة المرور")}</label>
+                      <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Password", "كلمة المرور")}</label>
                       <div className="relative">
-                        <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 ${isRtl ? 'right-3' : 'left-3'}`} />
+                        <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 ${isRtl ? 'right-3' : 'left-3'}`} />
                         <input
                           type={showPassword ? "text" : "password"}
                           required
                           placeholder="••••••••"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className={`w-full bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-[#E5A93C] ${isRtl ? 'pr-9 pl-9' : 'pl-9 pr-9'}`}
+                          className={`w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-2.5 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327] ${isRtl ? 'pr-9 pl-9' : 'pl-9 pr-9'}`}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#E5A93C] ${isRtl ? 'left-3' : 'right-3'}`}
+                          className={`absolute top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer ${isRtl ? 'left-3' : 'right-3'}`}
                         >
                           {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                         </button>
@@ -874,16 +825,16 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         animate={{ opacity: 1, height: 'auto' }}
                         className="space-y-1"
                       >
-                        <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">{t("Confirm Password", "تأكيد كلمة المرور")}</label>
+                        <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Confirm Password", "تأكيد كلمة المرور")}</label>
                         <div className="relative">
-                          <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 ${isRtl ? 'right-3' : 'left-3'}`} />
+                          <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 ${isRtl ? 'right-3' : 'left-3'}`} />
                           <input
                             type="password"
                             required
                             placeholder="••••••••"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`w-full bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs rounded-xl py-2.5 outline-none focus:border-[#E5A93C] ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
+                            className={`w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-2.5 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327] ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
                           />
                         </div>
                       </motion.div>
@@ -894,7 +845,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         <button
                           type="button"
                           onClick={() => { setMode('reset-password'); setError(null); }}
-                          className="text-[11px] font-bold text-[#E5A93C] hover:underline"
+                          className="text-[11px] font-bold text-teal-700 dark:text-teal-400 hover:underline cursor-pointer"
                         >
                           {t("Forgot Password?", "نسيت كلمة المرور؟")}
                         </button>
@@ -902,7 +853,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                     )}
 
                     {error && (
-                      <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs font-bold space-y-2">
+                      <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold space-y-2">
                         <div className="flex items-center gap-2">
                           <AlertCircle className="w-4 h-4 shrink-0" />
                           <span>{error}</span>
@@ -912,7 +863,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                             type="button"
                             onClick={handleGoogleRedirectAuth}
                             disabled={loading}
-                            className="w-full py-2 px-3 bg-[#4A1224] hover:bg-[#831843] text-[#E5A93C] border border-[#E5A93C]/40 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                            className="w-full py-2 px-3 bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 text-teal-900 dark:text-teal-300 border border-teal-300/40 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] cursor-pointer"
                           >
                             <Globe className="w-3.5 h-3.5" />
                             <span>{t("Click Here for Direct Google Sign-In", "اضغط هنا لتسجيل الدخول المباشر")}</span>
@@ -924,10 +875,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl hover:opacity-95 transition-all shadow-lg shadow-[#E5A93C]/25 disabled:opacity-50"
+                      className="w-full py-3.5 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-teal-700/20 disabled:opacity-50 cursor-pointer"
                     >
                       {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin mx-auto text-slate-950" />
+                        <Loader2 className="w-4 h-4 animate-spin mx-auto text-white" />
                       ) : mode === 'email-login' ? (
                         t("Sign In", "تسجيل الدخول")
                       ) : (
@@ -938,9 +889,9 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
                   {/* Or Continue With Google */}
                   <div className="flex items-center gap-3 pt-1">
-                    <div className="h-px bg-[#4A1224]/50 flex-1" />
-                    <span className="text-[10px] font-black text-[#E5A93C]/80 uppercase tracking-widest">{t("Or", "أو")}</span>
-                    <div className="h-px bg-[#4A1224]/50 flex-1" />
+                    <div className="h-px bg-stone-200 dark:bg-stone-800 flex-1" />
+                    <span className="text-[10px] font-black text-stone-500 uppercase tracking-widest">{t("Or", "أو")}</span>
+                    <div className="h-px bg-stone-200 dark:bg-stone-800 flex-1" />
                   </div>
 
                   <div className="space-y-2">
@@ -948,12 +899,12 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       type="button"
                       onClick={handleGoogleAuth}
                       disabled={loading}
-                      className="w-full h-11 flex items-center justify-center gap-2 bg-white text-slate-950 rounded-xl hover:bg-slate-100 transition-all font-black uppercase tracking-wider text-xs shadow-md disabled:opacity-50 active:scale-[0.98]"
+                      className="w-full h-11 flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-900 dark:text-white rounded-xl transition-all font-black uppercase tracking-wider text-xs shadow-sm border border-stone-200 dark:border-stone-700 disabled:opacity-50 active:scale-[0.98] cursor-pointer"
                     >
                       {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
                       ) : (
-                        <Chrome className="w-4 h-4 text-slate-950" />
+                        <Chrome className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                       )}
                       <span>{t("Continue with Google", "المتابعة عبر جوجل")}</span>
                     </button>
@@ -962,14 +913,14 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       type="button"
                       onClick={handleGoogleRedirectAuth}
                       disabled={loading}
-                      className={`w-full py-2.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                      className={`w-full py-2.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                         showRedirectOption
-                          ? 'bg-[#4A1224]/40 border-[#E5A93C]/50 text-[#E5A93C] hover:bg-[#4A1224]/60 shadow-sm'
-                          : 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:text-[#E5A93C] hover:border-[#E5A93C]/40'
+                          ? 'bg-teal-50 dark:bg-teal-950/40 border-teal-300 text-teal-900 dark:text-teal-300 hover:bg-teal-100'
+                          : 'bg-white dark:bg-[#121B1E] border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-teal-400'
                       }`}
                     >
                       <Globe className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t("Direct Google Sign-In (No Popups)", "تسجيل جوجل المباشر (بدون نوافذ منبثقة)")}</span>
+                      <span>{t("Direct Google Sign-In (No Popups)", "تسجيل الدخول المباشر بجوجل")}</span>
                     </button>
                   </div>
                 </div>

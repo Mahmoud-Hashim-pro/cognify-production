@@ -16,10 +16,13 @@ interface SidebarProps {
   setProfile: (profile: UserProfile) => void;
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
+  activeDisabilityTab?: DisabilityTab;
+  onSelectDisabilityTab?: (tab: DisabilityTab) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
   openLiveCaptions: () => void;
   onClose?: () => void;
+  onLogout?: () => void;
 }
 
 // Cognify Assistive "constellation" logomark
@@ -37,10 +40,13 @@ export default function Sidebar({
   setProfile, 
   currentView, 
   setCurrentView, 
+  activeDisabilityTab,
+  onSelectDisabilityTab,
   isDarkMode, 
   toggleTheme, 
   openLiveCaptions, 
-  onClose 
+  onClose,
+  onLogout,
 }: SidebarProps) {
   const handleChange = (key: keyof UserProfile, value: string) => {
     const updated = { ...profile, [key]: value };
@@ -57,6 +63,9 @@ export default function Sidebar({
     try {
       localStorage.setItem('cognify_default_disability_tab', tab);
     } catch {}
+    if (onSelectDisabilityTab) {
+      onSelectDisabilityTab(tab);
+    }
     setCurrentView('disability');
   };
 
@@ -79,6 +88,14 @@ export default function Sidebar({
     setCurrentView('chat');
   };
 
+  const isTabActive = (tab: DisabilityTab) => {
+    if (currentView !== 'disability') return false;
+    const currentTab = activeDisabilityTab || 'hub';
+    if (tab === 'hub') return currentTab === 'hub';
+    if (tab === 'deaf') return currentTab === 'deaf' || currentTab === 'bridge' || currentTab === 'radar';
+    return currentTab === tab;
+  };
+
   // Dedicated Assistive Suites Navigation List
   const assistiveItems = [
     {
@@ -86,54 +103,27 @@ export default function Sidebar({
       label: localize(profile.language, 'Accessibility Hub', 'منظومة ذوي الهمم (الرئيسية)'),
       icon: Accessibility,
       action: () => navigateToDisabilityTab('hub'),
-      active: currentView === 'disability',
+      active: isTabActive('hub'),
       badge: localize(profile.language, 'Hub', 'الرئيسية'),
-      badgeColor: 'bg-[#4A1224]/60 text-[#E5A93C] border-[#E5A93C]/40',
+      badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
     },
     {
       id: 'vision',
       label: localize(profile.language, 'Visual Companion', 'الرفيق البصري (كاميرا وصوت)'),
       icon: Eye,
       action: () => navigateToDisabilityTab('vision'),
-      active: false,
+      active: isTabActive('vision'),
       badge: '👁️',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      badgeColor: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
     },
     {
       id: 'hearing',
-      label: localize(profile.language, 'Hearing Center', 'المركز السمعي الموحد (الصم)'),
+      label: localize(profile.language, '3D Sign & Hearing Studio', 'استوديو لغة الإشارة 3D والمحطة السمعية'),
       icon: Ear,
       action: () => navigateToDisabilityTab('deaf'),
-      active: false,
-      badge: '👂',
-      badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
-    },
-    {
-      id: 'video',
-      label: localize(profile.language, 'Sign Video Studio', 'استوديو لغة الإشارة 3D'),
-      icon: Layers,
-      action: () => { onClose?.(); setCurrentView('video'); },
-      active: currentView === 'video',
+      active: isTabActive('deaf') || currentView === 'video',
       badge: '🤟',
-      badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
-    },
-    {
-      id: 'orchestrator',
-      label: localize(profile.language, 'Sensory Bridge', 'جسر التواصل بين الإعاقات'),
-      icon: Sparkles,
-      action: () => navigateToDisabilityTab('orchestrator'),
-      active: false,
-      badge: '🤝',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-    },
-    {
-      id: 'caregiver',
-      label: localize(profile.language, 'Caregiver & SOS Hub', 'لوحة المرافق والاستغاثة SOS'),
-      icon: Shield,
-      action: () => navigateToDisabilityTab('caregiver'),
-      active: false,
-      badge: '🚨',
-      badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+      badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
     },
     {
       id: 'chat',
@@ -144,7 +134,7 @@ export default function Sidebar({
     },
     {
       id: 'profile',
-      label: localize(profile.language, 'Accessibility Passport', 'جواز الإتاحة والملف الشخصي'),
+      label: localize(profile.language, 'Accommodation Passport', 'جواز الإتاحة والملف الشخصي'),
       icon: User,
       action: () => { onClose?.(); setCurrentView('profile'); },
       active: currentView === 'profile',
@@ -168,27 +158,35 @@ export default function Sidebar({
   const navBtn = (active: boolean) =>
     `group flex items-center gap-3 w-full px-3 min-h-[44px] py-2 rounded-xl text-[13px] font-medium text-start transition-all relative select-none ${
       active
-        ? 'bg-gradient-to-r from-[#4A1224]/60 via-[#831843]/20 to-transparent border border-[#E5A93C]/50 text-[#E5A93C] font-bold shadow-sm shadow-[#2D0B16]/50'
-        : 'text-slate-300 hover:bg-[#4A1224]/20 hover:text-white border border-transparent hover:border-[#E5A93C]/20 active:scale-[0.98]'
+        ? isDarkMode
+          ? 'bg-teal-950/60 border border-teal-600/50 text-teal-300 font-bold shadow-sm'
+          : 'bg-teal-50 border border-teal-600/40 text-teal-900 font-bold shadow-sm'
+        : isDarkMode
+          ? 'text-stone-300 hover:bg-[#162327] hover:text-white border border-transparent hover:border-teal-700/40 active:scale-[0.98]'
+          : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950 border border-transparent hover:border-stone-200 active:scale-[0.98]'
     }`;
-  const navIcon = (_active: boolean) => `w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-110 group-focus-visible:scale-110`;
+  const navIcon = (_active: boolean) => `w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-110 group-focus-visible:scale-110 text-teal-700 dark:text-teal-400`;
 
   const userInitial = (profile.name || profile.email || 'U').trim().charAt(0).toUpperCase();
 
   return (
-    <div className="w-[284px] max-w-[85vw] h-full shrink-0 bg-[#0E0610]/95 text-slate-200 border-e border-[#4A1224]/40 backdrop-blur-2xl flex flex-col px-[18px] py-[22px]">
+    <div className={`w-[284px] max-w-[85vw] h-full shrink-0 ${
+      isDarkMode 
+        ? 'bg-[#0E1416]/98 text-stone-200 border-stone-800' 
+        : 'bg-[#FAF8F5]/98 text-stone-800 border-stone-200'
+    } border-e backdrop-blur-2xl flex flex-col px-[18px] py-[22px]`}>
       {/* Brand & Mobile Close Button */}
       <div className="flex items-center justify-between px-1.5 pb-1">
         <div className="flex items-center gap-3">
-          <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-[#E5A93C] shrink-0 shadow-lg shadow-[#4A1224]/40 ring-1 ring-[#E5A93C]/30 border border-[#E5A93C]/30" style={{ background: 'linear-gradient(135deg,#4A1224,#831843,#E5A93C)' }}>
+          <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white shrink-0 shadow-md bg-gradient-to-br from-teal-600 to-teal-800 ring-1 ring-teal-500/30">
             <Logo className="w-[20px] h-[20px]" />
           </div>
           <div className="leading-none">
-            <div className="font-serif text-[23px] font-bold text-white tracking-tight flex items-center gap-1.5">
+            <div className={`font-serif text-[23px] font-bold ${isDarkMode ? 'text-white' : 'text-stone-900'} tracking-tight flex items-center gap-1.5`}>
               <span>Cognify</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/40">A11y</span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-teal-950/60 text-teal-300 border-teal-800' : 'bg-teal-50 text-teal-900 border-teal-200'} border`}>A11y</span>
             </div>
-            <div className="text-[11px] text-[#E5A93C]/80 font-medium mt-0.5">
+            <div className={`text-[11px] ${isDarkMode ? 'text-stone-400' : 'text-stone-600'} font-medium mt-0.5`}>
               {localize(profile.language, 'Assistive Technology Suite', 'منظومة ذوي الهمم والإتاحة')}
             </div>
           </div>
@@ -196,7 +194,7 @@ export default function Sidebar({
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#4A1224]/40 transition-colors shrink-0"
+            className={`p-1.5 rounded-xl ${isDarkMode ? 'text-stone-400 hover:text-white hover:bg-stone-800' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200'} transition-colors shrink-0 cursor-pointer`}
             aria-label={localize(profile.language, 'Close menu', 'إغلاق القائمة')}
           >
             <X className="w-5 h-5" />
@@ -208,15 +206,15 @@ export default function Sidebar({
       <div className="mt-3">
         <button
           onClick={startNewChat}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-[#4A1224] via-[#831843] to-[#E5A93C] hover:brightness-110 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-[#4A1224]/40 active:scale-[0.98] transition-all hover:shadow-[#E5A93C]/20 border border-[#E5A93C]/30"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-teal-700/20 active:scale-[0.98] transition-all cursor-pointer"
         >
-          <Plus className="w-[17px] h-[17px] text-[#E5A93C]" /> {getTranslation(profile.language, 'newThread')}
+          <Plus className="w-[17px] h-[17px] text-white" /> {getTranslation(profile.language, 'newThread')}
         </button>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto custom-scrollbar -mx-1 my-[16px] px-1 flex flex-col gap-[3px]">
-        <div className="text-[10px] font-extrabold text-[#E5A93C]/70 tracking-wider px-3 pt-1.5 pb-1 uppercase">
+        <div className={`text-[10px] font-extrabold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider px-3 pt-1.5 pb-1 uppercase`}>
           {localize(profile.language, 'Assistive Ecosystem', 'أدوات الإتاحة والتكيّف')}
         </div>
 
@@ -230,7 +228,7 @@ export default function Sidebar({
             <item.icon className={navIcon(item.active)} />
             <span className="truncate">{item.label}</span>
             {item.badge && (
-              <span className={`ms-auto text-[10px] font-bold px-[6px] py-[1.5px] rounded-full border ${item.badgeColor || 'bg-slate-800 text-slate-300 border-slate-700'}`}>
+              <span className={`ms-auto text-[10px] font-bold px-[6px] py-[1.5px] rounded-full border ${item.badgeColor || (isDarkMode ? 'bg-stone-800 text-stone-300 border-stone-700' : 'bg-stone-100 text-stone-900 border-stone-300')}`}>
                 {item.badge}
               </span>
             )}
@@ -246,7 +244,7 @@ export default function Sidebar({
           >
             <AlertCircle className={navIcon(currentView === 'admin')} />
             {localize(profile.language, 'Admin Portal', 'لوحة الإدارة')}
-            <span className="ms-auto text-[10px] font-bold text-slate-300 bg-[#171E2E] border border-slate-700/80 px-[7px] py-[2px] rounded-full">
+            <span className={`ms-auto text-[10px] font-bold ${isDarkMode ? 'text-stone-300 bg-stone-800 border-stone-700' : 'text-stone-800 bg-stone-100 border-stone-300'} border px-[7px] py-[2px] rounded-full`}>
               {localize(profile.language, 'Staff', 'مقيّد')}
             </span>
           </button>
@@ -256,7 +254,7 @@ export default function Sidebar({
         {(profile.chatThreads?.length || 0) > 0 && (
           <>
             <div className="flex items-center justify-between px-3 pt-4 pb-1">
-              <span className="text-[10px] font-extrabold text-slate-500 tracking-wider uppercase">
+              <span className={`text-[10px] font-extrabold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider uppercase`}>
                 {getTranslation(profile.language, 'chatHistory')}
               </span>
               <button
@@ -269,7 +267,7 @@ export default function Sidebar({
                     });
                   }
                 }}
-                className="text-[10px] font-bold text-rose-400/80 hover:text-rose-300 transition-colors"
+                className="text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
                 title="Clear all chats"
               >
                 {getTranslation(profile.language, 'clearAll')}
@@ -278,14 +276,18 @@ export default function Sidebar({
             {profile.chatThreads?.slice().reverse().map((t) => {
               const active = profile.activeThreadId === t.id;
               return (
-                <div key={t.id} className={`group flex items-center gap-1 rounded-xl transition-all ${active ? 'bg-[#171E2E] border border-slate-700/80' : 'hover:bg-slate-800/40 border border-transparent'}`}>
+                <div key={t.id} className={`group flex items-center gap-1 rounded-xl transition-all ${
+                  active 
+                    ? isDarkMode ? 'bg-[#162327] border border-teal-800' : 'bg-teal-50 border border-teal-200'
+                    : isDarkMode ? 'hover:bg-stone-800/40 border border-transparent' : 'hover:bg-stone-100 border border-transparent'
+                }`}>
                   <button
                     onClick={() => switchThread(t.id)}
-                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1.5 text-start overflow-hidden min-w-0"
+                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1.5 text-start overflow-hidden min-w-0 cursor-pointer"
                     aria-current={active ? 'true' : undefined}
                   >
-                    <span className="text-[13px] font-semibold text-slate-200 truncate w-full max-w-[200px]">{t.title}</span>
-                    <span className="text-[11px] text-slate-400 truncate w-full max-w-[200px]">{t.lastMessageSnippet || (localize(profile.language, 'No messages yet', 'لا رسائل بعد'))}</span>
+                    <span className={`text-[13px] font-semibold truncate w-full max-w-[200px] ${isDarkMode ? 'text-stone-200' : 'text-stone-900'}`}>{t.title}</span>
+                    <span className={`text-[11px] truncate w-full max-w-[200px] ${isDarkMode ? 'text-stone-400' : 'text-stone-500'}`}>{t.lastMessageSnippet || (localize(profile.language, 'No messages yet', 'لا رسائل بعد'))}</span>
                   </button>
                   <button
                     onClick={(e) => {
@@ -297,7 +299,7 @@ export default function Sidebar({
                       setProfile({ ...profile, chatThreads: updated, activeThreadId: nextActive });
                       if (profile.uid) deleteDoc(doc(db, `users/${profile.uid}/threads/${t.id}`)).catch((er) => console.error(er));
                     }}
-                    className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 min-w-[36px] min-h-[36px] flex items-center justify-center p-2 me-1 text-slate-400 hover:text-rose-400 focus-visible:text-rose-400 rounded-lg transition-all"
+                    className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 min-w-[36px] min-h-[36px] flex items-center justify-center p-2 me-1 text-stone-400 hover:text-rose-500 focus-visible:text-rose-500 rounded-lg transition-all cursor-pointer"
                     title={localize(profile.language, 'Delete chat', 'حذف المحادثة')}
                     aria-label={localize(profile.language, 'Delete chat', 'حذف المحادثة')}
                   >
@@ -311,20 +313,28 @@ export default function Sidebar({
       </nav>
 
       {/* Footer: theme + language, profile chip, captions + logout */}
-      <div className="border-t border-[#4A1224]/40 pt-3 flex flex-col gap-2">
+      <div className={`border-t ${isDarkMode ? 'border-stone-800' : 'border-stone-200'} pt-3 flex flex-col gap-2`}>
         <div className="flex gap-[7px]">
           <button 
             onClick={toggleTheme} 
-            className="flex-1 flex items-center justify-center gap-[7px] min-h-[44px] py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#150917] text-slate-200 hover:text-white hover:bg-[#4A1224]/30 text-xs font-semibold transition-all"
+            className={`flex-1 flex items-center justify-center gap-[7px] min-h-[44px] py-2.5 rounded-xl border ${
+              isDarkMode 
+                ? 'border-stone-800 bg-[#162327] text-stone-200 hover:text-white hover:bg-stone-800' 
+                : 'border-stone-200 bg-white text-stone-800 hover:text-stone-950 hover:bg-stone-100'
+            } text-xs font-semibold transition-all cursor-pointer`}
           >
-            {isDarkMode ? <Sun className="w-4 h-4 text-[#E5A93C]" /> : <Moon className="w-4 h-4 text-slate-300" />}
+            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-stone-600" />}
             {isDarkMode ? (localize(profile.language, 'Light', 'فاتح')) : (localize(profile.language, 'Dark', 'داكن'))}
           </button>
           <div className="flex-1 relative">
             <select
               value={profile.language || 'English'}
               onChange={(e) => handleChange('language', e.target.value)}
-              className="w-full h-full min-h-[44px] appearance-none cursor-pointer text-center py-2.5 px-2 rounded-xl border border-[#4A1224]/50 bg-[#150917] text-slate-200 text-xs font-semibold hover:border-[#E5A93C]/40 transition-all outline-none focus:border-[#E5A93C] [color-scheme:dark]"
+              className={`w-full h-full min-h-[44px] appearance-none cursor-pointer text-center py-2.5 px-2 rounded-xl border ${
+                isDarkMode
+                  ? 'border-stone-800 bg-[#162327] text-stone-200 hover:border-teal-500 focus:border-teal-500 [color-scheme:dark]'
+                  : 'border-stone-200 bg-white text-stone-800 hover:border-teal-500 focus:border-teal-500 [color-scheme:light]'
+              } text-xs font-semibold transition-all outline-none`}
               aria-label={localize(profile.language, 'Select Language', 'اختر اللغة')}
             >
               {['English', 'Arabic', 'Egyptian Ammiya', 'French', 'Spanish'].map((l) => (
@@ -334,26 +344,36 @@ export default function Sidebar({
           </div>
         </div>
 
-        <div className={`flex items-center gap-2.5 w-full px-2.5 min-h-[50px] py-1.5 rounded-2xl border bg-[#150917]/90 backdrop-blur-md transition-all ${currentView === 'profile' || currentView === 'settings' ? 'border-[#E5A93C]/70 shadow-md shadow-[#4A1224]/30' : 'border-[#4A1224]/50 hover:border-[#E5A93C]/40'}`}>
+        <div className={`flex items-center gap-2.5 w-full px-2.5 min-h-[50px] py-1.5 rounded-2xl border ${
+          isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+        } backdrop-blur-md transition-all ${
+          currentView === 'profile' || currentView === 'settings' 
+            ? 'border-teal-600 shadow-sm'
+            : isDarkMode ? 'hover:border-stone-700' : 'hover:border-teal-400'
+        }`}>
           <button 
             onClick={() => setCurrentView('profile')} 
-            className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group" 
+            className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer" 
             title={localize(profile.language, 'View Profile', 'الملف الشخصي وجواز الإتاحة')}
           >
             <div className="relative shrink-0">
-              <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 overflow-hidden shadow-md group-hover:scale-105 transition-transform ring-1 ring-[#E5A93C]/30" style={{ background: 'linear-gradient(135deg, #4A1224, #831843, #E5A93C)' }}>
+              <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 overflow-hidden shadow-sm bg-gradient-to-br from-teal-600 to-teal-800 group-hover:scale-105 transition-transform ring-1 ring-teal-500/30">
                 {profile.photoURL ? <img src={profile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : userInitial}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#E5A93C] ring-2 ring-[#0E0610]" />
+              <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-teal-500 ring-2 ${isDarkMode ? 'ring-[#0E1416]' : 'ring-white'}`} />
             </div>
             <div className="leading-tight overflow-hidden flex-1">
-              <div className="text-[13px] font-bold text-slate-100 truncate group-hover:text-[#E5A93C] transition-colors">{profile.name || profile.email?.split('@')[0] || 'User'}</div>
-              <div className="text-[11px] text-[#E5A93C]/80 truncate">{profile.disabilityType || profile.accessibilityMode || 'Special Needs'}</div>
+              <div className={`text-[13px] font-bold ${isDarkMode ? 'text-stone-100 group-hover:text-teal-400' : 'text-stone-900 group-hover:text-teal-700'} truncate transition-colors`}>{profile.name || profile.email?.split('@')[0] || 'User'}</div>
+              <div className={`text-[11px] ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} truncate`}>{profile.disabilityType || profile.accessibilityMode || 'Special Needs'}</div>
             </div>
           </button>
           <button
             onClick={() => setCurrentView('settings')}
-            className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 ${currentView === 'settings' ? 'bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/50' : 'text-slate-300 hover:text-[#E5A93C] hover:bg-[#4A1224]/30'}`}
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer ${
+              currentView === 'settings'
+                ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500'
+                : 'text-stone-600 dark:text-stone-400 hover:text-teal-700 hover:bg-stone-100 dark:hover:bg-stone-800'
+            }`}
             title={localize(profile.language, 'Settings', 'الإعدادات')}
             aria-label={localize(profile.language, 'Settings', 'الإعدادات')}
           >
@@ -364,13 +384,28 @@ export default function Sidebar({
         <div className="flex gap-[7px]">
           <button 
             onClick={openLiveCaptions} 
-            className="flex-1 flex items-center justify-center gap-2 min-h-[44px] py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#150917] text-[#E5A93C] hover:bg-[#4A1224]/30 hover:border-[#E5A93C]/40 text-xs font-semibold transition-all"
+            className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] py-2.5 rounded-xl border ${
+              isDarkMode 
+                ? 'border-stone-800 bg-[#162327] text-stone-200 hover:bg-stone-800 hover:border-teal-700' 
+                : 'border-stone-200 bg-white text-stone-800 hover:bg-stone-100 hover:border-teal-400'
+            } text-xs font-semibold transition-all cursor-pointer`}
           >
-            <Mic className="w-4 h-4 text-[#E5A93C]" /> {localize(profile.language, 'Captions', 'الكابشن')}
+            <Mic className={`w-4 h-4 text-teal-600 dark:text-teal-400`} /> {localize(profile.language, 'Captions', 'الكابشن')}
           </button>
           <button 
-            onClick={() => logout()} 
-            className="flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#150917] text-rose-400 hover:bg-rose-950/40 hover:border-rose-700/60 text-xs font-semibold transition-all" 
+            onClick={async () => {
+              onClose?.();
+              if (onLogout) {
+                onLogout();
+              } else {
+                await logout();
+              }
+            }} 
+            className={`flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] px-3.5 py-2.5 rounded-xl border ${
+              isDarkMode 
+                ? 'border-rose-900/40 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 hover:border-rose-700/60' 
+                : 'border-rose-200 bg-white text-rose-600 hover:bg-rose-50 hover:border-rose-400'
+            } text-xs font-semibold transition-all cursor-pointer`} 
             title={getTranslation(profile.language, 'logout')} 
             aria-label={getTranslation(profile.language, 'logout')}
           >

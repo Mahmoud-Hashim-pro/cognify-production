@@ -51,7 +51,7 @@ export interface StudentMemory {
   updatedAt: string; // ISO 8601 string
 }
 
-export type PedagogyStyle = 'analogies' | 'technical' | 'scaffolded' | 'socratic';
+export type PedagogyStyle = 'analogies' | 'technical' | 'scaffolded' | 'socratic' | 'simplified' | 'practical';
 
 export interface CognitiveDomainScores {
   fluidReasoning: number;      // 0–100 scaled

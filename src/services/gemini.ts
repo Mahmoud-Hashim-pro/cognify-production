@@ -182,7 +182,15 @@ function buildPersona(profile: UserProfile, explicitStudentState?: any): string 
   * If a user in the Advanced tier asks: "كلمني بالبلدي وببساطة ومن غير تعقيد" -> Switch immediately to ultra-simple, colloquial "بلدي" mode with everyday analogies.
   * Any direct in-conversation style instruction from the student ALWAYS supersedes the default calibrated level.`;
 
-  if (profile.preferredPedagogyStyle === 'analogies') {
+  if (profile.preferredPedagogyStyle === 'simplified') {
+    cognitiveBlock += `\n## ACTIVE PEDAGOGICAL STYLE: SIMPLIFIED (PLAIN LANGUAGE & ELI5)
+- Explain the core concept in warm, plain, accessible language with zero unnecessary jargon.
+- Use short sentences, clear bullet points, and gentle cognitive load.`;
+  } else if (profile.preferredPedagogyStyle === 'practical') {
+    cognitiveBlock += `\n## ACTIVE PEDAGOGICAL STYLE: WORKED EXAMPLE & HANDS-ON APPLICATION
+- Anchor the explanation in a realistic case study or fully worked problem with concrete inputs, steps, and expected outputs.
+- Detail practical verification tips and how to avoid common pitfalls.`;
+  } else if (profile.preferredPedagogyStyle === 'analogies') {
     cognitiveBlock += `\n## ACTIVE PEDAGOGICAL STYLE: VISUAL ANALOGIES & METAPHORS
 - Anchor explanations in physical, real-world analogies (mailboxes, water pipes, maps).
 - Prioritize visual mental models and intuitive concepts before syntax.`;
@@ -683,7 +691,15 @@ ${confirmed}
 - Deliver structured explanations balancing conceptual intuition, real-world context, and logical progression.`;
   }
 
-  if (profile.preferredPedagogyStyle === 'analogies') {
+  if (profile.preferredPedagogyStyle === 'simplified') {
+    cognitiveBlock += `\n## PEDAGOGICAL STYLE: SIMPLIFIED (PLAIN LANGUAGE & ELI5)
+- Explain the core concept in warm, plain, accessible language with zero unnecessary jargon.
+- Use short sentences, clear bullet points, and gentle cognitive load.`;
+  } else if (profile.preferredPedagogyStyle === 'practical') {
+    cognitiveBlock += `\n## PEDAGOGICAL STYLE: WORKED EXAMPLE & HANDS-ON APPLICATION
+- Anchor the explanation in a realistic case study or fully worked problem with concrete inputs, steps, and expected outputs.
+- Detail practical verification tips and how to avoid common pitfalls.`;
+  } else if (profile.preferredPedagogyStyle === 'analogies') {
     cognitiveBlock += `\n## PEDAGOGICAL STYLE: VISUAL ANALOGIES & METAPHORS
 - Anchor explanations in physical, real-world analogies (mailboxes, water pipes, maps).
 - Prioritize visual mental models and intuitive concepts before syntax.`;

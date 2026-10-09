@@ -1044,8 +1044,16 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
   return (
     <div dir={direction} className="fixed inset-0 bg-surface-2 z-[100] flex flex-col items-center justify-start py-12 px-6 overflow-y-auto custom-scrollbar relative">
       <button
-        onClick={() => logout()}
-        className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-2 px-4 py-2 bg-white hover:bg-surface-3 text-text-muted hover:text-text-main rounded-xl transition-all text-xs font-bold uppercase tracking-widest z-50 shadow-sm border border-border"
+        onClick={async () => {
+          try {
+            sessionStorage.removeItem('cognify_guest_preview');
+            sessionStorage.setItem('cognify_exit_preview', 'true');
+            await logout();
+          } catch {}
+          window.location.hash = '';
+          window.location.reload();
+        }}
+        className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-2 px-4 py-2 bg-white hover:bg-surface-3 text-text-muted hover:text-text-main rounded-xl transition-all text-xs font-bold uppercase tracking-widest z-50 shadow-sm border border-border cursor-pointer"
       >
         <LogOut className="w-4 h-4" /> {getTranslation(formData.language, "logout")}
       </button>
