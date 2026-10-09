@@ -1007,18 +1007,18 @@ export default function App() {
       case 'privacy_security':
       case 'privacy':
         return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
+          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
             <header className="flex items-center gap-3 mb-6">
               <button
                 onClick={() => navigateTo('disability')}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer`}
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                 <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
               </button>
               <button 
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer`}
                 aria-label="Toggle menu"
               >
                 <Menu className="w-6 h-6" />
@@ -1072,18 +1072,18 @@ export default function App() {
         };
 
         return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 relative overflow-hidden font-sans custom-scrollbar">
-            {/* Ambient Lighting Orbs - Royal Burgundy & Champagne Gold */}
+          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} relative overflow-hidden font-sans custom-scrollbar`}>
+            {/* Ambient Lighting Orbs - Serene Teal & Subtle Warm Amber */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 hidden md:block">
-              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#4A1224]/20 rounded-full blur-[140px]" />
-              <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-[#E5A93C]/10 rounded-full blur-[140px]" />
-              <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-[#831843]/15 rounded-full blur-[140px]" />
+              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[140px]" />
+              <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[140px]" />
+              <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-teal-600/10 rounded-full blur-[140px]" />
             </div>
 
             <header className="p-6 md:p-10 shrink-0 flex items-center gap-3">
               <button
                 onClick={() => navigateTo(homeViewFor(profile))}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer`}
                 title={localize(profile.language, 'Back to Assistant', 'العودة للمساعد')}
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1091,7 +1091,7 @@ export default function App() {
               </button>
               <button 
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
+                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer`}
                 aria-label="Toggle menu"
                 title="Open Menu"
               >
@@ -1099,15 +1099,15 @@ export default function App() {
               </button>
             </header>
             <div className="flex-1 flex items-center justify-center p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-              <div className="bg-[#0E0610]/95 rounded-[32px] sm:rounded-[40px] border border-[#4A1224]/60 backdrop-blur-xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 md:p-12 space-y-8 my-auto ring-1 ring-[#E5A93C]/20">
+              <div className={`${isDarkMode ? 'bg-[#121B1E] border-stone-800 text-white shadow-2xl' : 'bg-white border-stone-200 text-stone-900 shadow-sm'} rounded-[32px] sm:rounded-[40px] border backdrop-blur-xl max-w-2xl w-full p-6 sm:p-8 md:p-12 space-y-8 my-auto`}>
                 <div className="text-center space-y-2">
-                  <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">{getTranslation(profile.language, 'settings')}</h2>
-                  <div className="h-1.5 w-20 bg-gradient-to-r from-[#4A1224] via-[#831843] to-[#E5A93C] mx-auto rounded-full shadow-lg shadow-[#4A1224]/40" />
+                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">{getTranslation(profile.language, 'settings')}</h2>
+                  <div className="h-1.5 w-20 bg-gradient-to-r from-teal-600 to-teal-400 mx-auto rounded-full shadow-md" />
                 </div>
 
                 {/* Language Selection Card */}
-                <div className="p-5 sm:p-6 bg-[#150917]/90 rounded-3xl border border-[#4A1224]/50 space-y-4">
-                  <div className="flex items-center gap-2 text-[#E5A93C]">
+                <div className={`p-5 sm:p-6 ${isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4`}>
+                  <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
                     <Globe className="w-5 h-5" />
                     <h3 className="text-sm font-black uppercase tracking-widest">
                       {localize(profile.language, 'Language Selection', 'اختيار اللغة')}
@@ -1127,10 +1127,12 @@ export default function App() {
                         <button
                           key={lang.id}
                           onClick={() => handleLanguageChange(lang.id)}
-                          className={`p-3 rounded-2xl border flex items-center justify-between transition-all active:scale-95 text-start ${
+                          className={`p-3 rounded-2xl border flex items-center justify-between transition-all active:scale-95 text-start cursor-pointer ${
                             isSelected
-                              ? 'border-[#E5A93C]/80 bg-[#4A1224]/40 shadow-md shadow-[#4A1224]/30 text-[#E5A93C] font-bold'
-                              : 'border-[#4A1224]/40 bg-[#1A0C1E] hover:border-[#E5A93C]/40 text-slate-300 hover:text-white'
+                              ? 'border-teal-600 bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 font-bold shadow-sm'
+                              : isDarkMode
+                                ? 'border-stone-800 bg-[#121B1E] text-stone-300 hover:border-teal-700/50 hover:text-white'
+                                : 'border-stone-200 bg-white text-stone-700 hover:border-teal-600/40 hover:text-stone-950'
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
@@ -1140,7 +1142,7 @@ export default function App() {
                               <p className="text-[10px] text-slate-400 mt-0.5 truncate">{lang.label}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="w-4 h-4 text-[#E5A93C] shrink-0 ml-1" />}
+                          {isSelected && <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 ml-1" />}
                         </button>
                       );
                     })}
@@ -1148,8 +1150,8 @@ export default function App() {
                 </div>
 
                 {/* Custom API Key Card */}
-                <div className="p-5 sm:p-6 bg-[#150917]/90 rounded-3xl border border-[#4A1224]/50 space-y-4">
-                  <div className="flex items-center gap-2 text-[#E5A93C]">
+                <div className={`p-5 sm:p-6 ${isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4`}>
+                  <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
                     <Key className="w-5 h-5" />
                     <h3 className="text-sm font-black uppercase tracking-widest">
                       {localize(profile.language, 'AI Provider & Custom Key', 'مفتاح الذكاء الاصطناعي الخاص')}
@@ -1168,7 +1170,7 @@ export default function App() {
                       defaultValue={secureLoadKeySync('gemini')}
                       id="cognify-custom-gemini-key-input"
                       placeholder="AIzaSy... (Gemini API Key)"
-                      className="flex-1 px-4 py-3 bg-[#150917] border border-[#4A1224]/60 rounded-2xl text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#E5A93C]/70 focus:ring-2 focus:ring-[#E5A93C]/20"
+                      className={`flex-1 px-4 py-3 ${isDarkMode ? 'bg-[#121B1E] border-stone-800 text-white placeholder-stone-500' : 'bg-white border-stone-200 text-stone-900 placeholder-stone-400'} border rounded-2xl text-xs font-mono focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20`}
                     />
                     <button
                       onClick={async () => {
@@ -1197,7 +1199,7 @@ export default function App() {
                           }
                         }
                       }}
-                      className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 active:scale-95 transition-all shrink-0"
+                      className="px-6 py-3 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-2xl text-xs uppercase tracking-wider shadow-sm active:scale-95 transition-all shrink-0 cursor-pointer"
                     >
                       {localize(profile.language, 'Save Key', 'حفظ المفتاح')}
                     </button>
@@ -1205,12 +1207,12 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="p-6 bg-[#0A0C14]/80 rounded-3xl border border-slate-800/80 space-y-3">
-                     <div className="flex items-center gap-2 text-cyan-400">
+                   <div className={`p-6 ${isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-3`}>
+                     <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
                        <Settings className="w-5 h-5" />
                        <h3 className="text-sm font-black uppercase tracking-widest">{localize(profile.language, 'Core Parameters', 'المعايير الأساسية')}</h3>
                      </div>
-                     <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                     <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
                        {localize(
                          profile.language,
                          'Fundamental configuration (IQ, Level, Role). These are recalibrated automatically based on your performance and institutional metadata.',
@@ -1219,12 +1221,12 @@ export default function App() {
                      </p>
                    </div>
 
-                   <div className="p-6 bg-[#0A0C14]/80 rounded-3xl border border-slate-800/80 space-y-4">
-                     <div className="flex items-center gap-2 text-cyan-400">
+                   <div className={`p-6 ${isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4`}>
+                     <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
                        {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                        <h3 className="text-sm font-black uppercase tracking-widest">{localize(profile.language, 'Interface Theme', 'مظهر الواجهة')}</h3>
                      </div>
-                     <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                     <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
                        {localize(
                          profile.language,
                          'Switch between light and dark visual themes to reduce eye strain in low-light environments.',
@@ -1233,10 +1235,10 @@ export default function App() {
                      </p>
                      <button
                        onClick={toggleTheme}
-                       className={`w-full py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
+                       className={`w-full py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                          isDarkMode 
-                           ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25' 
-                           : 'bg-slate-800 border border-slate-700 text-slate-300 hover:text-white'
+                           ? 'bg-teal-950/60 border border-teal-800/60 text-teal-300 hover:bg-teal-900/60' 
+                           : 'bg-white border border-stone-200 text-stone-800 hover:bg-stone-100'
                        }`}
                      >
                        {isDarkMode 
@@ -1246,12 +1248,12 @@ export default function App() {
                    </div>
 
                    {/* Privacy & Data Sovereignty Card */}
-                   <div className="p-6 bg-[#0A0C14]/80 rounded-3xl border border-slate-800/80 space-y-4 md:col-span-2">
-                     <div className="flex items-center gap-2 text-rose-400">
+                   <div className={`p-6 ${isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4 md:col-span-2`}>
+                     <div className="flex items-center gap-2 text-rose-500">
                        <Shield className="w-5 h-5" />
                        <h3 className="text-sm font-black uppercase tracking-widest">{localize(profile.language, 'Privacy & Data Sovereignty (GDPR / FERPA)', 'الخصوصية وسيادة البيانات')}</h3>
                      </div>
-                     <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                     <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
                        {localize(
                          profile.language,
                          'Export your complete machine-readable learning archive, inspect provenance of stored facts, reset adaptive AI preferences, or permanently delete your account and all cloud data.',
@@ -1260,7 +1262,7 @@ export default function App() {
                      </p>
                      <button
                        onClick={() => navigateTo('privacy')}
-                       className="py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25 flex items-center justify-center gap-2 shadow-lg shadow-rose-500/10 active:scale-95"
+                       className="py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer"
                      >
                        <Shield className="w-4 h-4" />
                        <span>{localize(profile.language, 'Manage Privacy, Export & Erasure', 'إدارة الخصوصية والتصدير والحذف')}</span>
@@ -1270,7 +1272,7 @@ export default function App() {
 
                 <button 
                   onClick={() => navigateTo(homeViewFor(profile))}
-                  className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-cyan-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-teal-700 hover:bg-teal-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isAccessibilityUser(profile)
                     ? (isRTL(profile.language) ? 'العودة لمركز إمكانية الوصول' : localize(profile.language, 'Return to Accessibility Hub', 'العودة لمركز إمكانية الوصول'))
@@ -1323,7 +1325,7 @@ export default function App() {
       )}
 
       <div
-        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#080409] text-slate-100' : 'bg-[#FAF8F5] text-slate-900'} font-sans overflow-hidden selection:bg-[#E5A93C]/30 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
+        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} font-sans overflow-hidden selection:bg-teal-500/30 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
           profile?.accessibilityMode === 'Visual' ? 'text-lg contrast-125' : ''
         }`}
         dir={direction}
@@ -1414,8 +1416,8 @@ export default function App() {
         <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
           <Suspense
             fallback={
-              <div className="flex-1 flex items-center justify-center bg-[#080409] text-[#E5A93C]">
-                <Loader2 className="w-8 h-8 text-[#E5A93C] animate-spin" />
+              <div className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
+                <Loader2 className="w-8 h-8 text-teal-400 animate-spin" />
               </div>
             }
           >

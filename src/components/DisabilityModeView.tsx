@@ -25,7 +25,6 @@ const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOr
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation, isArabicLocale } from '../lib/translations';
 
-import BurgundyConstellationHero from './BurgundyConstellationHero';
 import StudentCockpitHub from './StudentCockpitHub';
 
 export type DisabilityTab =
@@ -248,8 +247,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       titleAr: 'جميع الأدوات',
       emoji: '🌟',
       icon: Sparkles,
-      color: 'text-[#E5A93C]',
-      activeBg: 'bg-[#4A1224]/50 text-[#E5A93C] border-[#E5A93C]/50',
+      color: 'text-teal-600 dark:text-teal-400',
+      activeBg: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-500/50',
       descAr: 'عرض شامل لجميع أدوات ومنظومات إمكانية الوصول والتكيف',
       descEn: 'Full view of all assistive and adaptation suites',
     },
@@ -295,7 +294,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       quickFeaturesEn: ['Currency Reader', 'Face & Person Memory', 'Color Matching', 'Haptic White Cane', 'Spatial Memory'],
       Icon: Eye,
       accentColor: 'text-emerald-400',
-      borderGlow: 'hover:border-emerald-500/60 border-[#4A1224]/60',
+      borderGlow: 'hover:border-emerald-500/60 border-stone-200 dark:border-stone-800',
       bgGlow: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
       buttonCls: 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 shadow-teal-500/20',
       matchingMode: 'Visual',
@@ -315,10 +314,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       quickFeaturesAr: ['🎙️ تفريغ كلام المتحدث فورياً', '🔊 تحدث بالصوت للغرفة', '⚡ بطاقات تواصل ومواقف ناطقة', '🚨 كاشف أصوات مرتفعة ووميض حقيقي'],
       quickFeaturesEn: ['🎙️ Live Speech Captions', '🔊 Text-to-Speech Voice', '⚡ Express AAC Cards', '🚨 Real Loud Sound Strobe'],
       Icon: Ear,
-      accentColor: 'text-[#E5A93C]',
-      borderGlow: 'hover:border-indigo-500/80 border-[#E5A93C]/30 ring-1 ring-indigo-500/20',
-      bgGlow: 'bg-indigo-500/15 text-[#E5A93C] border-[#E5A93C]/30',
-      buttonCls: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-600 text-white shadow-indigo-500/25',
+      accentColor: 'text-teal-600 dark:text-teal-400',
+      borderGlow: 'hover:border-teal-500/80 border-stone-200 dark:border-stone-800 ring-1 ring-teal-500/20',
+      bgGlow: 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-sm',
       matchingMode: 'Sign-Only',
     },
     {
@@ -335,10 +334,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       quickFeaturesAr: ['تكيف مع سرعة الاستيعاب', 'شرح خطوة بخطوة', 'دعم قارئات الشاشة بالكامل'],
       quickFeaturesEn: ['Adaptive Pace', 'Step-by-Step Guidance', 'Full Screen Reader Support'],
       Icon: MessageSquare,
-      accentColor: 'text-[#E5A93C]',
-      borderGlow: 'hover:border-[#E5A93C]/60 border-[#4A1224]/60',
-      bgGlow: 'bg-[#4A1224]/30 text-[#E5A93C] border-[#E5A93C]/30',
-      buttonCls: 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-white shadow-[#E5A93C]/20',
+      accentColor: 'text-teal-600 dark:text-teal-400',
+      borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
+      bgGlow: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-sm',
       matchingMode: 'None',
     },
     {
@@ -355,10 +354,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       quickFeaturesAr: ['11 لغة ولهجة محكية', 'تفعيل الأنماط المخصصة', 'التحكم في التباين'],
       quickFeaturesEn: ['11 Languages & Dialects', 'Custom Profile Activation', 'Contrast Options'],
       Icon: Settings,
-      accentColor: 'text-slate-300',
-      borderGlow: 'hover:border-slate-600 border-[#4A1224]/60',
-      bgGlow: 'bg-[#150917]/80 text-slate-300 border-[#4A1224]/50',
-      buttonCls: 'bg-slate-800 hover:bg-slate-700 text-white border border-[#4A1224]/50',
+      accentColor: 'text-stone-600 dark:text-stone-300',
+      borderGlow: 'hover:border-stone-400 dark:hover:border-stone-600 border-stone-200 dark:border-stone-800',
+      bgGlow: 'bg-stone-100 dark:bg-[#162327] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700',
+      buttonCls: 'bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-900 dark:text-white border border-stone-300 dark:border-stone-700',
       matchingMode: '',
     },
     ...(isOrgStaff ? [{
@@ -376,7 +375,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       quickFeaturesEn: ['Cohort Analytics', 'Adoption Reports'],
       Icon: Building2,
       accentColor: 'text-teal-400',
-      borderGlow: 'hover:border-teal-500/60 border-[#4A1224]/60',
+      borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
       bgGlow: 'bg-teal-500/10 text-teal-400 border-teal-500/30',
       buttonCls: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-teal-500/20',
       matchingMode: '',
@@ -410,7 +409,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, [isDeafActive, currentModule, MODULES]);
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex-1 flex flex-col h-full overflow-hidden relative select-none transition-colors duration-300 ${isDarkMode ? 'bg-[#080409] text-slate-100' : 'bg-[#FAF8F5] text-slate-900'}`}>
+    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex-1 flex flex-col h-full overflow-hidden relative select-none transition-colors duration-300 ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'}`}>
       
       {/* ── TOP NAVIGATION BAR (Always visible for seamless cross-disability jumping) ── */}
       <header className={`relative z-[9995] px-3 py-2 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b transition-colors duration-300 ${
@@ -713,10 +712,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0 flex flex-col p-3 sm:p-4 md:p-6 lg:p-8 pb-0"
             >
-              <div className="flex-1 min-h-0 bg-[#0E0610] rounded-t-3xl shadow-2xl border border-[#4A1224]/60 overflow-hidden relative flex flex-col">
+              <div className="flex-1 min-h-0 bg-white dark:bg-[#0E1416] rounded-t-3xl shadow-xl border border-stone-200 dark:border-stone-800 overflow-hidden relative flex flex-col">
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-slate-400">
-                    <div className="w-8 h-8 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
+                  <div className="flex-1 flex items-center justify-center p-8 text-stone-400">
+                    <div className="w-8 h-8 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
                   <ChatInterface
@@ -746,15 +745,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             >
               <div className="max-w-4xl mx-auto space-y-8 pb-20">
                 {/* Language Selection Card */}
-                <div className="bg-[#150917]/90 border border-[#4A1224]/60 p-6 sm:p-8 rounded-[28px] shadow-2xl backdrop-blur-xl">
+                <div className="bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 p-6 sm:p-8 rounded-[28px] shadow-sm backdrop-blur-xl">
                   <div className="mb-6 text-start">
-                    <div className="flex items-center gap-2 text-[#E5A93C] mb-1">
+                    <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 mb-1">
                       <Globe className="w-5 h-5" />
-                      <h2 className="text-xl font-black text-white tracking-tight">
+                      <h2 className="text-xl font-black text-stone-900 dark:text-white tracking-tight">
                         {localize(profile.language, 'Language Selection', 'اختيار اللغة')}
                       </h2>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-400">
+                    <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400">
                       {localize(
                         profile.language,
                         'Choose your preferred system & AI communication language',
@@ -770,20 +769,20 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         <button
                           key={lang.id}
                           onClick={() => updateLanguage(lang.id)}
-                          className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between transition-all active:scale-95 ${
+                          className={`p-3 sm:p-3.5 rounded-2xl border flex items-center justify-between transition-all active:scale-95 cursor-pointer ${
                             isSelected
-                              ? 'border-[#E5A93C] bg-[#4A1224]/40 shadow-sm text-[#E5A93C] font-bold'
-                              : 'border-[#4A1224]/60 bg-[#150917] hover:border-[#4A1224]/50 text-slate-200'
+                              ? 'border-teal-600 bg-teal-50 dark:bg-teal-950/60 shadow-sm text-teal-800 dark:text-teal-300 font-bold'
+                              : 'border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#162327] hover:border-teal-500 text-stone-800 dark:text-stone-200'
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="text-lg shrink-0">{lang.flag}</span>
                             <div className="text-start truncate">
                               <p className="text-xs font-bold leading-none">{lang.nativeName}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5 truncate">{lang.label}</p>
+                              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 truncate">{lang.label}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="w-4 h-4 text-[#E5A93C] shrink-0" />}
+                          {isSelected && <Check className="w-4 h-4 text-teal-600 shrink-0" />}
                         </button>
                       );
                     })}
@@ -791,15 +790,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 </div>
 
                 {/* Accessibility Mode Selector */}
-                <div className="bg-[#150917]/90 border border-[#4A1224]/60 p-6 sm:p-8 rounded-[28px] shadow-2xl backdrop-blur-xl">
+                <div className="bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 p-6 sm:p-8 rounded-[28px] shadow-sm backdrop-blur-xl">
                   <div className="mb-6 text-start">
-                    <div className="flex items-center gap-2 text-[#E5A93C] mb-1">
+                    <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 mb-1">
                       <Accessibility className="w-5 h-5" />
-                      <h2 className="text-xl font-black text-white tracking-tight">
+                      <h2 className="text-xl font-black text-stone-900 dark:text-white tracking-tight">
                         {localize(profile.language, 'Accessibility Accommodations', 'تسهيلات إمكانية الوصول')}
                       </h2>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-400">
+                    <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400">
                       {localize(
                         profile.language,
                         'Select the accessibility profile that best fits your interaction needs.',
@@ -821,21 +820,21 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         <button
                           key={mode}
                           onClick={() => updateMode(mode)}
-                          className={`p-4 rounded-2xl border text-start flex items-start gap-3 transition-all active:scale-95 ${
+                          className={`p-4 rounded-2xl border text-start flex items-start gap-3 transition-all active:scale-95 cursor-pointer ${
                             isSelected
-                              ? 'border-[#E5A93C] bg-[#4A1224]/40 shadow-sm ring-1 ring-[#E5A93C]'
-                              : 'border-[#4A1224]/60 bg-[#150917] hover:border-[#4A1224]/50 text-slate-300'
+                              ? 'border-teal-600 bg-teal-50 dark:bg-teal-950/60 shadow-sm ring-1 ring-teal-600'
+                              : 'border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-[#162327] hover:border-stone-300 dark:hover:border-stone-700 text-stone-800 dark:text-stone-300'
                           }`}
                         >
-                          <div className={`p-2 rounded-xl shrink-0 ${isSelected ? 'bg-[#4A1224]/50 text-[#E5A93C]' : 'bg-slate-800 text-slate-400'}`}>
+                          <div className={`p-2 rounded-xl shrink-0 ${isSelected ? 'bg-teal-700 text-white' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'}`}>
                             <ModeIcon className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-sm text-white">{localize(profile.language, labelEn, labelAr)}</span>
-                              {isSelected && <Check className="w-4 h-4 text-[#E5A93C] shrink-0" />}
+                              <span className="font-bold text-sm text-stone-900 dark:text-white">{localize(profile.language, labelEn, labelAr)}</span>
+                              {isSelected && <Check className="w-4 h-4 text-teal-600 shrink-0" />}
                             </div>
-                            <p className="text-xs text-slate-400 leading-relaxed">
+                            <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
                               {mode === 'None' && localize(profile.language, 'Standard cognitive experience without overlays.', 'واجهة قياسية طبيعية.')}
                               {mode === 'Speech' && localize(profile.language, 'Voice synthesis, continuous STT, and spoken narration.', 'نطق صوتي، وتفريغ صوتي مستمر.')}
                               {mode === 'Visual' && localize(profile.language, 'Spoken scene description, currency reader, and haptic white cane.', 'وصف بصري فوري، قارئ عملات، ونبضات لمسية.')}
