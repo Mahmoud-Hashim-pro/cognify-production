@@ -25,6 +25,7 @@ import { isAccessibilityUser } from '../lib/access';
 import { getTranslation, isArabicLocale } from '../lib/translations';
 
 import BurgundyConstellationHero from './BurgundyConstellationHero';
+import StudentCockpitHub from './StudentCockpitHub';
 
 export type DisabilityTab =
   | 'hub'
@@ -579,77 +580,21 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
              ═════════════════════════════════════════════════════════════════════ */}
           {activeTab === 'hub' && (
             <motion.div
-              key="hub-burgundy-showcase"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.25 }}
-              className="flex-1 flex flex-col items-center overflow-y-auto p-4 sm:p-6 select-none custom-scrollbar"
+              key="hub-cockpit-view"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="flex-1 flex flex-col items-center overflow-y-auto p-4 sm:p-6 md:p-8 select-none custom-scrollbar"
             >
-              <div className="max-w-4xl w-full space-y-6">
-                {/* 1. Royal Burgundy & Gold Constellation Hero Showcase */}
-                <BurgundyConstellationHero
-                  profile={profile}
-                  onLaunchPrimary={() => {
-                    const target = detectDirectDisabilityTab(profile);
-                    handleSelectTab(target);
-                  }}
-                  onExploreModes={() => {
-                    const el = document.getElementById('suites-grid');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  onSelectSuite={(suiteId) => handleSelectTab(suiteId)}
-                  isDarkMode={isDarkMode}
-                  toggleTheme={toggleTheme}
-                />
-
-                {/* 2. Direct Assistive Suites Grid */}
-                <div id="suites-grid" className="pt-2">
-                  <div className="flex items-center justify-between mb-3 px-1">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-rose-300 flex items-center gap-2">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{localize(profile.language, 'Dedicated Assistive Suites', 'منظومات التيسير المتخصصة')}</span>
-                    </h3>
-                    <span className="text-[10px] text-slate-400 font-bold">
-                      {localize(profile.language, 'Select to launch immediately', 'اختر منظومة للتشغيل الفوري')}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-start">
-                    {[
-                      { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
-                      { id: 'deaf' as const, labelAr: 'المركز السمعي الموحد', labelEn: 'Unified Hearing Center', Icon: Ear, descAr: 'تفريغ فوري، نطق صوتي، بطاقات سريعة، ومستشعر مخاطر', descEn: 'Live captions, voice speaker, express AAC & strobe alert', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
-                      { id: 'chat' as const, labelAr: 'المعلم الذكي المهيأ', labelEn: 'Accessible AI Tutor', Icon: Brain, descAr: 'شرح متكيف، تدرج معرفي، وأدوات قارئات الشاشة', descEn: 'Adaptive tutor tailored to your pace with screen reader & contrast support', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/40', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
-                    ].map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => handleSelectTab(s.id)}
-                        className={`p-4 min-h-[140px] rounded-2xl border transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between cursor-pointer ${
-                          isDarkMode
-                            ? `bg-[#150917] border-[#4A1224]/60 ${s.glow} hover:bg-[#150917]/80`
-                            : 'bg-white border-amber-200/80 hover:border-amber-400 hover:bg-amber-50/50 shadow-sm'
-                        }`}
-                      >
-                        <div>
-                          <div className={`w-9 h-9 rounded-xl ${s.iconBg} border flex items-center justify-center ${s.iconColor} mb-2.5 group-hover:scale-105 transition-transform`}>
-                            <s.Icon className="w-5 h-5" />
-                          </div>
-                          <span className={`text-xs font-black block transition-colors ${isDarkMode ? 'text-white group-hover:text-amber-300' : 'text-slate-900 group-hover:text-rose-700'}`}>
-                            {localize(profile.language, s.labelEn, s.labelAr)}
-                          </span>
-                          <span className={`text-[11px] block mt-1 leading-relaxed font-normal ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                            {localize(profile.language, s.descEn, s.descAr)}
-                          </span>
-                        </div>
-                        <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-amber-500 opacity-90 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                          <span>{localize(profile.language, 'Launch Suite', 'دخول المنظومة')}</span>
-                          <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <StudentCockpitHub
+                profile={profile}
+                onSelectSuite={(suiteId) => handleSelectTab(suiteId)}
+                onOpenPassport={() => setShowPassportModal(true)}
+                isDarkMode={isDarkMode}
+                toggleTheme={toggleTheme}
+                onSTTStateChange={onSTTStateChange}
+              />
             </motion.div>
           )}
 

@@ -4,7 +4,7 @@ import { Message, UserProfile, Task, PedagogyStyle } from "../types";
 import { generateAdaptiveResponseStream, generateBenchmarkComparison, generateProactiveInsights, generateChatTitle } from "../services/gemini";
 import { geminiService } from "../services/geminiService";
 import { PEDAGOGY_STYLES } from "../lib/adaptiveLearning";
-import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, RotateCcw, Zap, Bookmark, Search, Eye } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
 
 import ChatBookmarksDrawer, { BookmarkedInsight } from "./chat/ChatBookmarksDrawer";
 import ChatErgonomicsBar, { FontScale } from "./chat/ChatErgonomicsBar";
@@ -2378,23 +2378,32 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 {/* Top Bar: Adaptive Pedagogy Style Bar + France Travel Voice & Mic Language */}
                 <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar scrollbar-none py-0.5 px-1 bg-[#0E0610]/60 border border-[#4A1224]/50 rounded-2xl">
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider shrink-0">
-                      {localize(profile.language, 'Pedagogy:', 'أسلوب الشرح:')}
+                    <span className="text-[10px] text-amber-500 dark:text-amber-400 font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      <span>{localize(profile.language, 'Pedagogy:', 'أسلوب الشرح:')}</span>
                     </span>
                     {PEDAGOGY_STYLES.map((st) => {
                       const isSelected = activePedagogyStyle === st.id;
+                      const IconComponent =
+                        st.id === 'simplified' ? Sparkles :
+                        st.id === 'scaffolded' ? Layers :
+                        st.id === 'practical' ? Code :
+                        st.id === 'analogies' ? Lightbulb :
+                        st.id === 'socratic' ? HelpCircle : Cpu;
+
                       return (
                         <button
                           key={st.id}
                           type="button"
                           onClick={() => handleSelectPedagogy(st.id)}
-                          className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1.5 border ${
+                          className={`px-2.5 py-1 min-h-[32px] rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer ${
                             isSelected
-                              ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-white border-[#E5A93C]/40 shadow-md shadow-[#E5A93C]/20 ring-1 ring-[#E5A93C]/30'
-                              : 'bg-[#0E0610] text-slate-400 border-[#4A1224]/70 hover:bg-[#181d33] hover:text-white'
+                              ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-sm ring-1 ring-amber-400/50'
+                              : 'bg-[#150917] text-slate-300 border-[#4A1224]/70 hover:bg-[#25102a] hover:text-white'
                           }`}
                           title={localize(profile.language, st.descriptionEn, st.descriptionAr)}
                         >
+                          <IconComponent className="w-3 h-3 shrink-0" />
                           <span>{localize(profile.language, st.labelEn, st.labelAr)}</span>
                         </button>
                       );

@@ -213,6 +213,18 @@ html.high-contrast button:focus-visible {
   box-shadow: 0 0 0 6px rgba(255, 255, 0, 0.6) !important;
 }
 
+/* Universal Accessible Focus Rings (WCAG 2.2 AA) */
+:focus-visible {
+  outline: 2px solid #E5A93C !important;
+  outline-offset: 2px !important;
+}
+
+/* Accessible Interactive Touch Target (WCAG 2.2 AA SC 2.5.8) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
