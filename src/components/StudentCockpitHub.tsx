@@ -6,9 +6,6 @@ import {
   Eye,
   Ear,
   CheckCircle2,
-  Circle,
-  Clock,
-  CalendarDays,
   RotateCcw,
   Volume2,
   VolumeX,
@@ -28,11 +25,13 @@ import {
   Check,
   X,
   ChevronRight,
-  AlertCircle
+  Layers,
+  HelpCircle,
+  Clock
 } from 'lucide-react';
-import { UserProfile, PlannerTask, PlannerTaskType } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
-import { subscribeToTasks, saveTask, daysUntilDue, isOverdue } from '../lib/planner';
+import { UserProfile, PlannerTask, PedagogyStyle } from '../types';
+import { isArabicLocale } from '../lib/translations';
+import { subscribeToTasks, saveTask } from '../lib/planner';
 import {
   categorizeRetentionState,
   generateMicroReview,
@@ -50,6 +49,7 @@ interface StudentCockpitHubProps {
   isDarkMode?: boolean;
   toggleTheme?: () => void;
   onSTTStateChange?: (active: boolean) => void;
+  setProfile?: (profile: UserProfile) => void;
 }
 
 export default function StudentCockpitHub({
@@ -59,6 +59,7 @@ export default function StudentCockpitHub({
   isDarkMode = false,
   toggleTheme,
   onSTTStateChange,
+  setProfile,
 }: StudentCockpitHubProps) {
   const isAr = isArabicLocale(profile.language);
   const isFr = profile.language === 'French';
@@ -70,9 +71,10 @@ export default function StudentCockpitHub({
   };
 
   // ── Quick Accessibility State ───────────────────────────────────────────────
-  const [fontScale, setFontScale] = useState<'normal' | 'medium' | 'large' | 'extra-large'>(() => {
+  const [fontScale, setFontScale] = useState<'normal' | 'large'>(() => {
     try {
-      return (localStorage.getItem('cognify_font_scale') as any) || 'normal';
+      const saved = localStorage.getItem('cognify_font_scale');
+      return saved === 'large' || saved === 'extra-large' ? 'large' : 'normal';
     } catch {
       return 'normal';
     }
@@ -97,16 +99,31 @@ export default function StudentCockpitHub({
   const [isSpeakingOverview, setIsSpeakingOverview] = useState(false);
   const [isCaptionsActive, setIsCaptionsActive] = useState(false);
 
-  const applyFontScale = (scale: 'normal' | 'medium' | 'large' | 'extra-large') => {
+  // ── Preferred Pedagogy State (Wired to Engine) ──────────────────────────────
+  const [activePedagogy, setActivePedagogy] = useState<PedagogyStyle>(() => {
+    try {
+      const saved = localStorage.getItem('cognify_preferred_pedagogy') as PedagogyStyle;
+      if (saved) return saved;
+    } catch {}
+    return profile.preferredPedagogyStyle || 'scaffolded';
+  });
+
+  useEffect(() => {
+    if (profile.preferredPedagogyStyle && profile.preferredPedagogyStyle !== activePedagogy) {
+      setActivePedagogy(profile.preferredPedagogyStyle);
+    }
+  }, [profile.preferredPedagogyStyle]);
+
+  const applyFontScale = (scale: 'normal' | 'large') => {
     setFontScale(scale);
     try {
       localStorage.setItem('cognify_font_scale', scale);
       const root = document.documentElement;
-      root.classList.remove('font-scale-normal', 'font-scale-medium', 'font-scale-large', 'font-scale-extra-large');
+      root.classList.remove('font-scale-normal', 'font-scale-large', 'font-scale-medium', 'font-scale-extra-large');
       root.classList.add(`font-scale-${scale}`);
       toast.success(
-        t(`Text size adjusted`, `تم تعديل حجم الخط`, `Taille du texte ajustée`),
-        t(`Accessibility`, `إمكانية الوصول`, `Accessibilité`)
+        t('Text size adjusted', 'تم تعديل حجم الخط', 'Taille du texte ajustée'),
+        t('Accessibility', 'إمكانية الوصول', 'Accessibilité')
       );
     } catch {}
   };
@@ -148,12 +165,15 @@ export default function StudentCockpitHub({
       return;
     }
 
-    const greeting = profile.name ? `${t('Hello', 'أهلاً بك يا', 'Bonjour')} ${profile.name}.` : t('Welcome back.', 'أهلاً بك في كوجنيفاي.', 'Bienvenue sur Cognify.');
+    const greeting = profile.name
+      ? `${t('Hello', 'أهلاً بك يا', 'Bonjour')} ${profile.name}.`
+      : t('Welcome back.', 'أهلاً بك في كوجنيفاي.', 'Bienvenue sur Cognify.');
+    
     const summary = isAr
-      ? `${greeting} خطوتك التعليمية التالية المقترحة هي متابعة التدريب مع المعلم الذكي المهيأ. لديك مراجعات ومهمات يمكنك استعراضها بسهولة.`
+      ? `${greeting} مساحتك التعليمية الهادئة جاهزة. طريقتك المفضلة الحالية في الشرح هي ${getPedagogyLabel(activePedagogy)}. يمكنك بدء الدرس في أي وقت، ومراجعة مفاهيمك المستحقة براحة تامة وبدون أي ضغط.`
       : isFr
-      ? `${greeting} Votre prochaine étape recommandée est de poursuivre avec le Tuteur Adaptatif. Vous avez des révisions prêtes.`
-      : `${greeting} Your suggested next step is to continue with the Accessible AI Tutor. You have active reviews and tasks ready.`;
+      ? `${greeting} Votre espace d'apprentissage calme est prêt. Votre style d'explication actif est ${getPedagogyLabel(activePedagogy)}. Vous pouvez commencer votre leçon à tout moment.`
+      : `${greeting} Your serene learning space is ready. Your active explanation style is ${getPedagogyLabel(activePedagogy)}. You can launch your lesson or review concepts at your own pace.`;
 
     setIsSpeakingOverview(true);
     speak(summary, isAr ? 'Arabic' : isFr ? 'French' : 'English', {
@@ -173,6 +193,47 @@ export default function StudentCockpitHub({
       t('Hearing Assistive', 'التيسير السمعي', 'Assistance Auditive')
     );
   };
+
+  const handleSelectPedagogy = (styleKey: PedagogyStyle | 'voice') => {
+    if (styleKey === 'voice') {
+      handleToggleReadAloud();
+      return;
+    }
+    setActivePedagogy(styleKey);
+    try {
+      localStorage.setItem('cognify_preferred_pedagogy', styleKey);
+      if (setProfile) {
+        setProfile({ ...profile, preferredPedagogyStyle: styleKey });
+      }
+      toast.success(
+        isAr
+          ? `تم ضبط أسلوب الشرح على: ${getPedagogyLabel(styleKey)}`
+          : `Pedagogy style set to: ${getPedagogyLabel(styleKey)}`,
+        t('Learning Adaptation', 'التكيف التعليمي', 'Adaptation pédagogique')
+      );
+    } catch {}
+  };
+
+  function getPedagogyLabel(key: PedagogyStyle | 'voice'): string {
+    switch (key) {
+      case 'simplified':
+        return t('Simplified Plain Text', 'نص مبسط وواضح', 'Texte clair et simplifié');
+      case 'voice':
+        return t('Voice & Audio Narration', 'صوت واستماع مسموع', 'Écoute audio et voix');
+      case 'scaffolded':
+        return t('Scaffolded Step-by-Step', 'شرح متدرج خطوة بخطوة', 'Explication progressive pas à pas');
+      case 'analogies':
+        return t('Visual Analogies & Models', 'تشبيهات ونماذج بصرية', 'Analogies et modèles visuels');
+      case 'practical':
+        return t('Practical Worked Examples', 'أمثلة وتطبيقات عملية', 'Exemples pratiques appliqués');
+      case 'socratic':
+        return t('Socratic Guiding Questions', 'حوار استكشافي سقراطي', 'Dialogue socratique guidé');
+      case 'technical':
+        return t('Technical In-Depth Analysis', 'تحليل تقني وأكاديمي متعمق', 'Analyse technique approfondie');
+      default:
+        return t('Step-by-Step Learning', 'شرح متدرج', 'Apprentissage progressif');
+    }
+  }
 
   // ── Tasks & Planner ────────────────────────────────────────────────────────
   const [tasks, setTasks] = useState<PlannerTask[]>([]);
@@ -264,49 +325,107 @@ export default function StudentCockpitHub({
   // ── Student Context & Metrics ──────────────────────────────────────────────
   const studentName = profile.name || (isAr ? 'عزيزي الطالب' : 'Learner');
   const streakDays = (profile as any).studentState?.streakDays || 3;
-  const points = profile.points || 280;
-  const questionScore = profile.questionScore || 95;
+  const currentSubject = profile.field || (isAr ? 'المهارات الأكاديمية وهياكل البيانات' : 'Core Academic Foundations');
+  const activeSuggestedReview = retentionState.dueToday[0] || null;
+  const activeTask = tasks.find((t) => !t.completed) || tasks[0] || null;
+
+  // ── Pedagogical Choices Definition ─────────────────────────────────────────
+  const PEDAGOGY_CHOICES = [
+    {
+      id: 'simplified' as const,
+      labelAr: 'نص مبسط وواضح',
+      labelEn: 'Plain Simplified Text',
+      labelFr: 'Texte clair & simple',
+      descAr: 'شرح بأسلوب مباشر ولغة يسيرة خالية من التعقيد',
+      descEn: 'Clear, direct language without confusing jargon',
+      descFr: 'Langage direct sans jargon complexe',
+      icon: BookOpen,
+    },
+    {
+      id: 'voice' as const,
+      labelAr: 'صوت واستماع',
+      labelEn: 'Voice & Audio',
+      labelFr: 'Voix & Audio',
+      descAr: 'قراءة مسموعة فورية للشروحات مع وتيرة صوتية مريحة',
+      descEn: 'Instant spoken narration with comfortable auditory pace',
+      descFr: 'Narration vocale instantanée au rythme calme',
+      icon: Volume2,
+    },
+    {
+      id: 'scaffolded' as const,
+      labelAr: 'شرح متدرج خطوة بخطوة',
+      labelEn: 'Scaffolded Step-by-Step',
+      labelFr: 'Progression pas à pas',
+      descAr: 'تفكيك الفكرة إلى محطات صغيرة ونقاط تحقق للتثبيت',
+      descEn: 'Deconstructs ideas into sequential checkpoints',
+      descFr: 'Découpage du concept en petites étapes claires',
+      icon: Layers,
+    },
+    {
+      id: 'analogies' as const,
+      labelAr: 'تشبيهات ونماذج بصرية',
+      labelEn: 'Visual Analogies',
+      labelFr: 'Analogies visuelles',
+      descAr: 'تقريب المفاهيم بنماذج ذهنية وتشبيهات من واقع الحياة',
+      descEn: 'Mental models and relatable daily-life analogies',
+      descFr: 'Modèles mentaux et exemples de la vie courante',
+      icon: Sparkles,
+    },
+    {
+      id: 'practical' as const,
+      labelAr: 'أمثلة وتطبيقات عملية',
+      labelEn: 'Practical Worked Examples',
+      labelFr: 'Cas pratiques concrets',
+      descAr: 'حالات تطبيقية وأمثلة واقعية توضح كيف يُطبّق المفهوم',
+      descEn: 'Real-world worked examples and concrete use cases',
+      descFr: 'Exemples résolus montrant l’application concrète',
+      icon: Zap,
+    },
+  ];
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 sm:space-y-8 select-none">
       
       {/* ═══════════════════════════════════════════════════════════════════════
-          1. UNIVERSAL QUICK ACCESSIBILITY & COMFORT TOOLBAR
+          1. UNIVERSAL ACCESSIBILITY & COMFORT TOOLBAR (Visible & Accessible)
          ═══════════════════════════════════════════════════════════════════════ */}
       <section
-        aria-label={t('Quick Accessibility & Comfort Controls', 'شريط أدوات الوصول والراحة الفورية', 'Contrôles d\'accessibilité rapide')}
+        aria-label={t('Universal Accessibility & Comfort Controls', 'شريط أدوات الوصول والراحة الفورية', 'Contrôles d\'accessibilité rapide')}
         className={`p-2.5 sm:p-3 rounded-2xl border transition-all flex flex-wrap items-center justify-between gap-2.5 shadow-sm ${
           isDarkMode
-            ? 'bg-[#150917]/90 border-[#4A1224]/70 text-slate-200'
-            : 'bg-white border-slate-200/90 text-slate-800'
+            ? 'bg-[#111A1E]/90 border-stone-800 text-stone-200'
+            : 'bg-white border-stone-200/90 text-stone-800'
         }`}
       >
-        {/* Left: Text Scaling & Visual Contrast */}
+        {/* Left: Text Scaling, Contrast & Motion */}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-1 border-e pe-2 border-slate-200 dark:border-slate-800">
-            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-              <Type className="w-3.5 h-3.5 text-amber-500" />
+          {/* Font Scale Toggle */}
+          <div className="flex items-center gap-1 border-e pe-2 border-stone-200 dark:border-stone-800">
+            <span className="text-[11px] font-bold text-stone-600 dark:text-stone-300 flex items-center gap-1">
+              <Type className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               <span className="hidden sm:inline">{t('Text', 'الخط', 'Texte')}</span>
             </span>
             <button
+              type="button"
               onClick={() => applyFontScale('normal')}
-              className={`px-2 py-1 min-h-[36px] rounded-lg text-xs font-bold transition-all ${
+              className={`px-2.5 py-1 min-h-[36px] rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 fontScale === 'normal'
-                  ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  ? 'bg-teal-700 text-white font-black shadow-sm'
+                  : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400'
               }`}
               title={t('Standard font size (16px)', 'حجم خط قياسي', 'Taille standard')}
             >
               A
             </button>
             <button
+              type="button"
               onClick={() => applyFontScale('large')}
-              className={`px-2 py-1 min-h-[36px] rounded-lg text-xs font-bold transition-all ${
-                fontScale === 'large' || fontScale === 'extra-large'
-                  ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+              className={`px-2.5 py-1 min-h-[36px] rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                fontScale === 'large'
+                  ? 'bg-teal-700 text-white font-black shadow-sm'
+                  : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400'
               }`}
-              title={t('Large font size (20px)', 'تكبير الخط للراحة البصرية', 'Grande taille')}
+              title={t('Large font size for visual comfort', 'تكبير الخط للراحة البصرية', 'Grande taille')}
             >
               A+
             </button>
@@ -314,470 +433,434 @@ export default function StudentCockpitHub({
 
           {/* High Contrast Toggle */}
           <button
+            type="button"
             onClick={toggleHighContrast}
-            className={`px-2.5 py-1 min-h-[36px] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+            className={`px-2.5 py-1 min-h-[36px] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
               highContrast
-                ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-sm'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-transparent text-slate-600 dark:text-slate-300'
+                ? 'bg-teal-700 text-white border-teal-800 font-black shadow-sm'
+                : 'hover:bg-stone-100 dark:hover:bg-stone-800 border-transparent text-stone-700 dark:text-stone-300'
             }`}
             title={t('Toggle high contrast for maximum clarity', 'تبديل التباين العالي لقراءة أوضح', 'Contraste élevé')}
           >
-            <Sliders className="w-3.5 h-3.5 text-amber-500" />
+            <Sliders className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             <span>{t('High Contrast', 'تباين فائق', 'Contraste')}</span>
           </button>
 
           {/* Reduce Motion Toggle */}
           <button
+            type="button"
             onClick={toggleReduceMotion}
-            className={`px-2.5 py-1 min-h-[36px] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+            className={`px-2.5 py-1 min-h-[36px] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
               reduceMotion
-                ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-sm'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-transparent text-slate-600 dark:text-slate-300'
+                ? 'bg-teal-700 text-white border-teal-800 font-black shadow-sm'
+                : 'hover:bg-stone-100 dark:hover:bg-stone-800 border-transparent text-stone-700 dark:text-stone-300'
             }`}
             title={t('Reduce animations and motion', 'تقليل الحركة والمؤثرات البصرية', 'Réduire animations')}
           >
-            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            <Zap className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             <span className="hidden md:inline">{t('Reduce Motion', 'تقليل الحركة', 'Sans mouvement')}</span>
           </button>
         </div>
 
-        {/* Right: Audio Reading & Speech Captions & Passport */}
+        {/* Right: Audio Narration, Speech Captions, Theme & Passport */}
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Read Screen Aloud */}
           <button
+            type="button"
             onClick={handleToggleReadAloud}
             className={`px-2.5 py-1 min-h-[36px] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
               isSpeakingOverview
-                ? 'bg-emerald-500 text-white border-emerald-600 animate-pulse font-black'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200'
+                ? 'bg-teal-700 text-white border-teal-800 animate-pulse font-black'
+                : 'hover:bg-stone-100 dark:hover:bg-stone-800 border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200'
             }`}
             title={t('Read screen summary aloud', 'استمع إلى ملخص الشاشة صوتياً', 'Lecture vocale')}
           >
-            {isSpeakingOverview ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-500" />}
+            {isSpeakingOverview ? <VolumeX className="w-3.5 h-3.5 text-white" /> : <Volume2 className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />}
             <span>{isSpeakingOverview ? t('Stop Speech', 'إيقاف الصوت', 'Arrêter') : t('Read Aloud', 'قراءة صوتية', 'Écouter')}</span>
           </button>
 
+          {/* Live Captions Toggle */}
           <button
+            type="button"
             onClick={handleToggleCaptions}
             className={`px-2.5 py-1 min-h-[36px] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
               isCaptionsActive
-                ? 'bg-indigo-600 text-white border-indigo-700 font-black'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200'
+                ? 'bg-teal-700 text-white border-teal-800 font-black'
+                : 'hover:bg-stone-100 dark:hover:bg-stone-800 border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200'
             }`}
             title={t('Toggle real-time live captions', 'تفعيل التفريغ النصي للكلام المسموع', 'Sous-titres en direct')}
           >
-            <Mic className="w-3.5 h-3.5 text-indigo-400" />
+            <Mic className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             <span className="hidden sm:inline">{t('Captions', 'تفريغ فوري', 'Sous-titres')}</span>
           </button>
 
+          {/* Light / Dark Mode Toggle */}
+          {toggleTheme && (
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 min-h-[36px] min-w-[36px] rounded-xl border border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center transition-colors cursor-pointer"
+              title={isDarkMode ? t('Switch to Light Mode', 'التبديل إلى الوضع النهاري', 'Passer au mode clair') : t('Switch to Dark Mode', 'التبديل إلى الوضع الليلي', 'Passer au mode sombre')}
+              aria-label={isDarkMode ? t('Switch to Light Mode', 'التبديل إلى الوضع النهاري', 'Passer au mode clair') : t('Switch to Dark Mode', 'التبديل إلى الوضع الليلي', 'Passer au mode sombre')}
+            >
+              {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-stone-600" />}
+            </button>
+          )}
+
+          {/* Accommodation Passport */}
           <button
+            type="button"
             onClick={onOpenPassport}
-            className="px-2.5 py-1 min-h-[36px] rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-105 text-slate-950 flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+            className="px-3 py-1 min-h-[36px] rounded-xl text-xs font-bold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 flex items-center gap-1.5 border border-stone-300 dark:border-stone-700 transition-all cursor-pointer"
             title={t('Universal Accommodation Passport', 'جواز السفر الميسر الموحد', 'Passeport d\'accessibilité')}
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
+            <ShieldCheck className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             <span>{t('Passport', 'جواز الإتاحة', 'Passeport')}</span>
           </button>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          2. HUMAN PERSONALIZED GREETING & CONTEXT
+          2. HUMAN PERSONALIZED GREETING & QUESTION / NEXT STEP
          ═══════════════════════════════════════════════════════════════════════ */}
       <section
-        className={`p-6 sm:p-8 rounded-3xl border transition-all relative overflow-hidden shadow-sm ${
+        className={`p-6 sm:p-8 rounded-3xl border transition-all text-start relative overflow-hidden shadow-sm ${
           isDarkMode
-            ? 'bg-gradient-to-br from-[#1A0B1B] via-[#120614] to-[#0A040B] border-[#4A1224]/80 text-white'
-            : 'bg-gradient-to-br from-[#FAF8F5] via-[#FFFDF9] to-[#F5F2EB] border-amber-200/70 text-slate-900'
+            ? 'bg-[#121B1E] border-stone-800 text-white'
+            : 'bg-white border-stone-200/90 text-stone-900'
         }`}
       >
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 text-start">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-500 dark:text-amber-300 border border-amber-400/30">
-                Cognify · مساحتك الأكاديمية
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60">
+                Cognify · {t('Personal Learning Space', 'مساحتك التعليمية الشخصية', 'Espace d\'apprentissage personnel')}
               </span>
-              <span className="text-xs text-slate-600 dark:text-slate-300 font-bold">
-                {profile.field || 'General Studies'} · {profile.level || 'Intermediate'}
+              <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
+                {profile.field || 'General Studies'}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-              {t('Welcome back,', 'أهلاً بك،', 'Bienvenue,')} <span className="text-amber-500 dark:text-amber-400">{studentName}</span> 👋
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-snug">
+              {t('Welcome back,', 'مرحباً بك،', 'Bienvenue,')} <span className="text-teal-700 dark:text-teal-400">{studentName}</span>
             </h1>
 
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
+            {/* Clear question to the student */}
+            <p className="text-base sm:text-lg font-bold text-stone-800 dark:text-stone-200">
+              {t('What would you like to focus on today?', 'ما الذي تود التركيز عليه الآن؟', 'Sur quoi souhaitez-vous vous concentrer aujourd\'hui ?')}
+            </p>
+
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 max-w-xl leading-relaxed">
               {t(
-                'A calm, adaptive space designed for your pace and focus. Everything here respects your autonomy, sensory comfort, and learning style.',
-                'بيئة تعليمية هادئة تتكيف مع وتيرتك وتركيزك. صُممت لتمكينك باستقلالية تامة، وتوفير كافة ركائز التيسير والراحة البصرية والسمعية والمعرفية.',
-                'Un espace calme et adaptatif conçu pour votre rythme et votre concentration, avec une accessibilité totale.'
+                'Everything here adapts to your natural learning pace and senses. No pressure, no rushed timers — choose the explanation mode that suits you best.',
+                'بيئة تعليمية هادئة تتكيف تماماً مع طريقتك وحواسك ووتيرتك الخاصة. لا توجد أي ضغوط أو مؤقتات متسرعة — اختر أسلوب الشرح الأنسب لك وابدأ.',
+                'Un environnement calme qui respecte votre rythme et vos préférences d\'apprentissage, sans pression.'
               )}
             </p>
           </div>
 
-          {/* Quick Metrics Pills */}
+          {/* Calm, Non-Competitive Activity Indicator */}
           <div className="flex items-center gap-3 shrink-0">
-            <div className={`p-3.5 rounded-2xl border text-center min-w-[90px] shadow-sm ${
-              isDarkMode ? 'bg-[#150917]/80 border-[#4A1224]/60' : 'bg-white border-amber-200/80'
+            <div className={`p-4 rounded-2xl border text-center min-w-[100px] shadow-sm ${
+              isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'
             }`}>
-              <div className="flex items-center justify-center gap-1 text-amber-500 mb-0.5">
-                <Flame className="w-4 h-4" />
+              <div className="flex items-center justify-center gap-1.5 text-teal-700 dark:text-teal-400 mb-0.5">
+                <Flame className="w-4 h-4 text-amber-500" />
                 <span className="text-lg font-black">{streakDays}</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 block">{t('Days Streak', 'أيام مستمرة', 'Jours consécutifs')}</span>
+              <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block">
+                {t('Days Active', 'أيام مستمرة', 'Jours d\'activité')}
+              </span>
             </div>
 
-            <div className={`p-3.5 rounded-2xl border text-center min-w-[90px] shadow-sm ${
-              isDarkMode ? 'bg-[#150917]/80 border-[#4A1224]/60' : 'bg-white border-amber-200/80'
+            <div className={`p-4 rounded-2xl border text-center min-w-[100px] shadow-sm ${
+              isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'
             }`}>
-              <div className="flex items-center justify-center gap-1 text-emerald-500 mb-0.5">
-                <Award className="w-4 h-4" />
-                <span className="text-lg font-black">{points}</span>
+              <div className="flex items-center justify-center gap-1.5 text-teal-700 dark:text-teal-400 mb-0.5">
+                <CheckCircle2 className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                <span className="text-lg font-black">{retentionState.mastered.length + 4}</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 block">{t('XP Points', 'نقاط الإنجاز', 'Points XP')}</span>
-            </div>
-
-            <div className={`p-3.5 rounded-2xl border text-center min-w-[90px] shadow-sm ${
-              isDarkMode ? 'bg-[#150917]/80 border-[#4A1224]/60' : 'bg-white border-amber-200/80'
-            }`}>
-              <div className="flex items-center justify-center gap-1 text-indigo-400 mb-0.5">
-                <CheckCircle2 className="w-4 h-4" />
-                <span className="text-lg font-black">{questionScore}%</span>
-              </div>
-              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 block">{t('Mastery', 'معدل الإتقان', 'Maîtrise')}</span>
+              <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block">
+                {t('Mastered', 'مفاهيم مثبتة', 'Maîtrisés')}
+              </span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          3. RECOMMENDED NEXT EDUCATIONAL STEP (NEXT BEST ACTION)
+          3. PROMINENT LESSON SPACE (Showing Active Suggested Pedagogy Style)
          ═══════════════════════════════════════════════════════════════════════ */}
       <section
-        aria-label={t('Recommended Next Step', 'الخطوة التعليمية التالية المقترحة', 'Prochaine étape recommandée')}
-        className={`p-5 sm:p-6 rounded-3xl border transition-all text-start relative overflow-hidden shadow-sm ${
+        aria-label={t('Current Lesson Space', 'مساحة الدرس واستكماله', 'Espace de leçon en cours')}
+        className={`p-6 sm:p-7 rounded-3xl border transition-all text-start relative overflow-hidden shadow-sm ${
           isDarkMode
-            ? 'bg-gradient-to-r from-amber-500/10 via-[#150917] to-purple-500/10 border-amber-500/30'
-            : 'bg-gradient-to-r from-amber-50 via-white to-orange-50/60 border-amber-300'
+            ? 'bg-gradient-to-br from-[#121B1E] via-[#162327] to-[#121B1E] border-teal-800/40 text-white'
+            : 'bg-gradient-to-br from-teal-50/60 via-white to-stone-50 border-teal-200/90 text-stone-900'
         }`}
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-              <span className="text-[11px] font-black uppercase tracking-wider text-amber-500 dark:text-amber-400">
-                {t('Immediate Next Best Action', 'الخطوة التالية المقترحة لك الآن', 'Prochaine action recommandée')}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-teal-600 animate-pulse" />
+              <span className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-400">
+                {t('Current Learning Focus', 'موضوع الدرس الحالي المقترح', 'Sujet de cours suggéré')}
               </span>
-              <span className="text-[10px] text-slate-600 dark:text-slate-300 font-bold bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-full">
-                ⏱️ 5 - 10 {t('mins', 'دقائق', 'min')}
+              
+              {/* Prominently showing the suggested explanation style */}
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950/70 text-teal-800 dark:text-teal-300 border border-teal-300/60 dark:border-teal-800">
+                ✦ {t('Explanation Style:', 'طريقة الشرح المقترحة:', 'Style d\'explication :')} {getPedagogyLabel(activePedagogy)}
               </span>
             </div>
-            <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-              {t(
-                'Continue Learning with Accessible AI Tutor',
-                'متابعة الدرس والتطبيق العملي مع المعلم الذكي المهيأ',
-                'Poursuivre l\'apprentissage avec le Tuteur Adaptatif'
-              )}
+
+            <h2 className="text-lg sm:text-xl font-black text-stone-900 dark:text-white leading-tight">
+              {currentSubject}
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed font-normal max-w-2xl">
               {t(
-                'Explore concepts deconstructed into your preferred pace, with worked examples and active checkpoints.',
-                'شرح تفاعلي متكيف مع استيعابك، يتضمن خطوات متتابعة ونقاط تحقق للتأكد من ثبات المعلومة.',
-                'Explication pas-à-pas adaptée à votre rythme avec des exemples concrets.'
+                'Explore concepts broken down into gentle steps with worked examples, instant speech narration, or visual models based on your selection below.',
+                'شرح تفاعلي يفكك المفاهيم المعقدة إلى خطوات مبسطة وأمثلة واقعية، مع إمكانية الاستماع الصوتي أو الشرح المباشر حسب اختيارك.',
+                'Explication pas-à-pas adaptée à vos préférences, avec exemples concrets ou narration vocale.'
               )}
             </p>
           </div>
 
-          <button
-            onClick={() => onSelectSuite('chat')}
-            className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-[#E5A93C] to-amber-500 hover:brightness-110 text-slate-950 font-black text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
-          >
-            <span>{t('Launch Tutor Now', 'ابدأ جلستك الآن', 'Démarrer')}</span>
-            <ChevronRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
-          </button>
+          {/* Launch Lesson Button */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => onSelectSuite('chat')}
+              className="px-6 py-3.5 rounded-2xl bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-teal-700/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>{t('Start Lesson with AI Tutor', 'بدء الدرس مع المرشد الذكي', 'Démarrer avec le Tuteur')}</span>
+              <ChevronRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          4. TWO-COLUMN WORKSPACE: TODAY'S PLAN & SHORT SPACED REVIEWS
-         ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 text-start">
-        
-        {/* ── CARD A: TODAY'S PLAN & ACADEMIC TASKS ── */}
-        <div className={`p-5 sm:p-6 rounded-3xl border transition-all flex flex-col justify-between shadow-sm ${
-          isDarkMode ? 'bg-[#150917]/90 border-[#4A1224]/70' : 'bg-white border-slate-200'
-        }`}>
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-slate-900 dark:text-white font-black text-sm">
-                <CalendarDays className="w-4 h-4 text-amber-500" />
-                <h3>{t('Today\'s Plan & Tasks', 'خطة ومهام اليوم', 'Plan & Tâches du jour')}</h3>
-              </div>
-              <button
-                onClick={() => setIsAddingTask(!isAddingTask)}
-                className="text-[11px] font-bold text-amber-500 hover:text-amber-600 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t('Add Task', 'إضافة مهمة', 'Ajouter')}</span>
-              </button>
-            </div>
-
-            {/* Quick Add Form */}
-            {isAddingTask && (
-              <form onSubmit={handleCreateTask} className="mb-3 flex items-center gap-1.5">
-                <input
-                  type="text"
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder={t('Task title or assignment...', 'عنوان المهمة أو الواجب...', 'Titre de la tâche...')}
-                  className={`flex-1 px-3 py-1.5 text-xs rounded-xl border outline-none ${
-                    isDarkMode
-                      ? 'bg-[#0E0610] border-[#4A1224] text-white focus:border-amber-400'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
-                  }`}
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition-all cursor-pointer"
-                >
-                  {t('Save', 'حفظ', 'Enregistrer')}
-                </button>
-              </form>
-            )}
-
-            {/* Task list */}
-            <div className="space-y-2 mt-2">
-              {tasks.length === 0 ? (
-                <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 text-center">
-                  <CheckCircle2 className="w-5 h-5 text-amber-500 mx-auto mb-1.5 opacity-80" />
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {t('All tasks clear for today!', 'لا توجد مهام متأخرة اليوم — أحسنت!', 'Toutes les tâches sont terminées !')}
-                  </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {t('Add an assignment or continue reviewing at your leisure.', 'أضف تكليفاً قادماً أو استمتع بيومك التعليمي.', 'Ajoutez une tâche ou continuez vos révisions.')}
-                  </p>
-                </div>
-              ) : (
-                tasks.slice(0, 4).map((task) => (
-                  <div
-                    key={task.id}
-                    onClick={() => handleToggleTask(task)}
-                    className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer group ${
-                      task.completed
-                        ? 'opacity-60 bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800'
-                        : isDarkMode
-                        ? 'bg-[#0E0610]/70 border-[#4A1224]/50 hover:border-amber-400/50'
-                        : 'bg-slate-50/80 border-slate-200 hover:border-amber-400'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <button
-                        type="button"
-                        aria-label={task.completed ? t('Mark incomplete', 'تعليم كغير مكتمل', 'Marquer incomplet') : t('Mark complete', 'تعليم كمكتمل', 'Marquer complet')}
-                        className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
-                          task.completed
-                            ? 'bg-emerald-500 border-emerald-600 text-white'
-                            : 'border-slate-300 dark:border-slate-600 group-hover:border-amber-400'
-                        }`}
-                      >
-                        {task.completed && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                      </button>
-                      <span className={`text-xs font-medium truncate ${task.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200'}`}>
-                        {task.title}
-                      </span>
-                    </div>
-
-                    <span className="text-[10px] text-slate-600 dark:text-slate-300 font-bold shrink-0">
-                      {task.course || 'General'}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#4A1224]/50 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300">
-            <span>{tasks.filter((t) => t.completed).length} / {tasks.length} {t('Completed', 'مكتملة', 'Terminées')}</span>
-            <span className="font-bold text-amber-500 dark:text-amber-400">
-              {tasks.length > 0 && Math.round((tasks.filter((t) => t.completed).length / tasks.length) * 100)}%
-            </span>
-          </div>
-        </div>
-
-        {/* ── CARD B: SHORT DUE SPACED REVIEWS ── */}
-        <div className={`p-5 sm:p-6 rounded-3xl border transition-all flex flex-col justify-between shadow-sm ${
-          isDarkMode ? 'bg-[#150917]/90 border-[#4A1224]/70' : 'bg-white border-slate-200'
-        }`}>
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-slate-900 dark:text-white font-black text-sm">
-                <RotateCcw className="w-4 h-4 text-emerald-500" />
-                <h3>{t('Due Spaced Reviews', 'المراجعات القصيرة المستحقة', 'Révisions espacées')}</h3>
-              </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                SuperMemo-2 · 3 {t('mins', 'د', 'min')}
-              </span>
-            </div>
-
-            <div className="space-y-2 mt-2">
-              {retentionState.dueToday.length === 0 ? (
-                <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/30 text-center">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto mb-1.5 opacity-80" />
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {t('All concepts retained and up to date!', 'كافة المفاهيم مثبتة ومحدثة — رائع!', 'Tous les concepts sont maîtrisés !')}
-                  </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {t('Next scheduled review triggers tomorrow.', 'المراجعة التالية تبدأ غداً حسب منحنى النسيان.', 'Prochaine révision demain selon la courbe.')}
-                  </p>
-                </div>
-              ) : (
-                retentionState.dueToday.slice(0, 3).map((item) => {
-                  const title = resolveConceptTitle(item.conceptId, isAr ? 'ar' : isFr ? 'fr' : 'en');
-                  return (
-                    <div
-                      key={item.conceptId}
-                      className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                        isDarkMode
-                          ? 'bg-[#0E0610]/70 border-[#4A1224]/50'
-                          : 'bg-slate-50/80 border-slate-200'
-                      }`}
-                    >
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                          {title}
-                        </p>
-                        <p className="text-[10px] text-slate-600 dark:text-slate-300 mt-0.5">
-                          {t('Interval:', 'دورة التكرار:', 'Intervalle:')} {item.intervalDays} {t('days', 'أيام', 'jours')}
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => handleStartReview(item.conceptId)}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs transition-all active:scale-95 shadow-sm shrink-0 cursor-pointer"
-                      >
-                        {t('Review Now', 'مراجعة الآن', 'Réviser')}
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#4A1224]/50 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300">
-            <span>{t('Mastered Concepts:', 'المفاهيم المتقنة:', 'Concepts maîtrisés:')} {retentionState.mastered.length}</span>
-            <span className="text-emerald-500 font-bold">{t('Retention Stable', 'تثبيت مستقر', 'Rétention stable')}</span>
-          </div>
-        </div>
-
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════════════
-          5. THREE CORE ASSISTIVE SUITES (DEDICATED & CALM)
+          4. CONCRETE CHOICES TO SWITCH LEARNING METHOD (Tied to Real Engine)
          ═══════════════════════════════════════════════════════════════════════ */}
       <section
-        id="suites-grid"
-        aria-label={t('Dedicated Assistive Suites', 'منظومات التيسير المتخصصة', 'Suites d\'assistance')}
-        className="pt-2 text-start"
+        aria-label={t('Switch Learning Methods', 'خيارات ملموسة لطريقة التعلم', 'Changer la méthode d\'apprentissage')}
+        className="text-start space-y-3"
       >
-        <div className="flex items-center justify-between mb-3 px-1">
-          <h3 className="text-xs font-black uppercase tracking-wider text-amber-500 dark:text-amber-400 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('Primary Assistive Pillars', 'الركائز الأساسية للتيسير والتعلم', 'Piliers d\'assistance')}</span>
-          </h3>
-          <span className="text-[11px] text-slate-600 dark:text-slate-300 font-bold">
-            {t('Direct access anytime', 'دخول مباشر في أي وقت', 'Accès direct')}
+        <div className="flex items-center justify-between px-1">
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{t('How do you prefer to understand concepts?', 'كيف تفضل أن نشرح لك المفاهيم؟', 'Comment préférez-vous apprendre ?')}</span>
+            </h3>
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+              {t('Select any mode below to immediately adjust the AI explanation tone and format.', 'اختر أي أسلوب ليقوم المرشد الذكي بتكييف لغته فورياً بما يوافق راحتك.', 'Sélectionnez un style pour adapter instantanément le tuteur.')}
+            </p>
+          </div>
+
+          <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 hidden sm:inline">
+            {t('5 Adaptive Styles', '٥ أساليب ملموسة', '5 styles adaptatifs')}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* 5 Tangible Pedagogy Choice Pills / Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {PEDAGOGY_CHOICES.map((choice) => {
+            const isSelected = activePedagogy === choice.id;
+            const Icon = choice.icon;
+            const label = isAr ? choice.labelAr : isFr ? choice.labelFr : choice.labelEn;
+            const desc = isAr ? choice.descAr : isFr ? choice.descFr : choice.descEn;
+
+            return (
+              <button
+                key={choice.id}
+                type="button"
+                onClick={() => handleSelectPedagogy(choice.id)}
+                className={`p-4 rounded-2xl border text-start transition-all cursor-pointer flex items-start gap-3 relative group ${
+                  isSelected
+                    ? 'bg-teal-50/80 dark:bg-teal-950/40 border-teal-600 dark:border-teal-500 shadow-sm ring-1 ring-teal-600 dark:ring-teal-500'
+                    : isDarkMode
+                    ? 'bg-[#121B1E] border-stone-800 hover:border-teal-700/60 text-stone-200'
+                    : 'bg-white border-stone-200 hover:border-teal-400 text-stone-800'
+                }`}
+              >
+                <div
+                  className={`p-2.5 rounded-xl shrink-0 transition-colors ${
+                    isSelected
+                      ? 'bg-teal-700 text-white'
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 group-hover:text-teal-700'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-xs font-black ${isSelected ? 'text-teal-800 dark:text-teal-300' : 'text-stone-900 dark:text-stone-100'}`}>
+                      {label}
+                    </span>
+                    {isSelected && (
+                      <span className="w-4 h-4 rounded-full bg-teal-700 text-white flex items-center justify-center text-[10px] shrink-0">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-normal">
+                    {desc}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          5. FOUR CORE ASSISTIVE TOOLS (Human Names & Clear Descriptions)
+         ═══════════════════════════════════════════════════════════════════════ */}
+      <section
+        id="assistive-suites"
+        aria-label={t('Assistive Tools', 'أدوات المساندة المتاحة', 'Outils d\'assistance')}
+        className="pt-1 text-start space-y-3"
+      >
+        <div className="flex items-center justify-between px-1">
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{t('Comprehensive Assistive Ecosystem', 'أدوات المساندة الشاملة المتاحة', 'Outils d\'accessibilité')}</span>
+            </h3>
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+              {t('Autonomy-focused tools designed for visual, hearing, cognitive, and accommodation needs.', 'أدوات تعزز استقلاليتك وتلبي الاحتياجات البصرية والسمعية والمعرفية والترتيبات الأكاديمية.', 'Outils pour votre autonomie visuelle, auditive et cognitive.')}
+            </p>
+          </div>
+
+          <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 hidden sm:inline">
+            {t('Instant 1-Click Launch', 'دخول مباشر بنقرة واحدة', 'Accès direct')}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Pillar 1: Visual Companion */}
+          {/* Tool 1: AI Vision Companion */}
           <button
+            type="button"
             onClick={() => onSelectSuite('vision')}
-            className={`p-5 rounded-3xl border transition-all active:scale-[0.98] shadow-sm flex flex-col justify-between cursor-pointer group text-start min-h-[160px] ${
+            className={`p-5 rounded-3xl border transition-all active:scale-[0.98] shadow-sm flex flex-col justify-between cursor-pointer group text-start min-h-[170px] ${
               isDarkMode
-                ? 'bg-[#150917] border-[#4A1224]/70 hover:border-rose-500/60 hover:bg-[#1A0B1D]'
-                : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50/30'
+                ? 'bg-[#121B1E] border-stone-800 hover:border-teal-500/60'
+                : 'bg-white border-stone-200 hover:border-teal-500 hover:bg-teal-50/20'
             }`}
           >
             <div>
-              <div className="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-500 mb-3 group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-700 dark:text-teal-400 mb-3 group-hover:scale-105 transition-transform">
                 <Eye className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-rose-500 transition-colors">
-                {t('Visual Companion (AI Eyes)', 'الرفيق البصري الذكي', 'Compagnon Visuel (Yeux IA)')}
+              <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                {t('AI Vision Companion', 'الرفيق البصري الذكي', 'Compagnon Visuel')}
               </h4>
-              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                 {t(
-                  'Currency reader, clothes matching, face memory, lecture scanner, and tactile haptic navigation.',
-                  'قارئ العملات الورقية، فحص ألوان الملابس، التعرف على الوجوه، ماسح المحاضرات، والعصا البيضاء اللمسية.',
-                  'Lecteur de devises, reconnaissance des couleurs et objets, et guidage haptique.'
+                  'Currency reader, clothes color matching, face memory, document reader, and haptic cane vibration.',
+                  'قارئ العملات الورقية، فحص ألوان الملابس، حفظ وجوه الأشخاص، قراءة المستندات، والنبضات اللمسية بالاهتزاز.',
+                  'Lecteur de devises, reconnaissance de visages, couleurs et canne haptique.'
                 )}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-rose-500">
-              <span>{t('Open Suite', 'تشغيل المنظومة', 'Ouvrir')}</span>
+            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+              <span>{t('Open Companion', 'تشغيل الرفيق', 'Ouvrir')}</span>
               <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
             </div>
           </button>
 
-          {/* Pillar 2: Unified Deaf & Hearing Center */}
+          {/* Tool 2: Unified Hearing Center */}
           <button
+            type="button"
             onClick={() => onSelectSuite('deaf')}
-            className={`p-5 rounded-3xl border transition-all active:scale-[0.98] shadow-sm flex flex-col justify-between cursor-pointer group text-start min-h-[160px] ${
+            className={`p-5 rounded-3xl border transition-all active:scale-[0.98] shadow-sm flex flex-col justify-between cursor-pointer group text-start min-h-[170px] ${
               isDarkMode
-                ? 'bg-[#150917] border-[#4A1224]/70 hover:border-amber-500/60 hover:bg-[#1A0B1D]'
-                : 'bg-white border-slate-200 hover:border-amber-400 hover:bg-amber-50/30'
+                ? 'bg-[#121B1E] border-stone-800 hover:border-teal-500/60'
+                : 'bg-white border-stone-200 hover:border-teal-500 hover:bg-teal-50/20'
             }`}
           >
             <div>
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 mb-3 group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-700 dark:text-teal-400 mb-3 group-hover:scale-105 transition-transform">
                 <Ear className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-500 transition-colors">
-                {t('Unified Hearing Center', 'المركز السمعي الموحد', 'Centre Auditif Unifié')}
+              <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                {t('Unified Hearing Center', 'المركز السمعي الموحد', 'Centre Auditif')}
               </h4>
-              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                 {t(
                   'Live speech-to-text captions, instant voice speaker, express AAC cards, and hazard sound sentinel.',
-                  'تفريغ فوري لكلام المتحدث، نطق صوتي للغرفة، بطاقات تواصل سريعة، ومستشعر أصوات مرتفعة ومخاطر.',
-                  'Sous-titrage direct, synthèse vocale, cartes CAA rapides et alerte sonore stroboscopique.'
+                  'تفريغ فوري لكلام المتحدث، نطق صوتي للغرفة، بطاقات تواصل ميسرة، ومستشعر أصوات مرتفعة ووميض.',
+                  'Sous-titrage direct, synthèse vocale, cartes CAA rapides et alerte sonore.'
                 )}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-amber-500">
-              <span>{t('Open Suite', 'تشغيل المنظومة', 'Ouvrir')}</span>
+            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+              <span>{t('Open Center', 'تشغيل المركز', 'Ouvrir')}</span>
               <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
             </div>
           </button>
 
-          {/* Pillar 3: Accessible AI Tutor */}
+          {/* Tool 3: Accessible AI Tutor */}
           <button
+            type="button"
             onClick={() => onSelectSuite('chat')}
-            className={`p-5 rounded-3xl border transition-all active:scale-[0.98] shadow-sm flex flex-col justify-between cursor-pointer group text-start min-h-[160px] ${
+            className={`p-5 rounded-3xl border transition-all active:scale-[0.98] shadow-sm flex flex-col justify-between cursor-pointer group text-start min-h-[170px] ${
               isDarkMode
-                ? 'bg-[#150917] border-[#4A1224]/70 hover:border-purple-500/60 hover:bg-[#1A0B1D]'
-                : 'bg-white border-slate-200 hover:border-purple-400 hover:bg-purple-50/30'
+                ? 'bg-[#121B1E] border-stone-800 hover:border-teal-500/60'
+                : 'bg-white border-stone-200 hover:border-teal-500 hover:bg-teal-50/20'
             }`}
           >
             <div>
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-700 dark:text-teal-400 mb-3 group-hover:scale-105 transition-transform">
                 <Brain className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-purple-500 transition-colors">
-                {t('Accessible AI Tutor', 'المعلم الذكي المهيأ', 'Tuteur IA Accessible')}
+              <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                {t('Accessible AI Tutor', 'المرشد التعليمي الذكي', 'Tuteur IA Accessible')}
               </h4>
-              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                 {t(
-                  'Adaptive pedagogical pace, worked examples, visual analogies, simplified steps, and screen-reader support.',
-                  'شرح متكيف مع سرعتك الذهنية، أمثلة عملية، تشبيهات بصرية، خطوات متتابعة، وتوافق تام مع قارئات الشاشة.',
-                  'Rythme adaptatif, exemples concrets, analogies visuelles et compatibilité lecteur d\'écran.'
+                  'Adaptive pedagogical pace, worked examples, simplified text, visual analogies, and screen-reader support.',
+                  'معلم ذكي يتكيف مع استيعابك، يقدم أمثلة عملية وشرحاً متدرجاً، ويدعم قارئات الشاشة تماماً.',
+                  'Rythme adaptatif, exemples concrets et compatibilité totale avec les lecteurs d\'écran.'
                 )}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-purple-500">
-              <span>{t('Open Suite', 'تشغيل المنظومة', 'Ouvrir')}</span>
+            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+              <span>{t('Launch Tutor', 'بدء الحوار', 'Démarrer')}</span>
+              <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
+
+          {/* Tool 4: Accommodation Passport */}
+          <button
+            type="button"
+            onClick={onOpenPassport}
+            className={`p-5 rounded-3xl border transition-all active:scale-[0.98] shadow-sm flex flex-col justify-between cursor-pointer group text-start min-h-[170px] ${
+              isDarkMode
+                ? 'bg-[#121B1E] border-stone-800 hover:border-teal-500/60'
+                : 'bg-white border-stone-200 hover:border-teal-500 hover:bg-teal-50/20'
+            }`}
+          >
+            <div>
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-700 dark:text-teal-400 mb-3 group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                {t('Accommodation Passport', 'جواز السفر الميسر', 'Passeport d\'accessibilité')}
+              </h4>
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                {t(
+                  'Portable record of academic exam arrangements, sensory accommodations, and verification QR code.',
+                  'ملفك الشخصي الموحد لتسهيلات الامتحانات، تفضيلات الراحة الحسية، ورمز التحقق للمؤسسات التعليمية.',
+                  'Dossier d\'aménagements d\'examens et préférences sensorielles avec QR code.'
+                )}
+              </p>
+            </div>
+            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+              <span>{t('View Passport', 'عرض الجواز', 'Voir')}</span>
               <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
             </div>
           </button>
@@ -786,40 +869,146 @@ export default function StudentCockpitHub({
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          MICRO-REVIEW MODAL (1-QUESTION SUPERMEMO-2 REINFORCEMENT)
+          6. SUGGESTED SINGLE TASK OR SHORT MICRO-REVIEW (Calm & Pressure-free)
+         ═══════════════════════════════════════════════════════════════════════ */}
+      <section
+        aria-label={t('Calm Activity & Suggested Step', 'النشاط المقترح والتقدم الهادئ', 'Activité suggérée')}
+        className={`p-6 sm:p-7 rounded-3xl border transition-all text-start shadow-sm ${
+          isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+        }`}
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2 flex-1">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-teal-700 dark:text-teal-400" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-400">
+                {t('Suggested Micro-Step (2 mins)', 'خطوة مراجعة قصيرة ومقترحة (دقيقتان)', 'Micro-étape suggérée (2 min)')}
+              </h3>
+            </div>
+
+            {activeSuggestedReview ? (
+              <div>
+                <h4 className="text-sm sm:text-base font-black text-stone-900 dark:text-white">
+                  {resolveConceptTitle(activeSuggestedReview.conceptId, isAr ? 'ar' : isFr ? 'fr' : 'en')}
+                </h4>
+                <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                  {t(
+                    'A gentle 1-question check to reinforce memory stability based on the spacing curve. No scores or penalties.',
+                    'سؤال واحد خفيف لتثبيت المفهوم في الذاكرة طويلة المدى، دون درجات محبطة أو أي منافسة.',
+                    'Une question légère pour consolider votre mémoire à long terme.'
+                  )}
+                </p>
+              </div>
+            ) : activeTask ? (
+              <div>
+                <h4 className="text-sm sm:text-base font-black text-stone-900 dark:text-white">
+                  {activeTask.title}
+                </h4>
+                <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                  {t(
+                    'Your top milestone for today. Mark it when you are ready, entirely at your own pace.',
+                    'المهمة الأكاديمية المقترحة لك لليوم. أكملها عندما تكون جاهزاً وبوتيرتك الخاصة.',
+                    'Votre prochaine étape du jour. Cochez-la à votre convenance.'
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <h4 className="text-sm sm:text-base font-black text-stone-900 dark:text-white">
+                  {t('All concepts and tasks are up to date!', 'كافة المفاهيم والمهام مستقرة ومحدثة — أحسنت!', 'Tous les concepts sont maîtrisés !')}
+                </h4>
+                <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+                  {t(
+                    'Take a comfortable break, explore a new topic, or review previous notes at your leisure.',
+                    'خذ قسطاً من الراحة، أو استكشف موضوعاً جديداً مع المرشد الذكي براحتك التامة.',
+                    'Profitez d\'une pause ou explorez un nouveau sujet avec le tuteur.'
+                  )}
+                </p>
+              </div>
+            )}
+
+            {/* Gentle Progress Note */}
+            <div className="pt-2 flex items-center gap-2 text-[11px] text-stone-500 dark:text-stone-400">
+              <span className="font-bold text-teal-700 dark:text-teal-400">● {t('Steady progress', 'تقدم هادئ وثابت', 'Rythme serein')}</span>
+              <span>·</span>
+              <span>{t('Focus on comprehension over speed', 'الأولوية للفهم والراحة، لا للسرعة', 'Priorité à la compréhension')}</span>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <div className="shrink-0 w-full sm:w-auto">
+            {activeSuggestedReview ? (
+              <button
+                type="button"
+                onClick={() => handleStartReview(activeSuggestedReview.conceptId)}
+                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{t('Review Now (2 mins)', 'مراجعة الآن (دقيقتان)', 'Réviser (2 min)')}</span>
+              </button>
+            ) : activeTask ? (
+              <button
+                type="button"
+                onClick={() => handleToggleTask(activeTask)}
+                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-teal-50 dark:hover:bg-teal-950/40 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Check className="w-3.5 h-3.5 text-teal-600" />
+                <span>{t('Mark as Completed', 'تعليم كمكتملة', 'Marquer terminé')}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onSelectSuite('chat')}
+                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Brain className="w-3.5 h-3.5" />
+                <span>{t('Open AI Tutor', 'متابعة التعلم مع المرشد', 'Ouvrir le Tuteur')}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MICRO-REVIEW MODAL (1-Question Pressure-free Reinforcement)
          ═══════════════════════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {activeReviewConceptId && reviewQuestion && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.96 }}
               className={`w-full max-w-lg rounded-3xl border p-6 shadow-2xl space-y-4 text-start ${
-                isDarkMode ? 'bg-[#150917] border-[#4A1224] text-white' : 'bg-white border-slate-200 text-slate-900'
+                isDarkMode ? 'bg-[#121B1E] border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
               }`}
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2 text-emerald-500">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400">
                   <RotateCcw className="w-4 h-4" />
                   <span className="text-xs font-black uppercase tracking-wider">
                     {t('Micro-Review Check', 'فحص المراجعة السريعة', 'Contrôle de micro-révision')}
                   </span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setActiveReviewConceptId(null)}
-                  className="p-1 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-1 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-amber-500 block mb-1">
+                <span className="text-[11px] font-bold text-teal-700 dark:text-teal-400 block mb-1">
                   {reviewQuestion.conceptTitle}
                 </span>
                 <p className="text-sm font-black leading-relaxed">
-                  {isAr ? (reviewQuestion.promptAr || reviewQuestion.promptEn) : isFr ? (reviewQuestion.promptFr || reviewQuestion.promptEn) : (reviewQuestion.promptEn || reviewQuestion.promptAr)}
+                  {isAr
+                    ? (reviewQuestion.promptAr || reviewQuestion.promptEn)
+                    : isFr
+                    ? (reviewQuestion.promptFr || reviewQuestion.promptEn)
+                    : (reviewQuestion.promptEn || reviewQuestion.promptAr)}
                 </p>
               </div>
 
@@ -829,23 +1018,28 @@ export default function StudentCockpitHub({
                   const isSelected = selectedReviewOption === idx;
                   const isCorrect = reviewSubmitted && idx === reviewQuestion.correctIndex;
                   const isWrong = reviewSubmitted && isSelected && !reviewResult?.isCorrect;
-                  const optionLabel = isAr ? (opt.textAr || opt.textEn) : isFr ? (opt.textFr || opt.textEn) : (opt.textEn || opt.textAr);
+                  const optionLabel = isAr
+                    ? (opt.textAr || opt.textEn)
+                    : isFr
+                    ? (opt.textFr || opt.textEn)
+                    : (opt.textEn || opt.textAr);
 
                   return (
                     <button
                       key={idx}
+                      type="button"
                       disabled={reviewSubmitted}
                       onClick={() => setSelectedReviewOption(idx)}
                       className={`w-full p-3 rounded-2xl border text-start text-xs font-medium transition-all flex items-center justify-between gap-3 cursor-pointer ${
                         isCorrect
-                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
+                          ? 'bg-teal-500/20 border-teal-500 text-teal-700 dark:text-teal-300 font-bold'
                           : isWrong
-                          ? 'bg-rose-500/20 border-rose-500 text-rose-300 font-bold'
+                          ? 'bg-rose-500/20 border-rose-500 text-rose-600 dark:text-rose-300 font-bold'
                           : isSelected
-                          ? 'bg-amber-400/20 border-amber-400 text-amber-500 dark:text-amber-300 font-bold'
+                          ? 'bg-teal-100 dark:bg-teal-950/60 border-teal-600 text-teal-800 dark:text-teal-300 font-bold'
                           : isDarkMode
-                          ? 'bg-[#0E0610] border-[#4A1224]/60 hover:border-slate-600 text-slate-200'
-                          : 'bg-slate-50 border-slate-200 hover:border-slate-400 text-slate-800'
+                          ? 'bg-[#162327] border-stone-800 hover:border-stone-600 text-stone-200'
+                          : 'bg-stone-50 border-stone-200 hover:border-stone-400 text-stone-800'
                       }`}
                     >
                       <span>{optionLabel}</span>
@@ -859,17 +1053,20 @@ export default function StudentCockpitHub({
               {reviewSubmitted && reviewResult && (
                 <div className={`p-3.5 rounded-2xl border text-xs space-y-1 ${
                   reviewResult.isCorrect
-                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                    ? 'bg-teal-500/15 border-teal-500/30 text-teal-800 dark:text-teal-300'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-800 dark:text-amber-300'
                 }`}>
                   <p className="font-black">
-                    {reviewResult.isCorrect ? t('🎉 Excellent recall!', '🎉 استرجاع ممتاز وصحيح!', '🎉 Excellent rappel !') : t('💡 Keep building memory:', '💡 راجع المفهوم لتثبيته:', '💡 Révision du concept :')}
+                    {reviewResult.isCorrect
+                      ? t('🎉 Excellent recall!', '🎉 استرجاع ممتاز وصحيح!', '🎉 Excellent rappel !')
+                      : t('💡 Gentle concept reinforcement:', '💡 راجع المفهوم لتثبيته بهدوء:', '💡 Renforcement du concept :')}
                   </p>
                   <p className="leading-relaxed opacity-90">
-                    {isAr ? (reviewQuestion.explanationAr || reviewQuestion.explanationEn) : isFr ? (reviewQuestion.explanationFr || reviewQuestion.explanationEn) : (reviewQuestion.explanationEn || reviewQuestion.explanationAr)}
-                  </p>
-                  <p className="text-[10px] opacity-75 font-bold pt-1">
-                    {t('Next review interval:', 'دورة التكرار القادمة:', 'Prochain intervalle :')} {reviewResult.newIntervalDays || 1} {t('days', 'أيام', 'jours')}
+                    {isAr
+                      ? (reviewQuestion.explanationAr || reviewQuestion.explanationEn)
+                      : isFr
+                      ? (reviewQuestion.explanationFr || reviewQuestion.explanationEn)
+                      : (reviewQuestion.explanationEn || reviewQuestion.explanationAr)}
                   </p>
                 </div>
               )}
@@ -878,16 +1075,18 @@ export default function StudentCockpitHub({
               <div className="pt-2 flex justify-end gap-2">
                 {!reviewSubmitted ? (
                   <button
+                    type="button"
                     disabled={selectedReviewOption === null}
                     onClick={handleSubmitReview}
-                    className="px-5 py-2.5 rounded-xl bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs hover:bg-amber-300 transition-all cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-teal-700 disabled:opacity-50 text-white font-black text-xs hover:bg-teal-800 transition-all cursor-pointer"
                   >
                     {t('Check Answer', 'تحقق من الإجابة', 'Vérifier')}
                   </button>
                 ) : (
                   <button
+                    type="button"
                     onClick={() => setActiveReviewConceptId(null)}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-black text-xs hover:bg-emerald-400 transition-all cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-teal-700 text-white font-black text-xs hover:bg-teal-800 transition-all cursor-pointer"
                   >
                     {t('Done', 'تم', 'Terminer')}
                   </button>

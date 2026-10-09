@@ -6,7 +6,8 @@ import {
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Flame,
   ArrowLeft, ArrowRight, MessageSquare, Globe, Check, Brain,
   LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
-  SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck
+  SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck,
+  Sun, Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
@@ -414,8 +415,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       {/* ── TOP NAVIGATION BAR (Always visible for seamless cross-disability jumping) ── */}
       <header className={`relative z-[9995] px-3 py-2 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b transition-colors duration-300 ${
         isDarkMode 
-          ? 'border-[#4A1224]/60 bg-[#0E0610]/95 backdrop-blur-xl shadow-lg text-white' 
-          : 'border-amber-200/80 bg-white/95 backdrop-blur-xl shadow-sm text-slate-900'
+          ? 'border-stone-800 bg-[#0E1416]/95 backdrop-blur-xl shadow-lg text-white' 
+          : 'border-stone-200/90 bg-white/95 backdrop-blur-xl shadow-sm text-stone-900'
       }`}>
         <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
           {/* Main App Menu Drawer Button */}
@@ -427,10 +428,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             aria-label={isAccessibilityUser(profile)
               ? localize(profile.language, 'Open menu', 'افتح القائمة')
               : getTranslation(profile.language, 'back')}
-            className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C] cursor-pointer shrink-0 ${
+            className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0 ${
               isDarkMode
-                ? 'text-slate-400 bg-[#150917] border border-[#4A1224]/60 hover:text-white hover:bg-slate-800'
-                : 'text-slate-600 bg-amber-50/80 border border-amber-200 hover:text-slate-950 hover:bg-amber-100'
+                ? 'text-stone-300 bg-[#162327] border border-stone-800 hover:text-white hover:bg-stone-800'
+                : 'text-stone-700 bg-stone-100 border border-stone-200 hover:text-stone-950 hover:bg-stone-200'
             }`}
           >
             {isAccessibilityUser(profile)
@@ -449,15 +450,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
             className={`flex items-center p-1 rounded-2xl shadow-inner gap-1 outline-none overflow-x-auto custom-scrollbar transition-colors ${
               isDarkMode
-                ? 'bg-[#150917] border border-[#4A1224]/60'
-                : 'bg-amber-50/90 border border-amber-200'
+                ? 'bg-[#121B1E] border border-stone-800'
+                : 'bg-stone-100/90 border border-stone-200'
             }`}
           >
             {[
               { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', Icon: LayoutGrid },
-              { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
-              { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
-              { id: 'chat' as const, labelAr: 'المعلم الذكي', labelEn: 'AI Tutor', Icon: Brain },
+              { id: 'chat' as const, labelAr: 'المرشد الذكي', labelEn: 'AI Tutor', Icon: Brain },
+              { id: 'vision' as const, labelAr: 'البصري', labelEn: 'Visual', Icon: Eye },
+              { id: 'deaf' as const, labelAr: 'السمعي', labelEn: 'Hearing', Icon: Ear },
             ].map((suite) => {
               const isSelected = suite.id === 'deaf' ? isDeafActive : activeTab === suite.id;
               return (
@@ -467,13 +468,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => handleSelectTab(suite.id)}
-                  className={`px-2 sm:px-3 min-h-[38px] sm:min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
+                  className={`px-2.5 sm:px-3 min-h-[38px] sm:min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
                     isSelected
-                      ? 'bg-amber-400 text-slate-950 font-black shadow-md'
+                      ? 'bg-teal-700 text-white font-black shadow-sm'
                       : isDarkMode
-                        ? 'text-slate-300 hover:text-white hover:bg-[#150917]/70'
-                        : 'text-slate-600 hover:text-slate-950 hover:bg-amber-100/80'
-                  } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${isDarkMode ? 'focus-visible:ring-offset-slate-900' : 'focus-visible:ring-offset-white'}`}
+                        ? 'text-stone-300 hover:text-white hover:bg-stone-800'
+                        : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200/80'
+                  } focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${isDarkMode ? 'focus-visible:ring-offset-stone-900' : 'focus-visible:ring-offset-white'}`}
                 >
                   <suite.Icon className="w-3.5 h-3.5 shrink-0" />
                   <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
@@ -484,14 +485,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         </div>
 
         {/* Right Header Status / Sibling Switcher */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Sibling module pills when inside a suite */}
           {activeTab !== 'hub' && siblingModules.length > 1 ? (
             <div
               role="tablist"
               aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
               className={`flex items-center p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none transition-colors ${
-                isDarkMode ? 'bg-[#150917] border border-[#4A1224]/60' : 'bg-amber-50/90 border border-amber-200'
+                isDarkMode ? 'bg-[#121B1E] border border-stone-800' : 'bg-stone-100 border border-stone-200'
               }`}
             >
               {siblingModules.map((m) => {
@@ -505,11 +506,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     onClick={() => setActiveTab(m.id as DisabilityTab)}
                     className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
                       isSelected
-                        ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                        ? 'bg-teal-700 text-white font-black shadow-sm'
                         : isDarkMode
-                          ? 'text-slate-300 hover:text-white'
-                          : 'text-slate-600 hover:text-slate-950'
-                    } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 ${isDarkMode ? 'focus-visible:ring-offset-slate-900' : 'focus-visible:ring-offset-white'}`}
+                          ? 'text-stone-300 hover:text-white'
+                          : 'text-stone-600 hover:text-stone-950'
+                    } focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-1 ${isDarkMode ? 'focus-visible:ring-offset-stone-900' : 'focus-visible:ring-offset-white'}`}
                   >
                     <span
                       title={localize(profile.language, m.titleEn, m.titleAr)}
@@ -523,18 +524,33 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               })}
             </div>
           ) : (
-            /* Standard accessibility utilities: Passport & Settings */
+            /* Standard accessibility utilities: Theme toggle, Passport & Settings */
             <div className="flex items-center gap-1.5 sm:gap-2">
+              {toggleTheme && (
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className={`p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center rounded-xl border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0 ${
+                    isDarkMode
+                      ? 'text-amber-400 bg-[#162327] border-stone-800 hover:bg-stone-800'
+                      : 'text-stone-600 bg-stone-100 border-stone-200 hover:bg-stone-200'
+                  }`}
+                  title={isDarkMode ? 'التبديل للوضع النهاري' : 'التبديل للوضع الليلي'}
+                  aria-label="Toggle light or dark theme"
+                >
+                  {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+              )}
               <AriaButton
                 onPress={() => setShowPassportModal(true)}
                 aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
                 className={`px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl ${
                   isDarkMode
-                    ? 'bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border-amber-500/40 text-amber-200 hover:text-white hover:bg-amber-500/30'
-                    : 'bg-amber-100/80 border-amber-400/80 text-amber-950 hover:bg-amber-100 hover:text-black font-extrabold'
-                } border transition-all text-xs font-bold flex items-center gap-2 shadow-sm active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer`}
+                    ? 'bg-teal-950/40 border-teal-800 text-teal-300 hover:bg-teal-900/60'
+                    : 'bg-teal-50 border-teal-200 text-teal-900 hover:bg-teal-100 font-bold'
+                } border transition-all text-xs font-bold flex items-center gap-2 shadow-sm active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer`}
               >
-                <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-teal-700 dark:text-teal-400 shrink-0" />
                 <span className="hidden sm:inline">{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
               </AriaButton>
               <AriaButton
@@ -542,9 +558,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 aria-label={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
                 className={`p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center ${
                   isDarkMode
-                    ? 'text-slate-300 hover:text-white bg-[#150917] border-[#4A1224]/60'
-                    : 'text-slate-700 hover:text-slate-950 bg-amber-50/90 border-amber-200 hover:bg-amber-100'
-                } border rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer shrink-0`}
+                    ? 'text-stone-300 hover:text-white bg-[#162327] border-stone-800'
+                    : 'text-stone-700 hover:text-stone-950 bg-stone-100 border-stone-200 hover:bg-stone-200'
+                } border rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0`}
               >
                 <Settings className="w-4 h-4" />
               </AriaButton>
@@ -554,17 +570,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       </header>
 
       {/* ── MAIN CONTENT CONTAINER ── */}
-      <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
+      <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative pb-16 md:pb-0">
         <AnimatePresence mode="wait">
 
           {/* ═════════════════════════════════════════════════════════════════════
               VIEW: DISABILITY MODULES HUB & LAUNCHER
-             ═════════════════════════════════════════════════════════════════════ */}
-          {/* ═════════════════════════════════════════════════════════════════════
-              VIEW: CLEAN DIRECT ACCESSIBILITY SUITE SELECTOR (NO CARD CLUTTER)
-             ═════════════════════════════════════════════════════════════════════ */}
-          {/* ═════════════════════════════════════════════════════════════════════
-              VIEW: ROYAL BURGUNDY CONSTELLATION HERO & ASSISTIVE SUITES HUB
              ═════════════════════════════════════════════════════════════════════ */}
           {activeTab === 'hub' && (
             <motion.div
@@ -582,6 +592,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 isDarkMode={isDarkMode}
                 toggleTheme={toggleTheme}
                 onSTTStateChange={onSTTStateChange}
+                setProfile={setProfile}
               />
             </motion.div>
           )}
@@ -851,6 +862,59 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         profile={profile}
         setProfile={setProfile}
       />
+
+      {/* ── MOBILE BOTTOM NAVIGATION BAR (Comfortable thumb reach on phones) ── */}
+      <nav
+        aria-label={localize(profile.language, 'Mobile Bottom Navigation', 'شريط التنقل السفلي للهاتف')}
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-40 px-2 py-1.5 border-t backdrop-blur-md flex items-center justify-around shadow-lg transition-colors ${
+          isDarkMode
+            ? 'bg-[#0E1416]/95 border-stone-800 text-stone-300'
+            : 'bg-white/95 border-stone-200/90 text-stone-700'
+        }`}
+      >
+        {[
+          { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', icon: LayoutGrid },
+          { id: 'chat' as const, labelAr: 'المرشد', labelEn: 'Tutor', icon: Brain },
+          { id: 'vision' as const, labelAr: 'البصري', labelEn: 'Vision', icon: Eye },
+          { id: 'deaf' as const, labelAr: 'السمعي', labelEn: 'Hearing', icon: Ear },
+        ].map((item) => {
+          const isSelected = item.id === 'deaf' ? isDeafActive : activeTab === item.id;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleSelectTab(item.id)}
+              className={`flex flex-col items-center justify-center min-w-[56px] min-h-[48px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
+                isSelected
+                  ? 'text-teal-700 dark:text-teal-400 font-black'
+                  : 'hover:text-stone-950 dark:hover:text-white opacity-75'
+              }`}
+            >
+              <div className={`p-1 rounded-lg ${isSelected ? 'bg-teal-50 dark:bg-teal-950/60' : ''}`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] tracking-tight font-bold mt-0.5">
+                {localize(profile.language, item.labelEn, item.labelAr)}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Passport quick access on mobile */}
+        <button
+          type="button"
+          onClick={() => setShowPassportModal(true)}
+          className="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] py-1 px-2 rounded-xl transition-all cursor-pointer text-teal-700 dark:text-teal-400 hover:opacity-100 opacity-80"
+        >
+          <div className="p-1 rounded-lg">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <span className="text-[10px] tracking-tight font-bold mt-0.5">
+            {localize(profile.language, 'Passport', 'الجواز')}
+          </span>
+        </button>
+      </nav>
     </div>
   );
 });
