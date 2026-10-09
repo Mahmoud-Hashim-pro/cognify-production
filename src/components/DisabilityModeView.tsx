@@ -572,15 +572,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               <AriaButton
                 onPress={() => setShowPassportModal(true)}
                 aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
-                className="px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border border-amber-500/40 text-amber-200 hover:text-white hover:bg-amber-500/30 transition-all text-xs font-bold flex items-center gap-2 shadow-md active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+                className={`px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl ${
+                  isDarkMode
+                    ? 'bg-gradient-to-r from-amber-500/20 to-indigo-500/20 border-amber-500/40 text-amber-200 hover:text-white hover:bg-amber-500/30'
+                    : 'bg-amber-100/80 border-amber-400/80 text-amber-950 hover:bg-amber-100 hover:text-black font-extrabold'
+                } border transition-all text-xs font-bold flex items-center gap-2 shadow-sm active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer`}
               >
-                <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
                 <span className="hidden sm:inline">{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
               </AriaButton>
               <AriaButton
                 onPress={() => setActiveTab('settings')}
                 aria-label={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
-                className="p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer shrink-0"
+                className={`p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center ${
+                  isDarkMode
+                    ? 'text-slate-300 hover:text-white bg-[#150917] border-[#4A1224]/60'
+                    : 'text-slate-700 hover:text-slate-950 bg-amber-50/90 border-amber-200 hover:bg-amber-100'
+                } border rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer shrink-0`}
               >
                 <Settings className="w-4 h-4" />
               </AriaButton>
@@ -718,6 +726,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   profile={profile}
                   onNavigateBack={handleNavigateBack}
                   onMenuClick={onMenuClick}
+                  isDarkMode={isDarkMode}
                 />
               </React.Suspense>
             </motion.div>

@@ -32,6 +32,7 @@ interface UnifiedHearingCenterProps {
   profile: UserProfile;
   onNavigateBack?: () => void;
   onMenuClick?: () => void;
+  isDarkMode?: boolean;
 }
 
 type Dialect = 'Egyptian Ammiya' | 'Arabic' | 'English';
@@ -39,6 +40,7 @@ type Dialect = 'Egyptian Ammiya' | 'Arabic' | 'English';
 export default function UnifiedHearingCenter({
   profile,
   onNavigateBack,
+  isDarkMode = true,
 }: UnifiedHearingCenterProps) {
   // Dialect / Language
   const [dialect, setDialect] = useState<Dialect>(() => {
@@ -415,28 +417,44 @@ Question: "${q}"`;
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className="flex-1 flex flex-col h-full overflow-hidden select-none bg-[#080409] text-slate-100"
+      className={`flex-1 flex flex-col h-full overflow-hidden select-none transition-colors duration-300 ${
+        isDarkMode ? 'bg-[#080409] text-slate-100' : 'bg-[#FAF8F5] text-slate-900'
+      }`}
     >
       {/* ── TOP HEADER ── */}
-      <header className="px-4 py-2.5 border-b border-[#4A1224]/60 bg-[#0E0610]/95 backdrop-blur-xl flex items-center justify-between gap-3 shrink-0 z-10">
+      <header className={`px-4 py-2.5 border-b backdrop-blur-xl flex items-center justify-between gap-3 shrink-0 z-10 transition-colors duration-300 ${
+        isDarkMode
+          ? 'border-[#4A1224]/60 bg-[#0E0610]/95 text-white'
+          : 'border-amber-200/80 bg-white/95 text-slate-900 shadow-sm'
+      }`}>
         <div className="flex items-center gap-2.5">
           {onNavigateBack && (
             <button
               onClick={onNavigateBack}
-              className="p-1.5 rounded-xl bg-[#150917] border border-[#4A1224]/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
+                isDarkMode
+                  ? 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:text-white hover:bg-slate-800'
+                  : 'bg-amber-50 border-amber-200 text-slate-700 hover:text-slate-950 hover:bg-amber-100'
+              }`}
               title={loc('Back to Hub', 'رجوع للرئيسية')}
             >
               <ArrowRight className={`w-4 h-4 ${isAr ? '' : 'rotate-180'}`} />
             </button>
           )}
-          <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-[#E5A93C]/30 flex items-center justify-center text-[#E5A93C]">
+          <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
+            isDarkMode
+              ? 'bg-indigo-500/15 border-[#E5A93C]/30 text-[#E5A93C]'
+              : 'bg-amber-100 border-amber-300 text-amber-800'
+          }`}>
             <Ear className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="font-black text-sm text-white leading-tight flex items-center gap-2">
+            <h1 className={`font-black text-sm leading-tight flex items-center gap-2 ${
+              isDarkMode ? 'text-white' : 'text-slate-900'
+            }`}>
               <span>{loc('Bilateral Sign Language Station', 'محطة لغة الإشارة التبادلية')}</span>
             </h1>
-            <p className="text-[10px] text-slate-400">
+            <p className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
               {loc(
                 'AI Avatar explains in 3D Sign | Camera translates your signs into voice & text',
                 'الأفاتار يشرح بالذكاء الاصطناعي والإشارة 3D | الكاميرا تقرأ إشاراتك وتحولها لصوت أو نص'
@@ -446,7 +464,11 @@ Question: "${q}"`;
         </div>
 
         {/* Dialect Switcher */}
-        <div className="flex items-center gap-1 bg-[#150917] border border-[#4A1224]/60 p-1 rounded-xl text-xs">
+        <div className={`flex items-center gap-1 border p-1 rounded-xl text-xs ${
+          isDarkMode
+            ? 'bg-[#150917] border-[#4A1224]/60'
+            : 'bg-amber-50/90 border-amber-200'
+        }`}>
           {(['Egyptian Ammiya', 'Arabic', 'English'] as Dialect[]).map((d) => (
             <button
               key={d}
@@ -454,7 +476,9 @@ Question: "${q}"`;
               className={`px-2 py-1 rounded-lg font-bold transition-all text-[11px] cursor-pointer ${
                 dialect === d
                   ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  : isDarkMode
+                    ? 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-600 hover:text-slate-950'
               }`}
             >
               {d === 'Egyptian Ammiya' ? '🇪🇬 مصري' : d === 'Arabic' ? '🇸🇦 فصحى' : '🇺🇸 EN'}
@@ -464,24 +488,36 @@ Question: "${q}"`;
       </header>
 
       {/* ── BILATERAL SIGN LANGUAGE STATION: TWO CARDS ── */}
-      <main className="flex-1 min-h-0 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar">
+      <main className={`flex-1 min-h-0 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar ${
+        isDarkMode ? '' : 'bg-[#FAF8F5]'
+      }`}>
 
         {/* ══════════════════════════════════════════════════════════════════════
             CARD 1: THE 3D AVATAR & AI TUTOR (اسأل الذكاء الاصطناعي ويرد بالإشارة)
            ══════════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group">
+        <div className={`border rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group transition-colors duration-300 ${
+          isDarkMode
+            ? 'bg-[#120614]/90 border-[#4A1224]/60'
+            : 'bg-white border-amber-200/80 shadow-md'
+        }`}>
           <div className="flex flex-col h-full justify-between">
             {/* Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
+            <div className={`flex items-center justify-between pb-2 border-b shrink-0 ${
+              isDarkMode ? 'border-[#4A1224]/40' : 'border-amber-100'
+            }`}>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                  isDarkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-700'
+                }`}>
                   <Bot className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 flex-wrap">
+                  <h2 className={`text-xs sm:text-sm font-black flex items-center gap-1.5 flex-wrap ${
+                    isDarkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
                     <span>{loc('3D Sign Avatar & AI Tutor', 'أفاتار الذكاء الاصطناعي بلغة الإشارة 3D')}</span>
                   </h2>
-                  <p className="text-[10px] text-slate-400">
+                  <p className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                     {loc('Ask any question -> AI explains it in 3D Sign Language', 'اسأله أي سؤال ويشرحه لك بلغة الإشارة 3D')}
                   </p>
                 </div>
@@ -491,14 +527,22 @@ Question: "${q}"`;
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setIsAvatarPlaying(!isAvatarPlaying)}
-                  className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                    isDarkMode
+                      ? 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:text-white'
+                      : 'bg-amber-50 border-amber-200 text-slate-700 hover:text-slate-950 hover:bg-amber-100'
+                  }`}
                   title={isAvatarPlaying ? loc('Pause', 'إيقاف مؤقت') : loc('Play', 'تشغيل')}
                 >
                   {isAvatarPlaying ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                 </button>
                 <button
                   onClick={handleReplayAvatar}
-                  className="p-1.5 rounded-lg bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                    isDarkMode
+                      ? 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:text-amber-400'
+                      : 'bg-amber-50 border-amber-200 text-slate-700 hover:text-amber-700 hover:bg-amber-100'
+                  }`}
                   title={loc('Replay Sign Sequence', 'إعادة الحركة الإشارية')}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -507,10 +551,14 @@ Question: "${q}"`;
             </div>
 
             {/* 3D Avatar Canvas */}
-            <div className="w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl bg-gradient-to-b from-[#09030B] to-[#140616] border border-[#4A1224]/50 relative overflow-hidden flex items-center justify-center">
+            <div className={`w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl border relative overflow-hidden flex items-center justify-center ${
+              isDarkMode
+                ? 'bg-gradient-to-b from-[#09030B] to-[#140616] border-[#4A1224]/50'
+                : 'bg-gradient-to-b from-slate-900 to-slate-950 border-amber-300/70 shadow-inner'
+            }`}>
               <React.Suspense
                 fallback={
-                  <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
+                  <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
                     <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                     <span className="text-xs font-bold">{loc('Loading 3D Avatar…', 'جاري تشغيل الأفاتار 3D...')}</span>
                   </div>
@@ -526,21 +574,29 @@ Question: "${q}"`;
               </React.Suspense>
 
               {/* Active Sign Ticker */}
-              <div className="absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#0E0610]/85 backdrop-blur-md border border-[#4A1224]/60 text-xs">
-                <span className="text-[10px] text-slate-400 font-bold">
+              <div className={`absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg backdrop-blur-md border text-xs ${
+                isDarkMode
+                  ? 'bg-[#0E0610]/85 border-[#4A1224]/60'
+                  : 'bg-white/95 border-amber-300 text-slate-900 shadow-md'
+              }`}>
+                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                   {loc('Signing Word:', 'الكلمة المشارة:')}
                 </span>
-                <span className="font-black text-amber-400 text-xs tracking-wide">
+                <span className="font-black text-amber-500 text-xs tracking-wide">
                   {currentSigningWord || avatarWords[0] || '---'}
                 </span>
               </div>
             </div>
 
             {/* AI Subtitles / Explanation Box */}
-            <div className="p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 mb-2 min-h-[75px] max-h-[110px] overflow-y-auto custom-scrollbar flex flex-col justify-between">
-              <p className="text-xs text-slate-200 leading-relaxed font-medium">
+            <div className={`p-2.5 rounded-xl border mb-2 min-h-[75px] max-h-[110px] overflow-y-auto custom-scrollbar flex flex-col justify-between ${
+              isDarkMode
+                ? 'bg-[#09030B] border-[#4A1224]/40 text-slate-200'
+                : 'bg-amber-50/70 border-amber-200 text-slate-900'
+            }`}>
+              <p className={`text-xs leading-relaxed font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>
                 {isAiLoading ? (
-                  <span className="text-amber-400 flex items-center gap-1.5 animate-pulse">
+                  <span className="text-amber-500 flex items-center gap-1.5 animate-pulse">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{loc('Generating answer & translating to 3D Sign...', 'جاري توليد الإجابة وترجمتها للإشارة 3D...')}</span>
                   </span>
@@ -549,7 +605,9 @@ Question: "${q}"`;
                 )}
               </p>
               {!isAiLoading && (
-                <div className="flex items-center justify-between pt-1 text-[10px] text-slate-500 border-t border-slate-900 mt-1">
+                <div className={`flex items-center justify-between pt-1 text-[10px] border-t mt-1 ${
+                  isDarkMode ? 'border-slate-900 text-slate-500' : 'border-amber-200/60 text-slate-600'
+                }`}>
                   <span>{loc('✅ Ready', '✅ جاهز')}</span>
                 </div>
               )}
@@ -567,7 +625,11 @@ Question: "${q}"`;
                     'Ask AI any academic, scientific, or general question…',
                     'اسأل الذكاء الاصطناعي أي سؤال ليشرحه بلغة الإشارة...'
                   )}
-                  className="flex-1 p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/50 text-slate-100 placeholder:text-slate-500 text-xs focus:outline-none focus:border-indigo-400/80 transition-all"
+                  className={`flex-1 p-2.5 rounded-xl border text-xs focus:outline-none transition-all ${
+                    isDarkMode
+                      ? 'bg-[#09030B] border-[#4A1224]/50 text-slate-100 placeholder:text-slate-500 focus:border-indigo-400/80'
+                      : 'bg-white border-amber-200 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 shadow-sm'
+                  }`}
                 />
 
                 {/* Voice button */}
@@ -576,7 +638,9 @@ Question: "${q}"`;
                   className={`p-2.5 rounded-xl border text-xs transition-colors cursor-pointer ${
                     isQuestionVoiceActive
                       ? 'bg-rose-500 text-white border-rose-400 animate-pulse'
-                      : 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:text-white'
+                      : isDarkMode
+                        ? 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:text-white'
+                        : 'bg-amber-50 border-amber-200 text-slate-700 hover:text-slate-950 hover:bg-amber-100'
                   }`}
                   title={loc('Ask by Voice', 'اسأل بالصوت')}
                 >
@@ -600,22 +664,32 @@ Question: "${q}"`;
         {/* ══════════════════════════════════════════════════════════════════════
             HALF 2 (50%): THE CAMERA (مكان الميكرفون) TO CONVERT SIGNS TO VOICE & TEXT
            ══════════════════════════════════════════════════════════════════════ */}
-        <div className="bg-[#120614]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group">
+        <div className={`border rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group transition-colors duration-300 ${
+          isDarkMode
+            ? 'bg-[#120614]/90 border-[#4A1224]/60'
+            : 'bg-white border-amber-200/80 shadow-md'
+        }`}>
           <div className="flex flex-col h-full justify-between">
             {/* Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/40 shrink-0">
+            <div className={`flex items-center justify-between pb-2 border-b shrink-0 ${
+              isDarkMode ? 'border-[#4A1224]/40' : 'border-amber-100'
+            }`}>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                  isDarkMode ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-100 text-amber-800'
+                }`}>
                   <Camera className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+                  <h2 className={`text-xs sm:text-sm font-black flex items-center gap-1.5 ${
+                    isDarkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
                     <span>{loc('Live Camera Sign Recognition', 'كاميرا قراءة لغة الإشارة الذكية')}</span>
                     {isCameraActive && (
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     )}
                   </h2>
-                  <p className="text-[10px] text-slate-400">
+                  <p className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                     {loc('Open camera & sign with hands -> converts to text for AI', 'افتح الكاميرا وتكلم بلغة الإشارة -> تتحول فوراً لنص يُرسل للذكاء الاصطناعي')}
                   </p>
                 </div>
@@ -645,7 +719,11 @@ Question: "${q}"`;
             </div>
 
             {/* Video Viewfinder Container */}
-            <div className="w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl bg-[#09030B] border border-[#4A1224]/50 relative overflow-hidden flex items-center justify-center">
+            <div className={`w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl border relative overflow-hidden flex items-center justify-center ${
+              isDarkMode
+                ? 'bg-[#09030B] border-[#4A1224]/50'
+                : 'bg-amber-50/40 border-amber-200'
+            }`}>
               {/* Actual Video Element */}
               <video
                 ref={videoRef}
@@ -662,15 +740,19 @@ Question: "${q}"`;
 
               {/* Placeholder when camera is off */}
               {!isCameraActive && (
-                <div className="flex flex-col items-center justify-center text-center p-4 text-slate-500 gap-2">
-                  <div className="w-14 h-14 rounded-2xl bg-[#150917] border border-[#4A1224]/60 flex items-center justify-center text-slate-400">
-                    <Hand className="w-7 h-7 text-amber-400" />
+                <div className="flex flex-col items-center justify-center text-center p-4 gap-2">
+                  <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center ${
+                    isDarkMode
+                      ? 'bg-[#150917] border-[#4A1224]/60 text-slate-400'
+                      : 'bg-amber-100/70 border-amber-200 text-amber-700'
+                  }`}>
+                    <Hand className="w-7 h-7 text-amber-500" />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-200">
+                    <p className={`text-xs font-black ${isDarkMode ? 'text-slate-200' : 'text-slate-900'}`}>
                       {loc('Camera is ready', 'الكاميرا جاهزة للتشغيل')}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1 max-w-[280px]">
+                    <p className={`text-[11px] mt-1 max-w-[280px] leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                       {loc(
                         'Click "Start Camera" above and sign with your hands to convert into text for AI.',
                         'اضغط على زر "تشغيل الكاميرا" أعلاه وتكلم بإشارات يدك لتتحول مباشرةً لنص وتُرسل للذكاء الاصطناعي.'
@@ -682,11 +764,15 @@ Question: "${q}"`;
 
               {/* Live Detected Sign Banner */}
               {isCameraActive && (
-                <div className="absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#0E0610]/85 backdrop-blur-md border border-[#4A1224]/60 text-xs">
-                  <span className="text-[10px] text-slate-400 font-bold">
+                <div className={`absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg backdrop-blur-md border text-xs ${
+                  isDarkMode
+                    ? 'bg-[#0E0610]/85 border-[#4A1224]/60'
+                    : 'bg-white/95 border-amber-300 text-slate-900 shadow-md'
+                }`}>
+                  <span className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                     {cameraStatus || loc('Tracking Hands…', 'جاري رصد حركة اليدين…')}
                   </span>
-                  <span className="font-black text-emerald-400 text-xs tracking-wide">
+                  <span className="font-black text-emerald-600 text-xs tracking-wide">
                     {detectedSign ? (isAr ? `🤟 رُصدت: ${detectedSign}` : `🤟 Detected: ${detectedSign}`) : loc('Wave hand in front of camera', 'لوح بيدك أمام الكاميرا')}
                   </span>
                 </div>
@@ -696,25 +782,33 @@ Question: "${q}"`;
             {/* ── CONVERTED TEXT & AUDIO OUTPUT (تحتها يتحول الكلام لصوت أو نص) ── */}
             <div className="flex flex-col gap-2">
               {/* Text Box */}
-              <div className="p-2.5 rounded-xl bg-[#09030B] border border-[#4A1224]/40 min-h-[65px] max-h-[90px] overflow-y-auto custom-scrollbar flex flex-col justify-between">
-                <p className="text-xs sm:text-sm font-black text-amber-300 leading-relaxed">
+              <div className={`p-2.5 rounded-xl border min-h-[65px] max-h-[90px] overflow-y-auto custom-scrollbar flex flex-col justify-between ${
+                isDarkMode
+                  ? 'bg-[#09030B] border-[#4A1224]/40'
+                  : 'bg-amber-50/70 border-amber-200'
+              }`}>
+                <p className={`text-xs sm:text-sm font-black leading-relaxed ${
+                  accumulatedText.trim()
+                    ? isDarkMode ? 'text-amber-300' : 'text-amber-900'
+                    : isDarkMode ? 'text-slate-500 font-normal text-xs' : 'text-slate-500 font-normal text-xs'
+                }`}>
                   {accumulatedText.trim() ? (
                     accumulatedText
                   ) : (
-                    <span className="text-slate-500 font-normal text-xs">
-                      {loc(
-                        'Recognized words from your camera signs will appear here…',
-                        'الكلام المترجم من إشارات يدك سيظهر هنا في الوقت الفعلي…'
-                      )}
-                    </span>
+                    loc(
+                      'Recognized words from your camera signs will appear here…',
+                      'الكلام المترجم من إشارات يدك سيظهر هنا في الوقت الفعلي…'
+                    )
                   )}
                 </p>
 
                 {accumulatedText.trim() && (
-                  <div className="flex items-center justify-end pt-1 border-t border-slate-900 text-[10px] text-slate-400">
+                  <div className={`flex items-center justify-end pt-1 border-t text-[10px] ${
+                    isDarkMode ? 'border-slate-900 text-slate-400' : 'border-amber-200 text-slate-600'
+                  }`}>
                     <button
                       onClick={() => setAccumulatedText('')}
-                      className="text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
+                      className="text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer font-bold"
                     >
                       <Trash2 className="w-3 h-3" />
                       <span>{loc('Clear', 'مسح')}</span>

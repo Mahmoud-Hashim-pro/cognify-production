@@ -377,6 +377,14 @@ html.high-contrast button:focus-visible {
 
 :root:not(.dark) .border-slate-800,
 :root:not(.dark) .border-slate-800\/80,
+/* Light Mode Comprehensive Global Theme Adapters */
+:root:not(.dark) {
+  --color-bg-main: #FAF8F5;
+  --color-bg-card: #FFFFFF;
+  --color-text-main: #0F172A;
+  color-scheme: light;
+}
+
 :root:not(.dark) .border-slate-700,
 :root:not(.dark) .border-slate-700\/50,
 :root:not(.dark) .border-slate-700\/60,
@@ -395,10 +403,42 @@ html.high-contrast button:focus-visible {
   color: #475569 !important;
 }
 
+:root:not(.dark) h1.text-white,
+:root:not(.dark) h2.text-white,
+:root:not(.dark) h3.text-white,
+:root:not(.dark) h4.text-white {
+  color: #0F172A !important;
+}
+
 :root:not(.dark) .obsidian-card,
 :root:not(.dark) .obsidian-card-interactive {
-  background-color: rgba(255, 255, 255, 0.92) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+:root:not(.dark) .bg-\[\#080409\] {
+  background-color: #FAF8F5 !important;
+}
+
+:root:not(.dark) .bg-\[\#0E0610\],
+:root:not(.dark) .bg-\[\#0E0610\]\/95,
+:root:not(.dark) .bg-\[\#0E0610\]\/90,
+:root:not(.dark) .bg-\[\#0D0610\]\/90,
+:root:not(.dark) .bg-\[\#111622\] {
+  background-color: #FFFFFF !important;
+}
+
+:root:not(.dark) .bg-\[\#120614\],
+:root:not(.dark) .bg-\[\#120614\]\/90 {
+  background-color: #FFFFFF !important;
+}
+
+:root:not(.dark) .border-\[\#4A1224\],
+:root:not(.dark) .border-\[\#4A1224\]\/60,
+:root:not(.dark) .border-\[\#4A1224\]\/50,
+:root:not(.dark) .border-\[\#4A1224\]\/40 {
+  border-color: rgba(245, 158, 11, 0.28) !important;
 }
 
 
