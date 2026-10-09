@@ -13,30 +13,20 @@ import {
 import type { AccessibilityMode } from '../types';
 
 type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
-// Friendly picker labels shown to the user — NOT the same set as the app's real
-// AccessibilityMode enum (which has 'Vocal-Deaf' / 'Sign-Only' / 'Motor-Euphonia' /
-// 'Neurodiversity' instead of 'Hearing' / 'Motor' / 'Cognitive'). DISABILITY_MODE_MAP
-// below is the single place that translates between the two — every option here
-// MUST have an entry there, or that user silently ends up with accessibilityMode 'None'.
-type DisabilityOption = 'Visual' | 'Hearing' | 'Speech';
+type DisabilityOption = 'Visual' | 'Hearing' | 'Speech' | 'Universal';
 
-// The one source of truth for turning a picker chip into the real, canonical
-// AccessibilityMode value used everywhere else in the app (DisabilityModeView's
-// direct-suite routing, access.ts, etc.). Stored as-is in localStorage so
-// Onboarding.tsx / App.tsx no longer have to re-derive it by matching prose strings.
 const DISABILITY_MODE_MAP: Record<DisabilityOption, AccessibilityMode> = {
   'Visual': 'Visual',
   'Hearing': 'Vocal-Deaf',
   'Speech': 'Speech',
+  'Universal': 'Visual',
 };
 
-// Human-readable label stored in profile.disabilityType for display + as a free-text
-// fallback (DisabilityModeView's detectDirectDisabilityTab regex-matches this when
-// accessibilityMode itself isn't set, e.g. for older accounts).
 const DISABILITY_LABEL_MAP: Record<DisabilityOption, string> = {
   'Visual': 'Visual Impairment',
   'Hearing': 'Hearing Impairment',
-  'Speech': 'Speech Impairment',
+  'Speech': 'Speech & Motor Impairment',
+  'Universal': 'Cross-Disability & Sensory Bridge',
 };
 
 // Each Special Needs accessibility feature, tagged with which disability chip(s) it's the primary match for.
@@ -55,43 +45,58 @@ const SPECIAL_NEEDS_FEATURES: {
   {
     key: 'vision',
     Icon: Eye,
-    title: { en: 'Visual Companion (AI Eyes)', ar: 'الرفيق البصري الذكي' },
-    description: { en: 'Audio companion that reads currency, matches clothing colors, and recognizes faces', ar: 'رفيق صوتي يقرأ العملات، وينسّق ألوان الملابس، ويتعرف على الوجوه' },
+    title: { en: 'Visual Companion (AI Eyes)', ar: 'الرفيق البصري الذكي (عيون الذكاء الاصطناعي)' },
+    description: { en: 'Audio description, currency reader (EGP & global), color matcher, and spatial obstacle guidance', ar: 'وصف صوتي فوري، قراءة العملات والجنيه المصري، تنسيق ألوان الملابس، وحفظ الذاكرة المكانية' },
     matches: ['Visual'],
   },
   {
     key: 'sign-language',
-    Icon: Heart,
-    title: { en: 'Deaf & Hard of Hearing Suite (All-in-One)', ar: 'منظومة الصم وضعاف السمع الشاملة (الكل في واحد)' },
-    description: { en: '3D sign language studio, sound & hazard radar, and a live two-way communication bridge', ar: 'استوديو لغة إشارة ثلاثي الأبعاد، رادار للأصوات والمخاطر، وجسر تواصل مباشر ثنائي الاتجاه' },
+    Icon: Ear,
+    title: { en: 'Unified Deaf & Hearing Center', ar: 'منظومة الصم وضعاف السمع الشاملة' },
+    description: { en: '3D sign language avatar, live speech captions, express AAC cards, and sound hazard radar', ar: 'أفاتار إشارة 3D، تفريغ كلام مباشر، بطاقات تواصل سريعة، ورادار بيئي للأصوات والمخاطر' },
     matches: ['Hearing'],
   },
   {
-    // These last three aren't tied to any single chip (matches: []) — available to
-    // every Special Needs account regardless of which focus they pick, so they're
-    // always listed but never get the "SELECTED" highlight. Together with the four
-    // above, this is the full real set of 7 suites in DisabilityModeView's MODULES
-    // (All Suites badge shows "7") — don't drop any of these three or the preview
-    // undersells the app again.
+    key: 'video',
+    Icon: Sparkles,
+    title: { en: 'Sign Video Studio', ar: 'استوديو ترجمة الفيديو للغة الإشارة' },
+    description: { en: 'Convert educational videos and speech into continuous 3D sign language animations', ar: 'تحويل الفيديوهات والشروح الصوتية إلى لغة إشارة ثلاثية الأبعاد متزامنة' },
+    matches: ['Hearing'],
+  },
+  {
+    key: 'motor',
+    Icon: Activity,
+    title: { en: 'Speech Euphonia & Switch Control', ar: 'تحسين النطق والتحكم الحركي الذكي' },
+    description: { en: 'Voice synthesis for speech difficulties, dwell auto-clicker, and switch scanning for ALS', ar: 'توليف صوتي لمن يعانون من صعوبات النطق، نقر تلقائي عند التوقف، ومسح للمفاتيح البديلة' },
+    matches: ['Speech'],
+  },
+  {
+    key: 'orchestrator',
+    Icon: Zap,
+    title: { en: 'Cross-Disability Sensory Bridge', ar: 'جسر الحواس والتواصل متعدد الإعاقات' },
+    description: { en: 'Direct peer-to-peer sensory relay between Blind (Audio) and Deaf (Text/Sign) users', ar: 'جسر مباشر للتواصل التبادلي بين الكفيف والأصم بدون وسيط بشري' },
+    matches: ['Universal'],
+  },
+  {
     key: 'caregiver',
     Icon: Heart,
-    title: { en: 'Caregiver & Specialist Hub', ar: 'لوحة المرافق والمختص الطبي' },
-    description: { en: 'Family & clinical monitoring dashboard, live SOS test dispatch, and encrypted backup', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، ونسخ احتياطي مشفر' },
-    matches: [],
+    title: { en: 'Caregiver & Specialist SOS Hub', ar: 'لوحة المرافق والمختص ونداء الاستغاثة SOS' },
+    description: { en: 'Emergency SOS alerts, real-time location sharing, and clinical care logs', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، وتتبع الرعاية' },
+    matches: ['Universal'],
   },
   {
     key: 'chat',
-    Icon: Sparkles,
-    title: { en: 'Adaptive Cognitive Tutor', ar: 'المساعد التعليمي الذكي المهيأ' },
-    description: { en: 'Pedagogical tutoring assistant tailored to your pace, with step-by-step guidance and full screen-reader support', ar: 'مساعد تعليمي يتكيف مع وتيرتك، بشرح خطوة بخطوة ودعم كامل لقارئات الشاشة' },
-    matches: [],
+    Icon: Brain,
+    title: { en: 'Accessible AI Tutor', ar: 'المساعد التعليمي المهيأ للإتاحة' },
+    description: { en: 'Adaptive tutor tailored to your pace, with high contrast & screen-reader support', ar: 'مساعد تعليمي ذكي مهيأ بالكامل لقارئات الشاشة، تباين لوني فائق، وتدرج معرفي مرن' },
+    matches: ['Universal'],
   },
   {
     key: 'settings',
     Icon: Globe,
-    title: { en: 'Preferences & Dialects', ar: 'التفضيلات واللغات' },
-    description: { en: '11 languages & dialects including Egyptian Ammiya, plus adjustable accessibility profiles and display settings', ar: '11 لغة ولهجة ومنها المصري، مع إمكانية ضبط ملفات الإتاحة وإعدادات العرض' },
-    matches: [],
+    title: { en: 'Accessibility Passport & Dialects', ar: 'جواز الإتاحة واللغات' },
+    description: { en: '11 languages & dialects including Egyptian Ammiya, plus sensory profiles', ar: '11 لغة ولهجة ومنها المصري، مع ضبط جواز الإتاحة وملفات الحواس الشخصية' },
+    matches: ['Universal'],
   },
 ];
 
@@ -109,6 +114,68 @@ function getSpecialNeedsFeatures(
     }))
     .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
 }
+
+const DISABILITY_MODALITIES: {
+  id: DisabilityOption;
+  titleEn: string;
+  titleAr: string;
+  badgeEn: string;
+  badgeAr: string;
+  descEn: string;
+  descAr: string;
+  icon: typeof Eye;
+  focusTagEn: string;
+  focusTagAr: string;
+}[] = [
+  {
+    id: 'Visual',
+    titleEn: 'Visual Impairment & Blind',
+    titleAr: 'المكفوفين وضعاف البصر',
+    badgeEn: 'AI Eyes & Audio',
+    badgeAr: 'عيون اصطناعية وصوت',
+    descEn: 'Conversational audio eyes: currency reader (EGP & global), clothes color matching, face memory, and obstacle avoidance.',
+    descAr: 'رفيق صوتي فوري، قراءة العملات الورقية والجنيه، تنسيق ألوان الملابس، التعرف على الوجوه، والملاحة اللمسية.',
+    icon: Eye,
+    focusTagEn: 'Currency · Colors · Faces · Haptics',
+    focusTagAr: 'قارئ العملات · الملابس · الوجوه · الاهتزاز',
+  },
+  {
+    id: 'Hearing',
+    titleEn: 'Deaf & Hard of Hearing',
+    titleAr: 'الصم وضعاف السمع',
+    badgeEn: '3D Sign & Radar',
+    badgeAr: 'إشارة 3D ورادار',
+    descEn: 'Unified hearing center: 3D sign avatar, live speech captions, express AAC cards, and hazard sound radar.',
+    descAr: 'المركز السمعي الموحد: أفاتار إشارة ثلاثي الأبعاد، تفريغ كلام مباشر، بطاقات تواصل، ورادار للأصوات والمخاطر.',
+    icon: Ear,
+    focusTagEn: '3D Sign · Captions · Radar · Studio',
+    focusTagAr: 'إشارة 3D · كابشن فوري · رادار مخاطر · استوديو',
+  },
+  {
+    id: 'Speech',
+    titleEn: 'Speech & Motor Support',
+    titleAr: 'صعوبات النطق والحركة',
+    badgeEn: 'Euphonia & Switch',
+    badgeAr: 'توليف صوت ومفاتيح',
+    descEn: 'Custom voice synthesis for non-standard speech, dwell auto-clicker, single-switch scanning, and accessible inputs.',
+    descAr: 'توليف نطق صوتي مخصص، نقر تلقائي عند التوقف، ومسح للمفاتيح البديلة لمرضى التصلب والشلل الحركي.',
+    icon: Activity,
+    focusTagEn: 'Voice Euphonia · Switch · Dwell Click',
+    focusTagAr: 'توليف النطق · مسح المفاتيح · النقر التلقائي',
+  },
+  {
+    id: 'Universal',
+    titleEn: 'Cross-Disability & Caregiver',
+    titleAr: 'جسر الحواس ومرافقي الهمم',
+    badgeEn: 'Sensory Mesh & SOS',
+    badgeAr: 'جسر حواس وطوارئ SOS',
+    descEn: 'Peer-to-peer blind/deaf sensory bridge, emergency SOS dispatch, accessible tutor, and caregiver clinical dashboard.',
+    descAr: 'جسر تواصل تبادلي فوري بين الكفيف والأصم، إرسال استغاثة SOS، ومتابعة المختصين والمرافقين.',
+    icon: Heart,
+    focusTagEn: 'Sensory Bridge · SOS Alert · Caregiver Hub',
+    focusTagAr: 'جسر الحواس · نداء استغاثة SOS · لوحة المرافق',
+  },
+];
 
 interface LoginProps {
   onDirectPreview?: () => void;
@@ -132,13 +199,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showRedirectOption, setShowRedirectOption] = useState(false);
 
-  const [accountPath, setAccountPath] = useState<AccountPath>('Normal');
-  const [hoveredPath, setHoveredPath] = useState<AccountPath | null>(null);
-  const activePreviewPath = hoveredPath || accountPath;
-  const [universityEmail, setUniversityEmail] = useState("");
-  const [faculty, setFaculty] = useState("");
-  const [department, setDepartment] = useState("");
+  const [accountPath, setAccountPath] = useState<AccountPath>('Special Needs');
+  const [hoveredDisability, setHoveredDisability] = useState<DisabilityOption | null>(null);
   const [selectedDisability, setSelectedDisability] = useState<DisabilityOption>('Visual');
+  const activePreviewDisability = hoveredDisability || selectedDisability;
 
   const [showHelp, setShowHelp] = useState(false);
   const [isInIframe] = useState(() => {
@@ -183,22 +247,13 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   }, []);
 
   const handleContinuePath = () => {
-    if (accountPath === 'Graduation Project') {
-      return;
-    }
     clearPreLoginState();
     try {
-      localStorage.setItem('preLoginAccountPath', accountPath);
-      if (accountPath === 'Special Needs') {
-        localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
-        // The real enum value, stored directly — Onboarding.tsx / App.tsx should
-        // read this first instead of re-parsing the prose label above.
-        localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
-      } else {
-        localStorage.setItem('preLoginAccessibilityMode', 'None');
-        localStorage.removeItem('preLoginDisability');
-        localStorage.removeItem('cognify_default_disability_tab');
-      }
+      localStorage.setItem('preLoginAccountPath', 'Special Needs');
+      localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
+      localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
+      const tab = selectedDisability === 'Hearing' ? 'deaf' : selectedDisability === 'Visual' ? 'vision' : 'hub';
+      localStorage.setItem('cognify_default_disability_tab', tab);
     } catch (err) {
       console.warn("LocalStorage unavailable in current context:", err);
     }
@@ -211,7 +266,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
       localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
-      localStorage.setItem('cognify_default_disability_tab', 'hub');
+      const tab = selectedDisability === 'Hearing' ? 'deaf' : selectedDisability === 'Visual' ? 'vision' : 'hub';
+      localStorage.setItem('cognify_default_disability_tab', tab);
       window.location.hash = '#disability';
     } catch (err) {
       console.warn("Direct preview error:", err);
@@ -389,13 +445,13 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-black text-white tracking-tight font-serif">Cognify</span>
+              <span className="text-xl font-black text-white tracking-tight font-serif">Cognify A11y</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/40">
-                2.0
+                A11y Edition
               </span>
             </div>
             <span className="text-[11px] text-[#E5A93C]/80 font-medium">
-              {t("Adaptive AI Study Mentor", "مدرّسك الذكي التكيّفي")}
+              {t("Assistive Technology for People of Determination", "منظومة التقنيات المساعدة لأصحاب الهمم وذوي الإعاقة")}
             </span>
           </div>
         </div>
@@ -431,214 +487,86 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
               {/* Hero Title Header */}
               <div className="space-y-2 max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-[#2D0B16] via-[#4A1224] to-[#2D0B16] border border-[#E5A93C]/40 text-[#E5A93C] shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 text-[#E5A93C]" />
-                  <span>{t("Personalized Calibration · One Platform, Three Experiences", "معايرة تكيّفية مخصصة · منصة واحدة، ثلاث تجارب")}</span>
+                  <Accessibility className="w-3.5 h-3.5 text-[#E5A93C]" />
+                  <span>{t("Dedicated Assistive Ecosystem · For People of Determination", "المنظومة المتخصصة للإتاحة والتقنيات المساعدة · لأصحاب الهمم")}</span>
                 </div>
 
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
                   {isRtl ? (
-                    <>سؤال واحد. <span className="text-[#E5A93C]">ثلاثة</span> <span className="text-amber-300">طرق</span> <span className="text-[#E5A93C]">لسماع</span> الإجابة.</>
+                    <>منظومة <span className="text-[#E5A93C]">كوجنيفاي</span> المتخصصة <span className="text-amber-300">لذوي الإعاقة</span> والتقنيات المساعدة.</>
                   ) : (
-                    <>One question. <span className="text-[#E5A93C]">Three</span> <span className="text-amber-300">ways</span> <span className="text-[#E5A93C]">to</span> hear the answer.</>
+                    <>Cognify <span className="text-[#E5A93C]">Assistive Ecosystem</span> for <span className="text-amber-300">People of Determination</span>.</>
                   )}
                 </h1>
 
                 <p className="text-xs sm:text-[13px] text-slate-300 font-medium leading-relaxed">
                   {t(
-                    "Cognify doesn't just change its tone — it transforms its entire capabilities. Select a path below to see live capabilities and continue.",
-                    "كوجنيفاي لا يغير نبرته فقط — بل يغير إمكانياته ومميزاته بالكامل. اختر مساراً لمشاهدة قدراته المباشرة والمتابعة فوراً."
+                    "Empowering blind, deaf, non-verbal, and motor-impaired individuals with AI vision, 3D sign avatar, sound radar, and sensory bridging.",
+                    "تمكين ذوي الإعاقات البصرية والسمعية والحركية والنطقية بأحدث تقنيات الرؤية الحاسوبية، لغة الإشارة 3D، رادار المخاطر، وجسر الحواس."
                   )}
                 </p>
               </div>
 
-              {/* Main Interactive Comparison Card - Split View */}
+              {/* Main Interactive Modality Card - Split View */}
               <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-[28px] overflow-hidden shadow-2xl backdrop-blur-2xl ring-1 ring-[#E5A93C]/20">
                 {/* Top Royal Burgundy & Gold Strip */}
                 <div className="h-1.5 w-full bg-gradient-to-r from-[#2D0B16] via-[#831843] via-[#E5A93C] to-[#2D0B16]" />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-4 sm:p-5 lg:p-6">
-                  {/* Left Column: LIVE MODE OVERVIEW / معاينة إمكانيات ومميزات الوضع */}
+                  {/* Left Column: LIVE MODALITY OVERVIEW */}
                   <div className="lg:col-span-7 flex flex-col justify-between space-y-3">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full animate-pulse bg-[#E5A93C]" />
                           <span className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]">
-                            {t("LIVE MODE OVERVIEW", "ملخص إمكانيات الوضع")}
+                            {t("LIVE MODALITY OVERVIEW", "معاينة إمكانيات المسار المختار")}
                           </span>
                         </div>
-                        <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
-                          activePreviewPath === 'Normal'
-                            ? 'bg-[#4A1224]/60 text-[#E5A93C] border-[#E5A93C]/40'
-                            : activePreviewPath === 'Graduation Project'
-                            ? 'bg-[#3A2210]/60 text-amber-300 border-[#E5A93C]/40'
-                            : 'bg-[#4A1224]/80 text-[#E5A93C] border-[#E5A93C]/40 shadow-sm'
-                        }`}>
-                          {activePreviewPath === 'Normal' && t('Standard Path', 'المسار القياسي')}
-                          {activePreviewPath === 'Graduation Project' && t('Academic Path · Coming Soon', 'المسار الأكاديمي · قريباً')}
-                          {activePreviewPath === 'Special Needs' && t('Assistive Technology Suite', 'منظومة ذوي الهمم الشاملة')}
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border bg-[#4A1224]/80 text-[#E5A93C] border-[#E5A93C]/40 shadow-sm">
+                          {t("Assistive Technology Suite", "منظومة التقنيات المساعدة")}
                         </span>
                       </div>
 
                       {/* Dynamic Summary Card */}
                       <div className="bg-[#140816]/95 border border-[#4A1224]/60 rounded-2xl p-3.5 sm:p-4 space-y-3 shadow-xl backdrop-blur-md">
                         <AnimatePresence mode="wait">
-                          <motion.div
-                            key={activePreviewPath}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.2 }}
-                            className="space-y-3"
-                          >
-                            {/* Mode Title & Header Badge */}
-                            <div className="flex items-start gap-3">
-                              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all shadow-md ${
-                                activePreviewPath === 'Normal'
-                                  ? 'bg-gradient-to-br from-[#4A1224] via-[#831843] to-[#E5A93C] text-slate-950 shadow-[#4A1224]/30'
-                                  : activePreviewPath === 'Graduation Project'
-                                  ? 'bg-gradient-to-br from-[#3A2210] via-[#5A3816] to-[#E5A93C] text-slate-950 shadow-[#4A1224]/30'
-                                  : 'bg-gradient-to-br from-[#4A1224] via-[#831843] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/50 shadow-rose-950/40'
-                              }`}>
-                                {activePreviewPath === 'Normal' && <Brain className="w-5 h-5 text-[#E5A93C]" />}
-                                {activePreviewPath === 'Graduation Project' && <GraduationCap className="w-5 h-5 text-[#E5A93C]" />}
-                                {activePreviewPath === 'Special Needs' && (
-                                  <Accessibility className="w-5 h-5 text-[#E5A93C]" />
-                                )}
-                              </div>
+                          {(() => {
+                            const currentModality = DISABILITY_MODALITIES.find((m) => m.id === activePreviewDisability) || DISABILITY_MODALITIES[0];
+                            const ModalityIcon = currentModality.icon;
+                            return (
+                              <motion.div
+                                key={currentModality.id}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.2 }}
+                                className="space-y-3"
+                              >
+                                {/* Modality Title & Header Badge */}
+                                <div className="flex items-start gap-3">
+                                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all shadow-md bg-gradient-to-br from-[#831843] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/50 shadow-rose-950/40">
+                                    <ModalityIcon className="w-5 h-5 text-[#E5A93C]" />
+                                  </div>
 
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-sm sm:text-base font-black text-white tracking-tight leading-snug">
-                                  {activePreviewPath === 'Normal' && t("Personalized AI Cognitive Mentor", "المساعد المعرفي الذكي المخصص")}
-                                  {activePreviewPath === 'Graduation Project' && (
-                                    <span className="flex items-center gap-2 flex-wrap">
-                                      <span>{t("Faculty & Graduation Research Companion", "رفيق مشروع التخرج والأبحاث الأكاديمية")}</span>
-                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-[#E5A93C]/20 text-[#E5A93C] border border-[#E5A93C]/40 animate-pulse">
-                                        {t("Coming Soon", "قريباً")}
-                                      </span>
-                                    </span>
-                                  )}
-                                  {activePreviewPath === 'Special Needs' && (
-                                    <span className="flex items-center gap-2 flex-wrap">
-                                      <span>{t("People of Determination Hub", "منظومة ذوي الهمم · مركز التقنيات المساعدة")}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-sm sm:text-base font-black text-white tracking-tight leading-snug flex items-center gap-2 flex-wrap">
+                                      <span>{t(currentModality.titleEn, currentModality.titleAr)}</span>
                                       <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-[#E5A93C]/20 text-[#E5A93C] border border-[#E5A93C]/40 shrink-0">
-                                        {t("5 Assistive Modes", "5 مسارات مساندة")}
+                                        {t(currentModality.badgeEn, currentModality.badgeAr)}
                                       </span>
-                                    </span>
-                                  )}
-                                </h3>
-                                <p className="text-[11px] sm:text-xs text-slate-300 font-medium mt-0.5 leading-relaxed">
-                                  {activePreviewPath === 'Normal' && t(
-                                    "Calibrated dynamically to your cognitive pace. Explains concepts with 4 teaching styles, tracks goals, and calculates your GPA in real time.",
-                                    "معاير بدقة لسرعة استيعابك. يشرح بـ 4 أساليب تدريس، يتابع أهدافك، ويحسب معدلك التراكمي لحظة بلحظة."
-                                  )}
-                                  {activePreviewPath === 'Graduation Project' && t(
-                                    "Curriculum-aware AI deeply linked to your faculty, department, and courses. Assists with thesis formulation, methodology, and citation standards.",
-                                    "ذكاء اصطناعي يفهم مقررات كليتك وتخصصك بدقة. يدعم صياغة الرسالة، توثيق المراجع، ومتابعة تسليمات مشروعك."
-                                  )}
-                                  {activePreviewPath === 'Special Needs' && t(
-                                    "Assistive multi-modal suite for visual and hearing needs with 3D sign avatar, camera sign reader, and spoken tools.",
-                                    "منظومة إتاحة شاملة للإعاقات البصرية والسمعية مع أفاتار 3D، كاميرا قراءة الإشارة، وأدوات بصرية وصوتية."
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="h-px bg-[#4A1224]/50 w-full" />
-
-                            {/* Eye-catching Feature Highlights */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                              {activePreviewPath === 'Normal' && (
-                                <>
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <Sparkles className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("4 Adaptive Pedagogy Styles", "4 أساليب شرح تكيّفية")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Step-by-Step, Socratic, Visual & Technical", "خطوة بخطوة، سقراطي، تشبيهات وتقني")}</div>
-                                    </div>
+                                    </h3>
+                                    <p className="text-[11px] sm:text-xs text-slate-300 font-medium mt-0.5 leading-relaxed">
+                                      {t(currentModality.descEn, currentModality.descAr)}
+                                    </p>
                                   </div>
+                                </div>
 
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <Check className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("Dynamic GPA & Goal Tracker", "حاسبة GPA وتتبع الأهداف")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Live grade forecasting & study countdowns", "توقعات فورية للمعدل وعد تنازلي للمهام")}</div>
-                                    </div>
-                                  </div>
+                                <div className="h-px bg-[#4A1224]/50 w-full" />
 
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <Brain className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("Cognitive Gym & IQ Assessment", "الجيم المعرفي واختبارات الذكاء")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Daily brain workouts and cognitive metrics", "تمارين ذهنية يومية لقياس سرعة التفكير")}</div>
-                                    </div>
-                                  </div>
-
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <Tag className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("Spaced Retention Flashcards", "تكرار متباعد ذكي")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Active recall cards against forgetting", "بطاقات استذكار لمحاربة النسيان")}</div>
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-
-                              {activePreviewPath === 'Graduation Project' && (
-                                <>
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <GraduationCap className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("Faculty Curriculum Alignment", "ربط مباشر بمقررات كليتك")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("AI knows your specific college & department", "فهم كامل لمقررات وتخصص كليتك")}</div>
-                                    </div>
-                                  </div>
-
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <Sparkles className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("Thesis & Literature Reviews", "صياغة الرسالة ومراجعة المراجع")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Academic methodology and research synthesis", "منهجيات بحث أكاديمية وصياغة علمية")}</div>
-                                    </div>
-                                  </div>
-
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <Check className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("Automated Citation Engine", "محرك التوثيق الأكاديمي")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("IEEE, APA, Harvard format in a single click", "تنسيق مراجع معتمد بنقرة واحدة")}</div>
-                                    </div>
-                                  </div>
-
-                                  <div className="p-3 rounded-2xl bg-[#160A18]/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 flex items-start gap-3 shadow-md transition-all">
-                                    <div className="w-8 h-8 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 flex items-center justify-center shrink-0 mt-0.5">
-                                      <Brain className="w-4 h-4 text-[#E5A93C]" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-xs font-bold text-white leading-snug">{t("Sprint & Milestone Deliverables", "تتبع مراحل وتسليمات المشروع")}</div>
-                                      <div className="text-[11px] text-slate-300 leading-tight mt-1">{t("Track supervisor notes and project deadlines", "تتبع ملاحظات المشرف ومواعيد المناقشة")}</div>
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-
-                              {activePreviewPath === 'Special Needs' && (
-                                <>
-                                  {getSpecialNeedsFeatures(selectedDisability, t).slice(0, 4).map((feature) => (
+                                {/* Eye-catching Feature Highlights */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                  {getSpecialNeedsFeatures(activePreviewDisability, t).slice(0, 4).map((feature) => (
                                     <div
                                       key={feature.key}
                                       className={`p-2.5 sm:p-3 rounded-xl border flex items-start gap-2.5 transition-all shadow-md ${
@@ -657,7 +585,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                                           <span className="truncate">{feature.title}</span>
                                           {feature.isPrimary && (
                                             <span className="px-1.5 py-0.2 rounded-full text-[8px] font-black tracking-wider bg-[#E5A93C]/20 text-[#E5A93C] border border-[#E5A93C]/40 shrink-0">
-                                              {t('FOCUS', 'محدد')}
+                                              {t('ACTIVE', 'نشط')}
                                             </span>
                                           )}
                                         </div>
@@ -665,10 +593,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                                       </div>
                                     </div>
                                   ))}
-                                </>
-                              )}
-                            </div>
-                          </motion.div>
+                                </div>
+                              </motion.div>
+                            );
+                          })()}
                         </AnimatePresence>
                       </div>
                     </div>
@@ -677,289 +605,108 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                     <div className="space-y-1.5 pt-0.5">
                       <div className="flex items-center gap-2 text-xs font-bold">
                         <span className="inline-flex items-center gap-1.5 text-[#E5A93C]">
-                          <Check className="w-3.5 h-3.5" /> {t("Mode Unlocks:", "المميزات المفتوحة:")}
+                          <Check className="w-3.5 h-3.5" /> {t("Universal Access:", "إتاحة قياسية شاملة:")}
                         </span>
                         <span className="text-slate-300 font-semibold text-[11px] sm:text-xs">
-                          {activePreviewPath === 'Normal' && t("Adaptive AI Chat · GPA Engine · Spaced Retention · Cognitive Tests", "دردشة تكيّفية · حاسبة GPA · تكرار متباعد · اختبارات ذهنية")}
-                          {activePreviewPath === 'Graduation Project' && t("All Normal Features + Faculty Context + Thesis AI + Citations", "كل مميزات العادي + ربط الكلية + إرشاد الرسالة + توثيق المراجع")}
-                          {activePreviewPath === 'Special Needs' && t("All Normal Features + 3D Sign Language + Camera Sign Reader + Vision AI Eyes", "كل مميزات العادي + لغة إشارة 3D + كاميرا قراءة الإشارة + رفيق بصري")}
+                          {t("WCAG 2.2 AAA Compliant · Screen Reader Compatible · Zero Ads · Free Forever", "معايير WCAG 2.2 AAA العالمية · توافق تام مع قارئات الشاشة · بدون إعلانات")}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right Column: CHOOSE YOUR PATH */}
+                  {/* Right Column: CHOOSE YOUR ASSISTIVE FOCUS */}
                   <div className="lg:col-span-5 flex flex-col justify-between space-y-4 lg:border-s lg:border-[#4A1224]/50 lg:ps-6">
                     <div className="space-y-3">
                       <div>
                         <h2 className="text-base sm:text-lg font-black text-white tracking-tight">
-                          {t("Choose your path", "اختر مسارك")}
+                          {t("Select Assistive Focus", "اختر المسار المساند الأساسي")}
                         </h2>
                         <p className="text-[10px] sm:text-[11px] text-[#E5A93C]/80 font-medium">
-                          {t("You can change this later in settings.", "يمكنك تغيير هذا المسار لاحقاً من الإعدادات.")}
+                          {t("All 7 assistive modules remain unlocked and accessible.", "كافة الوحدات والأدوات المساندة تظل مفتوحة ومتاحة لك.")}
                         </p>
                       </div>
 
-                      {/* Vertical Path Selector Timeline */}
+                      {/* Modality Selector Cards */}
                       <RadioGroup
-                        value={accountPath}
-                        onChange={(val) => setAccountPath(val as AccountPath)}
-                        aria-label={t("Choose your path", "اختر مسارك")}
+                        value={selectedDisability}
+                        onChange={(val) => setSelectedDisability(val as DisabilityOption)}
+                        aria-label={t("Select Assistive Focus", "اختر المسار المساند")}
                         className="space-y-2.5 relative outline-none"
                       >
-                        {/* 1. Normal Path */}
-                        <Radio
-                          value="Normal"
-                          onMouseEnter={() => setHoveredPath('Normal')}
-                          onMouseLeave={() => setHoveredPath(null)}
-                          className={({ isSelected, isFocusVisible }) =>
-                            `relative z-10 w-full flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-200 outline-none ${
-                              isSelected
-                                ? 'bg-gradient-to-r from-[#4A1224]/60 via-[#831843]/20 to-[#120715]/95 border-[#E5A93C] shadow-xl shadow-[#4A1224]/30 ring-1 ring-[#E5A93C]/40 scale-[1.01]'
-                                : 'bg-[#140916]/70 border-[#4A1224]/40 hover:bg-[#1A0C1D]/80 hover:border-[#E5A93C]/40 shadow-sm'
-                            } ${isFocusVisible ? 'ring-2 ring-[#E5A93C] ring-offset-2 ring-offset-slate-950' : ''}`
-                          }
-                        >
-                          {({ isSelected }) => (
-                            <>
-                              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                                isSelected
-                                  ? 'bg-gradient-to-br from-[#4A1224] via-[#831843] to-[#E5A93C] text-slate-950 shadow-md shadow-[#4A1224]/40'
-                                  : 'bg-[#1A0C1D] text-slate-400 border border-[#4A1224]/60'
-                              }`}>
-                                <Brain className={`w-4 h-4 sm:w-5 sm:h-5 ${isSelected ? 'text-[#E5A93C]' : 'text-slate-400'}`} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-1.5">
-                                  <span className={`text-xs sm:text-sm font-black transition-colors ${isSelected ? 'text-[#E5A93C]' : 'text-white'}`}>
-                                    {t("Normal Path", "المسار القياسي (عام)")}
-                                  </span>
-                                  <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${
+                        {DISABILITY_MODALITIES.map((modality) => {
+                          const ModalityIcon = modality.icon;
+                          return (
+                            <Radio
+                              key={modality.id}
+                              value={modality.id}
+                              onMouseEnter={() => setHoveredDisability(modality.id)}
+                              onMouseLeave={() => setHoveredDisability(null)}
+                              className={({ isSelected, isFocusVisible }) =>
+                                `relative z-10 w-full flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-200 outline-none ${
+                                  isSelected
+                                    ? 'bg-gradient-to-r from-[#2D0B16] via-[#4A1224]/90 to-[#120715]/95 border-[#E5A93C] shadow-xl shadow-[#4A1224]/40 ring-1 ring-[#E5A93C]/50 scale-[1.01]'
+                                    : 'bg-[#140916]/70 border-[#4A1224]/40 hover:bg-[#2D0B16]/40 hover:border-[#E5A93C]/40 shadow-sm'
+                                } ${isFocusVisible ? 'ring-2 ring-[#E5A93C] ring-offset-2 ring-offset-slate-950' : ''}`
+                              }
+                            >
+                              {({ isSelected }) => (
+                                <>
+                                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
                                     isSelected
-                                      ? 'bg-[#E5A93C]/20 text-[#E5A93C] border-[#E5A93C]/40'
-                                      : 'bg-[#1A0C1D] text-slate-400 border-[#4A1224]/50'
+                                      ? 'bg-gradient-to-br from-[#831843] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/60 shadow-md shadow-rose-950/50'
+                                      : 'bg-[#1A0C1D] text-[#E5A93C]/70 border border-[#4A1224]/60'
                                   }`}>
-                                    {t("Active · Ready", "جاهز للبدء")}
-                                  </span>
-                                </div>
-                                <p className="text-[11px] text-slate-300 font-medium mt-0.5 leading-snug">
-                                  {t("Adaptive AI mentor, Socratic explanations, GPA forecasting & spaced retention flashcards.", "مساعد معرفي ذكي يتكيف مع استيعابك، حاسبة GPA، وتكرار متباعد لحفظ المعلومات.")}
-                                </p>
-                              </div>
-                              <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                isSelected
-                                  ? 'bg-[#E5A93C] text-slate-950 shadow-sm ring-4 ring-[#E5A93C]/20'
-                                  : 'border border-[#4A1224]/60 bg-[#140916]/50'
-                              }`}>
-                                {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                              </div>
-                            </>
-                          )}
-                        </Radio>
-
-                        {/* 2. Graduation Project */}
-                        <div className="relative z-10 space-y-1.5">
-                          <Radio
-                            value="Graduation Project"
-                            onMouseEnter={() => setHoveredPath('Graduation Project')}
-                            onMouseLeave={() => setHoveredPath(null)}
-                            className={({ isSelected, isFocusVisible }) =>
-                              `w-full flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-200 outline-none ${
-                                isSelected
-                                  ? 'bg-gradient-to-r from-[#3B220E]/50 via-[#4A1224]/25 to-[#120715]/95 border-[#E5A93C]/80 shadow-xl shadow-[#4A1224]/20 ring-1 ring-[#E5A93C]/30 scale-[1.01]'
-                                  : 'bg-[#140916]/70 border-[#4A1224]/40 hover:bg-[#1A0C1D]/80 hover:border-[#E5A93C]/40 shadow-sm'
-                              } ${isFocusVisible ? 'ring-2 ring-[#E5A93C] ring-offset-2 ring-offset-slate-950' : ''}`
-                            }
-                          >
-                            {({ isSelected }) => (
-                              <>
-                                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                                  isSelected
-                                    ? 'bg-gradient-to-br from-[#4A2810] via-[#5C1D24] to-[#E5A93C] text-slate-950 shadow-md shadow-[#4A1224]/30'
-                                    : 'bg-[#1A0C1D] text-slate-400 border border-[#4A1224]/60'
-                                }`}>
-                                  <GraduationCap className={`w-4 h-4 sm:w-5 sm:h-5 ${isSelected ? 'text-[#E5A93C]' : 'text-slate-400'}`} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between gap-1.5">
-                                    <span className={`text-xs sm:text-sm font-black transition-colors ${isSelected ? 'text-amber-300' : 'text-white'}`}>
-                                      {t("Graduation Project", "مشروع التخرج")}
-                                    </span>
-                                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E5A93C]/20 text-[#E5A93C] border border-[#E5A93C]/40 shrink-0 animate-pulse">
-                                      {t("Coming Soon", "قريباً")}
-                                    </span>
+                                    <ModalityIcon className="w-5 h-5" />
                                   </div>
-                                  <p className="text-[11px] text-slate-300 font-medium mt-0.5 leading-snug">
-                                    {t("Anchored to your faculty, department, courses & thesis formatting standards.", "مرتبط بكليتك وتخصصك ومقرراتك الأكاديمية وصياغة الرسائل العلمية.")}
-                                  </p>
-                                </div>
-                                <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                  isSelected
-                                    ? 'bg-[#E5A93C] text-slate-950 shadow-sm ring-4 ring-[#E5A93C]/20'
-                                    : 'border border-[#4A1224]/60 bg-[#140916]/50'
-                                }`}>
-                                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                                </div>
-                              </>
-                            )}
-                          </Radio>
-
-                          {/* Graduation Coming Soon Note */}
-                          {accountPath === 'Graduation Project' && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              className="p-3 rounded-xl bg-[#2D1B0A]/70 border border-[#E5A93C]/40 text-[#E5A93C] text-xs font-semibold leading-relaxed space-y-1 ms-3"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="flex items-center gap-1.5 font-black text-[#E5A93C] text-xs">
-                                <Sparkles className="w-3 h-3 shrink-0" />
-                                <span>{t("Feature Coming Soon", "الميزة قادمة قريباً")}</span>
-                              </div>
-                              <p className="text-[11px] text-amber-200/90 font-medium">
-                                {t(
-                                  "The Graduation Project pathway is under active development. Please select 'Normal' or 'People of Determination' to continue.",
-                                  "مسار مشروع التخرج قيد التجهيز وسيتم إطلاقه قريباً. يرجى اختيار المسار 'العادي' أو 'ذوي الهمم' للمتابعة الآن."
-                                )}
-                              </p>
-                            </motion.div>
-                          )}
-                        </div>
-
-                        {/* 3. Special Needs / People of Determination */}
-                        <div className="relative z-10 space-y-2">
-                          <Radio
-                            value="Special Needs"
-                            onMouseEnter={() => setHoveredPath('Special Needs')}
-                            onMouseLeave={() => setHoveredPath(null)}
-                            className={({ isSelected, isFocusVisible }) =>
-                              `w-full flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-200 outline-none ${
-                                isSelected
-                                  ? 'bg-gradient-to-r from-[#2D0B16] via-[#4A1224]/90 to-[#120715]/95 border-[#E5A93C] shadow-xl shadow-[#4A1224]/40 ring-1 ring-[#E5A93C]/50 scale-[1.01]'
-                                  : 'bg-[#140916]/70 border-[#4A1224]/40 hover:bg-[#2D0B16]/40 hover:border-[#E5A93C]/40 shadow-sm'
-                              } ${isFocusVisible ? 'ring-2 ring-[#E5A93C] ring-offset-2 ring-offset-slate-950' : ''}`
-                            }
-                          >
-                            {({ isSelected }) => (
-                              <>
-                                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                                  isSelected
-                                    ? 'bg-gradient-to-br from-[#831843] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/60 shadow-md shadow-rose-950/50'
-                                    : 'bg-[#1A0C1D] text-[#E5A93C] border border-[#4A1224]/60'
-                                }`}>
-                                  <Accessibility className="w-5 h-5 text-[#E5A93C]" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between gap-1.5">
-                                    <span className={`text-xs sm:text-sm font-black transition-colors ${isSelected ? 'text-[#E5A93C]' : 'text-white'}`}>
-                                      {t("People of Determination", "مسار ذوي الهمم")}
-                                    </span>
-                                    <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${
-                                      isSelected
-                                        ? 'bg-[#E5A93C]/20 text-[#E5A93C] border-[#E5A93C]/40'
-                                        : 'bg-[#1A0C1D] text-slate-400 border-[#4A1224]/50'
-                                    }`}>
-                                      {t("4 Assistive Modes", "4 مسارات داعمة")}
-                                    </span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-300 font-medium mt-0.5 leading-snug">
-                                    {t("Assistive suite: 3D sign avatar, Vision eyes, and neuro tools.", "منظومة الدعم الشامل: لغة إشارة 3D، رفيق بصري، وأدوات توحد.")}
-                                  </p>
-                                </div>
-                                <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                  isSelected
-                                    ? 'bg-[#E5A93C] text-slate-950 shadow-sm ring-4 ring-[#E5A93C]/20'
-                                    : 'border border-[#4A1224]/60 bg-[#140916]/50'
-                                }`}>
-                                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                                </div>
-                              </>
-                            )}
-                          </Radio>
-
-                          {/* Focus Chips: Compact inline selector */}
-                          {accountPath === 'Special Needs' && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              className="pt-1 ps-1 space-y-1.5"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="flex items-center justify-between text-[10px] font-bold text-[#E5A93C]">
-                                <span className="flex items-center gap-1">
-                                  <Sparkles className="w-3 h-3" />
-                                  {t("Focus Modality:", "نظام التركيز الأساسي:")}
-                                </span>
-                                <span className="text-slate-400 font-normal text-[9px]">
-                                  {t("All 4 suites active", "كافة الأنظمة متاحة")}
-                                </span>
-                              </div>
-                              <RadioGroup
-                                value={selectedDisability}
-                                onChange={(val) => setSelectedDisability(val as DisabilityOption)}
-                                aria-label={t("Accessibility focus", "نوع الإتاحة المطلوب")}
-                                orientation="horizontal"
-                                className="grid grid-cols-2 gap-1.5 outline-none"
-                              >
-                                {[
-                                  { id: 'Visual' as const, label: t('Visual (AI Eyes)', 'بصري (مكفوفين)') },
-                                  { id: 'Hearing' as const, label: t('Hearing (3D Sign)', 'سمعي (لغة إشارة)') },
-                                ].map((item) => (
-                                  <Radio
-                                    key={item.id}
-                                    value={item.id}
-                                    className={({ isSelected }) =>
-                                      `flex items-center justify-center py-1 px-1.5 rounded-lg cursor-pointer transition-all outline-none border text-[10px] font-bold text-center ${
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-1.5">
+                                      <span className={`text-xs sm:text-sm font-black transition-colors ${isSelected ? 'text-[#E5A93C]' : 'text-white'}`}>
+                                        {t(modality.titleEn, modality.titleAr)}
+                                      </span>
+                                      <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${
                                         isSelected
-                                          ? 'bg-[#E5A93C] text-slate-950 border-[#E5A93C] shadow-sm'
-                                          : 'bg-[#160A18] border-[#4A1224]/60 text-slate-300 hover:border-[#E5A93C]/40'
-                                      }`
-                                    }
-                                  >
-                                    <span className="truncate">{item.label}</span>
-                                  </Radio>
-                                ))}
-                              </RadioGroup>
-                            </motion.div>
-                          )}
-                        </div>
+                                          ? 'bg-[#E5A93C]/20 text-[#E5A93C] border-[#E5A93C]/40'
+                                          : 'bg-[#1A0C1D] text-slate-400 border-[#4A1224]/50'
+                                      }`}>
+                                        {t(modality.badgeEn, modality.badgeAr)}
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-300 font-medium mt-0.5 leading-snug">
+                                      {t(modality.focusTagEn, modality.focusTagAr)}
+                                    </p>
+                                  </div>
+                                  <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                    isSelected
+                                      ? 'bg-[#E5A93C] text-slate-950 shadow-sm ring-4 ring-[#E5A93C]/20'
+                                      : 'border border-[#4A1224]/60 bg-[#140916]/50'
+                                  }`}>
+                                    {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                                  </div>
+                                </>
+                              )}
+                            </Radio>
+                          );
+                        })}
                       </RadioGroup>
                     </div>
 
                     {/* Action Buttons Row */}
                     <div className="space-y-2 pt-1">
-                      {accountPath === 'Special Needs' && (
-                        <button
-                          type="button"
-                          onClick={handleDirectPreview}
-                          className="w-full py-2.5 px-4 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 bg-gradient-to-r from-[#2D0B16] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/50 hover:brightness-125 shadow-lg active:scale-[0.98] transition-all"
-                        >
-                          <Sparkles className="w-3.5 h-3.5 text-[#E5A93C] animate-pulse" />
-                          <span>{t("Direct Hub Preview (No Sign-In Needed) ✦", "استكشاف المنظومة كزائر (بدون تسجيل) ✦")}</span>
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={handleDirectPreview}
+                        className="w-full py-2.5 px-4 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 bg-gradient-to-r from-[#2D0B16] via-[#4A1224] to-[#2D0B16] text-[#E5A93C] border border-[#E5A93C]/50 hover:brightness-125 shadow-lg active:scale-[0.98] transition-all"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#E5A93C] animate-pulse" />
+                        <span>{t("Direct Hub Preview (No Sign-In Needed) ✦", "استكشاف المنظومة كزائر (بدون تسجيل) ✦")}</span>
+                      </button>
 
                       <AriaButton
                         onPress={handleContinuePath}
-                        isDisabled={accountPath === 'Graduation Project'}
-                        className={`w-full py-3 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed outline-none ${
-                          accountPath === 'Normal'
-                            ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 hover:brightness-110 shadow-[#E5A93C]/25 ring-1 ring-[#E5A93C]/40'
-                            : accountPath === 'Graduation Project'
-                            ? 'bg-slate-800 text-slate-400 border border-slate-700/80 shadow-none'
-                            : 'bg-gradient-to-r from-[#E5A93C] via-amber-400 to-[#E5A93C] text-slate-950 hover:brightness-110 shadow-[#E5A93C]/30 ring-1 ring-[#E5A93C]/50'
-                        }`}
+                        className="w-full py-3 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition-all active:scale-[0.98] outline-none bg-gradient-to-r from-[#E5A93C] via-amber-400 to-[#E5A93C] text-slate-950 hover:brightness-110 shadow-[#E5A93C]/30 ring-1 ring-[#E5A93C]/50"
                       >
-                        <span>
-                          {accountPath === 'Graduation Project'
-                            ? t("Choose Another Path to Continue", "يرجى اختيار مسار آخر للمتابعة")
-                            : accountPath === 'Normal'
-                            ? t("Continue with Normal Path", "المتابعة بالمسار القياسي")
-                            : t("Continue with People of Determination Path", "المتابعة بمسار ذوي الهمم (تسجيل/دخول)")}
-                        </span>
-                        {accountPath !== 'Graduation Project' && (
-                          <ArrowRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
-                        )}
+                        <span>{t("Continue to Sign In / Create Account", "المتابعة للتسجيل / تسجيل الدخول")}</span>
+                        <ArrowRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
                       </AriaButton>
                     </div>
                   </div>
@@ -986,11 +733,9 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                 </button>
 
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#150917] border border-[#4A1224]/60 text-slate-300">
-                  <span>{t("Path:", "المسار:")}</span>
+                  <span>{t("Assistive Suite:", "نوع الإتاحة:")}</span>
                   <strong className="text-[#E5A93C]">
-                    {accountPath === 'Normal' && t('Normal', 'عادي')}
-                    {accountPath === 'Graduation Project' && t('Graduation Project', 'مشروع تخرج')}
-                    {accountPath === 'Special Needs' && `${t('Special Needs', 'احتياجات خاصة')} (${selectedDisability})`}
+                    {DISABILITY_LABEL_MAP[selectedDisability] || selectedDisability}
                   </strong>
                 </div>
               </div>

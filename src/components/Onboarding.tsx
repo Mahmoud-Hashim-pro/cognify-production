@@ -72,7 +72,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
 
   const [formData, setFormData] = useState<Partial<UserProfile>>({
     email: user?.email || auth.currentUser?.email || "",
-    accountPath: (localStorage.getItem('preLoginAccountPath') as any) || "Normal",
+    accountPath: (localStorage.getItem('preLoginAccountPath') as any) || "Special Needs",
     universityEmail: localStorage.getItem('preLoginUniEmail') || "",
     // University/Faculty <select> elements fall back to displaying "Other"
     // whenever the stored value isn't in the list (see the value= logic on

@@ -66,39 +66,17 @@ const ProfilePage = lazyWithRetry(() => import("./components/ProfilePage"));
 const SignVideoStudio = lazyWithRetry(() => import("./components/SignVideoStudio"));
 const AdminDashboard = lazyWithRetry(() => import("./components/AdminDashboard"));
 const SupportCenter = lazyWithRetry(() => import("./components/SupportCenter"));
-const GoalTracker = lazyWithRetry(() => import("./components/Goaltracker"));
-const GpaCalculator = lazyWithRetry(() => import("./components/GpaCalculator"));
-const StudentAnalytics = lazyWithRetry(() => import("./components/StudentAnalytics"));
-const AcademicPlanner = lazyWithRetry(() => import("./components/AcademicPlanner"));
-const LearningHub = lazyWithRetry(() => import("./components/learning/LearningHub"));
-const StudentMemoryPage = lazyWithRetry(() => import("./components/StudentMemoryPage"));
-const StudentPrivacyCenter = lazyWithRetry(() => import("./components/StudentPrivacyCenter"));
-const InstitutionCohortHub = lazyWithRetry(() => import("./components/InstitutionCohortHub"));
-const CognitiveGym = lazyWithRetry(() => import("./components/CognitiveGym"));
-const IqAssessmentModal = lazyWithRetry(() => import("./components/IqAssessmentModal"));
-const FrenchTravelVoiceAssistant = lazyWithRetry(() => import("./components/FrenchTravelVoiceAssistant"));
 const ChatInterface = lazyWithRetry(() => import("./components/ChatInterface"));
-const StudentIntelligenceProfileView = lazyWithRetry(() => import("./components/StudentIntelligenceProfileView"));
-const TeacherIntelligenceView = lazyWithRetry(() => import("./components/TeacherIntelligenceView"));
-const ParentIntelligenceView = lazyWithRetry(() => import("./components/ParentIntelligenceView"));
-const RetentionLearningCenter = lazyWithRetry(() => import("./components/RetentionLearningCenter"));
-const PedagogicalEvaluationView = lazyWithRetry(() => import("./components/PedagogicalEvaluationView"));
-const BusinessTenancyView = lazyWithRetry(() => import("./components/BusinessTenancyView"));
-const DeveloperApiConsole = lazyWithRetry(() => import("./components/DeveloperApiConsole"));
-const SystemResilienceDashboard = lazyWithRetry(() => import("./components/SystemResilienceDashboard"));
 const PrivacySecurityCenter = lazyWithRetry(() => import("./components/PrivacySecurityCenter"));
-const AiQualityGuardMonitor = lazyWithRetry(() => import("./components/AiQualityGuardMonitor"));
 const AccessibilityOverlay = lazyWithRetry(() => import("./components/AccessibilityOverlay"));
 const LiveCaptions = lazyWithRetry(() => import("./components/LiveCaptions"));
 
-/** Every hash route the app answers to — the single source of truth for both the
- *  initial read on mount and the popstate handler, so they can't drift apart. */
+/** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'chat', 'learning', 'profile', 'settings', 'video', 'disability',
-  'admin', 'goals', 'gpa', 'analytics', 'planner', 'support', 'memory',
-  'institution', 'gym', 'iq', 'france', 'privacy', 'intelligence',
-  'teacher', 'parent', 'privacy_security', 'evaluation', 'ai_quality',
-  'resilience', 'tenancy', 'developer_api', 'retention',
+  'disability', 'video', 'chat', 'profile', 'settings', 'admin', 'support', 'privacy_security',
+  'learning', 'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
+  'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
+  'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
 ] as const;
 
 function createGuestProfile(): UserProfile {
@@ -150,14 +128,13 @@ export default function App() {
     setCurrentView('disability');
   };
 
-  // Seed from the URL hash so deep links and F5 land on the right screen.
+  // Seed from the URL hash so deep links and F5 land on the right screen (default: disability)
   const [currentView, setCurrentView] = useState<AppView>(() => {
-    if (typeof window !== 'undefined' && sessionStorage.getItem('cognify_guest_preview') === 'disability') {
-      return 'disability';
-    }
     const h = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
-    if (!h || h === 'video' || h === 'disability') return 'chat';
-    return (VALID_VIEWS as readonly string[]).includes(h) ? (h as any) : 'chat';
+    if (h && (['disability', 'video', 'chat', 'profile', 'settings', 'admin', 'support', 'privacy_security'] as string[]).includes(h)) {
+      return h as any;
+    }
+    return 'disability';
   });
   
   const [profile, setProfile] = useState<UserProfile | null>(() => {
@@ -185,7 +162,6 @@ export default function App() {
   const [isSTTActive, setIsSTTActive] = useState(false);
   const [disabilityTab, setDisabilityTab] = useState<DisabilityTab>('hub');
   const [isLiveCaptionsOpen, setIsLiveCaptionsOpen] = useState(false);
-  const [isIqModalOpen, setIsIqModalOpen] = useState(false);
 
   // Cognify Memory (Phase 2) state
   const [memoryState, setMemoryState] = useState<StudentMemory | null>(() => {
@@ -939,25 +915,6 @@ export default function App() {
   const renderView = () => {
     const activeProfile = fullProfile || profile;
     if (!activeProfile) return null;
-    // Guard academic sections that aren't available for this education level
-    if (
-      (['gpa', 'analytics', 'goals', 'planner', 'retention', 'evaluation'] as const).includes(currentView as any) &&
-      !canAccessSection(activeProfile.educationLevel, currentView as any)
-    ) {
-      return (
-        <ChatInterface
-          ref={chatRef}
-          profile={activeProfile}
-          onQuestionEvaluated={updateQuestionHistory}
-          syncMessages={syncActiveThread}
-          onMenuClick={() => setIsMobileMenuOpen(true)}
-          externalMessage={externalMessage}
-          onStreamingUpdate={(text) => setCurrentAIResponse(text)}
-          onSTTStateChange={setIsSTTActive}
-          setProfile={setProfile}
-        />
-      );
-    }
     switch (currentView) {
       case 'chat':
         return (
@@ -975,10 +932,8 @@ export default function App() {
             />
           </>
         );
-      case 'learning':
-        return <LearningHub profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
       case 'video':
-        return <SignVideoStudio profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
+        return <SignVideoStudio profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo('disability')} />;
       case 'disability':
         return <DisabilityModeView
           ref={chatRef}
@@ -995,201 +950,23 @@ export default function App() {
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
         />;
-      case 'memory':
-        return (
-          <StudentMemoryPage
-            profile={activeProfile}
-            memory={memoryState || DEFAULT_STUDENT_MEMORY}
-            loading={memoryLoading}
-            error={memoryError}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo(homeViewFor(profile))}
-            onRetry={() => {
-              setMemoryLoading(true);
-              setMemoryError(null);
-              setMemoryRetryCount((c) => c + 1);
-            }}
-            onUseFallbackMemory={() => {
-              setMemoryState((prev) => prev || DEFAULT_STUDENT_MEMORY);
-              setMemoryLoading(false);
-              setMemoryError(null);
-            }}
-          />
-        );
-      case 'privacy':
-        return (
-          <StudentPrivacyCenter
-            profile={activeProfile}
-            memory={memoryState}
-            onClearMemory={async () => {
-              if (profile?.uid) {
-                await clearStudentMemory(profile.uid);
-                setMemoryState(null);
-              }
-            }}
-            onClose={() => navigateTo(homeViewFor(profile))}
-          />
-        );
       case 'profile':
         return (
           <ProfilePage
             profile={activeProfile}
             onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo(homeViewFor(profile))}
+            onNavigateBack={() => navigateTo('disability')}
             setProfile={setProfile}
             onNavigate={(v) => navigateTo(v)}
           />
         );
-      case 'intelligence':
-        return (
-          <StudentIntelligenceProfileView
-            profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo('profile')}
-          />
-        );
-      case 'teacher':
-        return (
-          <TeacherIntelligenceView
-            lang={isArabicLocale(activeProfile.language) ? 'ar' : 'en'}
-            onBack={() => navigateTo(homeViewFor(profile))}
-          />
-        );
-      case 'parent':
-        return (
-          <ParentIntelligenceView
-            profile={activeProfile}
-            lang={isArabicLocale(activeProfile.language) ? 'ar' : 'en'}
-            onBack={() => navigateTo(homeViewFor(profile))}
-          />
-        );
-      case 'retention':
-        return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <header className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => navigateTo(homeViewFor(profile))}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
-              </button>
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
-                aria-label="Toggle menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </header>
-            <RetentionLearningCenter
-              schedules={activeProfile.studentState?.retentionSchedules || {}}
-              lang={isArabicLocale(activeProfile.language) ? 'ar' : 'en'}
-            />
-          </div>
-        );
-      case 'evaluation':
-        return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <header className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => navigateTo(homeViewFor(profile))}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
-              </button>
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
-                aria-label="Toggle menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </header>
-            <PedagogicalEvaluationView
-              isArabic={isArabicLocale(activeProfile.language)}
-            />
-          </div>
-        );
-      case 'tenancy':
-        return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <header className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => navigateTo(homeViewFor(profile))}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
-              </button>
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
-                aria-label="Toggle menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </header>
-            <BusinessTenancyView
-              isArabic={isArabicLocale(activeProfile.language)}
-            />
-          </div>
-        );
-      case 'developer_api':
-        return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <header className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => navigateTo(homeViewFor(profile))}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
-              </button>
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
-                aria-label="Toggle menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </header>
-            <DeveloperApiConsole
-              isArabic={isArabicLocale(activeProfile.language)}
-            />
-          </div>
-        );
-      case 'resilience':
-        return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <header className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => navigateTo(homeViewFor(profile))}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
-              </button>
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
-                aria-label="Toggle menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </header>
-            <SystemResilienceDashboard
-              isArabic={isArabicLocale(activeProfile.language)}
-            />
-          </div>
-        );
       case 'privacy_security':
+      case 'privacy':
         return (
           <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
             <header className="flex items-center gap-3 mb-6">
               <button
-                onClick={() => navigateTo(homeViewFor(profile))}
+                onClick={() => navigateTo('disability')}
                 className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1209,71 +986,10 @@ export default function App() {
             />
           </div>
         );
-      case 'ai_quality':
-        return (
-          <div className="flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <header className="flex items-center gap-3 mb-6">
-              <button
-                onClick={() => navigateTo(homeViewFor(profile))}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
-              </button>
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="p-2.5 text-slate-300 hover:text-[#E5A93C] bg-[#150917] hover:bg-[#1F0D22] shadow-md border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl active:scale-95 shrink-0"
-                aria-label="Toggle menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </header>
-            <AiQualityGuardMonitor
-              isArabic={isArabicLocale(activeProfile.language)}
-            />
-          </div>
-        );
       case 'admin':
-        return <AdminDashboard profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
+        return <AdminDashboard profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo('disability')} />;
       case 'support':
-        return <SupportCenter profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
-
-      case 'goals':
-        return (
-          <GoalTracker
-            profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo(homeViewFor(profile))}
-          />
-        );
-      case 'gpa':
-        return <GpaCalculator profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
-      case 'analytics':
-        return <StudentAnalytics profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
-      case 'planner':
-        return <AcademicPlanner profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
-      case 'institution':
-        return <InstitutionCohortHub profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo(homeViewFor(profile))} />;
-
-      case 'gym':
-      case 'iq':
-        return (
-          <CognitiveGym
-            profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onOpenIqModal={() => setIsIqModalOpen(true)}
-            onNavigateBack={() => navigateTo(homeViewFor(profile))}
-          />
-        );
-
-      case 'france':
-        return (
-          <FrenchTravelVoiceAssistant
-            profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo(homeViewFor(profile))}
-          />
-        );
+        return <SupportCenter profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo('disability')} />;
 
       case 'settings': {
         const ALL_SUPPORTED_LANGUAGES: { id: LanguagePreference; label: string; flag: string; nativeName: string }[] = [
@@ -1523,19 +1239,21 @@ export default function App() {
       }
       default:
         return (
-          <>
-            <ChatInterface 
-              ref={chatRef}
-              profile={activeProfile} 
-              onQuestionEvaluated={updateQuestionHistory} 
-              syncMessages={syncActiveThread} 
-              onMenuClick={() => setIsMobileMenuOpen(true)}
-              onStreamingUpdate={setCurrentAIResponse}
-              externalMessage={externalMessage}
-              onSTTStateChange={setIsSTTActive}
-              setProfile={setProfile}
-            />
-          </>
+          <DisabilityModeView
+            ref={chatRef}
+            profile={activeProfile}
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+            onNavigate={navigateTo}
+            onQuestionEvaluated={updateQuestionHistory}
+            syncMessages={syncActiveThread}
+            externalMessage={externalMessage}
+            onStreamingUpdate={(text) => setCurrentAIResponse(text)}
+            onSTTStateChange={setIsSTTActive}
+            onTabChange={setDisabilityTab}
+            setProfile={setProfile}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
+          />
         );
     }
   };
@@ -1702,27 +1420,7 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        <Suspense fallback={null}>
-          {isIqModalOpen && (fullProfile || profile) && (
-            <IqAssessmentModal
-              isOpen={isIqModalOpen}
-              onClose={() => setIsIqModalOpen(false)}
-              profile={fullProfile || profile}
-              onIqUpdated={(newScore, domainScores) => {
-                if (profile) {
-                  setProfile({
-                    ...profile,
-                    iqScore: newScore,
-                    cognitiveDomains: domainScores,
-                    lastIqTestDate: new Date().toISOString(),
-                    // Decoupled: Academic level and pedagogical stage are governed by
-                    // StudentStateManager concept mastery, not static IQ scores.
-                  });
-                }
-              }}
-            />
-          )}
-        </Suspense>
+
       </div>
     </ErrorBoundary>
   );
