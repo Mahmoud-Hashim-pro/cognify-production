@@ -41,6 +41,7 @@ import {
 import { createInitialRetentionSchedule } from '../lib/spacedRetention';
 import { speak, cancelSpeech } from '../lib/tts';
 import { toast } from './Toast';
+import CognifyPathwaysHero from './CognifyPathwaysHero';
 
 interface StudentCockpitHubProps {
   profile: UserProfile;
@@ -521,72 +522,20 @@ export default function StudentCockpitHub({
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          2. HUMAN PERSONALIZED GREETING & QUESTION / NEXT STEP
+          2. INCLUSIVE ANIMATED HERO & LEARNING PATHWAYS CONSTELLATION
          ═══════════════════════════════════════════════════════════════════════ */}
-      <section
-        className={`p-6 sm:p-8 rounded-3xl border transition-all text-start relative overflow-hidden shadow-sm ${
-          isDarkMode
-            ? 'bg-[#121B1E] border-stone-800 text-white'
-            : 'bg-white border-stone-200/90 text-stone-900'
-        }`}
-      >
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60">
-                Cognify · {t('Personal Learning Space', 'مساحتك التعليمية الشخصية', 'Espace d\'apprentissage personnel')}
-              </span>
-              <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-                {profile.field || 'General Studies'}
-              </span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-snug">
-              {t('Welcome back,', 'مرحباً بك،', 'Bienvenue,')} <span className="text-teal-700 dark:text-teal-400">{studentName}</span>
-            </h1>
-
-            {/* Clear question to the student */}
-            <p className="text-base sm:text-lg font-bold text-stone-800 dark:text-stone-200">
-              {t('What would you like to focus on today?', 'ما الذي تود التركيز عليه الآن؟', 'Sur quoi souhaitez-vous vous concentrer aujourd\'hui ?')}
-            </p>
-
-            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 max-w-xl leading-relaxed">
-              {t(
-                'Everything here adapts to your natural learning pace and senses. No pressure, no rushed timers — choose the explanation mode that suits you best.',
-                'بيئة تعليمية هادئة تتكيف تماماً مع طريقتك وحواسك ووتيرتك الخاصة. لا توجد أي ضغوط أو مؤقتات متسرعة — اختر أسلوب الشرح الأنسب لك وابدأ.',
-                'Un environnement calme qui respecte votre rythme et vos préférences d\'apprentissage, sans pression.'
-              )}
-            </p>
-          </div>
-
-          {/* Calm, Non-Competitive Activity Indicator */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className={`p-4 rounded-2xl border text-center min-w-[100px] shadow-sm ${
-              isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'
-            }`}>
-              <div className="flex items-center justify-center gap-1.5 text-teal-700 dark:text-teal-400 mb-0.5">
-                <Flame className="w-4 h-4 text-amber-500" />
-                <span className="text-lg font-black">{streakDays}</span>
-              </div>
-              <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block">
-                {t('Days Active', 'أيام مستمرة', 'Jours d\'activité')}
-              </span>
-            </div>
-
-            <div className={`p-4 rounded-2xl border text-center min-w-[100px] shadow-sm ${
-              isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'
-            }`}>
-              <div className="flex items-center justify-center gap-1.5 text-teal-700 dark:text-teal-400 mb-0.5">
-                <CheckCircle2 className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                <span className="text-lg font-black">{retentionState.mastered.length + 4}</span>
-              </div>
-              <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block">
-                {t('Mastered', 'مفاهيم مثبتة', 'Maîtrisés')}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CognifyPathwaysHero
+        profile={profile}
+        activePedagogy={activePedagogy}
+        onSelectPedagogy={handleSelectPedagogy}
+        onStartLearning={() => onSelectSuite('chat')}
+        onOpenAccessibility={onOpenPassport}
+        isDarkMode={isDarkMode}
+        reduceMotion={reduceMotion}
+        studentName={studentName}
+        streakDays={streakDays}
+        masteredCount={retentionState.mastered.length + 4}
+      />
 
       {/* ═══════════════════════════════════════════════════════════════════════
           3. PROMINENT LESSON SPACE (Showing Active Suggested Pedagogy Style)
