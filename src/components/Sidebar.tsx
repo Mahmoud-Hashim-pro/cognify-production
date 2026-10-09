@@ -133,15 +133,6 @@ export default function Sidebar({
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     },
     {
-      id: 'caregiver',
-      label: localize(profile.language, 'Caregiver & SOS Hub', 'لوحة المرافق والاستغاثة SOS'),
-      icon: Shield,
-      action: () => navigateToDisabilityTab('caregiver'),
-      active: isTabActive('caregiver'),
-      badge: '🚨',
-      badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
-    },
-    {
       id: 'chat',
       label: localize(profile.language, 'Accessible AI Tutor', 'المساعد الذكي المهيأ'),
       icon: MessageSquare,

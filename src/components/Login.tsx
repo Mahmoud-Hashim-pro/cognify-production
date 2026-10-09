@@ -67,13 +67,6 @@ const SPECIAL_NEEDS_FEATURES: {
     matches: ['Hearing'],
   },
   {
-    key: 'caregiver',
-    Icon: Heart,
-    title: { en: 'Caregiver & Specialist SOS Hub', ar: 'لوحة المرافق والمختص ونداء الاستغاثة SOS' },
-    description: { en: 'Emergency SOS alerts, real-time location sharing, and clinical care logs', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، وتتبع الرعاية' },
-    matches: [],
-  },
-  {
     key: 'settings',
     Icon: Globe,
     title: { en: 'Accessibility Passport & Dialects', ar: 'جواز الإتاحة واللغات' },

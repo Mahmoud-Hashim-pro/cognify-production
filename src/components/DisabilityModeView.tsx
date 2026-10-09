@@ -40,7 +40,7 @@ export type DisabilityTab =
   | 'deaf'
   | 'orchestrator';
 
-export type ModuleCategory = 'all' | 'vision' | 'hearing' | 'caregiver';
+export type ModuleCategory = 'all' | 'vision' | 'hearing';
 
 interface DisabilityModeViewProps {
   profile: UserProfile;
@@ -96,7 +96,6 @@ function categoryForTab(tab: DisabilityTab): ModuleCategory {
   switch (tab) {
     case 'vision': return 'vision';
     case 'deaf': return 'hearing';
-    case 'caregiver': return 'caregiver';
     default: return 'all';
   }
 }
@@ -286,17 +285,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       descAr: 'تفريغ فوري لكلام المتحدث، نطق صوتي للغرفة، بطاقات تواصل سريعة، ومستشعر أصوات حقيقي في شاشة واحدة',
       descEn: 'Live speech captions, vocal speaker, express AAC cards, and loud sound sentinel in one screen',
     },
-    {
-      id: 'caregiver' as const,
-      titleEn: 'Caregiver & Support',
-      titleAr: 'المرافق والدعم',
-      emoji: '🛡️',
-      icon: Shield,
-      color: 'text-rose-400',
-      activeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/50',
-      descAr: 'لوحة المرافق والمختص، اختبار نداء الاستغاثة، وجواز السفر الميسر الموحد',
-      descEn: 'Family & clinical dashboard, live SOS test dispatch, and universal accommodation passport',
-    },
   ];
 
   // Modules metadata definition with Category grouping
@@ -343,30 +331,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-600 text-white shadow-indigo-500/25',
       matchingMode: 'Sign-Only',
     },
-    // 3. CAREGIVER & SUPPORT
-    {
-      id: 'caregiver' as const,
-      category: 'caregiver' as const,
-      titleEn: 'Caregiver & Specialist Hub',
-      titleAr: 'لوحة المرافق والمختص الطبي',
-      shortEn: 'Caregiver Hub',
-      shortAr: 'لوحة المرافق',
-      badgeEn: 'Clinical & Family Oversight',
-      badgeAr: 'إشراف الأسرة والمختصين',
-      descEn: 'Unified monitoring dashboard for parents and clinical specialists, live emergency SOS test dispatch, telemetry metrics, and one-click JSON backup.',
-      descAr: 'لوحة تحكم للأهل والمختصين لمتابعة الأنشطة، اختبار نداء الاستغاثة التجريبي، إحصائيات الذاكرة البصرية والنطق، والنسخ الاحتياطي السحابي.',
-      quickFeaturesAr: ['مؤشرات قياس عن بُعد', 'اختبار نداء استغاثة مباشر', 'سجل الذاكرة البصرية والنطق', 'تصدير نسخة احتياطية مشفرة'],
-      quickFeaturesEn: ['Live Telemetry Metrics', 'SOS Test Dispatch', 'Vision & Vocal History', 'Encrypted JSON Backup'],
-      Icon: Shield,
-      accentColor: 'text-rose-400',
-      borderGlow: 'hover:border-rose-500/60 border-[#4A1224]/60',
-      bgGlow: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-      buttonCls: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-rose-500/20',
-      matchingMode: 'Multiple',
-    },
     {
       id: 'chat' as const,
-      category: 'caregiver' as const,
+      category: 'all' as const,
       titleEn: 'Adaptive Cognitive Tutor',
       titleAr: 'المساعد التعليمي الذكي المهيأ',
       shortEn: 'Adaptive Tutor',
@@ -386,7 +353,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     },
     {
       id: 'settings' as const,
-      category: 'caregiver' as const,
+      category: 'all' as const,
       titleEn: 'Preferences & Dialects',
       titleAr: 'التفضيلات واللغات',
       shortEn: 'Settings',
@@ -406,7 +373,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     },
     ...(isOrgStaff ? [{
       id: 'org' as const,
-      category: 'caregiver' as const,
+      category: 'all' as const,
       titleEn: 'My Organization Hub',
       titleAr: 'لوحة تحكم الجمعية / المؤسسة',
       shortEn: 'Org Hub',
@@ -448,7 +415,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   // Current active module metadata for sibling bar
   const currentModule = MODULES.find((m) => m.id === (isDeafActive ? 'deaf' : activeTab));
   const siblingModules = useMemo(() => {
-    if (isDeafActive || !currentModule || currentModule.category === 'caregiver') return [];
+    if (isDeafActive || !currentModule || currentModule.category === 'all') return [];
     return MODULES.filter((m) => m.category === currentModule.category);
   }, [isDeafActive, currentModule, MODULES]);
 
@@ -648,12 +615,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-start">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-start">
                     {[
                       { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
                       { id: 'deaf' as const, labelAr: 'المركز السمعي الموحد', labelEn: 'Unified Hearing Center', Icon: Ear, descAr: 'تفريغ فوري، نطق صوتي، بطاقات سريعة، ومستشعر مخاطر', descEn: 'Live captions, voice speaker, express AAC & strobe alert', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
                       { id: 'chat' as const, labelAr: 'المعلم الذكي المهيأ', labelEn: 'Accessible AI Tutor', Icon: Brain, descAr: 'شرح متكيف، تدرج معرفي، وأدوات قارئات الشاشة', descEn: 'Adaptive tutor tailored to your pace with screen reader & contrast support', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/40', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
-                      { id: 'caregiver' as const, labelAr: 'لوحة المرافق والاستغاثة SOS', labelEn: 'Caregiver & SOS Hub', Icon: Shield, descAr: 'متابعة شاملة، اختبار استغاثة فوري، وسجلات الرعاية', descEn: 'Family & clinical dashboard, live SOS dispatch & care logs', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
                     ].map((s) => (
                       <button
                         key={s.id}
