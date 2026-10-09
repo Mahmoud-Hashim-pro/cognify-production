@@ -1296,7 +1296,7 @@ export default function App() {
       )}
 
       <div
-        className={`flex w-full h-[100dvh] bg-[#080409] text-slate-100 font-sans overflow-hidden selection:bg-[#E5A93C]/30 transition-all duration-500 ${isGuestPreview ? 'pt-9' : ''} ${
+        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#080409] text-slate-100' : 'bg-[#FAF8F5] text-slate-900'} font-sans overflow-hidden selection:bg-[#E5A93C]/30 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
           profile?.accessibilityMode === 'Visual' ? 'text-lg contrast-125' : ''
         }`}
         dir={direction}

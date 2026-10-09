@@ -46,6 +46,13 @@ const SPECIAL_NEEDS_FEATURES: {
     matches: ['Visual'],
   },
   {
+    key: 'chat',
+    Icon: Brain,
+    title: { en: 'Accessible AI Tutor', ar: 'المساعد التعليمي المهيأ للإتاحة' },
+    description: { en: 'Adaptive multi-modal tutor tailored to your pace, with high contrast & screen-reader support', ar: 'مساعد تعليمي ذكي مهيأ بالكامل لقارئات الشاشة، تباين لوني فائق، وتدرج معرفي مرن' },
+    matches: ['Visual', 'Hearing'],
+  },
+  {
     key: 'sign-language',
     Icon: Ear,
     title: { en: 'Unified Deaf & Hearing Center', ar: 'منظومة الصم وضعاف السمع الشاملة' },
@@ -64,13 +71,6 @@ const SPECIAL_NEEDS_FEATURES: {
     Icon: Heart,
     title: { en: 'Caregiver & Specialist SOS Hub', ar: 'لوحة المرافق والمختص ونداء الاستغاثة SOS' },
     description: { en: 'Emergency SOS alerts, real-time location sharing, and clinical care logs', ar: 'لوحة متابعة للأهل والمختصين، اختبار نداء استغاثة مباشر، وتتبع الرعاية' },
-    matches: [],
-  },
-  {
-    key: 'chat',
-    Icon: Brain,
-    title: { en: 'Accessible AI Tutor', ar: 'المساعد التعليمي المهيأ للإتاحة' },
-    description: { en: 'Adaptive tutor tailored to your pace, with high contrast & screen-reader support', ar: 'مساعد تعليمي ذكي مهيأ بالكامل لقارئات الشاشة، تباين لوني فائق، وتدرج معرفي مرن' },
     matches: [],
   },
   {
@@ -547,7 +547,9 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                                             </span>
                                           )}
                                         </div>
-                                        <div className="text-[10px] sm:text-[11px] text-slate-300 leading-tight mt-0.5 line-clamp-2">{feature.description}</div>
+                                        {feature.isPrimary && (
+                                          <div className="text-[10px] sm:text-[11px] text-slate-300 leading-tight mt-0.5 line-clamp-2">{feature.description}</div>
+                                        )}
                                       </div>
                                     </div>
                                   ))}

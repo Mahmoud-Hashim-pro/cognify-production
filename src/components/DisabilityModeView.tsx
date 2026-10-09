@@ -4,7 +4,7 @@ import { AriaButton } from './ui/AriaButton';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Flame,
-  ArrowLeft, ArrowRight, MessageSquare, Globe, Check, 
+  ArrowLeft, ArrowRight, MessageSquare, Globe, Check, Brain,
   LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
   SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck
 } from 'lucide-react';
@@ -453,10 +453,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, [isDeafActive, currentModule, MODULES]);
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="flex-1 flex flex-col h-full bg-[#080409] text-slate-100 overflow-hidden relative select-none">
+    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex-1 flex flex-col h-full overflow-hidden relative select-none transition-colors duration-300 ${isDarkMode ? 'bg-[#080409] text-slate-100' : 'bg-[#FAF8F5] text-slate-900'}`}>
       
       {/* ── TOP NAVIGATION BAR (Always visible for seamless cross-disability jumping) ── */}
-      <header className="relative z-[9995] px-3 py-2 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b border-[#4A1224]/60 bg-[#0E0610]/95 backdrop-blur-xl shadow-lg">
+      <header className={`relative z-[9995] px-3 py-2 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b transition-colors duration-300 ${
+        isDarkMode 
+          ? 'border-[#4A1224]/60 bg-[#0E0610]/95 backdrop-blur-xl shadow-lg text-white' 
+          : 'border-amber-200/80 bg-white/95 backdrop-blur-xl shadow-sm text-slate-900'
+      }`}>
         <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
           {/* Main App Menu Drawer Button */}
           <AriaButton
@@ -467,7 +471,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             aria-label={isAccessibilityUser(profile)
               ? localize(profile.language, 'Open menu', 'افتح القائمة')
               : getTranslation(profile.language, 'back')}
-            className="p-2 text-slate-400 bg-[#150917] border border-[#4A1224]/60 hover:text-white hover:bg-slate-800 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C] cursor-pointer shrink-0"
+            className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C] cursor-pointer shrink-0 ${
+              isDarkMode
+                ? 'text-slate-400 bg-[#150917] border border-[#4A1224]/60 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 bg-amber-50/80 border border-amber-200 hover:text-slate-950 hover:bg-amber-100'
+            }`}
           >
             {isAccessibilityUser(profile)
               ? <Menu className="w-4 h-4" />
@@ -483,12 +491,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           <div
             role="tablist"
             aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
-            className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-2xl shadow-inner gap-1 outline-none overflow-x-auto custom-scrollbar"
+            className={`flex items-center p-1 rounded-2xl shadow-inner gap-1 outline-none overflow-x-auto custom-scrollbar transition-colors ${
+              isDarkMode
+                ? 'bg-[#150917] border border-[#4A1224]/60'
+                : 'bg-amber-50/90 border border-amber-200'
+            }`}
           >
             {[
               { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', Icon: LayoutGrid },
               { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
               { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
+              { id: 'chat' as const, labelAr: 'المعلم الذكي', labelEn: 'AI Tutor', Icon: Brain },
             ].map((suite) => {
               const isSelected = suite.id === 'deaf' ? isDeafActive : activeTab === suite.id;
               return (
@@ -501,8 +514,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   className={`px-2 sm:px-3 min-h-[38px] sm:min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
                     isSelected
                       ? 'bg-amber-400 text-slate-950 font-black shadow-md'
-                      : 'text-slate-300 hover:text-white hover:bg-[#150917]/70'
-                  } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900`}
+                      : isDarkMode
+                        ? 'text-slate-300 hover:text-white hover:bg-[#150917]/70'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-amber-100/80'
+                  } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 ${isDarkMode ? 'focus-visible:ring-offset-slate-900' : 'focus-visible:ring-offset-white'}`}
                 >
                   <suite.Icon className="w-3.5 h-3.5 shrink-0" />
                   <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
@@ -519,7 +534,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             <div
               role="tablist"
               aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
-              className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none"
+              className={`flex items-center p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none transition-colors ${
+                isDarkMode ? 'bg-[#150917] border border-[#4A1224]/60' : 'bg-amber-50/90 border border-amber-200'
+              }`}
             >
               {siblingModules.map((m) => {
                 const isSelected = activeTab === m.id;
@@ -533,8 +550,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
                       isSelected
                         ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
-                        : 'text-slate-300 hover:text-white'
-                    } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900`}
+                        : isDarkMode
+                          ? 'text-slate-300 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-950'
+                    } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 ${isDarkMode ? 'focus-visible:ring-offset-slate-900' : 'focus-visible:ring-offset-white'}`}
                   >
                     <span
                       title={localize(profile.language, m.titleEn, m.titleAr)}
@@ -625,20 +644,30 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {[
                       { id: 'vision' as const, labelAr: 'المرافق البصري الذكي', labelEn: 'Visual Companion', Icon: Eye, descAr: 'قراءة النصوص، العملات، الملابس، وسكانر المحاضرات', descEn: 'AI Eyes, currency, colors & lecture scan', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
                       { id: 'deaf' as const, labelAr: 'المركز السمعي الموحد', labelEn: 'Unified Hearing Center', Icon: Ear, descAr: 'تفريغ فوري، نطق صوتي، بطاقات سريعة، ومستشعر مخاطر', descEn: 'Live captions, voice speaker, express AAC & strobe alert', glow: 'hover:border-amber-500/60 hover:shadow-amber-950/40', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/15 border-amber-500/30' },
+                      { id: 'chat' as const, labelAr: 'المعلم الذكي المهيأ', labelEn: 'Accessible AI Tutor', Icon: Brain, descAr: 'شرح متكيف، تدرج معرفي، وأدوات قارئات الشاشة', descEn: 'Adaptive tutor tailored to your pace with screen reader & contrast support', glow: 'hover:border-purple-500/60 hover:shadow-purple-950/40', iconColor: 'text-purple-400', iconBg: 'bg-purple-500/15 border-purple-500/30' },
+                      { id: 'caregiver' as const, labelAr: 'لوحة المرافق والاستغاثة SOS', labelEn: 'Caregiver & SOS Hub', Icon: Shield, descAr: 'متابعة شاملة، اختبار استغاثة فوري، وسجلات الرعاية', descEn: 'Family & clinical dashboard, live SOS dispatch & care logs', glow: 'hover:border-rose-500/60 hover:shadow-rose-950/40', iconColor: 'text-rose-400', iconBg: 'bg-rose-500/15 border-rose-500/30' },
                     ].map((s) => (
                       <button
                         key={s.id}
                         onClick={() => handleSelectTab(s.id)}
-                        className={`p-4 min-h-[140px] rounded-2xl bg-[#150917] border border-[#4A1224]/60 ${s.glow} hover:bg-[#150917]/80 transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between cursor-pointer`}
+                        className={`p-4 min-h-[140px] rounded-2xl border transition-all active:scale-[0.98] shadow-md group flex flex-col justify-between cursor-pointer ${
+                          isDarkMode
+                            ? `bg-[#150917] border-[#4A1224]/60 ${s.glow} hover:bg-[#150917]/80`
+                            : 'bg-white border-amber-200/80 hover:border-amber-400 hover:bg-amber-50/50 shadow-sm'
+                        }`}
                       >
                         <div>
                           <div className={`w-9 h-9 rounded-xl ${s.iconBg} border flex items-center justify-center ${s.iconColor} mb-2.5 group-hover:scale-105 transition-transform`}>
                             <s.Icon className="w-5 h-5" />
                           </div>
-                          <span className="text-xs font-black text-white group-hover:text-amber-300 block transition-colors">{localize(profile.language, s.labelEn, s.labelAr)}</span>
-                          <span className="text-[11px] text-slate-300 block mt-1 leading-relaxed font-normal">{localize(profile.language, s.descEn, s.descAr)}</span>
+                          <span className={`text-xs font-black block transition-colors ${isDarkMode ? 'text-white group-hover:text-amber-300' : 'text-slate-900 group-hover:text-rose-700'}`}>
+                            {localize(profile.language, s.labelEn, s.labelAr)}
+                          </span>
+                          <span className={`text-[11px] block mt-1 leading-relaxed font-normal ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                            {localize(profile.language, s.descEn, s.descAr)}
+                          </span>
                         </div>
-                        <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-amber-400 opacity-90 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                        <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-amber-500 opacity-90 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                           <span>{localize(profile.language, 'Launch Suite', 'دخول المنظومة')}</span>
                           <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
                         </div>

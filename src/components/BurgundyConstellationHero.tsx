@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Eye, Ear, Hand, Check, Sun, Moon, Sparkles, ChevronDown } from 'lucide-react';
+import { Eye, Ear, Hand, Brain, Check, Sun, Moon, Sparkles, ChevronDown } from 'lucide-react';
 import { UserProfile } from '../types';
 import { isArabicLocale, localize } from '../lib/translations';
 
@@ -8,16 +8,16 @@ interface BurgundyConstellationHeroProps {
   profile: UserProfile;
   onLaunchPrimary: () => void;
   onExploreModes: () => void;
-  onSelectSuite?: (suiteId: 'vision' | 'deaf') => void;
+  onSelectSuite?: (suiteId: 'vision' | 'deaf' | 'chat') => void;
   isDarkMode?: boolean;
   toggleTheme?: () => void;
 }
 
 interface ConstellationNode {
-  id: 'vision' | 'hearing' | 'sign';
+  id: 'vision' | 'hearing' | 'sign' | 'chat';
   labelAr: string;
   labelEn: string;
-  suiteId: 'vision' | 'deaf';
+  suiteId: 'vision' | 'deaf' | 'chat';
   Icon: React.ComponentType<{ className?: string }>;
   x: number; // percentage in SVG viewBox 0-400
   y: number; // percentage in SVG viewBox 0-300
@@ -45,7 +45,7 @@ export default function BurgundyConstellationHero({
     ? isFemaleUser ? 'استكشفي الأوضاع' : 'استكشف الأوضاع'
     : 'Explore Assistive Suites';
 
-  // The 3 interconnected sensory disability symbols (Vision, Hearing, 3D Sign)
+  // The 4 interconnected sensory and cognitive symbols (Vision, Hearing, 3D Sign, AI Mind)
   const nodes: ConstellationNode[] = [
     {
       id: 'vision',
@@ -54,7 +54,7 @@ export default function BurgundyConstellationHero({
       suiteId: 'vision',
       Icon: Eye,
       x: 200,
-      y: 50,
+      y: 45,
       color: '#FB7185', // Rose
       glowColor: 'rgba(251, 113, 133, 0.45)',
     },
@@ -64,10 +64,21 @@ export default function BurgundyConstellationHero({
       labelEn: 'Hearing & Speech',
       suiteId: 'deaf',
       Icon: Ear,
-      x: 310,
-      y: 210,
+      x: 325,
+      y: 140,
       color: '#E5A93C', // Gold
       glowColor: 'rgba(229, 169, 60, 0.45)',
+    },
+    {
+      id: 'chat',
+      labelAr: 'المعلم الذكي',
+      labelEn: 'AI Tutor',
+      suiteId: 'chat',
+      Icon: Brain,
+      x: 200,
+      y: 225,
+      color: '#C084FC', // Purple
+      glowColor: 'rgba(192, 132, 252, 0.45)',
     },
     {
       id: 'sign',
@@ -75,18 +86,21 @@ export default function BurgundyConstellationHero({
       labelEn: '3D Sign Language',
       suiteId: 'deaf',
       Icon: Hand,
-      x: 90,
-      y: 210,
+      x: 75,
+      y: 140,
       color: '#F43F5E', // Deep Rose
       glowColor: 'rgba(244, 63, 94, 0.45)',
     },
   ];
 
-  // Connections between all 3 nodes (closed sensory loop)
+  // Connections between all 4 nodes (full diamond lattice)
   const connections: [number, number][] = [
     [0, 1], // Vision - Hearing
-    [1, 2], // Hearing - Sign
-    [2, 0], // Sign - Vision
+    [1, 2], // Hearing - Chat
+    [2, 3], // Chat - Sign
+    [3, 0], // Sign - Vision
+    [0, 2], // Vision - Chat (vertical axis)
+    [3, 1], // Sign - Hearing (horizontal axis)
   ];
 
   return (
@@ -94,35 +108,48 @@ export default function BurgundyConstellationHero({
       dir={isAr ? 'rtl' : 'ltr'}
       className="w-full relative overflow-hidden rounded-3xl cognify-burgundy-hero p-5 sm:p-8 md:p-10 select-none transition-all shadow-2xl"
       style={{
-        background: 'radial-gradient(circle at 50% 18%, rgba(159, 18, 57, 0.42) 0%, rgba(45, 11, 22, 0.95) 50%, rgba(13, 4, 7, 0.99) 100%)',
-        border: '1px solid rgba(229, 169, 60, 0.28)',
+        background: isDarkMode
+          ? 'radial-gradient(circle at 50% 18%, rgba(159, 18, 57, 0.42) 0%, rgba(45, 11, 22, 0.95) 50%, rgba(13, 4, 7, 0.99) 100%)'
+          : 'radial-gradient(circle at 50% 18%, rgba(255, 241, 242, 0.9) 0%, rgba(255, 245, 245, 0.96) 50%, rgba(255, 255, 255, 1) 100%)',
+        border: isDarkMode
+          ? '1px solid rgba(229, 169, 60, 0.28)'
+          : '1px solid rgba(244, 63, 94, 0.25)',
       }}
     >
       {/* Ambient Lighting Orbs */}
-      <div className="absolute -top-32 -left-32 w-64 h-64 bg-rose-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-burgundy/30 rounded-full blur-3xl pointer-events-none" />
+      {isDarkMode ? (
+        <>
+          <div className="absolute -top-32 -left-32 w-64 h-64 bg-rose-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-burgundy/30 rounded-full blur-3xl pointer-events-none" />
+        </>
+      ) : (
+        <>
+          <div className="absolute -top-32 -left-32 w-64 h-64 bg-rose-200/50 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-amber-200/50 rounded-full blur-3xl pointer-events-none" />
+        </>
+      )}
 
       {/* ── CARD HEADER: Brand Logo + Tagline + Theme Toggle ── */}
-      <div className="relative z-10 flex items-center justify-between pb-6 border-b border-rose-950/60 gap-3 flex-wrap">
+      <div className={`relative z-10 flex items-center justify-between pb-6 border-b ${isDarkMode ? 'border-rose-950/60' : 'border-rose-100'} gap-3 flex-wrap`}>
         {/* Right side: Cognify with gold monogram + Arabic tagline */}
         <div className="flex items-center gap-3">
           {/* Brand Icon Badge */}
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border-2 border-[#E5A93C] flex items-center justify-center text-[#E5A93C] shadow-md shadow-amber-950/50">
-            <Sparkles className="w-5 h-5 text-[#E5A93C]" />
+          <div className={`w-10 h-10 rounded-2xl ${isDarkMode ? 'bg-amber-500/10 border-2 border-[#E5A93C] text-[#E5A93C] shadow-md shadow-amber-950/50' : 'bg-amber-100 border-2 border-amber-500 text-amber-700 shadow-sm'} flex items-center justify-center`}>
+            <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            <div className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tight flex items-center gap-2`}>
               <span>Cognify</span>
             </div>
-            <div className="text-xs font-semibold text-rose-300/80">
+            <div className={`text-xs font-semibold ${isDarkMode ? 'text-rose-300/80' : 'text-rose-700'}`}>
               {localize(profile.language, 'Adaptive Learning Companion', 'رفيقك التعليمي المتكيّف')}
             </div>
           </div>
         </div>
 
         {/* Left side: Light / Dark Theme Toggle Pill */}
-        <div className="flex items-center bg-[#18050E] border border-rose-900/40 p-1 rounded-2xl shadow-inner gap-1">
+        <div className={`flex items-center ${isDarkMode ? 'bg-[#18050E] border-rose-900/40' : 'bg-rose-50/90 border-rose-200'} border p-1 rounded-2xl shadow-inner gap-1`}>
           <button
             onClick={() => {
               if (!isDarkMode && toggleTheme) toggleTheme();
@@ -130,7 +157,7 @@ export default function BurgundyConstellationHero({
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               isDarkMode
                 ? 'bg-[#831843] text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Moon className="w-3.5 h-3.5 text-amber-400" />
@@ -146,7 +173,7 @@ export default function BurgundyConstellationHero({
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Sun className="w-3.5 h-3.5 text-amber-400" />
+            <Sun className="w-3.5 h-3.5 text-amber-500" />
             <span>{localize(profile.language, 'Light', 'فاتح')}</span>
           </button>
         </div>
@@ -158,10 +185,14 @@ export default function BurgundyConstellationHero({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#E5A93C]/60 bg-[#E5A93C]/10 text-[#FDE68A] text-xs font-bold mb-6 shadow-sm shadow-amber-950/40"
+          className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border ${
+            isDarkMode
+              ? 'border-[#E5A93C]/60 bg-[#E5A93C]/10 text-[#FDE68A] shadow-amber-950/40'
+              : 'border-amber-400 bg-amber-50 text-amber-900 shadow-sm'
+          } text-xs font-bold mb-6`}
         >
           <span>{localize(profile.language, 'Every need has its symbol, all unified in one design', 'كل احتياج له رمزه، وكلهم متصلين في تصميم واحد')}</span>
-          <Check className="w-3.5 h-3.5 text-[#E5A93C]" />
+          <Check className="w-3.5 h-3.5 text-amber-500" />
         </motion.div>
 
         {/* ── CONSTELLATION GRAPHIC CANVAS ── */}
@@ -191,10 +222,10 @@ export default function BurgundyConstellationHero({
                   y1={from.y}
                   x2={to.x}
                   y2={to.y}
-                  stroke={isHighlighted ? '#E5A93C' : 'url(#burgundyGoldLine)'}
+                  stroke={isHighlighted ? '#E5A93C' : isDarkMode ? 'url(#burgundyGoldLine)' : 'rgba(244, 63, 94, 0.4)'}
                   strokeWidth={isHighlighted ? 2.5 : 1.25}
                   strokeDasharray={isHighlighted ? 'none' : '4 3'}
-                  strokeOpacity={isHighlighted ? 0.9 : 0.4}
+                  strokeOpacity={isHighlighted ? 0.9 : isDarkMode ? 0.4 : 0.6}
                   className="transition-all duration-300"
                 />
               );
@@ -227,7 +258,7 @@ export default function BurgundyConstellationHero({
                     cx={node.x}
                     cy={node.y}
                     r={isActive ? 22 : 18}
-                    fill="#1C060F"
+                    fill={isDarkMode ? '#1C060F' : '#FFFFFF'}
                     stroke={isActive ? '#E5A93C' : node.color}
                     strokeWidth={isActive ? 2.5 : 1.75}
                     className="transition-all duration-300 drop-shadow-md"
@@ -237,7 +268,7 @@ export default function BurgundyConstellationHero({
                     x={node.x}
                     y={node.y + 34}
                     textAnchor="middle"
-                    fill={isActive ? '#FDE68A' : '#E2D9E2'}
+                    fill={isDarkMode ? (isActive ? '#FDE68A' : '#E2D9E2') : (isActive ? '#B45309' : '#334155')}
                     fontSize="11"
                     fontWeight={isActive ? 'bold' : 'normal'}
                     className="select-none transition-colors"
@@ -273,7 +304,9 @@ export default function BurgundyConstellationHero({
               >
                 <node.Icon
                   className={`w-4 h-4 transition-transform duration-300 ${
-                    isActive ? 'scale-125 text-amber-300' : 'text-white'
+                    isActive
+                      ? isDarkMode ? 'scale-125 text-amber-300' : 'scale-125 text-amber-600'
+                      : isDarkMode ? 'text-white' : 'text-slate-800'
                   }`}
                 />
               </button>
@@ -286,16 +319,16 @@ export default function BurgundyConstellationHero({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-snug mt-2 mb-4"
+          className={`text-3xl sm:text-4xl md:text-5xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tight leading-snug mt-2 mb-4`}
         >
           {localize(profile.language, 'The Power of Accessibility Starts', 'قوة الوصول تبدأ')}{' '}
-          <span className="block sm:inline bg-gradient-to-r from-rose-400 via-amber-300 to-rose-300 bg-clip-text text-transparent drop-shadow-sm">
+          <span className="block sm:inline bg-gradient-to-r from-rose-500 via-amber-400 to-rose-400 bg-clip-text text-transparent drop-shadow-sm">
             {localize(profile.language, 'From Confidence in Design', 'من ثقة التصميم')}
           </span>
         </motion.h1>
 
         {/* ── MANIFESTO SUBTEXT ── */}
-        <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed font-normal max-w-xl mx-auto mb-8 px-2">
+        <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-slate-200/90' : 'text-slate-700'} leading-relaxed font-normal max-w-xl mx-auto mb-8 px-2`}>
           {localize(
             profile.language,
             'Vision, Hearing, Sign Language, and Mind — four genuine symbols coexisting in the same design, so no one feels like an afterthought or exception. Every need has a distinct visual presence, and all are part of the same strong identity.',
@@ -317,7 +350,11 @@ export default function BurgundyConstellationHero({
           {/* Secondary CTA: Dark with gold border */}
           <button
             onClick={onExploreModes}
-            className="w-full sm:w-auto flex-1 min-h-[48px] px-8 py-3.5 rounded-2xl bg-[#18050E]/80 border-2 border-[#E5A93C] text-[#FDE68A] hover:bg-[#E5A93C]/15 font-black text-sm tracking-wide shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className={`w-full sm:w-auto flex-1 min-h-[48px] px-8 py-3.5 rounded-2xl ${
+              isDarkMode
+                ? 'bg-[#18050E]/80 border-2 border-[#E5A93C] text-[#FDE68A] hover:bg-[#E5A93C]/15'
+                : 'bg-white border-2 border-amber-500 text-amber-900 hover:bg-amber-50'
+            } font-black text-sm tracking-wide shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer`}
           >
             <span>{secondaryCtaText}</span>
             <ChevronDown className="w-4 h-4 text-[#E5A93C]" />
