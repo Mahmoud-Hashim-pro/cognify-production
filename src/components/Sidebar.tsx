@@ -16,6 +16,8 @@ interface SidebarProps {
   setProfile: (profile: UserProfile) => void;
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
+  activeDisabilityTab?: DisabilityTab;
+  onSelectDisabilityTab?: (tab: DisabilityTab) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
   openLiveCaptions: () => void;
@@ -37,6 +39,8 @@ export default function Sidebar({
   setProfile, 
   currentView, 
   setCurrentView, 
+  activeDisabilityTab,
+  onSelectDisabilityTab,
   isDarkMode, 
   toggleTheme, 
   openLiveCaptions, 
@@ -57,6 +61,9 @@ export default function Sidebar({
     try {
       localStorage.setItem('cognify_default_disability_tab', tab);
     } catch {}
+    if (onSelectDisabilityTab) {
+      onSelectDisabilityTab(tab);
+    }
     setCurrentView('disability');
   };
 
@@ -79,6 +86,14 @@ export default function Sidebar({
     setCurrentView('chat');
   };
 
+  const isTabActive = (tab: DisabilityTab) => {
+    if (currentView !== 'disability') return false;
+    const currentTab = activeDisabilityTab || 'hub';
+    if (tab === 'hub') return currentTab === 'hub';
+    if (tab === 'deaf') return currentTab === 'deaf' || currentTab === 'bridge' || currentTab === 'radar';
+    return currentTab === tab;
+  };
+
   // Dedicated Assistive Suites Navigation List
   const assistiveItems = [
     {
@@ -86,7 +101,7 @@ export default function Sidebar({
       label: localize(profile.language, 'Accessibility Hub', 'منظومة ذوي الهمم (الرئيسية)'),
       icon: Accessibility,
       action: () => navigateToDisabilityTab('hub'),
-      active: currentView === 'disability',
+      active: isTabActive('hub'),
       badge: localize(profile.language, 'Hub', 'الرئيسية'),
       badgeColor: 'bg-[#4A1224]/60 text-[#E5A93C] border-[#E5A93C]/40',
     },
@@ -95,7 +110,7 @@ export default function Sidebar({
       label: localize(profile.language, 'Visual Companion', 'الرفيق البصري (كاميرا وصوت)'),
       icon: Eye,
       action: () => navigateToDisabilityTab('vision'),
-      active: false,
+      active: isTabActive('vision'),
       badge: '👁️',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     },
@@ -104,7 +119,7 @@ export default function Sidebar({
       label: localize(profile.language, 'Hearing Center', 'المركز السمعي الموحد (الصم)'),
       icon: Ear,
       action: () => navigateToDisabilityTab('deaf'),
-      active: false,
+      active: isTabActive('deaf'),
       badge: '👂',
       badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
     },
@@ -122,7 +137,7 @@ export default function Sidebar({
       label: localize(profile.language, 'Caregiver & SOS Hub', 'لوحة المرافق والاستغاثة SOS'),
       icon: Shield,
       action: () => navigateToDisabilityTab('caregiver'),
-      active: false,
+      active: isTabActive('caregiver'),
       badge: '🚨',
       badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
     },

@@ -1,6 +1,5 @@
 import { localize } from '../lib/translations';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { RadioGroup as AriaRadioGroup, Radio as AriaRadio } from 'react-aria-components/RadioGroup';
 import { AriaButton } from './ui/AriaButton';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
@@ -52,6 +51,7 @@ interface DisabilityModeViewProps {
   externalMessage?: string;
   onStreamingUpdate?: (text: string) => void;
   onSTTStateChange?: (active: boolean) => void;
+  currentTab?: DisabilityTab;
   onTabChange?: (tab: DisabilityTab) => void;
   setProfile?: (profile: UserProfile) => void;
   isDarkMode?: boolean;
@@ -110,17 +110,25 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   externalMessage,
   onStreamingUpdate,
   onSTTStateChange,
+  currentTab,
   onTabChange,
   setProfile,
   isDarkMode,
   toggleTheme,
 }, ref) {
-  const [activeTab, setActiveTab] = useState<DisabilityTab>(() => detectDirectDisabilityTab(profile));
+  const [activeTab, setActiveTab] = useState<DisabilityTab>(() => currentTab || detectDirectDisabilityTab(profile));
   const [showPassportModal, setShowPassportModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ModuleCategory>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   const isOrgStaff = !!profile?.isOrgManager && !!(profile?.organization || '').trim();
+
+  // Sync activeTab whenever parent updates currentTab
+  useEffect(() => {
+    if (currentTab && currentTab !== activeTab) {
+      setActiveTab(currentTab);
+    }
+  }, [currentTab]);
 
   // Tell parent which tab is active
   useEffect(() => { 
@@ -133,10 +141,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     const currentMode = profile?.accessibilityMode || '';
     if (currentMode && currentMode !== lastProfileModeRef.current) {
       lastProfileModeRef.current = currentMode;
-      const directTab = detectDirectDisabilityTab(profile);
+      const directTab = currentTab || detectDirectDisabilityTab(profile);
       setActiveTab(directTab);
     }
-  }, [profile?.accessibilityMode, profile?.disabilityType]);
+  }, [profile?.accessibilityMode, profile?.disabilityType, currentTab]);
 
   // Set default suite persistently when user chooses a suite
   const handleSelectTab = React.useCallback((tab: DisabilityTab) => {
@@ -472,69 +480,73 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           </AriaButton>
 
           {/* Primary Disability Mode Switcher: Instant, Uncluttered, Accessible Across All Suites */}
-          <AriaRadioGroup
-            value={isDeafActive ? 'deaf' : (activeTab as string)}
-            onChange={(suiteId) => handleSelectTab(suiteId as DisabilityTab)}
+          <div
+            role="tablist"
             aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
-            orientation="horizontal"
             className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-2xl shadow-inner gap-1 outline-none overflow-x-auto custom-scrollbar"
           >
             {[
               { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', Icon: LayoutGrid },
               { id: 'vision' as const, labelAr: 'بصرية', labelEn: 'Visual', Icon: Eye },
               { id: 'deaf' as const, labelAr: 'سمعية', labelEn: 'Hearing', Icon: Ear },
-            ].map((suite) => (
-              <AriaRadio
-                key={suite.id}
-                value={suite.id}
-                className={({ isSelected, isFocusVisible }) =>
-                  `px-2 sm:px-3 min-h-[38px] sm:min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
+            ].map((suite) => {
+              const isSelected = suite.id === 'deaf' ? isDeafActive : activeTab === suite.id;
+              return (
+                <button
+                  key={suite.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => handleSelectTab(suite.id)}
+                  className={`px-2 sm:px-3 min-h-[38px] sm:min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
                     isSelected
                       ? 'bg-amber-400 text-slate-950 font-black shadow-md'
                       : 'text-slate-300 hover:text-white hover:bg-[#150917]/70'
-                  } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-900' : ''}`
-                }
-              >
-                <suite.Icon className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
-              </AriaRadio>
-            ))}
-          </AriaRadioGroup>
+                  } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900`}
+                >
+                  <suite.Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Right Header Status / Sibling Switcher */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Sibling module pills when inside a suite */}
           {activeTab !== 'hub' && siblingModules.length > 1 ? (
-            <AriaRadioGroup
-              value={activeTab as string}
-              onChange={(mId) => setActiveTab(mId as DisabilityTab)}
+            <div
+              role="tablist"
               aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
-              orientation="horizontal"
               className="flex items-center bg-[#150917] border border-[#4A1224]/60 p-1 rounded-xl max-w-[280px] sm:max-w-md overflow-x-auto custom-scrollbar gap-1 outline-none"
             >
-              {siblingModules.map((m) => (
-                <AriaRadio
-                  key={m.id}
-                  value={m.id}
-                  className={({ isSelected, isFocusVisible }) =>
-                    `px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
+              {siblingModules.map((m) => {
+                const isSelected = activeTab === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelected}
+                    onClick={() => setActiveTab(m.id as DisabilityTab)}
+                    className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
                       isSelected
                         ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
                         : 'text-slate-300 hover:text-white'
-                    } ${isFocusVisible ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-slate-900' : ''}`
-                  }
-                >
-                  <span
-                    title={localize(profile.language, m.titleEn, m.titleAr)}
-                    className="flex items-center gap-1.5"
+                    } focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900`}
                   >
-                    <m.Icon className="w-3.5 h-3.5" />
-                    <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
-                  </span>
-                </AriaRadio>
-              ))}
-            </AriaRadioGroup>
+                    <span
+                      title={localize(profile.language, m.titleEn, m.titleAr)}
+                      className="flex items-center gap-1.5"
+                    >
+                      <m.Icon className="w-3.5 h-3.5" />
+                      <span>{localize(profile.language, m.shortEn, m.shortAr)}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           ) : (
             /* Standard accessibility utilities: Passport & Settings */
             <div className="flex items-center gap-1.5 sm:gap-2">

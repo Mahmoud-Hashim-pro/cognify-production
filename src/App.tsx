@@ -160,8 +160,18 @@ export default function App() {
   const [externalMessage, setExternalMessage] = useState("");
   const [currentAIResponse, setCurrentAIResponse] = useState("");
   const [isSTTActive, setIsSTTActive] = useState(false);
-  const [disabilityTab, setDisabilityTab] = useState<DisabilityTab>('hub');
   const [isLiveCaptionsOpen, setIsLiveCaptionsOpen] = useState(false);
+  const [disabilityTab, setDisabilityTab] = useState<DisabilityTab>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('cognify_default_disability_tab');
+        if (saved === 'vision' || saved === 'deaf' || saved === 'hub' || saved === 'caregiver') {
+          return saved as DisabilityTab;
+        }
+      } catch {}
+    }
+    return 'hub';
+  });
 
   // Cognify Memory (Phase 2) state
   const [memoryState, setMemoryState] = useState<StudentMemory | null>(() => {
@@ -945,6 +955,7 @@ export default function App() {
           externalMessage={externalMessage}
           onStreamingUpdate={(text) => setCurrentAIResponse(text)}
           onSTTStateChange={setIsSTTActive}
+          currentTab={disabilityTab}
           onTabChange={setDisabilityTab}
           setProfile={setProfile}
           isDarkMode={isDarkMode}
@@ -1249,6 +1260,7 @@ export default function App() {
             externalMessage={externalMessage}
             onStreamingUpdate={(text) => setCurrentAIResponse(text)}
             onSTTStateChange={setIsSTTActive}
+            currentTab={disabilityTab}
             onTabChange={setDisabilityTab}
             setProfile={setProfile}
             isDarkMode={isDarkMode}
@@ -1358,6 +1370,11 @@ export default function App() {
               }} 
               currentView={currentView}
               setCurrentView={navigateTo}
+              activeDisabilityTab={disabilityTab}
+              onSelectDisabilityTab={(tab) => {
+                setDisabilityTab(tab);
+                setIsMobileMenuOpen(false);
+              }}
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
               openLiveCaptions={() => setIsLiveCaptionsOpen(true)}
