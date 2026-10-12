@@ -1019,6 +1019,8 @@ export default function App() {
             onNavigateBack={() => navigateTo('disability')}
             setProfile={setProfile}
             onNavigate={(v) => navigateTo(v)}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
           />
         );
       case 'privacy_security':
