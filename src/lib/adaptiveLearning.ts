@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Phase 3: Adaptive Learning Engine
  * 
  * Provides:
@@ -20,12 +20,44 @@ export interface PedagogyStyleMeta {
 
 export const PEDAGOGY_STYLES: PedagogyStyleMeta[] = [
   {
+    id: 'simplified',
+    labelEn: 'Simplified',
+    labelAr: 'شرح مبسط',
+    icon: 'Sparkles',
+    descriptionEn: 'Clear, gentle, and straightforward explanation without cognitive friction.',
+    descriptionAr: 'شرح ميسر ومباشر خالٍ من التعقيد والمصطلحات الصعبة.',
+  },
+  {
+    id: 'scaffolded',
+    labelEn: 'Step-by-Step',
+    labelAr: 'خطوات متتابعة',
+    icon: 'Layers',
+    descriptionEn: 'Deconstructed sequential micro-steps with active comprehension checks.',
+    descriptionAr: 'تفكيك المسألة لخطوات متدرجة ومترابطة مع نقاط تحقق.',
+  },
+  {
+    id: 'practical',
+    labelEn: 'Worked Example',
+    labelAr: 'مثال عملي',
+    icon: 'Code',
+    descriptionEn: 'Applied end-to-end case study with concrete inputs, steps, and output.',
+    descriptionAr: 'تطبيق عملي خطوة بخطوة مع مسألة محلولة ومدخلات ونتائج واضحة.',
+  },
+  {
     id: 'analogies',
-    labelEn: 'Visual Analogies',
-    labelAr: 'تشبيهات بصرية',
+    labelEn: 'Visual Analogy',
+    labelAr: 'تشبيه بصري',
     icon: 'Lightbulb',
     descriptionEn: 'Concrete mental models and real-world everyday analogies.',
-    descriptionAr: 'أمثلة حياتية وتشبيهات بصرية ملموسة لتقريب المفهوم.',
+    descriptionAr: 'أمثلة حياتية وتشبيهات بصرية ملموسة لتقريب المفهوم المجرد.',
+  },
+  {
+    id: 'socratic',
+    labelEn: 'Interactive Inquiry',
+    labelAr: 'أسئلة تفاعلية',
+    icon: 'HelpCircle',
+    descriptionEn: 'Guided reflective questions prompting you to derive the solution.',
+    descriptionAr: 'حوار تفاعلي بأسئلة استكشافية تدفعك لاستنتاج الحل بنفسك.',
   },
   {
     id: 'technical',
@@ -35,22 +67,6 @@ export const PEDAGOGY_STYLES: PedagogyStyleMeta[] = [
     descriptionEn: 'Formal specifications, algorithmic complexity, and academic rigor.',
     descriptionAr: 'شرح أكاديمي دقيق ومباشر ومواصفات تقنية دون مقدمات.',
   },
-  {
-    id: 'scaffolded',
-    labelEn: 'Step-by-Step',
-    labelAr: 'خطوة بخطوة',
-    icon: 'Layers',
-    descriptionEn: 'Deconstructed micro-steps with active comprehension checks.',
-    descriptionAr: 'تفكيك المسألة لخطوات صغيرة متدرجة ومترابطة.',
-  },
-  {
-    id: 'socratic',
-    labelEn: 'Socratic Inquiry',
-    labelAr: 'حوار سقراطي',
-    icon: 'HelpCircle',
-    descriptionEn: 'Guided questions prompting the student to derive the solution themselves.',
-    descriptionAr: 'طرح أسئلة استكشافية تدفعك لاستنتاج الحل بنفسك.',
-  },
 ];
 
 /**
@@ -58,19 +74,12 @@ export const PEDAGOGY_STYLES: PedagogyStyleMeta[] = [
  */
 export function getPedagogyPromptDirective(style?: PedagogyStyle): string {
   switch (style) {
-    case 'analogies':
+    case 'simplified':
       return `
-## PEDAGOGICAL STYLE: VISUAL ANALOGIES & METAPHORS
-- Connect every abstract concept to a concrete, physical real-world object (e.g., mailboxes for pointers, water pipes for electrical current, recipe steps for algorithms).
-- Provide a simple ASCII or mental diagram when it clarifies structure.
-- Focus on intuition before formal syntax.`;
-
-    case 'technical':
-      return `
-## PEDAGOGICAL STYLE: DEEP TECHNICAL & ACADEMIC RIGOR
-- Be concise, dense, and technically precise.
-- Reference formal time/space complexity (Big-O), memory layout, type systems, and edge cases.
-- Skip conversational pleasantries; deliver high-density technical analysis directly.`;
+## PEDAGOGICAL STYLE: SIMPLIFIED (PLAIN LANGUAGE & ELI5)
+- Explain the core concept in warm, plain, accessible language with zero unnecessary jargon.
+- Use short sentences, clear bullet points, and welcoming examples.
+- Ensure the cognitive load is calm, confidence-building, and immediately digestible.`;
 
     case 'scaffolded':
       return `
@@ -79,12 +88,33 @@ export function getPedagogyPromptDirective(style?: PedagogyStyle): string {
 - Do not overwhelm with all information at once; define prerequisites first.
 - Include a quick checkpoint question at the end to verify the foundational step before proceeding.`;
 
+    case 'practical':
+      return `
+## PEDAGOGICAL STYLE: WORKED EXAMPLE & APPLIED CASE STUDY
+- Anchor the explanation in a realistic, concrete case study or worked problem from start to finish.
+- Detail the exact inputs, step-by-step logic, code/calculations, and the final observable outcome.
+- Explicitly point out common practical pitfalls and how to verify the solution.`;
+
+    case 'analogies':
+      return `
+## PEDAGOGICAL STYLE: VISUAL ANALOGIES & METAPHORS
+- Connect every abstract concept to a concrete, physical real-world object (e.g., mailboxes for pointers, water pipes for electrical current, recipe steps for algorithms).
+- Provide a simple ASCII or mental diagram when it clarifies structure.
+- Focus on intuition before formal syntax.`;
+
     case 'socratic':
       return `
-## PEDAGOGICAL STYLE: SOCRATIC INQUIRY
+## PEDAGOGICAL STYLE: INTERACTIVE SOCRATIC INQUIRY
 - Do not just provide the final answer immediately.
 - Guide the student by asking 1-2 targeted reflective questions that lead them to discover the answer themselves.
 - Acknowledge their effort, validate what is correct in their approach, and probe the missing piece.`;
+
+    case 'technical':
+      return `
+## PEDAGOGICAL STYLE: DEEP TECHNICAL & ACADEMIC RIGOR
+- Be concise, dense, and technically precise.
+- Reference formal time/space complexity (Big-O), memory layout, type systems, and edge cases.
+- Skip conversational pleasantries; deliver high-density technical analysis directly.`;
 
     default:
       return '';

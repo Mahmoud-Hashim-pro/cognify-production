@@ -56,9 +56,10 @@ interface CaregiverHubProps {
   onNavigateBack?: () => void;
   setProfile?: (profile: UserProfile) => void;
   onOpenPassport?: () => void;
+  isDarkMode?: boolean;
 }
 
-export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOpenPassport }: CaregiverHubProps) {
+export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOpenPassport, isDarkMode = true }: CaregiverHubProps) {
   const lang = profile.language || 'Arabic';
   const isAr = isArabicLocale(lang);
   const isFr = lang === 'French';
@@ -426,28 +427,40 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   const latestSensory = sensoryLogs[0];
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#111622] text-white overflow-y-auto p-4 sm:p-6" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className={`flex-1 flex flex-col h-full overflow-y-auto p-4 sm:p-6 transition-colors duration-300 ${
+      isDarkMode ? 'bg-[#111622] text-white' : 'bg-[#FAF8F5] text-slate-900'
+    }`} dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <header className="pb-4 border-b border-[#4A1224]/60 flex items-center justify-between gap-3 mb-6 flex-wrap">
+      <header className={`pb-4 border-b flex items-center justify-between gap-3 mb-6 flex-wrap transition-colors duration-300 ${
+        isDarkMode ? 'border-[#4A1224]/60' : 'border-amber-200/80'
+      }`}>
         <div className="flex items-center gap-2.5">
           {onNavigateBack && (
             <button
               onClick={onNavigateBack}
               aria-label={t('Back', 'رجوع', 'Retour')}
-              className="min-w-[44px] min-h-[44px] p-2.5 rounded-xl bg-[#150917] hover:bg-slate-800 text-slate-200 hover:text-white border border-[#4A1224]/50 transition-all flex items-center justify-center cursor-pointer"
+              className={`min-w-[44px] min-h-[44px] p-2.5 rounded-xl border transition-all flex items-center justify-center cursor-pointer ${
+                isDarkMode
+                  ? 'bg-[#150917] hover:bg-slate-800 text-slate-200 hover:text-white border-[#4A1224]/50'
+                  : 'bg-amber-50 hover:bg-amber-100 text-slate-700 hover:text-slate-950 border-amber-200'
+              }`}
             >
               <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
             </button>
           )}
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-lg shadow-amber-950/40">
+            <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center shadow-lg ${
+              isDarkMode
+                ? 'bg-amber-500/15 border-amber-500/30 text-amber-400 shadow-amber-950/40'
+                : 'bg-amber-100 border-amber-300 text-amber-800 shadow-amber-200/50'
+            }`}>
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="font-black text-sm sm:text-base leading-tight text-white">
+              <h1 className={`font-black text-sm sm:text-base leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                 {t('Caregiver & Specialist Command Hub', 'لوحة تحكم المرافق والمختص الطبي', 'Centre Accompagnant & Spécialiste')}
               </h1>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {t('Telemetry, safety controls, sensory pattern analytics and clinical insights', 'متابعة المؤشرات الحيوية، التحليل السريري للأنماط الحسية، تجربة الطوارئ وجواز الوصول')}
               </p>
             </div>

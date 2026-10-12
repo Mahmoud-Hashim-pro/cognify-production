@@ -4,7 +4,7 @@ import { Message, UserProfile, Task, PedagogyStyle } from "../types";
 import { generateAdaptiveResponseStream, generateBenchmarkComparison, generateProactiveInsights, generateChatTitle } from "../services/gemini";
 import { geminiService } from "../services/geminiService";
 import { PEDAGOGY_STYLES } from "../lib/adaptiveLearning";
-import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, RotateCcw, Zap, Bookmark, Search, Eye } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
 
 import ChatBookmarksDrawer, { BookmarkedInsight } from "./chat/ChatBookmarksDrawer";
 import ChatErgonomicsBar, { FontScale } from "./chat/ChatErgonomicsBar";
@@ -1413,11 +1413,11 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
   return (
     <div className={`flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-hidden relative selection:bg-[#E5A93C]/30 selection:text-white ${isEmbedded ? 'h-full' : 'h-[var(--app-h,100dvh)]'}`}>
-      {/* Ambient background lighting orbs - Royal Burgundy & Champagne Gold */}
+      {/* Ambient background lighting orbs - Serene Teal & Ambient Gold */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 hidden md:block">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#4A1224]/20 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-[#E5A93C]/10 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-[#831843]/15 rounded-full blur-[140px]" />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[140px]" />
+        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-teal-600/10 rounded-full blur-[140px]" />
       </div>
 
       {/* File Preview Modal */}
@@ -1544,22 +1544,22 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
       {/* Header Info */}
       {!isEmbedded && (
-        <div className="bg-[#0D0610]/90 border-b border-[#4A1224]/50 backdrop-blur-2xl h-[64px] px-4 md:px-8 flex justify-between items-center z-10 shrink-0 shadow-lg shadow-black/40">
+        <div className="bg-white/95 dark:bg-[#121B1E]/95 border-b border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white backdrop-blur-2xl h-[64px] px-4 md:px-8 flex justify-between items-center z-10 shrink-0 shadow-sm">
           <div className="flex items-center gap-3 md:gap-4">
             <button 
               onClick={onMenuClick}
-              className="p-2 -ms-2 text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30 rounded-xl active:scale-95 transition-all"
+              className="p-2 -ms-2 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl active:scale-95 transition-all cursor-pointer"
               aria-label="Toggle Sidebar Menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2.5">
-              <span className="font-serif font-black text-lg tracking-tight text-white flex items-center gap-1.5">
+              <span className="font-serif font-black text-lg tracking-tight text-stone-900 dark:text-white flex items-center gap-1.5">
                 <span>Cognify</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/40">2.0</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800">2.0</span>
               </span>
-              <span className="text-xs md:text-sm font-semibold text-[#E5A93C]/80 truncate max-w-[100px] xs:max-w-[140px] md:max-w-xs flex items-center gap-1.5">
-                <span className="text-[#4A1224]">·</span> {activeThread?.title || localize(profile.language, 'AI Session', 'جلسة ذكية')}
+              <span className="text-xs md:text-sm font-semibold text-teal-700 dark:text-teal-400 truncate max-w-[100px] xs:max-w-[140px] md:max-w-xs flex items-center gap-1.5">
+                <span className="text-stone-400">·</span> {activeThread?.title || localize(profile.language, 'AI Session', 'جلسة ذكية')}
               </span>
             </div>
             {profile.accessibilityMode !== 'None' && (
@@ -1567,7 +1567,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 onClick={handleDisableAccessibility}
                 title={localize(profile.language, 'Accessibility mode is on — click to turn it off', 'وضع الإتاحة شغّال — اضغط لإيقافه')}
                 aria-label={localize(profile.language, 'Turn off accessibility mode', 'إيقاف وضع الإتاحة')}
-                className="hidden sm:flex items-center gap-1.5 ps-3 pe-2 py-1 bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/40 hover:bg-[#4A1224]/70 rounded-full text-[10px] font-black uppercase tracking-wider transition-all group shadow-sm"
+                className="hidden sm:flex items-center gap-1.5 ps-3 pe-2 py-1 bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60 rounded-full text-[10px] font-black uppercase tracking-wider transition-all group shadow-sm cursor-pointer"
               >
                  <Accessibility className="w-3.5 h-3.5" /> {profile.accessibilityMode} {localize(profile.language, 'Mode', 'وضع')}
                  <X className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
@@ -2378,23 +2378,32 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 {/* Top Bar: Adaptive Pedagogy Style Bar + France Travel Voice & Mic Language */}
                 <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar scrollbar-none py-0.5 px-1 bg-[#0E0610]/60 border border-[#4A1224]/50 rounded-2xl">
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider shrink-0">
-                      {localize(profile.language, 'Pedagogy:', 'أسلوب الشرح:')}
+                    <span className="text-[10px] text-amber-500 dark:text-amber-400 font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      <span>{localize(profile.language, 'Pedagogy:', 'أسلوب الشرح:')}</span>
                     </span>
                     {PEDAGOGY_STYLES.map((st) => {
                       const isSelected = activePedagogyStyle === st.id;
+                      const IconComponent =
+                        st.id === 'simplified' ? Sparkles :
+                        st.id === 'scaffolded' ? Layers :
+                        st.id === 'practical' ? Code :
+                        st.id === 'analogies' ? Lightbulb :
+                        st.id === 'socratic' ? HelpCircle : Cpu;
+
                       return (
                         <button
                           key={st.id}
                           type="button"
                           onClick={() => handleSelectPedagogy(st.id)}
-                          className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1.5 border ${
+                          className={`px-2.5 py-1 min-h-[32px] rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer ${
                             isSelected
-                              ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-white border-[#E5A93C]/40 shadow-md shadow-[#E5A93C]/20 ring-1 ring-[#E5A93C]/30'
-                              : 'bg-[#0E0610] text-slate-400 border-[#4A1224]/70 hover:bg-[#181d33] hover:text-white'
+                              ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-sm ring-1 ring-amber-400/50'
+                              : 'bg-[#150917] text-slate-300 border-[#4A1224]/70 hover:bg-[#25102a] hover:text-white'
                           }`}
                           title={localize(profile.language, st.descriptionEn, st.descriptionAr)}
                         >
+                          <IconComponent className="w-3 h-3 shrink-0" />
                           <span>{localize(profile.language, st.labelEn, st.labelAr)}</span>
                         </button>
                       );
