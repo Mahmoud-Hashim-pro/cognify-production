@@ -204,7 +204,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
       localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
-      localStorage.setItem('cognify_default_disability_tab', 'hub');
+      localStorage.setItem('cognify_default_disability_tab', 'chat');
     } catch (err) {
       console.warn("LocalStorage unavailable in current context:", err);
     }
@@ -218,7 +218,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
       localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
       localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
-      localStorage.setItem('cognify_default_disability_tab', 'hub');
+      localStorage.setItem('cognify_default_disability_tab', 'chat');
       window.location.hash = '#disability';
     } catch (err) {
       console.warn("Direct preview error:", err);
