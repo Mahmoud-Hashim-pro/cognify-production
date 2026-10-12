@@ -338,13 +338,31 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     } catch (err: any) {
       if (!isMountedRef.current) return;
       const code = err?.code || '';
-      const msg = code === 'auth/network-request-failed'
-        ? t("Network error — check your connection and try again.", "خطأ في الشبكة — تحقق من الاتصال وحاول مجدداً.")
-        : code === 'auth/email-already-in-use'
-          ? t("This email is already registered. Try signing in instead.", "هذا البريد مسجل بالفعل. حاول تسجيل الدخول بدلاً من ذلك.")
-          : code === 'auth/weak-password'
-            ? t("Password is too weak — use at least 8 characters.", "كلمة المرور ضعيفة — استخدم 8 خانات على الأقل.")
-            : (err.message || '').replace("Firebase: ", "");
+      const rawMsg = err?.message || '';
+      let msg = '';
+      if (code === 'auth/network-request-failed') {
+        msg = t("Network error — check your connection and try again.", "خطأ في الاتصال بالإنترنت — يرجى التحقق من الشبكة وإعادة المحاولة.");
+      } else if (code === 'auth/email-already-in-use') {
+        msg = t("This email is already registered. Try signing in instead.", "هذا البريد مسجل بالفعل. يرجى التبديل لتبويب تسجيل الدخول.");
+      } else if (code === 'auth/weak-password') {
+        msg = t("Password is too weak — use at least 8 characters.", "كلمة المرور ضعيفة — يرجى استخدام 8 خانات على الأقل.");
+      } else if (
+        code === 'auth/invalid-credential' ||
+        code === 'auth/wrong-password' ||
+        code === 'auth/user-not-found' ||
+        code === 'auth/internal-error' ||
+        rawMsg.includes('INVALID_LOGIN_CREDENTIALS') ||
+        rawMsg.includes('auth/internal-error')
+      ) {
+        msg = t(
+          "Incorrect email or password. Please verify your credentials or click 'Forgot Password?' to reset.",
+          "البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور أو الضغط على 'نسيت كلمة المرور؟' لاستعادتها."
+        );
+      } else if (code === 'auth/too-many-requests') {
+        msg = t("Too many attempts. Please wait a few moments or reset your password.", "تم حظر المحاولات مؤقتاً بسبب تكرار المحاولة. انتظر دقيقة أو استخدم استعادة كلمة المرور.");
+      } else {
+        msg = rawMsg.replace("Firebase: ", "");
+      }
       setError(msg);
     } finally {
       if (isMountedRef.current) {
@@ -922,6 +940,18 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       <Globe className="w-3.5 h-3.5 shrink-0" />
                       <span>{t("Direct Google Sign-In (No Popups)", "تسجيل الدخول المباشر بجوجل")}</span>
                     </button>
+
+                    {/* Instant Direct Student Access (bypass password friction) */}
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={handleDirectPreview}
+                        className="w-full py-2.5 px-3 rounded-xl border border-teal-600/30 bg-teal-50/60 hover:bg-teal-100/70 dark:bg-teal-950/30 dark:hover:bg-teal-900/40 text-teal-800 dark:text-teal-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98]"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                        <span>{t("Direct Student Access (Instant Preview)", "دخول فوري كطالب (تخطي التسجيل)")}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
