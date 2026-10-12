@@ -946,14 +946,6 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
           جاري تحميل مجسم الإشارة 3D...
         </div>
       )}
-      {/*
-        HONEST DISCLAIMER — Arabic-first transparent disclosure for ArSL / Deaf community.
-      */}
-      <div className="absolute top-2 left-2 z-40 px-2.5 py-1 bg-black/60 backdrop-blur-sm border border-amber-500/30 rounded-lg pointer-events-none">
-        <span className="text-[10px] text-amber-300 font-bold leading-tight block text-center">
-          ⚠️ إشارات تجريبية — تحت المراجعة اللغوية مع الجمعية المصرية للصم
-        </span>
-      </div>
     </div>
   );
 }
