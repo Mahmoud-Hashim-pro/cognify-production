@@ -1648,8 +1648,9 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         </div>
 
 
-        {/* Floating Bottom Action Dock */}
-        <div className="pointer-events-auto space-y-2.5 max-w-2xl mx-auto w-full">
+        {/* Floating Bottom Action Dock — only active when camera stream is operating */}
+        {status !== 'camera-denied' && status !== 'unsupported' && (
+          <div className="pointer-events-auto space-y-2.5 max-w-2xl mx-auto w-full">
           {/* Primary Action: only the button matching the currently selected language shows */}
           <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
             {companionLang === 'ar' && (() => {
@@ -1916,6 +1917,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             </button>
           </div>
         </div>
+        )}
       </div>
 
       {/* First-Launch Language Picker — shown once until a language is chosen */}
