@@ -2,7 +2,7 @@ import { localize, isArabicLocale, getTranslation } from '../lib/translations';
 import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
-  User, Settings, Accessibility, LifeBuoy, MessageSquare, AlertCircle, 
+  User, Settings, LifeBuoy, MessageSquare, AlertCircle, 
   LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap
 } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
@@ -90,8 +90,8 @@ export default function Sidebar({
 
   const isTabActive = (tab: DisabilityTab) => {
     if (currentView !== 'disability') return false;
-    const currentTab = activeDisabilityTab || 'hub';
-    if (tab === 'hub') return currentTab === 'hub';
+    const currentTab = activeDisabilityTab || 'chat';
+    if (tab === 'chat') return currentTab === 'chat';
     if (tab === 'deaf') return currentTab === 'deaf' || currentTab === 'bridge' || currentTab === 'radar';
     return currentTab === tab;
   };
@@ -99,13 +99,18 @@ export default function Sidebar({
   // Dedicated Assistive Suites Navigation List
   const assistiveItems = [
     {
-      id: 'disability_hub',
-      label: localize(profile.language, 'Accessibility Hub', 'منظومة ذوي الهمم (الرئيسية)'),
-      icon: Accessibility,
-      action: () => navigateToDisabilityTab('hub'),
-      active: isTabActive('hub'),
-      badge: localize(profile.language, 'Hub', 'الرئيسية'),
-      badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+      id: 'chat',
+      label: localize(profile.language, 'Accessible AI Tutor', 'المساعد الذكي المهيأ'),
+      icon: MessageSquare,
+      action: () => {
+        onClose?.();
+        if (currentView === 'disability') {
+          navigateToDisabilityTab('chat');
+        } else {
+          setCurrentView('chat');
+        }
+      },
+      active: currentView === 'chat' || (currentView === 'disability' && (activeDisabilityTab === 'chat' || !activeDisabilityTab)),
     },
     {
       id: 'vision',
@@ -124,13 +129,6 @@ export default function Sidebar({
       active: isTabActive('deaf') || currentView === 'video',
       badge: '🤟',
       badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-    },
-    {
-      id: 'chat',
-      label: localize(profile.language, 'Accessible AI Tutor', 'المساعد الذكي المهيأ'),
-      icon: MessageSquare,
-      action: () => { onClose?.(); setCurrentView('chat'); },
-      active: currentView === 'chat',
     },
     {
       id: 'profile',

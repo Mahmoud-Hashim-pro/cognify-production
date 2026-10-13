@@ -87,8 +87,8 @@ function createGuestProfile(): UserProfile {
     const savedDis = localStorage.getItem('preLoginDisability');
     if (savedMode) mode = savedMode;
     if (savedDis) disLabel = savedDis;
-    if (!localStorage.getItem('cognify_default_disability_tab')) {
-      localStorage.setItem('cognify_default_disability_tab', 'hub');
+    if (!localStorage.getItem('cognify_default_disability_tab') || localStorage.getItem('cognify_default_disability_tab') === 'hub') {
+      localStorage.setItem('cognify_default_disability_tab', 'chat');
     }
   } catch {}
   return {
@@ -127,7 +127,7 @@ export default function App() {
       sessionStorage.removeItem('cognify_exit_preview');
       sessionStorage.setItem('cognify_guest_preview', 'disability');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
-      localStorage.setItem('cognify_default_disability_tab', 'hub');
+      localStorage.setItem('cognify_default_disability_tab', 'chat');
       window.location.hash = '#disability';
     } catch {}
     setIsGuestPreview(true);
@@ -198,12 +198,12 @@ export default function App() {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('cognify_default_disability_tab');
-        if (saved === 'vision' || saved === 'deaf' || saved === 'hub' || saved === 'caregiver') {
+        if (saved === 'vision' || saved === 'deaf' || saved === 'chat' || saved === 'caregiver') {
           return saved as DisabilityTab;
         }
       } catch {}
     }
-    return 'hub';
+    return 'chat';
   });
 
   // Cognify Memory (Phase 2) state
@@ -273,7 +273,12 @@ export default function App() {
         setMemoryError(null);
       },
       (err) => {
-        console.error('Firestore memory subscription error:', err);
+        const errMsg = (err as any)?.message || String(err);
+        if (errMsg.includes('permission') || errMsg.includes('PERMISSION_DENIED')) {
+          console.warn('[Cognify Memory] Cloud sync restricted; operating in resilient local cache mode.');
+        } else {
+          console.warn('[Cognify Memory] Memory subscription notice:', errMsg);
+        }
         // Fall back gracefully to cache or default so the user is never stuck
         setMemoryState((prev) => prev || cached || DEFAULT_STUDENT_MEMORY);
         setMemoryError(null);
@@ -1019,6 +1024,8 @@ export default function App() {
             onNavigateBack={() => navigateTo('disability')}
             setProfile={setProfile}
             onNavigate={(v) => navigateTo(v)}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
           />
         );
       case 'privacy_security':

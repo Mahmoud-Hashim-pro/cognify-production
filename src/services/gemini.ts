@@ -127,8 +127,8 @@ const GEMINI_MODEL = GEMINI_MODELS[0];
 // One-time visibility into AI config (never logs the key values themselves), so
 // a "the chat silently does nothing" problem is diagnosable from DevTools.
 console.info(
-  `[Cognify AI] Gemini key: ${getGeminiKeys().length ? "set" : "MISSING"} · ` +
-  `Groq/xAI fallback: ${getGroqKeys().length || getXaiKeys().length ? "set" : "none"} · model: ${GEMINI_MODEL}`,
+  `[Cognify AI] Key Mode: ${getGeminiKeys().length ? "Client BYOK (set)" : "Secure Server Proxy (/api/gemini/*)"} · ` +
+  `Fallback: ${getGroqKeys().length || getXaiKeys().length ? "Client fallback" : "Server-managed"} · Model: ${GEMINI_MODEL}`,
 );
 
 /** Compact adaptive system prompt (shared by the Groq fallback). */

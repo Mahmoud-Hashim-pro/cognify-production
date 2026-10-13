@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cognify-v11-unified-cache';
+const CACHE_NAME = 'cognify-v13-clean-cache';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -28,12 +28,18 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and API/Firebase backend endpoints
-  if (request.method !== 'GET' || url.pathname.startsWith('/api/') || url.hostname.includes('firestore') || url.hostname.includes('googleapis')) {
+  // 1. Strictly ignore all non-GET and cross-origin requests (fonts, analytics, CDN, APIs).
+  // Letting the browser handle these natively avoids Service Worker Fetch CSP conflicts.
+  if (request.method !== 'GET' || url.origin !== self.location.origin) {
     return;
   }
 
-  // Network-first for navigation requests with offline fallback to cached index.html
+  // 2. Skip internal backend endpoints
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
+  // 3. Network-first for navigation requests with offline fallback to cached index.html
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -44,12 +50,15 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match('/index.html'))
+        .catch(async () => {
+          const cached = await caches.match('/index.html');
+          return cached || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        })
     );
     return;
   }
 
-  // Cache-first for static immutable assets with strict HTML MIME guard
+  // 4. Cache-first for static immutable assets with strict HTML MIME guard
   if (url.pathname.startsWith('/assets/')) {
     event.respondWith(
       caches.match(request).then(async (cached) => {
@@ -73,14 +82,24 @@ self.addEventListener('fetch', (event) => {
             }
           }
           return response;
+        }).catch(async () => {
+          const fallback = await caches.match(request);
+          return fallback || new Response('Asset unavailable', { status: 404, headers: { 'Content-Type': 'text/plain' } });
         });
       })
     );
     return;
   }
 
-  // Default network-falling-back-to-cache
+  // 5. Default network-falling-back-to-cache with guaranteed Response object
   event.respondWith(
-    fetch(request).catch(() => caches.match(request))
+    fetch(request).catch(async () => {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+      return new Response('Network unavailable', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' },
+      });
+    })
   );
 });

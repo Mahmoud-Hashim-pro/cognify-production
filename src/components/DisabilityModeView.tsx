@@ -5,7 +5,7 @@ import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Flame,
   ArrowLeft, ArrowRight, MessageSquare, Globe, Check, Brain,
-  LayoutGrid, Building2, Zap, Radio, Shield, ListFilter, Layers, 
+  Building2, Zap, Radio, Shield, ListFilter, Layers, 
   SlidersHorizontal, CheckCircle2, ChevronRight, Grid, List, BookOpen, ShieldCheck,
   Sun, Moon
 } from 'lucide-react';
@@ -25,7 +25,6 @@ const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOr
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation, isArabicLocale } from '../lib/translations';
 
-import StudentCockpitHub from './StudentCockpitHub';
 
 export type DisabilityTab =
   | 'hub'
@@ -63,19 +62,19 @@ interface DisabilityModeViewProps {
  * Auto-detects which suite an accessibility user should land in directly,
  * based on their chosen accessibilityMode (primary) or free-text
  * disabilityType (fallback for older profiles / non-standard entries).
- * Returns 'hub' (the card overview) when nothing maps cleanly — never guess
+ * Returns 'chat' (the AI Tutor) when nothing maps cleanly — never guess
  * a suite the user didn't actually indicate.
  */
 function detectDirectDisabilityTab(_profile: UserProfile): DisabilityTab {
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
-    if (saved === 'hub' || saved === 'deaf' || saved === 'vision') {
+    if (saved === 'chat' || saved === 'deaf' || saved === 'vision') {
       return saved as DisabilityTab;
     }
   } catch {}
 
-  // Default to student cockpit hub as the primary home
-  return 'hub';
+  // Default to AI Tutor (chat) as the primary home
+  return 'chat';
 }
 
 // Maps a suite tab to its category filter chip, so "Back to Hub" can re-open the
@@ -104,7 +103,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   isDarkMode,
   toggleTheme,
 }, ref) {
-  const [activeTab, setActiveTab] = useState<DisabilityTab>(() => currentTab || detectDirectDisabilityTab(profile));
+  const [activeTab, setActiveTab] = useState<DisabilityTab>(() => {
+    const directTab = currentTab || detectDirectDisabilityTab(profile);
+    return directTab === 'hub' ? 'chat' : directTab;
+  });
   const [showPassportModal, setShowPassportModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ModuleCategory>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -114,9 +116,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   // Sync activeTab whenever parent updates currentTab
   useEffect(() => {
     if (currentTab && currentTab !== activeTab) {
-      setActiveTab(currentTab);
+      setActiveTab(currentTab === 'hub' ? 'chat' : currentTab);
     }
-  }, [currentTab]);
+  }, [currentTab, activeTab]);
 
   // Tell parent which tab is active
   useEffect(() => { 
@@ -130,22 +132,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     if (currentMode && currentMode !== lastProfileModeRef.current) {
       lastProfileModeRef.current = currentMode;
       const directTab = currentTab || detectDirectDisabilityTab(profile);
-      setActiveTab(directTab);
+      setActiveTab(directTab === 'hub' ? 'chat' : directTab);
     }
   }, [profile?.accessibilityMode, profile?.disabilityType, currentTab]);
 
   // Set default suite persistently when user chooses a suite
   const handleSelectTab = React.useCallback((tab: DisabilityTab) => {
-    setActiveTab(tab);
-    onTabChange?.(tab);
-    if (tab === 'vision' || tab === 'deaf' || tab === 'hub') {
+    const targetTab = tab === 'hub' ? 'chat' : tab;
+    setActiveTab(targetTab);
+    onTabChange?.(targetTab);
+    if (targetTab === 'vision' || targetTab === 'deaf' || targetTab === 'chat') {
       try {
-        localStorage.setItem('cognify_default_disability_tab', tab);
+        localStorage.setItem('cognify_default_disability_tab', targetTab);
       } catch {}
       let newMode: AccessibilityMode | null = null;
       let newType: string | null = null;
-      if (tab === 'vision') { newMode = 'Visual'; newType = 'Visual Impairment'; }
-      else if (tab === 'deaf') { newMode = 'Vocal-Deaf'; newType = 'Hearing Impairment'; }
+      if (targetTab === 'vision') { newMode = 'Visual'; newType = 'Visual Impairment'; }
+      else if (targetTab === 'deaf') { newMode = 'Vocal-Deaf'; newType = 'Hearing Impairment'; }
 
       if (newMode) {
         lastProfileModeRef.current = newMode;
@@ -160,8 +163,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, [profile, setProfile, onTabChange]);
 
   const handleNavigateBack = React.useCallback(() => {
-    if (activeTab !== 'hub') {
-      setActiveTab('hub');
+    if (activeTab !== 'chat') {
+      setActiveTab('chat');
     } else if (onNavigate) {
       onNavigate('chat');
     } else {
@@ -454,7 +457,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             }`}
           >
             {[
-              { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', Icon: LayoutGrid },
               { id: 'chat' as const, labelAr: 'المرشد الذكي', labelEn: 'AI Tutor', Icon: Brain },
               { id: 'vision' as const, labelAr: 'البصري', labelEn: 'Visual', Icon: Eye },
               { id: 'deaf' as const, labelAr: 'السمعي', labelEn: 'Hearing', Icon: Ear },
@@ -486,7 +488,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         {/* Right Header Status / Sibling Switcher */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Sibling module pills when inside a suite */}
-          {activeTab !== 'hub' && siblingModules.length > 1 ? (
+          {activeTab !== 'chat' && siblingModules.length > 1 ? (
             <div
               role="tablist"
               aria-label={localize(profile.language, 'Suite Sub-modules', 'أقسام المنظومة')}
@@ -572,29 +574,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       <main className="flex-1 min-h-0 flex flex-col overflow-hidden relative pb-16 md:pb-0">
         <AnimatePresence mode="wait">
 
-          {/* ═════════════════════════════════════════════════════════════════════
-              VIEW: DISABILITY MODULES HUB & LAUNCHER
-             ═════════════════════════════════════════════════════════════════════ */}
-          {activeTab === 'hub' && (
-            <motion.div
-              key="hub-cockpit-view"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="flex-1 flex flex-col items-center overflow-y-auto p-4 sm:p-6 md:p-8 select-none custom-scrollbar"
-            >
-              <StudentCockpitHub
-                profile={profile}
-                onSelectSuite={(suiteId) => handleSelectTab(suiteId)}
-                onOpenPassport={() => setShowPassportModal(true)}
-                isDarkMode={isDarkMode}
-                toggleTheme={toggleTheme}
-                onSTTStateChange={onSTTStateChange}
-                setProfile={setProfile}
-              />
-            </motion.div>
-          )}
 
           {/* ═════════════════════════════════════════════════════════════════════
               ACTIVE MODULE VIEWS (CLEAN & DEDICATED)
@@ -872,7 +851,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         }`}
       >
         {[
-          { id: 'hub' as const, labelAr: 'الرئيسية', labelEn: 'Hub', icon: LayoutGrid },
           { id: 'chat' as const, labelAr: 'المرشد', labelEn: 'Tutor', icon: Brain },
           { id: 'vision' as const, labelAr: 'البصري', labelEn: 'Vision', icon: Eye },
           { id: 'deaf' as const, labelAr: 'السمعي', labelEn: 'Hearing', icon: Ear },

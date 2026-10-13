@@ -78,8 +78,8 @@ export async function getStudentMemory(uid?: string | null): Promise<StudentMemo
   } catch (err) {
     const cached = getCachedStudentMemory(uid);
     if (cached) return cached;
-    handleFirestoreError(err, OperationType.GET, path);
-    throw err;
+    console.warn(`[Cognify Memory] Soft fallback to default memory for ${path}:`, (err as any)?.message || err);
+    return DEFAULT_STUDENT_MEMORY;
   }
 }
 
@@ -129,12 +129,9 @@ export function subscribeToStudentMemory(
       },
       (err) => {
         clearTimeout(safetyTimer);
-        handleFirestoreError(err, OperationType.GET, path);
-        if (cached) {
-          onUpdate?.(cached);
-        } else {
-          onError?.(err as Error);
-        }
+        const fallback = getCachedStudentMemory(uid) || DEFAULT_STUDENT_MEMORY;
+        onUpdate?.(fallback);
+        onError?.(err as Error);
       }
     );
 
@@ -144,12 +141,9 @@ export function subscribeToStudentMemory(
     };
   } catch (err) {
     clearTimeout(safetyTimer);
-    handleFirestoreError(err, OperationType.GET, path);
-    if (cached) {
-      onUpdate?.(cached);
-    } else {
-      onError?.(err as Error);
-    }
+    const fallback = getCachedStudentMemory(uid) || DEFAULT_STUDENT_MEMORY;
+    onUpdate?.(fallback);
+    onError?.(err as Error);
     return () => {};
   }
 }
