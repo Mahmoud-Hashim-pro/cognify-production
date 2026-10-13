@@ -273,7 +273,12 @@ export default function App() {
         setMemoryError(null);
       },
       (err) => {
-        console.error('Firestore memory subscription error:', err);
+        const errMsg = (err as any)?.message || String(err);
+        if (errMsg.includes('permission') || errMsg.includes('PERMISSION_DENIED')) {
+          console.warn('[Cognify Memory] Cloud sync restricted; operating in resilient local cache mode.');
+        } else {
+          console.warn('[Cognify Memory] Memory subscription notice:', errMsg);
+        }
         // Fall back gracefully to cache or default so the user is never stuck
         setMemoryState((prev) => prev || cached || DEFAULT_STUDENT_MEMORY);
         setMemoryError(null);

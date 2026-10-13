@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cognify-v12-unified-cache';
+const CACHE_NAME = 'cognify-v13-clean-cache';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -28,39 +28,18 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and API/Firebase backend endpoints
-  if (
-    request.method !== 'GET' ||
-    url.pathname.startsWith('/api/') ||
-    url.hostname.includes('firestore') ||
-    url.hostname.includes('firebase') ||
-    url.hostname.includes('googleapis')
-  ) {
+  // 1. Strictly ignore all non-GET and cross-origin requests (fonts, analytics, CDN, APIs).
+  // Letting the browser handle these natively avoids Service Worker Fetch CSP conflicts.
+  if (request.method !== 'GET' || url.origin !== self.location.origin) {
     return;
   }
 
-  // Cross-origin request handling: only intercept Google Fonts, pass through all others (e.g. analytics)
-  if (url.origin !== self.location.origin) {
-    if (url.hostname === 'fonts.gstatic.com' || url.hostname === 'fonts.googleapis.com') {
-      event.respondWith(
-        caches.match(request).then((cached) => {
-          if (cached) return cached;
-          return fetch(request)
-            .then((response) => {
-              if (response && response.status === 200) {
-                const clone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-              }
-              return response;
-            })
-            .catch(() => cached || new Response('', { status: 408, statusText: 'Font unavailable' }));
-        })
-      );
-    }
+  // 2. Skip internal backend endpoints
+  if (url.pathname.startsWith('/api/')) {
     return;
   }
 
-  // Network-first for navigation requests with offline fallback to cached index.html
+  // 3. Network-first for navigation requests with offline fallback to cached index.html
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -79,7 +58,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static immutable assets with strict HTML MIME guard
+  // 4. Cache-first for static immutable assets with strict HTML MIME guard
   if (url.pathname.startsWith('/assets/')) {
     event.respondWith(
       caches.match(request).then(async (cached) => {
@@ -112,7 +91,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default network-falling-back-to-cache with guaranteed Response object
+  // 5. Default network-falling-back-to-cache with guaranteed Response object
   event.respondWith(
     fetch(request).catch(async () => {
       const cached = await caches.match(request);
