@@ -501,25 +501,25 @@ Question: "${q}"`;
       </header>
 
       {/* ── BILATERAL SIGN LANGUAGE STATION: TWO CARDS ── */}
-      <main className={`flex-1 min-h-0 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar ${
+      <main className={`flex-1 min-h-0 p-3 sm:p-4 pb-6 sm:pb-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar ${
         isDarkMode ? 'bg-[#0E1416]' : 'bg-[#FAF8F5]'
       }`}>
 
         {/* ══════════════════════════════════════════════════════════════════════
             CARD 1: THE 3D AVATAR & SCRIPT STUDIO (اسأل الذكاء الاصطناعي أو ترجم مباشرة)
            ══════════════════════════════════════════════════════════════════════ */}
-        <div className={`border rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group transition-colors duration-300 ${
+        <div className={`border rounded-2xl p-3 sm:p-3.5 flex flex-col shadow-xl relative overflow-hidden group transition-colors duration-300 ${
           isDarkMode
             ? 'bg-[#121B1E] border-stone-800'
             : 'bg-white border-stone-200 shadow-sm'
         }`}>
-          <div className="flex flex-col h-full justify-between">
+          <div className="flex flex-col h-full">
             {/* Header */}
             <div className={`flex items-center justify-between pb-2 border-b shrink-0 ${
               isDarkMode ? 'border-stone-800/80' : 'border-stone-100'
             }`}>
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                   isDarkMode ? 'bg-teal-950/60 text-teal-400 border border-teal-800' : 'bg-teal-50 text-teal-700 border border-teal-200'
                 }`}>
                   <Bot className="w-4 h-4" />
@@ -537,7 +537,7 @@ Question: "${q}"`;
               </div>
 
               {/* Avatar Controls */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => setIsAvatarPlaying(!isAvatarPlaying)}
                   className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
@@ -564,7 +564,7 @@ Question: "${q}"`;
             </div>
 
             {/* 3D Avatar Canvas */}
-            <div className={`w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl border relative overflow-hidden flex items-center justify-center ${
+            <div className={`w-full flex-1 h-[170px] sm:h-[190px] md:h-[210px] min-h-[140px] max-h-[240px] my-1.5 rounded-xl border relative overflow-hidden flex items-center justify-center ${
               isDarkMode
                 ? 'bg-gradient-to-b from-[#0B1114] to-[#162327] border-stone-800'
                 : 'bg-gradient-to-b from-stone-900 to-stone-950 border-stone-300 shadow-inner'
@@ -602,7 +602,7 @@ Question: "${q}"`;
             </div>
 
             {/* AI Subtitles / Explanation Box */}
-            <div className={`p-2.5 rounded-xl border mb-2 min-h-[75px] max-h-[110px] overflow-y-auto custom-scrollbar flex flex-col justify-between ${
+            <div className={`p-2 rounded-xl border mb-1.5 min-h-[46px] max-h-[68px] overflow-y-auto custom-scrollbar flex flex-col justify-between shrink-0 ${
               isDarkMode
                 ? 'bg-[#0B1114] border-stone-800/80 text-stone-200'
                 : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -618,7 +618,7 @@ Question: "${q}"`;
                 )}
               </p>
               {!isAiLoading && (
-                <div className={`flex items-center justify-between pt-1 text-[10px] border-t mt-1 ${
+                <div className={`flex items-center justify-between pt-0.5 text-[10px] border-t mt-1 ${
                   isDarkMode ? 'border-stone-800 text-stone-500' : 'border-stone-200 text-stone-600'
                 }`}>
                   <span>{loc('✅ Ready', '✅ جاهز')}</span>
@@ -626,8 +626,8 @@ Question: "${q}"`;
               )}
             </div>
 
-            {/* Script & Question Input Form */}
-            <div className="flex flex-col gap-2 pt-1">
+            {/* Script & Question Input Form (Pinned & Always Visible) */}
+            <div className="flex flex-col gap-1.5 pt-0.5 shrink-0 mt-auto">
               <div className="flex items-center gap-1.5">
                 <input
                   type="text"
@@ -643,7 +643,7 @@ Question: "${q}"`;
                     'Type any text to sign directly, or ask a question…',
                     'اكتب أي نص أو جملة للترجمة الفورية، أو اسأل سؤالاً...'
                   )}
-                  className={`flex-1 p-2.5 rounded-xl border text-xs focus:outline-none transition-all ${
+                  className={`flex-1 p-2 rounded-xl border text-xs focus:outline-none transition-all ${
                     isDarkMode
                       ? 'bg-[#0B1114] border-stone-800 text-stone-100 placeholder:text-stone-500 focus:border-teal-500'
                       : 'bg-white border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-teal-600 shadow-sm'
@@ -653,7 +653,7 @@ Question: "${q}"`;
                 {/* Voice button */}
                 <button
                   onClick={toggleQuestionVoice}
-                  className={`p-2.5 rounded-xl border text-xs transition-colors cursor-pointer ${
+                  className={`p-2 rounded-xl border text-xs transition-colors cursor-pointer shrink-0 ${
                     isQuestionVoiceActive
                       ? 'bg-rose-500 text-white border-rose-400 animate-pulse'
                       : isDarkMode
@@ -667,7 +667,7 @@ Question: "${q}"`;
               </div>
 
               {/* Action Buttons: Direct Sign 🤟 + Ask AI ✨ */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 shrink-0">
                 <button
                   onClick={() => handleDirectSignScript()}
                   disabled={!aiQuestion.trim()}
@@ -695,18 +695,18 @@ Question: "${q}"`;
         {/* ══════════════════════════════════════════════════════════════════════
             CARD 2: THE CAMERA TO CONVERT SIGNS TO VOICE & TEXT
            ══════════════════════════════════════════════════════════════════════ */}
-        <div className={`border rounded-2xl p-3.5 flex flex-col justify-between shadow-xl relative overflow-hidden group transition-colors duration-300 ${
+        <div className={`border rounded-2xl p-3 sm:p-3.5 flex flex-col shadow-xl relative overflow-hidden group transition-colors duration-300 ${
           isDarkMode
             ? 'bg-[#121B1E] border-stone-800'
             : 'bg-white border-stone-200 shadow-sm'
         }`}>
-          <div className="flex flex-col h-full justify-between">
+          <div className="flex flex-col h-full">
             {/* Header */}
             <div className={`flex items-center justify-between pb-2 border-b shrink-0 ${
               isDarkMode ? 'border-stone-800/80' : 'border-stone-100'
             }`}>
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                   isDarkMode ? 'bg-teal-950/60 text-teal-400 border border-teal-800' : 'bg-teal-50 text-teal-700 border border-teal-200'
                 }`}>
                   <Camera className="w-4 h-4" />
@@ -729,7 +729,7 @@ Question: "${q}"`;
               {/* Start / Stop Camera Button */}
               <button
                 onClick={isCameraActive ? handleStopCamera : handleStartCamera}
-                className={`py-1.5 px-3.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer ${
+                className={`py-1.5 px-3.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer shrink-0 ${
                   isCameraActive
                     ? 'bg-rose-600 hover:bg-rose-700 text-white'
                     : 'bg-teal-700 hover:bg-teal-800 text-white'
@@ -750,7 +750,7 @@ Question: "${q}"`;
             </div>
 
             {/* Video Viewfinder Container */}
-            <div className={`w-full flex-1 min-h-[240px] max-h-[300px] my-2 rounded-xl border relative overflow-hidden flex items-center justify-center ${
+            <div className={`w-full flex-1 h-[170px] sm:h-[190px] md:h-[210px] min-h-[140px] max-h-[240px] my-1.5 rounded-xl border relative overflow-hidden flex items-center justify-center ${
               isDarkMode
                 ? 'bg-[#0B1114] border-stone-800'
                 : 'bg-stone-100 border-stone-200'
@@ -771,19 +771,19 @@ Question: "${q}"`;
 
               {/* Placeholder when camera is off */}
               {!isCameraActive && (
-                <div className="flex flex-col items-center justify-center text-center p-4 gap-2">
-                  <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center ${
+                <div className="flex flex-col items-center justify-center text-center p-3 gap-1.5">
+                  <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${
                     isDarkMode
                       ? 'bg-[#162327] border-stone-800 text-stone-400'
                       : 'bg-stone-200/70 border-stone-300 text-stone-700'
                   }`}>
-                    <Hand className="w-7 h-7 text-teal-500" />
+                    <Hand className="w-6 h-6 text-teal-500" />
                   </div>
                   <div>
                     <p className={`text-xs font-black ${isDarkMode ? 'text-stone-200' : 'text-stone-900'}`}>
                       {loc('Camera is ready', 'الكاميرا جاهزة للتشغيل')}
                     </p>
-                    <p className={`text-[11px] mt-1 max-w-[280px] leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
+                    <p className={`text-[11px] mt-0.5 max-w-[280px] leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
                       {loc(
                         'Click "Start Camera" above and sign with your hands to convert into text for AI.',
                         'اضغط على زر "تشغيل الكاميرا" أعلاه وتكلم بإشارات يدك لتتحول مباشرةً لنص وتُرسل للذكاء الاصطناعي.'
@@ -811,9 +811,9 @@ Question: "${q}"`;
             </div>
 
             {/* ── CONVERTED TEXT & AUDIO OUTPUT (تحتها يتحول الكلام لصوت أو نص) ── */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5 shrink-0 mt-auto">
               {/* Text Box */}
-              <div className={`p-2.5 rounded-xl border min-h-[65px] max-h-[90px] overflow-y-auto custom-scrollbar flex flex-col justify-between ${
+              <div className={`p-2 rounded-xl border min-h-[46px] max-h-[68px] overflow-y-auto custom-scrollbar flex flex-col justify-between shrink-0 ${
                 isDarkMode
                   ? 'bg-[#0B1114] border-stone-800/80'
                   : 'bg-stone-50 border-stone-200'
@@ -834,7 +834,7 @@ Question: "${q}"`;
                 </p>
 
                 {accumulatedText.trim() && (
-                  <div className={`flex items-center justify-end pt-1 border-t text-[10px] ${
+                  <div className={`flex items-center justify-end pt-0.5 border-t text-[10px] ${
                     isDarkMode ? 'border-stone-800 text-stone-400' : 'border-stone-200 text-stone-600'
                   }`}>
                     <button
@@ -848,8 +848,8 @@ Question: "${q}"`;
                 )}
               </div>
 
-              {/* Action Buttons: Live Audio + Send Question to AI */}
-              <div className="grid grid-cols-2 gap-2">
+              {/* Action Buttons: Live Audio + Send Question to AI (Pinned & Always Visible) */}
+              <div className="grid grid-cols-2 gap-2 shrink-0">
                 {/* 1. Live Audio Output */}
                 <button
                   onClick={handleSpeakAccumulatedText}
