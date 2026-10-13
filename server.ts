@@ -32,12 +32,12 @@ async function startServer() {
     res.setHeader(
       "Content-Security-Policy",
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com https://va.vercel-scripts.com; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com data:; " +
       "img-src 'self' data: blob: https:; " +
       "media-src 'self' blob: data: https:; " +
-      "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://api.telegram.org https://api.twilio.com; " +
+      "connect-src 'self' https://*.googleapis.com https://fonts.gstatic.com https://fonts.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://api.telegram.org https://api.twilio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com; " +
       "worker-src 'self' blob:; " +
       "frame-src 'self' https://*.firebaseapp.com; " +
       "object-src 'none'; " +

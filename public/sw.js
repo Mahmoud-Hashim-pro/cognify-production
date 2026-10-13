@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cognify-v11-unified-cache';
+const CACHE_NAME = 'cognify-v12-unified-cache';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -29,7 +29,34 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Skip non-GET requests and API/Firebase backend endpoints
-  if (request.method !== 'GET' || url.pathname.startsWith('/api/') || url.hostname.includes('firestore') || url.hostname.includes('googleapis')) {
+  if (
+    request.method !== 'GET' ||
+    url.pathname.startsWith('/api/') ||
+    url.hostname.includes('firestore') ||
+    url.hostname.includes('firebase') ||
+    url.hostname.includes('googleapis')
+  ) {
+    return;
+  }
+
+  // Cross-origin request handling: only intercept Google Fonts, pass through all others (e.g. analytics)
+  if (url.origin !== self.location.origin) {
+    if (url.hostname === 'fonts.gstatic.com' || url.hostname === 'fonts.googleapis.com') {
+      event.respondWith(
+        caches.match(request).then((cached) => {
+          if (cached) return cached;
+          return fetch(request)
+            .then((response) => {
+              if (response && response.status === 200) {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+              }
+              return response;
+            })
+            .catch(() => cached || new Response('', { status: 408, statusText: 'Font unavailable' }));
+        })
+      );
+    }
     return;
   }
 
@@ -44,7 +71,10 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match('/index.html'))
+        .catch(async () => {
+          const cached = await caches.match('/index.html');
+          return cached || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        })
     );
     return;
   }
@@ -73,14 +103,24 @@ self.addEventListener('fetch', (event) => {
             }
           }
           return response;
+        }).catch(async () => {
+          const fallback = await caches.match(request);
+          return fallback || new Response('Asset unavailable', { status: 404, headers: { 'Content-Type': 'text/plain' } });
         });
       })
     );
     return;
   }
 
-  // Default network-falling-back-to-cache
+  // Default network-falling-back-to-cache with guaranteed Response object
   event.respondWith(
-    fetch(request).catch(() => caches.match(request))
+    fetch(request).catch(async () => {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+      return new Response('Network unavailable', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' },
+      });
+    })
   );
 });

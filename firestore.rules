@@ -304,6 +304,11 @@ service cloud.firestore {
       match /spatialObjects/{objectId} {
         allow read, write, delete: if isOwner(userId);
       }
+
+      // Adaptive long-term personalization & memory configuration
+      match /memory/{memoryId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
     }
 
     match /securityAudits/{auditId} {
