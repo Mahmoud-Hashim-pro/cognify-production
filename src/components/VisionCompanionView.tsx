@@ -1111,7 +1111,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       {/* ── 1. FULL-SCREEN LIVE CAMERA VIEWPORT ── */}
       <div className="absolute inset-0 w-full h-full bg-black overflow-hidden flex items-center justify-center">
         {status === 'camera-denied' ? (
-          <div className="text-center p-8 max-w-sm z-20">
+          <div className="text-center p-6 sm:p-8 max-w-md z-20 bg-stone-900/90 border border-stone-800 rounded-3xl backdrop-blur-xl shadow-2xl mx-4">
             <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
             <p className="text-white font-bold mb-2 text-sm sm:text-base">
               {isMinorStudent && !profile.parentalConsent?.verified
@@ -1120,25 +1120,49 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     'مطلوب قانونيًا موافقة ولي الأمر قبل تفعيل الكاميرا للطلاب القاصرين.'
                   )
                 : t(
-                    'Camera access is needed for the Visual Companion to work.',
-                    'محتاجين إذن الكاميرا عشان الرفيق البصري يشتغل.'
+                    'Camera access is needed for the Visual Companion live video.',
+                    'محتاجين إذن الكاميرا عشان البث المباشر للرفيق البصري يشتغل.'
                   )}
             </p>
-            {isMinorStudent && !profile.parentalConsent?.verified ? (
+            <p className="text-stone-300 text-xs mb-4 leading-relaxed font-medium">
+              {t(
+                'If your browser blocked camera access: click the camera or lock icon in the address bar (next to localhost:3000), set Camera to "Allow", and refresh.',
+                'إذا حظر المتصفح الكاميرا: اضغط على أيقونة الكاميرا أو القفل في شريط العنوان (بجوار localhost:3000) واضبط الكاميرا على "السماح / Allow" ثم أعد تحميل الصفحة.'
+              )}
+            </p>
+            <div className="flex flex-col gap-2.5">
+              {isMinorStudent && !profile.parentalConsent?.verified ? (
+                <button
+                  onClick={() => setShowConsentModal(true)}
+                  className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-xl transition-all cursor-pointer"
+                >
+                  {t('Open Parental Consent Portal', 'فتح بوابة موافقة ولي الأمر')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => startCamera()}
+                  className="w-full py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-xl cursor-pointer transition-all active:scale-95"
+                >
+                  {t('Try again', 'إعادة محاولة تشغيل الكاميرا')}
+                </button>
+              )}
+
               <button
-                onClick={() => setShowConsentModal(true)}
-                className="mt-3 px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-xl transition-all cursor-pointer"
+                onClick={() => {
+                  setShowDocStudio(true);
+                  announceFeature(
+                    'استوديو المستندات وتلخيص المحاضرات والـ PDF',
+                    'Document and Lecture Studio',
+                    'Studio de Documents et Cours',
+                    true
+                  );
+                }}
+                className="w-full py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-teal-300 font-bold text-xs shadow-md cursor-pointer transition-all border border-stone-700 active:scale-95 flex items-center justify-center gap-2"
               >
-                {t('Open Parental Consent Portal', 'فتح بوابة موافقة ولي الأمر')}
+                <FileText className="w-4 h-4" />
+                <span>{t('Open Document & PDF Studio (No Camera Needed)', 'استوديو المستندات والـ PDF (بدون كاميرا)')}</span>
               </button>
-            ) : (
-              <button
-                onClick={() => startCamera()}
-                className="mt-3 px-6 py-3 rounded-2xl bg-primary text-white font-bold text-sm shadow-xl cursor-pointer"
-              >
-                {t('Try again', 'حاول تاني')}
-              </button>
-            )}
+            </div>
           </div>
         ) : status === 'unsupported' ? (
           <div className="text-center p-8 max-w-sm text-white z-20">
