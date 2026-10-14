@@ -1,0 +1,554 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Alexandria:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/* Make `dark:` variants follow the app's theme toggle (.dark class) instead of
+   the OS preference, so the manual Light/Dark toggle is consistent everywhere. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Cognify Redesign v2 (final): dark-first, violet primary, Inter, cool neutrals. */
+  --font-sans: "Inter", "Alexandria", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", "Alexandria", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-primary: #6D4AFF;
+  --color-primary-press: #5B3DF5;
+  --color-primary-soft: #EDE9FF;
+  --color-secondary: #5C5C68;
+  --color-success: #15A06A;
+  --color-warning: #6D4AFF;
+  --color-accent: #6D4AFF;
+  --color-accent-soft: #EDE9FF;
+  --color-danger: #E5484D;
+  --color-danger-soft: #FCEAEA;
+  --color-bg-main: #F3F3F6;
+  --color-bg-card: #FFFFFF;
+  --color-surface-2: #F7F7FA;
+  --color-surface-3: #ECECF0;
+  --color-text-main: #18181F;
+  --color-text-muted: #5C5C68;
+  --color-faint: #9090A0;
+  --color-border: #E6E6EB;
+  --color-border-2: #D8D8DF;
+
+  /* Overwrite low-contrast default slate tokens to guarantee WCAG AA (>= 4.5:1 on dark) */
+  --color-slate-500: #94A3B8; /* Contrast 6.96:1 - Pass WCAG AA */
+  --color-slate-600: #CBD5E1; /* High contrast pass (WCAG AAA) */
+
+  /* Dignified Accessible Brand Palette for People of Determination */
+  --color-brand-warm: #111622;
+  --color-brand-surface: #171E2E;
+  --color-brand-accent: #F59E0B;
+  --color-brand-accent-glow: #FDE68A;
+  --color-brand-calm: #10B981;
+
+  /* Serene Teal & Warm Earth Identity */
+  --color-brand-burgundy: #0F766E;
+  --color-brand-wine: #0D9488;
+  --color-brand-ruby: #14B8A6;
+  --color-brand-gold: #0D9488;
+  --color-brand-gold-glow: #99F6E4;
+}
+
+@layer base {
+  html, body {
+    overflow-x: clip;
+    max-width: 100vw;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-bg-main text-text-main font-sans;
+  }
+}
+
+/* Mobile GPU Compositing & Performance Optimization */
+@media (max-width: 768px) {
+  .backdrop-blur-2xl,
+  .backdrop-blur-xl {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  .blur-\[140px\] {
+    display: none !important;
+  }
+}
+
+/* Premium Obsidian & Frosted Glass Design Tokens - Serene Teal & Warm Ambient */
+.cognify-aurora-bg {
+  background-color: #0E1416;
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(13, 148, 136, 0.18) 0px, transparent 55%),
+    radial-gradient(at 85% 20%, rgba(217, 119, 6, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 85%, rgba(15, 118, 110, 0.2) 0px, transparent 55%);
+}
+
+.aurora-card-glow {
+  position: relative;
+  background: rgba(18, 27, 30, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(13, 148, 136, 0.15);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cognify-burgundy-hero {
+  position: relative;
+  background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.3) 0%, rgba(14, 20, 22, 0.95) 45%, rgba(11, 16, 18, 0.98) 100%);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.25);
+}
+
+.aurora-card-glow:hover {
+  border-color: rgba(13, 148, 136, 0.5);
+  box-shadow: 0 25px 60px -15px rgba(13, 148, 136, 0.25), inset 0 1px 0 rgba(13, 148, 136, 0.25);
+  transform: translateY(-3px);
+}
+
+.obsidian-card {
+  background: rgba(18, 27, 30, 0.85);
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.1);
+}
+
+.obsidian-card-interactive {
+  background: rgba(18, 27, 30, 0.85);
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.obsidian-card-interactive:hover {
+  border-color: rgba(13, 148, 136, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.2);
+}
+
+.glass-pill {
+  background: rgba(13, 148, 136, 0.15);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-pill:hover {
+  background: rgba(13, 148, 136, 0.25);
+  border-color: rgba(13, 148, 136, 0.45);
+}
+
+/* Universal WCAG 2.4.7 Interactive Focus Visible Indicator */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #E5A93C !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(229, 169, 60, 0.35) !important;
+  z-index: 50 !important;
+}
+
+/* Universal WCAG 2.3.3 Reduced Motion (System Preference + In-App Setting) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Universal Font Scaling System */
+html.font-scale-normal { font-size: 16px; }
+html.font-scale-medium { font-size: 18px; }
+html.font-scale-large { font-size: 20px; }
+html.font-scale-extra-large { font-size: 23px; }
+
+/* Universal High-Contrast Mode */
+html.high-contrast body,
+html.high-contrast .bg-slate-900,
+html.high-contrast .bg-slate-950,
+html.high-contrast .bg-\[\#0A0C14\],
+html.high-contrast .bg-\[\#121524\] {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+}
+html.high-contrast p,
+html.high-contrast span,
+html.high-contrast h1,
+html.high-contrast h2,
+html.high-contrast h3,
+html.high-contrast h4,
+html.high-contrast label {
+  color: #FFFFFF !important;
+}
+html.high-contrast a:focus-visible,
+html.high-contrast button:focus-visible {
+  outline: 4px solid #FFFF00 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px rgba(255, 255, 0, 0.6) !important;
+}
+
+/* Universal Accessible Focus Rings (WCAG 2.2 AA) */
+:focus-visible {
+  outline: 2px solid #E5A93C !important;
+  outline-offset: 2px !important;
+}
+
+/* Accessible Interactive Touch Target (WCAG 2.2 AA SC 2.5.8) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #0D9488;
+  border-radius: 9999px;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0F766E;
+  border-color: rgba(20, 184, 166, 0.4);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #0D9488 transparent;
+}
+
+/* Hide scrollbar completely while maintaining scroll functionality */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* --- Dark Theme Overrides (Cognify Redesign v2: near-black + violet) --- */
+.dark body {
+  background-color: #09090B !important;
+}
+
+/* Backgrounds */
+.dark .bg-slate-50,
+.dark .bg-bg-main {
+  background-color: #09090B !important;
+  color: #ECECEF !important;
+}
+
+.dark .bg-white,
+.dark .bg-bg-card {
+  background-color: #111114 !important;
+  border-color: #232328 !important;
+  color: #ECECEF !important;
+}
+
+.dark .bg-slate-100,
+.dark .bg-\[\#f1f5f9\] {
+  background-color: #17171C !important;
+  border-color: #2A2A31 !important;
+  color: #ECECEF !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: #1C1C22 !important;
+}
+
+/* Texts */
+.dark .text-slate-900,
+.dark .text-black,
+.dark .text-text-main {
+  color: #ECECEF !important;
+}
+
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #D4D4DA !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-text-muted {
+  color: #9B9BA6 !important;
+}
+
+/* Borders */
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark .border-border {
+  border-color: #232328 !important;
+}
+
+/* Design tokens — v2 dark values. */
+.dark .bg-surface-2 { background-color: #17171C !important; }
+.dark .bg-surface-3 { background-color: #1C1C22 !important; }
+.dark .text-faint { color: #65656F !important; }
+.dark .border-border-2 { border-color: #2E2E35 !important; }
+.dark .bg-primary { background-color: #7C5CFF !important; }
+.dark .bg-primary-soft { background-color: #211A36 !important; }
+.dark .bg-accent-soft { background-color: #211A36 !important; }
+.dark .bg-danger-soft { background-color: #2C1517 !important; }
+.dark .text-primary { color: #BBAAFF !important; }
+.dark .text-accent { color: #BBAAFF !important; }
+
+.dark .shadow-sm,
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 14px 34px -16px rgba(0,0,0,0.75) !important;
+}
+
+/* Dark CTA tiles → keep them dark; primary-on-dark buttons go violet. */
+.dark .bg-slate-900,
+.dark .bg-slate-950 {
+  background-color: #17171C !important;
+}
+.dark .bg-slate-900.text-white {
+  background-color: #7C5CFF !important;
+}
+
+/* --- Global Light Mode Theme Overrides ---------------------------------
+   When .dark is not present on :root, invert dark literal surfaces to clean light surfaces */
+:root:not(.dark) {
+  --color-bg-main: #F4F6F9;
+  --color-bg-card: #FFFFFF;
+  --color-text-main: #0F172A;
+  --color-text-muted: #475569;
+}
+
+:root:not(.dark) body,
+:root:not(.dark) #root {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+:root:not(.dark) .bg-\[\#0A0C14\],
+:root:not(.dark) .bg-\[\#0a0c14\],
+:root:not(.dark) .bg-\[\#0d101d\],
+:root:not(.dark) .bg-\[\#0D101D\],
+:root:not(.dark) .bg-\[\#0E111D\],
+:root:not(.dark) .bg-\[\#0e111d\],
+:root:not(.dark) .bg-\[\#0E111D\]\/95,
+:root:not(.dark) .bg-\[\#0e111d\]\/95,
+:root:not(.dark) .bg-\[\#181C2E\],
+:root:not(.dark) .bg-\[\#121524\],
+:root:not(.dark) .bg-\[\#121524\]\/95,
+:root:not(.dark) .bg-slate-950 {
+  background-color: #FFFFFF !important;
+}
+
+:root:not(.dark) .bg-slate-900,
+:root:not(.dark) .bg-slate-900\/60,
+:root:not(.dark) .bg-slate-900\/80,
+:root:not(.dark) .bg-slate-900\/90,
+:root:not(.dark) .bg-slate-900\/95 {
+  background-color: #F1F5F9 !important;
+}
+
+:root:not(.dark) .border-slate-800,
+:root:not(.dark) .border-slate-800\/80,
+/* Light Mode Comprehensive Global Theme Adapters */
+:root:not(.dark) {
+  --color-bg-main: #FAF8F5;
+  --color-bg-card: #FFFFFF;
+  --color-text-main: #0F172A;
+  color-scheme: light;
+}
+
+:root:not(.dark) .border-slate-700,
+:root:not(.dark) .border-slate-700\/50,
+:root:not(.dark) .border-slate-700\/60,
+:root:not(.dark) .border-slate-700\/80 {
+  border-color: #E2E8F0 !important;
+}
+
+:root:not(.dark) .text-slate-100,
+:root:not(.dark) .text-slate-200 {
+  color: #0F172A !important;
+}
+
+:root:not(.dark) .text-slate-300,
+:root:not(.dark) .text-slate-400,
+:root:not(.dark) .text-slate-500 {
+  color: #475569 !important;
+}
+
+:root:not(.dark) h1.text-white,
+:root:not(.dark) h2.text-white,
+:root:not(.dark) h3.text-white,
+:root:not(.dark) h4.text-white {
+  color: #0F172A !important;
+}
+
+:root:not(.dark) .obsidian-card,
+:root:not(.dark) .obsidian-card-interactive {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   Systemic Neutralization of Legacy Burgundy / Wine Palette in Both Modes
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── DARK MODE OVERRIDES ─────────────────────────────────────────────────── */
+.dark .bg-\[\#080409\],
+.dark .bg-\[\#080409\]\/90,
+.dark .bg-\[\#080409\]\/95 {
+  background-color: #0E1416 !important;
+}
+
+.dark .bg-\[\#0E0610\],
+.dark .bg-\[\#0E0610\]\/95,
+.dark .bg-\[\#0E0610\]\/90,
+.dark .bg-\[\#0D0610\],
+.dark .bg-\[\#0D0610\]\/90,
+.dark .bg-\[\#111622\],
+.dark .bg-\[\#150917\],
+.dark .bg-\[\#150917\]\/90,
+.dark .bg-\[\#120614\],
+.dark .bg-\[\#120614\]\/90,
+.dark .bg-\[\#18050E\],
+.dark .bg-\[\#18050E\]\/80,
+.dark .bg-\[\#1A0713\],
+.dark .bg-\[\#1C060F\],
+.dark .bg-\[\#1F0D22\] {
+  background-color: #121B1E !important;
+}
+
+.dark [class*="border-\[\#4A1224\]"],
+.dark [class*="border-\[\#831843\]"],
+.dark [class*="border-\[\#2D0B16\]"] {
+  border-color: rgba(20, 184, 166, 0.25) !important;
+}
+
+.dark [class*="bg-\[\#4A1224\]"],
+.dark [class*="bg-\[\#831843\]"],
+.dark [class*="bg-\[\#2D0B16\]"] {
+  background-color: rgba(15, 118, 110, 0.25) !important;
+}
+
+.dark [class*="text-\[\#4A1224\]"],
+.dark [class*="text-\[\#831843\]"] {
+  color: #2DD4BF !important;
+}
+
+/* ── LIGHT MODE OVERRIDES ────────────────────────────────────────────────── */
+:root:not(.dark) .bg-\[\#080409\],
+:root:not(.dark) .bg-\[\#080409\]\/90,
+:root:not(.dark) .bg-\[\#080409\]\/95 {
+  background-color: #FAF8F5 !important;
+}
+
+:root:not(.dark) .bg-\[\#0E0610\],
+:root:not(.dark) .bg-\[\#0E0610\]\/95,
+:root:not(.dark) .bg-\[\#0E0610\]\/90,
+:root:not(.dark) .bg-\[\#0D0610\],
+:root:not(.dark) .bg-\[\#0D0610\]\/90,
+:root:not(.dark) .bg-\[\#111622\],
+:root:not(.dark) .bg-\[\#150917\],
+:root:not(.dark) .bg-\[\#150917\]\/90,
+:root:not(.dark) .bg-\[\#120614\],
+:root:not(.dark) .bg-\[\#120614\]\/90,
+:root:not(.dark) .bg-\[\#18050E\],
+:root:not(.dark) .bg-\[\#18050E\]\/80,
+:root:not(.dark) .bg-\[\#1A0713\],
+:root:not(.dark) .bg-\[\#1C060F\],
+:root:not(.dark) .bg-\[\#1F0D22\] {
+  background-color: #FFFFFF !important;
+}
+
+:root:not(.dark) [class*="border-\[\#4A1224\]"],
+:root:not(.dark) [class*="border-\[\#831843\]"],
+:root:not(.dark) [class*="border-\[\#2D0B16\]"] {
+  border-color: #E7E5E4 !important;
+}
+
+:root:not(.dark) [class*="bg-\[\#4A1224\]"],
+:root:not(.dark) [class*="bg-\[\#831843\]"],
+:root:not(.dark) [class*="bg-\[\#2D0B16\]"] {
+  background-color: rgba(15, 118, 110, 0.08) !important;
+}
+
+:root:not(.dark) [class*="text-\[\#4A1224\]"],
+:root:not(.dark) [class*="text-\[\#831843\]"] {
+  color: #0F766E !important;
+}
+
+
+
+/* Splash screen animations */
+@keyframes splashPop { from { opacity:0; transform: scale(.7); } to { opacity:1; transform:none; } }
+.splash-pop { animation: splashPop .5s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes splashDot { 0%,100%{ opacity:.25; } 50%{ opacity:1; } }
+.splash-dot { animation: splashDot 1.2s ease-in-out infinite; }
+
+/* ── Single-switch auto-scan highlight ──────────────────────────────────────
+   Deliberately loud: the student may be reading this from across the room, or
+   with low vision on top of the motor impairment. The row highlight is calmer
+   than the item one so the two scan stages are never confused. */
+@keyframes cognifyScanPulse {
+  0%, 100% { box-shadow: 0 0 0 4px #fbbf24, 0 0 22px 6px rgba(251,191,36,.75); }
+  50%      { box-shadow: 0 0 0 6px #fde68a, 0 0 34px 10px rgba(251,191,36,.95); }
+}
+.cognify-scan-hl {
+  outline: 4px solid #fbbf24 !important;
+  outline-offset: 2px;
+  border-radius: 14px;
+  animation: cognifyScanPulse 1s ease-in-out infinite;
+  position: relative;
+  z-index: 40;
+}
+.cognify-scan-hl-row {
+  outline: 3px dashed #38bdf8 !important;
+  outline-offset: 2px;
+  border-radius: 14px;
+  background-color: rgba(56, 189, 248, .14) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cognify-scan-hl { animation: none; box-shadow: 0 0 0 5px #fbbf24; }
+}
+/* Keep the scanned item clear of the fixed switch bar at the bottom. */
+.cognify-scan-hl, .cognify-scan-hl-row { scroll-margin-bottom: 130px; scroll-margin-top: 90px; }

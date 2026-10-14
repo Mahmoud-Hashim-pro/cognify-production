@@ -1,0 +1,288 @@
+/**
+ * Streaming chat endpoint (Server-Sent Events).
+ *
+ * Emits `data: {"text": "<full text so far>", "done": false}` per chunk and a
+ * final `{"text": "...", "done": true}` — exactly the shape the client already
+ * parses, so no client-side stream handling had to change.
+ *
+ * The provider keys stay on the server; the browser only ever talks to us.
+ *
+ * Phase 1.1 (router): which provider is tried FIRST now depends on
+ * classifyRequest() — "reasoning" requests (complex code / debugging) try
+ * the NVIDIA reasoning models before Gemini; "fast" and "vision" requests
+ * keep the original Gemini-first order. Either way, the full recovery chain
+ * still runs if the first choice fails.
+ * Phase 1.3 (telemetry): every attempt is logged via telemetry.ts.
+ */
+import {
+  guard, readBody, buildPersona, threadsSummary, buildContents,
+  buildOpenAIMessages, geminiFetch, providerFor, orderedFallbackKeys, stripReasoning,
+} from '../_lib/ai.js';
+import { classifyRequest, type TaskCategory } from '../_lib/router.js';
+import { logTelemetry } from '../_lib/telemetry.js';
+import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
+import { applyCorsHeaders } from '../_lib/cors.js';
+import { sanitizeStreamingResponse, validateAndSanitizeResponse } from '../_lib/qualityGuard.js';
+
+/** Streams from the OpenAI-compatible fallback chain. Returns the final text ("" if all failed). */
+async function streamFallback(
+  messages: any[],
+  category: TaskCategory,
+  attachments: any[],
+  send: (obj: any) => void,
+): Promise<string> {
+  let full = '';
+  outer: for (const key of orderedFallbackKeys(category)) {
+    const { url, models, params } = providerFor(key);
+    const provider = url.includes('nvidia') ? 'nvidia' : url.includes('groq') ? 'groq' : 'xai';
+    for (const model of models) {
+      const t0 = Date.now();
+      let r: Response;
+      try {
+        r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature: params?.temperature ?? 0.7,
+            ...(params?.top_p ? { top_p: params.top_p } : {}),
+            ...(params?.max_tokens ? { max_tokens: params.max_tokens } : {}),
+            ...(params?.seed ? { seed: params.seed } : {}),
+            stream: true,
+          }),
+          signal: AbortSignal.timeout(15000),
+        });
+      } catch (err) {
+        logTelemetry({ provider, model, category, latencyMs: Date.now() - t0, success: false, error: String(err) });
+        continue;
+      }
+      if (!r.ok || !r.body) {
+        logTelemetry({ provider, model, category, latencyMs: Date.now() - t0, success: false, status: r.status });
+        continue;
+      }
+      // Tell the UI the answer came from the text-only fallback, so it can
+      // warn when attachments were sent (that provider can't see them).
+      if (attachments?.length) send({ text: '', done: false, usedFallback: true });
+      const reader = (r.body as any).getReader();
+      const dec = new TextDecoder('utf-8');
+      let buf = '';
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop() || '';
+          for (const line of lines) {
+            const t = line.trim();
+            if (!t.startsWith('data:')) continue;
+            const payload = t.slice(5).trim();
+            if (payload === '[DONE]') continue;
+            try {
+              const j = JSON.parse(payload);
+              const c = j?.choices?.[0]?.delta?.content || '';
+              // Reasoning models (deepseek-r1, nemotron-*-reasoning) stream
+              // their chain-of-thought first. Accumulate raw, but only ever
+              // SEND the answer with <think>...</think> removed.
+              if (c) { full += c; send({ text: stripReasoning(full), done: false }); }
+            } catch { /* partial frame */ }
+          }
+        }
+      } catch (streamErr) {
+        logTelemetry({ provider, model, category, latencyMs: Date.now() - t0, success: false, error: String(streamErr) });
+      } finally {
+        try { await reader.cancel(); } catch { /* already closed */ }
+      }
+      logTelemetry({ provider, model, category, latencyMs: Date.now() - t0, success: !!full, outputChars: full.length });
+      if (full) break outer;
+    }
+  }
+  return full;
+}
+
+/** Streams from Gemini. Returns the final text ("" if it produced nothing). */
+async function streamGemini(
+  message: string,
+  history: any[],
+  attachments: any[],
+  system: string,
+  category: TaskCategory,
+  send: (obj: any) => void,
+): Promise<string> {
+  let full = '';
+  const t0 = Date.now();
+  try {
+    const body = JSON.stringify({
+      contents: buildContents(message, history, attachments),
+      systemInstruction: { parts: [{ text: system }] },
+      // A short/direct question should start and finish quickly. Complex or
+      // image requests retain a larger ceiling so their quality is unaffected.
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.95,
+        maxOutputTokens: category === 'fast' ? 1024 : 2048,
+      },
+    });
+    const { res: gres } = await geminiFetch('streamGenerateContent', body, { stream: true, category });
+
+    if (gres && gres.body) {
+      const reader = (gres.body as any).getReader();
+      const dec = new TextDecoder('utf-8');
+      let buf = '';
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop() || '';
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data:')) continue;
+            const payload = trimmed.slice(5).trim();
+            if (!payload || payload === '[DONE]') continue;
+            try {
+              const j = JSON.parse(payload);
+              const t = j?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+              if (t) { full += t; send({ text: stripReasoning(full), done: false }); }
+            } catch { /* partial JSON frame */ }
+          }
+        }
+        if (full) {
+          logTelemetry({ provider: 'gemini', category, latencyMs: Date.now() - t0, success: true, outputChars: full.length });
+        }
+      } catch (streamErr) {
+        logTelemetry({ provider: 'gemini', category, latencyMs: Date.now() - t0, success: false, error: String(streamErr) });
+      } finally {
+        try { await reader.cancel(); } catch { /* already closed */ }
+      }
+    }
+  } catch (fetchErr) {
+    logTelemetry({ provider: 'gemini', category, latencyMs: Date.now() - t0, success: false, error: String(fetchErr) });
+  }
+  return full;
+}
+
+export default async function handler(req: any, res: any) {
+  if (!applyCorsHeaders(req, res)) return;
+  if (!(await guard(req, res))) return;
+
+  try {
+    const { message, profile = {}, history = [], attachments = [], studentState } = await readBody(req);
+    if (!message || typeof message !== 'string') {
+      res.status(400).json({ error: 'message is required' });
+      return;
+    }
+
+    if (message.length > 32000) {
+      res.status(400).json({ error: 'Payload too large: message exceeds 32,000 characters limit' });
+      return;
+    }
+
+    if (Array.isArray(attachments) && attachments.length > 5) {
+      res.status(400).json({ error: 'Payload too large: attachments exceed 5 items limit' });
+      return;
+    }
+
+    // Phase 1.1 — deterministic router with student state awareness.
+    const effectiveState = studentState || profile?.studentState;
+
+    // OWASP API1:2023 BOLA Defense: Ensure studentState / profile matches authenticated identity
+    if (req.authenticatedUid) {
+      if (effectiveState?.uid && effectiveState.uid !== req.authenticatedUid && effectiveState.uid !== 'guest') {
+        res.status(403).json({ error: 'BOLA violation: State identity does not match authenticated user identity' });
+        return;
+      }
+      if (profile?.uid && profile.uid !== req.authenticatedUid && profile.uid !== 'guest') {
+        res.status(403).json({ error: 'BOLA violation: Profile identity does not match authenticated user identity' });
+        return;
+      }
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // don't let a proxy buffer the stream
+
+    const send = (obj: any) => {
+      if (res.writableEnded) return;
+
+      // Streaming prefixes are visible before the final quality guard runs.
+      // Sanitize every non-final text prefix so provider output cannot leak
+      // secrets while it is being streamed to the browser.
+      const safeObj = obj?.done === false && typeof obj?.text === 'string' && obj.text
+        ? { ...obj, text: sanitizeStreamingResponse(obj.text, {
+            accessibilityMode: profile?.accessibilityMode,
+            language: profile?.language,
+            cognitiveStage: profile?.level,
+          }).text }
+        : obj;
+
+      try { res.write(`data: ${JSON.stringify(safeObj)}\n\n`); } catch { /* client gone */ }
+    };
+
+    const safeHistory = Array.isArray(history) ? history : [];
+    const safeAttachments = Array.isArray(attachments) ? attachments : [];
+
+    const category = classifyRequest(message, safeAttachments, effectiveState);
+    const system = buildPersona(profile, threadsSummary(profile), effectiveState, message);
+    let full = '';
+
+    try {
+      if (category === 'reasoning') {
+        // Deep-reasoning requests: try NVIDIA (GLM-5.2 / DeepSeek-R1) first,
+        // fall back to Gemini streaming if that produced nothing.
+        full = await streamFallback(buildOpenAIMessages(message, system, safeHistory), category, safeAttachments, send);
+        if (!full) {
+          full = await streamGemini(message, safeHistory, safeAttachments, system, category, send);
+        }
+      } else {
+        // "fast" and "vision": Gemini first (native multimodal handles
+        // vision directly), OpenAI-compatible chain as the fallback.
+        full = await streamGemini(message, safeHistory, safeAttachments, system, category, send);
+        if (!full) {
+          full = await streamFallback(buildOpenAIMessages(message, system, safeHistory), category, safeAttachments, send);
+        }
+      }
+    } catch (err) {
+      console.error('[api] stream inner error:', err);
+    }
+
+    full = stripReasoning(full);
+    const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';
+    if (!full) {
+      full = isAr
+        ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني بعد لحظات 🙏'
+        : '⚠️ The AI is busy right now. Please try again in a moment 🙏';
+    }
+
+    // Shared Output Quality Guard: sanitize output, redact sensitive secrets, repair markdown & latex
+    const validated = validateAndSanitizeResponse(full, {
+      accessibilityMode: profile?.accessibilityMode,
+      language: profile?.language,
+      cognitiveStage: profile?.level,
+    });
+    full = validated.text;
+
+    // Phase 1 / Chat Enhancement: Fulfill image generation if requested by user or promised by model
+    const imageResult = ensureImageInResponse(message, full, safeHistory);
+    full = imageResult.text;
+
+    send({
+      text: full,
+      done: true,
+      warnings: validated.warnings,
+      ...(imageResult.attachment ? { attachments: [imageResult.attachment] } : {}),
+    });
+  } catch (err) {
+    console.error('[api] stream handler error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'AI request failed' });
+    }
+  } finally {
+    if (!res.writableEnded) {
+      try { res.end(); } catch { /* ignore */ }
+    }
+  }
+}

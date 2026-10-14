@@ -1,0 +1,363 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (matches Auth UID)
+    // Fields:
+    //   - uid: string (required) - Firebase Auth UID
+    //   - email: string (required)
+    //   - role: string (required) - 'Student' | 'Professional'
+    //   - level: string (required) - 'Basic' | 'Intermediate' | 'Advanced'
+    //   - onboardingComplete: bool (required)
+    //   - points: number (required)
+    //   - iqScore: number (optional)
+    //   - lastQuizDate: string (optional) - ISO 8601
+    //   - questionHistory: list (optional) - List of {score, date}
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ── Access tiers (keep in sync with src/lib/roles.ts) ────────────────────
+    // Super Admins sit ABOVE admins: only they can grant/revoke admin rights
+    // AND grant/revoke super admin itself.
+    //
+    // FOUNDER super admins are hardcoded here and can NEVER be demoted — that's
+    // the lockout protection. Runtime super admins carry isSuperAdmin:true on
+    // their user document and can be granted/revoked from the Admin Dashboard.
+    function isFounderSuperAdmin() {
+      // .lower() so a differently-cased token email can't miss the allowlist
+      // (the stored side in isFounderTarget/protectedEmails already lowercases).
+      // STRICT REQUIREMENT: email_verified must be true to prevent unverified email spoofing.
+      return isAuthenticated() &&
+             request.auth.token.get('email_verified', false) == true &&
+             request.auth.token.email.lower() in [
+               "modyhashim2006@gmail.com",
+               "pro.mahmoud.h@gmail.com"
+             ];
+    }
+
+    // Security & DevTools telemetry stream is strictly restricted to modyhashim2006@gmail.com
+    function isSecurityAuditsOwner() {
+      return isAuthenticated() &&
+             request.auth.token.get('email_verified', false) == true &&
+             request.auth.token.email.lower() == "modyhashim2006@gmail.com";
+    }
+
+    // Super admin = Custom Claims role check (primary: request.auth.token.role == 'superadmin')
+    // OR hardcoded founder email (bootstrap fallback)
+    // OR runtime isSuperAdmin:true flag on the /users doc.
+    function isSuperAdmin() {
+      return (isAuthenticated() && (
+               ('role' in request.auth.token && request.auth.token.role == 'superadmin') ||
+               request.auth.token.get('role', '') == 'superadmin'
+             )) ||
+             isFounderSuperAdmin() ||
+             (isAuthenticated() &&
+              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isSuperAdmin', false) == true);
+    }
+
+    // The TARGET of this write is a founder — their super-admin status is immutable.
+    function isFounderTarget() {
+      return resource.data.get('email', '').lower() in [
+        "modyhashim2006@gmail.com",
+        "pro.mahmoud.h@gmail.com"
+      ];
+    }
+
+    // The isSuperAdmin flag must not change on this write.
+    function superFlagUnchanged() {
+      return request.resource.data.get('isSuperAdmin', false) == resource.data.get('isSuperAdmin', false);
+    }
+
+    // Permanent email-based admins (below super admins, bootstrap fallback).
+    function isPermanentAdmin() {
+      return isAuthenticated() &&
+             request.auth.token.get('email_verified', false) == true &&
+             request.auth.token.email.lower() in [
+               "its.alkhateeb@gmail.com",
+               "esraahosni8@gmail.com",
+               "audit.test.student2026@gmail.com"
+             ];
+    }
+
+    // Admin = Custom Claims role check (primary: request.auth.token.role in ['admin', 'superadmin'])
+    // OR super admin OR permanent admin (bootstrap fallback)
+    // OR a user whose own /users doc has isAdmin:true (granted via Admin Dashboard).
+    function isAdmin() {
+      return (isAuthenticated() && (
+               ('role' in request.auth.token && request.auth.token.role in ['admin', 'superadmin']) ||
+               request.auth.token.get('role', '') in ['admin', 'superadmin']
+             )) ||
+             isSuperAdmin() ||
+             isPermanentAdmin() ||
+             (isAuthenticated() &&
+              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true);
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // All permanent members (super admins + permanent admins), lowercase.
+    function protectedEmails() {
+      return [
+        "modyhashim2006@gmail.com",
+        "pro.mahmoud.h@gmail.com",
+        "its.alkhateeb@gmail.com",
+        "esraahosni8@gmail.com"
+      ];
+    }
+
+    // A "protected" doc belongs to a permanent member (super admin or permanent
+    // admin). Their profiles can never be deleted or tampered with by lower
+    // tiers. lower() guards against a stored email with different casing.
+    function isProtectedTarget() {
+      return resource.data.get('email', '').lower() in protectedEmails();
+    }
+
+    // Same protection for a user's SUBCOLLECTIONS (threads, goals, ...): checks
+    // the parent /users doc's email. Costs one get() — only on the admin path.
+    function isProtectedUser(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId)) &&
+             get(/databases/$(database)/documents/users/$(userId)).data.get('email', '').lower() in protectedEmails();
+    }
+
+    // The isAdmin flag must NOT change unless the writer is an admin. This blocks
+    // a normal user from self-promoting by writing isAdmin:true to their own doc.
+    function adminFlagUnchanged() {
+      return request.resource.data.get('isAdmin', false) == resource.data.get('isAdmin', false);
+    }
+
+    // Org-manager privileges (isOrgManager + organization) can only be changed
+    // by a super admin — blocks self-promotion AND org-hopping after sign-up.
+    function orgFieldsUnchanged() {
+      return request.resource.data.get('isOrgManager', false) == resource.data.get('isOrgManager', false)
+          && request.resource.data.get('organization', '') == resource.data.get('organization', '');
+    }
+
+    // An organization manager (charity staff, e.g. Al-Resala) may READ the
+    // profiles of users who signed up with THEIR organization's code — only.
+    // Direct field access (not .get()) so LIST queries filtered with
+    // where('organization','==',X) are statically provable against this rule.
+    function isOrgManagerOfTarget() {
+      return isAuthenticated()
+          && resource.data.organization != ''
+          && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isOrgManager', false) == true
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('organization', '') == resource.data.organization;
+    }
+
+    // Identity fields must never change on an update — protects against an admin
+    // (or a promoted admin) corrupting/spoofing another user's uid or email,
+    // since isValidUser() skips schema checks for admins.
+    function identityPreserved() {
+      return request.resource.data.uid == resource.data.uid
+          && (
+            !('email' in resource.data) ||
+            resource.data.get('email', '') == '' ||
+            request.resource.data.get('email', '').lower() == resource.data.get('email', '').lower()
+          );
+    }
+
+    // A verified parent/guardian is explicitly authorized on the target student's profile
+    // via linkedParentUid, parentEmail, or authorizedParentUids.
+    // This strictly blocks parents from accessing unlinked children's private learning state.
+    function isVerifiedParent(userId) {
+      return isAuthenticated()
+          && exists(/databases/$(database)/documents/users/$(userId))
+          && (
+            get(/databases/$(database)/documents/users/$(userId)).data.get('linkedParentUid', '') == request.auth.uid ||
+            (request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '') != '' && get(/databases/$(database)/documents/users/$(userId)).data.get('parentEmail', '').lower() == request.auth.token.email.lower()) ||
+            request.auth.uid in get(/databases/$(database)/documents/users/$(userId)).data.get('authorizedParentUids', [])
+          );
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.size() >= 3 && email.size() <= 256 && email.matches("^[^@]+@[^@]+\\.[^@]+$");
+    }
+
+    // The stored email MUST match the verified identity on the token. Without
+    // this, anyone could create their own doc claiming a founder's address —
+    // which makes the doc permanently undeletable (isProtectedTarget) and makes
+    // the client-side role helpers, which read the DOCUMENT email, show it as a
+    // founder super admin. Uses .get() so a provider without an email claim
+    // fails closed instead of erroring.
+    function emailMatchesToken(data) {
+      return data.email.lower() == request.auth.token.get('email', '').lower();
+    }
+
+    function isValidUser(data) {
+      return isAdmin() || (data.keys().hasAll(["uid", "email", "role", "level", "onboardingComplete", "points"]) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             emailMatchesToken(data) &&
+             data.role in ["Student", "Professional"] &&
+             data.level in ["Basic", "Intermediate", "Advanced"] &&
+             data.points is number &&
+             data.onboardingComplete is bool &&
+             !("chatHistory" in data) &&
+             !("spatialMemories" in data) &&
+             !("spatialMemoriesV2" in data) &&
+             (!("chatThreads" in data) || data.chatThreads is list) &&
+             (!("questionHistory" in data) || data.questionHistory is list) &&
+             (!("tasks" in data) || data.tasks is list) &&
+             (!("photoURL" in data) || data.photoURL is string));
+    }
+
+    match /users/{userId} {
+      // Owner + admins as before, PLUS org managers for their own org's users, PLUS verified parents.
+      allow read: if isOwner(userId) || isAdmin() || isOrgManagerOfTarget() || isVerifiedParent(userId);
+      // A new user can create only their own doc and may NOT self-assign admin
+      // or org-manager (the organization CODE itself may be set at sign-up).
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) &&
+                    (isSuperAdmin() ||
+                     (request.resource.data.get('isAdmin', false) == false &&
+                      request.resource.data.get('isOrgManager', false) == false &&
+                      request.resource.data.get('isSuperAdmin', false) == false));
+      // Either: the user updates their own doc (but can't flip their own admin
+      // or org-manager privileges), OR an admin updates anyone's doc — but the
+      // privilege flags can only be changed by a super admin, and NON-super
+      // admins can never touch a permanent member's profile.
+      allow update: if identityPreserved()
+                    // A founder's super-admin status can never be revoked by anyone,
+                    // including another super admin. This is the lockout protection.
+                    && (superFlagUnchanged() || !isFounderTarget())
+                    // The super flag may only ever be changed on SOMEONE ELSE's doc,
+                    // so nobody can demote themselves (accidentally or via the SDK).
+                    && (superFlagUnchanged() || !isOwner(userId))
+                    && (
+                      // The user updating their OWN doc can never touch any privilege flag.
+                      (isOwner(userId) && isValidUser(request.resource.data)
+                        && adminFlagUnchanged() && orgFieldsUnchanged() && superFlagUnchanged())
+                      // An admin updating anyone: privilege flags (admin/org/super) may
+                      // ONLY be changed by a super admin, and non-super admins can never
+                      // touch a permanent member's profile.
+                      || (isAdmin()
+                          && ((adminFlagUnchanged() && orgFieldsUnchanged() && superFlagUnchanged()) || isSuperAdmin())
+                          && (!isProtectedTarget() || isOwner(userId) || isSuperAdmin()))
+                    );
+      // Deletion policy:
+      //  - The authenticated user can delete their own account (Right to Erasure / GDPR / Egyptian Law 151),
+      //    UNLESS they are a protected founder/permanent admin.
+      //  - Super admins can delete any non-protected user. Regular admins can delete no one.
+      //  - Permanent members (super admins + permanent admins) can NEVER be deleted.
+      allow delete: if (isOwner(userId) && !isProtectedTarget()) ||
+                       (isSuperAdmin() && !isProtectedTarget());
+      
+      // Academic subcollections: explicitly matched, accessible by student owner or administrator
+      match /learningEvents/{eventId} {
+        // Learning events are append-only evidence: admins may review them, but
+        // only the owner may create or erase their own records.
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, delete: if isOwner(userId);
+        allow update: if isOwner(userId) && request.resource.data == resource.data;
+      }
+
+      match /loginHistory/{historyId} {
+        // Login records are user-owned security history; admins have read-only access.
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, delete: if isOwner(userId);
+        allow update: if isOwner(userId) && request.resource.data == resource.data;
+      }
+
+      match /studentState/{docId} {
+        allow read: if isOwner(userId) || isAdmin() || isVerifiedParent(userId);
+        allow write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /learningProfile/{docId} {
+        allow read: if isOwner(userId) || isAdmin() || isVerifiedParent(userId);
+        allow write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /goals/{goalId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /courses/{courseId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /attendance/{attendanceId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /planner/{plannerId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+
+      // Private student chat threads and spatial memory: strictly OWNER-ONLY (zero admin read/write)
+      match /threads/{threadId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+
+      match /spatialObjects/{objectId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+
+      // Adaptive long-term personalization & memory configuration
+      match /memory/{memoryId} {
+        allow read, write, delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    match /securityAudits/{auditId} {
+      allow create: if isAuthenticated() &&
+                       request.resource.data.keys().hasAll(['eventType', 'timestamp']) &&
+                       (!('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid);
+      allow read: if isSecurityAuditsOwner();
+      allow delete: if isSecurityAuditsOwner();
+      allow update: if false;
+    }
+
+    match /system/{docId} {
+      allow read: if true; // Connection test path
+    }
+
+    // ── Emergency Incidents Persistent Audit Log ───────────────────────────
+    match /emergency_incidents/{incidentId} {
+      // Must be authenticated and the record UID must match the caller's auth UID
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      // Read allowed for super admin or the student owner
+      allow read: if isSuperAdmin() || (isAuthenticated() && resource.data.uid == request.auth.uid);
+      allow update, delete: if false; // Immutable audit trail
+    }
+
+    // ── Consent-based Caregiver/Parent Linking ──────────────────────────────
+    // Doc ID convention: {childUid}_{parentUid}. A parent can only ever
+    // create their OWN pending request; only the target child can move it to
+    // approved/rejected. Approving a request does NOT itself grant data
+    // access — the student still has to separately write linkedParentUid on
+    // their own /users/{uid} doc (see approveCaregiverLinkRequest in
+    // src/lib/caregiverLinking.ts), which the /users rules above already
+    // restrict to the owner. This collection is just the request/approval
+    // handshake, never the access grant itself.
+    match /caregiverLinkRequests/{requestId} {
+      allow create: if isAuthenticated()
+                    && request.resource.data.parentUid == request.auth.uid
+                    && request.resource.data.parentUid != request.resource.data.childUid
+                    && request.resource.data.status == 'pending'
+                    && requestId == (request.resource.data.childUid + '_' + request.resource.data.parentUid);
+      allow read: if isAuthenticated()
+                  && (resource.data.parentUid == request.auth.uid || resource.data.childUid == request.auth.uid);
+      // Only the target child may resolve a request, and only status may change.
+      allow update: if isAuthenticated()
+                    && resource.data.childUid == request.auth.uid
+                    && request.resource.data.parentUid == resource.data.parentUid
+                    && request.resource.data.childUid == resource.data.childUid
+                    && request.resource.data.status in ['approved', 'rejected'];
+      allow delete: if isAuthenticated()
+                    && (resource.data.parentUid == request.auth.uid || resource.data.childUid == request.auth.uid);
+    }
+  }
+}

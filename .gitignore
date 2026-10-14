@@ -1,0 +1,19 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Internal business documents — never publish (public repo)
+Cognify_Fund_Plan.html
+Cognify_Accessibility_Proposal_AlResala.docx
+*.docx
+
+# Local Claude settings (personal)
+.claude/settings.local.json
+
+# Archive files
+*.zip

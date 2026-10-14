@@ -1,0 +1,47 @@
+name: Quality Gate & Automated Verification
+
+on:
+  push:
+    branches:
+      - main
+      - Esraa
+  pull_request:
+    branches:
+      - main
+      - Esraa
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Type-Check, Build & Invariant Test Battery
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: 🔎 Dependency Vulnerability Gate
+        run: npm audit --audit-level=low
+
+      - name: 🛡️ TypeScript & ESLint Quality Gate
+        run: npm run lint
+
+      - name: 📦 Production Build Verification
+        run: npm run build
+
+      - name: 🧪 Execute 3,500+ Automated Test Suite
+        run: npm test
