@@ -37,7 +37,7 @@ async function startServer() {
       "font-src 'self' https://fonts.gstatic.com data:; " +
       "img-src 'self' data: blob: https:; " +
       "media-src 'self' blob: data: https:; " +
-      "connect-src 'self' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:* ws: wss: https://*.googleapis.com https://fonts.gstatic.com https://fonts.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://api.telegram.org https://api.twilio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com; " +
+      "connect-src 'self' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:* ws: wss: https://api.ipify.org https://*.ipify.org https://*.googleapis.com https://fonts.gstatic.com https://fonts.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://api.telegram.org https://api.twilio.com https://va.vercel-scripts.com https://vitals.vercel-insights.com; " +
       "worker-src 'self' blob:; " +
       "frame-src 'self' https://*.firebaseapp.com; " +
       "object-src 'none'; " +

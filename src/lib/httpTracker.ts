@@ -59,7 +59,7 @@ export function categorizeUrl(url: string): RequestCategory {
   if (u.includes('/api/gemini') || u.includes('generativelanguage.googleapis.com')) {
     return 'gemini';
   }
-  if (u.includes('/api/telemetry') || u.includes('securityaudit') || u.includes('apiify')) {
+  if (u.includes('/api/telemetry') || u.includes('securityaudit') || u.includes('ipify') || u.includes('apiify')) {
     return 'telemetry';
   }
   if (

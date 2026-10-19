@@ -45,8 +45,11 @@ export interface SecurityAuditRecord {
 export const LOCAL_STORAGE_SECURITY_KEY = 'cognify_security_audits_local';
 const THROTTLE_WINDOW_MS = 15000; // 15 seconds per event type
 
-// Module-level IP cache
+// Module-level IP cache & deduplication
 let cachedClientIp: string | null = null;
+let lastIpAttemptTime = 0;
+let pendingIpResolution: Promise<string> | null = null;
+const IP_RETRY_COOLDOWN_MS = 60000; // 60s cooldown on failure/429 to avoid hammering network
 const lastEventTimes = new Map<SecurityAuditRecord['eventType'], number>();
 
 /**
@@ -54,6 +57,13 @@ const lastEventTimes = new Map<SecurityAuditRecord['eventType'], number>();
  */
 export function resetClientIpCache(): void {
   cachedClientIp = null;
+  lastIpAttemptTime = 0;
+  pendingIpResolution = null;
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.removeItem('cognify_client_ip');
+    }
+  } catch {}
 }
 
 /**
@@ -61,59 +71,104 @@ export function resetClientIpCache(): void {
  * Tries internal serverless API (/api/telemetry/securityAudit) first.
  * Falls back to external ipify service.
  * Defaults to '127.0.0.1 (Local)' if offline or unreachable.
- * Caches the resolved IP in a module variable so it only calls once or as needed.
+ * Caches the resolved IP across the session and shares in-flight promises to eliminate duplicate network calls.
  */
 export async function resolveClientIp(): Promise<string> {
-  if (cachedClientIp && cachedClientIp !== '127.0.0.1 (Local)') {
+  // 1. Return in-memory cache if available
+  if (cachedClientIp) {
     return cachedClientIp;
   }
 
-  // 1. Try serverless telemetry endpoint
-  try {
-    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timeout = controller ? setTimeout(() => controller.abort(), 3000) : null;
-    const res = await fetch('/api/telemetry/securityAudit', {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-      signal: controller ? controller.signal : undefined,
-    });
-    if (timeout) clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.ip && typeof data.ip === 'string') {
-        cachedClientIp = data.ip;
-        return cachedClientIp;
+  // 2. Check sessionStorage for previously resolved IP in this tab
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    try {
+      const stored = window.sessionStorage.getItem('cognify_client_ip');
+      if (stored) {
+        cachedClientIp = stored;
+        return stored;
       }
-    }
-  } catch {
-    // Fall through to external lookup
+    } catch {}
   }
 
-  // 2. Try external ipify lookup
-  try {
-    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timeout = controller ? setTimeout(() => controller.abort(), 3000) : null;
-    const res = await fetch('https://api.ipify.org?format=json', {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-      signal: controller ? controller.signal : undefined,
-    });
-    if (timeout) clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.ip && typeof data.ip === 'string') {
-        cachedClientIp = data.ip;
-        return cachedClientIp;
-      }
-    }
-  } catch {
-    // Fall through to local fallback
+  // 3. Prevent duplicate concurrent requests (Promise sharing)
+  if (pendingIpResolution) {
+    return pendingIpResolution;
   }
 
-  cachedClientIp = '127.0.0.1 (Local)';
-  return cachedClientIp;
+  // 4. Rate-limit cooldown: if recently failed or 429'd, return fallback without hammering network
+  const now = Date.now();
+  if (now - lastIpAttemptTime < IP_RETRY_COOLDOWN_MS) {
+    return cachedClientIp || '127.0.0.1 (Local)';
+  }
+  lastIpAttemptTime = now;
+
+  pendingIpResolution = (async () => {
+    // 1. Try serverless telemetry endpoint
+    try {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeout = controller ? setTimeout(() => controller.abort(), 3000) : null;
+      const res = await fetch('/api/telemetry/securityAudit', {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        signal: controller ? controller.signal : undefined,
+      });
+      if (timeout) clearTimeout(timeout);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ip && typeof data.ip === 'string') {
+          cachedClientIp = data.ip;
+          try {
+            if (typeof window !== 'undefined' && window.sessionStorage) {
+              window.sessionStorage.setItem('cognify_client_ip', data.ip);
+            }
+          } catch {}
+          return cachedClientIp;
+        }
+      } else if (res.status === 429) {
+        // Respect Retry-After header if provided
+        const retryAfterSec = parseInt(res.headers.get('Retry-After') || '60', 10);
+        const cooldown = (isNaN(retryAfterSec) ? 60 : retryAfterSec) * 1000;
+        lastIpAttemptTime = Date.now() + cooldown - IP_RETRY_COOLDOWN_MS;
+      }
+    } catch {
+      // Fall through to external lookup
+    }
+
+    // 2. Try external ipify lookup
+    try {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeout = controller ? setTimeout(() => controller.abort(), 3000) : null;
+      const res = await fetch('https://api.ipify.org?format=json', {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        signal: controller ? controller.signal : undefined,
+      });
+      if (timeout) clearTimeout(timeout);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ip && typeof data.ip === 'string') {
+          cachedClientIp = data.ip;
+          try {
+            if (typeof window !== 'undefined' && window.sessionStorage) {
+              window.sessionStorage.setItem('cognify_client_ip', data.ip);
+            }
+          } catch {}
+          return cachedClientIp;
+        }
+      }
+    } catch {
+      // Fall through to local fallback
+    }
+
+    cachedClientIp = '127.0.0.1 (Local)';
+    return cachedClientIp;
+  })().finally(() => {
+    pendingIpResolution = null;
+  });
+
+  return pendingIpResolution;
 }
 
 /**
@@ -349,6 +404,7 @@ export function initSecurityTracker(
   };
 
   // 3. Window Dimension Delta Probe (DevTools docked window detector)
+  let isDockedDevToolsOpen = false;
   const checkDimensions = () => {
     try {
       const widthDelta = window.outerWidth - window.innerWidth;
@@ -356,7 +412,11 @@ export function initSecurityTracker(
       const inDbDashboard = isDatabaseDashboardActive();
       const path = window.location.hash || window.location.pathname || '/';
 
-      if (widthDelta > 160 || heightDelta > 160) {
+      const isOpenNow = widthDelta > 160 || heightDelta > 160;
+
+      // Edge-triggered: only log when transitioning from closed to open
+      if (isOpenNow && !isDockedDevToolsOpen) {
+        isDockedDevToolsOpen = true;
         if (inDbDashboard) {
           logSecurityEvent(
             getProfile(),
@@ -370,47 +430,72 @@ export function initSecurityTracker(
             `DevTools docked open state detected on ${path} (delta: ${widthDelta}px x ${heightDelta}px)`
           );
         }
+      } else if (!isOpenNow && isDockedDevToolsOpen) {
+        // Reset state when user closes or undocks DevTools
+        isDockedDevToolsOpen = false;
       }
     } catch {}
   };
 
   // 4. Console Getter Probe (Evaluated when DevTools console formats DOM preview)
   let probeInterval: any = null;
+  let probeTriggered = false;
   if (typeof Image !== 'undefined') {
     try {
       const probe = new Image();
       Object.defineProperty(probe, 'id', {
         get() {
+          // If already triggered, return cached token without re-entering audit logging
+          if (probeTriggered) {
+            return 'cognify_security_probe';
+          }
+          probeTriggered = true;
+
+          // Stop probing once DevTools console evaluation is confirmed
+          if (probeInterval) {
+            clearInterval(probeInterval);
+            probeInterval = null;
+          }
+
           const inDb = isDatabaseDashboardActive();
           const path = typeof window !== 'undefined' ? (window.location.hash || window.location.pathname || '/') : '/';
-          logSecurityEvent(
-            getProfile(),
-            'debugger_probe',
-            inDb
-              ? 'CRITICAL: DevTools console render detected via Image getter inside Database Dashboard!'
-              : `DevTools console render detected via Image getter probe on ${path}`
-          );
+
+          // Asynchronously defer logSecurityEvent so DevTools console formatting is not blocked
+          setTimeout(() => {
+            logSecurityEvent(
+              getProfile(),
+              'debugger_probe',
+              inDb
+                ? 'CRITICAL: DevTools console render detected via Image getter inside Database Dashboard!'
+                : `DevTools console render detected via Image getter probe on ${path}`
+            );
+          }, 0);
+
           return 'cognify_security_probe';
         },
         configurable: true,
       });
 
       probeInterval = setInterval(() => {
+        if (probeTriggered) return;
         try {
           console.debug(probe);
         } catch {}
-      }, 3000);
+      }, 5000);
     } catch {}
   }
 
   // 5. Anti-Debugger / Step-through execution timing probe
   let debuggerInterval: any = null;
+  let lastAnomalyLogTime = 0;
   if (typeof performance !== 'undefined') {
     debuggerInterval = setInterval(() => {
       try {
         const start = performance.now();
         const diff = performance.now() - start;
-        if (diff > 120) {
+        const now = Date.now();
+        if (diff > 120 && now - lastAnomalyLogTime > 60000) {
+          lastAnomalyLogTime = now;
           logSecurityEvent(
             getProfile(),
             'debugger_probe',
