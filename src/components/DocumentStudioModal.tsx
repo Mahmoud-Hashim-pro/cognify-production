@@ -29,12 +29,14 @@ import {
   Music,
   Radio,
   Accessibility,
+  Printer,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { generateAdaptiveResponse } from '../services/gemini';
 import { speak, cancelSpeech, unlockSpeechSynthesis } from '../lib/tts';
 import { toast } from './Toast';
 import { cleanVisionDescription } from '../lib/visionCleaner';
+import { downloadNativeDocx, detectQuestionPatterns, DocxQuestionItem } from '../lib/docxExport';
 
 const SignAvatar3D = React.lazy(() => import('./SignAvatar3D'));
 
@@ -126,6 +128,114 @@ export function exportToWordDocument(
   flashcards?: DocFlashcard[]
 ) {
   if (typeof window === 'undefined') return;
+  // Trigger modern native docx file generation via docx package
+  downloadNativeDocx({
+    title,
+    summary,
+    fullText,
+    lang,
+    quiz,
+    flashcards,
+  }).catch((err) => {
+    console.warn('Native docx export failed, falling back to legacy format:', err);
+    legacyExportToWordDocument(title, summary, fullText, lang, quiz, flashcards);
+  });
+}
+
+export function printAccessibleDocument(
+  title: string,
+  summary: string,
+  fullText?: string,
+  lang: 'ar' | 'en' | 'fr' = 'ar',
+  quiz?: DocQuizQuestion[],
+  flashcards?: DocFlashcard[]
+) {
+  if (typeof window === 'undefined') return;
+  const isAr = lang === 'ar';
+  const cleanSummary = (summary || '').replace(/\*\*/g, '').replace(/###/g, '');
+  const cleanFull = (fullText || '').replace(/\*\*/g, '').replace(/###/g, '');
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    window.print();
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="${isAr ? 'ar' : 'en'}" dir="${isAr ? 'rtl' : 'ltr'}">
+    <head>
+      <meta charset="utf-8">
+      <title>${title || (isAr ? 'مستند كوجنيفاي التعليمي' : 'Cognify Educational Document')}</title>
+      <style>
+        @page { margin: 20mm; size: A4; }
+        body {
+          font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+          direction: ${isAr ? 'rtl' : 'ltr'};
+          text-align: ${isAr ? 'right' : 'left'};
+          line-height: 1.8;
+          color: #0f172a;
+          margin: 0;
+          padding: 24px;
+        }
+        h1 { font-size: 20pt; color: #1e1b4b; border-bottom: 3px solid #4338ca; padding-bottom: 8px; margin-bottom: 16px; }
+        h2 { font-size: 14pt; color: #312e81; margin-top: 24px; margin-bottom: 10px; }
+        .meta { color: #64748b; font-size: 10pt; margin-bottom: 20px; }
+        .box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+        .q-box { border-right: ${isAr ? '4px solid #16a34a' : 'none'}; border-left: ${isAr ? 'none' : '4px solid #16a34a'}; background: #f0fdf4; padding: 12px; margin-bottom: 12px; }
+        .fc-box { border: 1px solid #e9d5ff; background: #faf5ff; padding: 10px; margin-bottom: 10px; }
+        @media print {
+          body { padding: 0; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>${title || (isAr ? 'مستند كوجنيفاي التعليمي' : 'Cognify Educational Document')}</h1>
+      <div class="meta">${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')} • ${isAr ? 'منصة كوجنيفاي التعليمية الميسرة' : 'Cognify Inclusive Learning Platform'}</div>
+      <h2>${isAr ? '📌 الزبدة وخلاصة المحتوى' : '📌 Core Takeaways'}</h2>
+      <div class="box">${cleanSummary.replace(/\n/g, '<br/>')}</div>
+      ${quiz && quiz.length > 0 ? `
+        <h2>${isAr ? '📝 بنك الأسئلة والتدريبات' : '📝 Practice Questions'}</h2>
+        ${quiz.map((q, i) => `
+          <div class="q-box">
+            <b>${isAr ? 'سؤال' : 'Question'} ${i + 1}: ${q.question}</b><br/>
+            ${q.options.map((opt, oi) => `&bull; ${opt} ${oi === q.answerIndex ? '<b>(الإجابة الصحيحة ✅)</b>' : ''}`).join('<br/>')}<br/>
+            <span style="color:#4338ca; font-size:10pt;">💡 ${isAr ? 'التوضيح' : 'Explanation'}: ${q.explanation}</span>
+          </div>
+        `).join('')}
+      ` : ''}
+      ${flashcards && flashcards.length > 0 ? `
+        <h2>${isAr ? '🗂️ بطاقات المراجعة السريعة' : '🗂️ Flashcards'}</h2>
+        ${flashcards.map((f, i) => `
+          <div class="fc-box">
+            <b>${isAr ? 'بطاقة' : 'Card'} ${i + 1}:</b> ${f.front}<br/>
+            <b>${isAr ? 'المفهوم / الإجابة:' : 'Answer / Concept:'}</b> ${f.back}
+          </div>
+        `).join('')}
+      ` : ''}
+      ${cleanFull ? `
+        <h2>${isAr ? '📝 النص الكامل المستخرج' : '📝 Full Extracted Content'}</h2>
+        <div class="box" style="white-space: pre-wrap; font-size: 11pt;">${cleanFull}</div>
+      ` : ''}
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+  }, 400);
+}
+
+function legacyExportToWordDocument(
+  title: string,
+  summary: string,
+  fullText?: string,
+  lang: 'ar' | 'en' | 'fr' = 'ar',
+  quiz?: DocQuizQuestion[],
+  flashcards?: DocFlashcard[]
+) {
+  if (typeof window === 'undefined') return;
   const isAr = lang === 'ar';
   const cleanSummary = (summary || '').replace(/\*\*/g, '').replace(/###/g, '');
   const cleanFull = (fullText || '').replace(/\*\*/g, '').replace(/###/g, '');
@@ -136,129 +246,17 @@ export function exportToWordDocument(
     <head>
       <meta charset='utf-8'>
       <title>${title}</title>
-      <!--[if gte mso 9]>
-      <xml>
-        <w:WordDocument>
-          <w:View>Print</w:View>
-          <w:Zoom>100</w:Zoom>
-          <w:DoNotOptimizeForBrowser/>
-        </w:WordDocument>
-      </xml>
-      <![endif]-->
       <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-          direction: ${isAr ? 'rtl' : 'ltr'};
-          text-align: ${isAr ? 'right' : 'left'};
-          line-height: 1.8;
-          color: #1e293b;
-          margin: 40px;
-        }
-        .header {
-          border-bottom: 3px solid #4f46e5;
-          padding-bottom: 12px;
-          margin-bottom: 24px;
-        }
-        h1 {
-          font-size: 22pt;
-          color: #1e1b4b;
-          margin-bottom: 6px;
-        }
-        .meta {
-          font-size: 11pt;
-          color: #64748b;
-        }
-        .section-title {
-          font-size: 16pt;
-          font-weight: bold;
-          color: #4338ca;
-          margin-top: 24px;
-          margin-bottom: 10px;
-          border-left: ${isAr ? 'none' : '4px solid #4338ca'};
-          border-right: ${isAr ? '4px solid #4338ca' : 'none'};
-          padding-${isAr ? 'right' : 'left'}: 10px;
-        }
-        .summary-box {
-          background-color: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 16px;
-          font-size: 13pt;
-          color: #0f172a;
-        }
-        .full-text-box {
-          font-size: 12pt;
-          color: #334155;
-          white-space: pre-wrap;
-        }
-        .footer {
-          margin-top: 40px;
-          border-top: 1px solid #e2e8f0;
-          padding-top: 12px;
-          font-size: 10pt;
-          color: #94a3b8;
-          text-align: center;
-        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; direction: ${isAr ? 'rtl' : 'ltr'}; text-align: ${isAr ? 'right' : 'left'}; }
       </style>
     </head>
-    <body dir="${isAr ? 'rtl' : 'ltr'}">
-      <div class="header">
-        <h1>${title || (isAr ? 'ملخص ومستند كوجنيفي' : 'Cognify Document')}</h1>
-        <div class="meta">
-          ${isAr ? 'تم الاستخراج والتلخيص عبر منصة كوجنيفي للذكاء الاصطناعي والرفيق البصري' : 'Generated by Cognify AI Visual Companion'} • ${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
-        </div>
-      </div>
-      
-      <div class="section-title">
-        ${isAr ? '📌 الزبدة وخلاصة المحاضرة / المستند' : '📌 Core Takeaways & Summary'}
-      </div>
-      <div class="summary-box">
-        ${cleanSummary.replace(/\n/g, '<br/>')}
-      </div>
-
-      ${quiz && quiz.length > 0 ? `
-        <div class="section-title">
-          ${isAr ? '📝 بنك أسئلة واختبار المحاضرة' : '📝 Lecture Quiz & Knowledge Check'}
-        </div>
-        <div class="summary-box">
-          ${quiz.map((q, i) => `
-            <div style="margin-bottom: 16px;">
-              <b>س ${i + 1}: ${q.question}</b><br/>
-              ${q.options.map((opt, oi) => `&nbsp;&nbsp;[${String.fromCharCode(65 + oi)}] ${opt} ${oi === q.answerIndex ? '<b>(الإجابة الصحيحة ✅)</b>' : ''}`).join('<br/>')}<br/>
-              <span style="color: #4338ca; font-size: 11pt;">💡 الشرح: ${q.explanation}</span>
-            </div>
-          `).join('<hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 12px 0;" />')}
-        </div>
-      ` : ''}
-
-      ${flashcards && flashcards.length > 0 ? `
-        <div class="section-title">
-          ${isAr ? '🗂️ بطاقات المراجعة السريعة (Flashcards)' : '🗂️ Spaced Repetition Flashcards'}
-        </div>
-        <div class="summary-box">
-          ${flashcards.map((f, i) => `
-            <p><b>بطاقة ${i + 1}: ${f.front}</b><br/>
-            &nbsp;&nbsp;← <b>الحل / المفهوم:</b> ${f.back}</p>
-          `).join('<hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 8px 0;" />')}
-        </div>
-      ` : ''}
-
-      ${cleanFull ? `
-        <div class="section-title">
-          ${isAr ? '📝 تفاصيل النص المستخرج كاملاً' : '📝 Full Extracted Content'}
-        </div>
-        <div class="full-text-box">
-          ${cleanFull.replace(/\n/g, '<br/>')}
-        </div>
-      ` : ''}
-
-      <div class="footer">
-        Cognify 2.0 • Empowering Inclusive Learning and Accessibility
-      </div>
+    <body>
+      <h1>${title}</h1>
+      <p>${cleanSummary.replace(/\n/g, '<br/>')}</p>
+      ${cleanFull ? `<hr/><pre>${cleanFull}</pre>` : ''}
     </body>
     </html>
   `;
-
   const blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -394,7 +392,23 @@ export default function DocumentStudioModal({
 
       const { base64, mimeType } = await fileDataPromise;
 
-      const prompt = `أنت معلم وأكاديمي متميز ومترجم ذكي وخبير تلخيص للمكفوفين وضعاف البصر.
+      const isAudio = file.type.startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(file.name);
+      const prompt = isAudio
+        ? `أنت معلم وأكاديمي متميز ومترجم ذكي وخبير تلخيص للمكفوفين وضعاف البصر.
+الملف الصوتي المرفق هو تسجيل لمحاضرة دراسية بعنوان "${file.name}".
+المطلوب منك بدقة فائقة:
+1. استمع للتسجيل بالكامل وقم بتفريغه مع وضع طوابع زمنية دقيقة للفقرات (مثلاً [00:15]، [02:30]، [05:45]).
+2. ترجم ولخص إلى: "${isAr ? 'اللغة العربية العامية المصرية الواضحة والمفهومة للطلاب' : isFr ? 'Français' : 'English'}".
+3. قدّم الإجابة في قسمين محددين:
+---SUMMARY_START---
+اكتب هنا "المفيد والزبدة الصافية للمحاضرة": ملخص شديد الوضوح والتركيز يبرز الفكرة الجوهرية، القوانين أو النظريات الأساسية، التكليفات ومواعيد الاختبارات في نقاط مباشرة.
+---SUMMARY_END---
+
+---FULLTEXT_START---
+اكتب هنا التفريغ الكامل للمحاضرة مقسماً إلى فقرات مع طوابعها الزمنية [MM:SS] مع شرح واضح ومفصل للمعادلات والمفاهيم.
+---FULLTEXT_END---
+4. تنبيه خاص للطلاب ذوي الإعاقة البصرية (STEM & Formulas & Diagrams): إذا كان المحتوى يحتوي على أي معادلات رياضية أو فيزيائية أو رسوم؛ قم بشرحها ونطقها بالكامل بالكلمات الصريحة لتكون مفهومة صوتياً 100%.`
+        : `أنت معلم وأكاديمي متميز ومترجم ذكي وخبير تلخيص للمكفوفين وضعاف البصر.
 المستند المرفق هو محاضرة أو كتاب أو ورقة دراسية بعنوان "${file.name}".
 المطلوب منك بدقة فائقة:
 1. اقرأ واستخرج محتوى هذا المستند كاملاً.
@@ -439,12 +453,25 @@ export default function DocumentStudioModal({
       const docItem: SavedDocItem = {
         id: `doc_${Date.now()}`,
         title: file.name.replace(/\.[^/.]+$/, ''),
-        sourceType: file.type.includes('pdf') ? 'pdf' : 'image',
+        sourceType: isAudio ? 'audio' : file.type.includes('pdf') ? 'pdf' : 'image',
         summary: cleanSummary || summary,
         fullText: cleanFull || fullText,
         targetLang: targetLanguage,
         createdAt: new Date().toISOString(),
       };
+
+      // Automatically detect and parse question patterns into the interactive quiz
+      const detected = detectQuestionPatterns(cleanFull || cleanSummary || fullText || summary);
+      if (detected.length > 0) {
+        setDocQuiz(
+          detected.map((d) => ({
+            question: d.prompt,
+            options: d.options && d.options.length > 0 ? d.options : [isAr ? 'صح' : 'True', isAr ? 'خطأ' : 'False'],
+            answerIndex: 0,
+            explanation: d.explanation || (isAr ? 'مستخرجة مباشرة من سياق المحاضرة' : 'Extracted from lecture context'),
+          }))
+        );
+      }
 
       setCurrentDoc({
         ...docItem,
@@ -1135,7 +1162,7 @@ ${currentDoc.summary}
                     <input
                       type="file"
                       id="vision-doc-file-upload-modal"
-                      accept=".pdf,image/*,.docx,.txt"
+                      accept=".pdf,image/*,.docx,.txt,audio/*,.mp3,.wav,.m4a,.webm,.ogg"
                       className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -1153,13 +1180,13 @@ ${currentDoc.summary}
                       <div className="space-y-1">
                         <p className="font-bold text-base sm:text-lg text-white">
                           {companionLang === 'ar'
-                            ? 'اضغط هنا لرفع ملف PDF أو صورة مستند أو ورقة محاضرة'
-                            : 'Click here to upload a PDF, document image, or lecture slide'}
+                            ? 'اضغط هنا لرفع ملف PDF، مستند Word، تسجيل صوتي أو صورة محاضرة'
+                            : 'Click here to upload a PDF, Word doc, audio lecture, or image'}
                         </p>
                         <p className="text-xs text-slate-400">
                           {companionLang === 'ar'
-                            ? 'يدعم ملفات PDF، الكتب، السلايدات، الصور والروشتات (مع استخراج الزبدة وترجمتها صوتياً)'
-                            : 'Supports PDF, slides, lecture notes, textbook pages, and document photos'}
+                            ? 'يدعم ملفات PDF، Word، الكتب، السلايدات، التسجيلات الصوتية (.mp3 / .wav) والصور والروشتات'
+                            : 'Supports PDF, Word, lecture audio (.mp3/.wav), slides, textbook pages, and document photos'}
                         </p>
                       </div>
                       <span className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg active:scale-95 transition-all">
@@ -1329,7 +1356,7 @@ ${currentDoc.summary}
                             <span>{companionLang === 'ar' ? 'ترجمة إشارة (3D)' : 'Sign (3D)'}</span>
                           </button>
 
-                          {/* Download as Word Button */}
+                          {/* Download as Word (.docx) Button */}
                           <button
                             type="button"
                             onClick={() => {
@@ -1341,13 +1368,33 @@ ${currentDoc.summary}
                                 docQuiz,
                                 docFlashcards
                               );
-                              toast.success(companionLang === 'ar' ? 'تم تنزيل مستند Word بنجاح 📄' : 'Word document downloaded 📄');
+                              toast.success(companionLang === 'ar' ? 'تم تنزيل مستند Word (.docx) الأصلي 📄' : 'Native Word (.docx) downloaded 📄');
                             }}
-                            className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
-                            title="تنزيل كملف Word صالح للفتح والتعديل مع الأسئلة والملخص"
+                            className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+                            title="تنزيل كملف Word (.docx) منسق وميسر للقراءة والطباعة"
                           >
                             <Download className="w-4 h-4" />
-                            <span>{companionLang === 'ar' ? 'تحميل Word (.doc)' : 'Export Word'}</span>
+                            <span>{companionLang === 'ar' ? 'تحميل Word (.docx)' : 'Export Word (.docx)'}</span>
+                          </button>
+
+                          {/* Print / Save as PDF Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              printAccessibleDocument(
+                                currentDoc.title,
+                                currentDoc.summary,
+                                currentDoc.fullText,
+                                currentDoc.targetLang,
+                                docQuiz,
+                                docFlashcards
+                              );
+                            }}
+                            className="px-3 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+                            title="طباعة أو تصدير بصيغة PDF ميسرة"
+                          >
+                            <Printer className="w-4 h-4" />
+                            <span>{companionLang === 'ar' ? 'تصدير / طباعة PDF' : 'Export / Print PDF'}</span>
                           </button>
                         </div>
                       </div>
@@ -1359,7 +1406,8 @@ ${currentDoc.summary}
                             type="button"
                             onClick={handlePrevParagraph}
                             disabled={currentParagraphIdx <= 0}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white"
+                            aria-label={companionLang === 'ar' ? 'الفقرة السابقة' : 'Previous paragraph'}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
                             title="الفقرة السابقة"
                           >
                             <Rewind className="w-4 h-4" />
@@ -1367,7 +1415,8 @@ ${currentDoc.summary}
                           <button
                             type="button"
                             onClick={() => speakCurrentParagraph(currentParagraphIdx)}
-                            className="p-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white"
+                            aria-label={companionLang === 'ar' ? 'إعادة نطق الفقرة الحالية' : 'Repeat current paragraph'}
+                            className="p-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
                             title="إعادة نطق الفقرة الحالية"
                           >
                             <RotateCcw className="w-4 h-4" />
@@ -1376,7 +1425,8 @@ ${currentDoc.summary}
                             type="button"
                             onClick={handleNextParagraph}
                             disabled={currentParagraphIdx >= paragraphs.length - 1}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white"
+                            aria-label={companionLang === 'ar' ? 'الفقرة التالية' : 'Next paragraph'}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
                             title="الفقرة التالية"
                           >
                             <FastForward className="w-4 h-4" />
@@ -1742,6 +1792,31 @@ ${currentDoc.summary}
                       </p>
                     </div>
                   )}
+
+                  {/* Option B: Upload Recorded Audio File (.mp3, .wav, .m4a, .webm, .ogg) */}
+                  <div className="pt-4 border-t border-[#4A1224]/60 max-w-md mx-auto">
+                    <input
+                      type="file"
+                      id="vision-audio-lecture-upload"
+                      accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.flac,.aac"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setDocStudioTab('pdf');
+                          processDocumentFile(file);
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                    <label
+                      htmlFor="vision-audio-lecture-upload"
+                      className="cursor-pointer inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-900/60 hover:bg-indigo-800 border border-indigo-500/50 text-indigo-200 font-bold text-xs shadow-lg active:scale-95 transition-all"
+                    >
+                      <Music className="w-4 h-4 text-[#E5A93C]" />
+                      <span>{companionLang === 'ar' ? 'أو ارفع ملف تسجيل صوتي للمحاضرة (.mp3 / .wav / .m4a)' : 'Or upload lecture audio file (.mp3 / .wav / .m4a)'}</span>
+                    </label>
+                  </div>
                 </div>
               )}
 

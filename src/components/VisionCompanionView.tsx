@@ -33,6 +33,11 @@ import {
   Palette,
   Compass,
   FileText,
+  ArrowLeft,
+  RefreshCw,
+  Clock,
+  CheckCircle2,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
@@ -53,6 +58,7 @@ import {
 interface VisionCompanionViewProps {
   profile: UserProfile;
   setProfile?: (profile: UserProfile) => void;
+  onNavigateBack?: () => void;
 }
 
 type Status = 'idle' | 'starting-camera' | 'ready' | 'analyzing' | 'camera-denied' | 'unsupported';
@@ -71,7 +77,7 @@ import DocumentStudioModal from './DocumentStudioModal';
 import SpatialMemoryTrajectoryView from './SpatialMemoryTrajectoryView';
 import ParentalConsentModal from './ParentalConsentModal';
 
-export default function VisionCompanionView({ profile, setProfile }: VisionCompanionViewProps) {
+export default function VisionCompanionView({ profile, setProfile, onNavigateBack }: VisionCompanionViewProps) {
   const isMinorStudent = Boolean((profile.age && profile.age < 18) || (profile as any).isMinor);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(
     Boolean(isMinorStudent && !profile.parentalConsent?.verified)
@@ -82,6 +88,21 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const isMountedRef = useRef<boolean>(true);
+
+  // Monotonically increasing request ID & in-flight tracking to reject stale scene descriptions
+  const activeRequestIdRef = useRef<number>(0);
+  const lastObservationTimeRef = useRef<number>(0);
+  const [observationTimestamp, setObservationTimestamp] = useState<number | null>(null);
+  const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | null>(null);
+  const [observationConfidenceReason, setObservationConfidenceReason] = useState<string>('');
+  const [verbosity, setVerbosity] = useState<'concise' | 'detailed'>('concise');
+  const [experienceMode, setExperienceMode] = useState<'beginner' | 'advanced'>(() => {
+    try {
+      return (localStorage.getItem('cognify_vision_exp_mode') as any) || 'advanced';
+    } catch {
+      return 'advanced';
+    }
+  });
 
   const [status, setStatus] = useState<Status>('starting-camera');
   const [lastDescription, setLastDescription] = useState<string>('');
@@ -587,6 +608,10 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       return;
     }
 
+    const currentReqId = ++activeRequestIdRef.current;
+    const captureTimestamp = Date.now();
+    lastObservationTimeRef.current = captureTimestamp;
+
     setLastSnapshot(frame);
     setStatus('analyzing');
     const waitingMsg = lectureMode
@@ -855,6 +880,21 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       prompt = `${langMandate}\n${prompt}`;
     }
 
+    const verbosityInstruction =
+      verbosity === 'concise'
+        ? targetLang === 'ar'
+          ? '\nمستوى الإيجاز (موجز): اذكر فوراً في جملة واحدة أو جملتين مباشرتين أهم ما أمام المستخدم ومكانه، وأي عائق فوري أو مسار آمن. تجنب تماماً الحشو أو المقدمات.'
+          : targetLang === 'fr'
+          ? '\nNiveau de concision (court) : Donnez 1 à 2 phrases directes sur l\'élément clé et la sécurité.'
+          : '\nBrevity Level (Concise): Deliver 1 to 2 sharp sentences stating primary object, relative position, and immediate safety status. Zero fluff.'
+        : targetLang === 'ar'
+        ? '\nمستوى الإيجاز (مفصل): قدم وصفاً مكانياً دقيقاً، مع تحديد اتجاهات الساعة (مثلاً: عند الساعة 12، عند الساعة 2)، والمسافات التقريبية بالأمتار أو الخطوات، وملمس الأسطح، وقراءة النصوص المكتوبة.'
+        : targetLang === 'fr'
+        ? '\nNiveau de concision (détaillé) : Description spatiale riche avec positions horaires (ex. 12h, 2h) et distances estimées.'
+        : '\nBrevity Level (Detailed): Provide rich spatial layout with clock-face directions (e.g. 12 o\'clock, 2 o\'clock), estimated distances in meters, and visible text.';
+
+    prompt = `${prompt}\n${verbosityInstruction}`;
+
     try {
       const cleanData = frame.replace(/^data:[^;]+;base64,/, '');
       const result = await generateAdaptiveResponse(
@@ -873,7 +913,8 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         [{ name: 'scene.jpg', type: 'image/jpeg', data: cleanData }]
       );
 
-      if (!isMountedRef.current) return;
+      // CRITICAL: Reject stale responses if newer frame/request was already initiated or unmounted
+      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current) return;
       const isAuthNotice =
         result.includes('المعاينة') ||
         result.includes('تسجيل الدخول') ||
@@ -919,6 +960,23 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       setStatus('ready');
       setAnnounce(cleaned);
 
+      // Track live vs previous vs uncertain observation
+      const isUncertain = /غير واضح|غير متأكد|صورة غير واضحة|إضاءة منخفضة|إضاءة ضعيفة|العدسة محجوبة|مهتزة|blurry|unclear|low light|obscured|not sure/i.test(result);
+      if (isUncertain) {
+        setObservationType('uncertain');
+        setObservationConfidenceReason(
+          targetLang === 'ar'
+            ? 'الصورة قد تكون مهتزة أو الإضاءة خافتة'
+            : targetLang === 'fr'
+            ? 'Image potentiellement floue ou faible éclairage'
+            : 'Image may be blurry or dimly lit'
+        );
+      } else {
+        setObservationType(forcedFrame ? 'previous' : 'live');
+        setObservationConfidenceReason('');
+      }
+      setObservationTimestamp(captureTimestamp);
+
       // Automatically extract and record spatial physical objects for this user
       if (profile?.uid) {
         const extracted = extractSpatialObjectsFromVision(cleaned, profile.uid, targetLang);
@@ -962,7 +1020,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         });
       }, 60);
     } catch {
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current) return;
       setStatus('ready');
       const err =
         targetLang === 'ar'
@@ -1189,135 +1247,270 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       {/* ── 2. ACCESSIBLE FLOATING HUD OVERLAY ── */}
       <div className="relative z-20 flex flex-col justify-between h-full p-3 sm:p-5 md:p-6 pointer-events-none">
         {/* Floating Top Command Bar */}
-        <div className="pointer-events-auto flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
-          {/* Three Language Choices: Arabic, English, French */}
-          <div className="flex items-center bg-black/75 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-2xl">
+        <div className="pointer-events-auto flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap w-full">
+          {/* Left group: Back button + Language Choices + Mode Toggle */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {onNavigateBack && (
+              <button
+                type="button"
+                onClick={() => {
+                  cancelSpeech();
+                  onNavigateBack();
+                }}
+                aria-label={t('Back to Assistant', 'العودة للمساعد', 'Retour')}
+                className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
+                title={t('Back to Assistant / Tutor', 'العودة للمساعد أو المرشد الذكي', 'Retour')}
+              >
+                <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+                <span className="hidden sm:inline">{t('Back', 'رجوع', 'Retour')}</span>
+              </button>
+            )}
+
+            {/* Three Language Choices: Arabic, English, French */}
+            <div className="flex items-center bg-black/75 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  chooseLang('ar');
+                  toast.success('تم اختيار اللغة العربية 🇪🇬');
+                }}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
+                  companionLang === 'ar'
+                    ? 'bg-emerald-600 text-white shadow-lg'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <span>🇪🇬</span>
+                <span>عربي</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  chooseLang('en');
+                  toast.success('English language selected 🇬🇧');
+                }}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
+                  companionLang === 'en'
+                    ? 'bg-primary text-white shadow-lg'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <span>🇬🇧</span>
+                <span>English</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  chooseLang('fr');
+                  toast.success('Langue française sélectionnée 🇫🇷');
+                }}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
+                  companionLang === 'fr'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <span>🇫🇷</span>
+                <span>Français</span>
+              </button>
+            </div>
+
+            {/* Beginner / Advanced Mode Toggle */}
             <button
+              type="button"
               onClick={() => {
-                chooseLang('ar');
-                toast.success('تم اختيار اللغة العربية 🇪🇬');
+                const next = experienceMode === 'beginner' ? 'advanced' : 'beginner';
+                setExperienceMode(next);
+                try { localStorage.setItem('cognify_vision_exp_mode', next); } catch {}
+                toast.info(next === 'beginner' ? t('Simplified Beginner Mode active', 'تم تفعيل الوضع البسيط المريح', 'Mode simplifié activé') : t('Advanced Studio Mode active', 'تم تفعيل الوضع المتقدم الكامل', 'Mode avancé activé'));
               }}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                companionLang === 'ar'
-                  ? 'bg-emerald-600 text-white shadow-lg'
-                  : 'text-slate-300 hover:text-white'
+              aria-label={t('Toggle simplified mode', 'تبديل الوضع البسيط والمتقدم', 'Mode')}
+              className={`p-2 sm:px-2.5 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1 text-xs font-bold shrink-0 cursor-pointer ${
+                experienceMode === 'beginner'
+                  ? 'bg-teal-700/80 border-teal-400/50 text-white ring-1 ring-teal-400'
+                  : 'bg-black/75 hover:bg-black/90 text-white border-white/20'
               }`}
+              title={experienceMode === 'beginner' ? 'الوضع البسيط: كادر نقي وأزرار أساسية فقط' : 'الوضع المتقدم: إظهار كافة الأدوات المتخصصة'}
             >
-              <span>🇪🇬</span>
-              <span>عربي</span>
-            </button>
-            <button
-              onClick={() => {
-                chooseLang('en');
-                toast.success('English language selected 🇬🇧');
-              }}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                companionLang === 'en'
-                  ? 'bg-primary text-white shadow-lg'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <span>🇬🇧</span>
-              <span>English</span>
-            </button>
-            <button
-              onClick={() => {
-                chooseLang('fr');
-                toast.success('Langue française sélectionnée 🇫🇷');
-              }}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                companionLang === 'fr'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <span>🇫🇷</span>
-              <span>Français</span>
+              <span>{experienceMode === 'beginner' ? '🔰' : '⚙️'}</span>
+              <span className="hidden xl:inline">{experienceMode === 'beginner' ? t('Simple', 'بسيط', 'Simple') : t('Advanced', 'متقدم', 'Avancé')}</span>
             </button>
           </div>
 
           {/* Right Utilities: Modes + Spatial Memory + Flip Camera + Fullscreen */}
           <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
-            <button
-              onClick={toggleCurrencyMode}
-              aria-pressed={currencyMode}
-              aria-label={t('Currency Reader', 'قارئ العملات', 'Lecteur de monnaie')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                currencyMode
-                  ? 'bg-emerald-500/90 border-emerald-300 text-black shadow-emerald-950/50'
-                  : 'bg-black/75 border-emerald-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Currency Reader: detect banknotes and cash instantly',
-                'قارئ العملات: قراءة الفلوس والنقود فوراً بالصوت',
-                'Lecteur de monnaie : reconnaître les billets'
-              )}
-            >
-              <Banknote className={`w-4 h-4 shrink-0 ${currencyMode ? 'text-black' : 'text-emerald-400'}`} />
-              <span className="hidden xl:inline">{t('Cash', 'فلوس', 'Monnaie')}</span>
-            </button>
+            {experienceMode === 'advanced' && (
+              <>
+                <button
+                  type="button"
+                  onClick={toggleCurrencyMode}
+                  aria-pressed={currencyMode}
+                  aria-label={t('Currency Reader', 'قارئ العملات', 'Lecteur de monnaie')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    currencyMode
+                      ? 'bg-emerald-500/90 border-emerald-300 text-black shadow-emerald-950/50'
+                      : 'bg-black/75 border-emerald-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Currency Reader: detect banknotes and cash instantly',
+                    'قارئ العملات: قراءة الفلوس والنقود فوراً بالصوت',
+                    'Lecteur de monnaie : reconnaître les billets'
+                  )}
+                >
+                  <Banknote className={`w-4 h-4 shrink-0 ${currencyMode ? 'text-black' : 'text-emerald-400'}`} />
+                  <span className="hidden xl:inline">{t('Cash', 'فلوس', 'Monnaie')}</span>
+                </button>
 
-            <button
-              onClick={toggleFaceMode}
-              aria-pressed={faceMode}
-              aria-label={t('Face Recognition', 'من أمامي؟', 'Qui est là ?')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                faceMode
-                  ? 'bg-blue-600/90 border-blue-300 text-white shadow-blue-950/50'
-                  : 'bg-black/75 border-blue-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Face Recognition: identify familiar people and faces',
-                'من أمامي: التعرف على الوجوه والمقربين والأشخاص',
-                'Reconnaissance faciale : identifier les proches'
-              )}
-            >
-              <Users className={`w-4 h-4 shrink-0 ${faceMode ? 'text-white' : 'text-blue-400'}`} />
-              <span className="hidden xl:inline">{t('People', 'وجوه', 'Visages')}</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={toggleFaceMode}
+                  aria-pressed={faceMode}
+                  aria-label={t('Face Recognition', 'من أمامي؟', 'Qui est là ?')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    faceMode
+                      ? 'bg-blue-600/90 border-blue-300 text-white shadow-blue-950/50'
+                      : 'bg-black/75 border-blue-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Face Recognition: identify familiar people and faces',
+                    'من أمامي: التعرف على الوجوه والمقربين والأشخاص',
+                    'Reconnaissance faciale : identifier les proches'
+                  )}
+                >
+                  <Users className={`w-4 h-4 shrink-0 ${faceMode ? 'text-white' : 'text-blue-400'}`} />
+                  <span className="hidden xl:inline">{t('People', 'وجوه', 'Visages')}</span>
+                </button>
 
-            <button
-              onClick={toggleOutfitMode}
-              aria-pressed={outfitMode}
-              aria-label={t('Color & Outfit Matcher', 'تنسيق الملابس والألوان', 'Style & Couleurs')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                outfitMode
-                  ? 'bg-pink-600/90 border-pink-300 text-white shadow-pink-950/50'
-                  : 'bg-black/75 border-pink-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Color & Outfit Matcher: match clothing colors and check style',
-                'تنسيق الملابس: فحص ألوان الملابس وتناسق الطقم',
-                'Harmonie des vêtements : vérifier les couleurs et le style'
-              )}
-            >
-              <Palette className={`w-4 h-4 shrink-0 ${outfitMode ? 'text-white' : 'text-pink-400'}`} />
-              <span className="hidden xl:inline">{t('Outfit', 'ملابس', 'Tenue')}</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={toggleOutfitMode}
+                  aria-pressed={outfitMode}
+                  aria-label={t('Color & Outfit Matcher', 'تنسيق الملابس والألوان', 'Style & Couleurs')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    outfitMode
+                      ? 'bg-pink-600/90 border-pink-300 text-white shadow-pink-950/50'
+                      : 'bg-black/75 border-pink-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Color & Outfit Matcher: match clothing colors and check style',
+                    'تنسيق الملابس: فحص ألوان الملابس وتناسق الطقم',
+                    'Harmonie des vêtements : vérifier les couleurs et le style'
+                  )}
+                >
+                  <Palette className={`w-4 h-4 shrink-0 ${outfitMode ? 'text-white' : 'text-pink-400'}`} />
+                  <span className="hidden xl:inline">{t('Outfit', 'ملابس', 'Tenue')}</span>
+                </button>
 
-            <button
-              onClick={toggleNavGuideMode}
-              aria-pressed={navGuideMode}
-              aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                navGuideMode
-                  ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/90 border-[#E5A93C]/40 text-black shadow-[#E5A93C]/20 animate-pulse'
-                  : 'bg-black/75 border-[#E5A93C]/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
-                'العصا الذكية: كشف العوائق والممرات مع تنبيهات اهتزازية',
-                'Canne virtuelle : obstacles et marches avec vibrations haptiques'
-              )}
-            >
-              <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-[#E5A93C]'}`} />
-              <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={toggleNavGuideMode}
+                  aria-pressed={navGuideMode}
+                  aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    navGuideMode
+                      ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/90 border-[#E5A93C]/40 text-black shadow-[#E5A93C]/20 animate-pulse'
+                      : 'bg-black/75 border-[#E5A93C]/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
+                    'العصا الذكية: كشف العوائق والممرات مع تنبيهات اهتزازية',
+                    'Canne virtuelle : obstacles et marches avec vibrations haptiques'
+                  )}
+                >
+                  <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-[#E5A93C]'}`} />
+                  <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
+                </button>
 
+                <button
+                  type="button"
+                  onClick={toggleLectureMode}
+                  aria-pressed={lectureMode}
+                  aria-label={t('Lecture & Board Scanner', 'سكانر المحاضرات والسبورة', 'Scanner de cours et tableau')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    lectureMode
+                      ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50 ring-2 ring-purple-400'
+                      : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Lecture & Board Scanner: extract blackboard text, formulas, and academic slides',
+                    'سكانر المحاضرات والسبورة: قراءة السبورة والمعادلات وشرح السلايد بالصوت',
+                    'Scanner de cours : lire le tableau, équations et diapositives'
+                  )}
+                >
+                  <GraduationCap className={`w-4 h-4 shrink-0 ${lectureMode ? 'text-white' : 'text-purple-400'}`} />
+                  <span className="hidden xl:inline">{t('Lecture', 'محاضرات', 'Cours')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={toggleShoppingMode}
+                  aria-pressed={shoppingMode}
+                  aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    shoppingMode
+                      ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50'
+                      : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Shopping Assistant: identify products, prices, and expiry dates',
+                    'مساعد التسوق: فحص المنتجات والأسعار وتواريخ الصلاحية',
+                    'Assistant achat : identifier produits, prix et dates de péremption'
+                  )}
+                >
+                  <ShoppingBag className={`w-4 h-4 shrink-0 ${shoppingMode ? 'text-white' : 'text-purple-400'}`} />
+                  <span className="hidden xl:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDocStudio(true);
+                    announceFeature(
+                      'استوديو المستندات وتلخيص المحاضرات والـ PDF',
+                      'Document and Lecture Studio',
+                      'Studio de Documents et Cours',
+                      true
+                    );
+                  }}
+                  aria-label={t('Document & Lecture Studio', 'المستندات والمحاضرات', 'Documents & Cours')}
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-indigo-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+                  title={t(
+                    'Document & Lecture Studio: read PDF, convert to Word, lecture audio recording, translation, speech-to-text',
+                    'المستندات والمحاضرات: قراءة PDF، تحويل لـ Word، تسجيل وتلخيص المحاضرات، ترجمة، تحويل الصوت لكتابة',
+                    'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
+                  )}
+                >
+                  <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
+                  <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-indigo-300 font-mono">PDF</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSpatialMemory(true);
+                    if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
+                    announceFeature('الذاكرة المكانية وحاجتي فين', 'Spatial Memory Object Locator', 'Localisation des Objets', true);
+                  }}
+                  aria-label={t('Spatial Memory', 'الذاكرة المكانية', 'Mémoire spatiale')}
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+                  title={t('Spatial Memory: Where are my things?', 'الذاكرة المكانية: حاجتي فين؟', 'Mémoire spatiale : Où sont mes affaires ?')}
+                >
+                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="hidden xl:inline">{t('Where is my stuff?', 'حاجتي فين؟', 'Où est mon objet ?')}</span>
+                  {spatialRecords.length > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
+                </button>
+              </>
+            )}
+
+            {/* Read Mode (Text OCR) Toggle */}
             <button
+              type="button"
               onClick={toggleReadMode}
               aria-pressed={readMode}
-              aria-label={t('Read Mode', 'وضع القراءة', 'Mode lecture')}
+              aria-label={t('Read Mode', 'وضع القراءة والنصوص', 'Mode lecture')}
               className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
                 readMode
                   ? 'bg-amber-500/90 border-amber-300 text-black'
@@ -1330,85 +1523,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               )}
             >
               <BookOpen className={`w-4 h-4 shrink-0 ${readMode ? 'text-black' : 'text-amber-400'}`} />
-              <span className="hidden xl:inline">{t('Read Mode', 'اقرأ لي', 'Lecture')}</span>
-            </button>
-
-            <button
-              onClick={toggleLectureMode}
-              aria-pressed={lectureMode}
-              aria-label={t('Lecture & Board Scanner', 'سكانر المحاضرات والسبورة', 'Scanner de cours et tableau')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                lectureMode
-                  ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50 ring-2 ring-purple-400'
-                  : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Lecture & Board Scanner: extract blackboard text, formulas, and academic slides',
-                'سكانر المحاضرات والسبورة: قراءة السبورة والمعادلات وشرح السلايد بالصوت',
-                'Scanner de cours : lire le tableau, équations et diapositives'
-              )}
-            >
-              <GraduationCap className={`w-4 h-4 shrink-0 ${lectureMode ? 'text-white' : 'text-purple-400'}`} />
-              <span className="hidden xl:inline">{t('Lecture', 'محاضرات', 'Cours')}</span>
-            </button>
-
-            <button
-              onClick={toggleShoppingMode}
-              aria-pressed={shoppingMode}
-              aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                shoppingMode
-                  ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50'
-                  : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Shopping Assistant: identify products, prices, and expiry dates',
-                'مساعد التسوق: فحص المنتجات والأسعار وتواريخ الصلاحية',
-                'Assistant achat : identifier produits, prix et dates de péremption'
-              )}
-            >
-              <ShoppingBag className={`w-4 h-4 shrink-0 ${shoppingMode ? 'text-white' : 'text-purple-400'}`} />
-              <span className="hidden xl:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowDocStudio(true);
-                announceFeature(
-                  'استوديو المستندات وتلخيص المحاضرات والـ PDF',
-                  'Document and Lecture Studio',
-                  'Studio de Documents et Cours',
-                  true
-                );
-              }}
-              aria-label={t('Document & Lecture Studio', 'المستندات والمحاضرات', 'Documents & Cours')}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-indigo-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-              title={t(
-                'Document & Lecture Studio: read PDF, convert to Word, lecture audio recording, translation, speech-to-text',
-                'المستندات والمحاضرات: قراءة PDF، تحويل لـ Word، تسجيل وتلخيص المحاضرات، ترجمة، تحويل الصوت لكتابة',
-                'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
-              )}
-            >
-              <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
-              <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-indigo-300 font-mono">PDF</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowSpatialMemory(true);
-                if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
-                announceFeature('الذاكرة المكانية وحاجتي فين', 'Spatial Memory Object Locator', 'Localisation des Objets', true);
-              }}
-              aria-label={t('Spatial Memory', 'الذاكرة المكانية', 'Mémoire spatiale')}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-              title={t('Spatial Memory: Where are my things?', 'الذاكرة المكانية: حاجتي فين؟', 'Mémoire spatiale : Où sont mes affaires ?')}
-            >
-              <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="hidden xl:inline">{t('Where is my stuff?', 'حاجتي فين؟', 'Où est mon objet ?')}</span>
-              {spatialRecords.length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              )}
+              <span className="hidden xl:inline">{t('Read Text', 'اقرأ لي', 'Lire texte')}</span>
             </button>
 
             {(status === 'ready' || status === 'analyzing') && (
@@ -1570,22 +1685,103 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 <X className="w-5 h-5" strokeWidth={3} />
               </button>
 
-              <div className="bg-black/80 backdrop-blur-2xl border border-white/20 text-white rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar">
-                <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2 pr-2 gap-2 flex-wrap">
-                  <span className="font-bold flex items-center gap-1.5 text-primary">
-                    <Sparkles className="w-4 h-4" />
-                    {lectureMode
-                      ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة 🎓' : companionLang === 'fr' ? 'Analyse du Cours et Tableau 🎓' : 'Lecture Board & Slide Digest 🎓')
-                      : readMode && readAction === 'summarize'
-                      ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
-                      : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
-                  </span>
-                  <div className="flex items-center gap-1.5">
+              <div
+                role="region"
+                aria-label={t('Visual observation description', 'وصف الملاحظة البصرية', 'Description de l\'observation visuelle')}
+                aria-live="polite"
+                aria-busy={status === 'analyzing'}
+                className="bg-black/85 backdrop-blur-2xl border border-white/20 text-white rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto space-y-3 max-h-64 sm:max-h-72 overflow-y-auto custom-scrollbar"
+              >
+                <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2.5 pr-2 gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold flex items-center gap-1.5 text-primary">
+                      <Sparkles className="w-4 h-4" />
+                      {lectureMode
+                        ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة 🎓' : companionLang === 'fr' ? 'Analyse du Cours et Tableau 🎓' : 'Lecture Board & Slide Digest 🎓')
+                        : readMode && readAction === 'summarize'
+                        ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
+                        : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
+                    </span>
+
+                    {/* Status Badge: Live vs Previous vs Uncertain */}
+                    {observationType === 'live' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-[11px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>{companionLang === 'ar' ? 'ملاحظة حية' : companionLang === 'fr' ? 'Direct' : 'Live'}</span>
+                        {observationTimestamp && (
+                          <span className="opacity-75 font-mono text-[9px] sm:text-[10px]">
+                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {observationType === 'previous' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] sm:text-[11px] font-bold">
+                        <Clock className="w-3 h-3 text-amber-400" />
+                        <span>{companionLang === 'ar' ? 'لقطة سابقة' : companionLang === 'fr' ? 'Précédente' : 'Previous Frame'}</span>
+                        {observationTimestamp && (
+                          <span className="opacity-75 font-mono text-[9px] sm:text-[10px]">
+                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {observationType === 'uncertain' && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-[10px] sm:text-[11px] font-bold"
+                        title={observationConfidenceReason}
+                      >
+                        <AlertTriangle className="w-3 h-3 text-rose-400" />
+                        <span>{companionLang === 'ar' ? 'غير مؤكد' : companionLang === 'fr' ? 'Incertain' : 'Uncertain'}</span>
+                        {observationConfidenceReason && (
+                          <span className="hidden md:inline opacity-80 text-[9px] sm:text-[10px]">({observationConfidenceReason})</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Header actions: Refresh + Verbosity + Speech + Doc Studio + Read Text Only */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {/* Explicit Refresh / Re-analyze button */}
+                    <button
+                      type="button"
+                      onClick={() => describeScene(companionLang)}
+                      disabled={status === 'analyzing'}
+                      aria-label={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
+                      title={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
+                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${status === 'analyzing' ? 'animate-spin' : ''}`} />
+                      <span className="hidden sm:inline">{companionLang === 'ar' ? 'إعادة فحص' : companionLang === 'fr' ? 'Actualiser' : 'Refresh'}</span>
+                    </button>
+
+                    {/* Verbosity Toggle Button (Concise vs Detailed) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = verbosity === 'concise' ? 'detailed' : 'concise';
+                        setVerbosity(next);
+                        const notice = next === 'concise'
+                          ? (companionLang === 'ar' ? 'تم ضبط الوصف على موجز' : companionLang === 'fr' ? 'Mode concis activé' : 'Concise mode active')
+                          : (companionLang === 'ar' ? 'تم ضبط الوصف على مفصل وموسع' : companionLang === 'fr' ? 'Mode détaillé activé' : 'Detailed mode active');
+                        speak(notice, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+                      }}
+                      aria-label={verbosity === 'concise' ? 'Switch to detailed description' : 'Switch to concise description'}
+                      title={verbosity === 'concise' ? (companionLang === 'ar' ? 'النمط موجز — اضغط للتفصيل' : 'Concise — Click for Detailed') : (companionLang === 'ar' ? 'النمط مفصل — اضغط للإيجاز' : 'Detailed — Click for Concise')}
+                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{verbosity === 'concise' ? (companionLang === 'ar' ? 'موجز ⚡' : 'Concise ⚡') : (companionLang === 'ar' ? 'مفصل 🔍' : 'Detailed 🔍')}</span>
+                    </button>
+
+                    {/* Lecture Mode: Open Doc Studio */}
                     {lectureMode && (
                       <button
+                        type="button"
                         onClick={() => {
                           setShowDocStudio(true);
                         }}
+                        aria-label={t('Open in Document Studio', 'فتح في استوديو المحاضرات والمستندات', 'Ouvrir dans le Studio')}
                         className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition-colors"
                         title={t('Open in Document Studio', 'فتح في استوديو المحاضرات والمستندات', 'Ouvrir dans le Studio')}
                       >
@@ -1593,12 +1789,16 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                         <span>{t('Doc Studio', 'استوديو المحاضرة', 'Studio')}</span>
                       </button>
                     )}
+
+                    {/* Read Mode: Toggle between Core Takeaway and Full Reading */}
                     {readMode && lastSnapshot && (
                       <button
+                        type="button"
                         onClick={() => {
                           const nextAction = readAction === 'read' ? 'summarize' : 'read';
                           describeScene(companionLang, lastSnapshot, nextAction);
                         }}
+                        aria-label={readAction === 'read' ? 'Summarize core takeaways' : 'Read full text'}
                         className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition-colors"
                         title={
                           readAction === 'read'
@@ -1619,8 +1819,36 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                         )}
                       </button>
                     )}
+
+                    {/* Read Text Only (OCR) direct action button when not in readMode */}
+                    {!readMode && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReadMode(true);
+                          setReadAction('read');
+                          setLectureMode(false);
+                          setCurrencyMode(false);
+                          setFaceMode(false);
+                          setOutfitMode(false);
+                          setNavGuideMode(false);
+                          setShoppingMode(false);
+                          describeScene(companionLang, lastSnapshot || undefined, 'read');
+                        }}
+                        aria-label={t('Read Text Only', 'اقرأ النصوص فقط', 'Lire le texte')}
+                        title={t('Read any text or writing visible in the scene', 'قراءة أي كتابة أو نصوص في المشهد بدقة', 'Lire les textes visibles')}
+                        className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 transition-colors"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{companionLang === 'ar' ? 'اقرأ النصوص' : companionLang === 'fr' ? 'Lire texte' : 'Read Text Only'}</span>
+                      </button>
+                    )}
+
+                    {/* Speech Voice Play/Stop */}
                     <button
+                      type="button"
                       onClick={toggleSpeech}
+                      aria-label={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'إعادة النطق الصوتي' : 'Repeat description aloud')}
                       className={`flex items-center gap-1.5 font-bold text-xs px-3 py-1.5 rounded-xl transition-colors ${
                         isSpeaking
                           ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300'
@@ -1634,7 +1862,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                       )}
                       {isSpeaking
                         ? (companionLang === 'ar' ? 'وقف الصوت' : companionLang === 'fr' ? 'Muet' : 'Stop')
-                        : (companionLang === 'ar' ? 'إعادة النطق الصوتي' : companionLang === 'fr' ? 'Répéter' : 'Repeat Aloud')}
+                        : (companionLang === 'ar' ? 'إعادة النطق' : companionLang === 'fr' ? 'Répéter' : 'Repeat Aloud')}
                     </button>
                   </div>
                 </div>
@@ -1858,9 +2086,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
           {/* Secondary Controls Bar */}
           <div className="flex items-center gap-2 sm:gap-3">
             <button
+              type="button"
               onClick={toggleSpeech}
               disabled={!lastDescription}
-              className={`flex-1 min-h-[46px] rounded-xl backdrop-blur-xl border text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 ${
+              aria-label={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'كرر الوصف بالصوت' : 'Repeat description aloud')}
+              title={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'كرر الوصف بالصوت' : 'Repeat description aloud')}
+              className={`flex-1 min-h-[46px] rounded-xl backdrop-blur-xl border text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none ${
                 isSpeaking
                   ? 'bg-red-500/30 hover:bg-red-500/40 border-red-400/40'
                   : 'bg-black/70 hover:bg-black/90 border-white/20'
@@ -1879,20 +2110,25 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             </button>
 
             <button
+              type="button"
               onClick={openSaveDialog}
               disabled={!lastDescription}
-              className="flex-1 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95"
+              aria-label={companionLang === 'ar' ? 'حفظ هذا المشهد في الذاكرة' : companionLang === 'fr' ? 'Mémoriser ce lieu ou objet' : 'Remember this scene or person'}
+              title={companionLang === 'ar' ? 'احفظ ده في الذاكرة' : 'Save to memory'}
+              className="flex-1 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
             >
               <BookmarkPlus className="w-4 h-4 text-amber-400" />
               <span>{companionLang === 'ar' ? 'احفظ ده' : companionLang === 'fr' ? 'Mémoriser' : 'Remember this'}</span>
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 setShowSpatialMemory(true);
                 if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
               }}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-emerald-500/40 text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95"
+              aria-label={companionLang === 'ar' ? 'فتح الذاكرة المكانية ومواقع الأشياء' : companionLang === 'fr' ? 'Ouvrir la mémoire spatiale' : 'Open spatial memory and object locations'}
+              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-emerald-500/40 text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
               title={companionLang === 'ar' ? 'الذاكرة المكانية' : companionLang === 'fr' ? 'Mémoire spatiale' : 'Spatial Memory'}
             >
               <MapPin className="w-4 h-4" />
@@ -1900,6 +2136,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 setShowDocStudio(true);
                 announceFeature(
@@ -1909,7 +2146,8 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                   true
                 );
               }}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-[#E5A93C]/30 text-[#E5A93C] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95"
+              aria-label={companionLang === 'ar' ? 'فتح استوديو المستندات وتلخيص المحاضرات والـ PDF' : companionLang === 'fr' ? 'Ouvrir le studio de documents et cours' : 'Open Document and Lecture Studio'}
+              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-[#E5A93C]/30 text-[#E5A93C] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
               title={companionLang === 'ar' ? 'المستندات وتلخيص المحاضرات' : 'Docs & Lectures'}
             >
               <FileText className="w-4 h-4" />

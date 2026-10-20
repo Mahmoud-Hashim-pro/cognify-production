@@ -592,7 +592,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               }>
-                <VisionCompanionView profile={profile} setProfile={setProfile} />
+                <VisionCompanionView profile={profile} setProfile={setProfile} onNavigateBack={handleNavigateBack} />
               </React.Suspense>
             </motion.div>
           )}
