@@ -38,6 +38,7 @@ import {
   Clock,
   CheckCircle2,
   SlidersHorizontal,
+  Upload,
 } from 'lucide-react';
 import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
@@ -87,6 +88,7 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isMountedRef = useRef<boolean>(true);
 
   // Monotonically increasing request ID & in-flight tracking to reject stale scene descriptions
@@ -414,6 +416,15 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     [companionLang]
   );
 
+  const getUserMediaWithTimeout = (constraints: MediaStreamConstraints, timeoutMs = 4000): Promise<MediaStream> => {
+    return Promise.race([
+      navigator.mediaDevices.getUserMedia(constraints),
+      new Promise<MediaStream>((_, reject) =>
+        setTimeout(() => reject(new Error('CAMERA_TIMEOUT')), timeoutMs)
+      ),
+    ]);
+  };
+
   const startCamera = useCallback(
     async (mode: 'environment' | 'user' = facingMode) => {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -425,22 +436,22 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
         streamRef.current?.getTracks().forEach((tr) => tr.stop());
         let stream: MediaStream;
         try {
-          stream = await navigator.mediaDevices.getUserMedia({
+          stream = await getUserMediaWithTimeout({
             video: {
               facingMode: mode,
               width: { min: 960, ideal: 1920, max: 1920 },
               height: { min: 540, ideal: 1080, max: 1080 },
             },
             audio: false,
-          });
+          }, 3500);
         } catch {
           try {
-            stream = await navigator.mediaDevices.getUserMedia({
+            stream = await getUserMediaWithTimeout({
               video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
               audio: false,
-            });
+            }, 2500);
           } catch {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            stream = await getUserMediaWithTimeout({ video: true, audio: false }, 2500);
           }
         }
 
@@ -452,15 +463,22 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => {});
+          try {
+            await videoRef.current.play();
+          } catch (playErr) {
+            console.warn('Video auto-play warning:', playErr);
+          }
         }
-        setStatus('ready');
-        setAnnounce(
-          companionLang === 'ar'
-            ? 'الكاميرا جاهزة بملء الشاشة. اضغط الزرار لسماع وصف ما أمامك.'
-            : 'Full-screen camera ready. Tap either button to describe what is in front of you.'
-        );
-      } catch {
+        if (isMountedRef.current) {
+          setStatus('ready');
+          setAnnounce(
+            companionLang === 'ar'
+              ? 'الكاميرا جاهزة بملء الشاشة. اضغط الزرار لسماع وصف ما أمامك.'
+              : 'Full-screen camera ready. Tap either button to describe what is in front of you.'
+          );
+        }
+      } catch (camErr) {
+        console.warn('Camera failed or timed out:', camErr);
         if (isMountedRef.current) setStatus('camera-denied');
       }
     },
@@ -593,6 +611,7 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
           ? "La caméra n'est pas disponible. Veuillez autoriser l'accès à la caméra."
           : 'Camera is not available. Please allow camera access.';
       speak(errNoCam, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
+      fileInputRef.current?.click();
       return;
     }
 
@@ -605,6 +624,7 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
           ? "Impossible de capturer l'image de la caméra, veuillez réessayer."
           : 'Could not capture the camera frame, please try again.';
       speak(errNoFrame, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
+      fileInputRef.current?.click();
       return;
     }
 
@@ -1033,6 +1053,24 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error(companionLang === 'ar' ? 'يرجى اختيار ملف صورة صالح.' : 'Please select a valid image file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setLastSnapshot(dataUrl);
+      setStatus('ready');
+      describeScene(companionLang, dataUrl);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
   const handleSearchSpatial = () => {
     if (!profile?.uid || !spatialQueryInput.trim()) return;
     const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang);
@@ -1165,6 +1203,14 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       </div>
 
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageUpload}
+        accept="image/*"
+        className="hidden"
+        aria-hidden="true"
+      />
 
       {/* ── 1. FULL-SCREEN LIVE CAMERA VIEWPORT ── */}
       <div className="absolute inset-0 w-full h-full bg-black overflow-hidden flex items-center justify-center">
@@ -1197,13 +1243,34 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                   {t('Open Parental Consent Portal', 'فتح بوابة موافقة ولي الأمر')}
                 </button>
               ) : (
-                <button
-                  onClick={() => startCamera()}
-                  className="w-full py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-xl cursor-pointer transition-all active:scale-95"
-                >
-                  {t('Try again', 'إعادة محاولة تشغيل الكاميرا')}
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => startCamera()}
+                    className="py-3 px-4 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>{t('Try camera again', 'إعادة محاولة الكاميرا')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="py-3 px-4 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>{t('Upload Image', 'رفع صورة من جهازك')}</span>
+                  </button>
+                </div>
               )}
+
+              <button
+                type="button"
+                onClick={() => playDemoSample(companionLang)}
+                className="w-full py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-emerald-300 font-bold text-xs shadow-md cursor-pointer transition-all border border-stone-700 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Volume2 className="w-4 h-4 text-emerald-400" />
+                <span>{t('Play Live Demo Audio Walkthrough', 'تشغيل عينة صوتية حية فوراً (بدون كاميرا)')}</span>
+              </button>
 
               <button
                 onClick={() => {
@@ -1238,8 +1305,42 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         )}
 
         {status === 'starting-camera' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md z-20 p-6 text-center">
+            <div className="p-6 rounded-3xl bg-stone-900/95 border border-stone-800 max-w-md w-full shadow-2xl flex flex-col items-center">
+              <Loader2 className="w-12 h-12 text-[#E5A93C] animate-spin mb-4" />
+              <p className="text-white font-black text-base sm:text-lg mb-2">
+                {companionLang === 'ar'
+                  ? 'جاري تشغيل الكاميرا والاتصال...'
+                  : companionLang === 'fr'
+                  ? 'Activation de la caméra...'
+                  : 'Starting camera stream...'}
+              </p>
+              <p className="text-stone-300 text-xs sm:text-sm mb-5 leading-relaxed font-medium">
+                {companionLang === 'ar'
+                  ? 'إذا ظهر إشعار في المتصفح بالأعلى يطلب إذن الكاميرا، اضغط "سماح" (Allow). يمكنك أيضاً رفع صورة للفحص مباشرة أو تجربة عينة صوتية.'
+                  : companionLang === 'fr'
+                  ? "Veuillez autoriser l'accès à la caméra dans le navigateur, ou importer une image."
+                  : 'Please allow camera access in the browser prompt, or upload a photo directly.'}
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>{companionLang === 'ar' ? 'رفع صورة من جهازك' : 'Upload photo'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => playDemoSample(companionLang)}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer border border-white/20"
+                >
+                  <Volume2 className="w-4 h-4 text-emerald-400" />
+                  <span>{companionLang === 'ar' ? 'عينة صوتية حية 🔊' : 'Live sample 🔊'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -1336,6 +1437,18 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               <span className="hidden xl:inline">{experienceMode === 'beginner' ? t('Simple', 'بسيط', 'Simple') : t('Advanced', 'متقدم', 'Avancé')}</span>
             </button>
           </div>
+
+            {/* Direct Image File Upload Button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label={t('Upload photo from device', 'رفع صورة من الجهاز', 'Importer une image')}
+              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border border-white/20 bg-black/75 hover:bg-black/90 text-white shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
+              title={t('Upload photo from device for AI analysis', 'رفع صورة من جهازك للتحليل الصوتي الفوري', 'Importer une photo pour analyse')}
+            >
+              <Upload className="w-4 h-4 text-[#E5A93C]" />
+              <span className="hidden xl:inline">{t('Upload Photo', 'رفع صورة', 'Image')}</span>
+            </button>
 
           {/* Right Utilities: Modes + Spatial Memory + Flip Camera + Fullscreen */}
           <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
@@ -1689,7 +1802,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 role="region"
                 aria-label={t('Visual observation description', 'وصف الملاحظة البصرية', 'Description de l\'observation visuelle')}
                 aria-live="polite"
-                aria-busy={status === 'analyzing'}
+                aria-busy={false}
                 className="bg-black/85 backdrop-blur-2xl border border-white/20 text-white rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto space-y-3 max-h-64 sm:max-h-72 overflow-y-auto custom-scrollbar"
               >
                 <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2.5 pr-2 gap-2 flex-wrap">
@@ -1746,12 +1859,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     <button
                       type="button"
                       onClick={() => describeScene(companionLang)}
-                      disabled={status === 'analyzing'}
+
                       aria-label={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
                       title={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
                       className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-50"
                     >
-                      <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${status === 'analyzing' ? 'animate-spin' : ''}`} />
+                      <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
                       <span className="hidden sm:inline">{companionLang === 'ar' ? 'إعادة فحص' : companionLang === 'fr' ? 'Actualiser' : 'Refresh'}</span>
                     </button>
 
@@ -1936,7 +2049,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               return (
                 <button
                   onClick={() => describeScene('ar')}
-                  disabled={status === 'analyzing' || status === 'starting-camera'}
+                  disabled={status === 'analyzing'}
                   className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
                 >
                   {cfg.icon}
@@ -2003,7 +2116,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               return (
                 <button
                   onClick={() => describeScene('en')}
-                  disabled={status === 'analyzing' || status === 'starting-camera'}
+                  disabled={status === 'analyzing'}
                   className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
                 >
                   {cfg.icon}
@@ -2070,7 +2183,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               return (
                 <button
                   onClick={() => describeScene('fr')}
-                  disabled={status === 'analyzing' || status === 'starting-camera'}
+                  disabled={status === 'analyzing'}
                   className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
                 >
                   {cfg.icon}
