@@ -93,6 +93,7 @@ import { runArslCurriculumAndModelVerification } from './arslCurriculumAndModelV
 import { runCognitiveEngineVerification } from './cognitiveEngineVerification.js';
 import { runLearningDisabilityEngineVerification } from './learningDisabilityEngineVerification.js';
 import { runBlindAndLowVisionVerification } from './blindAndLowVisionVerification.js';
+import { runDocumentAndAudioTranscriptionVerification } from './documentAndAudioTranscriptionVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2296,6 +2297,13 @@ Keep practicing closures with higher-order functions!
     const m28Res = await runBlindAndLowVisionVerification();
     totalPassed += m28Res.passed;
     totalFailed += m28Res.failed;
+  }
+
+  // 60. Milestone 29: Document Extractor & Audio Lecture Transcription Engine (Phase 3)
+  {
+    const m29Res = await runDocumentAndAudioTranscriptionVerification();
+    totalPassed += m29Res.passed;
+    totalFailed += m29Res.failed;
   }
 
   console.log(`\n========================================`);

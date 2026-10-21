@@ -561,6 +561,13 @@ export function buildContents(message: string, history: Msg[], attachments: any[
         else if (fname.endsWith('.png')) mime = 'image/png';
         else if (fname.endsWith('.webp')) mime = 'image/webp';
         else if (fname.endsWith('.txt')) mime = 'text/plain';
+        else if (fname.endsWith('.mp3')) mime = 'audio/mp3';
+        else if (fname.endsWith('.wav')) mime = 'audio/wav';
+        else if (fname.endsWith('.m4a')) mime = 'audio/m4a';
+        else if (fname.endsWith('.webm')) mime = 'audio/webm';
+        else if (fname.endsWith('.ogg')) mime = 'audio/ogg';
+        else if (fname.endsWith('.aac')) mime = 'audio/aac';
+        else if (fname.endsWith('.flac')) mime = 'audio/flac';
       }
       const cleanData = typeof f.data === 'string' ? f.data.replace(/^data:[^;]+;base64,/, '') : f.data;
       if (cleanData) {

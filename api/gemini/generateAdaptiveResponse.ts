@@ -29,6 +29,19 @@ export default async function handler(req: any, res: any) {
     const safeHistory = Array.isArray(history) ? history : [];
     const safeAttachments = Array.isArray(attachments) ? attachments : [];
 
+    // Phase 3 — Server-side attachment size & format validation
+    for (const att of safeAttachments) {
+      if (att && att.data) {
+        const approxBytes = Math.round((att.data.length * 3) / 4);
+        const isAudio = (att.type || '').startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(att.name || '');
+        const maxLimit = isAudio ? 50 * 1024 * 1024 : 25 * 1024 * 1024;
+        if (approxBytes > maxLimit) {
+          res.status(413).json({ error: `Payload too large: attachment "${att.name || 'file'}" exceeds limit` });
+          return;
+        }
+      }
+    }
+
     // Phase 1.1 — deterministic router with student state awareness.
     const effectiveState = studentState || profile?.studentState;
 
