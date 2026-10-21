@@ -1408,6 +1408,13 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         return;
       }
 
+      // 'T' or 't': Open Integrated Accessibility Toolkit (Scanner, Stickers, PDF Evidence)
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        window.location.hash = '#toolkit';
+        return;
+      }
+
       // 'A' or 'a': Toggle low-vision font size
       if (e.key === 'a' || e.key === 'A') {
         e.preventDefault();
@@ -1873,6 +1880,19 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
                   <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
                   <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-indigo-300 font-mono">PDF</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.location.hash = '#toolkit';
+                  }}
+                  aria-label={t('Integrated Accessibility Toolkit: Scanner, Stickers, PDF', 'منظومة الوصول: سكانر وملصقات وPDF', "Boîte d'accessibilité")}
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-teal-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+                  title={t('Open Accessibility Toolkit (Key: T)', 'فتح منظومة الوصول المتكاملة (اختصار: T)', 'Ouvrir la boîte à outils')}
+                >
+                  <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
+                  <span className="hidden xl:inline">{t('Toolkit', 'المنظومة', 'Outils')}</span>
                 </button>
 
                 <button

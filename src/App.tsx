@@ -82,10 +82,11 @@ const PrivacySecurityCenter = lazyWithRetry(() => import("./components/PrivacySe
 const AccessibilityOverlay = lazyWithRetry(() => import("./components/AccessibilityOverlay"));
 const LiveCaptions = lazyWithRetry(() => import("./components/LiveCaptions"));
 const AccessibleBookStudioView = lazyWithRetry(() => import("./components/AccessibleBookStudioView"));
+const UnifiedAccessibilityToolkitView = lazyWithRetry(() => import("./components/UnifiedAccessibilityToolkitView"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'admin', 'support', 'privacy_security',
   'learning', 'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -1100,6 +1101,23 @@ export default function App() {
             profile={activeProfile}
             onMenuClick={() => setIsMobileMenuOpen(true)}
             onNavigateBack={() => navigateTo('disability')}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'toolkit':
+        return (
+          <UnifiedAccessibilityToolkitView
+            profile={activeProfile}
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+            onNavigateBack={() => navigateTo('disability')}
+            onOpenBookStudio={(content, title) => {
+              if (content) {
+                try {
+                  sessionStorage.setItem('cognify_book_studio_import', JSON.stringify({ text: content, title }));
+                } catch {}
+              }
+              navigateTo('book_studio');
+            }}
             isDarkMode={isDarkMode}
           />
         );

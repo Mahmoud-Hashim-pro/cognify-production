@@ -329,6 +329,27 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 shadow-teal-500/20',
       matchingMode: 'Visual',
     },
+    // Integrated Accessibility Toolkit (Phase 7)
+    {
+      id: 'toolkit' as const,
+      category: 'vision' as const,
+      titleEn: 'Integrated Accessibility Toolkit',
+      titleAr: 'منظومة الوصول المتكاملة والمساعد البصري',
+      shortEn: 'Accessibility Toolkit',
+      shortAr: 'منظومة الوصول',
+      badgeEn: 'Vision · Scanner · PDF · Stickers',
+      badgeAr: 'رؤية · سكانر · PDF · ملصقات',
+      descEn: 'Unified accessibility hub: WhatsApp sticker & image explainer, multi-page camera document scanner, PDF evidence assistant, and speech readout.',
+      descAr: 'مركز ميسر موحد: شارح ملصقات واتساب والصور، ماسح ضوئي متعدد الصفحات وصانع PDF، ومساعد الاستشهاد بأدلة PDF، مع قارئ صوتي متقدم.',
+      quickFeaturesAr: ['🖼️ شارح ملصقات واتساب والصور بالذكاء الاصطناعي', '📄 ماسح ضوئي متعدد الصفحات وصانع PDF', '🔍 مساعد البحث والاستشهاد بأدلة PDF', '🎙️ تفريغ المحاضرات وسجل النشاط الشامل'],
+      quickFeaturesEn: ['🖼️ AI WhatsApp Sticker & Image Explainer', '📄 Multi-page Camera Scanner & PDF Creator', '🔍 PDF Evidence Q&A with Page Quotes', '🎙️ Audio Transcriber & Unified Activity Store'],
+      Icon: Sparkles,
+      accentColor: 'text-teal-400',
+      borderGlow: 'hover:border-teal-500/80 border-stone-200 dark:border-stone-800 ring-1 ring-teal-500/20',
+      bgGlow: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-sm',
+      matchingMode: '',
+    },
     // Accessible Educational Book Studio (Phase 6)
     {
       id: 'studio' as const,
@@ -720,6 +741,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         onClick={() => {
                           if (m.id === 'studio' && onNavigate) {
                             (onNavigate as any)('book_studio');
+                          } else if (m.id === 'toolkit' && onNavigate) {
+                            (onNavigate as any)('toolkit');
                           } else {
                             handleSelectTab(m.id as DisabilityTab);
                           }
@@ -796,6 +819,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               e.stopPropagation();
                               if (m.id === 'studio' && onNavigate) {
                                 (onNavigate as any)('book_studio');
+                              } else if (m.id === 'toolkit' && onNavigate) {
+                                (onNavigate as any)('toolkit');
                               } else {
                                 handleSelectTab(m.id as DisabilityTab);
                               }

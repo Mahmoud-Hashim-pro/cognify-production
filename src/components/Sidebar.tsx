@@ -140,6 +140,15 @@ export default function Sidebar({
       badgeColor: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
     },
     {
+      id: 'toolkit',
+      label: localize(profile.language, 'Accessibility Toolkit', 'منظومة الوصول والمساعد المتكامل'),
+      icon: Sparkles,
+      action: () => { onClose?.(); setCurrentView('toolkit'); },
+      active: currentView === 'toolkit',
+      badge: '✨',
+      badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+    },
+    {
       id: 'profile',
       label: localize(profile.language, 'Accommodation Passport', 'جواز الإتاحة والملف الشخصي'),
       icon: User,

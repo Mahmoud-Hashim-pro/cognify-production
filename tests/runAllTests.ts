@@ -97,6 +97,7 @@ import { runDocumentAndAudioTranscriptionVerification } from './documentAndAudio
 import { runAccessibilityAuditVerification } from './accessibilityAuditVerification.js';
 import { runNavigationAndAuthVerification } from './navigationAndAuthVerification.js';
 import { runEducationalBookStudioVerification } from './educationalBookStudioVerification.js';
+import { runAccessibilityToolkitVerification } from './accessibilityToolkitVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2328,6 +2329,13 @@ Keep practicing closures with higher-order functions!
     const m32Res = await runEducationalBookStudioVerification();
     totalPassed += m32Res.passed;
     totalFailed += m32Res.failed;
+  }
+
+  // 64. Milestone 33: Integrated Accessibility Toolkit (Phase 7)
+  {
+    const m33Res = await runAccessibilityToolkitVerification();
+    totalPassed += m33Res.passed;
+    totalFailed += m33Res.failed;
   }
 
   console.log(`\n========================================`);

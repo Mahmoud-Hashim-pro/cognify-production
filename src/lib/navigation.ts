@@ -30,7 +30,7 @@ export interface RouteState {
 }
 
 export const VALID_VIEWS: readonly AppView[] = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'admin', 'support', 'privacy_security',
   'learning', 'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -71,7 +71,8 @@ export function parseRoute(hashString: string): RouteState {
   if (clean === 'privacy') return { view: 'privacy_security' };
   if (clean === 'intelligence') return { view: 'profile' };
 
-  // Handle direct disability tab shorthands (e.g. #vision, #deaf, #hub, #book_studio)
+  // Handle direct disability tab shorthands (e.g. #vision, #deaf, #hub, #book_studio, #toolkit)
+  if (clean === 'toolkit' || clean === 'assistant' || clean === 'scanner' || clean === 'stickers') return { view: 'toolkit' };
   if (clean === 'studio' || clean === 'book_studio' || clean === 'book-studio' || clean === 'books') return { view: 'book_studio' };
   if (clean === 'vision') return { view: 'disability', tab: 'vision' };
   if (clean === 'deaf' || clean === 'hearing') return { view: 'disability', tab: 'deaf' };

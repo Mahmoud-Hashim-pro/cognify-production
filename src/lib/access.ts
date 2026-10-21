@@ -2,7 +2,7 @@ import { UserProfile, AccountPath } from '../types';
 
 // The views supported in the Cognify Assistive Platform.
 export type AppView =
-  | 'chat' | 'profile' | 'settings' | 'video' | 'disability' | 'book_studio'
+  | 'chat' | 'profile' | 'settings' | 'video' | 'disability' | 'book_studio' | 'toolkit'
   | 'admin' | 'support' | 'privacy_security'
   | 'learning' | 'goals' | 'gpa' | 'analytics' | 'planner' | 'memory'
   | 'gym' | 'iq' | 'institution' | 'france' | 'privacy' | 'intelligence'
