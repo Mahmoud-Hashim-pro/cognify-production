@@ -164,13 +164,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
   const handleNavigateBack = React.useCallback(() => {
     if (activeTab !== 'chat') {
-      setActiveTab('chat');
+      handleSelectTab('chat');
+      try {
+        localStorage.setItem('cognify_default_disability_tab', 'chat');
+      } catch {}
     } else if (onNavigate) {
       onNavigate('chat');
     } else {
       onMenuClick();
     }
-  }, [activeTab, onNavigate, onMenuClick]);
+  }, [activeTab, handleSelectTab, onNavigate, onMenuClick]);
 
   const SUPPORTED_LANGUAGES: { id: LanguagePreference; label: string; flag: string; nativeName: string }[] = [
     { id: 'French', label: 'French', flag: '🇫🇷', nativeName: 'Français' },

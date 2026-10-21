@@ -1351,12 +1351,20 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         <div className="pointer-events-auto flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap w-full">
           {/* Left group: Back button + Language Choices + Mode Toggle */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {onNavigateBack && (
-              <button
+            <button
                 type="button"
                 onClick={() => {
                   cancelSpeech();
-                  onNavigateBack();
+                  try {
+                    streamRef.current?.getTracks().forEach((tr) => tr.stop());
+                  } catch {}
+                  if (onNavigateBack) {
+                    onNavigateBack();
+                  } else if (typeof window !== 'undefined' && window.history.length > 1) {
+                    window.history.back();
+                  } else {
+                    window.location.hash = '#chat';
+                  }
                 }}
                 aria-label={t('Back to Assistant', 'العودة للمساعد', 'Retour')}
                 className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
@@ -1365,7 +1373,6 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
                 <span className="hidden sm:inline">{t('Back', 'رجوع', 'Retour')}</span>
               </button>
-            )}
 
             {/* Three Language Choices: Arabic, English, French */}
             <div className="flex items-center bg-black/75 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-2xl">
@@ -1416,26 +1423,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               </button>
             </div>
 
-            {/* Beginner / Advanced Mode Toggle */}
-            <button
-              type="button"
-              onClick={() => {
-                const next = experienceMode === 'beginner' ? 'advanced' : 'beginner';
-                setExperienceMode(next);
-                try { localStorage.setItem('cognify_vision_exp_mode', next); } catch {}
-                toast.info(next === 'beginner' ? t('Simplified Beginner Mode active', 'تم تفعيل الوضع البسيط المريح', 'Mode simplifié activé') : t('Advanced Studio Mode active', 'تم تفعيل الوضع المتقدم الكامل', 'Mode avancé activé'));
-              }}
-              aria-label={t('Toggle simplified mode', 'تبديل الوضع البسيط والمتقدم', 'Mode')}
-              className={`p-2 sm:px-2.5 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1 text-xs font-bold shrink-0 cursor-pointer ${
-                experienceMode === 'beginner'
-                  ? 'bg-teal-700/80 border-teal-400/50 text-white ring-1 ring-teal-400'
-                  : 'bg-black/75 hover:bg-black/90 text-white border-white/20'
-              }`}
-              title={experienceMode === 'beginner' ? 'الوضع البسيط: كادر نقي وأزرار أساسية فقط' : 'الوضع المتقدم: إظهار كافة الأدوات المتخصصة'}
-            >
-              <span>{experienceMode === 'beginner' ? '🔰' : '⚙️'}</span>
-              <span className="hidden xl:inline">{experienceMode === 'beginner' ? t('Simple', 'بسيط', 'Simple') : t('Advanced', 'متقدم', 'Avancé')}</span>
-            </button>
+            
           </div>
 
             {/* Direct Image File Upload Button */}
@@ -1452,7 +1440,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
 
           {/* Right Utilities: Modes + Spatial Memory + Flip Camera + Fullscreen */}
           <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
-            {experienceMode === 'advanced' && (
+            <>
               <>
                 <button
                   type="button"
@@ -1616,7 +1604,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                   )}
                 </button>
               </>
-            )}
+            </>
 
             {/* Read Mode (Text OCR) Toggle */}
             <button
