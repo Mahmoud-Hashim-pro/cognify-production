@@ -593,10 +593,13 @@ export function buildOpenAIMessages(message: string, system: string, history: Ms
 export async function geminiFetch(
   path: string,
   body: string,
-  opts: { stream?: boolean; category?: TaskCategory } = {},
+  opts: { stream?: boolean; category?: TaskCategory | string; timeoutMs?: number } = {},
 ): Promise<{ res: Response | null; status: number }> {
   const keys = GEMINI_KEYS();
   let lastStatus = 0;
+  // Adaptive timeout: 60s for large multimodal/audio payloads, 25s for standard vision/chat
+  const reqTimeoutMs = opts.timeoutMs ?? (body.length > 500_000 || opts.category === 'transcription' ? 60000 : 25000);
+
   for (const model of GEMINI_MODELS) {
     for (const key of keys.length ? keys : ['']) {
       if (!key) break;
@@ -610,18 +613,23 @@ export async function geminiFetch(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body,
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(reqTimeoutMs),
         });
       } catch (err) {
         lastStatus = 0;
-        logTelemetry({ provider: 'gemini', model, category: opts.category, latencyMs: Date.now() - t0, inputChars: body.length, success: false, error: String(err) });
+        logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: false, error: String(err) });
         continue;
       }
-      logTelemetry({ provider: 'gemini', model, category: opts.category, latencyMs: Date.now() - t0, inputChars: body.length, success: r.ok, status: r.status });
+      logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: r.ok, status: r.status });
       if (r.ok && (!opts.stream || r.body)) return { res: r, status: r.status };
       lastStatus = r.status;
       // 400 = bad request payload — another key/model won't help.
       if (r.status === 400) return { res: null, status: 400 };
+      // 429/503 = rate limit or temporary provider overload -> jittered backoff before next key
+      if (r.status === 429 || r.status === 503) {
+        await new Promise((resolve) => setTimeout(resolve, 200 + Math.floor(Math.random() * 200)));
+        continue;
+      }
       // 401/403 = bad key or exhausted quota — try next key in the pool.
       if (r.status === 401 || r.status === 403) continue;
     }
@@ -712,8 +720,8 @@ export async function readBody(req: any): Promise<any> {
   if (req.readableEnded || req.complete) return {};
   return await new Promise((resolve) => {
     let raw = '';
-    const MAX_BYTES = 10 * 1024 * 1024; // 10MB
-    const timer = setTimeout(() => resolve({}), 15000);
+    const MAX_BYTES = 60 * 1024 * 1024; // 60MB (generous buffer for audio recordings and multi-page document scans)
+    const timer = setTimeout(() => resolve({}), 30000);
     req.on('data', (c: any) => {
       raw += c;
       if (raw.length > MAX_BYTES) {
@@ -735,9 +743,17 @@ export async function readBody(req: any): Promise<any> {
 import { verifyRequestAuth } from './authGuard.js';
 import { checkDistributedRateLimit } from './rateLimiter.js';
 import { applyCorsHeaders } from './cors.js';
+import { checkAndConsumeQuota, type AssistiveQuotaCategory } from './usageQuotaEngine.js';
 
-/** Shared guard: POST only, authentication, provider key check, and dual-tier rate limiting (IP + User). */
-export async function guard(req: any, res: any): Promise<boolean> {
+export { type AssistiveQuotaCategory };
+
+/** Shared guard: POST only, authentication, provider key check, dual-tier rate limiting (IP + User), and assistive category quotas. */
+export async function guard(
+  req: any,
+  res: any,
+  assistiveCategory?: AssistiveQuotaCategory,
+  cost: number = 1
+): Promise<boolean> {
   // 0. CORS & Preflight OPTIONS Handling
   if (!applyCorsHeaders(req, res)) {
     return false;
@@ -784,7 +800,7 @@ export async function guard(req: any, res: any): Promise<boolean> {
     return false;
   }
 
-  // 4. User-Level Rate Limiting (Account Quota Defense: 60 requests/minute)
+  // 4. User-Level Rate Limiting (Account Quota Defense: 60 requests/minute baseline)
   const userRateLimit = await checkDistributedRateLimit(`user:${auth.uid}`, 60);
   if (typeof res.setHeader === 'function') {
     res.setHeader('X-RateLimit-Limit-User', '60');
@@ -796,6 +812,31 @@ export async function guard(req: any, res: any): Promise<boolean> {
     }
     res.status(429).json({ error: 'User rate limit exceeded. Please wait a moment before sending more requests.' });
     return false;
+  }
+
+  // 5. Assistive Category Quota & Fair-Use Accounting (Generous Differentiated Limits)
+  if (assistiveCategory) {
+    const quota = checkAndConsumeQuota(auth.uid, assistiveCategory, cost);
+    if (typeof res.setHeader === 'function') {
+      res.setHeader('X-RateLimit-Category', assistiveCategory);
+      res.setHeader('X-RateLimit-Remaining-Category', String(quota.dailyRemaining));
+      res.setHeader('X-RateLimit-Limit-Category', String(quota.dailyLimit));
+    }
+    if (!quota.allowed) {
+      if (typeof res.setHeader === 'function') {
+        res.setHeader('Retry-After', String(quota.resetInSeconds));
+      }
+      res.status(429).json({
+        error: quota.explanation?.en || 'Quota allowance reached for this category.',
+        code: 'QUOTA_EXCEEDED',
+        category: assistiveCategory,
+        limitType: quota.limitType,
+        resetInSeconds: quota.resetInSeconds,
+        resetTimeUtc: quota.resetTimeUtc,
+        explanation: quota.explanation,
+      });
+      return false;
+    }
   }
 
   return true;

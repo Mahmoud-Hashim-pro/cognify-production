@@ -1,13 +1,13 @@
 /** Non-streaming chat. Returns { result }. Keys stay server-side. */
-import { guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat } from '../_lib/ai.js';
+import { guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat, type AssistiveQuotaCategory } from '../_lib/ai.js';
 import { classifyRequest } from '../_lib/router.js';
 import { validateAndSanitizeResponse } from '../_lib/qualityGuard.js';
 import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
 import { applyCorsHeaders } from '../_lib/cors.js';
+import { deduplicateInflight, generateUserContentHash } from '../_lib/usageQuotaEngine.js';
 
 export default async function handler(req: any, res: any) {
   if (!applyCorsHeaders(req, res)) return;
-  if (!(await guard(req, res))) return;
 
   try {
     const { message, profile = {}, history = [], attachments = [], studentState } = await readBody(req);
@@ -28,6 +28,13 @@ export default async function handler(req: any, res: any) {
 
     const safeHistory = Array.isArray(history) ? history : [];
     const safeAttachments = Array.isArray(attachments) ? attachments : [];
+
+    // Phase 8: Determine Assistive Category for transparent fair-use quota accounting
+    const isVision = safeAttachments.some((a: any) => (a.type || '').startsWith('image/'));
+    const isAudio = safeAttachments.some((a: any) => (a.type || '').startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(a.name || ''));
+    const assistiveCategory: AssistiveQuotaCategory = isVision ? 'camera_vision' : isAudio ? 'audio_transcription' : 'general_chat';
+
+    if (!(await guard(req, res, assistiveCategory))) return;
 
     // Phase 3 — Server-side attachment size & format validation
     for (const att of safeAttachments) {

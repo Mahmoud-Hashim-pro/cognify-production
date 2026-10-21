@@ -37,11 +37,18 @@ import {
   Play,
   Pause,
   RotateCcw,
+  Gauge,
+  X,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
 import { speak, cancelSpeech } from '../lib/tts';
+import {
+  fetchUserUsageQuota,
+  UserUsageSnapshot,
+  ASSISTIVE_QUOTAS,
+} from '../lib/usageQuotaEngine';
 import {
   ToolkitCategory,
   ScannedPageItem,
@@ -366,6 +373,23 @@ export default function UnifiedAccessibilityToolkitView({
     loadActivities();
   }, [activeCategory]);
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // 5. TRANSPARENT USAGE & QUOTA ALLOWANCES (PHASE 8)
+  // ─────────────────────────────────────────────────────────────────────────
+  const [showUsageModal, setShowUsageModal] = useState(false);
+  const [usageSnapshot, setUsageSnapshot] = useState<UserUsageSnapshot | null>(null);
+
+  const loadUsageQuota = async () => {
+    const snap = await fetchUserUsageQuota();
+    setUsageSnapshot(snap);
+  };
+
+  useEffect(() => {
+    if (showUsageModal) {
+      loadUsageQuota();
+    }
+  }, [showUsageModal]);
+
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
@@ -412,6 +436,24 @@ export default function UnifiedAccessibilityToolkitView({
               </p>
             </div>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowUsageModal(true)}
+            className={`px-3 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+              isDarkMode
+                ? 'bg-stone-800/80 hover:bg-stone-800 border-stone-700 text-teal-400'
+                : 'bg-teal-50 hover:bg-teal-100 border-teal-200 text-teal-800'
+            }`}
+            aria-label={localize(profile.language, 'View daily usage allowances and quota status', 'عرض حدود وحصص الاستخدام اليومية')}
+          >
+            <Gauge className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {localize(profile.language, 'Usage & Quotas', 'حصص الاستخدام')}
+            </span>
+          </button>
         </div>
       </header>
 
@@ -1007,6 +1049,7 @@ export default function UnifiedAccessibilityToolkitView({
                             type="button"
                             onClick={() => speak(item.snippet, isAr ? 'Arabic' : 'English')}
                             className="p-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white cursor-pointer"
+                            aria-label={localize(profile.language, 'Read Aloud', 'قراءة صوتية')}
                             title={localize(profile.language, 'Read Aloud', 'قراءة صوتية')}
                           >
                             <Volume2 className="w-3.5 h-3.5" />
@@ -1018,6 +1061,7 @@ export default function UnifiedAccessibilityToolkitView({
                               toast.success(isAr ? 'تم النسخ' : 'Copied');
                             }}
                             className="p-2 rounded-xl border border-stone-700 hover:bg-stone-800 text-stone-300 cursor-pointer"
+                            aria-label={localize(profile.language, 'Copy Text', 'نسخ النص')}
                             title={localize(profile.language, 'Copy Text', 'نسخ النص')}
                           >
                             <Copy className="w-3.5 h-3.5" />
@@ -1029,6 +1073,7 @@ export default function UnifiedAccessibilityToolkitView({
                               loadActivities();
                             }}
                             className="p-2 rounded-xl border border-red-500/40 hover:bg-red-500/20 text-red-400 cursor-pointer"
+                            aria-label={localize(profile.language, 'Delete', 'حذف')}
                             title={localize(profile.language, 'Delete', 'حذف')}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1044,6 +1089,126 @@ export default function UnifiedAccessibilityToolkitView({
 
         </div>
       </main>
+
+      {/* ── USAGE & QUOTAS ACCESSIBLE MODAL (PHASE 8) ── */}
+      <AnimatePresence>
+        {showUsageModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="usage-modal-title"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`w-full max-w-xl rounded-3xl border p-6 shadow-2xl max-h-[90vh] overflow-y-auto ${
+                isDarkMode ? 'bg-[#121B1E] border-stone-800 text-stone-100' : 'bg-white border-stone-200 text-stone-900'
+              }`}
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-stone-700/40">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-teal-500/20 border border-teal-500/40 text-teal-400 flex items-center justify-center">
+                    <Gauge className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                  </div>
+                  <div>
+                    <h2 id="usage-modal-title" className="text-base font-black">
+                      {localize(profile.language, 'Daily Assistive Allowances', 'الحصص وحدود الاستخدام اليومية')}
+                    </h2>
+                    <p className="text-xs text-stone-400">
+                      {usageSnapshot
+                        ? localize(
+                            profile.language,
+                            `Resets every day at 00:00 UTC (in ~${Math.ceil(usageSnapshot.resetInSeconds / 3600)} hours)`,
+                            `تتجدد تلقائياً يومياً عند منتصف الليل بتوقيت UTC (خلال ~${Math.ceil(usageSnapshot.resetInSeconds / 3600)} ساعة)`
+                          )
+                        : localize(profile.language, 'Calculating allowances...', 'جاري حساب الحصص...')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowUsageModal(false)}
+                  className="p-2 rounded-xl border border-stone-700 hover:bg-stone-800 text-stone-400 hover:text-white cursor-pointer"
+                  aria-label={localize(profile.language, 'Close Usage Dialog', 'إغلاق نافذة الحصص')}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4 pt-4">
+                {Object.entries(ASSISTIVE_QUOTAS).map(([key, def]) => {
+                  const catUsage = usageSnapshot?.categories?.[key as any] || {
+                    dailyUsed: 0,
+                    dailyLimit: def.dailyAllowance,
+                    dailyRemaining: def.dailyAllowance,
+                    percentageUsed: 0,
+                  };
+                  const pct = Math.min(100, Math.round((catUsage.dailyUsed / catUsage.dailyLimit) * 100));
+
+                  return (
+                    <div
+                      key={key}
+                      className={`p-4 rounded-2xl border ${
+                        isDarkMode ? 'bg-stone-900/40 border-stone-800' : 'bg-stone-50 border-stone-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-bold">
+                          {localize(profile.language, def.nameEn, def.nameAr)}
+                        </span>
+                        <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400">
+                          {catUsage.dailyRemaining} {localize(profile.language, 'remaining', 'متبقي')} / {catUsage.dailyLimit}
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-400 mb-2.5">
+                        {localize(profile.language, def.descriptionEn, def.descriptionAr)}
+                      </p>
+                      <div
+                        className="w-full bg-stone-700/30 rounded-full h-2 overflow-hidden"
+                        role="progressbar"
+                        aria-valuenow={pct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={localize(profile.language, `${def.nameEn} usage progress: ${pct}%`, `نسبة استهلاك ${def.nameAr}: ${pct}%`)}
+                      >
+                        <div
+                          className={`h-2 rounded-full transition-all duration-500 ${
+                            pct >= 90 ? 'bg-amber-500' : 'bg-teal-500'
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-xs text-teal-700 dark:text-teal-300">
+                <p className="leading-relaxed">
+                  {localize(
+                    profile.language,
+                    '💡 Cognify allowances are generous and designed for intensive university lectures, homework, and continuous navigation. If any single quota is reached, other assistive tools continue to work uninterrupted.',
+                    '💡 حصص كوجنيفاي سخية ومصممة لدعم المحاضرات الجامعية اليومية، والمذاكرة، والتنقل المستمر. إذا اكتملت حصة أي ميزة، تظل باقي الأدوات المساعدة تعمل دون توقف.'
+                  )}
+                </p>
+              </div>
+
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowUsageModal(false)}
+                  className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs cursor-pointer"
+                  aria-label={localize(profile.language, 'Done', 'تم')}
+                >
+                  {localize(profile.language, 'Done', 'تم')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

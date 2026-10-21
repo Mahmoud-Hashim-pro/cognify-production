@@ -98,6 +98,7 @@ import { runAccessibilityAuditVerification } from './accessibilityAuditVerificat
 import { runNavigationAndAuthVerification } from './navigationAndAuthVerification.js';
 import { runEducationalBookStudioVerification } from './educationalBookStudioVerification.js';
 import { runAccessibilityToolkitVerification } from './accessibilityToolkitVerification.js';
+import { runUsageLimitsReliabilityVerification } from './usageLimitsReliabilityVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2336,6 +2337,13 @@ Keep practicing closures with higher-order functions!
     const m33Res = await runAccessibilityToolkitVerification();
     totalPassed += m33Res.passed;
     totalFailed += m33Res.failed;
+  }
+
+  // 65. Milestone 34: Usage Limits & Reliability Engine (Phase 8)
+  {
+    const m34Res = await runUsageLimitsReliabilityVerification();
+    totalPassed += m34Res.passed;
+    totalFailed += m34Res.failed;
   }
 
   console.log(`\n========================================`);
