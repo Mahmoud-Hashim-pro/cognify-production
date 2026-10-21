@@ -20,9 +20,9 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-  // Generous 50MB payload limit for multi-page document scans, camera frames & audio lectures
-  app.use(express.json({ limit: '50mb' }));
-  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+  // Strict 2MB payload limit for REST APIs to prevent DoS payloads (large media streams are chunked client-side)
+  app.use(express.json({ limit: '2mb' }));
+  app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
   // Comprehensive Security Headers Middleware
   app.use((_req, res, next) => {
