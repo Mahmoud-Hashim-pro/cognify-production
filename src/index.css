@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Alexandria:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&family=Instrument+Serif:ital@0;1&family=Alexandria:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 /* Make `dark:` variants follow the app's theme toggle (.dark class) instead of
@@ -7,10 +7,23 @@
 
 @theme {
   /* Cognify Redesign v2 (final): dark-first, violet primary, Inter, cool neutrals. */
-  --font-sans: "Inter", "Alexandria", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Inter", "Alexandria", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "IBM Plex Sans Arabic", "Tajawal", "Alexandria", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", "Tajawal", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "IBM Plex Sans Arabic", "Tajawal", "Alexandria", sans-serif;
+
   --font-serif: "Instrument Serif", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Master Brand Design Tokens (Phase 2 Specifications) */
+  --color-cognify-indigo: #243B73;
+  --color-cognify-indigo-dark: #1B2D59;
+  --color-cognify-indigo-light: #34529B;
+  --color-cognify-teal: #087F8C;
+  --color-cognify-teal-dark: #06626C;
+  --color-cognify-teal-light: #0AA5B6;
+  --color-cognify-bg-light: #F5F7FB;
+  --color-cognify-text-primary: #172033;
+  --color-cognify-surface: #FFFFFF;
 
   --color-primary: #0D9488;
   --color-primary-press: #0F766E;
@@ -223,6 +236,73 @@ html.high-contrast button:focus-visible {
 .touch-target {
   min-height: 44px;
   min-width: 44px;
+}
+
+.touch-target-mobile {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Cognify Reusable Design System Component Utilities (Phase 2) */
+.cognify-btn-primary {
+  min-height: 44px;
+  background-color: var(--color-cognify-indigo, #243B73);
+  color: #FFFFFF;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+.cognify-btn-primary:hover {
+  background-color: var(--color-cognify-indigo-dark, #1B2D59);
+}
+.cognify-btn-primary:active {
+  transform: scale(0.98);
+}
+.cognify-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cognify-btn-secondary {
+  min-height: 44px;
+  background-color: var(--color-cognify-teal, #087F8C);
+  color: #FFFFFF;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+.cognify-btn-secondary:hover {
+  background-color: var(--color-cognify-teal-dark, #06626C);
+}
+.cognify-btn-secondary:active {
+  transform: scale(0.98);
+}
+
+.cognify-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+.dark .cognify-card {
+  background-color: #121B1E;
+  border-color: #1F2937;
+  color: #F3F4F6;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
