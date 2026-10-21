@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { RadioGroup, Radio } from 'react-aria-components/RadioGroup';
 import { AriaButton } from './ui/AriaButton';
 import { signInWithGoogle, signInWithGoogleRedirect, loginWithEmail, registerWithEmail, auth, clearPreLoginState } from '../lib/firebase';
+import { checkAndClearSessionExpired } from '../lib/navigation';
 import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -156,6 +157,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   const activePreviewDisability = hoveredDisability || selectedDisability;
 
   const [showHelp, setShowHelp] = useState(false);
+  const [sessionExpiredNotice] = useState<boolean>(() => checkAndClearSessionExpired());
   const [isInIframe] = useState(() => {
     try {
       return window.self !== window.top;
@@ -439,6 +441,24 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
           </button>
         </div>
       </header>
+
+      {/* Session Expired Reassurance Notice */}
+      {sessionExpiredNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="max-w-xl w-full mx-auto mb-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 flex items-center gap-3 shadow-sm animate-fade-in"
+        >
+          <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <div className="text-xs sm:text-sm font-medium leading-relaxed">
+            <p className="font-bold">{t("Session Expired", "انتهت صلاحية الجلسة")}</p>
+            <p>{t(
+              "Your session expired. Please sign in again — your target screen and draft work will be automatically restored.",
+              "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى وسيتم نقلك تلقائياً لوجهتك السابقة واستعادة تقدمك."
+            )}</p>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="max-w-5xl mx-auto w-full z-10 space-y-4">

@@ -362,8 +362,39 @@ export default function DocumentStudioModal({
     hasTables?: boolean;
   } | null>(null);
 
-  // Audio Lecture Engine State
-  const [audioLectureState, setAudioLectureState] = useState<AudioLectureState>(INITIAL_AUDIO_LECTURE_STATE);
+  // Audio Lecture Engine State — rehydrate from session cache if available
+  const [audioLectureState, setAudioLectureState] = useState<AudioLectureState>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = sessionStorage.getItem('cognify_doc_audio_lecture_draft');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.transcript || parsed.summaries)) {
+            return {
+              ...INITIAL_AUDIO_LECTURE_STATE,
+              ...parsed,
+            };
+          }
+        }
+      } catch {}
+    }
+    return INITIAL_AUDIO_LECTURE_STATE;
+  });
+
+  // Auto-persist audio lecture transcript & summaries across tab switches
+  useEffect(() => {
+    try {
+      if (audioLectureState.transcript || audioLectureState.summaries?.short || audioLectureState.summaries?.detailed) {
+        sessionStorage.setItem('cognify_doc_audio_lecture_draft', JSON.stringify({
+          status: audioLectureState.status,
+          file: audioLectureState.file,
+          transcript: audioLectureState.transcript,
+          summaries: audioLectureState.summaries,
+          segments: audioLectureState.segments,
+        }));
+      }
+    } catch {}
+  }, [audioLectureState]);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [audioDuration, setAudioDuration] = useState(0);

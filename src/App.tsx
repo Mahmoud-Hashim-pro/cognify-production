@@ -19,6 +19,17 @@ import PwaInstallPrompt from "./components/PwaInstallPrompt";
 import { isRTL, isArabicLocale, getTranslation, localize } from "./lib/translations";
 import { canAccessSection } from "./lib/academics";
 import { canAccessView, homeViewFor, isAccessibilityUser, AppView } from "./lib/access";
+import {
+  parseRoute,
+  buildHash,
+  saveReturnDestination,
+  getReturnDestination,
+  clearReturnDestination,
+  markSessionExpired,
+  isSameRoute,
+  RouteState,
+  VALID_DISABILITY_TABS,
+} from "./lib/navigation";
 import { isAdminUser } from "./lib/roles";
 import { subscribeToStudentMemory, clearStudentMemory, getCachedStudentMemory, DEFAULT_STUDENT_MEMORY } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
@@ -127,13 +138,14 @@ export default function App() {
       sessionStorage.removeItem('cognify_exit_preview');
       sessionStorage.setItem('cognify_guest_preview', 'disability');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
-      localStorage.setItem('cognify_default_disability_tab', 'chat');
-      window.location.hash = '#disability';
+      localStorage.setItem('cognify_default_disability_tab', 'hub');
+      window.location.hash = '#disability/hub';
     } catch {}
     setIsGuestPreview(true);
     setProfile(createGuestProfile());
     setProfileLoading(false);
     setCurrentView('disability');
+    setDisabilityTab('hub');
   };
 
   const handleLogout = async () => {
@@ -148,22 +160,23 @@ export default function App() {
     setIsGuestPreview(false);
     setProfile(null);
     setProfileLoading(false);
-    setCurrentView('chat');
-    window.location.hash = '';
+    setCurrentView('disability');
+    setDisabilityTab('hub');
+    window.location.hash = '#disability/hub';
     toast.success(
       direction === 'rtl' ? 'تم تسجيل الخروج بنجاح' : 'Signed out successfully',
       direction === 'rtl' ? 'تسجيل الخروج' : 'Sign Out'
     );
   };
 
-  // Seed from the URL hash so deep links and F5 land on the right screen (default: disability)
-  const [currentView, setCurrentView] = useState<AppView>(() => {
-    const h = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
-    if (h && (['disability', 'video', 'chat', 'profile', 'settings', 'admin', 'support', 'privacy_security'] as string[]).includes(h)) {
-      return h as any;
-    }
-    return 'disability';
-  });
+  // Seed from the URL hash so deep links, sub-tabs, and F5 land on the right screen (default: disability/hub)
+  const initialRouteRef = useRef<RouteState>(
+    typeof window !== 'undefined'
+      ? parseRoute(window.location.hash)
+      : { view: 'disability', tab: 'hub' }
+  );
+
+  const [currentView, setCurrentView] = useState<AppView>(initialRouteRef.current.view);
   
   const [profile, setProfile] = useState<UserProfile | null>(() => {
     if (typeof window !== 'undefined') {
@@ -195,15 +208,16 @@ export default function App() {
   const [isSTTActive, setIsSTTActive] = useState(false);
   const [isLiveCaptionsOpen, setIsLiveCaptionsOpen] = useState(false);
   const [disabilityTab, setDisabilityTab] = useState<DisabilityTab>(() => {
+    if (initialRouteRef.current.tab) return initialRouteRef.current.tab;
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('cognify_default_disability_tab');
-        if (saved === 'vision' || saved === 'deaf' || saved === 'chat' || saved === 'caregiver' || saved === 'hub') {
+        if (saved && (VALID_DISABILITY_TABS as readonly string[]).includes(saved)) {
           return saved as DisabilityTab;
         }
       } catch {}
     }
-    return 'chat';
+    return 'hub';
   });
 
   // Cognify Memory (Phase 2) state
@@ -405,21 +419,31 @@ export default function App() {
     } catch {}
   };
 
-  // Sync navigation with browser history
+  // Sync navigation with browser history (popstate, hardware back on Android, deep links)
   useEffect(() => {
-    // If there's no hash on load, set it to the default #chat explicitly without a reload
-    if (!window.location.hash) {
-      window.history.replaceState(null, '', '#chat');
+    const route = parseRoute(window.location.hash);
+    const canonicalHash = buildHash(route);
+
+    // If there's no hash on load, replace with canonical hash without extra history entry
+    if (!window.location.hash || window.location.hash === '#') {
+      window.history.replaceState({ view: route.view, tab: route.tab }, '', canonicalHash);
     }
 
-    const handlePopState = () => {
-      let hash = window.location.hash.replace('#', '');
-      if (hash === 'intelligence') hash = 'profile';
-      if ((VALID_VIEWS as readonly string[]).includes(hash)) {
-        setCurrentView(hash as any);
-      } else {
-        setCurrentView('chat');
-        window.history.replaceState(null, '', '#chat');
+    const handlePopState = (event: PopStateEvent) => {
+      // 1. If state object is attached to popstate, use it
+      if (event.state && event.state.view) {
+        setCurrentView(event.state.view);
+        if (event.state.tab) {
+          setDisabilityTab(event.state.tab);
+        }
+        return;
+      }
+
+      // 2. Otherwise parse from current window.location.hash
+      const parsed = parseRoute(window.location.hash);
+      setCurrentView(parsed.view);
+      if (parsed.tab) {
+        setDisabilityTab(parsed.tab);
       }
     };
 
@@ -427,14 +451,31 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Custom navigation function that updates URL and state
- const navigateTo = (
-  view: AppView
-) => {
-  window.history.pushState(null, '', `#${view}`);
-  setCurrentView(view);
-  setIsMobileMenuOpen(false);
-};
+  // Custom navigation function that updates URL and history state without duplicates
+  const navigateTo = (view: AppView, tab?: DisabilityTab) => {
+    const targetRoute: RouteState = {
+      view,
+      tab: tab || (view === 'disability' ? (disabilityTab || 'hub') : undefined),
+    };
+    const currentRoute: RouteState = {
+      view: currentView,
+      tab: currentView === 'disability' ? (disabilityTab || 'hub') : undefined,
+    };
+
+    // Avoid duplicate history entries
+    if (isSameRoute(targetRoute, currentRoute)) {
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
+    const newHash = buildHash(targetRoute);
+    window.history.pushState({ view: targetRoute.view, tab: targetRoute.tab }, '', newHash);
+    setCurrentView(targetRoute.view);
+    if (targetRoute.tab) {
+      setDisabilityTab(targetRoute.tab);
+    }
+    setIsMobileMenuOpen(false);
+  };
 
   // Section access guard: nobody can open a section outside their enrolled path
   // (e.g. a Normal user opening #disability, or a Special-Needs user wandering
@@ -442,12 +483,16 @@ export default function App() {
   useEffect(() => {
     if (!profile) return;
     if (!canAccessView(profile, currentView as any, isAdminUser(profile))) {
-      // Redirect SILENTLY to the user's home section. No scary red toast — this
-      // also fires on deep-links and on the user's own mode change, where an
-      // error would be alarming and confusing. The redirect itself is feedback.
       const home = homeViewFor(profile);
-      window.history.replaceState(null, '', `#${home}`);
+      const homeRoute: RouteState = { view: home, tab: 'hub' };
+      const homeHash = buildHash(homeRoute);
+      window.history.replaceState({ view: home, tab: 'hub' }, '', homeHash);
       setCurrentView(home);
+      setDisabilityTab('hub');
+      toast.warning(
+        direction === 'rtl' ? 'هذه الصفحة مخصصة للمشرفين فقط. تم نقلك لمركز الميزات.' : 'Admin portal is restricted. Redirected to Features Hub.',
+        direction === 'rtl' ? 'صلاحيات مقيدة' : 'Access Restricted'
+      );
     }
   }, [profile, currentView]);
 
@@ -557,29 +602,41 @@ export default function App() {
         setProfile(data);
         clearPreLoginState();
 
-        // Smart Entry Routing:
+        // Smart Entry Routing with Session Restoration:
         // Execute ONLY ONCE on initial entry/mount so subsequent background snapshots
-        // (like country lookup completing 2s later, or task progress writes)
         // NEVER override the user's active view or bounce them between screens!
         if (!initialRouteAppliedRef.current) {
           initialRouteAppliedRef.current = true;
-          const hash = window.location.hash.replace('#', '');
-          const isA11y = preLoginPath === 'Normal' ? false : isAccessibilityUser(data);
-          if (isA11y) {
-            // For accessibility users: if no hash or default empty/chat on first load, land on disability
-            if (!hash || hash === 'chat' || hash === '') {
-              setCurrentView('disability');
-              window.history.replaceState(null, '', '#disability');
-            } else if ((VALID_VIEWS as readonly string[]).includes(hash)) {
-              setCurrentView(hash as any);
+          const returnDest = getReturnDestination();
+          clearReturnDestination();
+
+          if (returnDest) {
+            // Restore exact view and tab from previous session!
+            setCurrentView(returnDest.view);
+            if (returnDest.tab) {
+              setDisabilityTab(returnDest.tab);
             }
+            window.history.replaceState({ view: returnDest.view, tab: returnDest.tab }, '', returnDest.hash || buildHash(returnDest));
+            toast.info(
+              direction === 'rtl' ? 'تمت استعادة جلستك ومتابعة عملك بنجاح' : 'Restored your previous session and active screen',
+              direction === 'rtl' ? 'استعادة الجلسة' : 'Session Restored'
+            );
           } else {
-            // For normal users: if no hash, land on chat. If deep-linked or user navigated to another valid view, PRESERVE it!
-            if (!hash || hash === 'disability' || hash === 'video') {
-              setCurrentView('chat');
-              window.history.replaceState(null, '', '#chat');
-            } else if ((VALID_VIEWS as readonly string[]).includes(hash)) {
-              setCurrentView(hash as any);
+            // Standard smart routing:
+            const route = parseRoute(window.location.hash);
+            const isA11y = preLoginPath === 'Normal' ? false : isAccessibilityUser(data);
+            if (isA11y) {
+              if (route.view === 'chat' && !window.location.hash.includes('chat')) {
+                setCurrentView('disability');
+                setDisabilityTab('hub');
+                window.history.replaceState({ view: 'disability', tab: 'hub' }, '', '#disability/hub');
+              } else {
+                setCurrentView(route.view);
+                if (route.tab) setDisabilityTab(route.tab);
+              }
+            } else {
+              setCurrentView(route.view);
+              if (route.tab) setDisabilityTab(route.tab);
             }
           }
         }
@@ -924,6 +981,19 @@ export default function App() {
   }
 
   if (!user && !isGuestPreview) {
+    // Preserve unauthenticated deep-link or expired session destination before presenting Login
+    const currentRoute: RouteState = { view: currentView, tab: disabilityTab };
+    saveReturnDestination(currentRoute, window.location.hash);
+
+    // If user was previously known but auth state turned null unexpectedly (not explicit logout)
+    try {
+      const lastUid = localStorage.getItem('last_known_uid');
+      const isExplicitExit = sessionStorage.getItem('cognify_exit_preview') === 'true';
+      if (lastUid && !isExplicitExit) {
+        markSessionExpired();
+      }
+    } catch {}
+
     return <Login onDirectPreview={handleEnterGuestPreview} />;
   }
 
@@ -1011,7 +1081,14 @@ export default function App() {
           onStreamingUpdate={(text) => setCurrentAIResponse(text)}
           onSTTStateChange={setIsSTTActive}
           currentTab={disabilityTab}
-          onTabChange={setDisabilityTab}
+          onTabChange={(newTab) => {
+            setDisabilityTab(newTab);
+            const targetRoute: RouteState = { view: 'disability', tab: newTab };
+            const newHash = buildHash(targetRoute);
+            if (window.location.hash !== newHash) {
+              window.history.pushState({ view: 'disability', tab: newTab }, '', newHash);
+            }
+          }}
           setProfile={setProfile}
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}

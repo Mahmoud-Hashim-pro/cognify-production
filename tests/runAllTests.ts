@@ -95,6 +95,7 @@ import { runLearningDisabilityEngineVerification } from './learningDisabilityEng
 import { runBlindAndLowVisionVerification } from './blindAndLowVisionVerification.js';
 import { runDocumentAndAudioTranscriptionVerification } from './documentAndAudioTranscriptionVerification.js';
 import { runAccessibilityAuditVerification } from './accessibilityAuditVerification.js';
+import { runNavigationAndAuthVerification } from './navigationAndAuthVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2312,6 +2313,13 @@ Keep practicing closures with higher-order functions!
     const m30Res = await runAccessibilityAuditVerification();
     totalPassed += m30Res.passed;
     totalFailed += m30Res.failed;
+  }
+
+  // 62. Milestone 31: Navigation, Back Buttons, Popstate & Auth Guards (Phase 5)
+  {
+    const m31Res = await runNavigationAndAuthVerification();
+    totalPassed += m31Res.passed;
+    totalFailed += m31Res.failed;
   }
 
   console.log(`\n========================================`);

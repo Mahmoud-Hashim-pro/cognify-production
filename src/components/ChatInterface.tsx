@@ -143,7 +143,25 @@ export interface ChatInterfaceRef {
 const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ profile, onQuestionEvaluated, onMenuClick, syncMessages, externalMessage, onStreamingUpdate, isEmbedded, onSTTStateChange, setProfile }, ref) => {
   const activeThread = profile.chatThreads?.find(t => t.id === profile.activeThreadId);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return sessionStorage.getItem('cognify_chat_draft_input') || '';
+      } catch {}
+    }
+    return '';
+  });
+
+  // Auto-persist draft unsubmitted input across navigation
+  useEffect(() => {
+    try {
+      if (input) {
+        sessionStorage.setItem('cognify_chat_draft_input', input);
+      } else {
+        sessionStorage.removeItem('cognify_chat_draft_input');
+      }
+    } catch {}
+  }, [input]);
   const [showTasks, setShowTasks] = useState(false);
   const [newTaskInput, setNewTaskInput] = useState("");
   const [showInsights, setShowInsights] = useState(false);

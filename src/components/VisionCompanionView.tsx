@@ -96,8 +96,26 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   const lastObservationTimeRef = useRef<number>(0);
   const activeAbortControllerRef = useRef<AbortController | null>(null);
   const lastCaptureAttemptRef = useRef<number>(0);
-  const [observationTimestamp, setObservationTimestamp] = useState<number | null>(null);
-  const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | null>(null);
+  const [observationTimestamp, setObservationTimestamp] = useState<number | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.timestamp) return parsed.timestamp;
+      }
+    } catch {}
+    return null;
+  });
+  const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.description) return 'previous';
+      }
+    } catch {}
+    return null;
+  });
   const [observationConfidenceReason, setObservationConfidenceReason] = useState<string>('');
   const [verbosity, setVerbosity] = useState<'concise' | 'detailed'>('concise');
   const [experienceMode, setExperienceMode] = useState<'beginner' | 'advanced'>(() => {
@@ -109,7 +127,16 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   });
 
   const [status, setStatus] = useState<Status>('starting-camera');
-  const [lastDescription, setLastDescription] = useState<string>('');
+  const [lastDescription, setLastDescription] = useState<string>(() => {
+    try {
+      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.description) return parsed.description;
+      }
+    } catch {}
+    return '';
+  });
   const [lastSnapshot, setLastSnapshot] = useState<string | null>(null);
   const [announce, setAnnounce] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -1070,6 +1097,13 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         setObservationConfidenceReason('');
       }
       setObservationTimestamp(captureTimestamp);
+      try {
+        sessionStorage.setItem('cognify_vision_last_observation', JSON.stringify({
+          description: cleaned,
+          timestamp: captureTimestamp,
+          type: 'previous',
+        }));
+      } catch {}
 
       // Automatically extract and record spatial physical objects for this user
       if (profile?.uid) {

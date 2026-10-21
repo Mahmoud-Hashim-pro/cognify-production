@@ -164,7 +164,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
   const handleNavigateBack = React.useCallback(() => {
     if (activeTab !== 'hub') {
-      handleSelectTab('hub');
+      if (typeof window !== 'undefined' && window.history.state && window.history.state.tab && window.history.state.tab !== 'hub') {
+        window.history.back();
+      } else {
+        handleSelectTab('hub');
+      }
       try {
         localStorage.setItem('cognify_default_disability_tab', 'hub');
       } catch {}
@@ -468,6 +472,24 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 : getTranslation(profile.language, 'back')}
             </span>
           </AriaButton>
+
+          {/* Dedicated Back Control returning to Features Hub when in a sub-module */}
+          {activeTab !== 'hub' && (
+            <AriaButton
+              onPress={handleNavigateBack}
+              aria-label={localize(profile.language, 'Back to Features Hub', 'العودة لقائمة الميزات')}
+              className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0 ${
+                isDarkMode
+                  ? 'text-teal-300 bg-teal-950/60 border border-teal-800 hover:bg-teal-900/60'
+                  : 'text-teal-900 bg-teal-50 border border-teal-300 hover:bg-teal-100 font-bold'
+              }`}
+            >
+              <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+              <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
+                {localize(profile.language, 'Hub', 'الميزات')}
+              </span>
+            </AriaButton>
+          )}
 
           {/* Primary Disability Mode Switcher: Instant, Uncluttered, Accessible Across All Suites */}
           <div
@@ -873,6 +895,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               exit={{ opacity: 0, y: -10 }}
               className="w-full h-full min-h-0 flex flex-col p-3 sm:p-4 md:p-6 lg:p-8 pb-0"
             >
+              <div className="flex items-center justify-between pb-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleNavigateBack}
+                  aria-label={localize(profile.language, 'Back to Features Hub', 'العودة لقائمة الميزات')}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-600 outline-none"
+                >
+                  <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+                  <span>{localize(profile.language, 'Back to Hub', 'الرجوع للميزات')}</span>
+                </button>
+              </div>
               <div className="flex-1 min-h-0 bg-white dark:bg-[#0E1416] rounded-t-3xl shadow-xl border border-stone-200 dark:border-stone-800 overflow-hidden relative flex flex-col">
                 <React.Suspense fallback={
                   <div className="flex-1 flex items-center justify-center p-8 text-stone-400">
@@ -905,6 +938,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               className="w-full h-full overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-10"
             >
               <div className="max-w-4xl mx-auto space-y-8 pb-20">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleNavigateBack}
+                    aria-label={localize(profile.language, 'Back to Features Hub', 'العودة لقائمة الميزات')}
+                    className="px-3 py-2 rounded-2xl bg-stone-100 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 hover:text-stone-950 dark:hover:text-white transition-all flex items-center gap-2 text-xs font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-600 outline-none shadow-sm"
+                  >
+                    <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+                    <span>{localize(profile.language, 'Back to Hub', 'الرجوع للميزات')}</span>
+                  </button>
+                </div>
                 {/* Language Selection Card */}
                 <div className="bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 p-6 sm:p-8 rounded-[28px] shadow-sm backdrop-blur-xl">
                   <div className="mb-6 text-start">
