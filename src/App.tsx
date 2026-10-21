@@ -81,10 +81,11 @@ const ChatInterface = lazyWithRetry(() => import("./components/ChatInterface"));
 const PrivacySecurityCenter = lazyWithRetry(() => import("./components/PrivacySecurityCenter"));
 const AccessibilityOverlay = lazyWithRetry(() => import("./components/AccessibilityOverlay"));
 const LiveCaptions = lazyWithRetry(() => import("./components/LiveCaptions"));
+const AccessibleBookStudioView = lazyWithRetry(() => import("./components/AccessibleBookStudioView"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'admin', 'support', 'privacy_security',
   'learning', 'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -1093,6 +1094,15 @@ export default function App() {
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
         />;
+      case 'book_studio':
+        return (
+          <AccessibleBookStudioView
+            profile={activeProfile}
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+            onNavigateBack={() => navigateTo('disability')}
+            isDarkMode={isDarkMode}
+          />
+        );
       case 'profile':
         return (
           <ProfilePage

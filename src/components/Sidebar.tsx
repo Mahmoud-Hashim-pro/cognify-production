@@ -3,7 +3,7 @@ import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
   User, Settings, LifeBuoy, MessageSquare, AlertCircle, 
-  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap
+  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen
 } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
@@ -129,6 +129,15 @@ export default function Sidebar({
       active: isTabActive('deaf') || currentView === 'video',
       badge: '🤟',
       badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+    },
+    {
+      id: 'book_studio',
+      label: localize(profile.language, 'Educational Book Studio', 'استوديو الكتب والمستندات التعليمية'),
+      icon: BookOpen,
+      action: () => { onClose?.(); setCurrentView('book_studio'); },
+      active: currentView === 'book_studio',
+      badge: '📖',
+      badgeColor: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
     },
     {
       id: 'profile',

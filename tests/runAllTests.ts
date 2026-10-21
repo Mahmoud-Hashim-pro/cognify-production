@@ -96,6 +96,7 @@ import { runBlindAndLowVisionVerification } from './blindAndLowVisionVerificatio
 import { runDocumentAndAudioTranscriptionVerification } from './documentAndAudioTranscriptionVerification.js';
 import { runAccessibilityAuditVerification } from './accessibilityAuditVerification.js';
 import { runNavigationAndAuthVerification } from './navigationAndAuthVerification.js';
+import { runEducationalBookStudioVerification } from './educationalBookStudioVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2320,6 +2321,13 @@ Keep practicing closures with higher-order functions!
     const m31Res = await runNavigationAndAuthVerification();
     totalPassed += m31Res.passed;
     totalFailed += m31Res.failed;
+  }
+
+  // 63. Milestone 32: Accessible Educational Book & Document Studio Engine (Phase 6)
+  {
+    const m32Res = await runEducationalBookStudioVerification();
+    totalPassed += m32Res.passed;
+    totalFailed += m32Res.failed;
   }
 
   console.log(`\n========================================`);

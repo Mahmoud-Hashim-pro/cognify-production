@@ -329,6 +329,27 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       buttonCls: 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 shadow-teal-500/20',
       matchingMode: 'Visual',
     },
+    // Accessible Educational Book Studio (Phase 6)
+    {
+      id: 'studio' as const,
+      category: 'vision' as const,
+      titleEn: 'Accessible Educational Book Studio',
+      titleAr: 'استوديو الكتب والمستندات التعليمية الميسرة',
+      shortEn: 'Book Studio',
+      shortAr: 'استوديو الكتب',
+      badgeEn: 'Accessible DOCX & PDF',
+      badgeAr: 'تنسيق وورد واختبارات ميسرة',
+      descEn: 'Transform raw notes, lectures, and exams into accessible Word (.docx) & PDF documents with automatic TOC, question recognition, and screen reader outline.',
+      descAr: 'تحويل المحتوى الخام والمسودات إلى مستندات Word واختبارات منسقة، تدعم الفهرس التلقائي، والتعرف على الأسئلة وهيكلية العناوين لقارئات الشاشة.',
+      quickFeaturesAr: ['📖 8 قوالب تعليمية (كتب، ملازم، امتحانات)', '❓ التعرف التلقائي على الأسئلة ومساحات الإجابة', '📄 تصدير DOCX حقيقي متوافق مع Word', '♿ استعراض هيكلية العناوين لقارئ الشاشة'],
+      quickFeaturesEn: ['📖 8 Educational Templates (Books, Exams, Notes)', '❓ Question & Answer Space Auto-Detection', '📄 Native DOCX Export for Word', '♿ Screen-Reader Friendly Outline Tree'],
+      Icon: BookOpen,
+      accentColor: 'text-indigo-400',
+      borderGlow: 'hover:border-indigo-500/80 border-stone-200 dark:border-stone-800 ring-1 ring-indigo-500/20',
+      bgGlow: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+      buttonCls: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm',
+      matchingMode: '',
+    },
     // 2. HEARING (Unified 3D Sign & Hearing Studio)
     {
       id: 'deaf' as const,
@@ -696,7 +717,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         key={m.id}
                         role="article"
                         aria-label={localize(profile.language, m.titleEn, m.titleAr)}
-                        onClick={() => handleSelectTab(m.id as DisabilityTab)}
+                        onClick={() => {
+                          if (m.id === 'studio' && onNavigate) {
+                            (onNavigate as any)('book_studio');
+                          } else {
+                            handleSelectTab(m.id as DisabilityTab);
+                          }
+                        }}
                         className={`group relative rounded-3xl p-6 sm:p-7 border transition-all duration-200 cursor-pointer flex flex-col justify-between hover:shadow-xl active:scale-[0.99] ${
                           isDarkMode
                             ? 'bg-[#121B1E] hover:bg-[#162327] border-stone-800 hover:border-teal-500/60'
@@ -767,7 +794,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleSelectTab(m.id as DisabilityTab);
+                              if (m.id === 'studio' && onNavigate) {
+                                (onNavigate as any)('book_studio');
+                              } else {
+                                handleSelectTab(m.id as DisabilityTab);
+                              }
                             }}
                             className="px-4 py-2 rounded-xl text-xs font-black bg-teal-700 hover:bg-teal-800 text-white shadow-sm flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                           >

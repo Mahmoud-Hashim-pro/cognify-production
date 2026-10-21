@@ -1749,6 +1749,31 @@ ${currentDoc.summary}
                             <span>{companionLang === 'ar' ? 'تحميل Word (.docx)' : 'Export Word (.docx)'}</span>
                           </button>
 
+                          {/* Open in Educational Book Studio */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              try {
+                                sessionStorage.setItem(
+                                  'cognify_book_studio_import',
+                                  JSON.stringify({
+                                    text: currentDoc.fullText || currentDoc.summary || '',
+                                    title: currentDoc.title || 'Document',
+                                  })
+                                );
+                                onClose();
+                                window.location.hash = '#book_studio';
+                              } catch (e) {
+                                console.error('Failed to open book studio:', e);
+                              }
+                            }}
+                            className="px-3 py-2 rounded-xl bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+                            title="فتح في استوديو الكتب لتنسيق الفصول والأسئلة"
+                          >
+                            <BookOpen className="w-4 h-4" />
+                            <span>{companionLang === 'ar' ? 'استوديو الكتب 📖' : 'Book Studio 📖'}</span>
+                          </button>
+
                           {/* Print / Save as PDF Button */}
                           <button
                             type="button"
