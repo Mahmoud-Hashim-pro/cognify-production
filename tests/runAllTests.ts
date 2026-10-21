@@ -94,6 +94,7 @@ import { runCognitiveEngineVerification } from './cognitiveEngineVerification.js
 import { runLearningDisabilityEngineVerification } from './learningDisabilityEngineVerification.js';
 import { runBlindAndLowVisionVerification } from './blindAndLowVisionVerification.js';
 import { runDocumentAndAudioTranscriptionVerification } from './documentAndAudioTranscriptionVerification.js';
+import { runAccessibilityAuditVerification } from './accessibilityAuditVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2304,6 +2305,13 @@ Keep practicing closures with higher-order functions!
     const m29Res = await runDocumentAndAudioTranscriptionVerification();
     totalPassed += m29Res.passed;
     totalFailed += m29Res.failed;
+  }
+
+  // 61. Milestone 30: Accessibility Audit & Screen-Reader Verification (Phase 4 - WCAG 2.2 AA)
+  {
+    const m30Res = await runAccessibilityAuditVerification();
+    totalPassed += m30Res.passed;
+    totalFailed += m30Res.failed;
   }
 
   console.log(`\n========================================`);

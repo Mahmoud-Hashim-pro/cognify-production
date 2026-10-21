@@ -1308,12 +1308,14 @@ ${currentDoc.summary}
 
               <div className="flex items-center gap-2">
                 {/* Target Translation Language Selector */}
-                <div className="flex items-center bg-[#150917] border border-[#4A1224]/50 p-1 rounded-xl text-xs font-bold">
-                  <Languages className="w-3.5 h-3.5 text-[#E5A93C] mr-1.5 ml-1" />
+                <div className="flex items-center bg-[#150917] border border-[#4A1224]/50 p-1 rounded-xl text-xs font-bold" role="group" aria-label={companionLang === 'ar' ? 'لغة الترجمة والتلخيص' : 'Translation language'}>
+                  <Languages className="w-3.5 h-3.5 text-[#E5A93C] mr-1.5 ml-1" aria-hidden="true" />
                   <button
                     type="button"
                     onClick={() => setDocTargetLang('ar')}
-                    className={`px-2 py-1 rounded-lg transition-all ${
+                    aria-label="الترجمة إلى العربية"
+                    aria-pressed={docTargetLang === 'ar'}
+                    className={`px-2 py-1 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none ${
                       docTargetLang === 'ar' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
                     }`}
                     title="ترجمة وتلخيص بالعربية"
@@ -1323,7 +1325,9 @@ ${currentDoc.summary}
                   <button
                     type="button"
                     onClick={() => setDocTargetLang('en')}
-                    className={`px-2 py-1 rounded-lg transition-all ${
+                    aria-label="Translate to English"
+                    aria-pressed={docTargetLang === 'en'}
+                    className={`px-2 py-1 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                       docTargetLang === 'en' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'
                     }`}
                     title="Translate to English"
@@ -1333,7 +1337,9 @@ ${currentDoc.summary}
                   <button
                     type="button"
                     onClick={() => setDocTargetLang('fr')}
-                    className={`px-2 py-1 rounded-lg transition-all ${
+                    aria-label="Traduire en Français"
+                    aria-pressed={docTargetLang === 'fr'}
+                    className={`px-2 py-1 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-blue-400 focus:outline-none ${
                       docTargetLang === 'fr' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
                     }`}
                     title="Traduire en Français"
@@ -1343,70 +1349,91 @@ ${currentDoc.summary}
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => {
                     cancelSpeech();
                     onClose();
                   }}
-                  aria-label="Close"
-                  className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                  aria-label={companionLang === 'ar' ? 'إغلاق استوديو المستندات' : 'Close Document Studio'}
+                  className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-[#4A1224]/60 px-4 gap-1 sm:gap-2 overflow-x-auto scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-[#080409]/40">
+            <div
+              role="tablist"
+              aria-label={companionLang === 'ar' ? 'أقسام استوديو المستندات' : 'Document Studio tabs'}
+              className="flex border-b border-[#4A1224]/60 px-4 gap-1 sm:gap-2 overflow-x-auto scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-[#080409]/40"
+            >
               <button
                 type="button"
+                role="tab"
+                id="doc-tab-pdf"
+                aria-controls="doc-panel-pdf"
+                aria-selected={docStudioTab === 'pdf'}
                 onClick={() => setDocStudioTab('pdf')}
-                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                   docStudioTab === 'pdf'
                     ? 'border-indigo-500 text-[#E5A93C]'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <FileUp className="w-4 h-4" />
+                <FileUp className="w-4 h-4" aria-hidden="true" />
                 <span>{companionLang === 'ar' ? 'قارئ PDF والمستندات' : 'PDF & Doc Reader'}</span>
               </button>
 
               <button
                 type="button"
+                role="tab"
+                id="doc-tab-audio-rec"
+                aria-controls="doc-panel-audio-rec"
+                aria-selected={docStudioTab === 'audio-rec'}
                 onClick={() => setDocStudioTab('audio-rec')}
-                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                   docStudioTab === 'audio-rec'
                     ? 'border-red-500 text-red-400'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Mic className="w-4 h-4" />
+                <Mic className="w-4 h-4" aria-hidden="true" />
                 <span>{companionLang === 'ar' ? 'تسجيل وتلخيص المحاضرة' : 'Record & Summarize Lecture'}</span>
-                {isRecordingAudio && <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />}
+                {isRecordingAudio && <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" aria-hidden="true" />}
               </button>
 
               <button
                 type="button"
+                role="tab"
+                id="doc-tab-speech-to-text"
+                aria-controls="doc-panel-speech-to-text"
+                aria-selected={docStudioTab === 'speech-to-text'}
                 onClick={() => setDocStudioTab('speech-to-text')}
-                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                   docStudioTab === 'speech-to-text'
                     ? 'border-emerald-500 text-emerald-400'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Volume2 className="w-4 h-4" />
+                <Volume2 className="w-4 h-4" aria-hidden="true" />
                 <span>{companionLang === 'ar' ? 'صوت ↔ كتابة (Speech ↔ Text)' : 'Speech ↔ Text'}</span>
               </button>
 
               <button
                 type="button"
+                role="tab"
+                id="doc-tab-history"
+                aria-controls="doc-panel-history"
+                aria-selected={docStudioTab === 'history'}
                 onClick={() => setDocStudioTab('history')}
-                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                   docStudioTab === 'history'
                     ? 'border-amber-500 text-amber-400'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <History className="w-4 h-4" />
+                <History className="w-4 h-4" aria-hidden="true" />
                 <span>{companionLang === 'ar' ? 'سجل المحفوظات' : 'Doc History'}</span>
                 <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300">
                   {docHistory.length}
@@ -1418,7 +1445,13 @@ ${currentDoc.summary}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
               {/* TAB 1: PDF & DOCUMENT READER */}
               {docStudioTab === 'pdf' && (
-                <div className="space-y-5">
+                <div
+                  role="tabpanel"
+                  id="doc-panel-pdf"
+                  aria-labelledby="doc-tab-pdf"
+                  tabIndex={0}
+                  className="space-y-5 focus:outline-none"
+                >
                   {/* Upload Card */}
                   <div className="border-2 border-dashed border-[#E5A93C]/30 hover:border-indigo-400 rounded-3xl p-6 sm:p-8 bg-[#080409]/40 text-center transition-all">
                     <input
@@ -1426,6 +1459,7 @@ ${currentDoc.summary}
                       id="vision-doc-file-upload-modal"
                       accept=".pdf,image/*,.docx,.txt,audio/*,.mp3,.wav,.m4a,.webm,.ogg"
                       className="hidden"
+                      aria-label={companionLang === 'ar' ? 'رفع ملف PDF أو مستند أو صوت' : 'Upload PDF, document, or audio file'}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) processDocumentFile(file);
@@ -1999,6 +2033,7 @@ ${currentDoc.summary}
                         <div className="flex gap-2">
                           <input
                             type="text"
+                            aria-label={companionLang === 'ar' ? 'اسأل المعلم الذكي عن هذه المحاضرة' : 'Ask AI tutor about this document'}
                             value={docChatInput}
                             onChange={(e) => setDocChatInput(e.target.value)}
                             onKeyDown={(e) => {
@@ -2015,12 +2050,13 @@ ${currentDoc.summary}
                             type="button"
                             onClick={handleAskDocQuestion}
                             disabled={!docChatInput.trim() || isDocChatAnswering}
-                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-lg active:scale-95 disabled:opacity-40 transition-all"
+                            aria-label={companionLang === 'ar' ? 'إرسال السؤال للمعلم الذكي' : 'Send question to AI tutor'}
+                            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-lg active:scale-95 disabled:opacity-40 transition-all focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
                           >
                             {isDocChatAnswering ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                             ) : (
-                              <Send className="w-4 h-4" />
+                              <Send className="w-4 h-4" aria-hidden="true" />
                             )}
                             <span>{companionLang === 'ar' ? 'إرسال' : 'Send'}</span>
                           </button>
@@ -2033,12 +2069,18 @@ ${currentDoc.summary}
 
               {/* TAB 2: LIVE AUDIO LECTURE TRANSCRIPTION & STUDY HUB */}
               {docStudioTab === 'audio-rec' && (
-                <div className="space-y-6">
+                <div
+                  role="tabpanel"
+                  id="doc-panel-audio-rec"
+                  aria-labelledby="doc-tab-audio-rec"
+                  tabIndex={0}
+                  className="space-y-6 focus:outline-none"
+                >
                   {/* Audio Lecture Header */}
                   <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3 flex-wrap gap-2">
                     <div>
                       <h4 className="font-black text-lg text-white flex items-center gap-2">
-                        <Headphones className="w-5 h-5 text-indigo-400" />
+                        <Headphones className="w-5 h-5 text-indigo-400" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'منظومة تفريغ وتلخيص المحاضرات الصوتية' : 'Audio Lecture Transcription & Study Hub'}</span>
                       </h4>
                       <p className="text-xs text-slate-400">
@@ -2055,9 +2097,10 @@ ${currentDoc.summary}
                           setAudioLectureState(INITIAL_AUDIO_LECTURE_STATE);
                           setIsPlayingAudio(false);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all"
+                        aria-label={companionLang === 'ar' ? 'محاضرة جديدة' : 'New Lecture'}
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" />
+                        <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'محاضرة جديدة' : 'New Lecture'}</span>
                       </button>
                     )}
@@ -2074,6 +2117,7 @@ ${currentDoc.summary}
                             id="audio-lecture-file-input"
                             accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.flac,.aac"
                             className="hidden"
+                            aria-label={companionLang === 'ar' ? 'رفع ملف محاضرة صوتية' : 'Upload audio lecture file'}
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) processAudioLectureFile(file);
@@ -2505,24 +2549,32 @@ ${currentDoc.summary}
 
               {/* TAB 3: SPEECH ↔ TEXT STUDIO */}
               {docStudioTab === 'speech-to-text' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  role="tabpanel"
+                  id="doc-panel-speech-to-text"
+                  aria-labelledby="doc-tab-speech-to-text"
+                  tabIndex={0}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 focus:outline-none"
+                >
                   {/* Panel A: Speech to Text (Voice Dictation) */}
                   <div className="p-4 sm:p-5 rounded-3xl bg-[#080409]/70 border border-[#4A1224]/60 space-y-3 flex flex-col">
                     <div className="flex items-center justify-between">
                       <h4 className="font-black text-sm text-emerald-400 flex items-center gap-1.5">
-                        <Mic className="w-4 h-4" />
+                        <Mic className="w-4 h-4" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'تحدث ليكتب لك (إملاء صوتي)' : 'Speech to Text (Dictation)'}</span>
                       </h4>
                       <button
                         type="button"
                         onClick={toggleDictation}
-                        className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow ${
+                        aria-label={isDictating ? (companionLang === 'ar' ? 'إيقاف الإملاء الصوتي' : 'Stop dictation') : (companionLang === 'ar' ? 'بدء الإملاء الصوتي' : 'Start dictation')}
+                        aria-pressed={isDictating}
+                        className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none ${
                           isDictating
                             ? 'bg-red-600 text-white animate-pulse'
                             : 'bg-emerald-600 hover:bg-emerald-500 text-white'
                         }`}
                       >
-                        {isDictating ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                        {isDictating ? <MicOff className="w-3.5 h-3.5" aria-hidden="true" /> : <Mic className="w-3.5 h-3.5" aria-hidden="true" />}
                         <span>{isDictating ? (companionLang === 'ar' ? 'إيقاف' : 'Stop') : (companionLang === 'ar' ? 'تحدث الآن' : 'Dictate')}</span>
                       </button>
                     </div>
@@ -2531,6 +2583,7 @@ ${currentDoc.summary}
                       rows={7}
                       value={dictationText}
                       onChange={(e) => setDictationText(e.target.value)}
+                      aria-label={companionLang === 'ar' ? 'نص الإملاء الصوتي' : 'Voice dictation text'}
                       placeholder={
                         companionLang === 'ar'
                           ? 'اضغط على "تحدث الآن" وابدأ الكلام، وسيتم كتابة كل ما تقوله بدقة هنا...'
@@ -2548,7 +2601,8 @@ ${currentDoc.summary}
                           toast.success(companionLang === 'ar' ? 'تم نسخ النص المكتوب 📋' : 'Copied to clipboard 📋');
                         }}
                         disabled={!dictationText.trim()}
-                        className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs disabled:opacity-40"
+                        aria-label={companionLang === 'ar' ? 'نسخ النص المكتوب' : 'Copy transcribed text'}
+                        className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
                       >
                         {companionLang === 'ar' ? 'نسخ النص' : 'Copy'}
                       </button>
@@ -2565,9 +2619,10 @@ ${currentDoc.summary}
                           toast.success(companionLang === 'ar' ? 'تم حفظ ملف Word 📄' : 'Word file saved 📄');
                         }}
                         disabled={!dictationText.trim()}
-                        className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 disabled:opacity-40"
+                        aria-label={companionLang === 'ar' ? 'تصدير الإملاء الصوتي كملف Word' : 'Export dictation as Word file'}
+                        className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-blue-400 focus:outline-none"
                       >
-                        <Download className="w-3.5 h-3.5" />
+                        <Download className="w-3.5 h-3.5" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'تصدير Word' : 'Export Word'}</span>
                       </button>
                     </div>
@@ -2577,7 +2632,7 @@ ${currentDoc.summary}
                   <div className="p-4 sm:p-5 rounded-3xl bg-[#080409]/70 border border-[#4A1224]/60 space-y-3 flex flex-col">
                     <div className="flex items-center justify-between">
                       <h4 className="font-black text-sm text-blue-400 flex items-center gap-1.5">
-                        <Volume2 className="w-4 h-4" />
+                        <Volume2 className="w-4 h-4" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'اكتب ليقرأ لك بصوت واضح' : 'Text to Speech Reader'}</span>
                       </h4>
                     </div>
@@ -2586,6 +2641,7 @@ ${currentDoc.summary}
                       rows={7}
                       value={textToReadAloud}
                       onChange={(e) => setTextToReadAloud(e.target.value)}
+                      aria-label={companionLang === 'ar' ? 'النص المراد قراءته صوتياً' : 'Text to read aloud'}
                       placeholder={
                         companionLang === 'ar'
                           ? 'الصق أو اكتب أي نص هنا لسماعه فوراً بصوت طبيعي واضح...'
@@ -2608,9 +2664,11 @@ ${currentDoc.summary}
                           });
                         }}
                         disabled={!textToReadAloud.trim()}
-                        className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg disabled:opacity-40 active:scale-95 transition-all"
+                        aria-pressed={isSpeakingDoc}
+                        aria-label={companionLang === 'ar' ? 'قراءة النص بصوت عالٍ' : 'Read text aloud'}
+                        className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg disabled:opacity-40 active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-blue-400 focus:outline-none"
                       >
-                        <Volume2 className="w-4 h-4" />
+                        <Volume2 className="w-4 h-4" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'اقرأ بصوت عالي' : 'Read Aloud'}</span>
                       </button>
                       <button
@@ -2619,7 +2677,8 @@ ${currentDoc.summary}
                           cancelSpeech();
                           setIsSpeakingDoc(false);
                         }}
-                        className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs"
+                        aria-label={companionLang === 'ar' ? 'إيقاف القراءة الصوتية' : 'Stop reading aloud'}
+                        className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs focus-visible:ring-2 focus-visible:ring-slate-400 focus:outline-none"
                       >
                         {companionLang === 'ar' ? 'إيقاف' : 'Stop'}
                       </button>
@@ -2630,7 +2689,13 @@ ${currentDoc.summary}
 
               {/* TAB 4: SAVED DOCUMENTS ARCHIVE */}
               {docStudioTab === 'history' && (
-                <div className="space-y-3">
+                <div
+                  role="tabpanel"
+                  id="doc-panel-history"
+                  aria-labelledby="doc-tab-history"
+                  tabIndex={0}
+                  className="space-y-3 focus:outline-none"
+                >
                   <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-[#4A1224]/60">
                     <span>{companionLang === 'ar' ? 'المستندات والمحاضرات التي تم تلخيصها سابقاً' : 'Previously Summarized Documents'}</span>
                     <span className="font-mono text-[#E5A93C] font-bold">{docHistory.length} items</span>
@@ -2638,7 +2703,7 @@ ${currentDoc.summary}
 
                   {docHistory.length === 0 ? (
                     <div className="text-center py-12 text-slate-500 space-y-2">
-                      <FileText className="w-10 h-10 mx-auto opacity-40 text-slate-400" />
+                      <FileText className="w-10 h-10 mx-auto opacity-40 text-slate-400" aria-hidden="true" />
                       <p className="text-sm font-bold text-slate-400">
                         {companionLang === 'ar'
                           ? 'لا توجد مستندات محفوظة بعد.'
@@ -2678,7 +2743,7 @@ ${currentDoc.summary}
                               setCurrentDoc(item);
                               setDocStudioTab('pdf');
                             }}
-                            className="px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 font-bold text-xs"
+                            className="px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 font-bold text-xs focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
                           >
                             {companionLang === 'ar' ? 'فتح' : 'Open'}
                           </button>
@@ -2688,18 +2753,20 @@ ${currentDoc.summary}
                               exportToWordDocument(item.title, item.summary, item.fullText, item.targetLang);
                               toast.success(companionLang === 'ar' ? 'تم تنزيل Word 📄' : 'Word downloaded 📄');
                             }}
-                            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-400"
+                            aria-label={companionLang === 'ar' ? `تحميل مستند ${item.title} كملف Word` : `Download ${item.title} as Word document`}
+                            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-400 focus-visible:ring-2 focus-visible:ring-blue-400 focus:outline-none"
                             title="تحميل كملف Word"
                           >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             type="button"
                             onClick={() => deleteDocFromHistory(item.id)}
-                            className="p-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400"
+                            aria-label={companionLang === 'ar' ? `حذف مستند ${item.title}` : `Delete document ${item.title}`}
+                            className="p-2 rounded-xl bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 focus-visible:ring-2 focus-visible:ring-red-400 focus:outline-none"
                             title="حذف"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
                           </button>
                         </div>
                       </div>

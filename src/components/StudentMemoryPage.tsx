@@ -491,9 +491,13 @@ export default function StudentMemoryPage({
           </div>
 
           <button
+            type="button"
+            role="switch"
+            aria-checked={safeMemory.enabled}
+            aria-label={localize(profile.language, 'Enable Persistent Student Memory Context', 'تفعيل سياق ذاكرة الطالب المستمرة')}
             onClick={handleToggle}
             disabled={isSubmitting}
-            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C] ${
               safeMemory.enabled ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600' : 'bg-slate-800'
             }`}
           >

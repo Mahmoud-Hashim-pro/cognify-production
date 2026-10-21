@@ -23,24 +23,31 @@ export default function AdminPasswordResetModal({
 }: AdminPasswordResetModalProps) {
   return (
     <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-[#150917] border border-amber-500/40 rounded-[28px] shadow-2xl shadow-amber-500/10 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="password-reset-title"
+        className="bg-[#150917] border border-amber-500/40 rounded-[28px] shadow-2xl shadow-amber-500/10 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200"
+      >
         {/* Header */}
         <div className="p-6 border-b border-[#4A1224]/60 flex items-center justify-between bg-[#080409]/70">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-2xl shadow-inner">
-              <Key className="w-5 h-5" />
+              <Key className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-base font-black text-white uppercase tracking-tight">Change / Reset Password</h3>
+              <h3 id="password-reset-title" className="text-base font-black text-white uppercase tracking-tight">Change / Reset Password</h3>
               <p className="text-xs text-slate-400">Super Admin Authentication Management</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             disabled={isSending}
-            className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors disabled:opacity-50"
+            aria-label="Close password reset modal"
+            className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 

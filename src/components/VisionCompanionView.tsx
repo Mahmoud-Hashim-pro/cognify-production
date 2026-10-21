@@ -1462,6 +1462,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         ref={fileInputRef}
         onChange={handleImageUpload}
         accept="image/*"
+        aria-label={companionLang === 'ar' ? 'رفع صورة للتحليل البصري' : 'Upload photo for visual analysis'}
         className="hidden"
         aria-hidden="true"
       />
@@ -2649,11 +2650,13 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               </div>
 
               {/* Type Switcher: Object vs Person */}
-              <div className="flex gap-2 p-1 bg-[#080409] rounded-xl border border-[#4A1224]/60">
+              <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#080409] rounded-xl border border-[#4A1224]/60">
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={!isSavingPerson}
                   onClick={() => setIsSavingPerson(false)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                     !isSavingPerson ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -2661,8 +2664,10 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                 </button>
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={isSavingPerson}
                   onClick={() => setIsSavingPerson(true)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                     isSavingPerson ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -2764,7 +2769,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                 <>
                   {/* Query Input */}
                   <div className="space-y-1.5">
-                    <label className="text-xs text-slate-400 font-semibold">
+                    <label htmlFor="spatial-query-input" className="text-xs text-slate-400 font-semibold block">
                       {companionLang === 'ar'
                         ? 'اسأل عن مكان أي شيء (مثلاً: "فين الريموت؟" أو "فين المفاتيح؟"):'
                         : companionLang === 'fr'
@@ -2773,6 +2778,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     </label>
                     <div className="flex gap-2">
                       <input
+                        id="spatial-query-input"
                         type="text"
                         value={spatialQueryInput}
                         onChange={(e) => setSpatialQueryInput(e.target.value)}
@@ -2789,10 +2795,12 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                         className="flex-1 px-4 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                       <button
+                        type="button"
                         onClick={handleSearchSpatial}
-                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
+                        aria-label={companionLang === 'ar' ? 'بحث في الذاكرة المكانية' : companionLang === 'fr' ? 'Rechercher' : 'Search spatial memory'}
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
                       >
-                        <Search className="w-4 h-4" />
+                        <Search className="w-4 h-4" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'بحث' : companionLang === 'fr' ? 'Chercher' : 'Search'}</span>
                       </button>
                     </div>

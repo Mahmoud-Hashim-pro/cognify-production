@@ -96,9 +96,10 @@ export default function MilestoneList({
           <button
             type="button"
             onClick={addMilestone}
-            className="p-2.5 bg-[#4A1224]/40 border border-[#E5A93C]/30 text-[#E5A93C] rounded-2xl hover:bg-[#4A1224]/60 transition-colors active:scale-95"
+            aria-label={isArabic ? 'إضافة خطوة' : 'Add milestone'}
+            className="p-2.5 bg-[#4A1224]/40 border border-[#E5A93C]/30 text-[#E5A93C] rounded-2xl hover:bg-[#4A1224]/60 transition-colors active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       )}

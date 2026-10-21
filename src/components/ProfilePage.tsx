@@ -515,15 +515,21 @@ export default function ProfilePage({
               
               {isEditing && (
                 <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-xs text-white">
-                  <Camera className="w-7 h-7 text-teal-300 mb-1" />
+                  <Camera className="w-7 h-7 text-teal-300 mb-1" aria-hidden="true" />
                   <span className="text-[10px] font-bold">{localize(profile.language, 'Change', 'تغيير الصورة')}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    aria-label={localize(profile.language, 'Upload profile photo', 'رفع صورة شخصية')}
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                  />
                 </label>
               )}
 
               {!isEditing && (
                 <div className="absolute -bottom-1 -end-1 bg-teal-600 text-white p-1.5 rounded-xl shadow-md border-2 border-white dark:border-[#121B1E] z-10" title="Verified Scholar Profile">
-                  <ShieldCheck className="w-4 h-4 text-white" />
+                  <ShieldCheck className="w-4 h-4 text-white" aria-hidden="true" />
                 </div>
               )}
             </div>
@@ -536,6 +542,7 @@ export default function ProfilePage({
                     {localize(profile.language, 'Full Name', 'الاسم الكامل')}
                   </label>
                   <input 
+                    aria-label={localize(profile.language, 'Full Name', 'الاسم الكامل')}
                     className={`w-full border rounded-xl px-3.5 py-2 text-center text-base font-bold outline-none focus:border-teal-500 transition-all ${
                       isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                     }`}
@@ -549,6 +556,7 @@ export default function ProfilePage({
                     {localize(profile.language, 'Education Level', 'المرحلة الدراسية')}
                   </label>
                   <select 
+                    aria-label={localize(profile.language, 'Education Level', 'المرحلة الدراسية')}
                     className={`w-full border rounded-xl px-3 py-2 text-center text-xs font-bold outline-none focus:border-teal-500 transition-all cursor-pointer ${
                       isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                     }`}
@@ -607,6 +615,7 @@ export default function ProfilePage({
                 </span>
                 {isEditing ? (
                   <select
+                    aria-label={localize(profile.language, 'Language', 'لغة المنصة')}
                     value={editedProfile.language || 'Arabic'}
                     onChange={(e) => handleChange('language', e.target.value)}
                     className={`border rounded-lg px-2 py-1 text-xs font-bold outline-none focus:border-teal-500 ${
@@ -628,7 +637,7 @@ export default function ProfilePage({
               {/* Location */}
               <div className="flex items-center justify-between text-xs py-1">
                 <span className="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider text-[11px]">
-                  <MapPin className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <MapPin className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" aria-hidden="true" />
                   {localize(profile.language, 'Location', 'المدينة والدولة')}
                 </span>
                 <span className="font-bold text-stone-800 dark:text-stone-200">
@@ -639,11 +648,12 @@ export default function ProfilePage({
               {/* Accessibility Accommodations Mode */}
               <div className="flex items-center justify-between text-xs py-1">
                 <span className="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider text-[11px]">
-                  <Eye className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <Eye className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" aria-hidden="true" />
                   {localize(profile.language, 'Accessibility Mode', 'نمط الإتاحة')}
                 </span>
                 {isEditing ? (
                   <select
+                    aria-label={localize(profile.language, 'Accessibility Mode', 'نمط الإتاحة')}
                     value={editedProfile.accessibilityMode || 'None'}
                     onChange={(e) => handleChange('accessibilityMode', e.target.value as AccessibilityMode)}
                     className={`border rounded-lg px-2 py-1 text-xs font-bold outline-none focus:border-teal-500 ${

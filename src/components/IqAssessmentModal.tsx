@@ -205,6 +205,9 @@ export default function IqAssessmentModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="iq-assessment-modal-title"
         className="relative w-full max-w-2xl rounded-[32px] bg-[#0E0610] border border-[#4A1224]/60 text-slate-100 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         dir={isAr ? 'rtl' : 'ltr'}
       >
@@ -212,10 +215,10 @@ export default function IqAssessmentModal({
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#4A1224]/60 bg-[#150917]/80">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] flex items-center justify-center font-bold shadow-md shadow-[#E5A93C]/5">
-              <Brain className="w-5 h-5" />
+              <Brain className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="font-black text-white text-base flex items-center gap-2.5 tracking-tight">
+              <h2 id="iq-assessment-modal-title" className="font-black text-white text-base flex items-center gap-2.5 tracking-tight">
                 {localize(profile.language, 'Cognitive Style Preview', 'استكشاف الأسلوب المعرفي والتعليمي')}
                 <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
                   Adaptive
@@ -231,10 +234,12 @@ export default function IqAssessmentModal({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2.5 rounded-2xl text-slate-400 hover:text-white hover:bg-[#150917] border border-transparent hover:border-[#4A1224]/60 transition-all active:scale-95"
+            aria-label={localize(profile.language, 'Close cognitive assessment', 'إغلاق نافذة التقييم المعرفي')}
+            className="p-2.5 rounded-2xl text-slate-400 hover:text-white hover:bg-[#150917] border border-transparent hover:border-[#4A1224]/60 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 

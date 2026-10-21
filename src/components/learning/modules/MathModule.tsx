@@ -173,11 +173,13 @@ export const MathModule: React.FC<MathModuleProps> = ({
                 </button>
 
                 <button
+                  type="button"
                   onClick={speakQuestion}
-                  className="p-2 rounded-xl bg-[#150917]/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-[#4A1224]/50 transition-all"
+                  aria-label={isArabic ? 'استمع للمسألة بصوت واضح' : 'Listen to math question'}
+                  className="p-2 rounded-xl bg-[#150917]/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-[#4A1224]/50 transition-all focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
                   title={isArabic ? 'استمع للمسألة' : 'Listen to question'}
                 >
-                  <Volume2 className="w-4 h-4" />
+                  <Volume2 className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             </div>

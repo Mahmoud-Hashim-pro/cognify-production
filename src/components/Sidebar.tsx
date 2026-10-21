@@ -154,7 +154,7 @@ export default function Sidebar({
   ];
 
   const navBtn = (active: boolean) =>
-    `group flex items-center gap-3 w-full px-3 min-h-[44px] py-2 rounded-xl text-[13px] font-medium text-start transition-all relative select-none ${
+    `group flex items-center gap-3 w-full px-3 min-h-[44px] py-2 rounded-xl text-[13px] font-medium text-start transition-all relative select-none focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
       active
         ? isDarkMode
           ? 'bg-teal-950/60 border border-teal-600/50 text-teal-300 font-bold shadow-sm'
@@ -191,11 +191,12 @@ export default function Sidebar({
         </div>
         {onClose && (
           <button
+            type="button"
             onClick={onClose}
-            className={`p-1.5 rounded-xl ${isDarkMode ? 'text-stone-400 hover:text-white hover:bg-stone-800' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200'} transition-colors shrink-0 cursor-pointer`}
+            className={`p-1.5 rounded-xl ${isDarkMode ? 'text-stone-400 hover:text-white hover:bg-stone-800' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200'} transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
             aria-label={localize(profile.language, 'Close menu', 'إغلاق القائمة')}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -203,10 +204,11 @@ export default function Sidebar({
       {/* New chat with Accessible Tutor */}
       <div className="mt-3">
         <button
+          type="button"
           onClick={startNewChat}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-teal-700/20 active:scale-[0.98] transition-all cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-teal-700/20 active:scale-[0.98] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
         >
-          <Plus className="w-[17px] h-[17px] text-white" /> {getTranslation(profile.language, 'newThread')}
+          <Plus className="w-[17px] h-[17px] text-white" aria-hidden="true" /> {getTranslation(profile.language, 'newThread')}
         </button>
       </div>
 
@@ -218,12 +220,13 @@ export default function Sidebar({
 
         {assistiveItems.map((item) => (
           <button
+            type="button"
             key={item.id}
             onClick={item.action}
             className={navBtn(item.active)}
             aria-current={item.active ? 'page' : undefined}
           >
-            <item.icon className={navIcon(item.active)} />
+            <item.icon className={navIcon(item.active)} aria-hidden="true" />
             <span className="truncate">{item.label}</span>
             {item.badge && (
               <span className={`ms-auto text-[10px] font-bold px-[6px] py-[1.5px] rounded-full border ${item.badgeColor || (isDarkMode ? 'bg-stone-800 text-stone-300 border-stone-700' : 'bg-stone-100 text-stone-900 border-stone-300')}`}>
@@ -236,11 +239,12 @@ export default function Sidebar({
         {/* Admin Portal (Staff Only) */}
         {isAdmin && (
           <button
+            type="button"
             onClick={() => { onClose?.(); setCurrentView('admin'); }}
             className={navBtn(currentView === 'admin') + ' relative mt-2'}
             aria-current={currentView === 'admin' ? 'page' : undefined}
           >
-            <AlertCircle className={navIcon(currentView === 'admin')} />
+            <AlertCircle className={navIcon(currentView === 'admin')} aria-hidden="true" />
             {localize(profile.language, 'Admin Portal', 'لوحة الإدارة')}
             <span className={`ms-auto text-[10px] font-bold ${isDarkMode ? 'text-stone-300 bg-stone-800 border-stone-700' : 'text-stone-800 bg-stone-100 border-stone-300'} border px-[7px] py-[2px] rounded-full`}>
               {localize(profile.language, 'Staff', 'مقيّد')}
@@ -256,6 +260,7 @@ export default function Sidebar({
                 {getTranslation(profile.language, 'chatHistory')}
               </span>
               <button
+                type="button"
                 onClick={() => {
                   const threadsToDelete = profile.chatThreads || [];
                   setProfile({ ...profile, chatThreads: [], activeThreadId: undefined });
@@ -265,7 +270,8 @@ export default function Sidebar({
                     });
                   }
                 }}
-                className="text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
+                aria-label={localize(profile.language, 'Clear all chats', 'مسح جميع المحادثات')}
+                className="text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none rounded"
                 title="Clear all chats"
               >
                 {getTranslation(profile.language, 'clearAll')}
@@ -280,14 +286,16 @@ export default function Sidebar({
                     : isDarkMode ? 'hover:bg-stone-800/40 border border-transparent' : 'hover:bg-stone-100 border border-transparent'
                 }`}>
                   <button
+                    type="button"
                     onClick={() => switchThread(t.id)}
-                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1.5 text-start overflow-hidden min-w-0 cursor-pointer"
+                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1.5 text-start overflow-hidden min-w-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none rounded-lg"
                     aria-current={active ? 'true' : undefined}
                   >
                     <span className={`text-[13px] font-semibold truncate w-full max-w-[200px] ${isDarkMode ? 'text-stone-200' : 'text-stone-900'}`}>{t.title}</span>
                     <span className={`text-[11px] truncate w-full max-w-[200px] ${isDarkMode ? 'text-stone-400' : 'text-stone-500'}`}>{t.lastMessageSnippet || (localize(profile.language, 'No messages yet', 'لا رسائل بعد'))}</span>
                   </button>
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       const updated = profile.chatThreads?.filter((th) => th.id !== t.id) || [];
@@ -297,11 +305,11 @@ export default function Sidebar({
                       setProfile({ ...profile, chatThreads: updated, activeThreadId: nextActive });
                       if (profile.uid) deleteDoc(doc(db, `users/${profile.uid}/threads/${t.id}`)).catch((er) => console.error(er));
                     }}
-                    className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 min-w-[36px] min-h-[36px] flex items-center justify-center p-2 me-1 text-stone-400 hover:text-rose-500 focus-visible:text-rose-500 rounded-lg transition-all cursor-pointer"
+                    className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 min-w-[36px] min-h-[36px] flex items-center justify-center p-2 me-1 text-stone-400 hover:text-rose-500 focus-visible:text-rose-500 rounded-lg transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none"
                     title={localize(profile.language, 'Delete chat', 'حذف المحادثة')}
                     aria-label={localize(profile.language, 'Delete chat', 'حذف المحادثة')}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
               );
@@ -314,14 +322,16 @@ export default function Sidebar({
       <div className={`border-t ${isDarkMode ? 'border-stone-800' : 'border-stone-200'} pt-3 flex flex-col gap-2`}>
         <div className="flex gap-[7px]">
           <button 
+            type="button"
             onClick={toggleTheme} 
+            aria-label={isDarkMode ? localize(profile.language, 'Switch to Light Theme', 'التبديل إلى الوضع الفاتح') : localize(profile.language, 'Switch to Dark Theme', 'التبديل إلى الوضع الداكن')}
             className={`flex-1 flex items-center justify-center gap-[7px] min-h-[44px] py-2.5 rounded-xl border ${
               isDarkMode 
                 ? 'border-stone-800 bg-[#162327] text-stone-200 hover:text-white hover:bg-stone-800' 
                 : 'border-stone-200 bg-white text-stone-800 hover:text-stone-950 hover:bg-stone-100'
-            } text-xs font-semibold transition-all cursor-pointer`}
+            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
           >
-            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-stone-600" />}
+            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" aria-hidden="true" /> : <Moon className="w-4 h-4 text-stone-600" aria-hidden="true" />}
             {isDarkMode ? (localize(profile.language, 'Light', 'فاتح')) : (localize(profile.language, 'Dark', 'داكن'))}
           </button>
           <div className="flex-1 relative">
@@ -332,7 +342,7 @@ export default function Sidebar({
                 isDarkMode
                   ? 'border-stone-800 bg-[#162327] text-stone-200 hover:border-teal-500 focus:border-teal-500 [color-scheme:dark]'
                   : 'border-stone-200 bg-white text-stone-800 hover:border-teal-500 focus:border-teal-500 [color-scheme:light]'
-              } text-xs font-semibold transition-all outline-none`}
+              } text-xs font-semibold transition-all outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
               aria-label={localize(profile.language, 'Select Language', 'اختر اللغة')}
             >
               {['English', 'Arabic', 'Egyptian Ammiya', 'French', 'Spanish'].map((l) => (
@@ -350,15 +360,17 @@ export default function Sidebar({
             : isDarkMode ? 'hover:border-stone-700' : 'hover:border-teal-400'
         }`}>
           <button 
+            type="button"
             onClick={() => setCurrentView('profile')} 
-            className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer" 
+            className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none rounded-xl" 
             title={localize(profile.language, 'View Profile', 'الملف الشخصي وجواز الإتاحة')}
+            aria-label={localize(profile.language, 'View Profile and Accommodation Passport', 'الملف الشخصي وجواز الإتاحة')}
           >
             <div className="relative shrink-0">
               <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 overflow-hidden shadow-sm bg-gradient-to-br from-teal-600 to-teal-800 group-hover:scale-105 transition-transform ring-1 ring-teal-500/30">
                 {profile.photoURL ? <img src={profile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : userInitial}
               </div>
-              <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-teal-500 ring-2 ${isDarkMode ? 'ring-[#0E1416]' : 'ring-white'}`} />
+              <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-teal-500 ring-2 ${isDarkMode ? 'ring-[#0E1416]' : 'ring-white'}`} aria-hidden="true" />
             </div>
             <div className="leading-tight overflow-hidden flex-1">
               <div className={`text-[13px] font-bold ${isDarkMode ? 'text-stone-100 group-hover:text-teal-400' : 'text-stone-900 group-hover:text-teal-700'} truncate transition-colors`}>{profile.name || profile.email?.split('@')[0] || 'User'}</div>
@@ -366,8 +378,9 @@ export default function Sidebar({
             </div>
           </button>
           <button
+            type="button"
             onClick={() => setCurrentView('settings')}
-            className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer ${
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
               currentView === 'settings'
                 ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500'
                 : 'text-stone-600 dark:text-stone-400 hover:text-teal-700 hover:bg-stone-100 dark:hover:bg-stone-800'
@@ -375,22 +388,25 @@ export default function Sidebar({
             title={localize(profile.language, 'Settings', 'الإعدادات')}
             aria-label={localize(profile.language, 'Settings', 'الإعدادات')}
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
         <div className="flex gap-[7px]">
           <button 
+            type="button"
             onClick={openLiveCaptions} 
+            aria-label={localize(profile.language, 'Open Live Captions', 'فتح الكابشن المباشر')}
             className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] py-2.5 rounded-xl border ${
               isDarkMode 
                 ? 'border-stone-800 bg-[#162327] text-stone-200 hover:bg-stone-800 hover:border-teal-700' 
                 : 'border-stone-200 bg-white text-stone-800 hover:bg-stone-100 hover:border-teal-400'
-            } text-xs font-semibold transition-all cursor-pointer`}
+            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
           >
-            <Mic className={`w-4 h-4 text-teal-600 dark:text-teal-400`} /> {localize(profile.language, 'Captions', 'الكابشن')}
+            <Mic className={`w-4 h-4 text-teal-600 dark:text-teal-400`} aria-hidden="true" /> {localize(profile.language, 'Captions', 'الكابشن')}
           </button>
           <button 
+            type="button"
             onClick={async () => {
               onClose?.();
               if (onLogout) {
@@ -403,11 +419,11 @@ export default function Sidebar({
               isDarkMode 
                 ? 'border-rose-900/40 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 hover:border-rose-700/60' 
                 : 'border-rose-200 bg-white text-rose-600 hover:bg-rose-50 hover:border-rose-400'
-            } text-xs font-semibold transition-all cursor-pointer`} 
+            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none`} 
             title={getTranslation(profile.language, 'logout')} 
             aria-label={getTranslation(profile.language, 'logout')}
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>

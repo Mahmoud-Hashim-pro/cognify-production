@@ -1395,11 +1395,13 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 </div>
               </div>
               <button
+                type="button"
                 onClick={closePhotoLightbox}
-                className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
+                aria-label="Close photo viewer"
+                className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                 title="Close photo viewer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 

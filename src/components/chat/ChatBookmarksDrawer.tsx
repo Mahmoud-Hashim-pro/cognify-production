@@ -78,9 +78,10 @@ export default function ChatBookmarksDrawer({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30 transition-colors"
+                aria-label={localize(language, 'Close saved insights drawer', 'إغلاق قائمة الملاحظات المحفوظة')}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30 transition-colors focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 

@@ -70,6 +70,9 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="visual-comfort-title"
         className="w-full max-w-lg bg-[#150917] border border-[#4A1224]/60 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150"
         dir={isAr ? 'rtl' : 'ltr'}
       >
@@ -77,10 +80,10 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
         <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-indigo-500/20 border border-[#E5A93C]/30 flex items-center justify-center text-[#E5A93C]">
-              <BookOpen className="w-5 h-5" />
+              <BookOpen className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="font-black text-sm sm:text-base text-white">
+              <h3 id="visual-comfort-title" className="font-black text-sm sm:text-base text-white">
                 {t('Visual Comfort & Dyslexia Suite', 'أدوات الراحة البصرية وتيسير القراءة (Dyslexia)', 'Confort Visuel')}
               </h3>
               <p className="text-[11px] text-slate-400">
@@ -89,11 +92,12 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-all"
-            aria-label="Close"
+            className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-all focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
+            aria-label={t('Close', 'إغلاق', 'Fermer')}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -101,8 +105,11 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* High-Legibility Font Toggle */}
           <button
+            type="button"
+            role="switch"
+            aria-checked={settings.isDyslexiaFont}
             onClick={() => updateSetting({ isDyslexiaFont: !settings.isDyslexiaFont })}
-            className={`p-3.5 rounded-2xl border text-start flex items-center justify-between transition-all ${
+            className={`p-3.5 rounded-2xl border text-start flex items-center justify-between transition-all focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
               settings.isDyslexiaFont
                 ? 'bg-indigo-600/30 border-indigo-400 text-indigo-200'
                 : 'bg-[#080409] border-[#4A1224]/60 text-slate-400 hover:border-[#4A1224]/50'
@@ -112,13 +119,16 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
               <div className="font-bold text-xs text-white">{t('Dyslexia-Friendly Font', 'خط عالي التباين وواسع (Dyslexia)')}</div>
               <div className="text-[10px] text-slate-400">{t('Increases letter and word spacing', 'يوسع المسافات بين الحروف لمنع تداخل الكلمات')}</div>
             </div>
-            <span className="text-2xl">🔤</span>
+            <span className="text-2xl" aria-hidden="true">🔤</span>
           </button>
 
           {/* Reading Ruler Toggle */}
           <button
+            type="button"
+            role="switch"
+            aria-checked={settings.showReadingRuler}
             onClick={() => updateSetting({ showReadingRuler: !settings.showReadingRuler })}
-            className={`p-3.5 rounded-2xl border text-start flex items-center justify-between transition-all ${
+            className={`p-3.5 rounded-2xl border text-start flex items-center justify-between transition-all focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none ${
               settings.showReadingRuler
                 ? 'bg-amber-600/30 border-amber-400 text-amber-200'
                 : 'bg-[#080409] border-[#4A1224]/60 text-slate-400 hover:border-[#4A1224]/50'
@@ -128,17 +138,17 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
               <div className="font-bold text-xs text-white">{t('Guided Reading Ruler', 'مسطرة القراءة المضيئة')}</div>
               <div className="text-[10px] text-slate-400">{t('Focuses on one line at a time', 'تظليل السطر المقروء وتتبع حركة المؤشر')}</div>
             </div>
-            <span className="text-2xl">📏</span>
+            <span className="text-2xl" aria-hidden="true">📏</span>
           </button>
         </div>
 
         {/* Comfort Tint Selector */}
         <div className="p-3.5 rounded-2xl bg-[#080409] border border-[#4A1224]/60 space-y-2">
-          <label className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
-            <Palette className="w-4 h-4 text-[#E5A93C]" />
+          <span id="screen-tint-label" className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+            <Palette className="w-4 h-4 text-[#E5A93C]" aria-hidden="true" />
             <span>{t('Screen Tint (Reduces Glare & Irlen Strain):', 'لون خلفية هادئ ومريح للعين (يقلل الوهج البصري):')}</span>
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          </span>
+          <div role="radiogroup" aria-labelledby="screen-tint-label" className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
               { id: 'none', label: t('Default Dark', 'داكن عادي'), color: 'bg-[#150917] border-[#4A1224]/50 text-white' },
               { id: 'cream', label: t('Warm Cream', 'كريمي دافئ'), color: 'bg-amber-950/60 border-amber-500/50 text-amber-200' },
@@ -147,8 +157,11 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
             ].map((tint) => (
               <button
                 key={tint.id}
+                type="button"
+                role="radio"
+                aria-checked={settings.tintColor === tint.id}
                 onClick={() => updateSetting({ tintColor: tint.id as any })}
-                className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-center ${tint.color} ${
+                className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-center focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${tint.color} ${
                   settings.tintColor === tint.id ? 'ring-2 ring-indigo-400 shadow-lg scale-102' : 'opacity-70 hover:opacity-100'
                 }`}
               >
@@ -163,10 +176,12 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="font-bold">{t('Live Reading Preview:', 'معاينة القراءة الفورية:')}</span>
             <button
+              type="button"
               onClick={speakSample}
-              className="text-[#E5A93C] hover:text-indigo-300 flex items-center gap-1 font-bold"
+              aria-label={t('Listen to reading preview sample', 'استمع إلى عينة القراءة')}
+              className="text-[#E5A93C] hover:text-indigo-300 flex items-center gap-1 font-bold focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none rounded"
             >
-              <Volume2 className="w-3.5 h-3.5" />
+              <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
               <span>{t('Listen', 'استمع')}</span>
             </button>
           </div>
@@ -184,8 +199,9 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
         {/* Footer */}
         <div className="flex items-center justify-end pt-2 border-t border-[#4A1224]/60">
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg transition-all"
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg transition-all focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
           >
             {t('Done', 'حفظ وإغلاق')}
           </button>

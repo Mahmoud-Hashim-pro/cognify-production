@@ -1628,6 +1628,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     <Search className="w-4 h-4 text-[#E5A93C] shrink-0" />
                     <input
                       type="text"
+                      aria-label={localize(profile.language, 'Search within this conversation', 'بحث داخل هذه المحادثة')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder={localize(profile.language, 'Search within this conversation...', 'بحث داخل هذه المحادثة...')}

@@ -443,15 +443,17 @@ Question: "${q}"`;
         <div className="flex items-center gap-2.5">
           {onNavigateBack && (
             <button
+              type="button"
               onClick={onNavigateBack}
-              className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
+              aria-label={loc('Back to Hub', 'رجوع للرئيسية')}
+              className={`p-1.5 rounded-xl border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                 isDarkMode
                   ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800'
                   : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
               }`}
               title={loc('Back to Hub', 'رجوع للرئيسية')}
             >
-              <ArrowRight className={`w-4 h-4 ${isAr ? '' : 'rotate-180'}`} />
+              <ArrowRight className={`w-4 h-4 ${isAr ? '' : 'rotate-180'}`} aria-hidden="true" />
             </button>
           )}
           <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
@@ -539,26 +541,31 @@ Question: "${q}"`;
               {/* Avatar Controls */}
               <div className="flex items-center gap-1 shrink-0">
                 <button
+                  type="button"
                   onClick={() => setIsAvatarPlaying(!isAvatarPlaying)}
-                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                  aria-label={isAvatarPlaying ? loc('Pause 3D Avatar', 'إيقاف الأفاتار') : loc('Play 3D Avatar', 'تشغيل الأفاتار')}
+                  aria-pressed={isAvatarPlaying}
+                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                     isDarkMode
                       ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white'
                       : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
                   }`}
                   title={isAvatarPlaying ? loc('Pause', 'إيقاف مؤقت') : loc('Play', 'تشغيل')}
                 >
-                  {isAvatarPlaying ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  {isAvatarPlaying ? <Square className="w-3.5 h-3.5" aria-hidden="true" /> : <Play className="w-3.5 h-3.5" aria-hidden="true" />}
                 </button>
                 <button
+                  type="button"
                   onClick={handleReplayAvatar}
-                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                  aria-label={loc('Replay Sign Sequence', 'إعادة الحركة الإشارية')}
+                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                     isDarkMode
                       ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-teal-400'
                       : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-teal-700 hover:bg-stone-200'
                   }`}
                   title={loc('Replay Sign Sequence', 'إعادة الحركة الإشارية')}
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -639,11 +646,15 @@ Question: "${q}"`;
                       else handleDirectSignScript();
                     }
                   }}
+                  aria-label={loc(
+                    'Type any text to sign directly, or ask a question',
+                    'اكتب أي نص أو جملة للترجمة الفورية، أو اسأل سؤالاً'
+                  )}
                   placeholder={loc(
                     'Type any text to sign directly, or ask a question…',
                     'اكتب أي نص أو جملة للترجمة الفورية، أو اسأل سؤالاً...'
                   )}
-                  className={`flex-1 p-2 rounded-xl border text-xs focus:outline-none transition-all ${
+                  className={`flex-1 p-2 rounded-xl border text-xs focus:outline-none transition-all focus-visible:ring-2 focus-visible:ring-teal-400 ${
                     isDarkMode
                       ? 'bg-[#0B1114] border-stone-800 text-stone-100 placeholder:text-stone-500 focus:border-teal-500'
                       : 'bg-white border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-teal-600 shadow-sm'
@@ -652,8 +663,11 @@ Question: "${q}"`;
 
                 {/* Voice button */}
                 <button
+                  type="button"
                   onClick={toggleQuestionVoice}
-                  className={`p-2 rounded-xl border text-xs transition-colors cursor-pointer shrink-0 ${
+                  aria-label={isQuestionVoiceActive ? loc('Stop Voice Input', 'إيقاف الإملاء الصوتي') : loc('Speak by Voice', 'تحدث بالصوت')}
+                  aria-pressed={isQuestionVoiceActive}
+                  className={`p-2 rounded-xl border text-xs transition-colors cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                     isQuestionVoiceActive
                       ? 'bg-rose-500 text-white border-rose-400 animate-pulse'
                       : isDarkMode
@@ -662,29 +676,33 @@ Question: "${q}"`;
                   }`}
                   title={loc('Speak by Voice', 'تحدث بالصوت')}
                 >
-                  {isQuestionVoiceActive ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  {isQuestionVoiceActive ? <MicOff className="w-4 h-4" aria-hidden="true" /> : <Mic className="w-4 h-4" aria-hidden="true" />}
                 </button>
               </div>
 
               {/* Action Buttons: Direct Sign 🤟 + Ask AI ✨ */}
               <div className="grid grid-cols-2 gap-2 shrink-0">
                 <button
+                  type="button"
                   onClick={() => handleDirectSignScript()}
                   disabled={!aiQuestion.trim()}
-                  className="py-2 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                  aria-label={loc('Sign this text directly in 3D avatar', 'ترجمة هذا النص مباشرة على الأفاتار 3D')}
+                  className="py-2 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
                   title={loc('Sign this text directly in 3D avatar', 'ترجمة هذا النص مباشرة على الأفاتار 3D')}
                 >
-                  <Hand className="w-3.5 h-3.5 shrink-0" />
+                  <Hand className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>{loc('Direct Sign 🤟', 'ترجمة للإشارة 🤟')}</span>
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handleAskAi()}
                   disabled={!aiQuestion.trim() || isAiLoading}
-                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                  aria-label={loc('Ask AI and sign explanation', 'اسأل الذكاء الاصطناعي واعرض الشرح بالإشارة')}
+                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
                   title={loc('Ask AI & sign explanation', 'اسأل الذكاء الاصطناعي واعرض الشرح بالإشارة')}
                 >
-                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>{loc('Ask AI & Sign ✨', 'اسأل واشرح ✨')}</span>
                 </button>
               </div>
@@ -728,8 +746,11 @@ Question: "${q}"`;
 
               {/* Start / Stop Camera Button */}
               <button
+                type="button"
                 onClick={isCameraActive ? handleStopCamera : handleStartCamera}
-                className={`py-1.5 px-3.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer shrink-0 ${
+                aria-label={isCameraActive ? loc('Stop Camera Sign Recognition', 'إيقاف كاميرا لغة الإشارة') : loc('Start Camera Sign Recognition', 'تشغيل كاميرا لغة الإشارة')}
+                aria-pressed={isCameraActive}
+                className={`py-1.5 px-3.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                   isCameraActive
                     ? 'bg-rose-600 hover:bg-rose-700 text-white'
                     : 'bg-teal-700 hover:bg-teal-800 text-white'
@@ -737,12 +758,12 @@ Question: "${q}"`;
               >
                 {isCameraActive ? (
                   <>
-                    <CameraOff className="w-3.5 h-3.5" />
+                    <CameraOff className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>{loc('Stop Camera', 'إيقاف الكاميرا')}</span>
                   </>
                 ) : (
                   <>
-                    <Camera className="w-3.5 h-3.5" />
+                    <Camera className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>{loc('Start Camera', 'تشغيل الكاميرا')}</span>
                   </>
                 )}
@@ -838,10 +859,12 @@ Question: "${q}"`;
                     isDarkMode ? 'border-stone-800 text-stone-400' : 'border-stone-200 text-stone-600'
                   }`}>
                     <button
+                      type="button"
                       onClick={() => setAccumulatedText('')}
-                      className="text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer font-bold"
+                      aria-label={loc('Clear recognized words', 'مسح الكلمات المترجمة')}
+                      className="text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer font-bold focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none rounded"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3 h-3" aria-hidden="true" />
                       <span>{loc('Clear', 'مسح')}</span>
                     </button>
                   </div>
@@ -852,16 +875,23 @@ Question: "${q}"`;
               <div className="grid grid-cols-2 gap-2 shrink-0">
                 {/* 1. Live Audio Output */}
                 <button
+                  type="button"
                   onClick={handleSpeakAccumulatedText}
                   disabled={!accumulatedText.trim()}
-                  className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer ${
+                  aria-label={
+                    isSpeakingCameraText
+                      ? loc('Speaking recognized words', 'جاري نطق الكلمات المترجمة')
+                      : loc('Live audio playback of recognized signs', 'نطق الكلمات المترجمة بصوت حي مباشر')
+                  }
+                  aria-pressed={isSpeakingCameraText}
+                  className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                     isSpeakingCameraText
                       ? 'bg-emerald-500 text-white animate-pulse'
                       : 'bg-teal-700 hover:bg-teal-800 disabled:opacity-40 text-white'
                   }`}
                   title={loc('Live audio playback of recognized signs', 'نطق الكلمات المترجمة بصوت حي مباشر')}
                 >
-                  <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                  <Volume2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>
                     {isSpeakingCameraText
                       ? loc('Speaking… 🔊', 'جاري النطق… 🔊')
@@ -871,11 +901,13 @@ Question: "${q}"`;
 
                 {/* 2. Send Question to AI Avatar */}
                 <button
+                  type="button"
                   onClick={handleSendToAiTutor}
                   disabled={!accumulatedText.trim() || isAiLoading}
-                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                  aria-label={loc('Send recognized text to AI Avatar', 'إرسال النص المترجم للأفاتار الذكي')}
+                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
                 >
-                  <Bot className="w-3.5 h-3.5 shrink-0" />
+                  <Bot className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>{loc('Send to AI Avatar 🤖', 'إرسال للأفاتار 🤖')}</span>
                 </button>
               </div>

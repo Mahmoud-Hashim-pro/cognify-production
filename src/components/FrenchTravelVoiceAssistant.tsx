@@ -572,20 +572,24 @@ Return STRICT JSON:
         <div className="flex items-center gap-3">
           {onNavigateBack && (
             <button
+              type="button"
               onClick={onNavigateBack}
-              className="p-2.5 text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 transition-all"
+              aria-label={localize(profile.language, 'Back', 'رجوع')}
+              className="p-2.5 text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
               title={localize(profile.language, 'Back', 'رجوع')}
             >
-              <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+              <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
             </button>
           )}
           {onMenuClick && (
             <button
+              type="button"
               onClick={onMenuClick}
-              className="p-2.5 text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 transition-all md:hidden"
+              aria-label={localize(profile.language, 'Open Menu', 'فتح القائمة')}
+              className="p-2.5 text-slate-300 hover:text-white bg-[#150917] border border-[#4A1224]/60 hover:border-[#4A1224]/50 rounded-2xl active:scale-95 transition-all md:hidden focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
               title={localize(profile.language, 'Open Menu', 'فتح القائمة')}
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5" aria-hidden="true" />
             </button>
           )}
 

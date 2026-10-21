@@ -109,8 +109,13 @@ export default function EditGoalModal({ goal, onClose, onSave, language }: EditG
                   {isArabic ? 'تعديل الهدف' : 'Edit Goal'}
                 </h2>
               </div>
-              <button onClick={onClose} className="p-2 rounded-xl hover:bg-[#4A1224]/30 transition-colors text-slate-400 hover:text-[#E5A93C]">
-                <X className="w-5 h-5" />
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={isArabic ? 'إغلاق نافذة تعديل الهدف' : 'Close edit goal dialog'}
+                className="p-2 rounded-xl hover:bg-[#4A1224]/30 transition-colors text-slate-400 hover:text-[#E5A93C] focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
+              >
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
