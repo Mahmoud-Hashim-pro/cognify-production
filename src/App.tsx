@@ -198,7 +198,7 @@ export default function App() {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('cognify_default_disability_tab');
-        if (saved === 'vision' || saved === 'deaf' || saved === 'chat' || saved === 'caregiver') {
+        if (saved === 'vision' || saved === 'deaf' || saved === 'chat' || saved === 'caregiver' || saved === 'hub') {
           return saved as DisabilityTab;
         }
       } catch {}

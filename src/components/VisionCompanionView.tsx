@@ -1366,12 +1366,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     window.location.hash = '#chat';
                   }
                 }}
-                aria-label={t('Back to Assistant', 'العودة للمساعد', 'Retour')}
+                aria-label={t('Back to Features Hub', 'العودة للميزات', 'Retour aux fonctionnalités')}
                 className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
-                title={t('Back to Assistant / Tutor', 'العودة للمساعد أو المرشد الذكي', 'Retour')}
+                title={t('Back to Features Hub', 'العودة لقائمة الميزات والأدوات', 'Retour aux fonctionnalités')}
               >
                 <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-                <span className="hidden sm:inline">{t('Back', 'رجوع', 'Retour')}</span>
+                <span className="hidden sm:inline">{t('Features', 'الميزات', 'Retour')}</span>
               </button>
 
             {/* Three Language Choices: Arabic, English, French */}

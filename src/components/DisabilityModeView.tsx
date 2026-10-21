@@ -105,7 +105,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 }, ref) {
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => {
     const directTab = currentTab || detectDirectDisabilityTab(profile);
-    return directTab === 'hub' ? 'chat' : directTab;
+    return directTab;
   });
   const [showPassportModal, setShowPassportModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ModuleCategory>('all');
@@ -116,7 +116,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   // Sync activeTab whenever parent updates currentTab
   useEffect(() => {
     if (currentTab && currentTab !== activeTab) {
-      setActiveTab(currentTab === 'hub' ? 'chat' : currentTab);
+      setActiveTab(currentTab);
     }
   }, [currentTab, activeTab]);
 
@@ -132,16 +132,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     if (currentMode && currentMode !== lastProfileModeRef.current) {
       lastProfileModeRef.current = currentMode;
       const directTab = currentTab || detectDirectDisabilityTab(profile);
-      setActiveTab(directTab === 'hub' ? 'chat' : directTab);
+      setActiveTab(directTab);
     }
   }, [profile?.accessibilityMode, profile?.disabilityType, currentTab]);
 
   // Set default suite persistently when user chooses a suite
   const handleSelectTab = React.useCallback((tab: DisabilityTab) => {
-    const targetTab = tab === 'hub' ? 'chat' : tab;
+    const targetTab = tab;
     setActiveTab(targetTab);
     onTabChange?.(targetTab);
-    if (targetTab === 'vision' || targetTab === 'deaf' || targetTab === 'chat') {
+    if (targetTab === 'vision' || targetTab === 'deaf' || targetTab === 'chat' || targetTab === 'hub') {
       try {
         localStorage.setItem('cognify_default_disability_tab', targetTab);
       } catch {}
@@ -163,10 +163,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, [profile, setProfile, onTabChange]);
 
   const handleNavigateBack = React.useCallback(() => {
-    if (activeTab !== 'chat') {
-      handleSelectTab('chat');
+    if (activeTab !== 'hub') {
+      handleSelectTab('hub');
       try {
-        localStorage.setItem('cognify_default_disability_tab', 'chat');
+        localStorage.setItem('cognify_default_disability_tab', 'hub');
       } catch {}
     } else if (onNavigate) {
       onNavigate('chat');
@@ -296,8 +296,28 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       badgeAr: 'المكفوفين وضعاف البصر',
       descEn: 'Friendly conversational audio companion. Reads Egyptian pounds & currencies, matches clothes colors, recognizes people, and guides with tactile haptic vibration.',
       descAr: 'وصف صوتي بشري فوري، قارئ العملات الورقية (الجنيه المصري والعملات)، تنسيق الملابس، التعرف على الأشخاص والوجوه، والملاحة اللمسية بالاهتزاز.',
-      quickFeaturesAr: ['قارئ العملات الفوري', 'التعرف على الأشخاص والوجوه', 'تنسيق ألوان الملابس', 'ملاحة واهتزازات لمسية', 'الذاكرة المكانية للأشياء'],
-      quickFeaturesEn: ['Currency Reader', 'Face & Person Memory', 'Color Matching', 'Haptic White Cane', 'Spatial Memory'],
+      quickFeaturesAr: [
+        '💵 قارئ العملات الورقية والنقود',
+        '👤 التعرف على الوجوه والأشخاص',
+        '🎨 فحص وتنسيق ألوان الملابس',
+        '🦯 عصا الملاحة الذكية والنبضات اللمسية',
+        '📖 وضع القراءة واستخراج النصوص',
+        '🎓 سكانر المحاضرات وشرح السبورة',
+        '🛍️ مساعد التسوق وفحص المنتجات',
+        '📄 استوديو المستندات وقراءة PDF',
+        '📍 الذاكرة المكانية (حاجتي فين؟)'
+      ],
+      quickFeaturesEn: [
+        '💵 Cash & Currency Reader',
+        '👤 Face & Person Recognition',
+        '🎨 Color & Outfit Matcher',
+        '🦯 Smart Haptic Navigation Cane',
+        '📖 Real-time Text OCR Reading',
+        '🎓 Lecture & Board Scanner',
+        '🛍️ Shopping & Product Assistant',
+        '📄 Document Studio & PDF Reader',
+        '📍 Spatial Memory Locator'
+      ],
       Icon: Eye,
       accentColor: 'text-emerald-400',
       borderGlow: 'hover:border-emerald-500/60 border-stone-200 dark:border-stone-800',
@@ -460,9 +480,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             }`}
           >
             {[
-              { id: 'chat' as const, labelAr: 'المرشد الذكي', labelEn: 'AI Tutor', Icon: Brain },
+              { id: 'hub' as const, labelAr: 'كافة الميزات', labelEn: 'All Features', Icon: Grid },
               { id: 'vision' as const, labelAr: 'البصري', labelEn: 'Visual', Icon: Eye },
               { id: 'deaf' as const, labelAr: 'السمعي', labelEn: 'Hearing', Icon: Ear },
+              { id: 'chat' as const, labelAr: 'المرشد الذكي', labelEn: 'AI Tutor', Icon: Brain },
             ].map((suite) => {
               const isSelected = suite.id === 'deaf' ? isDeafActive : activeTab === suite.id;
               return (
@@ -581,6 +602,164 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           {/* ═════════════════════════════════════════════════════════════════════
               ACTIVE MODULE VIEWS (CLEAN & DEDICATED)
              ═════════════════════════════════════════════════════════════════════ */}
+
+          {/* ═════════════════════════════════════════════════════════════════════
+              VIEW: DISABILITY MODULES & FEATURES CARDS HUB
+             ═════════════════════════════════════════════════════════════════════ */}
+          {activeTab === 'hub' && (
+            <motion.div
+              key="hub-features-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex-1 w-full h-full overflow-y-auto custom-scrollbar p-3 sm:p-6 md:p-8"
+            >
+              <div className="max-w-6xl mx-auto space-y-6 pb-24">
+                {/* Header Welcome Banner */}
+                <div className={`p-6 sm:p-8 rounded-3xl border shadow-sm transition-colors ${
+                  isDarkMode 
+                    ? 'bg-[#121B1E] border-stone-800 text-white' 
+                    : 'bg-white border-stone-200 text-stone-900'
+                }`}>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 mb-2">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>{localize(profile.language, 'Assistive Intelligence Suite', 'منظومة الذكاء الاصطناعي التيسيري')}</span>
+                      </div>
+                      <h1 className="text-xl sm:text-2xl font-black tracking-tight">
+                        {localize(profile.language, 'Choose a Feature or Assistive Tool', 'اختر الميزة أو الأداة المطلوبة')}
+                      </h1>
+                      <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1 max-w-2xl leading-relaxed">
+                        {localize(
+                          profile.language,
+                          'Access all vision, hearing, cognitive, and sensory tools directly with full accessibility adaptation.',
+                          'استكشف وتنقّل بين كافة ميزات التيسير البصري والسمعي والإدراكي المصممة لدعمك وتلبية احتياجاتك مباشرة.'
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Category Filter Chips */}
+                    <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-stone-100 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 self-stretch sm:self-auto overflow-x-auto">
+                      {[
+                        { id: 'all' as const, labelAr: 'كافة الميزات', labelEn: 'All Features' },
+                        { id: 'vision' as const, labelAr: 'البصري', labelEn: 'Vision' },
+                        { id: 'hearing' as const, labelAr: 'السمعي والإشارة', labelEn: 'Hearing & Sign' },
+                      ].map((cat) => (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                            selectedCategory === cat.id
+                              ? 'bg-teal-700 text-white shadow-sm'
+                              : 'text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white'
+                          }`}
+                        >
+                          {localize(profile.language, cat.labelEn, cat.labelAr)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  {filteredModules.map((m) => {
+                    const CardIcon = m.Icon;
+                    const isActive = isModuleActiveForProfile(m);
+
+                    return (
+                      <div
+                        key={m.id}
+                        role="article"
+                        aria-label={localize(profile.language, m.titleEn, m.titleAr)}
+                        onClick={() => handleSelectTab(m.id as DisabilityTab)}
+                        className={`group relative rounded-3xl p-6 sm:p-7 border transition-all duration-200 cursor-pointer flex flex-col justify-between hover:shadow-xl active:scale-[0.99] ${
+                          isDarkMode
+                            ? 'bg-[#121B1E] hover:bg-[#162327] border-stone-800 hover:border-teal-500/60'
+                            : 'bg-white hover:bg-stone-50/90 border-stone-200 hover:border-teal-500/60'
+                        } ${isActive ? 'ring-2 ring-teal-500/40' : ''}`}
+                      >
+                        <div className="space-y-4">
+                          {/* Card Header: Icon + Title + Category Badge */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3.5">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-md ${
+                                isDarkMode ? 'bg-[#1A262B] text-teal-400 border border-teal-500/30' : 'bg-teal-50 text-teal-700 border border-teal-200'
+                              }`}>
+                                <CardIcon className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <h2 className="text-base sm:text-lg font-black text-stone-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                                  {localize(profile.language, m.titleEn, m.titleAr)}
+                                </h2>
+                                <span className="inline-block mt-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+                                  {localize(profile.language, m.badgeEn, m.badgeAr)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {isActive && (
+                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black bg-teal-500/20 text-teal-600 dark:text-teal-300 border border-teal-500/30">
+                                {localize(profile.language, 'Recommended', 'موصى به لملفك')}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Card Description */}
+                          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+                            {localize(profile.language, m.descEn, m.descAr)}
+                          </p>
+
+                          {/* Quick Feature Pills (الـ features داخل الكارت) */}
+                          <div className="pt-2">
+                            <span className="text-[11px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500 block mb-2">
+                              {localize(profile.language, 'Included Features:', 'الميزات والأدوات المشمولة:')}
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {(isAr ? m.quickFeaturesAr : m.quickFeaturesEn).map((feat, idx) => (
+                                <span
+                                  key={idx}
+                                  className={`text-xs font-semibold px-2.5 py-1 rounded-xl border transition-colors ${
+                                    isDarkMode
+                                      ? 'bg-stone-900/60 border-stone-800 text-stone-300 group-hover:border-teal-500/30'
+                                      : 'bg-stone-100 border-stone-200 text-stone-700 group-hover:border-teal-200'
+                                  }`}
+                                >
+                                  {feat}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card Bottom Action */}
+                        <div className="pt-6 mt-4 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between">
+                          <span className="text-xs font-bold text-stone-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors flex items-center gap-1">
+                            <span>{localize(profile.language, 'Open Suite', 'فتح الميزة')}</span>
+                            <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectTab(m.id as DisabilityTab);
+                            }}
+                            className="px-4 py-2 rounded-xl text-xs font-black bg-teal-700 hover:bg-teal-800 text-white shadow-sm flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                          >
+                            <span>{localize(profile.language, 'Launch Tool', 'تشغيل الأداة')}</span>
+                            <ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {activeTab === 'vision' && (
             <motion.div
@@ -854,9 +1033,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         }`}
       >
         {[
-          { id: 'chat' as const, labelAr: 'المرشد', labelEn: 'Tutor', icon: Brain },
+          { id: 'hub' as const, labelAr: 'الميزات', labelEn: 'Features', icon: Grid },
           { id: 'vision' as const, labelAr: 'البصري', labelEn: 'Vision', icon: Eye },
           { id: 'deaf' as const, labelAr: 'السمعي', labelEn: 'Hearing', icon: Ear },
+          { id: 'chat' as const, labelAr: 'المرشد', labelEn: 'Tutor', icon: Brain },
         ].map((item) => {
           const isSelected = item.id === 'deaf' ? isDeafActive : activeTab === item.id;
           const Icon = item.icon;
