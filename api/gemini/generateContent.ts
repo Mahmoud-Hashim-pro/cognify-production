@@ -12,7 +12,7 @@
  * 4. User-isolated idempotent response caching (zero cross-user leakage).
  * 5. Multi-provider text fallback (Gemini -> NVIDIA -> Groq -> xAI).
  */
-import { guard, readBody, geminiFetch, fallbackChat, type AssistiveQuotaCategory } from '../_lib/ai.js';
+import { guard, readBody, geminiFetch, fallbackChat, validateAttachmentMimeAndName, type AssistiveQuotaCategory } from '../_lib/ai.js';
 import { applyCorsHeaders } from '../_lib/cors.js';
 import {
   deduplicateInflight,
@@ -50,6 +50,18 @@ export default async function handler(req: any, res: any) {
 
     // Verify authentication, rate limits, and category-specific allowances
     if (!(await guard(req, res, category))) return;
+
+    // Phase 10: Validate MIME types of any inline media against allowlist
+    for (const p of parts) {
+      if (p?.inlineData) {
+        const mime = p.inlineData.mimeType;
+        const validation = validateAttachmentMimeAndName({ type: mime });
+        if (!validation.valid) {
+          res.status(415).json({ error: validation.reason || 'Unsupported media type' });
+          return;
+        }
+      }
+    }
 
     // Generous media size allowance: 50MB for audio, 25MB for images/documents
     const inlineBytes = parts.reduce(

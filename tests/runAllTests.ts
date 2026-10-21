@@ -99,6 +99,7 @@ import { runNavigationAndAuthVerification } from './navigationAndAuthVerificatio
 import { runEducationalBookStudioVerification } from './educationalBookStudioVerification.js';
 import { runAccessibilityToolkitVerification } from './accessibilityToolkitVerification.js';
 import { runUsageLimitsReliabilityVerification } from './usageLimitsReliabilityVerification.js';
+import { runSecurityPrivacyReviewVerification } from './securityPrivacyReviewVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2344,6 +2345,13 @@ Keep practicing closures with higher-order functions!
     const m34Res = await runUsageLimitsReliabilityVerification();
     totalPassed += m34Res.passed;
     totalFailed += m34Res.failed;
+  }
+
+  // 66. Milestone 35: Security & Privacy Review Engine (Phase 10)
+  {
+    const m35Res = await runSecurityPrivacyReviewVerification();
+    totalPassed += m35Res.passed;
+    totalFailed += m35Res.failed;
   }
 
   console.log(`\n========================================`);

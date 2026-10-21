@@ -1,5 +1,5 @@
 /** Non-streaming chat. Returns { result }. Keys stay server-side. */
-import { guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat, type AssistiveQuotaCategory } from '../_lib/ai.js';
+import { guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat, validateAttachmentMimeAndName, type AssistiveQuotaCategory } from '../_lib/ai.js';
 import { classifyRequest } from '../_lib/router.js';
 import { validateAndSanitizeResponse } from '../_lib/qualityGuard.js';
 import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
@@ -36,15 +36,22 @@ export default async function handler(req: any, res: any) {
 
     if (!(await guard(req, res, assistiveCategory))) return;
 
-    // Phase 3 — Server-side attachment size & format validation
+    // Phase 3 & 10 — Server-side attachment size & MIME validation
     for (const att of safeAttachments) {
-      if (att && att.data) {
-        const approxBytes = Math.round((att.data.length * 3) / 4);
-        const isAudio = (att.type || '').startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(att.name || '');
-        const maxLimit = isAudio ? 50 * 1024 * 1024 : 25 * 1024 * 1024;
-        if (approxBytes > maxLimit) {
-          res.status(413).json({ error: `Payload too large: attachment "${att.name || 'file'}" exceeds limit` });
+      if (att) {
+        const validation = validateAttachmentMimeAndName(att);
+        if (!validation.valid) {
+          res.status(415).json({ error: validation.reason || 'Unsupported media type' });
           return;
+        }
+        if (att.data) {
+          const approxBytes = Math.round((att.data.length * 3) / 4);
+          const isAudio = (att.type || '').startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(att.name || '');
+          const maxLimit = isAudio ? 50 * 1024 * 1024 : 25 * 1024 * 1024;
+          if (approxBytes > maxLimit) {
+            res.status(413).json({ error: `Payload too large: attachment "${att.name || 'file'}" exceeds limit` });
+            return;
+          }
         }
       }
     }

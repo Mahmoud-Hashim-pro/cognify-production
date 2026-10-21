@@ -16,7 +16,7 @@
  */
 import {
   guard, readBody, buildPersona, threadsSummary, buildContents,
-  buildOpenAIMessages, geminiFetch, providerFor, orderedFallbackKeys, stripReasoning,
+  buildOpenAIMessages, geminiFetch, providerFor, orderedFallbackKeys, stripReasoning, validateAttachmentMimeAndName,
 } from '../_lib/ai.js';
 import { classifyRequest, type TaskCategory } from '../_lib/router.js';
 import { logTelemetry } from '../_lib/telemetry.js';
@@ -185,6 +185,27 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
+    // Phase 10 — Server-side attachment size & MIME validation
+    const safeAttachments = Array.isArray(attachments) ? attachments : [];
+    for (const att of safeAttachments) {
+      if (att) {
+        const validation = validateAttachmentMimeAndName(att);
+        if (!validation.valid) {
+          res.status(415).json({ error: validation.reason || 'Unsupported media type' });
+          return;
+        }
+        if (att.data) {
+          const approxBytes = Math.round((att.data.length * 3) / 4);
+          const isAudio = (att.type || '').startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(att.name || '');
+          const maxLimit = isAudio ? 50 * 1024 * 1024 : 25 * 1024 * 1024;
+          if (approxBytes > maxLimit) {
+            res.status(413).json({ error: `Payload too large: attachment "${att.name || 'file'}" exceeds limit` });
+            return;
+          }
+        }
+      }
+    }
+
     // Phase 1.1 — deterministic router with student state awareness.
     const effectiveState = studentState || profile?.studentState;
 
@@ -223,7 +244,7 @@ export default async function handler(req: any, res: any) {
     };
 
     const safeHistory = Array.isArray(history) ? history : [];
-    const safeAttachments = Array.isArray(attachments) ? attachments : [];
+
 
     const category = classifyRequest(message, safeAttachments, effectiveState);
     const system = buildPersona(profile, threadsSummary(profile), effectiveState, message);
