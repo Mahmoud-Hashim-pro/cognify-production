@@ -100,6 +100,7 @@ import { runEducationalBookStudioVerification } from './educationalBookStudioVer
 import { runAccessibilityToolkitVerification } from './accessibilityToolkitVerification.js';
 import { runUsageLimitsReliabilityVerification } from './usageLimitsReliabilityVerification.js';
 import { runSecurityPrivacyReviewVerification } from './securityPrivacyReviewVerification.js';
+import { runEndToEndAndRegressionVerification } from './endToEndAndRegressionVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2352,6 +2353,13 @@ Keep practicing closures with higher-order functions!
     const m35Res = await runSecurityPrivacyReviewVerification();
     totalPassed += m35Res.passed;
     totalFailed += m35Res.failed;
+  }
+
+  // 67. Milestone 36: End-to-End & Comprehensive Regression Testing (Phase 11)
+  {
+    const m36Res = await runEndToEndAndRegressionVerification();
+    totalPassed += m36Res.passed;
+    totalFailed += m36Res.failed;
   }
 
   console.log(`\n========================================`);
