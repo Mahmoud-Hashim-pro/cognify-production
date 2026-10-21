@@ -252,7 +252,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       id: 'all' as const,
       titleEn: 'All Suites',
       titleAr: 'جميع الأدوات',
-      emoji: '🌟',
       icon: Sparkles,
       color: 'text-teal-600 dark:text-teal-400',
       activeBg: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-500/50',
@@ -261,25 +260,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     },
     {
       id: 'vision' as const,
-      titleEn: 'Visual & Blind',
-      titleAr: 'المكفوفين وضعاف البصر',
-      emoji: '👁️',
+      titleEn: 'Vision & Perception',
+      titleAr: 'الرؤية والإدراك',
       icon: Eye,
-      color: 'text-emerald-400',
-      activeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
-      descAr: 'الرفيق البصري الذكي، قارئ العملات والملابس، حفظ الوجوه، والملاحة بالاهتزاز اللمسي',
-      descEn: 'Conversational audio eyes, currency reader, face recall, clothes matching & haptic cane',
+      color: 'text-teal-600 dark:text-teal-400',
+      activeBg: 'bg-teal-500/20 text-teal-300 border-teal-500/50',
+      descAr: 'المساعد البصري الذكي، قراءة النصوص والعملات، وفحص المحيط وتنسيق الألوان',
+      descEn: 'Conversational visual assistant, currency and text reading, scene and color recognition',
     },
     {
       id: 'hearing' as const,
-      titleEn: 'Deaf & Hard of Hearing',
-      titleAr: 'الصم وضعاف السمع',
-      emoji: '👂',
+      titleEn: 'Hearing & Communication',
+      titleAr: 'السمع والتواصل',
       icon: Ear,
-      color: 'text-[#E5A93C]',
-      activeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50',
-      descAr: 'تفريغ فوري لكلام المتحدث، نطق صوتي للغرفة، بطاقات تواصل سريعة، ومستشعر أصوات حقيقي في شاشة واحدة',
-      descEn: 'Live speech captions, vocal speaker, express AAC cards, and loud sound sentinel in one screen',
+      color: 'text-teal-600 dark:text-teal-400',
+      activeBg: 'bg-teal-500/20 text-teal-300 border-teal-500/50',
+      descAr: 'التفريغ الفوري للكلام، استوديو لغة الإشارة 3D، وبطاقات التواصل التكيفي',
+      descEn: 'Live speech captions, 3D sign language studio, and adaptive AAC communication',
     },
   ];
 
@@ -289,41 +286,41 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     {
       id: 'vision' as const,
       category: 'vision' as const,
-      titleEn: 'Visual Companion (AI Eyes)',
+      titleEn: 'Visual Companion',
       titleAr: 'الرفيق البصري الذكي',
       shortEn: 'Visual Eyes',
       shortAr: 'الرفيق البصري',
-      badgeEn: 'Blind & Low Vision',
-      badgeAr: 'المكفوفين وضعاف البصر',
-      descEn: 'Friendly conversational audio companion. Reads Egyptian pounds & currencies, matches clothes colors, recognizes people, and guides with tactile haptic vibration.',
-      descAr: 'وصف صوتي بشري فوري، قارئ العملات الورقية (الجنيه المصري والعملات)، تنسيق الملابس، التعرف على الأشخاص والوجوه، والملاحة اللمسية بالاهتزاز.',
+      badgeEn: 'Vision & Spatial Perception',
+      badgeAr: 'الرؤية والإدراك المكاني',
+      descEn: 'Conversational assistant with computer vision. Reads currencies, recognizes people, describes environments, matches outfit colors, and provides tactile guidance.',
+      descAr: 'وصف صوتي فوري يعتمد على الرؤية الحاسوبية: قراءة العملات الورقية والنقود، التعرف على الأشخاص والوجوه، فحص وتنسيق الألوان، وقراءة النصوص والملاحة بالاهتزاز اللمسي.',
       quickFeaturesAr: [
-        '💵 قارئ العملات الورقية والنقود',
-        '👤 التعرف على الوجوه والأشخاص',
-        '🎨 فحص وتنسيق ألوان الملابس',
-        '🦯 عصا الملاحة الذكية والنبضات اللمسية',
-        '📖 وضع القراءة واستخراج النصوص',
-        '🎓 سكانر المحاضرات وشرح السبورة',
-        '🛍️ مساعد التسوق وفحص المنتجات',
-        '📄 استوديو المستندات وقراءة PDF',
-        '📍 الذاكرة المكانية (حاجتي فين؟)'
+        'قارئ العملات والنقود',
+        'التعرف على الوجوه والأشخاص',
+        'فحص وتنسيق الألوان',
+        'الملاحة اللمسية بالاهتزاز',
+        'التعرف الضوئي على النصوص (OCR)',
+        'سكانر السبورة والمحاضرات',
+        'مساعد التسوق والمنتجات',
+        'استوديو المستندات وPDF',
+        'الذاكرة المكانية وحفظ الأماكن'
       ],
       quickFeaturesEn: [
-        '💵 Cash & Currency Reader',
-        '👤 Face & Person Recognition',
-        '🎨 Color & Outfit Matcher',
-        '🦯 Smart Haptic Navigation Cane',
-        '📖 Real-time Text OCR Reading',
-        '🎓 Lecture & Board Scanner',
-        '🛍️ Shopping & Product Assistant',
-        '📄 Document Studio & PDF Reader',
-        '📍 Spatial Memory Locator'
+        'Currency & Cash Reader',
+        'Person & Face Recognition',
+        'Color & Outfit Matcher',
+        'Haptic Directional Guidance',
+        'Text & Document OCR',
+        'Lecture & Board Capture',
+        'Shopping & Label Assistant',
+        'Document & PDF Reader',
+        'Spatial Memory Locator'
       ],
       Icon: Eye,
-      accentColor: 'text-emerald-400',
-      borderGlow: 'hover:border-emerald-500/60 border-stone-200 dark:border-stone-800',
-      bgGlow: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-      buttonCls: 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 shadow-teal-500/20',
+      accentColor: 'text-teal-600 dark:text-teal-400',
+      borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
+      bgGlow: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs',
       matchingMode: 'Visual',
     },
     // Integrated Accessibility Toolkit (Phase 7)
@@ -331,20 +328,20 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       id: 'toolkit' as const,
       category: 'vision' as const,
       titleEn: 'Integrated Accessibility Toolkit',
-      titleAr: 'منظومة الوصول المتكاملة والمساعد البصري',
+      titleAr: 'منظومة الوصول المتكاملة',
       shortEn: 'Accessibility Toolkit',
       shortAr: 'منظومة الوصول',
-      badgeEn: 'Vision · Scanner · PDF · Stickers',
-      badgeAr: 'رؤية · سكانر · PDF · ملصقات',
-      descEn: 'Unified accessibility hub: WhatsApp sticker & image explainer, multi-page camera document scanner, PDF evidence assistant, and speech readout.',
-      descAr: 'مركز ميسر موحد: شارح ملصقات واتساب والصور، ماسح ضوئي متعدد الصفحات وصانع PDF، ومساعد الاستشهاد بأدلة PDF، مع قارئ صوتي متقدم.',
-      quickFeaturesAr: ['🖼️ شارح ملصقات واتساب والصور بالذكاء الاصطناعي', '📄 ماسح ضوئي متعدد الصفحات وصانع PDF', '🔍 مساعد البحث والاستشهاد بأدلة PDF', '🎙️ تفريغ المحاضرات وسجل النشاط الشامل'],
-      quickFeaturesEn: ['🖼️ AI WhatsApp Sticker & Image Explainer', '📄 Multi-page Camera Scanner & PDF Creator', '🔍 PDF Evidence Q&A with Page Quotes', '🎙️ Audio Transcriber & Unified Activity Store'],
+      badgeEn: 'Vision · Scanner · PDF · Media',
+      badgeAr: 'رؤية · سكانر · PDF · وسائط',
+      descEn: 'Unified assistive suite: AI image and WhatsApp sticker explanations, multi-page document camera scanner, and document Q&A with evidence citations.',
+      descAr: 'مركز ميسر موحد: شارح الصور والملصقات بالذكاء الاصطناعي، ماسح ضوئي متعدد الصفحات وصانع PDF، ومساعد الاستشهاد بأدلة PDF، مع قارئ صوتي متقدم.',
+      quickFeaturesAr: ['شارح الصور والملصقات بالذكاء الاصطناعي', 'ماسح ضوئي متعدد الصفحات وصانع PDF', 'البحث والاستشهاد بأدلة PDF', 'تفريغ المحاضرات وسجل النشاط الشامل'],
+      quickFeaturesEn: ['AI Image & Media Explainer', 'Multi-Page Camera Scanner & PDF', 'PDF Evidence Q&A with Page Quotes', 'Audio Transcriber & Activity Log'],
       Icon: Sparkles,
-      accentColor: 'text-teal-400',
-      borderGlow: 'hover:border-teal-500/80 border-stone-200 dark:border-stone-800 ring-1 ring-teal-500/20',
-      bgGlow: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
-      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-sm',
+      accentColor: 'text-teal-600 dark:text-teal-400',
+      borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
+      bgGlow: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs',
       matchingMode: '',
     },
     // Accessible Educational Book Studio (Phase 6)
@@ -352,20 +349,20 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       id: 'studio' as const,
       category: 'vision' as const,
       titleEn: 'Accessible Educational Book Studio',
-      titleAr: 'استوديو الكتب والمستندات التعليمية الميسرة',
+      titleAr: 'استوديو الكتب والمستندات التعليمية',
       shortEn: 'Book Studio',
       shortAr: 'استوديو الكتب',
-      badgeEn: 'Accessible DOCX & PDF',
-      badgeAr: 'تنسيق وورد واختبارات ميسرة',
-      descEn: 'Transform raw notes, lectures, and exams into accessible Word (.docx) & PDF documents with automatic TOC, question recognition, and screen reader outline.',
+      badgeEn: 'Accessible Word & PDF',
+      badgeAr: 'تنسيق Word واختبارات ميسرة',
+      descEn: 'Transform raw notes, lectures, and exams into accessible Word (.docx) and PDF documents with automated TOC, question recognition, and semantic heading outlines.',
       descAr: 'تحويل المحتوى الخام والمسودات إلى مستندات Word واختبارات منسقة، تدعم الفهرس التلقائي، والتعرف على الأسئلة وهيكلية العناوين لقارئات الشاشة.',
-      quickFeaturesAr: ['📖 8 قوالب تعليمية (كتب، ملازم، امتحانات)', '❓ التعرف التلقائي على الأسئلة ومساحات الإجابة', '📄 تصدير DOCX حقيقي متوافق مع Word', '♿ استعراض هيكلية العناوين لقارئ الشاشة'],
-      quickFeaturesEn: ['📖 8 Educational Templates (Books, Exams, Notes)', '❓ Question & Answer Space Auto-Detection', '📄 Native DOCX Export for Word', '♿ Screen-Reader Friendly Outline Tree'],
+      quickFeaturesAr: ['8 قوالب تعليمية (كتب، ملازم، امتحانات)', 'التعرف التلقائي على الأسئلة ومساحات الإجابة', 'تصدير Word DOCX حقيقي متوافق', 'استعراض هيكلية العناوين لقارئ الشاشة'],
+      quickFeaturesEn: ['8 Educational Templates (Books, Exams, Notes)', 'Question & Answer Space Auto-Detection', 'Native Word DOCX Export', 'Screen-Reader Friendly Outline Tree'],
       Icon: BookOpen,
-      accentColor: 'text-indigo-400',
-      borderGlow: 'hover:border-indigo-500/80 border-stone-200 dark:border-stone-800 ring-1 ring-indigo-500/20',
-      bgGlow: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
-      buttonCls: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm',
+      accentColor: 'text-teal-600 dark:text-teal-400',
+      borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
+      bgGlow: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs',
       matchingMode: '',
     },
     // 2. HEARING (Unified 3D Sign & Hearing Studio)
@@ -376,27 +373,27 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       titleAr: 'استوديو لغة الإشارة 3D والمحطة السمعية',
       shortEn: '3D Sign Studio',
       shortAr: 'استوديو الإشارة 3D',
-      badgeEn: 'Deaf & Hard of Hearing',
-      badgeAr: 'الصم وضعاف السمع',
-      descEn: 'Unified 1-screen 3D sign language and deaf assistive studio: Interactive 3D Sign Avatar, direct script-to-sign, live camera sign recognition, and instant speech.',
+      badgeEn: 'Sign Language & Audio',
+      badgeAr: 'لغة الإشارة والتواصل الصوتي',
+      descEn: 'Unified sign language and assistive suite: Interactive 3D Sign Avatar, direct script-to-sign, live camera sign recognition, and instant speech synthesis.',
       descAr: 'استوديو ومحطة إشارة ميسرة موحدة في شاشة واحدة: أفاتار تفاعلي 3D، ترجمة النصوص للإشارة مباشرة، وقراءة إشارات اليدين بالكاميرا وتحويلها لصوت فوري.',
-      quickFeaturesAr: ['🤟 أفاتار تفاعلي للغة الإشارة 3D', '📝 ترجمة النصوص للإشارة مباشرة', '📷 قراءة إشارات اليدين بالكاميرا', '🔊 نطق صوتي فوري مباشر'],
-      quickFeaturesEn: ['🤟 3D Interactive Sign Avatar', '📝 Direct Script-to-Sign', '📷 Live Camera Hand Tracking', '🔊 Instant Voice Speaker'],
+      quickFeaturesAr: ['أفاتار تفاعلي للغة الإشارة 3D', 'ترجمة النصوص للإشارة مباشرة', 'قراءة إشارات اليدين بالكاميرا', 'نطق صوتي فوري مباشر'],
+      quickFeaturesEn: ['3D Interactive Sign Avatar', 'Direct Script-to-Sign', 'Live Camera Hand Tracking', 'Instant Voice Speaker'],
       Icon: Ear,
       accentColor: 'text-teal-600 dark:text-teal-400',
-      borderGlow: 'hover:border-teal-500/80 border-stone-200 dark:border-stone-800 ring-1 ring-teal-500/20',
-      bgGlow: 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30',
-      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-sm',
+      borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
+      bgGlow: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs',
       matchingMode: 'Sign-Only',
     },
     {
       id: 'chat' as const,
       category: 'all' as const,
       titleEn: 'Adaptive Cognitive Tutor',
-      titleAr: 'المساعد التعليمي الذكي المهيأ',
+      titleAr: 'المساعد التعليمي التكيفي',
       shortEn: 'Adaptive Tutor',
       shortAr: 'المساعد المهيأ',
-      badgeEn: 'All Learners',
+      badgeEn: 'Personalized Learning',
       badgeAr: 'دعم إدراكي متكيف',
       descEn: 'Pedagogical tutoring assistant tailored to individual cognitive speed, worked examples, and screen-reader accessible plain text.',
       descAr: 'مساعد تعليمي ذكي يتكيف مع وتيرتك واستيعابك، يقدم شرحاً خطوة بخطوة ومتوافق مع قارئات الشاشة والأجهزة المساعدة.',
@@ -406,13 +403,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       accentColor: 'text-teal-600 dark:text-teal-400',
       borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
       bgGlow: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30',
-      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-sm',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs',
       matchingMode: 'None',
     },
     {
       id: 'settings' as const,
       category: 'all' as const,
-      titleEn: 'Preferences & Dialects',
+      titleEn: 'Preferences & Display Options',
       titleAr: 'التفضيلات واللغات',
       shortEn: 'Settings',
       shortAr: 'الإعدادات',
@@ -446,7 +443,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       accentColor: 'text-teal-400',
       borderGlow: 'hover:border-teal-500/60 border-stone-200 dark:border-stone-800',
       bgGlow: 'bg-teal-500/10 text-teal-400 border-teal-500/30',
-      buttonCls: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-teal-500/20',
+      buttonCls: 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs',
       matchingMode: '',
     }] : []),
   ];
@@ -744,56 +741,58 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             handleSelectTab(m.id as DisabilityTab);
                           }
                         }}
-                        className={`group relative rounded-3xl p-6 sm:p-7 border transition-all duration-200 cursor-pointer flex flex-col justify-between hover:shadow-xl active:scale-[0.99] ${
+                        className={`group relative rounded-2xl p-6 border transition-all duration-200 cursor-pointer flex flex-col justify-between hover:shadow-sm active:scale-[0.99] ${
                           isDarkMode
-                            ? 'bg-[#121B1E] hover:bg-[#162327] border-stone-800 hover:border-teal-500/60'
-                            : 'bg-white hover:bg-stone-50/90 border-stone-200 hover:border-teal-500/60'
-                        } ${isActive ? 'ring-2 ring-teal-500/40' : ''}`}
+                            ? 'bg-[#121B1E] hover:bg-[#162327] border-stone-800 hover:border-teal-500/50'
+                            : 'bg-white hover:bg-stone-50 border-stone-200 hover:border-teal-600/40 shadow-xs'
+                        } ${isActive ? 'ring-2 ring-teal-600/40' : ''}`}
                       >
                         <div className="space-y-4">
                           {/* Card Header: Icon + Title + Category Badge */}
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-3.5">
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-md ${
-                                isDarkMode ? 'bg-[#1A262B] text-teal-400 border border-teal-500/30' : 'bg-teal-50 text-teal-700 border border-teal-200'
+                              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
+                                isDarkMode 
+                                  ? 'bg-[#1A262B] text-teal-400 border-teal-800/60' 
+                                  : 'bg-teal-50 text-teal-800 border-teal-200'
                               }`}>
-                                <CardIcon className="w-6 h-6" />
+                                <CardIcon className="w-5 h-5" />
                               </div>
                               <div>
-                                <h2 className="text-base sm:text-lg font-black text-stone-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                                <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
                                   {localize(profile.language, m.titleEn, m.titleAr)}
                                 </h2>
-                                <span className="inline-block mt-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+                                <span className="inline-block mt-0.5 text-xs font-medium px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
                                   {localize(profile.language, m.badgeEn, m.badgeAr)}
                                 </span>
                               </div>
                             </div>
 
                             {isActive && (
-                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black bg-teal-500/20 text-teal-600 dark:text-teal-300 border border-teal-500/30">
+                              <span className="shrink-0 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30">
                                 {localize(profile.language, 'Recommended', 'موصى به لملفك')}
                               </span>
                             )}
                           </div>
 
                           {/* Card Description */}
-                          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+                          <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed font-normal">
                             {localize(profile.language, m.descEn, m.descAr)}
                           </p>
 
                           {/* Quick Feature Pills (الـ features داخل الكارت) */}
                           <div className="pt-2">
-                            <span className="text-[11px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500 block mb-2">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 block mb-2">
                               {localize(profile.language, 'Included Features:', 'الميزات والأدوات المشمولة:')}
                             </span>
                             <div className="flex flex-wrap gap-1.5">
                               {(isAr ? m.quickFeaturesAr : m.quickFeaturesEn).map((feat, idx) => (
                                 <span
                                   key={idx}
-                                  className={`text-xs font-semibold px-2.5 py-1 rounded-xl border transition-colors ${
+                                  className={`text-xs font-medium px-2.5 py-1 rounded-lg border transition-colors ${
                                     isDarkMode
                                       ? 'bg-stone-900/60 border-stone-800 text-stone-300 group-hover:border-teal-500/30'
-                                      : 'bg-stone-100 border-stone-200 text-stone-700 group-hover:border-teal-200'
+                                      : 'bg-stone-100/80 border-stone-200 text-stone-700 group-hover:border-teal-200'
                                   }`}
                                 >
                                   {feat}
@@ -804,8 +803,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         </div>
 
                         {/* Card Bottom Action */}
-                        <div className="pt-6 mt-4 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between">
-                          <span className="text-xs font-bold text-stone-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors flex items-center gap-1">
+                        <div className="pt-5 mt-4 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between">
+                          <span className="text-xs font-semibold text-stone-500 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors flex items-center gap-1">
                             <span>{localize(profile.language, 'Open Suite', 'فتح الميزة')}</span>
                             <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
                           </span>
@@ -822,7 +821,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                 handleSelectTab(m.id as DisabilityTab);
                               }
                             }}
-                            className="px-4 py-2 rounded-xl text-xs font-black bg-teal-700 hover:bg-teal-800 text-white shadow-sm flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                            className="px-4 py-2 rounded-lg text-xs font-bold bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-xs flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                           >
                             <span>{localize(profile.language, 'Launch Tool', 'تشغيل الأداة')}</span>
                             <ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
@@ -1037,7 +1036,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             <span className="text-lg shrink-0">{lang.flag}</span>
                             <div className="text-start truncate">
                               <p className="text-xs font-bold leading-none">{lang.nativeName}</p>
-                              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 truncate">{lang.label}</p>
+                              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 truncate">{lang.label}</p>
                             </div>
                           </div>
                           {isSelected && <Check className="w-4 h-4 text-teal-600 shrink-0" />}
@@ -1095,7 +1094,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
                               {mode === 'None' && localize(profile.language, 'Standard cognitive experience without overlays.', 'واجهة قياسية طبيعية.')}
                               {mode === 'Speech' && localize(profile.language, 'Voice synthesis, continuous STT, and spoken narration.', 'نطق صوتي، وتفريغ صوتي مستمر.')}
-                              {mode === 'Visual' && localize(profile.language, 'Spoken scene description, currency reader, and haptic white cane.', 'وصف بصري فوري، قارئ عملات، ونبضات لمسية.')}
+                              {mode === 'Visual' && localize(profile.language, 'Spoken scene description, currency reader, and haptic directional guidance.', 'وصف بصري فوري، قارئ عملات، ونبضات لمسية للتوجيه.')}
                               {mode === 'Vocal-Deaf' && localize(profile.language, 'High-contrast text captions and direct two-way bridge.', 'نصوص متباينة وتواصل مباشر.')}
                               {mode === 'Sign-Only' && localize(profile.language, '3D sign avatar, reverse sign-to-speech, and sign lexicons.', 'أفاتار إشارة ونطق الإشارة لصوت.')}
                             </p>
@@ -1151,7 +1150,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               <div className={`p-1 rounded-lg ${isSelected ? 'bg-teal-50 dark:bg-teal-950/60' : ''}`}>
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[10px] tracking-tight font-bold mt-0.5">
+              <span className="text-xs tracking-tight font-semibold mt-0.5">
                 {localize(profile.language, item.labelEn, item.labelAr)}
               </span>
             </button>
@@ -1167,7 +1166,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           <div className="p-1 rounded-lg">
             <ShieldCheck className="w-5 h-5" />
           </div>
-          <span className="text-[10px] tracking-tight font-bold mt-0.5">
+          <span className="text-xs tracking-tight font-semibold mt-0.5">
             {localize(profile.language, 'Passport', 'الجواز')}
           </span>
         </button>

@@ -6,6 +6,9 @@ import {
   Check,
   Type,
   Sliders,
+  Eye,
+  Ear,
+  Globe,
 } from 'lucide-react';
 import { UserProfile, AccessibilityPassport, AccessibilityMode } from '../types';
 import { doc, setDoc } from 'firebase/firestore';
@@ -188,9 +191,9 @@ export default function AccessibilityPassportModal({
             </span>
             <div role="radiogroup" aria-labelledby="passport-focus-label" className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
-                { id: 'Visual', icon: '👁️', label: t('Visual Ecosystem', 'بصري (كفيف/ضعف بصر)', 'Visuel') },
-                { id: 'Deaf', icon: '🧏', label: t('Deaf & Hearing', 'سمعي (أصم/ضعف سمع)', 'Auditif') },
-                { id: 'None', icon: '🌐', label: t('Standard', 'عام / قياسي', 'Standard') },
+                { id: 'Visual', Icon: Eye, label: t('Vision & Perception', 'الرؤية والإدراك', 'Vision & Perception') },
+                { id: 'Deaf', Icon: Ear, label: t('Hearing & Communication', 'السمع والتواصل', 'Audition & Communication') },
+                { id: 'None', Icon: Globe, label: t('Standard Experience', 'الواجهة القياسية', 'Standard') },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -198,14 +201,14 @@ export default function AccessibilityPassportModal({
                   role="radio"
                   aria-checked={passport.primaryCategory === item.id}
                   onClick={() => setPassport({ ...passport, primaryCategory: item.id as AccessibilityMode })}
-                  className={`p-3 rounded-2xl border transition-all text-start flex items-center gap-2.5 focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
+                  className={`p-3 rounded-2xl border transition-all text-start flex items-center gap-2.5 focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                     passport.primaryCategory === item.id
-                      ? 'bg-indigo-600 border-indigo-400 text-white font-black shadow-lg'
-                      : 'bg-[#080409] border-[#4A1224]/60 text-slate-300 hover:border-[#4A1224]/50'
+                      ? 'bg-teal-700 border-teal-500 text-white font-bold shadow-sm'
+                      : 'bg-stone-900 border-stone-800 text-stone-300 hover:border-teal-700/60'
                   }`}
                 >
-                  <span className="text-xl" aria-hidden="true">{item.icon}</span>
-                  <span className="text-xs leading-tight">{item.label}</span>
+                  <item.Icon className="w-5 h-5 text-teal-400 shrink-0" aria-hidden="true" />
+                  <span className="text-xs leading-tight font-medium">{item.label}</span>
                 </button>
               ))}
             </div>

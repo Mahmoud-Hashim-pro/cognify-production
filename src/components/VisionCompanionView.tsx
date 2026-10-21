@@ -1925,7 +1925,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                 >
                   <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
                   <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-indigo-300 font-mono">PDF</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-xs text-indigo-300 font-mono">PDF</span>
                 </button>
 
                 <button
@@ -2092,7 +2092,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                           : 'Guest Preview — Vision Companion'}
                       </span>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-[11px] font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-xs font-semibold">
                       {companionLang === 'ar' ? 'تسجيل الدخول مطلوب' : companionLang === 'fr' ? 'Connexion requise' : 'Sign In Required'}
                     </span>
                   </div>
@@ -2121,7 +2121,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                       className="px-4 py-3 rounded-2xl bg-[#4A1224]/80 hover:bg-[#4A1224] border border-[#E5A93C]/40 text-[#E5A93C] font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95 text-center"
                     >
                       <Volume2 className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                      <span>{companionLang === 'ar' ? 'اسمع عينة صوتية حية 🔊' : companionLang === 'fr' ? 'Écouter une démo vocale 🔊' : 'Hear Audio Demo Sample 🔊'}</span>
+                      <span>{companionLang === 'ar' ? 'اسمع عينة صوتية حية' : companionLang === 'fr' ? 'Écouter une démo vocale' : 'Hear Audio Demo Sample'}</span>
                     </button>
                   </div>
                 </div>
@@ -2153,7 +2153,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     <span className="font-bold flex items-center gap-1.5 text-primary">
                       <Sparkles className="w-4 h-4" />
                       {lectureMode
-                        ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة 🎓' : companionLang === 'fr' ? 'Analyse du Cours et Tableau 🎓' : 'Lecture Board & Slide Digest 🎓')
+                        ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة' : companionLang === 'fr' ? 'Analyse du Cours et Tableau' : 'Lecture Board & Slide Digest')
                         : readMode && readAction === 'summarize'
                         ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
                         : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
@@ -2161,22 +2161,22 @@ Speak directly in natural, warm, concise conversational prose without any markdo
 
                     {/* Status Badge: Live vs Previous vs Uncertain */}
                     {observationType === 'live' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-[11px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         <span>{companionLang === 'ar' ? 'ملاحظة حية' : companionLang === 'fr' ? 'Direct' : 'Live'}</span>
                         {observationTimestamp && (
-                          <span className="opacity-75 font-mono text-[9px] sm:text-[10px]">
+                          <span className="opacity-75 font-mono text-xs">
                             {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                           </span>
                         )}
                       </span>
                     )}
                     {observationType === 'previous' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] sm:text-[11px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold">
                         <Clock className="w-3 h-3 text-amber-400" />
                         <span>{companionLang === 'ar' ? 'لقطة سابقة' : companionLang === 'fr' ? 'Précédente' : 'Previous Frame'}</span>
                         {observationTimestamp && (
-                          <span className="opacity-75 font-mono text-[9px] sm:text-[10px]">
+                          <span className="opacity-75 font-mono text-xs">
                             {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                           </span>
                         )}
@@ -2184,13 +2184,13 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     )}
                     {observationType === 'uncertain' && (
                       <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-[10px] sm:text-[11px] font-bold"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-semibold"
                         title={observationConfidenceReason}
                       >
                         <AlertTriangle className="w-3 h-3 text-rose-400" />
                         <span>{companionLang === 'ar' ? 'غير مؤكد' : companionLang === 'fr' ? 'Incertain' : 'Uncertain'}</span>
                         {observationConfidenceReason && (
-                          <span className="hidden md:inline opacity-80 text-[9px] sm:text-[10px]">({observationConfidenceReason})</span>
+                          <span className="hidden md:inline opacity-80 text-xs">({observationConfidenceReason})</span>
                         )}
                       </span>
                     )}
@@ -2369,51 +2369,51 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇪🇬 مسح السبورة والمحاضرة',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'مسح السبورة والمحاضرة',
                   subtitle: 'استخراج القوانين والشرح الأكاديمي بالصوت',
                 };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇪🇬 فحص وقراءة النقود',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص وقراءة النقود',
                   subtitle: 'كشف فئات الجنيه والعملات بالصوت',
                 };
                 if (faceMode) return {
                   icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇪🇬 من يقف أمامي؟',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'من يقف أمامي؟',
                   subtitle: 'التعرف على الأشخاص والوجوه بالصوت',
                 };
                 if (outfitMode) return {
                   icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
-                  title: '🇪🇬 فحص ألوان الملابس',
-                  subtitle: 'تناسق الطقم والألوان بالصوت',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص ألوان الملابس',
+                  subtitle: 'تناسق الألوان والمظهر بالصوت',
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
-                  title: '🇪🇬 فحص المسار والعوائق',
-                  subtitle: 'العصا الافتراضية مع تنبيه اهتزازي',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص المسار والعوائق',
+                  subtitle: 'توجيه لمسي ومسار تجنب العوائق',
                 };
                 if (shoppingMode) return {
                   icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇪🇬 فحص المنتج والتسوق',
-                  subtitle: 'مساعد التسوق والأسعار',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص المنتج والتسوق',
+                  subtitle: 'مساعد قراءة المنتجات والأسعار',
                 };
                 if (readMode) return {
                   icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
-                  title: readAction === 'summarize' ? '🇪🇬 المفيد وخلاصة الكلام' : '🇪🇬 اقرأ اللي قدامي',
-                  subtitle: readAction === 'summarize' ? 'الزبدة وأهم نقطة بالصوت' : 'قراءة نص بالصوت كلمة بكلمة',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: readAction === 'summarize' ? 'المفيد وخلاصة الكلام' : 'قراءة النص أمام الكاميرا',
+                  subtitle: readAction === 'summarize' ? 'النقاط الجوهرية والملخص بالصوت' : 'قراءة صوتية دقيقة للنصوص',
                 };
                 return {
                   icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇪🇬 ماذا أمامي؟',
-                  subtitle: 'وصف فوري بالصوت',
+                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
+                  title: 'ماذا أمامي الآن؟',
+                  subtitle: 'وصف فوري مباشر بالصوت',
                 };
               };
               const cfg = getCfg();
@@ -2424,12 +2424,12 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   disabled={status === 'analyzing'}
                   aria-label={`${cfg.title} - ${cfg.subtitle}`}
                   aria-keyshortcuts="Space Enter"
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                     <span>{cfg.title}</span>
-                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
                   </div>
                 </button>
               );
@@ -2439,51 +2439,51 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇬🇧 Scan Lecture Board & Slides',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Lecture Board & Slides',
                   subtitle: 'Extract formulas, diagrams & academic digest',
                 };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇬🇧 Scan Cash & Currency',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Cash & Currency',
                   subtitle: 'Instant denomination audio reader',
                 };
                 if (faceMode) return {
                   icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇬🇧 Who is in front of me?',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Who is in front of me?',
                   subtitle: 'Face & familiar person recognition',
                 };
                 if (outfitMode) return {
                   icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
-                  title: '🇬🇧 Check Outfit & Colors',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Check Outfit & Colors',
                   subtitle: 'Color matching & style harmony',
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
-                  title: '🇬🇧 Scan Pathway & Obstacles',
-                  subtitle: 'Virtual cane with haptic feedback',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Pathway & Obstacles',
+                  subtitle: 'Haptic directional guidance and obstacle alerts',
                 };
                 if (shoppingMode) return {
                   icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇬🇧 Scan product & price',
-                  subtitle: 'Shopping assistant',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Product & Price',
+                  subtitle: 'Shopping and label assistant',
                 };
                 if (readMode) return {
                   icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
-                  title: readAction === 'summarize' ? '🇬🇧 Core takeaways & bottom line' : '🇬🇧 Read this for me',
-                  subtitle: readAction === 'summarize' ? 'Distilled essence & spoken facts' : 'Spoken text reading',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: readAction === 'summarize' ? 'Core Takeaways & Bottom Line' : 'Read This Text',
+                  subtitle: readAction === 'summarize' ? 'Distilled essence & spoken facts' : 'Accurate spoken reading',
                 };
                 return {
                   icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 border border-primary/40 shadow-indigo-950/60',
-                  title: '🇬🇧 What is here?',
-                  subtitle: 'Spoken English',
+                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
+                  title: 'What is in front of me?',
+                  subtitle: 'Instant spoken description',
                 };
               };
               const cfg = getCfg();
@@ -2494,12 +2494,12 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   disabled={status === 'analyzing'}
                   aria-label={`${cfg.title} - ${cfg.subtitle}`}
                   aria-keyshortcuts="Space Enter"
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                     <span>{cfg.title}</span>
-                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
                   </div>
                 </button>
               );
@@ -2509,51 +2509,51 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇫🇷 Scanner Tableau & Cours',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Tableau & Cours',
                   subtitle: 'Formules, schémas et synthèse académique',
                 };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇫🇷 Scanner Billets & Devises',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Billets & Devises',
                   subtitle: 'Lecture audio de la monnaie',
                 };
                 if (faceMode) return {
                   icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇫🇷 Qui est devant moi ?',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Qui est devant moi ?',
                   subtitle: 'Reconnaissance faciale et proches',
                 };
                 if (outfitMode) return {
                   icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
-                  title: '🇫🇷 Harmonie des Vêtements',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Harmonie des Vêtements',
                   subtitle: 'Accord des couleurs et tenue',
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
-                  title: '🇫🇷 Scanner Chemin & Obstacles',
-                  subtitle: 'Canne virtuelle avec retour haptique',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Chemin & Obstacles',
+                  subtitle: 'Guidage haptique et alertes',
                 };
                 if (shoppingMode) return {
                   icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇫🇷 Scanner produit & prix',
-                  subtitle: 'Assistant achat',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Produit & Prix',
+                  subtitle: 'Assistant achat et étiquettes',
                 };
                 if (readMode) return {
                   icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
-                  title: readAction === 'summarize' ? "🇫🇷 L'essentiel & conclusion" : '🇫🇷 Lisez ceci',
-                  subtitle: readAction === 'summarize' ? 'Synthèse utile & conclusion vocale' : 'Lecture du texte',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: readAction === 'summarize' ? "L'Essentiel & Conclusion" : 'Lire ce Texte',
+                  subtitle: readAction === 'summarize' ? 'Synthèse utile & conclusion vocale' : 'Lecture audio fidèle',
                 };
                 return {
                   icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇫🇷 Que vois-je ?',
-                  subtitle: 'Vocal en français',
+                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
+                  title: 'Que vois-je devant moi ?',
+                  subtitle: 'Description vocale instantanée',
                 };
               };
               const cfg = getCfg();
@@ -2564,12 +2564,12 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   disabled={status === 'analyzing'}
                   aria-label={`${cfg.title} - ${cfg.subtitle}`}
                   aria-keyshortcuts="Space Enter"
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                     <span>{cfg.title}</span>
-                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
                   </div>
                 </button>
               );
@@ -2925,7 +2925,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[140px]">
                     <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                       <span>{companionLang === 'ar' ? 'الأشياء المرصودة مؤخراً' : companionLang === 'fr' ? 'Objets récemment observés' : 'Recently Observed Items'}</span>
-                      <span className="text-[11px] font-mono text-emerald-400">{spatialRecords.length} items</span>
+                      <span className="text-xs font-mono text-emerald-400">{spatialRecords.length} items</span>
                     </div>
 
                     {spatialRecords.length === 0 ? (
@@ -2945,13 +2945,13 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                             setSpatialQueryResult(query.message);
                             speak(query.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
                           }}
-                          className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-[#4A1224]/50 flex items-center justify-between gap-3 group transition-all"
+                          className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-teal-900/40 flex items-center justify-between gap-3 group transition-all"
                         >
                           <div className="space-y-0.5">
                             <div className="font-bold text-sm text-white group-hover:text-emerald-400 flex items-center gap-2">
                               <span>{item.objectName}</span>
                               {item.relativePosition?.direction && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">
                                   {item.relativePosition.direction}
                                 </span>
                               )}
@@ -2962,7 +2962,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                             </div>
                           </div>
                           <div className="text-end shrink-0">
-                            <span className="text-[10px] text-slate-500 block">
+                            <span className="text-xs text-slate-400 block font-mono">
                               {new Date(item.lastSeenTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <span className="text-xs text-emerald-400 font-semibold group-hover:underline flex items-center justify-end gap-1">

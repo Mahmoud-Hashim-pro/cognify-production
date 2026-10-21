@@ -12,14 +12,14 @@
   --font-serif: "Instrument Serif", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-primary: #6D4AFF;
-  --color-primary-press: #5B3DF5;
-  --color-primary-soft: #EDE9FF;
+  --color-primary: #0D9488;
+  --color-primary-press: #0F766E;
+  --color-primary-soft: #CCFBF1;
   --color-secondary: #5C5C68;
   --color-success: #15A06A;
-  --color-warning: #6D4AFF;
-  --color-accent: #6D4AFF;
-  --color-accent-soft: #EDE9FF;
+  --color-warning: #D97706;
+  --color-accent: #0D9488;
+  --color-accent-soft: #CCFBF1;
   --color-danger: #E5484D;
   --color-danger-soft: #FCEAEA;
   --color-bg-main: #F3F3F6;
@@ -90,52 +90,52 @@
   background: rgba(18, 27, 30, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(13, 148, 136, 0.35);
-  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(13, 148, 136, 0.15);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cognify-burgundy-hero {
   position: relative;
   background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.3) 0%, rgba(14, 20, 22, 0.95) 45%, rgba(11, 16, 18, 0.98) 100%);
-  border: 1px solid rgba(13, 148, 136, 0.25);
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.25);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
 }
 
 .aurora-card-glow:hover {
-  border-color: rgba(13, 148, 136, 0.5);
-  box-shadow: 0 25px 60px -15px rgba(13, 148, 136, 0.25), inset 0 1px 0 rgba(13, 148, 136, 0.25);
-  transform: translateY(-3px);
+  border-color: rgba(13, 148, 136, 0.4);
+  box-shadow: 0 8px 24px -4px rgba(13, 148, 136, 0.15);
+  transform: translateY(-1px);
 }
 
 .obsidian-card {
   background: rgba(18, 27, 30, 0.85);
-  border: 1px solid rgba(13, 148, 136, 0.3);
+  border: 1px solid rgba(13, 148, 136, 0.2);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 1.5rem;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.1);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
 }
 
 .obsidian-card-interactive {
   background: rgba(18, 27, 30, 0.85);
-  border: 1px solid rgba(13, 148, 136, 0.3);
+  border: 1px solid rgba(13, 148, 136, 0.2);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 1.5rem;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.1);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .obsidian-card-interactive:hover {
-  border-color: rgba(13, 148, 136, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(13, 148, 136, 0.2);
+  border-color: rgba(13, 148, 136, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
 }
 
 .glass-pill {
   background: rgba(13, 148, 136, 0.15);
-  border: 1px solid rgba(13, 148, 136, 0.25);
+  border: 1px solid rgba(13, 148, 136, 0.2);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -325,12 +325,12 @@ html.high-contrast button:focus-visible {
 .dark .bg-surface-3 { background-color: #1C1C22 !important; }
 .dark .text-faint { color: #65656F !important; }
 .dark .border-border-2 { border-color: #2E2E35 !important; }
-.dark .bg-primary { background-color: #7C5CFF !important; }
-.dark .bg-primary-soft { background-color: #211A36 !important; }
-.dark .bg-accent-soft { background-color: #211A36 !important; }
+.dark .bg-primary { background-color: #0D9488 !important; }
+.dark .bg-primary-soft { background-color: #132E2B !important; }
+.dark .bg-accent-soft { background-color: #132E2B !important; }
 .dark .bg-danger-soft { background-color: #2C1517 !important; }
-.dark .text-primary { color: #BBAAFF !important; }
-.dark .text-accent { color: #BBAAFF !important; }
+.dark .text-primary { color: #5EEAD4 !important; }
+.dark .text-accent { color: #5EEAD4 !important; }
 
 .dark .shadow-sm,
 .dark .shadow-md,
@@ -346,7 +346,7 @@ html.high-contrast button:focus-visible {
   background-color: #17171C !important;
 }
 .dark .bg-slate-900.text-white {
-  background-color: #7C5CFF !important;
+  background-color: #0F766E !important;
 }
 
 /* --- Global Light Mode Theme Overrides ---------------------------------

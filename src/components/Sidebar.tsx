@@ -118,8 +118,6 @@ export default function Sidebar({
       icon: Eye,
       action: () => navigateToDisabilityTab('vision'),
       active: isTabActive('vision'),
-      badge: '👁️',
-      badgeColor: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
     },
     {
       id: 'hearing',
@@ -127,8 +125,6 @@ export default function Sidebar({
       icon: Ear,
       action: () => navigateToDisabilityTab('deaf'),
       active: isTabActive('deaf') || currentView === 'video',
-      badge: '🤟',
-      badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
     },
     {
       id: 'book_studio',
@@ -136,8 +132,6 @@ export default function Sidebar({
       icon: BookOpen,
       action: () => { onClose?.(); setCurrentView('book_studio'); },
       active: currentView === 'book_studio',
-      badge: '📖',
-      badgeColor: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
     },
     {
       id: 'toolkit',
@@ -145,8 +139,6 @@ export default function Sidebar({
       icon: Sparkles,
       action: () => { onClose?.(); setCurrentView('toolkit'); },
       active: currentView === 'toolkit',
-      badge: '✨',
-      badgeColor: 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800',
     },
     {
       id: 'profile',
@@ -200,9 +192,9 @@ export default function Sidebar({
           <div className="leading-none">
             <div className={`font-serif text-[23px] font-bold ${isDarkMode ? 'text-white' : 'text-stone-900'} tracking-tight flex items-center gap-1.5`}>
               <span>Cognify</span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-teal-950/60 text-teal-300 border-teal-800' : 'bg-teal-50 text-teal-900 border-teal-200'} border`}>A11y</span>
+              <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-teal-950/60 text-teal-300 border-teal-800' : 'bg-teal-50 text-teal-900 border-teal-200'} border`}>A11y</span>
             </div>
-            <div className={`text-[11px] ${isDarkMode ? 'text-stone-400' : 'text-stone-600'} font-medium mt-0.5`}>
+            <div className={`text-xs ${isDarkMode ? 'text-stone-400' : 'text-stone-600'} font-medium mt-0.5`}>
               {localize(profile.language, 'Assistive Technology Suite', 'منظومة ذوي الهمم والإتاحة')}
             </div>
           </div>
@@ -232,7 +224,7 @@ export default function Sidebar({
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto custom-scrollbar -mx-1 my-[16px] px-1 flex flex-col gap-[3px]">
-        <div className={`text-[10px] font-extrabold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider px-3 pt-1.5 pb-1 uppercase`}>
+        <div className={`text-xs font-bold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider px-3 pt-1.5 pb-1 uppercase`}>
           {localize(profile.language, 'Assistive Ecosystem', 'أدوات الإتاحة والتكيّف')}
         </div>
 
@@ -246,11 +238,6 @@ export default function Sidebar({
           >
             <item.icon className={navIcon(item.active)} aria-hidden="true" />
             <span className="truncate">{item.label}</span>
-            {item.badge && (
-              <span className={`ms-auto text-[10px] font-bold px-[6px] py-[1.5px] rounded-full border ${item.badgeColor || (isDarkMode ? 'bg-stone-800 text-stone-300 border-stone-700' : 'bg-stone-100 text-stone-900 border-stone-300')}`}>
-                {item.badge}
-              </span>
-            )}
           </button>
         ))}
 
@@ -264,7 +251,7 @@ export default function Sidebar({
           >
             <AlertCircle className={navIcon(currentView === 'admin')} aria-hidden="true" />
             {localize(profile.language, 'Admin Portal', 'لوحة الإدارة')}
-            <span className={`ms-auto text-[10px] font-bold ${isDarkMode ? 'text-stone-300 bg-stone-800 border-stone-700' : 'text-stone-800 bg-stone-100 border-stone-300'} border px-[7px] py-[2px] rounded-full`}>
+            <span className={`ms-auto text-xs font-semibold ${isDarkMode ? 'text-stone-300 bg-stone-800 border-stone-700' : 'text-stone-800 bg-stone-100 border-stone-300'} border px-2 py-0.5 rounded-md`}>
               {localize(profile.language, 'Staff', 'مقيّد')}
             </span>
           </button>
@@ -274,7 +261,7 @@ export default function Sidebar({
         {(profile.chatThreads?.length || 0) > 0 && (
           <>
             <div className="flex items-center justify-between px-3 pt-4 pb-1">
-              <span className={`text-[10px] font-extrabold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider uppercase`}>
+              <span className={`text-xs font-bold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider uppercase`}>
                 {getTranslation(profile.language, 'chatHistory')}
               </span>
               <button
@@ -289,7 +276,7 @@ export default function Sidebar({
                   }
                 }}
                 aria-label={localize(profile.language, 'Clear all chats', 'مسح جميع المحادثات')}
-                className="text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none rounded"
+                className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none rounded"
                 title="Clear all chats"
               >
                 {getTranslation(profile.language, 'clearAll')}
@@ -391,8 +378,8 @@ export default function Sidebar({
               <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-teal-500 ring-2 ${isDarkMode ? 'ring-[#0E1416]' : 'ring-white'}`} aria-hidden="true" />
             </div>
             <div className="leading-tight overflow-hidden flex-1">
-              <div className={`text-[13px] font-bold ${isDarkMode ? 'text-stone-100 group-hover:text-teal-400' : 'text-stone-900 group-hover:text-teal-700'} truncate transition-colors`}>{profile.name || profile.email?.split('@')[0] || 'User'}</div>
-              <div className={`text-[11px] ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} truncate`}>{profile.disabilityType || profile.accessibilityMode || 'Special Needs'}</div>
+              <div className={`text-sm font-bold ${isDarkMode ? 'text-stone-100 group-hover:text-teal-400' : 'text-stone-900 group-hover:text-teal-700'} truncate transition-colors`}>{profile.name || profile.email?.split('@')[0] || 'User'}</div>
+              <div className={`text-xs ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} truncate`}>{profile.disabilityType || profile.accessibilityMode || 'Assistive Learning'}</div>
             </div>
           </button>
           <button
