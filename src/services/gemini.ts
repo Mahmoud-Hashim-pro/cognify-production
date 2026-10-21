@@ -1166,6 +1166,15 @@ export async function generateAdaptiveResponse(
       }
     }
 
+    if (res.status === 401) {
+      const isFrench = profile?.language === 'French' || (profile?.language as unknown as string) === 'fr';
+      return isAr
+        ? `أهلاً بك في المعاينة التجريبية لمنصة كوجنيفاي! 🚀\n\nتتطلب ميزات الذكاء الاصطناعي السحابية تسجيل الدخول لحفظ تقدمك ومطابقة نموذجك المعرفي. يرجى تسجيل الدخول أو إنشاء حساب مجاني للمتابعة، أو تجربة العينة الصوتية الحية.`
+        : isFrench
+        ? `Bienvenue sur l'aperçu Cognify ! 🚀\n\nLes fonctionnalités d'IA cloud nécessitent une connexion pour personnaliser votre apprentissage. Veuillez vous connecter ou créer un compte gratuit pour continuer.`
+        : `Welcome to Cognify Preview Mode! 🚀\n\nCloud AI features require an authenticated session to track your personalized learning model. Please sign in or create a free account to continue.`;
+    }
+
     const isHtml = res.headers.get('Content-Type')?.includes('text/html');
     if (!res.ok || isHtml) {
       if (isHtml || res.status === 404) backendUp = false;

@@ -116,6 +116,15 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showGuestAuthCard, setShowGuestAuthCard] = useState(false);
 
+  // Low-vision font scaling: 'normal' | 'large' | 'extralarge'
+  const [textSize, setTextSize] = useState<'normal' | 'large' | 'extralarge'>(() => {
+    try {
+      return (localStorage.getItem('cognify_vision_font_size') as any) || 'normal';
+    } catch {
+      return 'normal';
+    }
+  });
+
   // Read Mode: focuses the AI on reading visible text or summarizing lectures/documents.
   const [readMode, setReadMode] = useState(false);
   // Read Action: 'summarize' for lecture & document summaries, 'read' for verbatim word-for-word reading.
@@ -161,6 +170,22 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
       window.speechSynthesis.resume();
     }
     speak(text, voiceLang as any);
+  }, [companionLang]);
+
+  const toggleTextSize = useCallback(() => {
+    setTextSize((prev) => {
+      const next = prev === 'normal' ? 'large' : prev === 'large' ? 'extralarge' : 'normal';
+      try {
+        localStorage.setItem('cognify_vision_font_size', next);
+      } catch {}
+      const msg = companionLang === 'ar'
+        ? (next === 'normal' ? 'حجم الخط عادي' : next === 'large' ? 'حجم الخط كبير' : 'حجم الخط كبير جداً')
+        : companionLang === 'fr'
+        ? (next === 'normal' ? 'Taille du texte standard' : next === 'large' ? 'Grande taille de texte' : 'Très grande taille de texte')
+        : (next === 'normal' ? 'Standard text size' : next === 'large' ? 'Large text size' : 'Extra large text size');
+      speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+      return next;
+    });
   }, [companionLang]);
 
   const resetAllModes = useCallback(() => {
@@ -509,16 +534,6 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Keyboard Escape listener for the save modal
-  useEffect(() => {
-    if (!showSaveDialog) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowSaveDialog(false);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showSaveDialog]);
 
   // isFullscreen used to be set synchronously and optimistically right when
   // the button was pressed — before requestFullscreen()'s promise even
@@ -1188,6 +1203,183 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
     setShowGuestAuthCard(false);
     setLastSnapshot(null);
   };
+
+  // Comprehensive accessible keyboard shortcuts for blind and visually impaired users
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInputFocused =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          target.getAttribute('role') === 'textbox');
+
+      // If user is actively typing in an input (e.g. Save Memory label, Spatial Search)
+      if (isInputFocused) {
+        if (e.key === 'Escape') {
+          if (showSaveDialog) setShowSaveDialog(false);
+          else target.blur();
+        }
+        return;
+      }
+
+      // Space or Enter: Trigger primary capture/description
+      if (e.code === 'Space' || e.key === 'Enter') {
+        e.preventDefault();
+        if (status === 'ready' || status === 'idle') {
+          describeScene(companionLang);
+        } else if (status === 'camera-denied') {
+          playDemoSample(companionLang);
+        }
+        return;
+      }
+
+      // 'R' or 'r': Replay speech / toggle speech
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        toggleSpeech();
+        return;
+      }
+
+      // 'S' or 's': Stop speech immediately
+      if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        cancelSpeech();
+        setIsSpeaking(false);
+        return;
+      }
+
+      // 'C' or 'c': Toggle Currency Reader
+      if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        toggleCurrencyMode();
+        return;
+      }
+
+      // 'T' or 't': Toggle Text Reader (OCR)
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        toggleReadMode();
+        return;
+      }
+
+      // 'L' or 'l': Toggle Lecture Scanner
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        toggleLectureMode();
+        return;
+      }
+
+      // 'N' or 'n': Toggle White Cane & Nav Guide
+      if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        toggleNavGuideMode();
+        return;
+      }
+
+      // 'F' or 'f': Toggle Face Recognition
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFaceMode();
+        return;
+      }
+
+      // 'O' or 'o': Toggle Outfit / Clothes matching
+      if (e.key === 'o' || e.key === 'O') {
+        e.preventDefault();
+        toggleOutfitMode();
+        return;
+      }
+
+      // 'U' or 'u': Upload image from device
+      if (e.key === 'u' || e.key === 'U') {
+        e.preventDefault();
+        fileInputRef.current?.click();
+        return;
+      }
+
+      // 'D' or 'd': Open Document & PDF Studio
+      if (e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        setShowDocStudio(true);
+        announceFeature(
+          'استوديو المستندات وتلخيص المحاضرات والـ PDF',
+          'Document and Lecture Studio',
+          'Studio de Documents et Cours',
+          true
+        );
+        return;
+      }
+
+      // 'A' or 'a': Toggle low-vision font size
+      if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        toggleTextSize();
+        return;
+      }
+
+      // 'V' or 'v': Toggle verbosity (concise vs detailed)
+      if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault();
+        setVerbosity((prev) => {
+          const next = prev === 'concise' ? 'detailed' : 'concise';
+          const msg = next === 'concise'
+            ? (companionLang === 'ar' ? 'تم تفعيل الوصف الموجز' : companionLang === 'fr' ? 'Mode concis activé' : 'Concise mode active')
+            : (companionLang === 'ar' ? 'تم تفعيل الوصف المفصل' : companionLang === 'fr' ? 'Mode détaillé activé' : 'Detailed mode active');
+          speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+          return next;
+        });
+        return;
+      }
+
+      // '?' or 'H' or 'h': Spoken announcement of keyboard shortcuts
+      if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+        e.preventDefault();
+        const helpMsg = companionLang === 'ar'
+          ? 'اختصارات لوحة المفاتيح للمكفوفين: مسافة أو إنتر للوصف الفوري، حرف آر لتكرار الصوت، حرف إس لإيقاف الصوت، حرف سي لقارئ النقود، حرف تي لقراءة النصوص، حرف إل للمحاضرات، حرف إن للعصا الذكية، حرف يو لرفع صورة، وحرف إيه لتكبير الخط، إسكيب لإغلاق الوصف.'
+          : companionLang === 'fr'
+          ? 'Raccourcis clavier : Espace ou Entrée pour décrire, R pour répéter la voix, S pour arrêter, C pour la monnaie, T pour lire le texte, L pour le cours, N pour la canne, U pour importer une image, A pour la taille du texte, Échap pour fermer.'
+          : 'Keyboard shortcuts for blind and visually impaired users: Press Space or Enter to describe the scene, R to repeat audio, S to stop speech, C for currency reader, T for text OCR, L for lecture scanner, N for white cane, U to upload image, A to enlarge text size, Escape to close.';
+        speak(helpMsg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+        return;
+      }
+
+      // Escape: Dismiss active description, save dialog, or modals
+      if (e.key === 'Escape') {
+        if (showSaveDialog) {
+          setShowSaveDialog(false);
+        } else if (lastDescription) {
+          closeDescription();
+        } else if (showSpatialMemory) {
+          setShowSpatialMemory(false);
+        } else if (showDocStudio) {
+          setShowDocStudio(false);
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [
+    companionLang,
+    status,
+    showSaveDialog,
+    lastDescription,
+    showSpatialMemory,
+    showDocStudio,
+    toggleSpeech,
+    toggleCurrencyMode,
+    toggleReadMode,
+    toggleLectureMode,
+    toggleNavGuideMode,
+    toggleFaceMode,
+    toggleOutfitMode,
+    toggleTextSize,
+    announceFeature,
+    playDemoSample,
+  ]);
 
   return (
     <div
@@ -1945,6 +2137,26 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                       </button>
                     )}
 
+                    {/* Font Size Toggle for Low-Vision */}
+                    <button
+                      type="button"
+                      onClick={toggleTextSize}
+                      aria-label={t('Toggle font size for low vision', 'تغيير حجم الخط لضعاف البصر', 'Changer la taille du texte')}
+                      title={t('Toggle font size: Normal, Large, Extra Large (Press A)', 'تغيير حجم الخط: عادي، كبير، كبير جداً (اضغط حرف A)', 'Taille du texte (Touche A)')}
+                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#E5A93C]"
+                    >
+                      <span className="font-mono font-black text-xs text-emerald-300">
+                        {textSize === 'extralarge' ? 'A++' : textSize === 'large' ? 'A+' : 'A'}
+                      </span>
+                      <span className="hidden sm:inline">
+                        {textSize === 'extralarge'
+                          ? (companionLang === 'ar' ? 'كبير جداً' : companionLang === 'fr' ? 'Très grand' : 'XL')
+                          : textSize === 'large'
+                          ? (companionLang === 'ar' ? 'كبير' : companionLang === 'fr' ? 'Grand' : 'Large')
+                          : (companionLang === 'ar' ? 'عادي' : companionLang === 'fr' ? 'Normal' : 'Normal')}
+                      </span>
+                    </button>
+
                     {/* Speech Voice Play/Stop */}
                     <button
                       type="button"
@@ -1967,7 +2179,15 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     </button>
                   </div>
                 </div>
-                <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
+                <p
+                  className={`text-slate-100 leading-relaxed font-medium transition-all ${
+                    textSize === 'extralarge'
+                      ? 'text-xl sm:text-2xl font-bold tracking-wide'
+                      : textSize === 'large'
+                      ? 'text-base sm:text-lg font-semibold'
+                      : 'text-sm sm:text-base'
+                  }`}
+                >
                   {lastDescription}
                 </p>
               </div>
@@ -2036,9 +2256,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const cfg = getCfg();
               return (
                 <button
+                  type="button"
                   onClick={() => describeScene('ar')}
                   disabled={status === 'analyzing'}
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
+                  aria-keyshortcuts="Space Enter"
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
@@ -2103,9 +2326,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const cfg = getCfg();
               return (
                 <button
+                  type="button"
                   onClick={() => describeScene('en')}
                   disabled={status === 'analyzing'}
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
+                  aria-keyshortcuts="Space Enter"
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
@@ -2170,9 +2396,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const cfg = getCfg();
               return (
                 <button
+                  type="button"
                   onClick={() => describeScene('fr')}
                   disabled={status === 'analyzing'}
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
+                  aria-keyshortcuts="Space Enter"
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">

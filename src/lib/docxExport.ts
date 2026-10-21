@@ -95,8 +95,15 @@ export function detectQuestionPatterns(rawText: string): DocxQuestionItem[] {
       continue;
     }
 
-    // Detect Answer / Explanation line: "الإجابة:", "Answer:", "Solution:", "الشرح:"
-    const ansMatch = line.match(/^(?:الإجابة|الحل|الجواب|Answer|Correct Answer|Solution|الشرح|Explanation)[:.-]\s*(.+)$/i);
+    // Detect Explanation line: "الشرح:", "التوضيح:", "Explanation:", "Reason:"
+    const expMatch = line.match(/^(?:الشرح|التوضيح|التفسير|Explanation|Reason)[:.-]\s*(.+)$/i);
+    if (expMatch && currentItem) {
+      currentItem.explanation = expMatch[1].trim();
+      continue;
+    }
+
+    // Detect Answer line: "الإجابة:", "الحل:", "الجواب:", "Answer:", "Correct Answer:", "Solution:"
+    const ansMatch = line.match(/^(?:[اإ]ل[اإ]جاب[ةه]|الحل|الجواب|Answer|Correct Answer|Solution)[:.-]\s*(.+)$/i);
     if (ansMatch && currentItem) {
       currentItem.correctAnswer = ansMatch[1].trim();
       continue;

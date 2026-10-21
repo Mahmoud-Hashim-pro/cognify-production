@@ -92,6 +92,7 @@ import { runNeurodiversityEngineVerification } from './neurodiversityEngineVerif
 import { runArslCurriculumAndModelVerification } from './arslCurriculumAndModelVerification.js';
 import { runCognitiveEngineVerification } from './cognitiveEngineVerification.js';
 import { runLearningDisabilityEngineVerification } from './learningDisabilityEngineVerification.js';
+import { runBlindAndLowVisionVerification } from './blindAndLowVisionVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2288,6 +2289,13 @@ Keep practicing closures with higher-order functions!
     const m27Res = await runLearningDisabilityEngineVerification();
     totalPassed += m27Res.passed;
     totalFailed += m27Res.failed;
+  }
+
+  // 59. Milestone 28: Blind & Low-Vision Accessibility Suite (Vision Companion, Clean OCR, Docx, Keyboard Hotkeys)
+  {
+    const m28Res = await runBlindAndLowVisionVerification();
+    totalPassed += m28Res.passed;
+    totalFailed += m28Res.failed;
   }
 
   console.log(`\n========================================`);

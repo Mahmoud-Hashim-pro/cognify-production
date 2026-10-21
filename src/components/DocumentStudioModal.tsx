@@ -393,6 +393,17 @@ export default function DocumentStudioModal({
       const { base64, mimeType } = await fileDataPromise;
 
       const isAudio = file.type.startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(file.name);
+      const isText = file.type.startsWith('text/') || file.name.endsWith('.txt');
+
+      let directTextContent = '';
+      if (isText) {
+        try {
+          directTextContent = await file.text();
+        } catch {
+          /* fallback to base64 */
+        }
+      }
+
       const prompt = isAudio
         ? `أنت معلم وأكاديمي متميز ومترجم ذكي وخبير تلخيص للمكفوفين وضعاف البصر.
 الملف الصوتي المرفق هو تسجيل لمحاضرة دراسية بعنوان "${file.name}".
@@ -410,6 +421,7 @@ export default function DocumentStudioModal({
 4. تنبيه خاص للطلاب ذوي الإعاقة البصرية (STEM & Formulas & Diagrams): إذا كان المحتوى يحتوي على أي معادلات رياضية أو فيزيائية أو رسوم؛ قم بشرحها ونطقها بالكامل بالكلمات الصريحة لتكون مفهومة صوتياً 100%.`
         : `أنت معلم وأكاديمي متميز ومترجم ذكي وخبير تلخيص للمكفوفين وضعاف البصر.
 المستند المرفق هو محاضرة أو كتاب أو ورقة دراسية بعنوان "${file.name}".
+${directTextContent ? `\nالمحتوى النصي الكامل للمستند:\n"""\n${directTextContent.slice(0, 50000)}\n"""\n` : ''}
 المطلوب منك بدقة فائقة:
 1. اقرأ واستخرج محتوى هذا المستند كاملاً.
 2. إذا كان المستند بأي لغة أخرى (مثل الإنجليزية)، ترجمه وفصّله بدقة إلى لغة الهدف المطلوبة: "${isAr ? 'اللغة العربية العامية المصرية الواضحة والمفهومة للطلاب' : isFr ? 'Français' : 'English'}".
@@ -453,7 +465,7 @@ export default function DocumentStudioModal({
       const docItem: SavedDocItem = {
         id: `doc_${Date.now()}`,
         title: file.name.replace(/\.[^/.]+$/, ''),
-        sourceType: isAudio ? 'audio' : file.type.includes('pdf') ? 'pdf' : 'image',
+        sourceType: isAudio ? 'audio' : (file.type.includes('pdf') || isText || file.name.endsWith('.docx') || file.name.endsWith('.doc')) ? 'pdf' : 'image',
         summary: cleanSummary || summary,
         fullText: cleanFull || fullText,
         targetLang: targetLanguage,
@@ -783,7 +795,17 @@ ${currentDoc.fullText || ''}
           setDictationText(text.trim());
         };
 
-        rec.onerror = () => setIsDictating(false);
+        rec.onerror = (e: any) => {
+          setIsDictating(false);
+          const errCode = e?.error || 'unknown';
+          if (errCode !== 'no-speech') {
+            toast.error(
+              companionLang === 'ar'
+                ? 'تعذر الوصول للميكروفون أو حدث انقطاع في الإملاء.'
+                : 'Microphone unreachable or dictation interrupted.'
+            );
+          }
+        };
         rec.onend = () => setIsDictating(false);
 
         rec.start();
