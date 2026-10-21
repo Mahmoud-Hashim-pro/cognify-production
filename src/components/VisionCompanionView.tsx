@@ -94,6 +94,8 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   // Monotonically increasing request ID & in-flight tracking to reject stale scene descriptions
   const activeRequestIdRef = useRef<number>(0);
   const lastObservationTimeRef = useRef<number>(0);
+  const activeAbortControllerRef = useRef<AbortController | null>(null);
+  const lastCaptureAttemptRef = useRef<number>(0);
   const [observationTimestamp, setObservationTimestamp] = useState<number | null>(null);
   const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | null>(null);
   const [observationConfidenceReason, setObservationConfidenceReason] = useState<string>('');
@@ -525,6 +527,8 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     }
     return () => {
       isMountedRef.current = false;
+      activeAbortControllerRef.current?.abort();
+      activeAbortControllerRef.current = null;
       streamRef.current?.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
       if (videoRef.current) {
@@ -574,6 +578,11 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return null;
 
+    // Wake up video playback if unexpectedly paused
+    if (video.paused && !video.ended) {
+      video.play().catch(() => {});
+    }
+
     const maxDim = 1280;
     let w = video.videoWidth;
     let h = video.videoHeight;
@@ -591,6 +600,7 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
+    ctx.clearRect(0, 0, w, h);
     ctx.drawImage(video, 0, 0, w, h);
     return canvas.toDataURL('image/jpeg', 0.85);
   };
@@ -600,6 +610,13 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     forcedFrame?: string,
     forcedAction?: 'summarize' | 'read'
   ) => {
+    // Battery and API quota protection: throttle captures occurring faster than 750ms
+    const now = Date.now();
+    if (now - lastCaptureAttemptRef.current < 750) {
+      return;
+    }
+    lastCaptureAttemptRef.current = now;
+
     const targetLang = choiceLang || companionLang;
     setCompanionLang(targetLang);
     const activeReadAction = forcedAction || readAction;
@@ -642,6 +659,14 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
       fileInputRef.current?.click();
       return;
     }
+
+    // Cancel superseded in-flight request before launching new analysis
+    if (activeAbortControllerRef.current) {
+      activeAbortControllerRef.current.abort();
+      activeAbortControllerRef.current = null;
+    }
+    const abortController = new AbortController();
+    activeAbortControllerRef.current = abortController;
 
     const currentReqId = ++activeRequestIdRef.current;
     const captureTimestamp = Date.now();
@@ -904,15 +929,47 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         }
       }
     } else if (targetLang === 'ar') {
-      prompt = `أنت رفيق بشري يتحدث بصوته لشخص كفيف عبر الكاميرا. تحدث فوراً بلغة عربية عامية سهلة ومباشرة كأنك صديق يقف بجانبه وينظر أمامه: ادخل في الموضوع فوراً بدون أي مقدمات أو عناوين أو ماركداون. ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر، مثلاً: "مفيش أخطار حواليك، قدامك..." ثم صف الأشخاص والأشياء والأسطح والنصوص المكتوبة بشكل طبيعي وتلقائي جداً. لا تذكر كلمات مثل "المخاطر" أو "النصوص المكتوبة" أو "وصف المشهد" كعناوين، ولا تستخدم نجوم الماركداون أو الشرطات نهائياً.${knownContext}`;
+      prompt = `أنت رفيق بصري ومساعد ذكي يتحدث بصوته لشخص كفيف أو ضعيف البصر عبر الكاميرا.
+انظر بدقة متناهية إلى ما يظهر أمام الكاميرا الآن، وقدم وصفاً مكانياً دقيقاً ومفيداً عملياً بالترتيب التالي:
+1. الأمان أولاً (المخاطر والعوائق): ابدأ فوراً بذكر أي خطر أو عائق مباشر في مسار الحركة (سلالم، أسلاك، حواف، زجاج، كراسي، سوائل مسكوبة). إذا كان المسار آمناً ومفتوحاً تماماً، ابدأ بجملة تطمينية سلسة ("مفيش أخطار حواليك، المسار مفتوح أمامك").
+2. العناصر الأساسية ومواقعها بالساعة أو الاتجاه: اذكر الأجسام أو الأشخاص البارزين ومواقعهم النسبية (مثلاً: "عند الساعة 12 قدامك مكتب"، "عند الساعة 2 على يمينك كرسي"، "على شمالك باب مفتوح").
+3. قراءة النصوص واللافتات والأسماء (OCR): اقرأ أي نصوص أو لافتات أو أسماء ماركات أو تواريخ أو أسعار ظاهرة كلمة بكلمة بدقة دون اختصار.
+4. الألوان والتفاصيل المكانية: صف ألوان العناصر الرئيسية وأبعادها التقريبية إذا كانت واضحة وموثوقة.
+5. الإقرار بعدم التأكد: إذا كانت الصورة مهتزة، مظلمة، الإضاءة ضعيفة، أو الجسم محجوباً جزئياً، قل بصراحة ووضوح: "الصورة غير واضحة تماماً" أو "الإضاءة خافتة، حاول تحريك الكاميرا ببطء أو تشغيل الإضاءة".
+تحدث بلغة عربية عامية سهلة وطبيعية وودودة ("بالبلدي")، بدون أي نجوم ماركداون (**) أو شرطات أو عناوين روبوتية (لا تقل "المخاطر:" أو "الوصف:") لكي يتدفق النطق الصوتي بسلاسة.${knownContext}`;
     } else if (targetLang === 'fr') {
-      prompt = `Vous êtes un compagnon humain chaleureux qui parle directement à voix haute à une personne aveugle à travers sa caméra. Parlez immédiatement dans un langage oral fluide, naturel et bienveillant, comme un ami à ses côtés : allez droit au but sans titres de section ni balises markdown. S'il n'y a aucun danger, commencez directement par rassurer la personne (ex. "Aucun danger autour de vous, devant vous se trouve..."). Décrivez les personnes, objets, surfaces et textes visibles de façon fluide et naturelle. N'utilisez AUCUN astérisque (**), tiret ou en-tête robotique.${knownContext}`;
+      prompt = `Vous êtes un compagnon visuel expert qui s'adresse à voix haute à une personne aveugle ou malvoyante à travers sa caméra.
+Analysez ce qui se trouve devant la caméra avec une grande précision selon cet ordre de priorité :
+1. Sécurité d'abord (Dangers et obstacles) : Signalez immédiatement tout obstacle ou danger (marches, câbles au sol, bordures, liquides). Si tout est dégagé, commencez par rassurer la personne ("Aucun danger, le passage est libre").
+2. Objets principaux et positions horaires : Décrivez les personnes et objets clés avec leurs positions relatives (ex. "À 12 heures droit devant vous se trouve un bureau", "À 2 heures sur votre droite se trouve une chaise", "Sur votre gauche une porte ouverte").
+3. Textes et panneaux visibles (OCR) : Lisez mot pour mot tout texte, étiquette, prix ou panneau visible.
+4. Couleurs et attributs visuels : Précisez les couleurs et dimensions relatives fiables.
+5. Incertitude explicite : Si l'image est floue, trop sombre ou partiellement masquée, dites-le clairement (ex. "L'image est un peu floue ou sombre, rapprochez légèrement la caméra").
+Parlez d'une voix naturelle, fluide et bienveillante sans astérisques markdown (**) ni titres robotiques.${knownContext}`;
     } else {
-      prompt = `You are a warm, helpful human companion speaking directly aloud to a blind person through their camera. Speak immediately in fluent, natural conversational prose as if you are a friend standing right beside them: Go straight to the point without any section titles, headings, or robotic boilerplate. If there are no hazards, start directly with reassuring words (e.g. "No hazards around you. Directly in front of you is..."). Describe people, objects, surfaces, and any visible text smoothly and naturally. Do NOT use markdown asterisks (**), bullet dashes, or labels like "Hazards:", "Visible Text:", or "Scene Description:".${knownContext}`;
+      prompt = `You are an expert visual companion speaking aloud to a blind or low-vision user through their camera.
+Examine what is visible in front of the camera right now with utmost precision, delivering a structured, practical description in this priority order:
+1. Safety First (Hazards & Obstacles): State immediately if any immediate obstacle or hazard is present (steps, cables, drop-offs, sharp objects, spills, traffic). If the path is fully clear and safe, begin with a brief reassuring note ("No hazards in your path, area is clear").
+2. Main Objects & Clock-Face Spatial Positions: Identify the primary objects or people and their relative positions using clock coordinates or directions (e.g., "At 12 o'clock directly ahead is a desk", "At 2 o'clock to your right is a chair", "To your left is an open doorway").
+3. Verbatim Text & Signs (OCR): Read any visible signs, packaging labels, prices, room numbers, or text accurately word for word.
+4. Colors & Spatial Attributes: Note prominent colors and spatial relationships when reliable.
+5. Explicit Uncertainty: If the image is blurry, poorly lit, obstructed, or out of frame, state that clearly and gently (e.g., "The image is slightly blurry or dim, try moving closer or adjusting lighting").
+Speak directly in natural, warm, concise conversational prose without any markdown asterisks (**), bullet points, or section headings (never say "Hazards:" or "Scene:").${knownContext}`;
     }
 
     if (!prompt.includes(langMandate.trim())) {
       prompt = `${langMandate}\n${prompt}`;
+    }
+
+    // Previous observation context comparison when camera has moved or scene changed
+    if (lastDescription && observationType === 'live' && !forcedFrame) {
+      const changePrompt =
+        targetLang === 'ar'
+          ? `\n\n[سياق الملاحظة السابقة - قبل لحظات]:\n"${lastDescription.slice(0, 300)}"\nقاعدة كشف التغيير: إذا كان المستخدم يوجه الكاميرا الآن لشيء جديد تماماً، صف المشهد الجديد فوراً دون تكرار القديم. أما إذا كان نفس المشهد، اذكر التغييرات أو الحركة التي طرأت.`
+          : targetLang === 'fr'
+          ? `\n\n[Contexte de l'observation précédente]:\n"${lastDescription.slice(0, 300)}"\nRègle : Si la caméra pointe vers une nouvelle scène, décrivez directement la nouvelle scène sans répéter l'ancienne.`
+          : `\n\n[Previous observation context - from a moment ago]:\n"${lastDescription.slice(0, 300)}"\nRule: If camera is now pointing at something new, describe the new scene directly without repeating the old one. If the same scene, describe significant changes.`;
+      prompt = `${prompt}\n${changePrompt}`;
     }
 
     const verbosityInstruction =
@@ -945,11 +1002,13 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             : undefined,
         },
         [],
-        [{ name: 'scene.jpg', type: 'image/jpeg', data: cleanData }]
+        [{ name: `scene_${captureTimestamp}_${currentReqId}.jpg`, type: 'image/jpeg', data: cleanData }],
+        undefined,
+        abortController.signal
       );
 
-      // CRITICAL: Reject stale responses if newer frame/request was already initiated or unmounted
-      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current) return;
+      // CRITICAL: Reject stale responses if newer frame/request was already initiated or unmounted or cancelled
+      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current || abortController.signal.aborted) return;
       const isAuthNotice =
         result.includes('المعاينة') ||
         result.includes('تسجيل الدخول') ||
@@ -995,8 +1054,8 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       setStatus('ready');
       setAnnounce(cleaned);
 
-      // Track live vs previous vs uncertain observation
-      const isUncertain = /غير واضح|غير متأكد|صورة غير واضحة|إضاءة منخفضة|إضاءة ضعيفة|العدسة محجوبة|مهتزة|blurry|unclear|low light|obscured|not sure/i.test(result);
+      // Track live vs previous vs uncertain observation with expanded multilingual patterns
+      const isUncertain = /غير واضح|غير متأكد|صورة غير واضحة|إضاءة منخفضة|إضاءة ضعيفة|إضاءة خافتة|العدسة محجوبة|مهتزة|مشوشة|مش واضحة|قرب الكاميرا|حاول تحريك الكاميرا|blurry|unclear|low light|obscured|not sure|hard to tell|bring closer|poorly lit|dimly lit|out of focus|flou|floue|sombre|peu clair|pas certain|rapprochez la caméra|mal éclairé/i.test(result);
       if (isUncertain) {
         setObservationType('uncertain');
         setObservationConfidenceReason(
@@ -1054,17 +1113,20 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
           },
         });
       }, 60);
-    } catch {
-      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current) return;
+    } catch (err: any) {
+      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current || abortController.signal.aborted || err?.name === 'AbortError') {
+        // Cancelled or superseded in-flight request — safely ignore without resetting UI
+        return;
+      }
       setStatus('ready');
-      const err =
+      const errPrompt =
         targetLang === 'ar'
           ? 'حصلت مشكلة في تحليل الصورة، من فضلك جرب تاني.'
           : targetLang === 'fr'
           ? "Un problème est survenu lors de l'analyse de l'image. Veuillez réessayer."
           : 'Something went wrong analyzing the image. Please try again.';
-      setLastDescription(err);
-      speak(err, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
+      setLastDescription(errPrompt);
+      speak(errPrompt, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
     }
   };
 
@@ -2039,9 +2101,9 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     <button
                       type="button"
                       onClick={() => describeScene(companionLang)}
-
+                      disabled={status === 'starting-camera'}
                       aria-label={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
-                      title={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
+                      title={t('Refresh and re-analyze scene (Space / Enter)', 'إعادة الفحص والتقاط المشهد من جديد (مسافة / Enter)', 'Réanalyser la scène (Espace / Entrée)')}
                       className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-50"
                     >
                       <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
@@ -2126,7 +2188,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                           setOutfitMode(false);
                           setNavGuideMode(false);
                           setShoppingMode(false);
-                          describeScene(companionLang, lastSnapshot || undefined, 'read');
+                          describeScene(companionLang, undefined, 'read');
                         }}
                         aria-label={t('Read Text Only', 'اقرأ النصوص فقط', 'Lire le texte')}
                         title={t('Read any text or writing visible in the scene', 'قراءة أي كتابة أو نصوص في المشهد بدقة', 'Lire les textes visibles')}

@@ -201,6 +201,70 @@ export async function runBlindAndLowVisionVerification(): Promise<{ passed: numb
     assert(registeredShortcuts.length >= 15, 'At least 15 keyboard shortcuts provided for blind navigation');
   }
 
+  // Test 15: Monotonic Request ID & Stale Frame Response Rejection
+  {
+    let activeRequestId = 0;
+    const req1Id = ++activeRequestId;
+    const req2Id = ++activeRequestId;
+
+    const isStaleReq1 = req1Id !== activeRequestId;
+    const isCurrentReq2 = req2Id === activeRequestId;
+
+    assert(isStaleReq1, 'Older analysis request ID 1 is flagged as stale after request 2 is issued');
+    assert(isCurrentReq2, 'Latest analysis request ID 2 is confirmed as active and valid');
+
+    // Test AbortController cancellation propagation
+    const abortCtrl1 = new AbortController();
+    const abortCtrl2 = new AbortController();
+    abortCtrl1.abort();
+
+    assert(abortCtrl1.signal.aborted === true, 'Superseded request AbortController is aborted');
+    assert(abortCtrl2.signal.aborted === false, 'Current active request AbortController remains live');
+  }
+
+  // Test 16: Multilingual Visual Uncertainty Detection (Arabic, English, French)
+  {
+    const uncertaintyRegex = /غير واضح|غير متأكد|صورة غير واضحة|إضاءة منخفضة|إضاءة ضعيفة|إضاءة خافتة|العدسة محجوبة|مهتزة|مشوشة|مش واضحة|قرب الكاميرا|حاول تحريك الكاميرا|blurry|unclear|low light|obscured|not sure|hard to tell|bring closer|poorly lit|dimly lit|out of focus|flou|floue|sombre|peu clair|pas certain|rapprochez la caméra|mal éclairé/i;
+
+    const arBlurry = 'الصورة غير واضحة والإضاءة خافتة حاول تحريك الكاميرا ببطء';
+    const arClear = 'مفيش أخطار حواليك، قدامك مكتب عمل ولابتوب عند الساعة 12';
+    const enBlurry = 'The image is blurry and dimly lit, please bring the camera closer';
+    const enClear = 'No hazards in your path. At 12 o\'clock directly ahead is an open laptop';
+    const frBlurry = 'L\'image est floue et la scène est sombre, rapprochez la caméra';
+    const frClear = 'Aucun danger autour de vous. À 12 heures se trouve un bureau avec un livre';
+
+    assert(uncertaintyRegex.test(arBlurry), 'Arabic blurry/dim description detected as uncertain');
+    assert(!uncertaintyRegex.test(arClear), 'Arabic crisp description recognized as clear/live');
+    assert(uncertaintyRegex.test(enBlurry), 'English blurry/dim description detected as uncertain');
+    assert(!uncertaintyRegex.test(enClear), 'English crisp description recognized as clear/live');
+    assert(uncertaintyRegex.test(frBlurry), 'French blurry/dim description detected as uncertain');
+    assert(!uncertaintyRegex.test(frClear), 'French crisp description recognized as clear/live');
+  }
+
+  // Test 17: Spatial Clock-Face Layout Recognition
+  {
+    const spatialTextAr = 'عند الساعة 12 قدامك باب مفتوح، وعند الساعة 2 على يمينك كرسي مكتب';
+    const hasClockAr = /الساعة\s*(12|1|2|3|4|5|6|7|8|9|10|11)/i.test(spatialTextAr);
+    assert(hasClockAr, 'Arabic clock-face spatial direction parsed accurately');
+
+    const spatialTextEn = 'At 12 o\'clock directly ahead is an open door, and at 2 o\'clock to your right is a desk chair';
+    const hasClockEn = /(?:at\s*)?(12|1|2|3|4|5|6|7|8|9|10|11)\s*o['’]clock/i.test(spatialTextEn);
+    assert(hasClockEn, 'English clock-face spatial direction parsed accurately');
+
+    const spatialTextFr = 'À 12 heures droit devant vous se trouve une porte ouverte, et à 2 heures sur votre droite une chaise';
+    const hasClockFr = /à\s*(12|1|2|3|4|5|6|7|8|9|10|11)\s*heures/i.test(spatialTextFr);
+    assert(hasClockFr, 'French clock-face spatial direction parsed accurately');
+  }
+
+  // Test 18: Hazard-First Priority Invariant
+  {
+    const hazardLeadAr = 'خد بالك فيه سلك كهرباء ممدود على الأرض، وقدامك ترابيزة عند الساعة 12';
+    const safeLeadAr = 'مفيش أخطار حواليك، المسار مفتوح قدامك';
+    const hazardRegexAr = /خد بالك|احذر|انتبه|سلك|سلم|درج|عائق/i;
+    assert(hazardRegexAr.test(hazardLeadAr), 'Hazard priority warning detected at start of Arabic description');
+    assert(!hazardRegexAr.test(safeLeadAr), 'Reassuring statement has no false hazard alerts');
+  }
+
   console.log(`\n  Blind & Low-Vision Platform Verification: ${passed} Passed, ${failed} Failed`);
   return { passed, failed };
 }

@@ -1129,14 +1129,15 @@ export async function generateAdaptiveResponse(
   profile: UserProfile,
   history: Message[],
   attachments: { name: string, type: string, data: string }[] = [],
-  studentState?: any
+  studentState?: any,
+  signal?: AbortSignal
 ) {
   const isAr = isArabicLocale(profile.language);
 
   // Direct (no-backend) path: stream from Gemini/Groq and collect the full text.
   const direct = async (): Promise<string> => {
     let text = "";
-    for await (const chunk of generateAdaptiveResponseStream(message, profile, history, attachments, undefined, studentState)) {
+    for await (const chunk of generateAdaptiveResponseStream(message, profile, history, attachments, signal, studentState)) {
       if (chunk.text) text = chunk.text;
     }
     return text || (isAr
@@ -1152,7 +1153,8 @@ export async function generateAdaptiveResponse(
     let res = await fetch('/api/gemini/generateAdaptiveResponse', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ message, profile, history, attachments, studentState })
+      body: JSON.stringify({ message, profile, history, attachments, studentState }),
+      signal
     });
 
     if (res.status === 401 && auth.currentUser) {
@@ -1161,7 +1163,8 @@ export async function generateAdaptiveResponse(
         res = await fetch('/api/gemini/generateAdaptiveResponse', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ message, profile, history, attachments, studentState })
+          body: JSON.stringify({ message, profile, history, attachments, studentState }),
+          signal
         });
       }
     }
@@ -1182,7 +1185,10 @@ export async function generateAdaptiveResponse(
     }
     const data = await res.json();
     return data.result;
-  } catch {
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw err;
+    }
     return direct();
   }
 }
