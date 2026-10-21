@@ -68,7 +68,7 @@ interface DisabilityModeViewProps {
 function detectDirectDisabilityTab(_profile: UserProfile): DisabilityTab {
   try {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
-    if (saved === 'chat' || saved === 'deaf' || saved === 'vision') {
+    if (saved === 'chat' || saved === 'deaf' || saved === 'vision' || saved === 'hub') {
       return saved as DisabilityTab;
     }
   } catch {}
@@ -164,13 +164,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
   const handleNavigateBack = React.useCallback(() => {
     if (activeTab !== 'hub') {
-      if (typeof window !== 'undefined' && window.history.state && window.history.state.tab && window.history.state.tab !== 'hub') {
-        window.history.back();
-      } else {
-        handleSelectTab('hub');
-      }
+      handleSelectTab('hub');
       try {
         localStorage.setItem('cognify_default_disability_tab', 'hub');
+        window.history.pushState({ view: 'disability', tab: 'hub' }, '', '#disability/hub');
       } catch {}
     } else if (onNavigate) {
       onNavigate('chat');

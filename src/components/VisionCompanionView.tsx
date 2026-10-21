@@ -470,13 +470,55 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     [companionLang]
   );
 
-  const getUserMediaWithTimeout = (constraints: MediaStreamConstraints, timeoutMs = 4000): Promise<MediaStream> => {
-    return Promise.race([
-      navigator.mediaDevices.getUserMedia(constraints),
-      new Promise<MediaStream>((_, reject) =>
-        setTimeout(() => reject(new Error('CAMERA_TIMEOUT')), timeoutMs)
-      ),
-    ]);
+  const getUserMediaSafe = async (mode: 'environment' | 'user'): Promise<MediaStream> => {
+    // Attempt progressive constraint relaxation:
+    // 1. High quality with ideal facing mode (works on mobile back camera and desktop webcams)
+    // 2. Standard 720p with ideal facing mode
+    // 3. Simple video: true (universal fallback)
+    const attempts: MediaStreamConstraints[] = [
+      {
+        video: {
+          facingMode: { ideal: mode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      },
+      {
+        video: {
+          facingMode: { ideal: mode },
+        },
+        audio: false,
+      },
+      {
+        video: true,
+        audio: false,
+      },
+    ];
+
+    let lastError: any = null;
+    for (const constraints of attempts) {
+      try {
+        const stream = await Promise.race([
+          navigator.mediaDevices.getUserMedia(constraints),
+          new Promise<MediaStream>((_, reject) =>
+            setTimeout(() => reject(new Error('CAMERA_TIMEOUT')), 20000)
+          ),
+        ]);
+        if (stream && stream.getVideoTracks().length > 0) {
+          return stream;
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn('getUserMedia attempt failed, trying fallback...', err?.name || err?.message);
+        // If user explicitly denied permission, do not keep trying other constraints
+        if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
+          throw err;
+        }
+      }
+    }
+
+    throw lastError || new Error('NO_CAMERA_FOUND');
   };
 
   const startCamera = useCallback(
@@ -488,26 +530,7 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
       setStatus('starting-camera');
       try {
         streamRef.current?.getTracks().forEach((tr) => tr.stop());
-        let stream: MediaStream;
-        try {
-          stream = await getUserMediaWithTimeout({
-            video: {
-              facingMode: mode,
-              width: { min: 960, ideal: 1920, max: 1920 },
-              height: { min: 540, ideal: 1080, max: 1080 },
-            },
-            audio: false,
-          }, 3500);
-        } catch {
-          try {
-            stream = await getUserMediaWithTimeout({
-              video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
-              audio: false,
-            }, 2500);
-          } catch {
-            stream = await getUserMediaWithTimeout({ video: true, audio: false }, 2500);
-          }
-        }
+        const stream = await getUserMediaSafe(mode);
 
         if (!isMountedRef.current) {
           stream.getTracks().forEach((tr) => tr.stop());
@@ -517,11 +540,9 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          try {
-            await videoRef.current.play();
-          } catch (playErr) {
+          videoRef.current.play().catch((playErr) => {
             console.warn('Video auto-play warning:', playErr);
-          }
+          });
         }
         if (isMountedRef.current) {
           setStatus('ready');
@@ -531,9 +552,18 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
               : 'Full-screen camera ready. Tap either button to describe what is in front of you.'
           );
         }
-      } catch (camErr) {
+      } catch (camErr: any) {
         console.warn('Camera failed or timed out:', camErr);
-        if (isMountedRef.current) setStatus('camera-denied');
+        if (isMountedRef.current) {
+          setStatus('camera-denied');
+          if (camErr?.name === 'NotAllowedError' || camErr?.name === 'PermissionDeniedError') {
+            setAnnounce(
+              companionLang === 'ar'
+                ? 'تم رفض إذن الكاميرا من المتصفح. يمكنك تفعيلها من شريط العنوان أو رفع صورة مباشرة.'
+                : 'Camera permission was denied. You can enable it in the address bar or upload a photo directly.'
+            );
+          }
+        }
       }
     },
     [facingMode, companionLang]
@@ -1636,6 +1666,23 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   <span>{companionLang === 'ar' ? 'عينة صوتية حية 🔊' : 'Live sample 🔊'}</span>
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  cancelSpeech();
+                  try {
+                    streamRef.current?.getTracks().forEach((tr) => tr.stop());
+                    streamRef.current = null;
+                  } catch {}
+                  if (onNavigateBack) onNavigateBack();
+                  else if (typeof window !== 'undefined') window.location.hash = '#disability/hub';
+                }}
+                className="mt-3 w-full py-2.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-white text-xs font-bold transition-all border border-stone-700 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                <span>{companionLang === 'ar' ? 'العودة لقائمة الميزات' : 'Back to Features Hub'}</span>
+              </button>
             </div>
           </div>
         )}
@@ -1653,13 +1700,12 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   cancelSpeech();
                   try {
                     streamRef.current?.getTracks().forEach((tr) => tr.stop());
+                    streamRef.current = null;
                   } catch {}
                   if (onNavigateBack) {
                     onNavigateBack();
-                  } else if (typeof window !== 'undefined' && window.history.length > 1) {
-                    window.history.back();
-                  } else {
-                    window.location.hash = '#chat';
+                  } else if (typeof window !== 'undefined') {
+                    window.location.hash = '#disability/hub';
                   }
                 }}
                 aria-label={t('Back to Features Hub', 'العودة للميزات', 'Retour aux fonctionnalités')}
