@@ -286,7 +286,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const speakText = useCallback((text: string) => {
     if (!text.trim()) return;
     if (!('speechSynthesis' in window)) {
-      setError("Speech output isn't supported on this browser.");
+      setError(isAr ? 'ميزة إخراج الصوت غير مدعومة في هذا المتصفح.' : "Speech output isn't supported on this browser.");
       return;
     }
     try {
@@ -339,7 +339,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError("Live captions need a supported browser such as Chrome, Edge, or Safari.");
+      setError(isAr ? 'تتطلب التسميات التوضيحية المباشرة متصفحاً مدعوماً مثل Chrome أو Edge أو Safari.' : "Live captions need a supported browser such as Chrome, Edge, or Safari.");
       return;
     }
     recognitionRef.current = new SpeechRecognition();
@@ -353,11 +353,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       // Map every error code to a clear message — otherwise captions just stop
       // mid-conversation with no explanation (common on hospital networks).
       const code = event?.error;
-      if (code === 'not-allowed' || code === 'service-not-allowed') setError("Microphone access denied. Enable permissions in your browser settings.");
-      else if (code === 'audio-capture') setError("No microphone found. Please connect one and try again.");
-      else if (code === 'network') setError("Speech service unreachable — check the internet connection.");
+      if (code === 'not-allowed' || code === 'service-not-allowed') setError(isAr ? 'تم رفض إذن الميكروفون. يرجى تفعيل الإذن من إعدادات المتصفح.' : "Microphone access denied. Enable permissions in your browser settings.");
+      else if (code === 'audio-capture') setError(isAr ? 'لم يتم العثور على ميكروفون. يرجى توصيل ميكروفون والمحاولة ثانية.' : "No microphone found. Please connect one and try again.");
+      else if (code === 'network') setError(isAr ? 'تعذر الاتصال بخدمة التعرف الصوتي — تحقق من اتصال الإنترنت.' : "Speech service unreachable — check the internet connection.");
       else if (code === 'no-speech' || code === 'aborted') { /* benign — no message */ }
-      else setError("Speech recognition stopped. Tap the mic to retry.");
+      else setError(isAr ? 'توقف التعرف على الصوت. اضغط على الميكروفون للمحاولة ثانية.' : "Speech recognition stopped. Tap the mic to retry.");
       setIsListening(false);
       stopAudioLevelTracking();
     };
@@ -609,10 +609,10 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             if (result?.trim()) {
               await processUtterance(result.trim());
             } else {
-              setError("No speech detected. Try speaking more clearly or adjusting your speech profile.");
+              setError(isAr ? 'لم يتم رصد صوت واضح. حاول التحدث بنبرة أوضح أو تعديل الملف الصوتي.' : "No speech detected. Try speaking more clearly or adjusting your speech profile.");
             }
           } catch (err) {
-            setError("Audio decoding failed. Check your microphone and try again.");
+            setError(isAr ? 'فشل فك ترميز الصوت. تحقق من الميكروفون وحاول ثانية.' : "Audio decoding failed. Check your microphone and try again.");
           } finally { setIsDecoding(false); }
         };
       };
@@ -628,7 +628,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError("Cannot access microphone. Check browser permissions.");
+      setError(isAr ? 'تعذر الوصول للميكروفون. يرجى التحقق من أذونات المتصفح.' : "Cannot access microphone. Check browser permissions.");
     }
   };
 
@@ -707,7 +707,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError("Cannot access microphone for calibration.");
+      setError(isAr ? 'تعذر الوصول للميكروفون لإجراء المعايرة.' : "Cannot access microphone for calibration.");
     }
   };
 
@@ -1080,7 +1080,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               <div className="mx-4 mb-2 px-4 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
                 <p className="text-xs text-red-300">{error}</p>
-                <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+                <button onClick={() => setError(null)} aria-label={isAr ? 'إغلاق رسالة الخطأ' : 'Dismiss error'} className="ms-auto text-red-400 hover:text-white p-1 rounded-lg"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
 

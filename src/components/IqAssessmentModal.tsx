@@ -376,7 +376,7 @@ export default function IqAssessmentModal({
                   className="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 hover:from-amber-400 hover:to-blue-500 text-white text-xs font-black uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-[#E5A93C]/20 active:scale-95 transition-all flex items-center gap-2"
                 >
                   {localize(profile.language, 'Start Assessment', 'ابدأ التقييم')}
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </button>
               </div>
             </div>
@@ -483,7 +483,7 @@ export default function IqAssessmentModal({
                   {currentIdx + 1 === IQ_QUESTION_BATTERY.length
                     ? localize(profile.language, 'Finish & Calculate', 'إنهاء وحساب النتيجة')
                     : localize(profile.language, 'Next Question', 'السؤال التالي')}
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </button>
               </div>
             </div>

@@ -623,7 +623,7 @@ export default function ProfilePage({
                     }`}
                   >
                     {LANGUAGE_OPTIONS.map(opt => (
-                      <option key={opt.id} value={opt.id}>{opt.flag} {opt.nameAr}</option>
+                      <option key={opt.id} value={opt.id}>{opt.flag} {isAr ? opt.nameAr : opt.nameEn}</option>
                     ))}
                   </select>
                 ) : (

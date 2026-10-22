@@ -341,7 +341,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
                   >
                     <Zap className="w-3.5 h-3.5" />
                     <span>{isAr ? 'مراجعة سريعة (60ث)' : 'Micro-Review (60s)'}</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                   </button>
                 </div>
               </div>

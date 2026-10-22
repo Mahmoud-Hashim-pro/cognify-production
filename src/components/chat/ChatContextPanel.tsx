@@ -123,7 +123,7 @@ export default function ChatContextPanel({
           title={localize(profile.language, 'Collapse Context Panel', 'طي لوحة المصادر')}
           className="hidden xl:flex absolute -start-3.5 top-1/2 -translate-y-1/2 z-30 w-7 h-12 bg-[#150917] border border-[#4A1224]/70 hover:border-[#E5A93C]/50 rounded-s-xl items-center justify-center text-slate-400 hover:text-[#E5A93C] shadow-xl transition-all active:scale-95 group cursor-pointer"
         >
-          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform" />
         </button>
       )}
 
@@ -150,7 +150,7 @@ export default function ChatContextPanel({
               title={localize(profile.language, 'Collapse Context Panel', 'طي لوحة المصادر')}
               className="p-1.5 text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30 rounded-lg transition-all"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 rtl:rotate-180" />
             </button>
           )}
         </div>

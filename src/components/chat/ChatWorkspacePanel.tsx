@@ -174,7 +174,7 @@ export default function ChatWorkspacePanel({
           title={localize(profile.language, 'Collapse Workspace', 'طي مساحة العمل')}
           className="hidden xl:flex absolute -end-3.5 top-1/2 -translate-y-1/2 z-30 w-7 h-12 bg-[#150917] border border-[#4A1224]/70 hover:border-[#E5A93C]/50 rounded-e-xl items-center justify-center text-slate-400 hover:text-[#E5A93C] shadow-xl transition-all active:scale-95 group cursor-pointer"
         >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          <ChevronLeft className="w-4 h-4 rtl:rotate-180 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 transition-transform" />
         </button>
       )}
 
@@ -210,7 +210,7 @@ export default function ChatWorkspacePanel({
                 title={localize(profile.language, 'Collapse Workspace', 'طي مساحة العمل')}
                 className="p-1.5 text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30 rounded-lg transition-all"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
               </button>
             )}
           </div>

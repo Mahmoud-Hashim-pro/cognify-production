@@ -27,9 +27,11 @@ export const Dialog: React.FC<DialogProps> = ({
   description,
   size = 'md',
   children,
-  dismissLabel = 'Close modal dialog',
+  dismissLabel,
   closeOnBackdropClick = true,
 }) => {
+  const isRTLDoc = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
+  const effectiveDismissLabel = dismissLabel || (isRTLDoc ? 'إغلاق النافذة المنبثقة' : 'Close modal dialog');
   const titleId = useId();
   const descId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -148,7 +150,7 @@ export const Dialog: React.FC<DialogProps> = ({
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            aria-label={dismissLabel}
+            aria-label={effectiveDismissLabel}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
           >
             <X className="w-5 h-5" aria-hidden="true" />
