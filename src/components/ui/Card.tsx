@@ -18,7 +18,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
           variant === 'default' && 'shadow-sm',
           variant === 'elevated' && 'shadow-md border-stone-200 dark:border-stone-700/80 dark:bg-[#1A2335]',
           variant === 'interactive' &&
-            'cursor-pointer hover:border-[#087F8C]/60 dark:hover:border-[#087F8C]/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#111622]',
+            'cursor-pointer hover:border-[#087F8C]/60 dark:hover:border-[#087F8C]/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#111622] motion-reduce:transition-none motion-reduce:active:scale-100',
           variant === 'highlighted' &&
             'border-[#243B73]/40 dark:border-[#243B73]/60 bg-[#F5F7FB] dark:bg-[#1A2438] shadow-sm',
           className

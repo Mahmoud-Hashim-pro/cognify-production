@@ -66,7 +66,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={(renderProps) =>
           cn(
             // Baseline flex layout & centering
-            'inline-flex items-center justify-center font-sans transition-all duration-150 cursor-pointer select-none',
+            'inline-flex items-center justify-center font-sans transition-all duration-150 cursor-pointer select-none motion-reduce:transition-none motion-reduce:active:scale-100',
             // High-contrast WCAG 2.2 compliant focus ring
             'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-[#F59E0B] data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-[#111622] dark:data-[focus-visible]:ring-offset-[#111622]',
             // Disabled & loading states
@@ -80,7 +80,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin shrink-0" aria-hidden="true" />
+            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" aria-hidden="true" />
             <span>{loadingText || children}</span>
           </>
         ) : (

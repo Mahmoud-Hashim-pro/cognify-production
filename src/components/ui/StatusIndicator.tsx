@@ -27,7 +27,7 @@ const statusConfig: Record<
     containerClass: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60',
   },
   processing: {
-    icon: <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-spin" aria-hidden="true" />,
+    icon: <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-spin motion-reduce:animate-none" aria-hidden="true" />,
     dotClass: 'bg-blue-500 ring-2 ring-blue-500/20',
     textClass: 'text-blue-800 dark:text-blue-300 font-semibold',
     containerClass: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60',
