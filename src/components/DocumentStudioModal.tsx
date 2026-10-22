@@ -98,53 +98,23 @@ export interface DocFlashcard {
 
 export const DOC_HISTORY_KEY = 'cognify_vision_doc_history';
 
-export function downloadTextAsWavFile(text: string, filename: string) {
+export function downloadTextAsTxtFile(text: string, filename: string) {
   if (typeof window === 'undefined') return;
-  const sampleRate = 16000;
-  const numChannels = 1;
-  const duration = Math.min(Math.max(text.length * 0.05, 2), 60);
-  const numSamples = Math.floor(sampleRate * duration);
-  const buffer = new ArrayBuffer(44 + numSamples * 2);
-  const view = new DataView(buffer);
-
-  const writeString = (offset: number, str: string) => {
-    for (let i = 0; i < str.length; i++) {
-      view.setUint8(offset + i, str.charCodeAt(i));
-    }
-  };
-
-  writeString(0, 'RIFF');
-  view.setUint32(4, 36 + numSamples * 2, true);
-  writeString(8, 'WAVE');
-  writeString(12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, numChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * numChannels * 2, true);
-  view.setUint16(32, numChannels * 2, true);
-  view.setUint16(34, 16, true);
-  writeString(36, 'data');
-  view.setUint32(40, numSamples * 2, true);
-
-  for (let i = 0; i < numSamples; i++) {
-    const t = i / sampleRate;
-    const tone = 260 + 30 * Math.sin(2 * Math.PI * 1.2 * t);
-    const sample = Math.sin(2 * Math.PI * tone * t) * 0.3 * Math.min(1, Math.exp(-t / (duration * 0.8)));
-    view.setInt16(44 + i * 2, Math.floor(sample * 32767), true);
-  }
-
-  const blob = new Blob([buffer], { type: 'audio/wav' });
+  const cleanContent = (text || '').trim();
+  const blob = new Blob([cleanContent], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const safeName = (filename || 'lecture-audio').replace(/[^\w\u0600-\u06FF-]/g, '_');
-  a.download = `${safeName}.wav`;
+  const safeName = (filename || 'lecture-notes').replace(/[^\w\u0600-\u06FF-]/g, '_');
+  a.download = `${safeName}.txt`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// Backwards compatibility alias
+export const downloadTextAsWavFile = downloadTextAsTxtFile;
 
 export function exportToWordDocument(
   title: string,
@@ -816,7 +786,9 @@ ${directTextContent ? directTextContent.slice(0, 50000) : 'اكتب هنا ال�
           language: isAr ? 'Egyptian Ammiya' : isFr ? 'French' : 'English',
         },
         [],
-        [{ name: file.name, type: mimeType, data: base64 }]
+        (needsOcr || validation.category === 'image')
+          ? [{ name: file.name, type: mimeType, data: base64 }]
+          : []
       );
 
       let summary = '';
@@ -1697,18 +1669,18 @@ ${currentDoc.summary}
                             <span>{isSpeakingDoc ? (companionLang === 'ar' ? 'وقف الصوت' : 'Stop') : (companionLang === 'ar' ? 'استمع صوتياً' : 'Listen')}</span>
                           </button>
 
-                          {/* Download as Audio File (.wav) */}
+                          {/* Export as Clean Accessible Text (.txt) for screen readers and note-takers */}
                           <button
                             type="button"
                             onClick={() => {
-                              downloadTextAsWavFile(currentDoc.summary, currentDoc.title);
-                              toast.success(companionLang === 'ar' ? 'تم تنزيل الملف الصوتي للمحاضرة 🎧' : 'Audio file downloaded 🎧');
+                              downloadTextAsTxtFile(currentDoc.fullText || currentDoc.summary, currentDoc.title);
+                              toast.success(companionLang === 'ar' ? 'تم تنزيل المستند النصي الميسر بنجاح 📝' : 'Accessible notes (.txt) downloaded 📝');
                             }}
                             className="px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
-                            title="تحميل كملف صوتي WAV للاستماع في أي وقت"
+                            title={companionLang === 'ar' ? 'تنزيل كملف نصي نقي صالح لقارئات الشاشة وأجهزة برايل' : 'Download clean text file for screen readers & braille note-takers'}
                           >
-                            <Music className="w-4 h-4" />
-                            <span>{companionLang === 'ar' ? 'تحميل صوتي (.wav)' : 'Audio (.wav)'}</span>
+                            <FileText className="w-4 h-4" />
+                            <span>{companionLang === 'ar' ? 'تصدير نص (.txt)' : 'Export (.txt)'}</span>
                           </button>
 
                           {/* Hands-Free Voice Commands Toggle */}

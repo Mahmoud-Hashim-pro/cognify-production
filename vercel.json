@@ -5,7 +5,9 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci || npm install",
   "env": {
-    "FIREBASE_PROJECT_ID": "gen-lang-client-0347404066"
+    "FIREBASE_PROJECT_ID": "gen-lang-client-0347404066",
+    "PRODUCTION_ORIGIN": "https://my-cognify-app.vercel.app",
+    "ALLOW_LOCAL_RATELIMIT_IN_PROD": "true"
   },
   "rewrites": [
     {

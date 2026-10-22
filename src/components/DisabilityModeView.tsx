@@ -25,7 +25,7 @@ import {
   Sun, Moon,
   ScanLine, Banknote, Palette, Compass, Users, FileText, FileCheck, Volume2,
   GraduationCap, History, Clock, Trash2, Play, FileUp, Download, ExternalLink,
-  RotateCcw
+  RotateCcw, Search, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
@@ -75,6 +75,7 @@ export type DashboardCategory =
   | 'see_understand'
   | 'read_scan'
   | 'listen_transcribe'
+  | 'learn_study'
   | 'create_format'
   | 'saved_recent'
   | 'accessibility_settings';
@@ -157,11 +158,19 @@ export const DASHBOARD_CATEGORIES: {
     icon: Ear,
   },
   {
+    id: 'learn_study',
+    titleEn: 'Learn and Study',
+    titleAr: 'التعلم والدراسة الذكية',
+    descEn: 'Adaptive pedagogical AI tutor, exam builder, and concept practice',
+    descAr: 'المرشد التعليمي التكيفي، إنشاء الاختبارات، وتثبيت المفاهيم والمراجعة',
+    icon: GraduationCap,
+  },
+  {
     id: 'create_format',
     titleEn: 'Create and Format Documents',
     titleAr: 'إنشاء وتنسيق المستندات',
-    descEn: 'Accessible educational book studio, exam generator, and Word DOCX formatter',
-    descAr: 'استوديو الكتب والمناهج الميسرة، بنوك الأسئلة، وتصدير Word DOCX',
+    descEn: 'Accessible educational book studio, publisher-grade Word (.docx) and PDF formatting',
+    descAr: 'استوديو الكتب والمناهج الميسرة وتصدير Word DOCX وPDF بهيكلية قارئ الشاشة',
     icon: BookOpen,
   },
   {
@@ -226,6 +235,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   });
   const [showPassportModal, setShowPassportModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<DashboardCategory>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Saved data states for category 5 (Saved Results and Recent Activity)
   const [recentDocs, setRecentDocs] = useState<SavedBookStudioItem[]>([]);
@@ -654,7 +664,43 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Category 4: Create and Format Documents (create_format)
+    // Category 4: Learn and Study (learn_study)
+    // ═══════════════════════════════════════════════════════════════════════
+    {
+      id: 'cognitive_tutor',
+      category: 'learn_study',
+      titleEn: 'Adaptive Cognitive AI Tutor',
+      titleAr: 'المرشد التعليمي التكيفي',
+      badgeEn: 'Cognitive Tutoring',
+      badgeAr: 'تعلم تكيفي',
+      descEn: 'Pedagogical AI tutor tailored to your cognitive pace, providing step-by-step guidance and plain explanations.',
+      descAr: 'مرشد تعليمي شخصي يتكيف مع وتيرة فهمك، يقدم شروحات ميسرة خطوة بخطوة متوافقة مع قارئات الشاشة.',
+      tagsEn: ['Adaptive Pace', 'Worked Examples', 'Accessible Plain Text'],
+      tagsAr: ['وتيرة متكيفة', 'أمثلة محلولة', 'لغة واضحة'],
+      Icon: Brain,
+      matchingMode: 'None',
+      action: ({ handleSelectTab }) => handleSelectTab('chat'),
+    },
+    {
+      id: 'exam_builder',
+      category: 'learn_study',
+      titleEn: 'Exam & Assessment Generator',
+      titleAr: 'منشئ الامتحانات وبنوك الأسئلة',
+      badgeEn: 'Accessible Tests',
+      badgeAr: 'امتحانات ميسرة',
+      descEn: 'Generate accessible multiple-choice, true/false, and short-answer exams with auto-sized answer boxes and keys.',
+      descAr: 'إنشاء اختبارات ونماذج تقييم ميسرة مع مساحات إجابة نقطية ونماذج إجابة للمعلم.',
+      tagsEn: ['MCQ / Essay', 'Dotted Answer Lines', 'Teacher Key'],
+      tagsAr: ['اختيار / مقالي', 'خطوط إجابة نقطية', 'نموذج المعلم'],
+      Icon: GraduationCap,
+      action: ({ onNavigate, handleSelectTab }) => {
+        if (onNavigate) (onNavigate as any)('book_studio');
+        else handleSelectTab('hub');
+      },
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Category 5: Create and Format Documents (create_format)
     // ═══════════════════════════════════════════════════════════════════════
     {
       id: 'book_studio',
@@ -672,38 +718,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         if (onNavigate) (onNavigate as any)('book_studio');
         else handleSelectTab('hub');
       },
-    },
-    {
-      id: 'exam_builder',
-      category: 'create_format',
-      titleEn: 'Exam & Assessment Generator',
-      titleAr: 'منشئ الامتحانات وبنوك الأسئلة',
-      badgeEn: 'Accessible Tests',
-      badgeAr: 'امتحانات ميسرة',
-      descEn: 'Generate accessible multiple-choice, true/false, and short-answer exams with auto-sized answer boxes and keys.',
-      descAr: 'إنشاء اختبارات ونماذج تقييم ميسرة مع مساحات إجابة نقطية ونماذج إجابة للمعلم.',
-      tagsEn: ['MCQ / Essay', 'Dotted Answer Lines', 'Teacher Key'],
-      tagsAr: ['اختيار / مقالي', 'خطوط إجابة نقطية', 'نموذج المعلم'],
-      Icon: GraduationCap,
-      action: ({ onNavigate, handleSelectTab }) => {
-        if (onNavigate) (onNavigate as any)('book_studio');
-        else handleSelectTab('hub');
-      },
-    },
-    {
-      id: 'cognitive_tutor',
-      category: 'create_format',
-      titleEn: 'Adaptive Cognitive AI Tutor',
-      titleAr: 'المرشد التعليمي التكيفي',
-      badgeEn: 'Cognitive Tutoring',
-      badgeAr: 'تعلم تكيفي',
-      descEn: 'Pedagogical AI tutor tailored to your cognitive pace, providing step-by-step guidance and plain explanations.',
-      descAr: 'مرشد تعليمي شخصي يتكيف مع وتيرة فهمك، يقدم شروحات ميسرة خطوة بخطوة متوافقة مع قارئات الشاشة.',
-      tagsEn: ['Adaptive Pace', 'Worked Examples', 'Accessible Plain Text'],
-      tagsAr: ['وتيرة متكيفة', 'أمثلة محلولة', 'لغة واضحة'],
-      Icon: Brain,
-      matchingMode: 'None',
-      action: ({ handleSelectTab }) => handleSelectTab('chat'),
     },
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -781,12 +795,25 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     }] : []),
   ], [isOrgStaff]);
 
-  // Filter features based on selectedCategory
+  // Filter features based on selectedCategory and searchQuery
   const filteredFeatures = useMemo(() => {
-    if (selectedCategory === 'all') return FEATURE_CARDS;
-    if (selectedCategory === 'saved_recent') return [];
-    return FEATURE_CARDS.filter((f) => f.category === selectedCategory);
-  }, [selectedCategory, FEATURE_CARDS]);
+    let list = FEATURE_CARDS;
+    if (selectedCategory !== 'all') {
+      if (selectedCategory === 'saved_recent') return [];
+      list = list.filter((f) => f.category === selectedCategory);
+    }
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return list;
+    return list.filter((f) => {
+      const matchEn = f.titleEn.toLowerCase().includes(query) ||
+        f.descEn.toLowerCase().includes(query) ||
+        f.tagsEn.some((t) => t.toLowerCase().includes(query));
+      const matchAr = f.titleAr.toLowerCase().includes(query) ||
+        f.descAr.toLowerCase().includes(query) ||
+        f.tagsAr.some((t) => t.toLowerCase().includes(query));
+      return matchEn || matchAr;
+    });
+  }, [selectedCategory, searchQuery, FEATURE_CARDS]);
 
   const isAr = profile.language === 'Arabic' || profile.language === 'Egyptian Ammiya';
   const isDeafActive = activeTab === 'deaf' || activeTab === 'radar' || activeTab === 'bridge' || activeTab === 'studio' || activeTab === 'video';
@@ -1160,50 +1187,126 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   </div>
                 </section>
 
-                {/* ── 3. CATEGORY NAVIGATION BAR (7 categories) ── */}
-                <div
-                  role="tablist"
-                  aria-label={localize(profile.language, 'Dashboard Categories', 'تصنيفات لوحة التحكم')}
-                  className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-stone-100 dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 overflow-x-auto custom-scrollbar"
-                >
-                  {DASHBOARD_CATEGORIES.map((cat) => {
-                    const isSelected = selectedCategory === cat.id;
-                    const CatIcon = cat.icon;
-                    const count = cat.id === 'all'
-                      ? FEATURE_CARDS.length
-                      : cat.id === 'saved_recent'
-                        ? (recentDocs.length + recentActivities.length + spatialObjects.length)
-                        : FEATURE_CARDS.filter((f) => f.category === cat.id).length;
+                {/* ── 3. SEARCH & CATEGORY NAVIGATION BAR ── */}
+                <div className="space-y-3">
+                  {/* Search Bar & Mobile Category Selector */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                    {/* Search Input */}
+                    <div className="relative flex-1">
+                      <label htmlFor="dashboard-feature-search" className="sr-only">
+                        {localize(profile.language, 'Search assistive features and tools', 'البحث في الأدوات والتسهيلات المتاحة')}
+                      </label>
+                      <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-stone-400">
+                        <Search className="w-4 h-4" />
+                      </div>
+                      <input
+                        id="dashboard-feature-search"
+                        type="search"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder={localize(
+                          profile.language,
+                          'Search features (e.g. camera, cash, captions, book studio)...',
+                          'ابحث في الأدوات (مثال: كاميرا، نقود، تفريغ، استوديو الكتب)...'
+                        )}
+                        className={`w-full ps-9 pe-9 py-2.5 min-h-[44px] rounded-xl text-xs sm:text-sm font-medium border outline-none transition-all focus:ring-2 focus:ring-[#087F8C] ${
+                          isDarkMode
+                            ? 'bg-[#171E2E] border-stone-800 text-stone-100 placeholder:text-stone-500 focus:border-[#087F8C]'
+                            : 'bg-white border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-[#087F8C] shadow-xs'
+                        }`}
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          aria-label={localize(profile.language, 'Clear search query', 'مسح نص البحث')}
+                          className="absolute inset-y-0 end-0 pe-3 flex items-center text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
 
-                    return (
-                      <button
-                        key={cat.id}
-                        role="tab"
-                        aria-selected={isSelected}
-                        aria-label={localize(profile.language, cat.titleEn, cat.titleAr)}
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`px-3 py-2 min-h-[40px] rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
-                          isSelected
-                            ? 'bg-teal-700 text-white font-black shadow-sm'
-                            : isDarkMode
-                              ? 'text-stone-300 hover:text-white hover:bg-stone-800/60'
-                              : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/80'
+                    {/* Mobile Category Select Dropdown (Ensures small screens never hide categories) */}
+                    <div className="md:hidden">
+                      <label htmlFor="mobile-category-select" className="sr-only">
+                        {localize(profile.language, 'Select tool category', 'اختر تصنيف الأدوات')}
+                      </label>
+                      <select
+                        id="mobile-category-select"
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value as DashboardCategory)}
+                        className={`w-full px-3 py-2.5 min-h-[44px] rounded-xl text-xs sm:text-sm font-bold border outline-none cursor-pointer focus:ring-2 focus:ring-[#087F8C] ${
+                          isDarkMode
+                            ? 'bg-[#171E2E] border-stone-800 text-stone-200'
+                            : 'bg-white border-stone-200 text-stone-800 shadow-xs'
                         }`}
                       >
-                        <CatIcon className="w-4 h-4 shrink-0" />
-                        <span>{localize(profile.language, cat.titleEn, cat.titleAr)}</span>
-                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          isSelected
-                            ? 'bg-teal-800 text-teal-100'
-                            : isDarkMode
-                              ? 'bg-stone-800 text-stone-400'
-                              : 'bg-stone-200 text-stone-600'
-                        }`}>
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
+                        {DASHBOARD_CATEGORIES.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {localize(profile.language, cat.titleEn, cat.titleAr)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Polite Screen Reader Live Announcement for Search */}
+                  <div className="sr-only" aria-live="polite" aria-atomic="true">
+                    {searchQuery
+                      ? localize(
+                          profile.language,
+                          `${filteredFeatures.length} assistive tools found for "${searchQuery}"`,
+                          `تم العثور على ${filteredFeatures.length} أداة لبحث "${searchQuery}"`
+                        )
+                      : ''}
+                  </div>
+
+                  {/* Desktop / Tablet Category Navigation Tabs */}
+                  <div
+                    role="tablist"
+                    aria-label={localize(profile.language, 'Dashboard Categories', 'تصنيفات لوحة التحكم')}
+                    className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-stone-100 dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 overflow-x-auto custom-scrollbar"
+                  >
+                    {DASHBOARD_CATEGORIES.map((cat) => {
+                      const isSelected = selectedCategory === cat.id;
+                      const CatIcon = cat.icon;
+                      const count = cat.id === 'all'
+                        ? FEATURE_CARDS.length
+                        : cat.id === 'saved_recent'
+                          ? (recentDocs.length + recentActivities.length + spatialObjects.length)
+                          : FEATURE_CARDS.filter((f) => f.category === cat.id).length;
+
+                      return (
+                        <button
+                          key={cat.id}
+                          role="tab"
+                          aria-selected={isSelected}
+                          aria-label={localize(profile.language, cat.titleEn, cat.titleAr)}
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`px-3 py-2 min-h-[40px] rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
+                            isSelected
+                              ? 'bg-teal-700 text-white font-black shadow-sm'
+                              : isDarkMode
+                                ? 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                                : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/80'
+                          }`}
+                        >
+                          <CatIcon className="w-4 h-4 shrink-0" />
+                          <span>{localize(profile.language, cat.titleEn, cat.titleAr)}</span>
+                          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            isSelected
+                              ? 'bg-teal-800 text-teal-100'
+                              : isDarkMode
+                                ? 'bg-stone-800 text-stone-400'
+                                : 'bg-stone-200 text-stone-600'
+                          }`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* ── 4. CATEGORIZED FEATURE CARDS GRID ── */}
@@ -1312,6 +1415,34 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         );
                       })}
                     </div>
+
+                    {filteredFeatures.length === 0 && (
+                      <div className="p-8 sm:p-12 text-center rounded-3xl border border-dashed border-stone-300 dark:border-stone-800 bg-stone-50/50 dark:bg-[#171E2E]/40 space-y-3">
+                        <FeatureIcon icon={<Search className="w-6 h-6 text-stone-400" />} tone="teal" size="lg" className="mx-auto" />
+                        <h3 className="text-sm sm:text-base font-bold text-stone-900 dark:text-stone-100">
+                          {localize(profile.language, 'No matching tools found', 'لم يتم العثور على أدوات مطابقة')}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto leading-relaxed">
+                          {localize(
+                            profile.language,
+                            `No assistive features found matching "${searchQuery}". Try a different keyword or reset filters.`,
+                            `لا توجد أدوات مطابقة لـ "${searchQuery}". جرب كلمة بحث أخرى أو أعد ضبط التصنيف.`
+                          )}
+                        </p>
+                        <div className="pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onPress={() => {
+                              setSearchQuery('');
+                              setSelectedCategory('all');
+                            }}
+                          >
+                            {localize(profile.language, 'Reset Search & Categories', 'إعادة ضبط البحث والتصنيفات')}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

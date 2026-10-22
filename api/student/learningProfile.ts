@@ -9,9 +9,9 @@
  *        POST /api/student/learningProfile { uid, displayName, studentState? }
  */
 
-import { generatePersonalLearningProfile } from '../../src/lib/learningProfileService';
-import { createInitialStudentState } from '../../src/lib/studentStateEngine';
-import type { PersonalLearningProfile, StudentState } from '../../src/types/studentState';
+import { generatePersonalLearningProfile } from '../../src/lib/learningProfileService.js';
+import { createInitialStudentState } from '../../src/lib/studentStateEngine.js';
+import type { PersonalLearningProfile, StudentState } from '../../src/types/studentState.js';
 import { verifyRequestAuth, extractBearerToken } from '../_lib/authGuard.js';
 import { applyCorsHeaders } from '../_lib/cors.js';
 
