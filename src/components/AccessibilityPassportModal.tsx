@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield,
@@ -63,6 +63,61 @@ export default function AccessibilityPassportModal({
 
   const [passport, setPassport] = useState<AccessibilityPassport>(initialPassport);
   const [isSaving, setIsSaving] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+
+  // Focus trap, Escape listener, and focus restoration
+  useEffect(() => {
+    if (!isOpen) {
+      if (previousActiveElementRef.current) {
+        previousActiveElementRef.current.focus();
+        previousActiveElementRef.current = null;
+      }
+      return;
+    }
+
+    previousActiveElementRef.current = document.activeElement as HTMLElement | null;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Initial focus on open
+    const timer = setTimeout(() => {
+      if (modalRef.current) {
+        const firstFocusable = modalRef.current.querySelector<HTMLElement>('button, [tabindex="0"]');
+        firstFocusable?.focus();
+      }
+    }, 50);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(timer);
+    };
+  }, [isOpen, onClose]);
 
   // Reset form to the latest saved profile data every time the modal opens.
   // Without this, if the user opens, closes, changes their mode externally, and
@@ -146,6 +201,7 @@ export default function AccessibilityPassportModal({
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md" dir={isAr ? 'rtl' : 'ltr'}>
       <motion.div
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="passport-modal-title"
@@ -176,7 +232,7 @@ export default function AccessibilityPassportModal({
             type="button"
             onClick={onClose}
             aria-label={t('Close', 'إغلاق', 'Fermer')}
-            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all focus-visible:ring-3 focus-visible:ring-[#F59E0B] focus:outline-none cursor-pointer"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>

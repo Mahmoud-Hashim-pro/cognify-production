@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import {
   ShieldCheck,
@@ -43,6 +43,60 @@ export default function ParentalConsentModal({
   const [allowAi, setAllowAi] = useState(true);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+
+  // Focus trap, Escape key, and focus restoration
+  useEffect(() => {
+    if (!isOpen) {
+      if (previousActiveElementRef.current) {
+        previousActiveElementRef.current.focus();
+        previousActiveElementRef.current = null;
+      }
+      return;
+    }
+
+    previousActiveElementRef.current = document.activeElement as HTMLElement | null;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onCancel();
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    const timer = setTimeout(() => {
+      if (modalRef.current) {
+        const firstFocusable = modalRef.current.querySelector<HTMLElement>('input, button');
+        firstFocusable?.focus();
+      }
+    }, 50);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(timer);
+    };
+  }, [isOpen, onCancel]);
 
   if (!isOpen) return null;
 
@@ -119,6 +173,7 @@ export default function ParentalConsentModal({
       aria-labelledby="consent-title"
     >
       <motion.div
+        ref={modalRef}
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -151,7 +206,7 @@ export default function ParentalConsentModal({
             type="button"
             onClick={onCancel}
             aria-label={isAr ? 'إغلاق نافذة موافقة ولي الأمر' : 'Close parental consent modal'}
-            className="p-1.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors focus-visible:ring-3 focus-visible:ring-[#F59E0B] focus:outline-none cursor-pointer"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>

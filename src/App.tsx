@@ -1011,9 +1011,9 @@ export default function App() {
 
   if ((!isGuestPreview && loading) || profileLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center" role="status" aria-live="polite">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <Loader2 className="w-10 h-10 text-primary animate-spin" aria-hidden="true" />
             <p className="text-slate-400 font-mono text-xs uppercase tracking-[0.3em] animate-pulse">
               {loading ? "Authenticating..." : "Syncing Profile..."}
             </p>
@@ -1593,8 +1593,9 @@ export default function App() {
         <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
           <Suspense
             fallback={
-              <div className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
-                <Loader2 className="w-8 h-8 text-teal-400 animate-spin" />
+              <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
+                <Loader2 className="w-8 h-8 text-teal-400 animate-spin" aria-hidden="true" />
+                <span className="sr-only">Loading view...</span>
               </div>
             }
           >

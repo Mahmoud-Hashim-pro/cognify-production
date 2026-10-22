@@ -101,8 +101,15 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
     const cd = countdown(task);
     return (
       <div className="flex items-center gap-3 px-5 py-4 bg-[#0E0610]/95 border border-[#4A1224]/60 hover:border-[#831843]/80 rounded-2xl transition-all backdrop-blur-md shadow-lg group">
-        <button onClick={() => toggle(task)} className="text-slate-500 hover:text-emerald-400 shrink-0 transition-colors">
-          {task.completed ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <Circle className="w-5 h-5" />}
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={task.completed}
+          aria-label={`${task.completed ? t('Mark incomplete', 'تعيين كغير مكتمل') : t('Mark complete', 'تعيين كمكتمل')}: ${task.title}`}
+          onClick={() => toggle(task)}
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-500 hover:text-emerald-400 shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B] rounded-xl cursor-pointer"
+        >
+          {task.completed ? <CheckCircle2 className="w-5 h-5 text-emerald-400" aria-hidden="true" /> : <Circle className="w-5 h-5" aria-hidden="true" />}
         </button>
         <div className="flex-1 min-w-0">
           <div className={`font-bold text-sm truncate ${task.completed ? 'line-through text-slate-500' : 'text-slate-100'}`}>{task.title}</div>

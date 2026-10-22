@@ -34,6 +34,17 @@ export const Dialog: React.FC<DialogProps> = ({
   const descId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+
+  // Remember trigger element when opened; restore focus when closed
+  useEffect(() => {
+    if (isOpen) {
+      previousActiveElementRef.current = document.activeElement as HTMLElement | null;
+    } else if (previousActiveElementRef.current) {
+      previousActiveElementRef.current.focus();
+      previousActiveElementRef.current = null;
+    }
+  }, [isOpen]);
 
   // Focus trap & Escape key listener
   useEffect(() => {
@@ -138,7 +149,7 @@ export const Dialog: React.FC<DialogProps> = ({
             type="button"
             onClick={onClose}
             aria-label={dismissLabel}
-            className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>

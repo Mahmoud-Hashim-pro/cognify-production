@@ -333,6 +333,19 @@ export default function DocumentStudioModal({
   // 3D Sign Avatar Integration
   const [showSignAvatarInDoc, setShowSignAvatarInDoc] = useState(false);
   const [isAvatarSigningDoc, setIsAvatarSigningDoc] = useState(false);
+
+  // Universal Escape key listener
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        cancelSpeech();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
   const [avatarSigningWords, setAvatarSigningWords] = useState<string[]>([]);
 
   const [docChatMessages, setDocChatMessages] = useState<DocChatMessage[]>([]);
@@ -1386,7 +1399,7 @@ ${currentDoc.summary}
                     onClose();
                   }}
                   aria-label={companionLang === 'ar' ? 'إغلاق استوديو المستندات' : 'Close Document Studio'}
-                  className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors focus-visible:ring-3 focus-visible:ring-[#F59E0B] focus:outline-none cursor-pointer"
                 >
                   <X className="w-5 h-5" aria-hidden="true" />
                 </button>
