@@ -1708,12 +1708,12 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     window.location.hash = '#disability/hub';
                   }
                 }}
-                aria-label={t('Back to Features Hub', 'العودة للميزات', 'Retour aux fonctionnalités')}
-                className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
-                title={t('Back to Features Hub', 'العودة لقائمة الميزات والأدوات', 'Retour aux fonctionnalités')}
+                aria-label={t('Back to Dashboard Hub', 'العودة للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
+                className="min-h-[44px] min-w-[44px] p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+                title={t('Back to Dashboard Hub', 'العودة للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
               >
                 <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-                <span className="hidden sm:inline">{t('Features', 'الميزات', 'Retour')}</span>
+                <span className="hidden sm:inline">{t('Dashboard', 'لوحة الميزات', 'Tableau de bord')}</span>
               </button>
 
             {/* Three Language Choices: Arabic, English, French */}

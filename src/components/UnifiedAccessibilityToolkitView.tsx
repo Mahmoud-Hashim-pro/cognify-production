@@ -43,6 +43,8 @@ import {
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
+import { Breadcrumbs } from './ui/Breadcrumbs';
+import { getRouteBreadcrumbs } from '../lib/navigation';
 import { speak, cancelSpeech } from '../lib/tts';
 import {
   fetchUserUsageQuota,
@@ -393,7 +395,7 @@ export default function UnifiedAccessibilityToolkitView({
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className={`flex-1 flex flex-col h-full overflow-hidden select-none transition-colors duration-300 ${
+      className={`flex-1 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
         isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'
       }`}
     >
@@ -409,21 +411,17 @@ export default function UnifiedAccessibilityToolkitView({
         }`}
       >
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onNavigateBack}
-            className={`p-2 rounded-xl border transition-colors flex items-center gap-1.5 font-bold text-xs cursor-pointer ${
-              isDarkMode
-                ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800'
-                : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
-            }`}
-            aria-label={localize(profile.language, 'Back to Disability Hub', 'الرجوع لمركز أدوات الوصول')}
-          >
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-            <span className="hidden sm:inline">{localize(profile.language, 'Back', 'رجوع')}</span>
-          </button>
+          <Breadcrumbs
+            items={getRouteBreadcrumbs({ view: 'toolkit' }, profile?.language)}
+            onNavigate={(v) => {
+              if (v === 'disability' && onNavigateBack) onNavigateBack();
+            }}
+            onNavigateBack={onNavigateBack}
+            backLabel={isAr ? 'لوحة الميزات' : 'Hub'}
+            isDarkMode={isDarkMode}
+          />
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 hidden md:flex">
             <div className="w-9 h-9 rounded-xl bg-teal-600/20 border border-teal-500/40 text-teal-400 flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-teal-600 dark:text-teal-400" />
             </div>

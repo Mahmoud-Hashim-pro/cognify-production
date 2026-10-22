@@ -3,7 +3,7 @@ import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
   User, Settings, LifeBuoy, MessageSquare, AlertCircle, 
-  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen
+  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen, LayoutDashboard
 } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
@@ -90,6 +90,13 @@ export default function Sidebar({
   // Dedicated Assistive Suites Navigation List
   const assistiveItems = [
     {
+      id: 'hub',
+      label: localize(profile.language, 'Dashboard Hub', 'لوحة الميزات الرئيسية'),
+      icon: LayoutDashboard,
+      action: () => navigateToDisabilityTab('hub'),
+      active: currentView === 'disability' && (activeDisabilityTab === 'hub' || !activeDisabilityTab),
+    },
+    {
       id: 'chat',
       label: localize(profile.language, 'Accessible AI Tutor', 'المساعد الذكي المهيأ'),
       icon: MessageSquare,
@@ -101,7 +108,7 @@ export default function Sidebar({
           setCurrentView('chat');
         }
       },
-      active: currentView === 'chat' || (currentView === 'disability' && (activeDisabilityTab === 'chat' || !activeDisabilityTab)),
+      active: currentView === 'chat' || (currentView === 'disability' && activeDisabilityTab === 'chat'),
     },
     {
       id: 'vision',
@@ -349,7 +356,10 @@ export default function Sidebar({
         }`}>
           <button 
             type="button"
-            onClick={() => setCurrentView('profile')} 
+            onClick={() => {
+              onClose?.();
+              setCurrentView('profile');
+            }} 
             className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none rounded-xl" 
             title={localize(profile.language, 'View Profile', 'الملف الشخصي وجواز الإتاحة')}
             aria-label={localize(profile.language, 'View Profile and Accommodation Passport', 'الملف الشخصي وجواز الإتاحة')}
@@ -367,7 +377,10 @@ export default function Sidebar({
           </button>
           <button
             type="button"
-            onClick={() => setCurrentView('settings')}
+            onClick={() => {
+              onClose?.();
+              setCurrentView('settings');
+            }}
             className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
               currentView === 'settings'
                 ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500'

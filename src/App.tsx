@@ -29,7 +29,9 @@ import {
   isSameRoute,
   RouteState,
   VALID_DISABILITY_TABS,
+  smartNavigateBack,
 } from "./lib/navigation";
+import { RouteAnnouncer } from "./components/ui/RouteAnnouncer";
 import { isAdminUser } from "./lib/roles";
 import { subscribeToStudentMemory, clearStudentMemory, getCachedStudentMemory, DEFAULT_STUDENT_MEMORY } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
@@ -498,13 +500,51 @@ export default function App() {
     }
   }, [profile, currentView]);
 
+  const lastFocusedTriggerRef = useRef<HTMLElement | null>(null);
+
+  const handleOpenMobileMenu = (e?: React.MouseEvent) => {
+    lastFocusedTriggerRef.current = (e?.currentTarget as HTMLElement) || (document.activeElement as HTMLElement) || null;
+    setIsMobileMenuOpen(true);
+  };
+
+  const handleCloseMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setTimeout(() => {
+      lastFocusedTriggerRef.current?.focus();
+    }, 50);
+  };
+
+  const handleBack = () => {
+    smartNavigateBack(navigateTo, 'disability', 'hub');
+  };
+
+  // When view or tab changes, shift focus to the main heading or #main-content
+  // so screen readers (VoiceOver, TalkBack, NVDA) immediately read the new page title.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const mainHeading = document.querySelector<HTMLElement>(
+        '#main-content h1, #main-content [role="heading"][aria-level="1"], #main-content'
+      );
+      if (mainHeading) {
+        if (!mainHeading.getAttribute('tabindex')) {
+          mainHeading.setAttribute('tabindex', '-1');
+        }
+        mainHeading.focus({ preventScroll: true });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [currentView, disabilityTab]);
+
   // When the off-canvas menu opens, move focus into it and allow Escape to close.
-  // Without this a keyboard/screen-reader user gets no signal that it opened and
-  // has no way to dismiss it (the backdrop is a non-focusable div).
+  // When it closes, restore focus to the trigger element that opened it.
   useEffect(() => {
     if (!isMobileMenuOpen) return;
     sidebarRef.current?.querySelector<HTMLElement>('button, a, [tabindex]:not([tabindex="-1"])')?.focus();
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsMobileMenuOpen(false); };
+    const onKey = (e: KeyboardEvent) => { 
+      if (e.key === 'Escape') {
+        handleCloseMobileMenu();
+      }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isMobileMenuOpen]);
@@ -1044,7 +1084,7 @@ export default function App() {
               profile={activeProfile}
               onQuestionEvaluated={updateQuestionHistory} 
               syncMessages={syncActiveThread} 
-              onMenuClick={() => setIsMobileMenuOpen(true)} 
+              onMenuClick={handleOpenMobileMenu} 
               externalMessage={externalMessage}
               onStreamingUpdate={(text) => setCurrentAIResponse(text)}
               onSTTStateChange={setIsSTTActive}
@@ -1057,7 +1097,7 @@ export default function App() {
           <DisabilityModeView
             ref={chatRef}
             profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
+            onMenuClick={handleOpenMobileMenu}
             onNavigate={navigateTo}
             onQuestionEvaluated={updateQuestionHistory}
             syncMessages={syncActiveThread}
@@ -1075,7 +1115,7 @@ export default function App() {
         return <DisabilityModeView
           ref={chatRef}
           profile={activeProfile}
-          onMenuClick={() => setIsMobileMenuOpen(true)}
+          onMenuClick={handleOpenMobileMenu}
           onNavigate={navigateTo}
           onQuestionEvaluated={updateQuestionHistory}
           syncMessages={syncActiveThread}
@@ -1099,8 +1139,8 @@ export default function App() {
         return (
           <AccessibleBookStudioView
             profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo('disability')}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={handleBack}
             isDarkMode={isDarkMode}
           />
         );
@@ -1108,8 +1148,8 @@ export default function App() {
         return (
           <UnifiedAccessibilityToolkitView
             profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo('disability')}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={handleBack}
             onOpenBookStudio={(content, title) => {
               if (content) {
                 try {
@@ -1125,8 +1165,8 @@ export default function App() {
         return (
           <ProfilePage
             profile={activeProfile}
-            onMenuClick={() => setIsMobileMenuOpen(true)}
-            onNavigateBack={() => navigateTo('disability')}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={handleBack}
             setProfile={setProfile}
             onNavigate={(v) => navigateTo(v)}
             isDarkMode={isDarkMode}
@@ -1139,16 +1179,20 @@ export default function App() {
           <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
             <header className="flex items-center gap-3 mb-6">
               <button
-                onClick={() => navigateTo('disability')}
-                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer`}
+                type="button"
+                onClick={handleBack}
+                aria-label={localize(activeProfile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
+                title={localize(activeProfile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
+                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                 <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
               </button>
               <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer`}
-                aria-label="Toggle menu"
+                type="button"
+                onClick={handleOpenMobileMenu}
+                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
+                aria-label={localize(activeProfile.language, 'Toggle menu', 'فتح القائمة الرئيسية')}
               >
                 <Menu className="w-6 h-6" />
               </button>
@@ -1160,9 +1204,9 @@ export default function App() {
           </div>
         );
       case 'admin':
-        return <AdminDashboard profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo('disability')} />;
+        return <AdminDashboard profile={activeProfile} onMenuClick={handleOpenMobileMenu} onNavigateBack={handleBack} />;
       case 'support':
-        return <SupportCenter profile={activeProfile} onMenuClick={() => setIsMobileMenuOpen(true)} onNavigateBack={() => navigateTo('disability')} />;
+        return <SupportCenter profile={activeProfile} onMenuClick={handleOpenMobileMenu} onNavigateBack={handleBack} />;
 
       case 'settings': {
         const ALL_SUPPORTED_LANGUAGES: { id: LanguagePreference; label: string; flag: string; nativeName: string }[] = [
@@ -1211,18 +1255,21 @@ export default function App() {
 
             <header className="p-6 md:p-10 shrink-0 flex items-center gap-3">
               <button
-                onClick={() => navigateTo(homeViewFor(profile))}
-                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer`}
-                title={localize(profile.language, 'Back to Assistant', 'العودة للمساعد')}
+                type="button"
+                onClick={handleBack}
+                aria-label={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
+                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
+                title={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                 <span className="text-xs font-bold hidden sm:inline">{localize(profile.language, 'Back', 'رجوع')}</span>
               </button>
               <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className={`p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer`}
-                aria-label="Toggle menu"
-                title="Open Menu"
+                type="button"
+                onClick={handleOpenMobileMenu}
+                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
+                aria-label={localize(profile.language, 'Toggle menu', 'فتح القائمة الرئيسية')}
+                title={localize(profile.language, 'Open Menu', 'فتح القائمة')}
               >
                 <Menu className="w-6 h-6" />
               </button>
@@ -1460,6 +1507,7 @@ export default function App() {
         dir={direction}
       >
         <ToastContainer rtl={direction === 'rtl'} />
+        <RouteAnnouncer route={{ view: currentView, tab: disabilityTab }} language={profile?.language} />
 
         {/* WCAG 2.4.1 Skip to main content link */}
         <a
@@ -1476,7 +1524,7 @@ export default function App() {
         {isMobileMenuOpen && (
           <div
             className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
-            onClick={() => setIsMobileMenuOpen(false)}
+            onClick={handleCloseMobileMenu}
           />
         )}
 
@@ -1536,7 +1584,7 @@ export default function App() {
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
               openLiveCaptions={() => setIsLiveCaptionsOpen(true)}
-              onClose={() => setIsMobileMenuOpen(false)}
+              onClose={handleCloseMobileMenu}
               onLogout={handleLogout}
             />
         </div>
