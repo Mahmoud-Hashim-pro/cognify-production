@@ -1556,8 +1556,8 @@ Speak directly in natural, warm, concise conversational prose without any markdo
             </p>
             <p className="text-stone-300 text-xs mb-4 leading-relaxed font-medium">
               {t(
-                'If your browser blocked camera access: click the camera or lock icon in the address bar (next to localhost:3000), set Camera to "Allow", and refresh.',
-                'إذا حظر المتصفح الكاميرا: اضغط على أيقونة الكاميرا أو القفل في شريط العنوان (بجوار localhost:3000) واضبط الكاميرا على "السماح / Allow" ثم أعد تحميل الصفحة.'
+                'If your browser blocked camera access: click the camera or lock icon in the address bar, set Camera to "Allow", and refresh.',
+                'إذا حظر المتصفح الكاميرا: اضغط على أيقونة الكاميرا أو القفل في شريط المتصفح، واضبط الكاميرا على "السماح / Allow" ثم أعد تحميل الصفحة.'
               )}
             </p>
             <div className="flex flex-col gap-2.5">
