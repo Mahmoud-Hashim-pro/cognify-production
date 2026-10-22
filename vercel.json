@@ -22,6 +22,18 @@
       "destination": "/api/gemini/auxiliary"
     },
     {
+      "source": "/api/usage/quota",
+      "destination": "/api/usage"
+    },
+    {
+      "source": "/api/usage/jobs",
+      "destination": "/api/usage"
+    },
+    {
+      "source": "/api/geo/country",
+      "destination": "/api/system/health?action=country"
+    },
+    {
       "source": "/((?!api/|assets/|models/|sw\\.js|manifest\\.webmanifest|.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }

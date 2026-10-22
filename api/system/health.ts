@@ -181,6 +181,59 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  // 1b. Check if this is a routed country request (/api/geo/country)
+  const url = (req.url || '').toLowerCase();
+  if (url.includes('/geo/country') || req.query?.action === 'country') {
+    let countryCode = (req.headers?.['x-vercel-ip-country'] as string)
+      || (req.headers?.['cf-ipcountry'] as string)
+      || (req.headers?.['x-country-code'] as string);
+
+    const region = (req.headers?.['x-vercel-ip-country-region'] as string) || null;
+    const rawCity = req.headers?.['x-vercel-ip-city'] as string | undefined;
+    const city = rawCity ? decodeURIComponent(rawCity) : null;
+
+    if (!countryCode || countryCode === 'Unknown') {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const fallbackRes = await fetch('https://api.country.is', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (fallbackRes.ok) {
+          const data = (await fallbackRes.json()) as any;
+          if (data && data.country && typeof data.country === 'string' && data.country.length === 2) {
+            countryCode = data.country.toUpperCase();
+          }
+        }
+      } catch {
+        // Fall through silently
+      }
+    }
+
+    const forwarded = req.headers?.['x-forwarded-for'];
+    let clientIp: string | null = null;
+    if (typeof forwarded === 'string') {
+      clientIp = forwarded.split(',')[0].trim();
+    } else if (Array.isArray(forwarded) && forwarded.length > 0) {
+      clientIp = forwarded[0].trim();
+    } else if (typeof req.headers?.['x-real-ip'] === 'string') {
+      clientIp = req.headers['x-real-ip'].trim();
+    } else if (req.socket?.remoteAddress) {
+      clientIp = req.socket.remoteAddress.trim();
+    }
+
+    if (clientIp && clientIp.startsWith('::ffff:')) {
+      clientIp = clientIp.replace('::ffff:', '');
+    }
+
+    res.setHeader?.('Cache-Control', 'no-store');
+    if (typeof res.status === 'function') {
+      res.status(200).json({ countryCode: countryCode || 'Unknown', region, city, ip: clientIp });
+    } else {
+      res.end?.(JSON.stringify({ countryCode: countryCode || 'Unknown', region, city, ip: clientIp }));
+    }
+    return;
+  }
+
   // 2. Trace correlation ID
   const traceId = getOrGenerateTraceId(req);
   attachTraceId(res, traceId);

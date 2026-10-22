@@ -1,5 +1,3 @@
 # Vercel deployment ignores
-server.ts
 tests
-scripts
 .github

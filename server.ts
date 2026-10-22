@@ -7,14 +7,12 @@ dotenv.config();
 
 import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";
-import countryHandler from "./api/geo/country";
 import emergencyDispatchHandler from "./api/emergency/dispatch";
 import learningProfileHandler from "./api/student/learningProfile";
 import proxyImageHandler from "./api/proxy-image";
 import healthHandler from "./api/system/health";
 import deleteUserHandler from "./api/admin/deleteUser";
-import usageQuotaHandler from "./api/usage/quota";
-import usageJobsHandler from "./api/usage/jobs";
+import usageHandler from "./api/usage";
 
 async function startServer() {
   const app = express();
@@ -62,7 +60,7 @@ async function startServer() {
 
   // Geo: visitor country (Vercel headers in prod, "Unknown" locally)
   app.all("/api/geo/country", (req, res) => {
-    return countryHandler(req, res);
+    return healthHandler(req, res);
   });
 
   // Emergency SOS automated server-side dispatch
@@ -87,12 +85,16 @@ async function startServer() {
 
   // Transparent Quota & Usage Accounting
   app.all("/api/usage/quota", (req, res) => {
-    return usageQuotaHandler(req, res);
+    return usageHandler(req, res);
   });
 
   // Long-Running Processing Jobs (Audio & Multi-page document recovery)
   app.all("/api/usage/jobs", (req, res) => {
-    return usageJobsHandler(req, res);
+    return usageHandler(req, res);
+  });
+
+  app.all("/api/usage", (req, res) => {
+    return usageHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);
