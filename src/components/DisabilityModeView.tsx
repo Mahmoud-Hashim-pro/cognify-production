@@ -985,7 +985,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
@@ -1145,7 +1145,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         type="button"
                         onClick={item.action}
                         aria-label={localize(profile.language, item.titleEn, item.titleAr)}
-                        className={`p-3 min-h-[48px] rounded-2xl border flex items-center gap-3 transition-all active:scale-95 cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
+                        className={`p-3 min-h-[48px] rounded-2xl border flex items-center gap-3 transition-all active:scale-95 cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] last:col-span-2 sm:last:col-span-1 lg:last:col-span-1 ${
                           isDarkMode
                             ? 'bg-[#171E2E] hover:bg-stone-800 border-stone-800 hover:border-[#087F8C]/50 text-stone-200 hover:text-white'
                             : 'bg-white hover:bg-stone-50 border-stone-200 hover:border-[#087F8C]/40 text-stone-800 hover:text-stone-950 shadow-xs'
@@ -1292,7 +1292,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             </div>
 
                             {/* Bottom Launch Action */}
-                            <div className="pt-4 mt-4 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between">
+                            <div className="pt-4 mt-4 border-t border-stone-100 dark:border-stone-800/80 flex flex-wrap items-center justify-between gap-2">
                               <span className="text-xs font-semibold text-stone-500 flex items-center gap-1">
                                 <span>{localize(profile.language, 'Direct Access', 'دخول مباشر')}</span>
                                 <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />

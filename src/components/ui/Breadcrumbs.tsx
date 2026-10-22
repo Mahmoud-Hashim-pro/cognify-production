@@ -71,9 +71,10 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
               {isLast ? (
                 <span
                   aria-current="page"
-                  className={`min-h-[36px] flex items-center px-2 py-1 font-bold rounded-lg ${
+                  className={`min-h-[36px] flex items-center px-2 py-1 font-bold rounded-lg max-w-[150px] sm:max-w-xs md:max-w-md truncate ${
                     isDarkMode ? 'text-teal-300' : 'text-teal-900'
                   }`}
+                  title={item.label}
                 >
                   {item.label}
                 </span>
@@ -81,14 +82,15 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                 <button
                   type="button"
                   onClick={() => onNavigate(item.view, item.tab)}
-                  className={`min-h-[44px] flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B] ${
+                  title={item.label}
+                  className={`min-h-[44px] flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B] max-w-[130px] sm:max-w-[180px] md:max-w-none ${
                     isDarkMode
                       ? 'text-stone-400 hover:text-white hover:bg-stone-800/60'
                       : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200/60'
                   }`}
                 >
-                  {item.id === 'hub' && <Home className="w-3.5 h-3.5" aria-hidden="true" />}
-                  <span>{item.label}</span>
+                  {item.id === 'hub' && <Home className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
+                  <span className="truncate">{item.label}</span>
                 </button>
               )}
             </li>

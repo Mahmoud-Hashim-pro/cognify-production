@@ -97,6 +97,7 @@
 
 @layer base {
   html, body {
+    overflow-x: hidden;
     overflow-x: clip;
     max-width: 100vw;
     -webkit-font-smoothing: antialiased;
@@ -761,3 +762,29 @@ html.high-contrast button:focus-visible {
   background-color: var(--color-cognify-surface-dark, #171E2E);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
 }
+
+/* ── Phase 10: Responsive Design & Viewport Adaptability ─────────────────── */
+@media (max-width: 640px) {
+  /* Prevent iOS Safari automatic viewport zoom shifts when focusing input fields */
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Safe area inset support on mobile navigation bars & bottom docks */
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Universal text-wrap and word-break defaults for content containers */
+.break-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+

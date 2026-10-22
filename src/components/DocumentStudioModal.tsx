@@ -1325,7 +1325,7 @@ ${currentDoc.summary}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 30, opacity: 0, scale: 0.98 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-4xl bg-[#150917] rounded-3xl border border-[#4A1224]/60 shadow-2xl text-white max-h-[92vh] flex flex-col overflow-hidden"
+            className="w-full max-w-4xl bg-[#150917] rounded-3xl border border-[#4A1224]/60 shadow-2xl text-white max-h-[92vh] max-h-[92dvh] flex flex-col overflow-hidden"
             dir={companionLang === 'ar' ? 'rtl' : 'ltr'}
           >
             {/* Header */}
@@ -1350,7 +1350,7 @@ ${currentDoc.summary}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {/* Target Translation Language Selector */}
                 <div className="flex items-center bg-[#150917] border border-[#4A1224]/50 p-1 rounded-xl text-xs font-bold" role="group" aria-label={companionLang === 'ar' ? 'لغة الترجمة والتلخيص' : 'Translation language'}>
                   <Languages className="w-3.5 h-3.5 text-[#E5A93C] mr-1.5 ml-1" aria-hidden="true" />
@@ -1574,7 +1574,7 @@ ${currentDoc.summary}
                       {/* Title & Action Bar */}
                       <div className="flex items-center justify-between gap-3 border-b border-[#4A1224]/60 pb-4 flex-wrap">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="px-2 py-0.5 rounded-lg bg-indigo-600/30 text-indigo-300 font-mono text-[10px] uppercase font-bold">
                               {currentDoc.sourceType}
                             </span>
@@ -1811,7 +1811,7 @@ ${currentDoc.summary}
 
                       {/* Smart Audio Scrubbing Navigation Bar */}
                       <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 flex-wrap text-xs font-bold">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             onClick={handlePrevParagraph}
@@ -1902,7 +1902,7 @@ ${currentDoc.summary}
                             <span className="text-xs font-bold text-amber-400 block mb-1">
                               {companionLang === 'ar' ? '📌 الزبدة وخلاصة المحاضرة:' : '📌 Key Takeaways & Summary:'}
                             </span>
-                            <p className="whitespace-pre-wrap">{currentDoc.summary}</p>
+                            <p className="whitespace-pre-wrap break-words">{currentDoc.summary}</p>
                           </div>
                         )}
 
@@ -1911,7 +1911,7 @@ ${currentDoc.summary}
                             <span className="text-xs font-bold text-[#E5A93C] block mb-1">
                               {companionLang === 'ar' ? '📝 تفاصيل النص المستخرج كاملاً:' : '📝 Full Extracted Content:'}
                             </span>
-                            <p className="whitespace-pre-wrap font-mono text-xs sm:text-sm">
+                            <p className="whitespace-pre-wrap font-mono text-xs sm:text-sm break-words">
                               {currentDoc.fullText || currentDoc.summary}
                             </p>
                           </div>
@@ -2420,7 +2420,7 @@ ${currentDoc.summary}
                         {/* Transcript Panel (7 cols) */}
                         <div className="lg:col-span-7 rounded-3xl bg-[#080409]/70 border border-[#4A1224]/70 p-4 sm:p-5 space-y-3 flex flex-col">
                           <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3 flex-wrap gap-2">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <FileText className="w-4 h-4 text-indigo-400" />
                               <h5 className="font-black text-sm text-white">
                                 {companionLang === 'ar' ? 'التفريغ الصوتي الدقيق مع الطوابع الزمنية' : 'Verbatim Transcript & Timestamps'}
@@ -2492,7 +2492,7 @@ ${currentDoc.summary}
                         {/* Summaries Panel (5 cols) */}
                         <div className="lg:col-span-5 rounded-3xl bg-[#080409]/70 border border-[#4A1224]/70 p-4 sm:p-5 space-y-3 flex flex-col">
                           <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <Sparkles className="w-4 h-4 text-amber-400" />
                               <h5 className="font-black text-sm text-white">
                                 {companionLang === 'ar' ? 'الملخصات والكبسولات الأكاديمية' : 'Study Summaries & Notes'}
@@ -2791,7 +2791,7 @@ ${currentDoc.summary}
                         className="p-4 rounded-2xl bg-[#080409]/60 border border-[#4A1224]/60 flex items-center justify-between gap-3 hover:border-[#4A1224]/50 transition-all flex-wrap sm:flex-nowrap"
                       >
                         <div className="space-y-1 flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="px-2 py-0.5 rounded-md bg-indigo-600/30 text-indigo-300 font-mono text-[10px] uppercase font-bold">
                               {item.sourceType}
                             </span>
