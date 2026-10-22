@@ -3,26 +3,12 @@ import { Button as ReactAriaButton, type ButtonProps as ReactAriaButtonProps } f
 import { cn } from '../../lib/utils';
 
 export interface AriaButtonProps extends ReactAriaButtonProps {
-  className?: string;
+  className?: string | ((values: { isHovered: boolean; isPressed: boolean; isFocused: boolean; isDisabled: boolean }) => string);
 }
 
 /**
- * Shared, accessible button built on Adobe React Aria's headless <Button>.
- *
- * Why this wrapper exists instead of every screen importing
- * `Button as AriaButton` from 'react-aria-components' directly:
- * - Guarantees a visible, WCAG 2.2-compliant focus ring (`data-focus-visible`)
- *   on every button in the app, even ones a future screen forgets to style.
- * - Centralizes the pressed/disabled/hover treatment so it can't drift
- *   between Login.tsx, DisabilityModeView.tsx, and any screen added later.
- * - Callers still fully control appearance via `className` (merged, not
- *   replaced, using `cn()` / tailwind-merge) and all React Aria press/keyboard
- *   behavior (`onPress`, `isDisabled`, roving focus, etc.) passes straight
- *   through untouched.
- *
- * Usage is a drop-in replacement for the old local alias:
- *   import { AriaButton } from './ui/AriaButton';
- *   <AriaButton onPress={...} className="...">...</AriaButton>
+ * Shared accessible button built on Adobe React Aria's headless <Button>.
+ * Guarantees high-contrast WCAG 2.2 focus ring (#F59E0B) and minimum touch ergonomics.
  */
 export const AriaButton = React.forwardRef<HTMLButtonElement, AriaButtonProps>(
   ({ className, ...props }, ref) => {
@@ -32,13 +18,12 @@ export const AriaButton = React.forwardRef<HTMLButtonElement, AriaButtonProps>(
         {...props}
         className={(renderProps) =>
           cn(
-            // Baseline focus-visible ring so keyboard/screen-reader users always
-            // get a visible indicator, even if a caller's className omits one.
-            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-[#E5A93C] data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-[#080409]',
+            // Baseline high-contrast focus-visible ring
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-[#F59E0B] data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-[#111622] dark:data-[focus-visible]:ring-offset-[#111622]',
             'data-[pressed]:scale-[0.98] transition-transform',
             'data-[disabled]:opacity-60 data-[disabled]:cursor-not-allowed',
             typeof className === 'function'
-              ? (className as (props: typeof renderProps) => string)(renderProps)
+              ? className(renderProps)
               : className
           )
         }

@@ -1,0 +1,75 @@
+import React from 'react';
+import { Button as ReactAriaButton, type ButtonProps as ReactAriaButtonProps } from 'react-aria-components/Button';
+import { cn } from '../../lib/utils';
+
+export type IconButtonVariant = 'default' | 'primary' | 'teal' | 'ghost' | 'outline' | 'danger';
+export type IconButtonSize = 'sm' | 'md' | 'lg';
+
+export interface IconButtonProps extends Omit<ReactAriaButtonProps, 'children'> {
+  'aria-label': string; // Mandatory accessible name for screen readers
+  icon: React.ReactNode;
+  variant?: IconButtonVariant;
+  size?: IconButtonSize;
+  className?: string | ((values: { isHovered: boolean; isPressed: boolean; isFocused: boolean; isDisabled: boolean }) => string);
+  tooltip?: string;
+}
+
+const variantStyles: Record<IconButtonVariant, string> = {
+  default: 'bg-stone-100 hover:bg-stone-200 text-stone-700 dark:bg-stone-800 dark:hover:bg-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700',
+  primary: 'bg-[#243B73] hover:bg-[#1B2D59] text-white shadow-sm',
+  teal: 'bg-[#087F8C] hover:bg-[#06626C] text-white shadow-sm',
+  ghost: 'bg-transparent hover:bg-stone-100 dark:hover:bg-stone-800/70 text-stone-600 dark:text-stone-300',
+  outline: 'border border-stone-300 dark:border-stone-700 bg-transparent hover:bg-stone-100 dark:hover:bg-stone-800/60 text-stone-800 dark:text-stone-200',
+  danger: 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/40 dark:hover:bg-red-900/60 dark:text-red-300 border border-red-200 dark:border-red-800',
+};
+
+const sizeStyles: Record<IconButtonSize, string> = {
+  sm: 'w-[44px] h-[44px] rounded-xl text-sm',
+  md: 'w-[48px] h-[48px] rounded-2xl text-base',
+  lg: 'w-[56px] h-[56px] rounded-2xl text-lg',
+};
+
+export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  (
+    {
+      'aria-label': ariaLabel,
+      icon,
+      variant = 'default',
+      size = 'md',
+      className,
+      tooltip,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <ReactAriaButton
+        ref={ref}
+        aria-label={ariaLabel}
+        {...props}
+        className={(renderProps) =>
+          cn(
+            'inline-flex items-center justify-center shrink-0 cursor-pointer transition-all duration-150',
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-[#F59E0B] data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-[#111622] dark:data-[focus-visible]:ring-offset-[#111622]',
+            'data-[pressed]:scale-[0.96]',
+            'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none',
+            variantStyles[variant],
+            sizeStyles[size],
+            typeof className === 'function' ? className(renderProps) : className
+          )
+        }
+      >
+        <span
+          className="shrink-0 flex items-center justify-center pointer-events-none"
+          title={tooltip || ariaLabel}
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+      </ReactAriaButton>
+    );
+  }
+);
+
+IconButton.displayName = 'IconButton';
+export default IconButton;

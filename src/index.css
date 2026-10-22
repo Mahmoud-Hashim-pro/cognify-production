@@ -22,8 +22,39 @@
   --color-cognify-teal-dark: #06626C;
   --color-cognify-teal-light: #0AA5B6;
   --color-cognify-bg-light: #F5F7FB;
+  --color-cognify-surface-light: #FFFFFF;
   --color-cognify-text-primary: #172033;
-  --color-cognify-surface: #FFFFFF;
+  --color-cognify-text-secondary: #475569;
+  --color-cognify-border-light: #E2E8F0;
+  
+  --color-cognify-bg-dark: #111622;
+  --color-cognify-surface-dark: #171E2E;
+  --color-cognify-surface-elevated: #1E273A;
+  --color-cognify-text-dark-primary: #F8FAFC;
+  --color-cognify-text-dark-secondary: #94A3B8;
+  --color-cognify-border-dark: #243048;
+
+  --color-cognify-focus: #F59E0B;
+
+  --color-cognify-success-light: #E6F4EA;
+  --color-cognify-success-text-light: #0E7052;
+  --color-cognify-success-dark: #062B21;
+  --color-cognify-success-text-dark: #34D399;
+
+  --color-cognify-warning-light: #FEF3C7;
+  --color-cognify-warning-text-light: #92400E;
+  --color-cognify-warning-dark: #2E1A05;
+  --color-cognify-warning-text-dark: #FBBF24;
+
+  --color-cognify-error-light: #FEE2E2;
+  --color-cognify-error-text-light: #B91C1C;
+  --color-cognify-error-dark: #360909;
+  --color-cognify-error-text-dark: #F87171;
+
+  --color-cognify-info-light: #EFF6FF;
+  --color-cognify-info-text-light: #1D4ED8;
+  --color-cognify-info-dark: #0B1E3B;
+  --color-cognify-info-text-dark: #60A5FA;
 
   --color-primary: #0D9488;
   --color-primary-press: #0F766E;
@@ -632,3 +663,42 @@ html.high-contrast button:focus-visible {
 }
 /* Keep the scanned item clear of the fixed switch bar at the bottom. */
 .cognify-scan-hl, .cognify-scan-hl-row { scroll-margin-bottom: 130px; scroll-margin-top: 90px; }
+
+/* ── Phase 2 Design System Accessibility Utilities ──────────────────────── */
+.cognify-focus-ring {
+  outline: none;
+  transition: box-shadow 0.15s ease-in-out;
+}
+.cognify-focus-ring:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+}
+
+.touch-target-desktop {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-target-mobile {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.scrolling-touch {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.cognify-card {
+  border: 1px solid var(--color-cognify-border-light, #E2E8F0);
+  background-color: var(--color-cognify-surface-light, #FFFFFF);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+:is(.dark, .dark *) .cognify-card {
+  border-color: var(--color-cognify-border-dark, #243048);
+  background-color: var(--color-cognify-surface-dark, #171E2E);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+}
