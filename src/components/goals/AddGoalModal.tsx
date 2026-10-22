@@ -109,10 +109,12 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
                 </h2>
               </div>
               <button
+                type="button"
                 onClick={handleClose}
-                className="p-2 rounded-xl hover:bg-[#4A1224]/30 transition-colors text-slate-400 hover:text-[#E5A93C]"
+                aria-label={isArabic ? 'إغلاق نافذة إضافة الهدف' : 'Close add goal dialog'}
+                className="p-2 rounded-xl hover:bg-[#4A1224]/30 transition-colors text-slate-400 hover:text-[#E5A93C] focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 

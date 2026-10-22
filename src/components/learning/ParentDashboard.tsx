@@ -97,20 +97,27 @@ export const ParentDashboard: React.FC<ParentDashboardProps> = ({
   if (!analytics) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080409] overflow-y-auto text-white p-4 sm:p-6 lg:p-8 animate-in fade-in duration-300 font-sans">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="parent-analytics-title"
+      className="fixed inset-0 z-50 bg-[#080409] overflow-y-auto text-white p-4 sm:p-6 lg:p-8 animate-in fade-in duration-300 font-sans"
+    >
       <div className="max-w-6xl mx-auto w-full">
         {/* Top Bar Header */}
         <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[#4A1224]/60 flex-wrap">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={onClose}
-              className="p-2.5 rounded-2xl bg-[#150917] hover:bg-slate-800 border border-[#4A1224]/60 text-slate-300 hover:text-white transition-all shadow-md"
+              aria-label={isArabic ? 'رجوع' : 'Back'}
+              className="p-2.5 rounded-2xl bg-[#150917] hover:bg-slate-800 border border-[#4A1224]/60 text-slate-300 hover:text-white transition-all shadow-md focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 rtl:rotate-180" aria-hidden="true" />
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl sm:text-2xl font-black text-white">
+                <h2 id="parent-analytics-title" className="text-xl sm:text-2xl font-black text-white">
                   {isArabic ? `تحليلات تعلّم: ${childName}` : `Learning Analytics: ${childName}`}
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-black border border-emerald-500/30">
@@ -125,10 +132,12 @@ export const ParentDashboard: React.FC<ParentDashboardProps> = ({
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={onClose}
-              className="p-2.5 rounded-2xl bg-[#150917] hover:bg-slate-800 border border-[#4A1224]/60 text-slate-400 hover:text-white"
+              aria-label={isArabic ? 'إغلاق لوحة تحليلات ولي الأمر' : 'Close parent dashboard'}
+              className="p-2.5 rounded-2xl bg-[#150917] hover:bg-slate-800 border border-[#4A1224]/60 text-slate-400 hover:text-white focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>

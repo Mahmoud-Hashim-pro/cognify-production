@@ -148,17 +148,18 @@ export default function ParentalConsentModal({
             </div>
           </div>
           <button
+            type="button"
             onClick={onCancel}
-            aria-label={isAr ? 'إغلاق' : 'Close'}
-            className="p-1.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+            aria-label={isAr ? 'إغلاق نافذة موافقة ولي الأمر' : 'Close parental consent modal'}
+            className="p-1.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         {/* Security / Privacy Assurance Notice */}
         <div className="p-3.5 rounded-2xl bg-[#150917] border border-amber-500/20 mb-4 flex items-start gap-3">
-          <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="text-xs text-slate-300 leading-relaxed space-y-1">
             <p className="font-bold text-amber-200">
               {isAr ? 'خصوصية فائقة بدون تخزين للصور أو الفيديو' : 'Zero-Storage On-Device Processing'}
@@ -175,38 +176,40 @@ export default function ParentalConsentModal({
           {/* Guardian Identity Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+              <label htmlFor="parent-full-name" className="block text-[11px] font-semibold text-slate-300 mb-1">
                 {isAr ? 'اسم ولي الأمر / الوصي الكامل *' : 'Parent / Guardian Full Name *'}
               </label>
               <input
+                id="parent-full-name"
                 type="text"
                 required
                 value={parentName}
                 onChange={(e) => setParentName(e.target.value)}
                 placeholder={isAr ? 'مثال: أحمد محمد' : 'e.g., John Doe'}
-                className="w-full px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224] text-white focus:outline-none focus:border-amber-400 text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224] text-white focus:outline-none focus:border-amber-400 text-xs focus-visible:ring-2 focus-visible:ring-amber-400"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+              <label htmlFor="parent-verified-email" className="block text-[11px] font-semibold text-slate-300 mb-1">
                 {isAr ? 'البريد الإلكتروني لولي الأمر *' : 'Parent Verified Email *'}
               </label>
               <input
+                id="parent-verified-email"
                 type="email"
                 required
                 value={parentEmail}
                 onChange={(e) => setParentEmail(e.target.value)}
                 placeholder={isAr ? 'parent@example.com' : 'parent@example.com'}
-                className="w-full px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224] text-white focus:outline-none focus:border-amber-400 text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224] text-white focus:outline-none focus:border-amber-400 text-xs focus-visible:ring-2 focus-visible:ring-amber-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+            <span id="relationship-group-label" className="block text-[11px] font-semibold text-slate-300 mb-1">
               {isAr ? 'الصفة القانونية / صلة القرابة' : 'Legal Relationship'}
-            </label>
-            <div className="grid grid-cols-3 gap-2">
+            </span>
+            <div role="radiogroup" aria-labelledby="relationship-group-label" className="grid grid-cols-3 gap-2">
               {[
                 { id: 'parent', labelAr: 'أب / أم', labelEn: 'Parent' },
                 { id: 'legal_guardian', labelAr: 'وصي قانوني', labelEn: 'Guardian' },
@@ -214,9 +217,11 @@ export default function ParentalConsentModal({
               ].map((item) => (
                 <button
                   type="button"
+                  role="radio"
+                  aria-checked={relationship === item.id}
                   key={item.id}
                   onClick={() => setRelationship(item.id as any)}
-                  className={`py-2 px-2.5 rounded-xl border text-center transition-all ${
+                  className={`py-2 px-2.5 rounded-xl border text-center transition-all focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none ${
                     relationship === item.id
                       ? 'border-amber-400 bg-amber-400/10 text-amber-300 font-bold'
                       : 'border-[#4A1224]/60 bg-[#080409] text-slate-400 hover:text-white'
@@ -319,16 +324,16 @@ export default function ParentalConsentModal({
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 rounded-xl border border-[#4A1224] text-slate-300 hover:bg-white/5 font-semibold transition-all text-xs"
+              className="px-4 py-2 rounded-xl border border-[#4A1224] text-slate-300 hover:bg-white/5 font-semibold transition-all text-xs focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none"
             >
               {isAr ? 'إلغاء' : 'Cancel'}
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !agreedToTerms}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none"
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
               <span>
                 {isSubmitting
                   ? (isAr ? 'جاري التوثيق...' : 'Recording...')

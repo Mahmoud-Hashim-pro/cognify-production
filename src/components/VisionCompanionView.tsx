@@ -33,6 +33,12 @@ import {
   Palette,
   Compass,
   FileText,
+  ArrowLeft,
+  RefreshCw,
+  Clock,
+  CheckCircle2,
+  SlidersHorizontal,
+  Upload,
 } from 'lucide-react';
 import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
@@ -53,6 +59,7 @@ import {
 interface VisionCompanionViewProps {
   profile: UserProfile;
   setProfile?: (profile: UserProfile) => void;
+  onNavigateBack?: () => void;
 }
 
 type Status = 'idle' | 'starting-camera' | 'ready' | 'analyzing' | 'camera-denied' | 'unsupported';
@@ -71,7 +78,7 @@ import DocumentStudioModal from './DocumentStudioModal';
 import SpatialMemoryTrajectoryView from './SpatialMemoryTrajectoryView';
 import ParentalConsentModal from './ParentalConsentModal';
 
-export default function VisionCompanionView({ profile, setProfile }: VisionCompanionViewProps) {
+export default function VisionCompanionView({ profile, setProfile, onNavigateBack }: VisionCompanionViewProps) {
   const isMinorStudent = Boolean((profile.age && profile.age < 18) || (profile as any).isMinor);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(
     Boolean(isMinorStudent && !profile.parentalConsent?.verified)
@@ -81,10 +88,55 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isMountedRef = useRef<boolean>(true);
 
+  // Monotonically increasing request ID & in-flight tracking to reject stale scene descriptions
+  const activeRequestIdRef = useRef<number>(0);
+  const lastObservationTimeRef = useRef<number>(0);
+  const activeAbortControllerRef = useRef<AbortController | null>(null);
+  const lastCaptureAttemptRef = useRef<number>(0);
+  const [observationTimestamp, setObservationTimestamp] = useState<number | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.timestamp) return parsed.timestamp;
+      }
+    } catch {}
+    return null;
+  });
+  const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.description) return 'previous';
+      }
+    } catch {}
+    return null;
+  });
+  const [observationConfidenceReason, setObservationConfidenceReason] = useState<string>('');
+  const [verbosity, setVerbosity] = useState<'concise' | 'detailed'>('concise');
+  const [experienceMode, setExperienceMode] = useState<'beginner' | 'advanced'>(() => {
+    try {
+      return (localStorage.getItem('cognify_vision_exp_mode') as any) || 'advanced';
+    } catch {
+      return 'advanced';
+    }
+  });
+
   const [status, setStatus] = useState<Status>('starting-camera');
-  const [lastDescription, setLastDescription] = useState<string>('');
+  const [lastDescription, setLastDescription] = useState<string>(() => {
+    try {
+      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.description) return parsed.description;
+      }
+    } catch {}
+    return '';
+  });
   const [lastSnapshot, setLastSnapshot] = useState<string | null>(null);
   const [announce, setAnnounce] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -92,6 +144,15 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showGuestAuthCard, setShowGuestAuthCard] = useState(false);
+
+  // Low-vision font scaling: 'normal' | 'large' | 'extralarge'
+  const [textSize, setTextSize] = useState<'normal' | 'large' | 'extralarge'>(() => {
+    try {
+      return (localStorage.getItem('cognify_vision_font_size') as any) || 'normal';
+    } catch {
+      return 'normal';
+    }
+  });
 
   // Read Mode: focuses the AI on reading visible text or summarizing lectures/documents.
   const [readMode, setReadMode] = useState(false);
@@ -138,6 +199,22 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       window.speechSynthesis.resume();
     }
     speak(text, voiceLang as any);
+  }, [companionLang]);
+
+  const toggleTextSize = useCallback(() => {
+    setTextSize((prev) => {
+      const next = prev === 'normal' ? 'large' : prev === 'large' ? 'extralarge' : 'normal';
+      try {
+        localStorage.setItem('cognify_vision_font_size', next);
+      } catch {}
+      const msg = companionLang === 'ar'
+        ? (next === 'normal' ? 'حجم الخط عادي' : next === 'large' ? 'حجم الخط كبير' : 'حجم الخط كبير جداً')
+        : companionLang === 'fr'
+        ? (next === 'normal' ? 'Taille du texte standard' : next === 'large' ? 'Grande taille de texte' : 'Très grande taille de texte')
+        : (next === 'normal' ? 'Standard text size' : next === 'large' ? 'Large text size' : 'Extra large text size');
+      speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+      return next;
+    });
   }, [companionLang]);
 
   const resetAllModes = useCallback(() => {
@@ -393,6 +470,57 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     [companionLang]
   );
 
+  const getUserMediaSafe = async (mode: 'environment' | 'user'): Promise<MediaStream> => {
+    // Attempt progressive constraint relaxation:
+    // 1. High quality with ideal facing mode (works on mobile back camera and desktop webcams)
+    // 2. Standard 720p with ideal facing mode
+    // 3. Simple video: true (universal fallback)
+    const attempts: MediaStreamConstraints[] = [
+      {
+        video: {
+          facingMode: { ideal: mode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      },
+      {
+        video: {
+          facingMode: { ideal: mode },
+        },
+        audio: false,
+      },
+      {
+        video: true,
+        audio: false,
+      },
+    ];
+
+    let lastError: any = null;
+    for (const constraints of attempts) {
+      try {
+        const stream = await Promise.race([
+          navigator.mediaDevices.getUserMedia(constraints),
+          new Promise<MediaStream>((_, reject) =>
+            setTimeout(() => reject(new Error('CAMERA_TIMEOUT')), 20000)
+          ),
+        ]);
+        if (stream && stream.getVideoTracks().length > 0) {
+          return stream;
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn('getUserMedia attempt failed, trying fallback...', err?.name || err?.message);
+        // If user explicitly denied permission, do not keep trying other constraints
+        if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
+          throw err;
+        }
+      }
+    }
+
+    throw lastError || new Error('NO_CAMERA_FOUND');
+  };
+
   const startCamera = useCallback(
     async (mode: 'environment' | 'user' = facingMode) => {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -402,26 +530,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
       setStatus('starting-camera');
       try {
         streamRef.current?.getTracks().forEach((tr) => tr.stop());
-        let stream: MediaStream;
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: mode,
-              width: { min: 960, ideal: 1920, max: 1920 },
-              height: { min: 540, ideal: 1080, max: 1080 },
-            },
-            audio: false,
-          });
-        } catch {
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
-              audio: false,
-            });
-          } catch {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          }
-        }
+        const stream = await getUserMediaSafe(mode);
 
         if (!isMountedRef.current) {
           stream.getTracks().forEach((tr) => tr.stop());
@@ -431,16 +540,30 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => {});
+          videoRef.current.play().catch((playErr) => {
+            console.warn('Video auto-play warning:', playErr);
+          });
         }
-        setStatus('ready');
-        setAnnounce(
-          companionLang === 'ar'
-            ? 'الكاميرا جاهزة بملء الشاشة. اضغط الزرار لسماع وصف ما أمامك.'
-            : 'Full-screen camera ready. Tap either button to describe what is in front of you.'
-        );
-      } catch {
-        if (isMountedRef.current) setStatus('camera-denied');
+        if (isMountedRef.current) {
+          setStatus('ready');
+          setAnnounce(
+            companionLang === 'ar'
+              ? 'الكاميرا جاهزة بملء الشاشة. اضغط الزرار لسماع وصف ما أمامك.'
+              : 'Full-screen camera ready. Tap either button to describe what is in front of you.'
+          );
+        }
+      } catch (camErr: any) {
+        console.warn('Camera failed or timed out:', camErr);
+        if (isMountedRef.current) {
+          setStatus('camera-denied');
+          if (camErr?.name === 'NotAllowedError' || camErr?.name === 'PermissionDeniedError') {
+            setAnnounce(
+              companionLang === 'ar'
+                ? 'تم رفض إذن الكاميرا من المتصفح. يمكنك تفعيلها من شريط العنوان أو رفع صورة مباشرة.'
+                : 'Camera permission was denied. You can enable it in the address bar or upload a photo directly.'
+            );
+          }
+        }
       }
     },
     [facingMode, companionLang]
@@ -461,6 +584,8 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     }
     return () => {
       isMountedRef.current = false;
+      activeAbortControllerRef.current?.abort();
+      activeAbortControllerRef.current = null;
       streamRef.current?.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
       if (videoRef.current) {
@@ -470,16 +595,6 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Keyboard Escape listener for the save modal
-  useEffect(() => {
-    if (!showSaveDialog) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowSaveDialog(false);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showSaveDialog]);
 
   // isFullscreen used to be set synchronously and optimistically right when
   // the button was pressed — before requestFullscreen()'s promise even
@@ -520,6 +635,11 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return null;
 
+    // Wake up video playback if unexpectedly paused
+    if (video.paused && !video.ended) {
+      video.play().catch(() => {});
+    }
+
     const maxDim = 1280;
     let w = video.videoWidth;
     let h = video.videoHeight;
@@ -537,6 +657,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
+    ctx.clearRect(0, 0, w, h);
     ctx.drawImage(video, 0, 0, w, h);
     return canvas.toDataURL('image/jpeg', 0.85);
   };
@@ -546,6 +667,13 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
     forcedFrame?: string,
     forcedAction?: 'summarize' | 'read'
   ) => {
+    // Battery and API quota protection: throttle captures occurring faster than 750ms
+    const now = Date.now();
+    if (now - lastCaptureAttemptRef.current < 750) {
+      return;
+    }
+    lastCaptureAttemptRef.current = now;
+
     const targetLang = choiceLang || companionLang;
     setCompanionLang(targetLang);
     const activeReadAction = forcedAction || readAction;
@@ -572,6 +700,7 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
           ? "La caméra n'est pas disponible. Veuillez autoriser l'accès à la caméra."
           : 'Camera is not available. Please allow camera access.';
       speak(errNoCam, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
+      fileInputRef.current?.click();
       return;
     }
 
@@ -584,8 +713,21 @@ export default function VisionCompanionView({ profile, setProfile }: VisionCompa
           ? "Impossible de capturer l'image de la caméra, veuillez réessayer."
           : 'Could not capture the camera frame, please try again.';
       speak(errNoFrame, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
+      fileInputRef.current?.click();
       return;
     }
+
+    // Cancel superseded in-flight request before launching new analysis
+    if (activeAbortControllerRef.current) {
+      activeAbortControllerRef.current.abort();
+      activeAbortControllerRef.current = null;
+    }
+    const abortController = new AbortController();
+    activeAbortControllerRef.current = abortController;
+
+    const currentReqId = ++activeRequestIdRef.current;
+    const captureTimestamp = Date.now();
+    lastObservationTimeRef.current = captureTimestamp;
 
     setLastSnapshot(frame);
     setStatus('analyzing');
@@ -844,16 +986,63 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         }
       }
     } else if (targetLang === 'ar') {
-      prompt = `أنت رفيق بشري يتحدث بصوته لشخص كفيف عبر الكاميرا. تحدث فوراً بلغة عربية عامية سهلة ومباشرة كأنك صديق يقف بجانبه وينظر أمامه: ادخل في الموضوع فوراً بدون أي مقدمات أو عناوين أو ماركداون. ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر، مثلاً: "مفيش أخطار حواليك، قدامك..." ثم صف الأشخاص والأشياء والأسطح والنصوص المكتوبة بشكل طبيعي وتلقائي جداً. لا تذكر كلمات مثل "المخاطر" أو "النصوص المكتوبة" أو "وصف المشهد" كعناوين، ولا تستخدم نجوم الماركداون أو الشرطات نهائياً.${knownContext}`;
+      prompt = `أنت رفيق بصري ومساعد ذكي يتحدث بصوته لشخص كفيف أو ضعيف البصر عبر الكاميرا.
+انظر بدقة متناهية إلى ما يظهر أمام الكاميرا الآن، وقدم وصفاً مكانياً دقيقاً ومفيداً عملياً بالترتيب التالي:
+1. الأمان أولاً (المخاطر والعوائق): ابدأ فوراً بذكر أي خطر أو عائق مباشر في مسار الحركة (سلالم، أسلاك، حواف، زجاج، كراسي، سوائل مسكوبة). ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر ("مفيش أخطار حواليك، المسار مفتوح أمامك").
+2. العناصر الأساسية ومواقعها بالساعة أو الاتجاه: ثم صف الأشخاص والأشياء البارزة ومواقعهم النسبية (مثلاً: "عند الساعة 12 قدامك مكتب"، "عند الساعة 2 على يمينك كرسي"، "على شمالك باب مفتوح").
+3. قراءة النصوص واللافتات والأسماء (OCR): اقرأ أي نصوص أو لافتات أو أسماء ماركات أو تواريخ أو أسعار ظاهرة كلمة بكلمة بدقة دون اختصار.
+4. الألوان والتفاصيل المكانية: صف ألوان العناصر الرئيسية وأبعادها التقريبية إذا كانت واضحة وموثوقة.
+5. الإقرار بعدم التأكد: إذا كانت الصورة مهتزة، مظلمة، الإضاءة ضعيفة، أو الجسم محجوباً جزئياً، قل بصراحة ووضوح: "الصورة غير واضحة تماماً" أو "الإضاءة خافتة، حاول تحريك الكاميرا ببطء أو تشغيل الإضاءة".
+تحدث بلغة عربية عامية سهلة وطبيعية وودودة ("بالبلدي")، بدون أي نجوم ماركداون (**) أو شرطات أو عناوين روبوتية (لا تقل "المخاطر:" أو "الوصف:") لكي يتدفق النطق الصوتي بسلاسة.${knownContext}`;
     } else if (targetLang === 'fr') {
-      prompt = `Vous êtes un compagnon humain chaleureux qui parle directement à voix haute à une personne aveugle à travers sa caméra. Parlez immédiatement dans un langage oral fluide, naturel et bienveillant, comme un ami à ses côtés : allez droit au but sans titres de section ni balises markdown. S'il n'y a aucun danger, commencez directement par rassurer la personne (ex. "Aucun danger autour de vous, devant vous se trouve..."). Décrivez les personnes, objets, surfaces et textes visibles de façon fluide et naturelle. N'utilisez AUCUN astérisque (**), tiret ou en-tête robotique.${knownContext}`;
+      prompt = `Vous êtes un compagnon visuel expert qui s'adresse à voix haute à une personne aveugle ou malvoyante à travers sa caméra.
+Analysez ce qui se trouve devant la caméra avec une grande précision selon cet ordre de priorité :
+1. Sécurité d'abord (Dangers et obstacles) : Signalez immédiatement tout obstacle ou danger (marches, câbles au sol, bordures, liquides). S'il n'y a aucun danger, commencez directement par rassurer la personne ("Aucun danger, le passage est libre").
+2. Objets principaux et positions horaires : Décrivez les personnes, objets clés et surfaces avec leurs positions relatives (ex. "À 12 heures droit devant vous se trouve un bureau", "À 2 heures sur votre droite se trouve une chaise", "Sur votre gauche une porte ouverte").
+3. Textes et panneaux visibles (OCR) : Lisez mot pour mot tout texte, étiquette, prix ou panneau visible.
+4. Couleurs et attributs visuels : Précisez les couleurs et dimensions relatives fiables.
+5. Incertitude explicite : Si l'image est floue, trop sombre ou partiellement masquée, dites-le clairement (ex. "L'image est un peu floue ou sombre, rapprochez légèrement la caméra").
+Parlez d'une voix naturelle, fluide et bienveillante sans astérisques markdown (**) ni titres robotiques.${knownContext}`;
     } else {
-      prompt = `You are a warm, helpful human companion speaking directly aloud to a blind person through their camera. Speak immediately in fluent, natural conversational prose as if you are a friend standing right beside them: Go straight to the point without any section titles, headings, or robotic boilerplate. If there are no hazards, start directly with reassuring words (e.g. "No hazards around you. Directly in front of you is..."). Describe people, objects, surfaces, and any visible text smoothly and naturally. Do NOT use markdown asterisks (**), bullet dashes, or labels like "Hazards:", "Visible Text:", or "Scene Description:".${knownContext}`;
+      prompt = `You are an expert visual companion speaking aloud to a blind or low-vision user through their camera.
+Examine what is visible in front of the camera right now with utmost precision, delivering a structured, practical description in this priority order:
+1. Safety First (Hazards & Obstacles): State immediately if any immediate obstacle or hazard is present (steps, cables, drop-offs, sharp objects, spills, traffic). If there are no hazards, start directly with reassuring words ("No hazards in your path, area is clear").
+2. Main Objects & Clock-Face Spatial Positions: Describe people, objects, and their relative positions using clock coordinates or directions (e.g., "At 12 o'clock directly ahead is a desk", "At 2 o'clock to your right is a chair", "To your left is an open doorway").
+3. Verbatim Text & Signs (OCR): Read any visible signs, packaging labels, prices, room numbers, or text accurately word for word.
+4. Colors & Spatial Attributes: Note prominent colors and spatial relationships when reliable.
+5. Explicit Uncertainty: If the image is blurry, poorly lit, obstructed, or out of frame, state that clearly and gently (e.g., "The image is slightly blurry or dim, try moving closer or adjusting lighting").
+Speak directly in natural, warm, concise conversational prose without any markdown asterisks (**), bullet points, or section headings (never say "Hazards:" or "Scene:").${knownContext}`;
     }
 
     if (!prompt.includes(langMandate.trim())) {
       prompt = `${langMandate}\n${prompt}`;
     }
+
+    // Previous observation context comparison when camera has moved or scene changed
+    if (lastDescription && observationType === 'live' && !forcedFrame) {
+      const changePrompt =
+        targetLang === 'ar'
+          ? `\n\n[سياق الملاحظة السابقة - قبل لحظات]:\n"${lastDescription.slice(0, 300)}"\nقاعدة كشف التغيير: إذا كان المستخدم يوجه الكاميرا الآن لشيء جديد تماماً، صف المشهد الجديد فوراً دون تكرار القديم. أما إذا كان نفس المشهد، اذكر التغييرات أو الحركة التي طرأت.`
+          : targetLang === 'fr'
+          ? `\n\n[Contexte de l'observation précédente]:\n"${lastDescription.slice(0, 300)}"\nRègle : Si la caméra pointe vers une nouvelle scène, décrivez directement la nouvelle scène sans répéter l'ancienne.`
+          : `\n\n[Previous observation context - from a moment ago]:\n"${lastDescription.slice(0, 300)}"\nRule: If camera is now pointing at something new, describe the new scene directly without repeating the old one. If the same scene, describe significant changes.`;
+      prompt = `${prompt}\n${changePrompt}`;
+    }
+
+    const verbosityInstruction =
+      verbosity === 'concise'
+        ? targetLang === 'ar'
+          ? '\nمستوى الإيجاز (موجز): اذكر فوراً في جملة واحدة أو جملتين مباشرتين أهم ما أمام المستخدم ومكانه، وأي عائق فوري أو مسار آمن. تجنب تماماً الحشو أو المقدمات.'
+          : targetLang === 'fr'
+          ? '\nNiveau de concision (court) : Donnez 1 à 2 phrases directes sur l\'élément clé et la sécurité.'
+          : '\nBrevity Level (Concise): Deliver 1 to 2 sharp sentences stating primary object, relative position, and immediate safety status. Zero fluff.'
+        : targetLang === 'ar'
+        ? '\nمستوى الإيجاز (مفصل): قدم وصفاً مكانياً دقيقاً، مع تحديد اتجاهات الساعة (مثلاً: عند الساعة 12، عند الساعة 2)، والمسافات التقريبية بالأمتار أو الخطوات، وملمس الأسطح، وقراءة النصوص المكتوبة.'
+        : targetLang === 'fr'
+        ? '\nNiveau de concision (détaillé) : Description spatiale riche avec positions horaires (ex. 12h, 2h) et distances estimées.'
+        : '\nBrevity Level (Detailed): Provide rich spatial layout with clock-face directions (e.g. 12 o\'clock, 2 o\'clock), estimated distances in meters, and visible text.';
+
+    prompt = `${prompt}\n${verbosityInstruction}`;
 
     try {
       const cleanData = frame.replace(/^data:[^;]+;base64,/, '');
@@ -870,10 +1059,13 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             : undefined,
         },
         [],
-        [{ name: 'scene.jpg', type: 'image/jpeg', data: cleanData }]
+        [{ name: `scene_${captureTimestamp}_${currentReqId}.jpg`, type: 'image/jpeg', data: cleanData }],
+        undefined,
+        abortController.signal
       );
 
-      if (!isMountedRef.current) return;
+      // CRITICAL: Reject stale responses if newer frame/request was already initiated or unmounted or cancelled
+      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current || abortController.signal.aborted) return;
       const isAuthNotice =
         result.includes('المعاينة') ||
         result.includes('تسجيل الدخول') ||
@@ -919,6 +1111,30 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       setStatus('ready');
       setAnnounce(cleaned);
 
+      // Track live vs previous vs uncertain observation with expanded multilingual patterns
+      const isUncertain = /غير واضح|غير متأكد|صورة غير واضحة|إضاءة منخفضة|إضاءة ضعيفة|إضاءة خافتة|العدسة محجوبة|مهتزة|مشوشة|مش واضحة|قرب الكاميرا|حاول تحريك الكاميرا|blurry|unclear|low light|obscured|not sure|hard to tell|bring closer|poorly lit|dimly lit|out of focus|flou|floue|sombre|peu clair|pas certain|rapprochez la caméra|mal éclairé/i.test(result);
+      if (isUncertain) {
+        setObservationType('uncertain');
+        setObservationConfidenceReason(
+          targetLang === 'ar'
+            ? 'الصورة قد تكون مهتزة أو الإضاءة خافتة'
+            : targetLang === 'fr'
+            ? 'Image potentiellement floue ou faible éclairage'
+            : 'Image may be blurry or dimly lit'
+        );
+      } else {
+        setObservationType(forcedFrame ? 'previous' : 'live');
+        setObservationConfidenceReason('');
+      }
+      setObservationTimestamp(captureTimestamp);
+      try {
+        sessionStorage.setItem('cognify_vision_last_observation', JSON.stringify({
+          description: cleaned,
+          timestamp: captureTimestamp,
+          type: 'previous',
+        }));
+      } catch {}
+
       // Automatically extract and record spatial physical objects for this user
       if (profile?.uid) {
         const extracted = extractSpatialObjectsFromVision(cleaned, profile.uid, targetLang);
@@ -961,18 +1177,39 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
           },
         });
       }, 60);
-    } catch {
-      if (!isMountedRef.current) return;
+    } catch (err: any) {
+      if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current || abortController.signal.aborted || err?.name === 'AbortError') {
+        // Cancelled or superseded in-flight request — safely ignore without resetting UI
+        return;
+      }
       setStatus('ready');
-      const err =
+      const errPrompt =
         targetLang === 'ar'
           ? 'حصلت مشكلة في تحليل الصورة، من فضلك جرب تاني.'
           : targetLang === 'fr'
           ? "Un problème est survenu lors de l'analyse de l'image. Veuillez réessayer."
           : 'Something went wrong analyzing the image. Please try again.';
-      setLastDescription(err);
-      speak(err, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
+      setLastDescription(errPrompt);
+      speak(errPrompt, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
     }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error(companionLang === 'ar' ? 'يرجى اختيار ملف صورة صالح.' : 'Please select a valid image file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setLastSnapshot(dataUrl);
+      setStatus('ready');
+      describeScene(companionLang, dataUrl);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleSearchSpatial = () => {
@@ -1093,6 +1330,190 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
     setLastSnapshot(null);
   };
 
+  // Comprehensive accessible keyboard shortcuts for blind and visually impaired users
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInputFocused =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          target.getAttribute('role') === 'textbox');
+
+      // If user is actively typing in an input (e.g. Save Memory label, Spatial Search)
+      if (isInputFocused) {
+        if (e.key === 'Escape') {
+          if (showSaveDialog) setShowSaveDialog(false);
+          else target.blur();
+        }
+        return;
+      }
+
+      // Space or Enter: Trigger primary capture/description
+      if (e.code === 'Space' || e.key === 'Enter') {
+        e.preventDefault();
+        if (status === 'ready' || status === 'idle') {
+          describeScene(companionLang);
+        } else if (status === 'camera-denied') {
+          playDemoSample(companionLang);
+        }
+        return;
+      }
+
+      // 'R' or 'r': Replay speech / toggle speech
+      if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        toggleSpeech();
+        return;
+      }
+
+      // 'S' or 's': Stop speech immediately
+      if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        cancelSpeech();
+        setIsSpeaking(false);
+        return;
+      }
+
+      // 'C' or 'c': Toggle Currency Reader
+      if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        toggleCurrencyMode();
+        return;
+      }
+
+      // 'T' or 't': Toggle Text Reader (OCR)
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        toggleReadMode();
+        return;
+      }
+
+      // 'L' or 'l': Toggle Lecture Scanner
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        toggleLectureMode();
+        return;
+      }
+
+      // 'N' or 'n': Toggle White Cane & Nav Guide
+      if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        toggleNavGuideMode();
+        return;
+      }
+
+      // 'F' or 'f': Toggle Face Recognition
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFaceMode();
+        return;
+      }
+
+      // 'O' or 'o': Toggle Outfit / Clothes matching
+      if (e.key === 'o' || e.key === 'O') {
+        e.preventDefault();
+        toggleOutfitMode();
+        return;
+      }
+
+      // 'U' or 'u': Upload image from device
+      if (e.key === 'u' || e.key === 'U') {
+        e.preventDefault();
+        fileInputRef.current?.click();
+        return;
+      }
+
+      // 'D' or 'd': Open Document & PDF Studio
+      if (e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        setShowDocStudio(true);
+        announceFeature(
+          'استوديو المستندات وتلخيص المحاضرات والـ PDF',
+          'Document and Lecture Studio',
+          'Studio de Documents et Cours',
+          true
+        );
+        return;
+      }
+
+      // 'T' or 't': Open Integrated Accessibility Toolkit (Scanner, Stickers, PDF Evidence)
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        window.location.hash = '#toolkit';
+        return;
+      }
+
+      // 'A' or 'a': Toggle low-vision font size
+      if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        toggleTextSize();
+        return;
+      }
+
+      // 'V' or 'v': Toggle verbosity (concise vs detailed)
+      if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault();
+        setVerbosity((prev) => {
+          const next = prev === 'concise' ? 'detailed' : 'concise';
+          const msg = next === 'concise'
+            ? (companionLang === 'ar' ? 'تم تفعيل الوصف الموجز' : companionLang === 'fr' ? 'Mode concis activé' : 'Concise mode active')
+            : (companionLang === 'ar' ? 'تم تفعيل الوصف المفصل' : companionLang === 'fr' ? 'Mode détaillé activé' : 'Detailed mode active');
+          speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+          return next;
+        });
+        return;
+      }
+
+      // '?' or 'H' or 'h': Spoken announcement of keyboard shortcuts
+      if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+        e.preventDefault();
+        const helpMsg = companionLang === 'ar'
+          ? 'اختصارات لوحة المفاتيح للمكفوفين: مسافة أو إنتر للوصف الفوري، حرف آر لتكرار الصوت، حرف إس لإيقاف الصوت، حرف سي لقارئ النقود، حرف تي لقراءة النصوص، حرف إل للمحاضرات، حرف إن للعصا الذكية، حرف يو لرفع صورة، وحرف إيه لتكبير الخط، إسكيب لإغلاق الوصف.'
+          : companionLang === 'fr'
+          ? 'Raccourcis clavier : Espace ou Entrée pour décrire, R pour répéter la voix, S pour arrêter, C pour la monnaie, T pour lire le texte, L pour le cours, N pour la canne, U pour importer une image, A pour la taille du texte, Échap pour fermer.'
+          : 'Keyboard shortcuts for blind and visually impaired users: Press Space or Enter to describe the scene, R to repeat audio, S to stop speech, C for currency reader, T for text OCR, L for lecture scanner, N for white cane, U to upload image, A to enlarge text size, Escape to close.';
+        speak(helpMsg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+        return;
+      }
+
+      // Escape: Dismiss active description, save dialog, or modals
+      if (e.key === 'Escape') {
+        if (showSaveDialog) {
+          setShowSaveDialog(false);
+        } else if (lastDescription) {
+          closeDescription();
+        } else if (showSpatialMemory) {
+          setShowSpatialMemory(false);
+        } else if (showDocStudio) {
+          setShowDocStudio(false);
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [
+    companionLang,
+    status,
+    showSaveDialog,
+    lastDescription,
+    showSpatialMemory,
+    showDocStudio,
+    toggleSpeech,
+    toggleCurrencyMode,
+    toggleReadMode,
+    toggleLectureMode,
+    toggleNavGuideMode,
+    toggleFaceMode,
+    toggleOutfitMode,
+    toggleTextSize,
+    announceFeature,
+    playDemoSample,
+  ]);
+
   return (
     <div
       ref={containerRef}
@@ -1107,6 +1528,15 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       </div>
 
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageUpload}
+        accept="image/*"
+        aria-label={companionLang === 'ar' ? 'رفع صورة للتحليل البصري' : 'Upload photo for visual analysis'}
+        className="hidden"
+        aria-hidden="true"
+      />
 
       {/* ── 1. FULL-SCREEN LIVE CAMERA VIEWPORT ── */}
       <div className="absolute inset-0 w-full h-full bg-black overflow-hidden flex items-center justify-center">
@@ -1139,13 +1569,34 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                   {t('Open Parental Consent Portal', 'فتح بوابة موافقة ولي الأمر')}
                 </button>
               ) : (
-                <button
-                  onClick={() => startCamera()}
-                  className="w-full py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-xl cursor-pointer transition-all active:scale-95"
-                >
-                  {t('Try again', 'إعادة محاولة تشغيل الكاميرا')}
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => startCamera()}
+                    className="py-3 px-4 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>{t('Try camera again', 'إعادة محاولة الكاميرا')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="py-3 px-4 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>{t('Upload Image', 'رفع صورة من جهازك')}</span>
+                  </button>
+                </div>
               )}
+
+              <button
+                type="button"
+                onClick={() => playDemoSample(companionLang)}
+                className="w-full py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-emerald-300 font-bold text-xs shadow-md cursor-pointer transition-all border border-stone-700 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Volume2 className="w-4 h-4 text-emerald-400" />
+                <span>{t('Play Live Demo Audio Walkthrough', 'تشغيل عينة صوتية حية فوراً (بدون كاميرا)')}</span>
+              </button>
 
               <button
                 onClick={() => {
@@ -1180,8 +1631,59 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
         )}
 
         {status === 'starting-camera' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md z-20 p-6 text-center">
+            <div className="p-6 rounded-3xl bg-stone-900/95 border border-stone-800 max-w-md w-full shadow-2xl flex flex-col items-center">
+              <Loader2 className="w-12 h-12 text-[#E5A93C] animate-spin mb-4" />
+              <p className="text-white font-black text-base sm:text-lg mb-2">
+                {companionLang === 'ar'
+                  ? 'جاري تشغيل الكاميرا والاتصال...'
+                  : companionLang === 'fr'
+                  ? 'Activation de la caméra...'
+                  : 'Starting camera stream...'}
+              </p>
+              <p className="text-stone-300 text-xs sm:text-sm mb-5 leading-relaxed font-medium">
+                {companionLang === 'ar'
+                  ? 'إذا ظهر إشعار في المتصفح بالأعلى يطلب إذن الكاميرا، اضغط "سماح" (Allow). يمكنك أيضاً رفع صورة للفحص مباشرة أو تجربة عينة صوتية.'
+                  : companionLang === 'fr'
+                  ? "Veuillez autoriser l'accès à la caméra dans le navigateur, ou importer une image."
+                  : 'Please allow camera access in the browser prompt, or upload a photo directly.'}
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>{companionLang === 'ar' ? 'رفع صورة من جهازك' : 'Upload photo'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => playDemoSample(companionLang)}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer border border-white/20"
+                >
+                  <Volume2 className="w-4 h-4 text-emerald-400" />
+                  <span>{companionLang === 'ar' ? 'عينة صوتية حية 🔊' : 'Live sample 🔊'}</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  cancelSpeech();
+                  try {
+                    streamRef.current?.getTracks().forEach((tr) => tr.stop());
+                    streamRef.current = null;
+                  } catch {}
+                  if (onNavigateBack) onNavigateBack();
+                  else if (typeof window !== 'undefined') window.location.hash = '#disability/hub';
+                }}
+                className="mt-3 w-full py-2.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-white text-xs font-bold transition-all border border-stone-700 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                <span>{companionLang === 'ar' ? 'العودة لقائمة الميزات' : 'Back to Features Hub'}</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -1189,135 +1691,282 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
       {/* ── 2. ACCESSIBLE FLOATING HUD OVERLAY ── */}
       <div className="relative z-20 flex flex-col justify-between h-full p-3 sm:p-5 md:p-6 pointer-events-none">
         {/* Floating Top Command Bar */}
-        <div className="pointer-events-auto flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
-          {/* Three Language Choices: Arabic, English, French */}
-          <div className="flex items-center bg-black/75 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-2xl">
+        <div className="pointer-events-auto flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap w-full">
+          {/* Left group: Back button + Language Choices + Mode Toggle */}
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
-              onClick={() => {
-                chooseLang('ar');
-                toast.success('تم اختيار اللغة العربية 🇪🇬');
-              }}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                companionLang === 'ar'
-                  ? 'bg-emerald-600 text-white shadow-lg'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <span>🇪🇬</span>
-              <span>عربي</span>
-            </button>
-            <button
-              onClick={() => {
-                chooseLang('en');
-                toast.success('English language selected 🇬🇧');
-              }}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                companionLang === 'en'
-                  ? 'bg-primary text-white shadow-lg'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <span>🇬🇧</span>
-              <span>English</span>
-            </button>
-            <button
-              onClick={() => {
-                chooseLang('fr');
-                toast.success('Langue française sélectionnée 🇫🇷');
-              }}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                companionLang === 'fr'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <span>🇫🇷</span>
-              <span>Français</span>
-            </button>
+                type="button"
+                onClick={() => {
+                  cancelSpeech();
+                  try {
+                    streamRef.current?.getTracks().forEach((tr) => tr.stop());
+                    streamRef.current = null;
+                  } catch {}
+                  if (onNavigateBack) {
+                    onNavigateBack();
+                  } else if (typeof window !== 'undefined') {
+                    window.location.hash = '#disability/hub';
+                  }
+                }}
+                aria-label={t('Back to Features Hub', 'العودة للميزات', 'Retour aux fonctionnalités')}
+                className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
+                title={t('Back to Features Hub', 'العودة لقائمة الميزات والأدوات', 'Retour aux fonctionnalités')}
+              >
+                <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+                <span className="hidden sm:inline">{t('Features', 'الميزات', 'Retour')}</span>
+              </button>
+
+            {/* Three Language Choices: Arabic, English, French */}
+            <div className="flex items-center bg-black/75 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  chooseLang('ar');
+                  toast.success('تم اختيار اللغة العربية 🇪🇬');
+                }}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
+                  companionLang === 'ar'
+                    ? 'bg-emerald-600 text-white shadow-lg'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <span>🇪🇬</span>
+                <span>عربي</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  chooseLang('en');
+                  toast.success('English language selected 🇬🇧');
+                }}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
+                  companionLang === 'en'
+                    ? 'bg-primary text-white shadow-lg'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <span>🇬🇧</span>
+                <span>English</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  chooseLang('fr');
+                  toast.success('Langue française sélectionnée 🇫🇷');
+                }}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
+                  companionLang === 'fr'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <span>🇫🇷</span>
+                <span>Français</span>
+              </button>
+            </div>
+
+            
           </div>
+
+            {/* Direct Image File Upload Button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label={t('Upload photo from device', 'رفع صورة من الجهاز', 'Importer une image')}
+              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border border-white/20 bg-black/75 hover:bg-black/90 text-white shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
+              title={t('Upload photo from device for AI analysis', 'رفع صورة من جهازك للتحليل الصوتي الفوري', 'Importer une photo pour analyse')}
+            >
+              <Upload className="w-4 h-4 text-[#E5A93C]" />
+              <span className="hidden xl:inline">{t('Upload Photo', 'رفع صورة', 'Image')}</span>
+            </button>
 
           {/* Right Utilities: Modes + Spatial Memory + Flip Camera + Fullscreen */}
           <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
-            <button
-              onClick={toggleCurrencyMode}
-              aria-pressed={currencyMode}
-              aria-label={t('Currency Reader', 'قارئ العملات', 'Lecteur de monnaie')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                currencyMode
-                  ? 'bg-emerald-500/90 border-emerald-300 text-black shadow-emerald-950/50'
-                  : 'bg-black/75 border-emerald-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Currency Reader: detect banknotes and cash instantly',
-                'قارئ العملات: قراءة الفلوس والنقود فوراً بالصوت',
-                'Lecteur de monnaie : reconnaître les billets'
-              )}
-            >
-              <Banknote className={`w-4 h-4 shrink-0 ${currencyMode ? 'text-black' : 'text-emerald-400'}`} />
-              <span className="hidden xl:inline">{t('Cash', 'فلوس', 'Monnaie')}</span>
-            </button>
+            <>
+              <>
+                <button
+                  type="button"
+                  onClick={toggleCurrencyMode}
+                  aria-pressed={currencyMode}
+                  aria-label={t('Currency Reader', 'قارئ العملات', 'Lecteur de monnaie')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    currencyMode
+                      ? 'bg-emerald-500/90 border-emerald-300 text-black shadow-emerald-950/50'
+                      : 'bg-black/75 border-emerald-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Currency Reader: detect banknotes and cash instantly',
+                    'قارئ العملات: قراءة الفلوس والنقود فوراً بالصوت',
+                    'Lecteur de monnaie : reconnaître les billets'
+                  )}
+                >
+                  <Banknote className={`w-4 h-4 shrink-0 ${currencyMode ? 'text-black' : 'text-emerald-400'}`} />
+                  <span className="hidden xl:inline">{t('Cash', 'فلوس', 'Monnaie')}</span>
+                </button>
 
-            <button
-              onClick={toggleFaceMode}
-              aria-pressed={faceMode}
-              aria-label={t('Face Recognition', 'من أمامي؟', 'Qui est là ?')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                faceMode
-                  ? 'bg-blue-600/90 border-blue-300 text-white shadow-blue-950/50'
-                  : 'bg-black/75 border-blue-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Face Recognition: identify familiar people and faces',
-                'من أمامي: التعرف على الوجوه والمقربين والأشخاص',
-                'Reconnaissance faciale : identifier les proches'
-              )}
-            >
-              <Users className={`w-4 h-4 shrink-0 ${faceMode ? 'text-white' : 'text-blue-400'}`} />
-              <span className="hidden xl:inline">{t('People', 'وجوه', 'Visages')}</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={toggleFaceMode}
+                  aria-pressed={faceMode}
+                  aria-label={t('Face Recognition', 'من أمامي؟', 'Qui est là ?')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    faceMode
+                      ? 'bg-blue-600/90 border-blue-300 text-white shadow-blue-950/50'
+                      : 'bg-black/75 border-blue-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Face Recognition: identify familiar people and faces',
+                    'من أمامي: التعرف على الوجوه والمقربين والأشخاص',
+                    'Reconnaissance faciale : identifier les proches'
+                  )}
+                >
+                  <Users className={`w-4 h-4 shrink-0 ${faceMode ? 'text-white' : 'text-blue-400'}`} />
+                  <span className="hidden xl:inline">{t('People', 'وجوه', 'Visages')}</span>
+                </button>
 
-            <button
-              onClick={toggleOutfitMode}
-              aria-pressed={outfitMode}
-              aria-label={t('Color & Outfit Matcher', 'تنسيق الملابس والألوان', 'Style & Couleurs')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                outfitMode
-                  ? 'bg-pink-600/90 border-pink-300 text-white shadow-pink-950/50'
-                  : 'bg-black/75 border-pink-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Color & Outfit Matcher: match clothing colors and check style',
-                'تنسيق الملابس: فحص ألوان الملابس وتناسق الطقم',
-                'Harmonie des vêtements : vérifier les couleurs et le style'
-              )}
-            >
-              <Palette className={`w-4 h-4 shrink-0 ${outfitMode ? 'text-white' : 'text-pink-400'}`} />
-              <span className="hidden xl:inline">{t('Outfit', 'ملابس', 'Tenue')}</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={toggleOutfitMode}
+                  aria-pressed={outfitMode}
+                  aria-label={t('Color & Outfit Matcher', 'تنسيق الملابس والألوان', 'Style & Couleurs')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    outfitMode
+                      ? 'bg-pink-600/90 border-pink-300 text-white shadow-pink-950/50'
+                      : 'bg-black/75 border-pink-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Color & Outfit Matcher: match clothing colors and check style',
+                    'تنسيق الملابس: فحص ألوان الملابس وتناسق الطقم',
+                    'Harmonie des vêtements : vérifier les couleurs et le style'
+                  )}
+                >
+                  <Palette className={`w-4 h-4 shrink-0 ${outfitMode ? 'text-white' : 'text-pink-400'}`} />
+                  <span className="hidden xl:inline">{t('Outfit', 'ملابس', 'Tenue')}</span>
+                </button>
 
-            <button
-              onClick={toggleNavGuideMode}
-              aria-pressed={navGuideMode}
-              aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                navGuideMode
-                  ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/90 border-[#E5A93C]/40 text-black shadow-[#E5A93C]/20 animate-pulse'
-                  : 'bg-black/75 border-[#E5A93C]/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
-                'العصا الذكية: كشف العوائق والممرات مع تنبيهات اهتزازية',
-                'Canne virtuelle : obstacles et marches avec vibrations haptiques'
-              )}
-            >
-              <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-[#E5A93C]'}`} />
-              <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={toggleNavGuideMode}
+                  aria-pressed={navGuideMode}
+                  aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    navGuideMode
+                      ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/90 border-[#E5A93C]/40 text-black shadow-[#E5A93C]/20 animate-pulse'
+                      : 'bg-black/75 border-[#E5A93C]/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
+                    'العصا الذكية: كشف العوائق والممرات مع تنبيهات اهتزازية',
+                    'Canne virtuelle : obstacles et marches avec vibrations haptiques'
+                  )}
+                >
+                  <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-[#E5A93C]'}`} />
+                  <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
+                </button>
 
+                <button
+                  type="button"
+                  onClick={toggleLectureMode}
+                  aria-pressed={lectureMode}
+                  aria-label={t('Lecture & Board Scanner', 'سكانر المحاضرات والسبورة', 'Scanner de cours et tableau')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    lectureMode
+                      ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50 ring-2 ring-purple-400'
+                      : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Lecture & Board Scanner: extract blackboard text, formulas, and academic slides',
+                    'سكانر المحاضرات والسبورة: قراءة السبورة والمعادلات وشرح السلايد بالصوت',
+                    'Scanner de cours : lire le tableau, équations et diapositives'
+                  )}
+                >
+                  <GraduationCap className={`w-4 h-4 shrink-0 ${lectureMode ? 'text-white' : 'text-purple-400'}`} />
+                  <span className="hidden xl:inline">{t('Lecture', 'محاضرات', 'Cours')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={toggleShoppingMode}
+                  aria-pressed={shoppingMode}
+                  aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
+                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
+                    shoppingMode
+                      ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50'
+                      : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
+                  }`}
+                  title={t(
+                    'Shopping Assistant: identify products, prices, and expiry dates',
+                    'مساعد التسوق: فحص المنتجات والأسعار وتواريخ الصلاحية',
+                    'Assistant achat : identifier produits, prix et dates de péremption'
+                  )}
+                >
+                  <ShoppingBag className={`w-4 h-4 shrink-0 ${shoppingMode ? 'text-white' : 'text-purple-400'}`} />
+                  <span className="hidden xl:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDocStudio(true);
+                    announceFeature(
+                      'استوديو المستندات وتلخيص المحاضرات والـ PDF',
+                      'Document and Lecture Studio',
+                      'Studio de Documents et Cours',
+                      true
+                    );
+                  }}
+                  aria-label={t('Document & Lecture Studio', 'المستندات والمحاضرات', 'Documents & Cours')}
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-indigo-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+                  title={t(
+                    'Document & Lecture Studio: read PDF, convert to Word, lecture audio recording, translation, speech-to-text',
+                    'المستندات والمحاضرات: قراءة PDF، تحويل لـ Word، تسجيل وتلخيص المحاضرات، ترجمة، تحويل الصوت لكتابة',
+                    'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
+                  )}
+                >
+                  <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
+                  <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-xs text-indigo-300 font-mono">PDF</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.location.hash = '#toolkit';
+                  }}
+                  aria-label={t('Integrated Accessibility Toolkit: Scanner, Stickers, PDF', 'منظومة الوصول: سكانر وملصقات وPDF', "Boîte d'accessibilité")}
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-teal-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+                  title={t('Open Accessibility Toolkit (Key: T)', 'فتح منظومة الوصول المتكاملة (اختصار: T)', 'Ouvrir la boîte à outils')}
+                >
+                  <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
+                  <span className="hidden xl:inline">{t('Toolkit', 'المنظومة', 'Outils')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSpatialMemory(true);
+                    if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
+                    announceFeature('الذاكرة المكانية وحاجتي فين', 'Spatial Memory Object Locator', 'Localisation des Objets', true);
+                  }}
+                  aria-label={t('Spatial Memory', 'الذاكرة المكانية', 'Mémoire spatiale')}
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
+                  title={t('Spatial Memory: Where are my things?', 'الذاكرة المكانية: حاجتي فين؟', 'Mémoire spatiale : Où sont mes affaires ?')}
+                >
+                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="hidden xl:inline">{t('Where is my stuff?', 'حاجتي فين؟', 'Où est mon objet ?')}</span>
+                  {spatialRecords.length > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
+                </button>
+              </>
+            </>
+
+            {/* Read Mode (Text OCR) Toggle */}
             <button
+              type="button"
               onClick={toggleReadMode}
               aria-pressed={readMode}
-              aria-label={t('Read Mode', 'وضع القراءة', 'Mode lecture')}
+              aria-label={t('Read Mode', 'وضع القراءة والنصوص', 'Mode lecture')}
               className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
                 readMode
                   ? 'bg-amber-500/90 border-amber-300 text-black'
@@ -1330,85 +1979,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               )}
             >
               <BookOpen className={`w-4 h-4 shrink-0 ${readMode ? 'text-black' : 'text-amber-400'}`} />
-              <span className="hidden xl:inline">{t('Read Mode', 'اقرأ لي', 'Lecture')}</span>
-            </button>
-
-            <button
-              onClick={toggleLectureMode}
-              aria-pressed={lectureMode}
-              aria-label={t('Lecture & Board Scanner', 'سكانر المحاضرات والسبورة', 'Scanner de cours et tableau')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                lectureMode
-                  ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50 ring-2 ring-purple-400'
-                  : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Lecture & Board Scanner: extract blackboard text, formulas, and academic slides',
-                'سكانر المحاضرات والسبورة: قراءة السبورة والمعادلات وشرح السلايد بالصوت',
-                'Scanner de cours : lire le tableau, équations et diapositives'
-              )}
-            >
-              <GraduationCap className={`w-4 h-4 shrink-0 ${lectureMode ? 'text-white' : 'text-purple-400'}`} />
-              <span className="hidden xl:inline">{t('Lecture', 'محاضرات', 'Cours')}</span>
-            </button>
-
-            <button
-              onClick={toggleShoppingMode}
-              aria-pressed={shoppingMode}
-              aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                shoppingMode
-                  ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50'
-                  : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Shopping Assistant: identify products, prices, and expiry dates',
-                'مساعد التسوق: فحص المنتجات والأسعار وتواريخ الصلاحية',
-                'Assistant achat : identifier produits, prix et dates de péremption'
-              )}
-            >
-              <ShoppingBag className={`w-4 h-4 shrink-0 ${shoppingMode ? 'text-white' : 'text-purple-400'}`} />
-              <span className="hidden xl:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowDocStudio(true);
-                announceFeature(
-                  'استوديو المستندات وتلخيص المحاضرات والـ PDF',
-                  'Document and Lecture Studio',
-                  'Studio de Documents et Cours',
-                  true
-                );
-              }}
-              aria-label={t('Document & Lecture Studio', 'المستندات والمحاضرات', 'Documents & Cours')}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-indigo-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-              title={t(
-                'Document & Lecture Studio: read PDF, convert to Word, lecture audio recording, translation, speech-to-text',
-                'المستندات والمحاضرات: قراءة PDF، تحويل لـ Word، تسجيل وتلخيص المحاضرات، ترجمة، تحويل الصوت لكتابة',
-                'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
-              )}
-            >
-              <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
-              <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-[10px] text-indigo-300 font-mono">PDF</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowSpatialMemory(true);
-                if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
-                announceFeature('الذاكرة المكانية وحاجتي فين', 'Spatial Memory Object Locator', 'Localisation des Objets', true);
-              }}
-              aria-label={t('Spatial Memory', 'الذاكرة المكانية', 'Mémoire spatiale')}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-              title={t('Spatial Memory: Where are my things?', 'الذاكرة المكانية: حاجتي فين؟', 'Mémoire spatiale : Où sont mes affaires ?')}
-            >
-              <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="hidden xl:inline">{t('Where is my stuff?', 'حاجتي فين؟', 'Où est mon objet ?')}</span>
-              {spatialRecords.length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              )}
+              <span className="hidden xl:inline">{t('Read Text', 'اقرأ لي', 'Lire texte')}</span>
             </button>
 
             {(status === 'ready' || status === 'analyzing') && (
@@ -1521,7 +2092,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                           : 'Guest Preview — Vision Companion'}
                       </span>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-[11px] font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-xs font-semibold">
                       {companionLang === 'ar' ? 'تسجيل الدخول مطلوب' : companionLang === 'fr' ? 'Connexion requise' : 'Sign In Required'}
                     </span>
                   </div>
@@ -1550,7 +2121,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                       className="px-4 py-3 rounded-2xl bg-[#4A1224]/80 hover:bg-[#4A1224] border border-[#E5A93C]/40 text-[#E5A93C] font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95 text-center"
                     >
                       <Volume2 className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                      <span>{companionLang === 'ar' ? 'اسمع عينة صوتية حية 🔊' : companionLang === 'fr' ? 'Écouter une démo vocale 🔊' : 'Hear Audio Demo Sample 🔊'}</span>
+                      <span>{companionLang === 'ar' ? 'اسمع عينة صوتية حية' : companionLang === 'fr' ? 'Écouter une démo vocale' : 'Hear Audio Demo Sample'}</span>
                     </button>
                   </div>
                 </div>
@@ -1570,22 +2141,103 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 <X className="w-5 h-5" strokeWidth={3} />
               </button>
 
-              <div className="bg-black/80 backdrop-blur-2xl border border-white/20 text-white rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar">
-                <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2 pr-2 gap-2 flex-wrap">
-                  <span className="font-bold flex items-center gap-1.5 text-primary">
-                    <Sparkles className="w-4 h-4" />
-                    {lectureMode
-                      ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة 🎓' : companionLang === 'fr' ? 'Analyse du Cours et Tableau 🎓' : 'Lecture Board & Slide Digest 🎓')
-                      : readMode && readAction === 'summarize'
-                      ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
-                      : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
-                  </span>
-                  <div className="flex items-center gap-1.5">
+              <div
+                role="region"
+                aria-label={t('Visual observation description', 'وصف الملاحظة البصرية', 'Description de l\'observation visuelle')}
+                aria-live="polite"
+                aria-busy={false}
+                className="bg-black/85 backdrop-blur-2xl border border-white/20 text-white rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto space-y-3 max-h-64 sm:max-h-72 overflow-y-auto custom-scrollbar"
+              >
+                <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2.5 pr-2 gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold flex items-center gap-1.5 text-primary">
+                      <Sparkles className="w-4 h-4" />
+                      {lectureMode
+                        ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة' : companionLang === 'fr' ? 'Analyse du Cours et Tableau' : 'Lecture Board & Slide Digest')
+                        : readMode && readAction === 'summarize'
+                        ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
+                        : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
+                    </span>
+
+                    {/* Status Badge: Live vs Previous vs Uncertain */}
+                    {observationType === 'live' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>{companionLang === 'ar' ? 'ملاحظة حية' : companionLang === 'fr' ? 'Direct' : 'Live'}</span>
+                        {observationTimestamp && (
+                          <span className="opacity-75 font-mono text-xs">
+                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {observationType === 'previous' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold">
+                        <Clock className="w-3 h-3 text-amber-400" />
+                        <span>{companionLang === 'ar' ? 'لقطة سابقة' : companionLang === 'fr' ? 'Précédente' : 'Previous Frame'}</span>
+                        {observationTimestamp && (
+                          <span className="opacity-75 font-mono text-xs">
+                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {observationType === 'uncertain' && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-semibold"
+                        title={observationConfidenceReason}
+                      >
+                        <AlertTriangle className="w-3 h-3 text-rose-400" />
+                        <span>{companionLang === 'ar' ? 'غير مؤكد' : companionLang === 'fr' ? 'Incertain' : 'Uncertain'}</span>
+                        {observationConfidenceReason && (
+                          <span className="hidden md:inline opacity-80 text-xs">({observationConfidenceReason})</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Header actions: Refresh + Verbosity + Speech + Doc Studio + Read Text Only */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {/* Explicit Refresh / Re-analyze button */}
+                    <button
+                      type="button"
+                      onClick={() => describeScene(companionLang)}
+                      disabled={status === 'starting-camera'}
+                      aria-label={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
+                      title={t('Refresh and re-analyze scene (Space / Enter)', 'إعادة الفحص والتقاط المشهد من جديد (مسافة / Enter)', 'Réanalyser la scène (Espace / Entrée)')}
+                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-50"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="hidden sm:inline">{companionLang === 'ar' ? 'إعادة فحص' : companionLang === 'fr' ? 'Actualiser' : 'Refresh'}</span>
+                    </button>
+
+                    {/* Verbosity Toggle Button (Concise vs Detailed) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = verbosity === 'concise' ? 'detailed' : 'concise';
+                        setVerbosity(next);
+                        const notice = next === 'concise'
+                          ? (companionLang === 'ar' ? 'تم ضبط الوصف على موجز' : companionLang === 'fr' ? 'Mode concis activé' : 'Concise mode active')
+                          : (companionLang === 'ar' ? 'تم ضبط الوصف على مفصل وموسع' : companionLang === 'fr' ? 'Mode détaillé activé' : 'Detailed mode active');
+                        speak(notice, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
+                      }}
+                      aria-label={verbosity === 'concise' ? 'Switch to detailed description' : 'Switch to concise description'}
+                      title={verbosity === 'concise' ? (companionLang === 'ar' ? 'النمط موجز — اضغط للتفصيل' : 'Concise — Click for Detailed') : (companionLang === 'ar' ? 'النمط مفصل — اضغط للإيجاز' : 'Detailed — Click for Concise')}
+                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{verbosity === 'concise' ? (companionLang === 'ar' ? 'موجز ⚡' : 'Concise ⚡') : (companionLang === 'ar' ? 'مفصل 🔍' : 'Detailed 🔍')}</span>
+                    </button>
+
+                    {/* Lecture Mode: Open Doc Studio */}
                     {lectureMode && (
                       <button
+                        type="button"
                         onClick={() => {
                           setShowDocStudio(true);
                         }}
+                        aria-label={t('Open in Document Studio', 'فتح في استوديو المحاضرات والمستندات', 'Ouvrir dans le Studio')}
                         className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition-colors"
                         title={t('Open in Document Studio', 'فتح في استوديو المحاضرات والمستندات', 'Ouvrir dans le Studio')}
                       >
@@ -1593,12 +2245,16 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                         <span>{t('Doc Studio', 'استوديو المحاضرة', 'Studio')}</span>
                       </button>
                     )}
+
+                    {/* Read Mode: Toggle between Core Takeaway and Full Reading */}
                     {readMode && lastSnapshot && (
                       <button
+                        type="button"
                         onClick={() => {
                           const nextAction = readAction === 'read' ? 'summarize' : 'read';
                           describeScene(companionLang, lastSnapshot, nextAction);
                         }}
+                        aria-label={readAction === 'read' ? 'Summarize core takeaways' : 'Read full text'}
                         className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition-colors"
                         title={
                           readAction === 'read'
@@ -1619,8 +2275,56 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                         )}
                       </button>
                     )}
+
+                    {/* Read Text Only (OCR) direct action button when not in readMode */}
+                    {!readMode && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReadMode(true);
+                          setReadAction('read');
+                          setLectureMode(false);
+                          setCurrencyMode(false);
+                          setFaceMode(false);
+                          setOutfitMode(false);
+                          setNavGuideMode(false);
+                          setShoppingMode(false);
+                          describeScene(companionLang, undefined, 'read');
+                        }}
+                        aria-label={t('Read Text Only', 'اقرأ النصوص فقط', 'Lire le texte')}
+                        title={t('Read any text or writing visible in the scene', 'قراءة أي كتابة أو نصوص في المشهد بدقة', 'Lire les textes visibles')}
+                        className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 transition-colors"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{companionLang === 'ar' ? 'اقرأ النصوص' : companionLang === 'fr' ? 'Lire texte' : 'Read Text Only'}</span>
+                      </button>
+                    )}
+
+                    {/* Font Size Toggle for Low-Vision */}
                     <button
+                      type="button"
+                      onClick={toggleTextSize}
+                      aria-label={t('Toggle font size for low vision', 'تغيير حجم الخط لضعاف البصر', 'Changer la taille du texte')}
+                      title={t('Toggle font size: Normal, Large, Extra Large (Press A)', 'تغيير حجم الخط: عادي، كبير، كبير جداً (اضغط حرف A)', 'Taille du texte (Touche A)')}
+                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#E5A93C]"
+                    >
+                      <span className="font-mono font-black text-xs text-emerald-300">
+                        {textSize === 'extralarge' ? 'A++' : textSize === 'large' ? 'A+' : 'A'}
+                      </span>
+                      <span className="hidden sm:inline">
+                        {textSize === 'extralarge'
+                          ? (companionLang === 'ar' ? 'كبير جداً' : companionLang === 'fr' ? 'Très grand' : 'XL')
+                          : textSize === 'large'
+                          ? (companionLang === 'ar' ? 'كبير' : companionLang === 'fr' ? 'Grand' : 'Large')
+                          : (companionLang === 'ar' ? 'عادي' : companionLang === 'fr' ? 'Normal' : 'Normal')}
+                      </span>
+                    </button>
+
+                    {/* Speech Voice Play/Stop */}
+                    <button
+                      type="button"
                       onClick={toggleSpeech}
+                      aria-label={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'إعادة النطق الصوتي' : 'Repeat description aloud')}
                       className={`flex items-center gap-1.5 font-bold text-xs px-3 py-1.5 rounded-xl transition-colors ${
                         isSpeaking
                           ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300'
@@ -1634,11 +2338,19 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                       )}
                       {isSpeaking
                         ? (companionLang === 'ar' ? 'وقف الصوت' : companionLang === 'fr' ? 'Muet' : 'Stop')
-                        : (companionLang === 'ar' ? 'إعادة النطق الصوتي' : companionLang === 'fr' ? 'Répéter' : 'Repeat Aloud')}
+                        : (companionLang === 'ar' ? 'إعادة النطق' : companionLang === 'fr' ? 'Répéter' : 'Repeat Aloud')}
                     </button>
                   </div>
                 </div>
-                <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
+                <p
+                  className={`text-slate-100 leading-relaxed font-medium transition-all ${
+                    textSize === 'extralarge'
+                      ? 'text-xl sm:text-2xl font-bold tracking-wide'
+                      : textSize === 'large'
+                      ? 'text-base sm:text-lg font-semibold'
+                      : 'text-sm sm:text-base'
+                  }`}
+                >
                   {lastDescription}
                 </p>
               </div>
@@ -1657,64 +2369,67 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇪🇬 مسح السبورة والمحاضرة',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'مسح السبورة والمحاضرة',
                   subtitle: 'استخراج القوانين والشرح الأكاديمي بالصوت',
                 };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇪🇬 فحص وقراءة النقود',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص وقراءة النقود',
                   subtitle: 'كشف فئات الجنيه والعملات بالصوت',
                 };
                 if (faceMode) return {
                   icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇪🇬 من يقف أمامي؟',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'من يقف أمامي؟',
                   subtitle: 'التعرف على الأشخاص والوجوه بالصوت',
                 };
                 if (outfitMode) return {
                   icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
-                  title: '🇪🇬 فحص ألوان الملابس',
-                  subtitle: 'تناسق الطقم والألوان بالصوت',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص ألوان الملابس',
+                  subtitle: 'تناسق الألوان والمظهر بالصوت',
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
-                  title: '🇪🇬 فحص المسار والعوائق',
-                  subtitle: 'العصا الافتراضية مع تنبيه اهتزازي',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص المسار والعوائق',
+                  subtitle: 'توجيه لمسي ومسار تجنب العوائق',
                 };
                 if (shoppingMode) return {
                   icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇪🇬 فحص المنتج والتسوق',
-                  subtitle: 'مساعد التسوق والأسعار',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'فحص المنتج والتسوق',
+                  subtitle: 'مساعد قراءة المنتجات والأسعار',
                 };
                 if (readMode) return {
                   icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
-                  title: readAction === 'summarize' ? '🇪🇬 المفيد وخلاصة الكلام' : '🇪🇬 اقرأ اللي قدامي',
-                  subtitle: readAction === 'summarize' ? 'الزبدة وأهم نقطة بالصوت' : 'قراءة نص بالصوت كلمة بكلمة',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: readAction === 'summarize' ? 'المفيد وخلاصة الكلام' : 'قراءة النص أمام الكاميرا',
+                  subtitle: readAction === 'summarize' ? 'النقاط الجوهرية والملخص بالصوت' : 'قراءة صوتية دقيقة للنصوص',
                 };
                 return {
                   icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇪🇬 ماذا أمامي؟',
-                  subtitle: 'وصف فوري بالصوت',
+                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
+                  title: 'ماذا أمامي الآن؟',
+                  subtitle: 'وصف فوري مباشر بالصوت',
                 };
               };
               const cfg = getCfg();
               return (
                 <button
+                  type="button"
                   onClick={() => describeScene('ar')}
-                  disabled={status === 'analyzing' || status === 'starting-camera'}
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                  disabled={status === 'analyzing'}
+                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
+                  aria-keyshortcuts="Space Enter"
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                     <span>{cfg.title}</span>
-                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
                   </div>
                 </button>
               );
@@ -1724,64 +2439,67 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇬🇧 Scan Lecture Board & Slides',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Lecture Board & Slides',
                   subtitle: 'Extract formulas, diagrams & academic digest',
                 };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇬🇧 Scan Cash & Currency',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Cash & Currency',
                   subtitle: 'Instant denomination audio reader',
                 };
                 if (faceMode) return {
                   icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇬🇧 Who is in front of me?',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Who is in front of me?',
                   subtitle: 'Face & familiar person recognition',
                 };
                 if (outfitMode) return {
                   icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
-                  title: '🇬🇧 Check Outfit & Colors',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Check Outfit & Colors',
                   subtitle: 'Color matching & style harmony',
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
-                  title: '🇬🇧 Scan Pathway & Obstacles',
-                  subtitle: 'Virtual cane with haptic feedback',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Pathway & Obstacles',
+                  subtitle: 'Haptic directional guidance and obstacle alerts',
                 };
                 if (shoppingMode) return {
                   icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇬🇧 Scan product & price',
-                  subtitle: 'Shopping assistant',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scan Product & Price',
+                  subtitle: 'Shopping and label assistant',
                 };
                 if (readMode) return {
                   icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
-                  title: readAction === 'summarize' ? '🇬🇧 Core takeaways & bottom line' : '🇬🇧 Read this for me',
-                  subtitle: readAction === 'summarize' ? 'Distilled essence & spoken facts' : 'Spoken text reading',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: readAction === 'summarize' ? 'Core Takeaways & Bottom Line' : 'Read This Text',
+                  subtitle: readAction === 'summarize' ? 'Distilled essence & spoken facts' : 'Accurate spoken reading',
                 };
                 return {
                   icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 border border-primary/40 shadow-indigo-950/60',
-                  title: '🇬🇧 What is here?',
-                  subtitle: 'Spoken English',
+                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
+                  title: 'What is in front of me?',
+                  subtitle: 'Instant spoken description',
                 };
               };
               const cfg = getCfg();
               return (
                 <button
+                  type="button"
                   onClick={() => describeScene('en')}
-                  disabled={status === 'analyzing' || status === 'starting-camera'}
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                  disabled={status === 'analyzing'}
+                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
+                  aria-keyshortcuts="Space Enter"
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                     <span>{cfg.title}</span>
-                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
                   </div>
                 </button>
               );
@@ -1791,64 +2509,67 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               const getCfg = () => {
                 if (lectureMode) return {
                   icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-700 via-indigo-700 to-rose-600 hover:from-purple-600 hover:to-rose-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇫🇷 Scanner Tableau & Cours',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Tableau & Cours',
                   subtitle: 'Formules, schémas et synthèse académique',
                 };
                 if (currencyMode) return {
                   icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 border border-emerald-400/40 shadow-emerald-950/60',
-                  title: '🇫🇷 Scanner Billets & Devises',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Billets & Devises',
                   subtitle: 'Lecture audio de la monnaie',
                 };
                 if (faceMode) return {
                   icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇫🇷 Qui est devant moi ?',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Qui est devant moi ?',
                   subtitle: 'Reconnaissance faciale et proches',
                 };
                 if (outfitMode) return {
                   icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-500 hover:to-rose-600 border border-pink-400/40 shadow-pink-950/60',
-                  title: '🇫🇷 Harmonie des Vêtements',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Harmonie des Vêtements',
                   subtitle: 'Accord des couleurs et tenue',
                 };
                 if (navGuideMode) return {
                   icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-400 to-teal-700 hover:from-amber-400 hover:to-teal-600 border border-[#E5A93C]/40 shadow-[#E5A93C]/20 animate-pulse',
-                  title: '🇫🇷 Scanner Chemin & Obstacles',
-                  subtitle: 'Canne virtuelle avec retour haptique',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Chemin & Obstacles',
+                  subtitle: 'Guidage haptique et alertes',
                 };
                 if (shoppingMode) return {
                   icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/40 shadow-purple-950/60',
-                  title: '🇫🇷 Scanner produit & prix',
-                  subtitle: 'Assistant achat',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: 'Scanner Produit & Prix',
+                  subtitle: 'Assistant achat et étiquettes',
                 };
                 if (readMode) return {
                   icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 border border-amber-400/40 shadow-amber-950/60',
-                  title: readAction === 'summarize' ? "🇫🇷 L'essentiel & conclusion" : '🇫🇷 Lisez ceci',
-                  subtitle: readAction === 'summarize' ? 'Synthèse utile & conclusion vocale' : 'Lecture du texte',
+                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
+                  title: readAction === 'summarize' ? "L'Essentiel & Conclusion" : 'Lire ce Texte',
+                  subtitle: readAction === 'summarize' ? 'Synthèse utile & conclusion vocale' : 'Lecture audio fidèle',
                 };
                 return {
                   icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-600 border border-blue-400/40 shadow-blue-950/60',
-                  title: '🇫🇷 Que vois-je ?',
-                  subtitle: 'Vocal en français',
+                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
+                  title: 'Que vois-je devant moi ?',
+                  subtitle: 'Description vocale instantanée',
                 };
               };
               const cfg = getCfg();
               return (
                 <button
+                  type="button"
                   onClick={() => describeScene('fr')}
-                  disabled={status === 'analyzing' || status === 'starting-camera'}
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 ${cfg.gradient}`}
+                  disabled={status === 'analyzing'}
+                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
+                  aria-keyshortcuts="Space Enter"
+                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
                 >
                   {cfg.icon}
                   <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
                     <span>{cfg.title}</span>
-                    <span className="text-[10px] font-normal opacity-90">{cfg.subtitle}</span>
+                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
                   </div>
                 </button>
               );
@@ -1858,9 +2579,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
           {/* Secondary Controls Bar */}
           <div className="flex items-center gap-2 sm:gap-3">
             <button
+              type="button"
               onClick={toggleSpeech}
               disabled={!lastDescription}
-              className={`flex-1 min-h-[46px] rounded-xl backdrop-blur-xl border text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 ${
+              aria-label={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'كرر الوصف بالصوت' : 'Repeat description aloud')}
+              title={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'كرر الوصف بالصوت' : 'Repeat description aloud')}
+              className={`flex-1 min-h-[46px] rounded-xl backdrop-blur-xl border text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none ${
                 isSpeaking
                   ? 'bg-red-500/30 hover:bg-red-500/40 border-red-400/40'
                   : 'bg-black/70 hover:bg-black/90 border-white/20'
@@ -1879,20 +2603,25 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             </button>
 
             <button
+              type="button"
               onClick={openSaveDialog}
               disabled={!lastDescription}
-              className="flex-1 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95"
+              aria-label={companionLang === 'ar' ? 'حفظ هذا المشهد في الذاكرة' : companionLang === 'fr' ? 'Mémoriser ce lieu ou objet' : 'Remember this scene or person'}
+              title={companionLang === 'ar' ? 'احفظ ده في الذاكرة' : 'Save to memory'}
+              className="flex-1 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
             >
               <BookmarkPlus className="w-4 h-4 text-amber-400" />
               <span>{companionLang === 'ar' ? 'احفظ ده' : companionLang === 'fr' ? 'Mémoriser' : 'Remember this'}</span>
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 setShowSpatialMemory(true);
                 if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
               }}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-emerald-500/40 text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95"
+              aria-label={companionLang === 'ar' ? 'فتح الذاكرة المكانية ومواقع الأشياء' : companionLang === 'fr' ? 'Ouvrir la mémoire spatiale' : 'Open spatial memory and object locations'}
+              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-emerald-500/40 text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
               title={companionLang === 'ar' ? 'الذاكرة المكانية' : companionLang === 'fr' ? 'Mémoire spatiale' : 'Spatial Memory'}
             >
               <MapPin className="w-4 h-4" />
@@ -1900,6 +2629,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 setShowDocStudio(true);
                 announceFeature(
@@ -1909,7 +2639,8 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                   true
                 );
               }}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-[#E5A93C]/30 text-[#E5A93C] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95"
+              aria-label={companionLang === 'ar' ? 'فتح استوديو المستندات وتلخيص المحاضرات والـ PDF' : companionLang === 'fr' ? 'Ouvrir le studio de documents et cours' : 'Open Document and Lecture Studio'}
+              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-[#E5A93C]/30 text-[#E5A93C] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
               title={companionLang === 'ar' ? 'المستندات وتلخيص المحاضرات' : 'Docs & Lectures'}
             >
               <FileText className="w-4 h-4" />
@@ -2019,11 +2750,13 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
               </div>
 
               {/* Type Switcher: Object vs Person */}
-              <div className="flex gap-2 p-1 bg-[#080409] rounded-xl border border-[#4A1224]/60">
+              <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#080409] rounded-xl border border-[#4A1224]/60">
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={!isSavingPerson}
                   onClick={() => setIsSavingPerson(false)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                     !isSavingPerson ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -2031,8 +2764,10 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 </button>
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={isSavingPerson}
                   onClick={() => setIsSavingPerson(true)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                     isSavingPerson ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -2134,7 +2869,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                 <>
                   {/* Query Input */}
                   <div className="space-y-1.5">
-                    <label className="text-xs text-slate-400 font-semibold">
+                    <label htmlFor="spatial-query-input" className="text-xs text-slate-400 font-semibold block">
                       {companionLang === 'ar'
                         ? 'اسأل عن مكان أي شيء (مثلاً: "فين الريموت؟" أو "فين المفاتيح؟"):'
                         : companionLang === 'fr'
@@ -2143,6 +2878,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                     </label>
                     <div className="flex gap-2">
                       <input
+                        id="spatial-query-input"
                         type="text"
                         value={spatialQueryInput}
                         onChange={(e) => setSpatialQueryInput(e.target.value)}
@@ -2159,10 +2895,12 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                         className="flex-1 px-4 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                       <button
+                        type="button"
                         onClick={handleSearchSpatial}
-                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
+                        aria-label={companionLang === 'ar' ? 'بحث في الذاكرة المكانية' : companionLang === 'fr' ? 'Rechercher' : 'Search spatial memory'}
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
                       >
-                        <Search className="w-4 h-4" />
+                        <Search className="w-4 h-4" aria-hidden="true" />
                         <span>{companionLang === 'ar' ? 'بحث' : companionLang === 'fr' ? 'Chercher' : 'Search'}</span>
                       </button>
                     </div>
@@ -2187,7 +2925,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                   <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[140px]">
                     <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                       <span>{companionLang === 'ar' ? 'الأشياء المرصودة مؤخراً' : companionLang === 'fr' ? 'Objets récemment observés' : 'Recently Observed Items'}</span>
-                      <span className="text-[11px] font-mono text-emerald-400">{spatialRecords.length} items</span>
+                      <span className="text-xs font-mono text-emerald-400">{spatialRecords.length} items</span>
                     </div>
 
                     {spatialRecords.length === 0 ? (
@@ -2207,13 +2945,13 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                             setSpatialQueryResult(query.message);
                             speak(query.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
                           }}
-                          className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-[#4A1224]/50 flex items-center justify-between gap-3 group transition-all"
+                          className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-teal-900/40 flex items-center justify-between gap-3 group transition-all"
                         >
                           <div className="space-y-0.5">
                             <div className="font-bold text-sm text-white group-hover:text-emerald-400 flex items-center gap-2">
                               <span>{item.objectName}</span>
                               {item.relativePosition?.direction && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">
                                   {item.relativePosition.direction}
                                 </span>
                               )}
@@ -2224,7 +2962,7 @@ Golden rule: Cut straight to the bottom line and essential takeaways with zero f
                             </div>
                           </div>
                           <div className="text-end shrink-0">
-                            <span className="text-[10px] text-slate-500 block">
+                            <span className="text-xs text-slate-400 block font-mono">
                               {new Date(item.lastSeenTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <span className="text-xs text-emerald-400 font-semibold group-hover:underline flex items-center justify-end gap-1">

@@ -6,6 +6,9 @@ import {
   Check,
   Type,
   Sliders,
+  Eye,
+  Ear,
+  Globe,
 } from 'lucide-react';
 import { UserProfile, AccessibilityPassport, AccessibilityMode } from '../types';
 import { doc, setDoc } from 'firebase/firestore';
@@ -145,6 +148,7 @@ export default function AccessibilityPassportModal({
       <motion.div
         role="dialog"
         aria-modal="true"
+        aria-labelledby="passport-modal-title"
         initial={{ scale: 0.92, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.92, opacity: 0 }}
@@ -154,10 +158,10 @@ export default function AccessibilityPassportModal({
         <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-400 shadow-lg">
-              <Shield className="w-5 h-5" />
+              <Shield className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="font-black text-base sm:text-lg flex items-center gap-2">
+              <h2 id="passport-modal-title" className="font-black text-base sm:text-lg flex items-center gap-2">
                 <span>{t('Universal Accessibility Passport', 'جواز السفر الميسر الشامل', 'Passeport Universel d\'Accessibilité')}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-500/40 text-indigo-300 font-bold">
                   v2.0
@@ -169,11 +173,12 @@ export default function AccessibilityPassportModal({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             aria-label={t('Close', 'إغلاق', 'Fermer')}
-            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"
+            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -181,27 +186,29 @@ export default function AccessibilityPassportModal({
         <div className="flex-1 overflow-y-auto space-y-5 pr-1 text-sm">
           {/* 1. Primary Category */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+            <span id="passport-focus-label" className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
               {t('1. Primary Accessibility Focus:', '1. النمط الأساسي للاحتياج والوصول:', '1. Profil Principal :')}
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            </span>
+            <div role="radiogroup" aria-labelledby="passport-focus-label" className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
-                { id: 'Visual', icon: '👁️', label: t('Visual Ecosystem', 'بصري (كفيف/ضعف بصر)', 'Visuel') },
-                { id: 'Deaf', icon: '🧏', label: t('Deaf & Hearing', 'سمعي (أصم/ضعف سمع)', 'Auditif') },
-                { id: 'None', icon: '🌐', label: t('Standard', 'عام / قياسي', 'Standard') },
+                { id: 'Visual', Icon: Eye, label: t('Vision & Perception', 'الرؤية والإدراك', 'Vision & Perception') },
+                { id: 'Deaf', Icon: Ear, label: t('Hearing & Communication', 'السمع والتواصل', 'Audition & Communication') },
+                { id: 'None', Icon: Globe, label: t('Standard Experience', 'الواجهة القياسية', 'Standard') },
               ].map((item) => (
                 <button
                   key={item.id}
                   type="button"
+                  role="radio"
+                  aria-checked={passport.primaryCategory === item.id}
                   onClick={() => setPassport({ ...passport, primaryCategory: item.id as AccessibilityMode })}
-                  className={`p-3 rounded-2xl border transition-all text-start flex items-center gap-2.5 ${
+                  className={`p-3 rounded-2xl border transition-all text-start flex items-center gap-2.5 focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
                     passport.primaryCategory === item.id
-                      ? 'bg-indigo-600 border-indigo-400 text-white font-black shadow-lg'
-                      : 'bg-[#080409] border-[#4A1224]/60 text-slate-300 hover:border-[#4A1224]/50'
+                      ? 'bg-teal-700 border-teal-500 text-white font-bold shadow-sm'
+                      : 'bg-stone-900 border-stone-800 text-stone-300 hover:border-teal-700/60'
                   }`}
                 >
-                  <span className="text-xl">{item.icon}</span>
-                  <span className="text-xs leading-tight">{item.label}</span>
+                  <item.Icon className="w-5 h-5 text-teal-400 shrink-0" aria-hidden="true" />
+                  <span className="text-xs leading-tight font-medium">{item.label}</span>
                 </button>
               ))}
             </div>
@@ -210,17 +217,17 @@ export default function AccessibilityPassportModal({
           {/* Universal System-Wide Accommodations (Font Scaling, High Contrast, Motion Reduction) */}
           <div className="p-4 rounded-3xl bg-[#080409] border border-[#4A1224]/60 space-y-4">
             <div className="flex items-center gap-2 font-bold text-xs text-amber-400">
-              <Sliders className="w-4 h-4" />
+              <Sliders className="w-4 h-4" aria-hidden="true" />
               <span>{t('Universal Display & Sensory Settings', 'إعدادات العرض والحواس الشاملة للمنظومة')}</span>
             </div>
 
             {/* Font Size Scaling */}
             <div className="space-y-1.5">
-              <label className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
-                <Type className="w-3.5 h-3.5 text-purple-400" />
+              <span id="font-scale-group-label" className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+                <Type className="w-3.5 h-3.5 text-purple-400" aria-hidden="true" />
                 <span>{t('System-Wide Font Size Scale:', 'حجم الخط العام لجميع الشاشات:')}</span>
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              </span>
+              <div role="radiogroup" aria-labelledby="font-scale-group-label" className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { id: 'normal', label: t('100% Normal', '100% عادي') },
                   { id: 'medium', label: t('115% Large', '115% كبير') },
@@ -232,6 +239,8 @@ export default function AccessibilityPassportModal({
                     <button
                       key={s.id}
                       type="button"
+                      role="radio"
+                      aria-checked={isCurrent}
                       onClick={() => {
                         const newScale = s.id as any;
                         setPassport({ ...passport, fontSizeScale: newScale });
@@ -240,7 +249,7 @@ export default function AccessibilityPassportModal({
                         root.classList.add(`font-scale-${newScale}`);
                         try { localStorage.setItem('cognify_font_scale', newScale); } catch {}
                       }}
-                      className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all ${
+                      className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none ${
                         isCurrent
                           ? 'bg-amber-500 border-amber-400 text-slate-950 shadow-md font-black'
                           : 'bg-[#150917] border-[#4A1224]/60 text-slate-300 hover:border-[#4A1224]/50'
@@ -260,7 +269,7 @@ export default function AccessibilityPassportModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all focus-visible:ring-2 focus-visible:ring-slate-400 focus:outline-none"
           >
             {t('Cancel', 'إلغاء', 'Annuler')}
           </button>
@@ -268,9 +277,9 @@ export default function AccessibilityPassportModal({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all disabled:opacity-50"
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
           >
-            <Check className="w-4 h-4" />
+            <Check className="w-4 h-4" aria-hidden="true" />
             <span>{isSaving ? t('Saving...', 'جاري الحفظ...') : t('Save & Activate Passport', 'حفظ وتفعيل الجواز')}</span>
           </button>
         </div>

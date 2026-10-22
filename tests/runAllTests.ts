@@ -92,6 +92,15 @@ import { runNeurodiversityEngineVerification } from './neurodiversityEngineVerif
 import { runArslCurriculumAndModelVerification } from './arslCurriculumAndModelVerification.js';
 import { runCognitiveEngineVerification } from './cognitiveEngineVerification.js';
 import { runLearningDisabilityEngineVerification } from './learningDisabilityEngineVerification.js';
+import { runBlindAndLowVisionVerification } from './blindAndLowVisionVerification.js';
+import { runDocumentAndAudioTranscriptionVerification } from './documentAndAudioTranscriptionVerification.js';
+import { runAccessibilityAuditVerification } from './accessibilityAuditVerification.js';
+import { runNavigationAndAuthVerification } from './navigationAndAuthVerification.js';
+import { runEducationalBookStudioVerification } from './educationalBookStudioVerification.js';
+import { runAccessibilityToolkitVerification } from './accessibilityToolkitVerification.js';
+import { runUsageLimitsReliabilityVerification } from './usageLimitsReliabilityVerification.js';
+import { runSecurityPrivacyReviewVerification } from './securityPrivacyReviewVerification.js';
+import { runEndToEndAndRegressionVerification } from './endToEndAndRegressionVerification.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -2288,6 +2297,69 @@ Keep practicing closures with higher-order functions!
     const m27Res = await runLearningDisabilityEngineVerification();
     totalPassed += m27Res.passed;
     totalFailed += m27Res.failed;
+  }
+
+  // 59. Milestone 28: Blind & Low-Vision Accessibility Suite (Vision Companion, Clean OCR, Docx, Keyboard Hotkeys)
+  {
+    const m28Res = await runBlindAndLowVisionVerification();
+    totalPassed += m28Res.passed;
+    totalFailed += m28Res.failed;
+  }
+
+  // 60. Milestone 29: Document Extractor & Audio Lecture Transcription Engine (Phase 3)
+  {
+    const m29Res = await runDocumentAndAudioTranscriptionVerification();
+    totalPassed += m29Res.passed;
+    totalFailed += m29Res.failed;
+  }
+
+  // 61. Milestone 30: Accessibility Audit & Screen-Reader Verification (Phase 4 - WCAG 2.2 AA)
+  {
+    const m30Res = await runAccessibilityAuditVerification();
+    totalPassed += m30Res.passed;
+    totalFailed += m30Res.failed;
+  }
+
+  // 62. Milestone 31: Navigation, Back Buttons, Popstate & Auth Guards (Phase 5)
+  {
+    const m31Res = await runNavigationAndAuthVerification();
+    totalPassed += m31Res.passed;
+    totalFailed += m31Res.failed;
+  }
+
+  // 63. Milestone 32: Accessible Educational Book & Document Studio Engine (Phase 6)
+  {
+    const m32Res = await runEducationalBookStudioVerification();
+    totalPassed += m32Res.passed;
+    totalFailed += m32Res.failed;
+  }
+
+  // 64. Milestone 33: Integrated Accessibility Toolkit (Phase 7)
+  {
+    const m33Res = await runAccessibilityToolkitVerification();
+    totalPassed += m33Res.passed;
+    totalFailed += m33Res.failed;
+  }
+
+  // 65. Milestone 34: Usage Limits & Reliability Engine (Phase 8)
+  {
+    const m34Res = await runUsageLimitsReliabilityVerification();
+    totalPassed += m34Res.passed;
+    totalFailed += m34Res.failed;
+  }
+
+  // 66. Milestone 35: Security & Privacy Review Engine (Phase 10)
+  {
+    const m35Res = await runSecurityPrivacyReviewVerification();
+    totalPassed += m35Res.passed;
+    totalFailed += m35Res.failed;
+  }
+
+  // 67. Milestone 36: End-to-End & Comprehensive Regression Testing (Phase 11)
+  {
+    const m36Res = await runEndToEndAndRegressionVerification();
+    totalPassed += m36Res.passed;
+    totalFailed += m36Res.failed;
   }
 
   console.log(`\n========================================`);

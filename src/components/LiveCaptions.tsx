@@ -872,8 +872,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               </span>
             </div>
 
-            <button onClick={onClose} className="lg:hidden p-2 rounded-full bg-bg-card/5 hover:bg-bg-card/10 border border-white/10">
-              <X className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close Live Captions"
+              className="lg:hidden p-2 rounded-full bg-bg-card/5 hover:bg-bg-card/10 border border-white/10 focus-visible:ring-2 focus-visible:ring-purple-400 focus:outline-none"
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -1210,18 +1215,22 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                         <span className="font-bold text-sm">Recording… {calibrationTimer}s</span>
                       </div>
                       <button
+                        type="button"
                         onClick={stopCalibrationRecord}
-                        className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-red-500/30"
+                        aria-label="Stop calibration recording"
+                        className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-red-500/30 focus-visible:ring-2 focus-visible:ring-white focus:outline-none"
                       >
-                        <StopCircle className="w-7 h-7" />
+                        <StopCircle className="w-7 h-7" aria-hidden="true" />
                       </button>
                     </div>
                   ) : (
                     <button
+                      type="button"
                       onClick={startCalibrationRecord}
-                      className="w-16 h-16 rounded-full bg-sky-500 text-white flex items-center justify-center mx-auto hover:bg-sky-400 shadow-lg shadow-sky-500/30 transition-all"
+                      aria-label="Start calibration recording"
+                      className="w-16 h-16 rounded-full bg-sky-500 text-white flex items-center justify-center mx-auto hover:bg-sky-400 shadow-lg shadow-sky-500/30 transition-all focus-visible:ring-2 focus-visible:ring-white focus:outline-none"
                     >
-                      <Mic className="w-7 h-7" />
+                      <Mic className="w-7 h-7" aria-hidden="true" />
                     </button>
                   )}
                   <p className="text-xs text-neutral-500">
@@ -1267,7 +1276,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         {/* Header */}
         <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-neutral-900 sticky top-0 z-20">
           <div className="flex items-center gap-3">
-            <Volume2 className="w-5 h-5 text-purple-400" />
+            <Volume2 className="w-5 h-5 text-purple-400" aria-hidden="true" />
             <div>
               <h3 className="text-sm font-bold text-white">Vocal Speech Assistant</h3>
               <p className="text-[11px] text-neutral-500">Tap any card to speak it aloud</p>
@@ -1275,13 +1284,21 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setShowSettings(!showSettings)}
-              className={`p-2 rounded-full border transition-colors ${showSettings ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-bg-card/5 border-white/10 text-neutral-400 hover:text-white'}`}
+              aria-label="Voice settings"
+              aria-expanded={showSettings}
+              className={`p-2 rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-purple-400 focus:outline-none ${showSettings ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-bg-card/5 border-white/10 text-neutral-400 hover:text-white'}`}
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4" aria-hidden="true" />
             </button>
-            <button onClick={onClose} className="hidden lg:flex p-2 rounded-full bg-bg-card/5 hover:bg-bg-card/10 border border-white/10 text-neutral-400">
-              <X className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close Live Captions"
+              className="hidden lg:flex p-2 rounded-full bg-bg-card/5 hover:bg-bg-card/10 border border-white/10 text-neutral-400 focus-visible:ring-2 focus-visible:ring-purple-400 focus:outline-none"
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>

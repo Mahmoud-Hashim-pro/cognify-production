@@ -86,7 +86,12 @@ export default function AdminUserDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-[#150917] border border-[#4A1224]/60 rounded-[32px] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="user-detail-modal-title"
+        className="bg-[#150917] border border-[#4A1224]/60 rounded-[32px] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"
+      >
         {/* Modal Header */}
         <div className="p-6 border-b border-[#4A1224]/60 flex items-center justify-between bg-[#080409]/60">
           <div className="flex items-center gap-3.5 min-w-0">
@@ -113,7 +118,7 @@ export default function AdminUserDetailModal({
               )}
               {user.photoURL && (
                 <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
-                  <Eye className="w-5 h-5" />
+                  <Eye className="w-5 h-5" aria-hidden="true" />
                 </div>
               )}
               <span
@@ -122,27 +127,30 @@ export default function AdminUserDetailModal({
               />
             </div>
             <div className="min-w-0">
-              <h3 className="text-lg font-black text-white truncate">
+              <h3 id="user-detail-modal-title" className="text-lg font-black text-white truncate">
                 {user.name || user.email?.split('@')[0] || 'User Profile'}
               </h3>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-xs font-medium text-slate-400 truncate">{user.email}</span>
                 <button
+                  type="button"
                   onClick={() => copyToClipboard(user.uid, `Firebase UID copied: ${user.uid}`)}
                   className="inline-flex items-center gap-1 font-mono text-[10px] text-slate-400 hover:text-[#E5A93C] bg-slate-800/80 px-2 py-0.5 rounded transition-colors"
                   title="Copy Firebase UID"
                 >
                   <span>UID: {user.uid.slice(0, 12)}…</span>
-                  <Copy className="w-2.5 h-2.5" />
+                  <Copy className="w-2.5 h-2.5" aria-hidden="true" />
                 </button>
               </div>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
+            aria-label="Close user details modal"
+            className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 

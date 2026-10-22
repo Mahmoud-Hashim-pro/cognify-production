@@ -89,15 +89,20 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md font-sans animate-in fade-in">
-      <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#080409] border border-[#4A1224]/60 p-6 shadow-2xl text-slate-100 space-y-6">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="a11y-preferences-title"
+        className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#080409] border border-[#4A1224]/60 p-6 shadow-2xl text-slate-100 space-y-6"
+      >
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#4A1224]/60">
           <div className="flex items-center gap-3">
             <span className="p-2.5 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              <Sliders className="w-5 h-5" />
+              <Sliders className="w-5 h-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="text-lg font-bold text-white">
+              <h2 id="a11y-preferences-title" className="text-lg font-bold text-white">
                 {isAr ? 'تفضيلات إمكانية الوصول والتواصل التكيفي' : 'Accessibility & Adaptive Communication'}
               </h2>
               <p className="text-xs text-slate-400">
@@ -109,16 +114,18 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
           </div>
 
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            aria-label={isAr ? 'إغلاق نافذة التفضيلات' : 'Close preferences modal'}
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         {/* Ethical Non-Diagnosis Guarantee Banner */}
         <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+          <ShieldCheck className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <div className="space-y-1">
             <div className="text-xs font-bold text-emerald-300">
               {isAr ? 'حاجز الخصوصية والكرامة الإنسانية (Non-Diagnosis Guard)' : 'Privacy & Dignity Guarantee'}
@@ -135,7 +142,7 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
         <div className="flex items-center justify-between p-4 rounded-2xl bg-[#150917] border border-[#4A1224]/60">
           <div>
             <div className="text-xs font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#E5A93C]" />
+              <Sparkles className="w-4 h-4 text-[#E5A93C]" aria-hidden="true" />
               <span>{isAr ? 'التكيّف التلقائي الذكي' : 'Smart Auto-Adaptation'}</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
@@ -146,8 +153,11 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
           </div>
 
           <button
+            type="button"
+            role="switch"
+            aria-checked={profile.autoAdaptationEnabled}
             onClick={handleToggleAutoAdaptation}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none ${
               profile.autoAdaptationEnabled
                 ? 'bg-[#4A1224]/60 text-[#E5A93C] border-[#E5A93C]/40'
                 : 'bg-slate-800 text-slate-400 border-[#4A1224]/50'
@@ -166,23 +176,25 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
         {/* 1. Response Length Selector */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-300">
+            <span id="response-length-label" className="text-xs font-bold text-slate-300">
               {isAr ? 'طول الشرح والتفصيل المفضل:' : 'Preferred Response Length:'}
-            </label>
+            </span>
             <button
+              type="button"
+              aria-pressed={Boolean(locks.preferredResponseLength)}
               onClick={() => handleToggleLock('preferredResponseLength')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all border ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all border focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
                 locks.preferredResponseLength
                   ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
                   : 'bg-slate-800 text-slate-500 border-[#4A1224]/50'
               }`}
             >
-              {locks.preferredResponseLength ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+              {locks.preferredResponseLength ? <Lock className="w-3 h-3" aria-hidden="true" /> : <Unlock className="w-3 h-3" aria-hidden="true" />}
               <span>{locks.preferredResponseLength ? (isAr ? 'مثبت يدوياً' : 'Locked') : (isAr ? 'تلقائي' : 'Auto')}</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-2.5">
+          <div role="radiogroup" aria-labelledby="response-length-label" className="grid grid-cols-3 gap-2.5">
             {[
               { id: 'concise', labelEn: 'Concise', labelAr: 'موجز وسريع' },
               { id: 'balanced', labelEn: 'Balanced', labelAr: 'متوازن' },
@@ -191,9 +203,12 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
               const isSelected = prefs.preferredResponseLength === opt.id;
               return (
                 <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
                   key={opt.id}
                   onClick={() => handleUpdate('preferredResponseLength', opt.id as ResponseLengthPreference)}
-                  className={`p-3 rounded-2xl border text-xs font-semibold transition-all ${
+                  className={`p-3 rounded-2xl border text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none ${
                     isSelected
                       ? 'bg-[#4A1224]/60 border-[#E5A93C]/50 text-[#E5A93C] shadow-md shadow-[#E5A93C]/20'
                       : 'bg-[#150917] border-[#4A1224]/60 text-slate-400 hover:text-slate-200 hover:border-[#4A1224]/50'
@@ -209,23 +224,25 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
         {/* 2. Modality Preference Selector */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-300">
+            <span id="modality-preference-label" className="text-xs font-bold text-slate-300">
               {isAr ? 'الوسيط الحسي المفضل للتواصل:' : 'Preferred Communication Modality:'}
-            </label>
+            </span>
             <button
+              type="button"
+              aria-pressed={Boolean(locks.preferredModality)}
               onClick={() => handleToggleLock('preferredModality')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all border ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all border focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
                 locks.preferredModality
                   ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
                   : 'bg-slate-800 text-slate-500 border-[#4A1224]/50'
               }`}
             >
-              {locks.preferredModality ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+              {locks.preferredModality ? <Lock className="w-3 h-3" aria-hidden="true" /> : <Unlock className="w-3 h-3" aria-hidden="true" />}
               <span>{locks.preferredModality ? (isAr ? 'مثبت يدوياً' : 'Locked') : (isAr ? 'تلقائي' : 'Auto')}</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div role="radiogroup" aria-labelledby="modality-preference-label" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {[
               { id: 'text', icon: FileText, labelEn: 'Text First', labelAr: 'نصوص أولاً' },
               { id: 'audio', icon: Volume2, labelEn: 'Audio First', labelAr: 'صوتي أولاً' },
@@ -236,15 +253,18 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
               const Icon = opt.icon;
               return (
                 <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
                   key={opt.id}
                   onClick={() => handleUpdate('preferredModality', opt.id as ModalityPreference)}
-                  className={`p-3 rounded-2xl border text-xs font-semibold transition-all flex flex-col items-center gap-2 ${
+                  className={`p-3 rounded-2xl border text-xs font-semibold transition-all flex flex-col items-center gap-2 focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
                     isSelected
                       ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300 shadow-md shadow-indigo-950/40'
                       : 'bg-[#150917] border-[#4A1224]/60 text-slate-400 hover:text-slate-200 hover:border-[#4A1224]/50'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4" aria-hidden="true" />
                   <span>{isAr ? opt.labelAr : opt.labelEn}</span>
                 </button>
               );
@@ -254,10 +274,10 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
 
         {/* 3. Visual Density */}
         <div className="space-y-3">
-          <label className="text-xs font-bold text-slate-300">
+          <span id="visual-density-label" className="text-xs font-bold text-slate-300">
             {isAr ? 'الكثافة البصرية للشاشة:' : 'Visual Density & Spacing:'}
-          </label>
-          <div className="grid grid-cols-3 gap-2.5">
+          </span>
+          <div role="radiogroup" aria-labelledby="visual-density-label" className="grid grid-cols-3 gap-2.5">
             {[
               { id: 'compact', labelEn: 'Compact', labelAr: 'مضغوط ومقتضب' },
               { id: 'standard', labelEn: 'Standard', labelAr: 'افتراضي مريح' },
@@ -266,9 +286,12 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
               const isSelected = prefs.visualDensity === opt.id;
               return (
                 <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
                   key={opt.id}
                   onClick={() => handleUpdate('visualDensity', opt.id as VisualDensityPreference, false)}
-                  className={`p-3 rounded-2xl border text-xs font-semibold transition-all ${
+                  className={`p-3 rounded-2xl border text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none ${
                     isSelected
                       ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
                       : 'bg-[#150917] border-[#4A1224]/60 text-slate-400 hover:text-slate-200 hover:border-[#4A1224]/50'
@@ -284,16 +307,18 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
         {/* Footer Actions */}
         <div className="pt-4 border-t border-[#4A1224]/60 flex items-center justify-between gap-3">
           <button
+            type="button"
             onClick={handleResetDefaults}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors focus-visible:ring-2 focus-visible:ring-slate-400 focus:outline-none"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
             <span>{isAr ? 'استعادة الافتراضيات' : 'Reset Defaults'}</span>
           </button>
 
           <button
+            type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-400 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white shadow-lg shadow-[#E5A93C]/20 transition-all active:scale-95"
+            className="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-400 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white shadow-lg shadow-[#E5A93C]/20 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none"
           >
             {isAr ? 'تم وحفظ التفضيلات' : 'Save & Done'}
           </button>

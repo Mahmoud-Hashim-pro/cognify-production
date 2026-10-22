@@ -13,12 +13,16 @@ import learningProfileHandler from "./api/student/learningProfile";
 import proxyImageHandler from "./api/proxy-image";
 import healthHandler from "./api/system/health";
 import deleteUserHandler from "./api/admin/deleteUser";
+import usageQuotaHandler from "./api/usage/quota";
+import usageJobsHandler from "./api/usage/jobs";
 
 async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
+  // Strict 2MB payload limit for REST APIs to prevent DoS payloads (large media streams are chunked client-side)
   app.use(express.json({ limit: '2mb' }));
+  app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
   // Comprehensive Security Headers Middleware
   app.use((_req, res, next) => {
@@ -79,6 +83,16 @@ async function startServer() {
   // Super Admin: Permanent Server-Side User & Data Purge
   app.all("/api/admin/deleteUser", (req, res) => {
     return deleteUserHandler(req, res);
+  });
+
+  // Transparent Quota & Usage Accounting
+  app.all("/api/usage/quota", (req, res) => {
+    return usageQuotaHandler(req, res);
+  });
+
+  // Long-Running Processing Jobs (Audio & Multi-page document recovery)
+  app.all("/api/usage/jobs", (req, res) => {
+    return usageJobsHandler(req, res);
   });
 
   app.use("/api/gemini", geminiRouter);

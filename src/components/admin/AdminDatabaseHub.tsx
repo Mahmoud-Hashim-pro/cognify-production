@@ -376,11 +376,13 @@ export default function AdminDatabaseHub({
           </button>
 
           <button
+            type="button"
             onClick={pingDatabase}
             title="Refresh Now"
-            className="p-2 bg-[#150917] hover:bg-slate-800 text-slate-300 border border-[#4A1224]/60 rounded-xl transition-all hover:text-white"
+            aria-label="Refresh database status now"
+            className="p-2 bg-[#150917] hover:bg-slate-800 text-slate-300 border border-[#4A1224]/60 rounded-xl transition-all hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>

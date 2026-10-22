@@ -800,6 +800,14 @@ ${otherThreadsSummary}
       else if (/\.(jpe?g)$/.test(fname)) mime = 'image/jpeg';
       else if (fname.endsWith('.png')) mime = 'image/png';
       else if (fname.endsWith('.webp')) mime = 'image/webp';
+      else if (fname.endsWith('.txt')) mime = 'text/plain';
+      else if (fname.endsWith('.mp3')) mime = 'audio/mp3';
+      else if (fname.endsWith('.wav')) mime = 'audio/wav';
+      else if (fname.endsWith('.m4a')) mime = 'audio/m4a';
+      else if (fname.endsWith('.webm')) mime = 'audio/webm';
+      else if (fname.endsWith('.ogg')) mime = 'audio/ogg';
+      else if (fname.endsWith('.aac')) mime = 'audio/aac';
+      else if (fname.endsWith('.flac')) mime = 'audio/flac';
     }
     const rawData = typeof file.data === 'string' ? file.data.replace(/^data:[^;]+;base64,/, '') : file.data;
     if (rawData) {
@@ -1129,14 +1137,15 @@ export async function generateAdaptiveResponse(
   profile: UserProfile,
   history: Message[],
   attachments: { name: string, type: string, data: string }[] = [],
-  studentState?: any
+  studentState?: any,
+  signal?: AbortSignal
 ) {
   const isAr = isArabicLocale(profile.language);
 
   // Direct (no-backend) path: stream from Gemini/Groq and collect the full text.
   const direct = async (): Promise<string> => {
     let text = "";
-    for await (const chunk of generateAdaptiveResponseStream(message, profile, history, attachments, undefined, studentState)) {
+    for await (const chunk of generateAdaptiveResponseStream(message, profile, history, attachments, signal, studentState)) {
       if (chunk.text) text = chunk.text;
     }
     return text || (isAr
@@ -1152,7 +1161,8 @@ export async function generateAdaptiveResponse(
     let res = await fetch('/api/gemini/generateAdaptiveResponse', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ message, profile, history, attachments, studentState })
+      body: JSON.stringify({ message, profile, history, attachments, studentState }),
+      signal
     });
 
     if (res.status === 401 && auth.currentUser) {
@@ -1161,9 +1171,19 @@ export async function generateAdaptiveResponse(
         res = await fetch('/api/gemini/generateAdaptiveResponse', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ message, profile, history, attachments, studentState })
+          body: JSON.stringify({ message, profile, history, attachments, studentState }),
+          signal
         });
       }
+    }
+
+    if (res.status === 401) {
+      const isFrench = profile?.language === 'French' || (profile?.language as unknown as string) === 'fr';
+      return isAr
+        ? `أهلاً بك في المعاينة التجريبية لمنصة كوجنيفاي! 🚀\n\nتتطلب ميزات الذكاء الاصطناعي السحابية تسجيل الدخول لحفظ تقدمك ومطابقة نموذجك المعرفي. يرجى تسجيل الدخول أو إنشاء حساب مجاني للمتابعة، أو تجربة العينة الصوتية الحية.`
+        : isFrench
+        ? `Bienvenue sur l'aperçu Cognify ! 🚀\n\nLes fonctionnalités d'IA cloud nécessitent une connexion pour personnaliser votre apprentissage. Veuillez vous connecter ou créer un compte gratuit pour continuer.`
+        : `Welcome to Cognify Preview Mode! 🚀\n\nCloud AI features require an authenticated session to track your personalized learning model. Please sign in or create a free account to continue.`;
     }
 
     const isHtml = res.headers.get('Content-Type')?.includes('text/html');
@@ -1173,7 +1193,10 @@ export async function generateAdaptiveResponse(
     }
     const data = await res.json();
     return data.result;
-  } catch {
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw err;
+    }
     return direct();
   }
 }

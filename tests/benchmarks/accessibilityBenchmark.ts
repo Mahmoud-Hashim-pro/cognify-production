@@ -199,20 +199,26 @@ async function benchmarkPillar1VisionCompanion() {
   const visionCompanionSource = fs.readFileSync(path.resolve('src/components/VisionCompanionView.tsx'), 'utf-8');
 
   // English prompt hazard check
-  const hasEnHazardInstruction = visionCompanionSource.includes('If there are no hazards, start directly with reassuring words');
-  const enHazardBeforeScene = visionCompanionSource.indexOf('If there are no hazards') < visionCompanionSource.indexOf('Describe people, objects');
+  const hasEnHazardInstruction = visionCompanionSource.includes('If there are no hazards, start directly with reassuring words') || visionCompanionSource.includes('begin with a brief reassuring note');
+  const enHazardPos = visionCompanionSource.indexOf('If there are no hazards') !== -1 ? visionCompanionSource.indexOf('If there are no hazards') : visionCompanionSource.indexOf('begin with a brief reassuring note');
+  const enScenePos = visionCompanionSource.indexOf('Describe people, objects') !== -1 ? visionCompanionSource.indexOf('Describe people, objects') : visionCompanionSource.indexOf('Identify the primary objects');
+  const enHazardBeforeScene = enHazardPos < enScenePos;
   assert(hasEnHazardInstruction, 'English prompt explicitly commands hazard evaluation first');
   assert(enHazardBeforeScene, 'English prompt orders hazard reassurance BEFORE general scene description');
 
   // Arabic prompt hazard check
-  const hasArHazardInstruction = visionCompanionSource.includes('ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر');
-  const arHazardBeforeScene = visionCompanionSource.indexOf('ابدأ مباشرة بجملة تطمينية') < visionCompanionSource.indexOf('ثم صف الأشخاص والأشياء');
+  const hasArHazardInstruction = visionCompanionSource.includes('ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر') || visionCompanionSource.includes('ابدأ بجملة تطمينية سلسة');
+  const arHazardPos = visionCompanionSource.indexOf('ابدأ مباشرة بجملة تطمينية') !== -1 ? visionCompanionSource.indexOf('ابدأ مباشرة بجملة تطمينية') : visionCompanionSource.indexOf('ابدأ بجملة تطمينية سلسة');
+  const arScenePos = visionCompanionSource.indexOf('ثم صف الأشخاص والأشياء') !== -1 ? visionCompanionSource.indexOf('ثم صف الأشخاص والأشياء') : visionCompanionSource.indexOf('اذكر الأجسام أو الأشخاص');
+  const arHazardBeforeScene = arHazardPos < arScenePos;
   assert(hasArHazardInstruction, 'Arabic prompt explicitly commands hazard reassurance first in friendly colloquial Arabic');
   assert(arHazardBeforeScene, 'Arabic prompt orders hazard reassurance BEFORE general object description');
 
   // French prompt hazard check
-  const hasFrHazardInstruction = visionCompanionSource.includes("S'il n'y a aucun danger, commencez directement par rassurer la personne");
-  const frHazardBeforeScene = visionCompanionSource.indexOf("S'il n'y a aucun danger") < visionCompanionSource.indexOf('Décrivez les personnes, objets');
+  const hasFrHazardInstruction = visionCompanionSource.includes("S'il n'y a aucun danger, commencez directement par rassurer la personne") || visionCompanionSource.includes("commencez par rassurer la personne");
+  const frHazardPos = visionCompanionSource.indexOf("S'il n'y a aucun danger") !== -1 ? visionCompanionSource.indexOf("S'il n'y a aucun danger") : visionCompanionSource.indexOf("commencez par rassurer la personne");
+  const frScenePos = visionCompanionSource.indexOf('Décrivez les personnes, objets');
+  const frHazardBeforeScene = frHazardPos < frScenePos;
   assert(hasFrHazardInstruction, 'French prompt explicitly commands hazard reassurance first');
   assert(frHazardBeforeScene, 'French prompt orders hazard reassurance BEFORE general object description');
 

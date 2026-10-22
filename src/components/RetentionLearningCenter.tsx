@@ -371,10 +371,12 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
               </div>
 
               <button
+                type="button"
                 onClick={handleCloseModal}
-                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                aria-label={isAr ? 'إغلاق تمرين تثبيت الذاكرة' : 'Close retention drill'}
+                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
