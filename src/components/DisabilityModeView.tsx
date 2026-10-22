@@ -1,6 +1,21 @@
 import { localize } from '../lib/translations';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { AriaButton } from './ui/AriaButton';
+import { 
+  AriaButton, 
+  Button, 
+  IconButton, 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
+  CardFooter, 
+  Badge, 
+  EmptyState, 
+  StatusIndicator, 
+  FeatureIcon, 
+  BrandLogo 
+} from './ui';
 import { UserProfile, AccessibilityMode, Message, LanguagePreference } from '../types';
 import { 
   Settings, Eye, Accessibility, Menu, Sparkles, User, Ear, Mic, Flame,
@@ -785,13 +800,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   ];
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex-1 flex flex-col h-full overflow-hidden relative select-none transition-colors duration-300 ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'}`}>
+    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex-1 flex flex-col h-full overflow-hidden relative transition-colors duration-300 ${isDarkMode ? 'bg-[#111622] text-stone-100' : 'bg-[#F5F7FB] text-stone-900'}`}>
       
       {/* ── TOP NAVIGATION BAR (Always visible for seamless cross-disability jumping) ── */}
-      <header className={`relative z-[9995] px-3 py-2 sm:px-6 sm:py-3 shrink-0 flex items-center justify-between border-b transition-colors duration-300 ${
+      <header className={`relative z-[9995] px-3 py-2 sm:px-6 sm:py-2.5 shrink-0 flex items-center justify-between border-b transition-colors duration-300 ${
         isDarkMode 
-          ? 'border-stone-800 bg-[#0E1416]/95 backdrop-blur-xl shadow-lg text-white' 
-          : 'border-stone-200/90 bg-white/95 backdrop-blur-xl shadow-sm text-stone-900'
+          ? 'border-stone-800 bg-[#111622]/95 backdrop-blur-xl shadow-xs text-white' 
+          : 'border-stone-200/80 bg-white/95 backdrop-blur-xl shadow-xs text-stone-900'
       }`}>
         <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
           {/* Main App Menu Drawer Button */}
@@ -803,28 +818,33 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             aria-label={isAccessibilityUser(profile)
               ? localize(profile.language, 'Open menu', 'افتح القائمة')
               : getTranslation(profile.language, 'back')}
-            className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0 ${
+            className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] cursor-pointer shrink-0 min-h-[44px] min-w-[44px] justify-center ${
               isDarkMode
-                ? 'text-stone-300 bg-[#162327] border border-stone-800 hover:text-white hover:bg-stone-800'
+                ? 'text-stone-300 bg-[#171E2E] border border-stone-800 hover:text-white hover:bg-stone-800'
                 : 'text-stone-700 bg-stone-100 border border-stone-200 hover:text-stone-950 hover:bg-stone-200'
             }`}
           >
             {isAccessibilityUser(profile)
               ? <Menu className="w-4 h-4" />
               : <ArrowLeft className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />}
-            <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">
+            <span className="hidden md:inline text-xs font-bold uppercase tracking-wider">
               {isAccessibilityUser(profile)
                 ? localize(profile.language, 'Menu', 'القائمة')
                 : getTranslation(profile.language, 'back')}
             </span>
           </AriaButton>
 
+          {/* Unified Brand Logo Anchor */}
+          <div className="hidden lg:flex items-center ps-1 pe-2 border-e border-stone-200 dark:border-stone-800">
+            <BrandLogo variant="horizontal" size="sm" badgeText="A11y" />
+          </div>
+
           {/* Dedicated Back Control returning to Features Hub when in a sub-module */}
           {activeTab !== 'hub' && (
             <AriaButton
               onPress={handleNavigateBack}
               aria-label={localize(profile.language, 'Back to Features Hub', 'العودة لقائمة الميزات')}
-              className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0 ${
+              className={`p-2 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] cursor-pointer shrink-0 min-h-[44px] ${
                 isDarkMode
                   ? 'text-teal-300 bg-teal-950/60 border border-teal-800 hover:bg-teal-900/60'
                   : 'text-teal-900 bg-teal-50 border border-teal-300 hover:bg-teal-100 font-bold'
@@ -843,7 +863,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             aria-label={localize(profile.language, 'Primary Accessibility Suites', 'منظومات الإتاحة الرئيسية')}
             className={`flex items-center p-1 rounded-2xl shadow-inner gap-1 outline-none overflow-x-auto custom-scrollbar transition-colors ${
               isDarkMode
-                ? 'bg-[#121B1E] border border-stone-800'
+                ? 'bg-[#171E2E] border border-stone-800'
                 : 'bg-stone-100/90 border border-stone-200'
             }`}
           >
@@ -856,15 +876,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => handleSelectTab(suite.id)}
-                  className={`px-2.5 sm:px-3 min-h-[38px] sm:min-h-[40px] py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
+                  className={`px-3 min-h-[44px] py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer outline-none shrink-0 ${
                     isSelected
-                      ? 'bg-teal-700 text-white font-black shadow-sm'
+                      ? 'bg-[#087F8C] text-white font-black shadow-sm'
                       : isDarkMode
                         ? 'text-stone-300 hover:text-white hover:bg-stone-800'
                         : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200/80'
-                  } focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${isDarkMode ? 'focus-visible:ring-offset-stone-900' : 'focus-visible:ring-offset-white'}`}
+                  } focus-visible:ring-2 focus-visible:ring-[#F59E0B] focus-visible:ring-offset-2 ${isDarkMode ? 'focus-visible:ring-offset-[#111622]' : 'focus-visible:ring-offset-white'}`}
                 >
-                  <suite.Icon className="w-3.5 h-3.5 shrink-0" />
+                  <suite.Icon className="w-4 h-4 shrink-0" />
                   <span className="hidden sm:inline">{localize(profile.language, suite.labelEn, suite.labelAr)}</span>
                 </button>
               );
@@ -878,9 +898,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center rounded-xl border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0 ${
+              className={`p-2 sm:p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] cursor-pointer shrink-0 ${
                 isDarkMode
-                  ? 'text-amber-400 bg-[#162327] border-stone-800 hover:bg-stone-800'
+                  ? 'text-amber-400 bg-[#171E2E] border-stone-800 hover:bg-stone-800'
                   : 'text-stone-600 bg-stone-100 border-stone-200 hover:bg-stone-200'
               }`}
               title={isDarkMode ? 'التبديل للوضع النهاري' : 'التبديل للوضع الليلي'}
@@ -892,23 +912,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           <AriaButton
             onPress={() => setShowPassportModal(true)}
             aria-label={localize(profile.language, 'Universal Accessibility Passport', 'جواز السفر الميسر الشامل')}
-            className={`px-2.5 sm:px-3.5 min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 rounded-xl ${
+            className={`px-3 sm:px-3.5 min-h-[44px] py-2 rounded-xl ${
               isDarkMode
-                ? 'bg-teal-950/40 border-teal-800 text-teal-300 hover:bg-teal-900/60'
+                ? 'bg-[#087F8C]/20 border-[#087F8C]/40 text-[#5EEAD4] hover:bg-[#087F8C]/30'
                 : 'bg-teal-50 border-teal-200 text-teal-900 hover:bg-teal-100 font-bold'
-            } border transition-all text-xs font-bold flex items-center gap-2 shadow-sm active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer`}
+            } border transition-all text-xs font-bold flex items-center gap-2 shadow-xs active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] cursor-pointer`}
           >
-            <ShieldCheck className="w-4 h-4 text-teal-700 dark:text-teal-400 shrink-0" />
-            <span className="hidden sm:inline">{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
+            <ShieldCheck className="w-4 h-4 text-[#087F8C] dark:text-[#5EEAD4] shrink-0" />
+            <span className="hidden md:inline">{localize(profile.language, 'Accommodation Passport', 'جواز السفر الميسر')}</span>
           </AriaButton>
           <AriaButton
             onPress={() => setActiveTab('settings')}
             aria-label={localize(profile.language, 'Settings & Languages', 'الإعدادات واللغات')}
-            className={`p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center ${
+            className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center ${
               isDarkMode
-                ? 'text-stone-300 hover:text-white bg-[#162327] border-stone-800'
+                ? 'text-stone-300 hover:text-white bg-[#171E2E] border-stone-800'
                 : 'text-stone-700 hover:text-stone-950 bg-stone-100 border-stone-200 hover:bg-stone-200'
-            } border rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer shrink-0`}
+            } border rounded-xl transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] cursor-pointer shrink-0`}
           >
             <Settings className="w-4 h-4" />
           </AriaButton>
@@ -932,26 +952,79 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             >
               <div className="max-w-6xl mx-auto space-y-6 pb-24">
 
+                {/* ── 0. WELCOME AREA & CONCISE PAGE IDENTITY ── */}
+                <section
+                  aria-label={localize(profile.language, 'Welcome and Profile Status', 'الترحيب وحالة الملف')}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#171E2E] border border-stone-200/80 dark:border-stone-800/80 shadow-xs"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h1 className="text-lg sm:text-xl font-black text-stone-900 dark:text-white tracking-tight">
+                        {localize(
+                          profile.language,
+                          `Welcome back, ${profile.name || 'Learner'}`,
+                          `مرحباً بك، ${profile.name || 'يا بطل'}`
+                        )}
+                      </h1>
+                      <StatusIndicator
+                        status="active"
+                        label={localize(
+                          profile.language,
+                          profile.disabilityType || profile.accessibilityMode || 'All Accommodations Active',
+                          profile.disabilityType || profile.accessibilityMode || 'منظومة التسهيلات جاهزة'
+                        )}
+                        size="sm"
+                      />
+                    </div>
+                    <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl">
+                      {localize(
+                        profile.language,
+                        'Your autonomous assistive learning hub. Real-time vision, document reading, audio transcription, and academic formatters.',
+                        'منظومتك الميسرة المتكاملة للاستقلالية: المساعد البصري، قارئ المستندات، التفريغ الصوتي، واستوديو الكتب الأكاديمية.'
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      leftIcon={<ShieldCheck className="w-4 h-4 text-[#087F8C] dark:text-[#5EEAD4]" />}
+                      onPress={() => setShowPassportModal(true)}
+                    >
+                      {localize(profile.language, 'A11y Passport', 'جواز التسهيلات')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      leftIcon={<Settings className="w-4 h-4" />}
+                      onPress={() => setActiveTab('settings')}
+                    >
+                      {localize(profile.language, 'Settings', 'الإعدادات')}
+                    </Button>
+                  </div>
+                </section>
+
                 {/* ── 1. PROMINENT VISUAL ASSISTANT HERO SPOTLIGHT ── */}
                 <section
                   aria-label={localize(profile.language, 'Visual Assistant Spotlight', 'المساعد البصري الرئيسي')}
                   className={`p-6 sm:p-7 rounded-3xl border transition-all duration-300 relative overflow-hidden ${
                     isDarkMode
-                      ? 'bg-gradient-to-br from-[#121B1E] via-[#152226] to-[#10191B] border-teal-800/50 shadow-md text-white'
-                      : 'bg-gradient-to-br from-white via-teal-50/40 to-stone-50 border-teal-200 shadow-sm text-stone-900'
+                      ? 'bg-gradient-to-br from-[#1B2D59]/50 via-[#171E2E] to-[#111622] border-[#243B73]/60 shadow-md text-white'
+                      : 'bg-gradient-to-br from-[#243B73]/10 via-white to-[#087F8C]/5 border-[#243B73]/30 shadow-sm text-stone-900'
                   }`}
                 >
                   <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
-                    <div className="space-y-2 max-w-2xl">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30">
-                        <Eye className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                    <div className="space-y-2.5 max-w-2xl">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#087F8C]/15 text-[#087F8C] dark:text-[#5EEAD4] border border-[#087F8C]/30">
+                        <Eye className="w-4 h-4" />
                         <span>{localize(profile.language, 'Primary Visual Assistant', 'المساعد البصري الرئيسي')}</span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#087F8C] animate-pulse" />
                       </div>
 
-                      <h1 className="text-xl sm:text-2xl font-black tracking-tight">
+                      <h2 className="text-xl sm:text-2xl font-black tracking-tight">
                         {localize(profile.language, 'Visual Assistant & Conversational Eyes', 'المساعد البصري التفاعلي الذكي')}
-                      </h1>
+                      </h2>
 
                       <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed font-medium">
                         {localize(
@@ -976,13 +1049,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             key={i}
                             type="button"
                             onClick={() => handleSelectTab('vision')}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-semibold border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
                               isDarkMode
-                                ? 'bg-stone-900/60 hover:bg-stone-800 border-stone-800 text-stone-300 hover:text-white'
+                                ? 'bg-[#171E2E] hover:bg-stone-800 border-stone-700 text-stone-200 hover:text-white'
                                 : 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950'
                             }`}
                           >
-                            <mode.icon className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                            <mode.icon className="w-3.5 h-3.5 text-[#087F8C] dark:text-[#5EEAD4]" />
                             <span>{localize(profile.language, mode.labelEn, mode.labelAr)}</span>
                           </button>
                         ))}
@@ -991,15 +1064,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                     {/* Big Launch Button */}
                     <div className="shrink-0 w-full sm:w-auto">
-                      <AriaButton
+                      <Button
+                        variant="teal"
+                        size="lg"
                         onPress={() => handleSelectTab('vision')}
+                        leftIcon={<Eye className="w-5 h-5" />}
+                        rightIcon={<ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />}
+                        className="w-full sm:w-auto shadow-md"
                         aria-label={localize(profile.language, 'Launch Visual Assistant camera view', 'تشغيل كاميرا المساعد البصري')}
-                        className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] rounded-2xl bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-sm shadow-md flex items-center justify-center gap-2.5 transition-all active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                       >
-                        <Eye className="w-5 h-5 shrink-0" />
-                        <span>{localize(profile.language, 'Launch Visual Assistant', 'تشغيل المساعد البصري')}</span>
-                        <ArrowRight className={`w-4 h-4 shrink-0 ${isAr ? 'rotate-180' : ''}`} />
-                      </AriaButton>
+                        {localize(profile.language, 'Launch Visual Assistant', 'تشغيل المساعد البصري')}
+                      </Button>
                     </div>
                   </div>
                 </section>
@@ -1011,7 +1086,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 >
                   <div className="flex items-center justify-between px-1">
                     <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-[#087F8C] dark:text-[#5EEAD4]" />
                       <span>{localize(profile.language, 'Common Actions', 'إجراءات سريعة شائعة')}</span>
                     </h2>
                   </div>
@@ -1023,6 +1098,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         titleEn: 'Visual Assistant',
                         titleAr: 'المساعد البصري',
                         icon: Eye,
+                        tone: 'indigo' as const,
                         action: () => handleSelectTab('vision'),
                       },
                       {
@@ -1030,6 +1106,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         titleEn: 'Scan Document',
                         titleAr: 'سكانر المستندات',
                         icon: ScanLine,
+                        tone: 'teal' as const,
                         action: () => {
                           if (onNavigate) (onNavigate as any)('toolkit');
                           else handleSelectTab('hub');
@@ -1040,6 +1117,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         titleEn: 'Live Captions',
                         titleAr: 'التفريغ الصوتي',
                         icon: Mic,
+                        tone: 'emerald' as const,
                         action: () => handleSelectTab('deaf'),
                       },
                       {
@@ -1047,6 +1125,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         titleEn: 'Book Studio',
                         titleAr: 'استوديو الكتب',
                         icon: BookOpen,
+                        tone: 'purple' as const,
                         action: () => {
                           if (onNavigate) (onNavigate as any)('book_studio');
                           else handleSelectTab('hub');
@@ -1057,6 +1136,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         titleEn: 'Accommodation Passport',
                         titleAr: 'جواز التسهيلات',
                         icon: ShieldCheck,
+                        tone: 'amber' as const,
                         action: () => setShowPassportModal(true),
                       },
                     ].map((item) => (
@@ -1065,17 +1145,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         type="button"
                         onClick={item.action}
                         aria-label={localize(profile.language, item.titleEn, item.titleAr)}
-                        className={`p-3 min-h-[48px] rounded-2xl border flex items-center gap-3 transition-all active:scale-95 cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
+                        className={`p-3 min-h-[48px] rounded-2xl border flex items-center gap-3 transition-all active:scale-95 cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
                           isDarkMode
-                            ? 'bg-[#121B1E] hover:bg-[#162327] border-stone-800 hover:border-teal-500/50 text-stone-200 hover:text-white'
-                            : 'bg-white hover:bg-stone-50 border-stone-200 hover:border-teal-600/40 text-stone-800 hover:text-stone-950 shadow-xs'
+                            ? 'bg-[#171E2E] hover:bg-stone-800 border-stone-800 hover:border-[#087F8C]/50 text-stone-200 hover:text-white'
+                            : 'bg-white hover:bg-stone-50 border-stone-200 hover:border-[#087F8C]/40 text-stone-800 hover:text-stone-950 shadow-xs'
                         }`}
                       >
-                        <div className={`p-2 rounded-xl shrink-0 ${
-                          isDarkMode ? 'bg-teal-950/50 text-teal-400' : 'bg-teal-50 text-teal-700'
-                        }`}>
-                          <item.icon className="w-4 h-4" />
-                        </div>
+                        <FeatureIcon icon={<item.icon className="w-4 h-4" />} tone={item.tone} size="sm" />
                         <span className="text-xs font-bold truncate">
                           {localize(profile.language, item.titleEn, item.titleAr)}
                         </span>
@@ -1156,44 +1232,40 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       {filteredFeatures.map((f) => {
                         const CardIcon = f.Icon;
                         const isRecommended = f.matchingMode && profile.accessibilityMode === f.matchingMode;
+                        const cardTone = f.matchingMode === 'Visual' ? 'indigo' : f.matchingMode === 'Vocal-Deaf' ? 'emerald' : 'teal';
 
                         return (
-                          <div
+                          <Card
                             key={f.id}
+                            variant="interactive"
                             role="article"
                             aria-label={localize(profile.language, f.titleEn, f.titleAr)}
                             onClick={() => f.action({ handleSelectTab, onNavigate, setShowPassportModal })}
-                            className={`group relative rounded-2xl p-5 sm:p-6 border transition-all duration-200 cursor-pointer flex flex-col justify-between hover:shadow-sm active:scale-[0.99] outline-none focus-within:ring-2 focus-within:ring-teal-600 ${
-                              isDarkMode
-                                ? 'bg-[#121B1E] hover:bg-[#162327] border-stone-800 hover:border-teal-500/50'
-                                : 'bg-white hover:bg-stone-50 border-stone-200 hover:border-teal-600/40 shadow-xs'
-                            } ${isRecommended ? 'ring-2 ring-teal-600/40' : ''}`}
+                            className={`p-5 sm:p-6 flex flex-col justify-between ${
+                              isRecommended ? 'ring-2 ring-[#087F8C]/40' : ''
+                            }`}
                           >
                             <div className="space-y-3.5">
                               {/* Header: Icon + Title + Badge */}
                               <div className="flex items-start justify-between gap-3">
                                 <div className="flex items-center gap-3">
-                                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
-                                    isDarkMode 
-                                      ? 'bg-[#1A262B] text-teal-400 border-teal-800/60' 
-                                      : 'bg-teal-50 text-teal-800 border-teal-200'
-                                  }`}>
-                                    <CardIcon className="w-5 h-5" />
-                                  </div>
+                                  <FeatureIcon icon={<CardIcon className="w-5 h-5" />} tone={cardTone as any} size="md" />
                                   <div>
-                                    <h3 className="text-sm sm:text-base font-bold text-stone-900 dark:text-stone-100 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors leading-snug">
+                                    <h3 className="text-sm sm:text-base font-bold text-stone-900 dark:text-stone-100 group-hover:text-[#087F8C] dark:group-hover:text-[#5EEAD4] transition-colors leading-snug">
                                       {localize(profile.language, f.titleEn, f.titleAr)}
                                     </h3>
-                                    <span className="inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                                      {localize(profile.language, f.badgeEn, f.badgeAr)}
-                                    </span>
+                                    <div className="mt-0.5">
+                                      <Badge variant={cardTone === 'indigo' ? 'primary' : 'teal'} size="sm">
+                                        {localize(profile.language, f.badgeEn, f.badgeAr)}
+                                      </Badge>
+                                    </div>
                                   </div>
                                 </div>
 
                                 {isRecommended && (
-                                  <span className="shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30">
-                                    {localize(profile.language, 'Recommended', 'موصى به لملفك')}
-                                  </span>
+                                  <Badge variant="warning" size="sm">
+                                    {localize(profile.language, 'Recommended', 'موصى به')}
+                                  </Badge>
                                 )}
                               </div>
 
@@ -1209,8 +1281,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                     key={idx}
                                     className={`text-[10px] sm:text-xs font-medium px-2 py-0.5 rounded-md border transition-colors ${
                                       isDarkMode
-                                        ? 'bg-stone-900/60 border-stone-800 text-stone-300 group-hover:border-teal-500/30'
-                                        : 'bg-stone-100/80 border-stone-200 text-stone-700 group-hover:border-teal-200'
+                                        ? 'bg-stone-900/60 border-stone-800 text-stone-300'
+                                        : 'bg-stone-100/80 border-stone-200 text-stone-700'
                                     }`}
                                   >
                                     {tag}
@@ -1221,25 +1293,22 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                             {/* Bottom Launch Action */}
                             <div className="pt-4 mt-4 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between">
-                              <span className="text-xs font-semibold text-stone-500 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors flex items-center gap-1">
+                              <span className="text-xs font-semibold text-stone-500 flex items-center gap-1">
                                 <span>{localize(profile.language, 'Direct Access', 'دخول مباشر')}</span>
                                 <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
                               </span>
 
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  f.action({ handleSelectTab, onNavigate, setShowPassportModal });
-                                }}
+                              <Button
+                                variant="teal"
+                                size="sm"
+                                onPress={() => f.action({ handleSelectTab, onNavigate, setShowPassportModal })}
+                                rightIcon={<ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />}
                                 aria-label={localize(profile.language, `Launch ${f.titleEn}`, `تشغيل ${f.titleAr}`)}
-                                className="px-3.5 py-2 min-h-[44px] rounded-lg text-xs font-bold bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-xs flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                               >
-                                <span>{localize(profile.language, 'Launch Tool', 'تشغيل الأداة')}</span>
-                                <ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
-                              </button>
+                                {localize(profile.language, 'Launch Tool', 'تشغيل الأداة')}
+                              </Button>
                             </div>
-                          </div>
+                          </Card>
                         );
                       })}
                     </div>
@@ -1302,18 +1371,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         {recentDocs.length > 0 ? (
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {recentDocs.map((docItem) => (
-                              <div
+                              <Card
                                 key={docItem.id}
-                                className={`p-4 rounded-2xl border flex flex-col justify-between gap-3 transition-all ${
-                                  isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200 shadow-xs'
-                                }`}
+                                className="p-4 flex flex-col justify-between gap-3 shadow-xs"
                               >
                                 <div>
                                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30">
+                                    <Badge variant="teal" size="sm">
                                       {docItem.template}
-                                    </span>
-                                    <span className="text-[10px] text-stone-500">
+                                    </Badge>
+                                    <span className="text-[10px] text-stone-500 font-medium">
                                       {new Date(docItem.updatedAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
                                     </span>
                                   </div>
@@ -1330,40 +1397,46 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                 </div>
 
                                 <div className="flex items-center gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenSavedDoc(docItem)}
+                                  <Button
+                                    variant="teal"
+                                    size="sm"
+                                    onPress={() => handleOpenSavedDoc(docItem)}
+                                    leftIcon={<BookOpen className="w-3.5 h-3.5" />}
+                                    className="flex-1"
                                     aria-label={localize(profile.language, `Open document ${docItem.title}`, `فتح المستند ${docItem.title}`)}
-                                    className="flex-1 py-1.5 px-3 min-h-[36px] rounded-lg text-xs font-bold bg-teal-700 hover:bg-teal-800 text-white flex items-center justify-center gap-1.5 cursor-pointer"
                                   >
-                                    <BookOpen className="w-3.5 h-3.5" />
-                                    <span>{localize(profile.language, 'Edit & Export', 'تعديل وتصدير')}</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSpeakSnippet(docItem.title)}
+                                    {localize(profile.language, 'Edit & Export', 'تعديل وتصدير')}
+                                  </Button>
+                                  <IconButton
+                                    icon={<Volume2 className="w-4 h-4" />}
+                                    size="sm"
+                                    variant="outline"
+                                    onPress={() => handleSpeakSnippet(docItem.title)}
                                     aria-label={localize(profile.language, `Read document title ${docItem.title} aloud`, `قراءة عنوان المستند ${docItem.title}`)}
-                                    className="p-1.5 min-w-[36px] min-h-[36px] rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:text-stone-950 flex items-center justify-center cursor-pointer"
-                                    title={localize(profile.language, 'Read Title Aloud', 'قراءة صوتية')}
-                                  >
-                                    <Volume2 className="w-3.5 h-3.5" />
-                                  </button>
+                                    tooltip={localize(profile.language, 'Read Title Aloud', 'قراءة صوتية')}
+                                  />
                                 </div>
-                              </div>
+                              </Card>
                             ))}
                           </div>
                         ) : (
-                          <div className={`p-4 rounded-2xl border text-center ${
-                            isDarkMode ? 'bg-[#121B1E] border-stone-800 text-stone-400' : 'bg-white border-stone-200 text-stone-500'
-                          }`}>
-                            <p className="text-xs">
-                              {localize(
-                                profile.language,
-                                'No documents formatted yet. Use the Book Studio to transform drafts into textbooks and exams.',
-                                'لم يتم حفظ مستندات حتى الآن. استخدم استوديو الكتب لتحويل المسودات إلى كتب وامتحانات.'
-                              )}
-                            </p>
-                          </div>
+                          <EmptyState
+                            icon={<BookOpen className="w-6 h-6 text-[#087F8C]" />}
+                            title={localize(profile.language, 'No saved documents yet', 'لا توجد مستندات محفوظة حتى الآن')}
+                            description={localize(
+                              profile.language,
+                              'Transform rough lecture notes, exercises, and study handouts into structured Word (.docx) and PDF files with real headings and answer spaces.',
+                              'حوّل مذكرات المحاضرات والمسودات إلى كتب وامتحانات رسمية منسقة بملفات Word وPDF مع مساحات إجابة واضحة.'
+                            )}
+                            action={{
+                              label: localize(profile.language, 'Open Book Studio', 'فتح استوديو الكتب'),
+                              onClick: () => {
+                                if (onNavigate) (onNavigate as any)('book_studio');
+                                else handleSelectTab('hub');
+                              },
+                              icon: <BookOpen className="w-4 h-4" />,
+                            }}
+                          />
                         )}
                       </div>
 
@@ -1394,18 +1467,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         {recentActivities.length > 0 ? (
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {recentActivities.map((act) => (
-                              <div
+                              <Card
                                 key={act.id}
-                                className={`p-4 rounded-2xl border flex flex-col justify-between gap-3 transition-all ${
-                                  isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200 shadow-xs'
-                                }`}
+                                className="p-4 flex flex-col justify-between gap-3 shadow-xs"
                               >
                                 <div>
                                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
+                                    <Badge variant="neutral" size="sm">
                                       {act.type}
-                                    </span>
-                                    <span className="text-[10px] text-stone-500">
+                                    </Badge>
+                                    <span className="text-[10px] text-stone-500 font-medium">
                                       {new Date(act.timestamp).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                   </div>
@@ -1418,40 +1489,47 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                 </div>
 
                                 <div className="flex items-center gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSpeakSnippet(act.snippet || act.title)}
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onPress={() => handleSpeakSnippet(act.snippet || act.title)}
+                                    leftIcon={<Volume2 className="w-3.5 h-3.5" />}
+                                    className="flex-1"
                                     aria-label={localize(profile.language, `Listen to ${act.title}`, `الاستماع إلى ${act.title}`)}
-                                    className="flex-1 py-1.5 px-3 min-h-[36px] rounded-lg text-xs font-bold bg-stone-100 dark:bg-stone-800 hover:bg-teal-50 dark:hover:bg-teal-950/50 text-stone-800 dark:text-stone-200 hover:text-teal-700 dark:hover:text-teal-300 flex items-center justify-center gap-1.5 cursor-pointer border border-stone-200 dark:border-stone-700"
                                   >
-                                    <Volume2 className="w-3.5 h-3.5" />
-                                    <span>{localize(profile.language, 'Listen Aloud', 'استمع صوتياً')}</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteActivity(act.id)}
+                                    {localize(profile.language, 'Listen Aloud', 'استمع صوتياً')}
+                                  </Button>
+                                  <IconButton
+                                    icon={<Trash2 className="w-4 h-4" />}
+                                    size="sm"
+                                    variant="ghost"
+                                    onPress={() => handleDeleteActivity(act.id)}
                                     aria-label={localize(profile.language, `Delete activity ${act.title}`, `حذف هذا النشاط`)}
-                                    className="p-1.5 min-w-[36px] min-h-[36px] rounded-lg border border-stone-200 dark:border-stone-800 text-stone-400 hover:text-rose-500 flex items-center justify-center cursor-pointer"
-                                    title={localize(profile.language, 'Delete', 'حذف')}
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
+                                    tooltip={localize(profile.language, 'Delete', 'حذف')}
+                                    className="text-stone-400 hover:text-rose-600 dark:hover:text-rose-400"
+                                  />
                                 </div>
-                              </div>
+                              </Card>
                             ))}
                           </div>
                         ) : (
-                          <div className={`p-4 rounded-2xl border text-center ${
-                            isDarkMode ? 'bg-[#121B1E] border-stone-800 text-stone-400' : 'bg-white border-stone-200 text-stone-500'
-                          }`}>
-                            <p className="text-xs">
-                              {localize(
-                                profile.language,
-                                'No scans or OCR runs yet. Capture a book page or signboard with Document Scanner.',
-                                'لا توجد عمليات مسح أو OCR بعد. التقط صفحة كتاب أو لافتة باستخدام ماسح المستندات.'
-                              )}
-                            </p>
-                          </div>
+                          <EmptyState
+                            icon={<ScanLine className="w-6 h-6 text-[#087F8C]" />}
+                            title={localize(profile.language, 'No recent scans or OCR activity', 'لا توجد عمليات مسح ضوئي سابقة')}
+                            description={localize(
+                              profile.language,
+                              'Capture book pages, study materials, or printed signs using the camera scanner to read them aloud and cite evidence.',
+                              'التقط صفحات الكتب أو المطبوعات واللافتات باستخدام ماسح الكاميرا للاستماع لها صوتياً والبحث في محتواها بالأدلة.'
+                            )}
+                            action={{
+                              label: localize(profile.language, 'Open Document Scanner', 'فتح ماسح المستندات'),
+                              onClick: () => {
+                                if (onNavigate) (onNavigate as any)('toolkit');
+                                else handleSelectTab('hub');
+                              },
+                              icon: <ScanLine className="w-4 h-4" />,
+                            }}
+                          />
                         )}
                       </div>
 
