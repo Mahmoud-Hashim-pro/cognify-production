@@ -11,7 +11,7 @@
  */
 
 import { generateAdaptiveResponse } from '../services/gemini';
-import { parseAudioSegments, AudioTranscriptSegment, formatBytes, MAX_AUDIO_SIZE_BYTES } from './documentExtractor';
+import { parseAudioSegments, AudioTranscriptSegment, formatBytes, MAX_AUDIO_SIZE_BYTES, MAX_DIRECT_ATTACHMENT_BYTES } from './documentExtractor';
 import { generateNativeDocxBlob } from './docxExport';
 import { cleanVisionDescription } from './visionCleaner';
 
@@ -76,6 +76,18 @@ export async function transcribeAudioLecture(
   const isFr = language === 'fr';
 
   onProgress?.(15, isAr ? 'قراءة وتحضير الملف الصوتي...' : 'Preparing audio file...');
+
+  // Avoid unnecessary buffering and prevent Vercel 4.5MB payload overflow
+  if (file.size > MAX_DIRECT_ATTACHMENT_BYTES) {
+    const formatted = formatBytes(file.size);
+    const limitFormatted = formatBytes(MAX_DIRECT_ATTACHMENT_BYTES);
+    const errorMsg = isAr
+      ? `حجم الملف الصوتي (${formatted}) يتجاوز الحد الأقصى للنقل المباشر (${limitFormatted}). للتسجيلات الطويلة، يرجى استخدام التسجيل الصوتي المباشر أو تقسيم الملف.`
+      : isFr
+      ? `La taille du fichier (${formatted}) dépasse la limite directe (${limitFormatted}).`
+      : `Audio file size (${formatted}) exceeds direct transmission limit (${limitFormatted}). Please record directly or split the file.`;
+    throw new Error(errorMsg);
+  }
 
   // Convert File/Blob to base64
   const reader = new FileReader();

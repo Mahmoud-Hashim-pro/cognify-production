@@ -52,6 +52,9 @@ import {
   formatBytes,
   MAX_DOCUMENT_SIZE_BYTES,
   MAX_AUDIO_SIZE_BYTES,
+  MAX_DIRECT_ATTACHMENT_BYTES,
+  MAX_PROMPT_TEXT_LENGTH,
+  validateDirectAttachmentSize,
   AudioTranscriptSegment,
 } from '../lib/documentExtractor';
 import {
@@ -112,9 +115,6 @@ export function downloadTextAsTxtFile(text: string, filename: string) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-
-// Backwards compatibility alias
-export const downloadTextAsWavFile = downloadTextAsTxtFile;
 
 export function exportToWordDocument(
   title: string,
@@ -285,7 +285,7 @@ export default function DocumentStudioModal({
   const [docLoading, setDocLoading] = useState(false);
   const [docStatusText, setDocStatusText] = useState('');
 
-  const [currentDoc, setCurrentDoc] = useState<SavedDocItem & { fileBase64?: string; fileMime?: string } | null>(null);
+  const [currentDoc, setCurrentDoc] = useState<SavedDocItem | null>(null);
   const [docTargetLang, setDocTargetLang] = useState<'ar' | 'en' | 'fr'>(() => companionLang || 'ar');
   const [docViewMode, setDocViewMode] = useState<'summary' | 'full' | 'quiz' | 'flashcards'>('summary');
   const [docQuiz, setDocQuiz] = useState<DocQuizQuestion[]>([]);
@@ -316,6 +316,22 @@ export default function DocumentStudioModal({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  // Cancel speech and stop audio playback when switching tabs or closing modal to prevent speaking stale content
+  useEffect(() => {
+    cancelSpeech();
+    setIsSpeakingDoc(false);
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      setIsPlayingAudio(false);
+    }
+  }, [docStudioTab, isOpen]);
+
+  // Cancel speech when switching active document
+  useEffect(() => {
+    cancelSpeech();
+    setIsSpeakingDoc(false);
+  }, [currentDoc?.id]);
   const [avatarSigningWords, setAvatarSigningWords] = useState<string[]>([]);
 
   const [docChatMessages, setDocChatMessages] = useState<DocChatMessage[]>([]);
@@ -439,6 +455,21 @@ export default function DocumentStudioModal({
         ...prev,
         status: 'error',
         error: { code: validation.error || 'INVALID_FILE', message: errorMsg, canRetry: false },
+      }));
+      return;
+    }
+
+    // Direct serverless upload payload boundary check
+    const directCheck = validateDirectAttachmentSize(file.size, 'audio');
+    if (!directCheck.valid) {
+      const errorMsg = directCheck.localizedMessage[docTargetLang] || directCheck.localizedMessage.ar;
+      toast.error(errorMsg);
+      speak(errorMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
+      onAnnounce?.(errorMsg);
+      setAudioLectureState((prev) => ({
+        ...prev,
+        status: 'error',
+        error: { code: directCheck.reason || 'ATTACHMENT_EXCEEDS_SERVERLESS_LIMIT', message: errorMsg, canRetry: false },
       }));
       return;
     }
@@ -571,8 +602,15 @@ export default function DocumentStudioModal({
     if (isPlayingAudio) {
       audioPlayerRef.current.pause();
       setIsPlayingAudio(false);
+      onAnnounce?.(docTargetLang === 'ar' ? 'تم إيقاف تشغيل التسجيل مؤقتاً' : 'Audio playback paused');
     } else {
-      audioPlayerRef.current.play().then(() => setIsPlayingAudio(true)).catch(console.error);
+      audioPlayerRef.current.play().then(() => {
+        setIsPlayingAudio(true);
+        onAnnounce?.(docTargetLang === 'ar' ? 'جاري تشغيل التسجيل الصوتي للمحاضرة' : 'Playing lecture audio');
+      }).catch((err) => {
+        console.error('Audio play error:', err);
+        setIsPlayingAudio(false);
+      });
     }
   };
 
@@ -745,27 +783,71 @@ export default function DocumentStudioModal({
         }
       }
 
-      // Convert file to base64 for multimodal fallback or OCR
-      const reader = new FileReader();
-      const fileDataPromise = new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
-        reader.onload = () => {
-          const res = reader.result as string;
-          const match = res.match(/^data:([^;]+);base64,(.+)$/);
-          if (match) {
-            resolve({ mimeType: match[1], base64: match[2] });
-          } else {
-            resolve({ mimeType: file.type || 'application/pdf', base64: res });
-          }
-        };
-        reader.onerror = (e) => reject(e);
-        reader.readAsDataURL(file);
-      });
+      // Detect if visual OCR or image parsing is strictly required
+      const requiresVisualOcr = needsOcr || validation.category === 'image';
+      const hasExtractedText = Boolean(directTextContent && directTextContent.trim().length > 0);
 
-      const { base64, mimeType } = await fileDataPromise;
+      // Handle completely empty documents when no visual OCR is possible
+      if (!hasExtractedText && !requiresVisualOcr) {
+        setDocLoading(false);
+        setDocStatusText('');
+        const emptyMsg = isAr
+          ? 'المستند فارغ أو لا يحتوي على نصوص قابلة للقراءة.'
+          : isFr
+          ? 'Le document est vide ou ne contient aucun texte lisible.'
+          : 'The document is empty or contains no readable text.';
+        toast.warning(emptyMsg);
+        speak(emptyMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
+        return;
+      }
+
+      // 3. Selective Attachment & Base64 Handling
+      let attachmentsPayload: { name: string; type: string; data: string }[] = [];
+
+      if (requiresVisualOcr) {
+        // Enforce direct serverless payload boundary before encoding Base64
+        const directSizeCheck = validateDirectAttachmentSize(file.size, validation.category);
+        if (!directSizeCheck.valid) {
+          setDocLoading(false);
+          setDocStatusText('');
+          setLastFailedFile(file);
+          const limitMsg = directSizeCheck.localizedMessage[targetLanguage] || directSizeCheck.localizedMessage.ar;
+          toast.error(limitMsg);
+          speak(limitMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
+          onAnnounce?.(limitMsg);
+          return;
+        }
+
+        // Convert file to Base64 ONLY when visual OCR is strictly needed
+        const reader = new FileReader();
+        const fileData = await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
+          reader.onload = () => {
+            const res = reader.result as string;
+            const match = res.match(/^data:([^;]+);base64,(.+)$/);
+            if (match) {
+              resolve({ mimeType: match[1], base64: match[2] });
+            } else {
+              resolve({ mimeType: file.type || 'application/pdf', base64: res });
+            }
+          };
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(file);
+        });
+
+        attachmentsPayload = [{ name: file.name, type: fileData.mimeType, data: fileData.base64 }];
+      }
+
+      // 4. Safe Prompt Payload Management: Stay safely below the server's 32,000 character limit
+      let promptTextContent = directTextContent;
+      let isPartiallySummarized = false;
+      if (directTextContent && directTextContent.length > MAX_PROMPT_TEXT_LENGTH) {
+        promptTextContent = directTextContent.slice(0, MAX_PROMPT_TEXT_LENGTH);
+        isPartiallySummarized = true;
+      }
 
       const prompt = `أنت معلم وأكاديمي متميز ومترجم ذكي وخبير تلخيص للمكفوفين وضعاف البصر.
 المستند المرفق هو محاضرة أو كتاب أو ورقة دراسية بعنوان "${file.name}".
-${directTextContent ? `\nالمحتوى النصي الكامل للمستند (مستخرج مع أرقام الصفحات):\n"""\n${directTextContent.slice(0, 50000)}\n"""\n` : ''}
+${promptTextContent ? `\nالمحتوى النصي للمستند${isPartiallySummarized ? ' (القسم الأول)' : ''}:\n"""\n${promptTextContent}\n"""\n` : ''}
 المطلوب منك بدقة فائقة:
 1. اقرأ واستخرج محتوى هذا المستند كاملاً.
 2. إذا كان المستند بأي لغة أخرى (مثل الإنجليزية)، ترجمه وفصّله بدقة إلى لغة الهدف المطلوبة: "${isAr ? 'اللغة العربية العامية المصرية الواضحة والمفهومة للطلاب' : isFr ? 'Français' : 'English'}".
@@ -775,7 +857,7 @@ ${directTextContent ? `\nالمحتوى النصي الكامل للمستند (
 ---SUMMARY_END---
 
 ---FULLTEXT_START---
-${directTextContent ? directTextContent.slice(0, 50000) : 'اكتب هنا النص المقروء والمستخرج من المستند مترجماً ومفصلاً بالكامل كلمة بكلمة أو فقرة بفقرة.'}
+${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقروء والمستخرج من المستند مترجماً ومفصلاً بالكامل كلمة بكلمة أو فقرة بفقرة.'}
 ---FULLTEXT_END---
 4. تنبيه خاص للطلاب ذوي الإعاقة البصرية (STEM & Formulas & Diagrams): إذا كان المستند يحتوي على أي معادلات رياضية أو فيزيائية أو رسوم بيانية أو جداول؛ قم بشرحها ونطقها بالكامل بالكلمات الصريحة لتكون مفهومة صوتياً 100% دون أن يفقد الطالب أي معلومة.`;
 
@@ -786,12 +868,11 @@ ${directTextContent ? directTextContent.slice(0, 50000) : 'اكتب هنا ال�
           language: isAr ? 'Egyptian Ammiya' : isFr ? 'French' : 'English',
         },
         [],
-        (needsOcr || validation.category === 'image')
-          ? [{ name: file.name, type: mimeType, data: base64 }]
-          : []
+        attachmentsPayload
       );
 
       let summary = '';
+      // Preserve the ENTIRE directTextContent for full reading, never truncate fullText!
       let fullText = directTextContent || '';
 
       if (aiResponse.includes('---SUMMARY_START---') && aiResponse.includes('---SUMMARY_END---')) {
@@ -799,7 +880,7 @@ ${directTextContent ? directTextContent.slice(0, 50000) : 'اكتب هنا ال�
       }
       if (aiResponse.includes('---FULLTEXT_START---') && aiResponse.includes('---FULLTEXT_END---')) {
         const parsedFull = aiResponse.split('---FULLTEXT_START---')[1].split('---FULLTEXT_END---')[0].trim();
-        if (parsedFull && parsedFull.length > 20) {
+        if (!directTextContent && parsedFull && parsedFull.length > 20) {
           fullText = parsedFull;
         }
       }
@@ -833,11 +914,7 @@ ${directTextContent ? directTextContent.slice(0, 50000) : 'اكتب هنا ال�
         );
       }
 
-      setCurrentDoc({
-        ...docItem,
-        fileBase64: base64,
-        fileMime: mimeType,
-      });
+      setCurrentDoc(docItem);
       saveDocToHistory(docItem);
       setDocChatMessages([
         {
@@ -851,9 +928,12 @@ ${directTextContent ? directTextContent.slice(0, 50000) : 'اكتب هنا ال�
       setDocLoading(false);
       setDocStatusText('');
 
+      const partialNotice = isPartiallySummarized
+        ? (isAr ? ' (تم حفظ كامل النص للقراءة في تبويب النص الكامل، والملخص يغطي القسم الرئيسي)' : ' (Full text preserved in Full Text tab; summary covers primary section)')
+        : '';
       const readout = isAr
-        ? `تم تلخيص ملف ${docItem.title} بنجاح. إليك أهم ما في المحاضرة: ${cleanSummary || summary}`
-        : `Summary of ${docItem.title} is ready: ${cleanSummary || summary}`;
+        ? `تم تلخيص ملف ${docItem.title} بنجاح${partialNotice}. إليك أهم ما في المحاضرة: ${cleanSummary || summary}`
+        : `Summary of ${docItem.title} is ready${partialNotice}: ${cleanSummary || summary}`;
 
       onAnnounce?.(readout);
       speak(readout, isAr ? 'Arabic' : isFr ? 'French' : 'English', {
@@ -1088,9 +1168,19 @@ ${currentDoc.fullText || ''}
     const lang = currentDoc.targetLang === 'ar' ? 'Arabic' : currentDoc.targetLang === 'fr' ? 'French' : 'English';
     speak(paragraphs[idx], lang as any, {
       rate: audioPlaybackRate,
-      onStart: () => setIsSpeakingDoc(true),
+      onStart: () => {
+        setIsSpeakingDoc(true);
+        onAnnounce?.(companionLang === 'ar' ? `قراءة الفقرة ${idx + 1} من ${paragraphs.length}` : `Reading paragraph ${idx + 1} of ${paragraphs.length}`);
+      },
       onEnd: () => setIsSpeakingDoc(false),
-      onError: () => setIsSpeakingDoc(false),
+      onError: (err) => {
+        setIsSpeakingDoc(false);
+        if (err === 'unsupported' || err === 'silent-fail') {
+          const failMsg = companionLang === 'ar' ? 'محرك نطق الصوت غير مدعوم في هذا المتصفح' : 'Speech synthesis voice unavailable in this browser';
+          toast.warning(failMsg);
+          onAnnounce?.(failMsg);
+        }
+      },
     });
   };
 
@@ -2177,8 +2267,10 @@ ${currentDoc.summary}
                             </span>
                             <span className="text-[11px] text-slate-400 max-w-xs">
                               {companionLang === 'ar'
-                                ? 'يدعم MP3, WAV, M4A, WEBM, OGG, FLAC حتى 50 ميجابايت'
-                                : 'Supports MP3, WAV, M4A, WEBM, OGG, FLAC up to 50MB'}
+                                ? 'يدعم MP3, WAV, M4A, WEBM, OGG, FLAC (حتى 3.2 ميجابايت للنقل المباشر، أو سجّل بالميكروفون)'
+                                : companionLang === 'fr'
+                                ? 'Prend en charge MP3, WAV, M4A, WEBM, OGG, FLAC (jusqu\'à 3,2 Mo direct, ou enregistrez au micro)'
+                                : 'Supports MP3, WAV, M4A, WEBM, OGG, FLAC (up to 3.2 MB direct upload, or record with mic)'}
                             </span>
                             <span className="mt-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow">
                               {companionLang === 'ar' ? 'اختر ملف صوتي' : 'Select Audio'}
@@ -2413,19 +2505,21 @@ ${currentDoc.summary}
                               <button
                                 type="button"
                                 onClick={handleDownloadTxt}
-                                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 shadow"
-                                title="تحميل كملف TXT"
+                                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1 shadow focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
+                                title={companionLang === 'ar' ? 'تنزيل التفريغ كملف نصي TXT لقارئات الشاشة' : 'Download transcript as TXT file'}
+                                aria-label={companionLang === 'ar' ? 'تنزيل التفريغ النصي كملف TXT' : 'Download transcript as TXT file'}
                               >
-                                <FileDown className="w-3.5 h-3.5 text-amber-400" />
+                                <FileDown className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
                                 <span>TXT</span>
                               </button>
                               <button
                                 type="button"
                                 onClick={handleExportTranscriptDocx}
-                                className="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1 shadow"
-                                title="تصدير التفريغ الأصلي كملف Word"
+                                className="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1 shadow focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
+                                title={companionLang === 'ar' ? 'تصدير التفريغ كملف Word منسق (.docx)' : 'Export transcript as Word document (.docx)'}
+                                aria-label={companionLang === 'ar' ? 'تصدير التفريغ كملف Word منسق' : 'Export transcript as Word document'}
                               >
-                                <Download className="w-3.5 h-3.5" />
+                                <Download className="w-3.5 h-3.5" aria-hidden="true" />
                                 <span>Word (.docx)</span>
                               </button>
                             </div>

@@ -14,6 +14,7 @@ process.env.ALLOW_TEST_AUTH = 'true';
 
 import { isAllowedOrigin, applyCorsHeaders } from '../api/_lib/cors.js';
 import { getExpectedProjectId } from '../api/_lib/authGuard.js';
+import { checkDistributedRateLimit } from '../api/_lib/rateLimiter.js';
 import learningProfileHandler from '../api/student/learningProfile.js';
 import securityAuditHandler from '../api/telemetry/securityAudit.js';
 import generateAdaptiveResponseHandler from '../api/gemini/generateAdaptiveResponse.js';
@@ -172,6 +173,32 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
     assert(disallowedAllowed === false, 'applyCorsHeaders rejects disallowed origin with false');
     assert(blockedStatus === 403, 'applyCorsHeaders responds with HTTP 403 Forbidden');
     assert(blockedBody?.error?.includes('Origin not allowed'), 'applyCorsHeaders error message cites origin disallowed');
+
+    // Wildcard origin rejection in production: ALLOWED_ORIGINS='*' must NOT permit arbitrary origin in production
+    const prevNodeEnvProd = process.env.NODE_ENV;
+    const prevAllowedWild = process.env.ALLOWED_ORIGINS;
+    try {
+      (process.env as any).NODE_ENV = 'production';
+      process.env.ALLOWED_ORIGINS = '*';
+      assert(isAllowedOrigin('https://arbitrary-attacker.com') === false, 'Rejects wildcard in ALLOWED_ORIGINS in production');
+    } finally {
+      if (prevNodeEnvProd !== undefined) process.env.NODE_ENV = prevNodeEnvProd;
+      else delete process.env.NODE_ENV;
+      if (prevAllowedWild !== undefined) process.env.ALLOWED_ORIGINS = prevAllowedWild;
+      else delete process.env.ALLOWED_ORIGINS;
+    }
+
+    // No wildcard with credentialed requests without origin
+    const credHeaders: Record<string, string> = {};
+    const mockCredReq = {
+      method: 'POST',
+      headers: { authorization: 'Bearer token_test_123' },
+    };
+    const mockCredRes = {
+      setHeader: (k: string, v: string) => { credHeaders[k] = v; },
+    };
+    applyCorsHeaders(mockCredReq, mockCredRes);
+    assert(credHeaders['Access-Control-Allow-Origin'] !== '*', 'Never sets wildcard Access-Control-Allow-Origin when authorization credentials are present');
   }
 
   // --------------------------------------------------------------------------
@@ -269,6 +296,153 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
     await learningProfileHandler(validReq, m3.res);
     assert(m3.getCode() === 200, 'Accepts legitimate earned mastery with valid history (HTTP 200)');
     assert(m3.getBody()?.success === true, 'Legitimate profile generated successfully');
+
+    // 4. Authorized student reading their own profile
+    const ownReq = {
+      method: 'GET',
+      headers: { authorization: 'Bearer test_valid_token_student_samir' },
+      query: { uid: 'student_samir', displayName: 'Samir' },
+    };
+    const mOwn = makeRes();
+    await learningProfileHandler(ownReq, mOwn.res);
+    assert(mOwn.getCode() === 200, 'Authorized student reads their own profile with HTTP 200');
+    assert(mOwn.getBody()?.profile?.uid === 'student_samir', 'Profile UID matches verified authenticated student');
+
+    // 5. Acting identity derived from verified token when UID omitted
+    const tokenOnlyReq = {
+      method: 'GET',
+      headers: { authorization: 'Bearer test_valid_token_student_samir' },
+      query: { displayName: 'Samir Auto' },
+    };
+    const mTokenOnly = makeRes();
+    await learningProfileHandler(tokenOnlyReq, mTokenOnly.res);
+    assert(mTokenOnly.getCode() === 200, 'Derives identity from token when UID is omitted in request (HTTP 200)');
+    assert(mTokenOnly.getBody()?.profile?.uid === 'student_samir', 'Profile UID strictly derived from token');
+
+    // 6. Authenticated student attempting BOLA/IDOR on another student
+    const bolaReq = {
+      method: 'GET',
+      headers: { authorization: 'Bearer test_valid_token_student_samir' },
+      query: { uid: 'student_layla' },
+    };
+    const mBola = makeRes();
+    await learningProfileHandler(bolaReq, mBola.res);
+    assert(mBola.getCode() === 403, 'Rejects BOLA attempt on another student profile with HTTP 403 Forbidden');
+    assert(mBola.getBody()?.error?.includes('BOLA/IDOR Forbidden'), 'Error specifies BOLA/IDOR Forbidden');
+
+    // 7. Student state identity spoofing guard
+    const spoofStateReq = {
+      method: 'POST',
+      headers: { authorization: 'Bearer test_valid_token_student_samir' },
+      body: {
+        uid: 'student_samir',
+        studentState: { uid: 'student_layla' },
+      },
+    };
+    const mSpoofState = makeRes();
+    await learningProfileHandler(spoofStateReq, mSpoofState.res);
+    assert(mSpoofState.getCode() === 403, 'Rejects student state identity spoofing with HTTP 403');
+
+    // 8. Authorized staff / superadmin reading student profile
+    const staffReq = {
+      method: 'GET',
+      headers: { authorization: 'Bearer test_valid_token_superadmin_master' },
+      query: { uid: 'student_layla' },
+    };
+    const mStaff = makeRes();
+    await learningProfileHandler(staffReq, mStaff.res);
+    assert(mStaff.getCode() === 200, 'Authorized staff/superadmin can access student profile (HTTP 200)');
+    assert(mStaff.getBody()?.profile?.uid === 'student_layla', 'Staff retrieves requested student profile');
+
+    // 9. Unauthenticated request in production
+    const prevEnvProdAuth = process.env.NODE_ENV;
+    try {
+      (process.env as any).NODE_ENV = 'production';
+      const unauthReq = {
+        method: 'GET',
+        query: { uid: 'student_samir' },
+        headers: {},
+      };
+      const mUnauth = makeRes();
+      await learningProfileHandler(unauthReq, mUnauth.res);
+      assert(mUnauth.getCode() === 401, 'Unauthenticated request in production rejected with HTTP 401');
+      assert(mUnauth.getBody()?.error?.includes('Authentication required'), 'HTTP 401 cites authentication required');
+    } finally {
+      if (prevEnvProdAuth !== undefined) process.env.NODE_ENV = prevEnvProdAuth;
+      else delete process.env.NODE_ENV;
+    }
+
+    // 10. Unsupported HTTP method
+    const methodReq = {
+      method: 'DELETE',
+      headers: {},
+      query: {},
+    };
+    const mMethod = makeRes();
+    await learningProfileHandler(methodReq, mMethod.res);
+    assert(mMethod.getCode() === 405, 'Rejects unsupported HTTP method with HTTP 405 Method Not Allowed');
+
+    // 11. Malformed JSON request body
+    const malformedJsonReq = {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{"invalid_json: 123',
+    };
+    const mMalformed = makeRes();
+    await learningProfileHandler(malformedJsonReq, mMalformed.res);
+    assert(mMalformed.getCode() === 400, 'Rejects malformed JSON body with HTTP 400 Bad Request');
+
+    // 12. Malformed studentState schema (primitive instead of object)
+    const malformedStateReq = {
+      method: 'POST',
+      body: {
+        uid: 'guest',
+        studentState: 'not_an_object',
+      },
+    };
+    const mMalformedState = makeRes();
+    await learningProfileHandler(malformedStateReq, mMalformedState.res);
+    assert(mMalformedState.getCode() === 400, 'Rejects primitive studentState with HTTP 400');
+
+    // 13. Negative attempts / correct values rejected
+    const negativeReq = {
+      method: 'POST',
+      body: {
+        uid: 'guest',
+        studentState: {
+          conceptMastery: {
+            variables: { attempts: -5, correct: 0, accuracy: 0 },
+          },
+        },
+      },
+    };
+    const mNegative = makeRes();
+    await learningProfileHandler(negativeReq, mNegative.res);
+    assert(mNegative.getCode() === 400, 'Rejects negative attempts with HTTP 400');
+
+    // 14. Production error masking: Unexpected service failure hides internal details
+    try {
+      (process.env as any).NODE_ENV = 'production';
+      const brokenReq = {
+        method: 'POST',
+        body: {
+          uid: 'guest',
+          studentState: {
+            get conceptMastery(): any {
+              throw new Error('SensitiveDatabaseSecretStackInternalCrash');
+            },
+          },
+        },
+      };
+      const mBroken = makeRes();
+      await learningProfileHandler(brokenReq, mBroken.res);
+      assert(mBroken.getCode() === 500, 'Returns HTTP 500 on internal service error in production');
+      assert(!mBroken.getBody()?.error?.includes('SensitiveDatabaseSecretStackInternalCrash'), 'Production error response masks internal message and stack details');
+      assert(mBroken.getBody()?.error?.includes('Failed to compute personal learning profile'), 'Production error returns safe, stable message');
+    } finally {
+      if (prevEnvProdAuth !== undefined) process.env.NODE_ENV = prevEnvProdAuth;
+      else delete process.env.NODE_ENV;
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -338,6 +512,78 @@ export async function runApiCorsAuthHardeningVerification(): Promise<{ passed: n
       body: '{"unclosed_json: true',
     }, malformedM.res);
     assert(malformedM.getCode() === 400, 'Malformed JSON body rejected with HTTP 400 Bad Request');
+
+    // 4. Missing Upstash Redis in production: checkDistributedRateLimit produces misconfigured: true
+    const prevEnvProdRate = process.env.NODE_ENV;
+    const prevRedisUrl = process.env.UPSTASH_REDIS_REST_URL;
+    const prevRedisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+    const prevAllowLocal = process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD;
+    try {
+      (process.env as any).NODE_ENV = 'production';
+      delete process.env.UPSTASH_REDIS_REST_URL;
+      delete process.env.UPSTASH_REDIS_REST_TOKEN;
+      delete process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD;
+
+      const misconfiguredResult = await checkDistributedRateLimit('test_prod_key', 60);
+      assert(misconfiguredResult.allowed === false, 'checkDistributedRateLimit blocks when Redis is missing in production');
+      assert(misconfiguredResult.misconfigured === true, 'checkDistributedRateLimit sets misconfigured: true when Redis is missing in production');
+
+      // Endpoints return HTTP 500 (not HTTP 429) when rate limiting backend is misconfigured
+      const misconfiguredRes = makeRes();
+      await securityAuditHandler({
+        headers: { 'x-forwarded-for': '198.51.100.222' },
+      }, misconfiguredRes.res);
+      assert(misconfiguredRes.getCode() === 500, 'Security audit returns HTTP 500 on missing production Redis configuration');
+      assert(misconfiguredRes.getBody()?.error?.includes('Server configuration error'), 'HTTP 500 error specifies server configuration error');
+      assert(!misconfiguredRes.getBody()?.error?.includes('Too many requests'), 'HTTP 500 does NOT falsely claim user rate limit exceeded');
+    } finally {
+      if (prevEnvProdRate !== undefined) process.env.NODE_ENV = prevEnvProdRate;
+      else delete process.env.NODE_ENV;
+      if (prevRedisUrl !== undefined) process.env.UPSTASH_REDIS_REST_URL = prevRedisUrl;
+      else delete process.env.UPSTASH_REDIS_REST_URL;
+      if (prevRedisToken !== undefined) process.env.UPSTASH_REDIS_REST_TOKEN = prevRedisToken;
+      else delete process.env.UPSTASH_REDIS_REST_TOKEN;
+      if (prevAllowLocal !== undefined) process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD = prevAllowLocal;
+      else delete process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD;
+    }
+
+    // 5. Simulated Redis outage/failure: checkDistributedRateLimit produces unavailable: true and HTTP 503
+    const originalFetch = globalThis.fetch;
+    try {
+      (process.env as any).NODE_ENV = 'production';
+      process.env.UPSTASH_REDIS_REST_URL = 'https://fake-upstash-redis.upstash.io';
+      process.env.UPSTASH_REDIS_REST_TOKEN = 'mock_secret_token_12345';
+      delete process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD;
+
+      // Mock fetch failure (simulating Redis down / network timeout)
+      globalThis.fetch = async () => {
+        throw new Error('Connection refused to Upstash Redis');
+      };
+
+      const outageResult = await checkDistributedRateLimit('test_outage_key', 60);
+      assert(outageResult.allowed === false, 'checkDistributedRateLimit blocks on Redis outage');
+      assert(outageResult.unavailable === true, 'checkDistributedRateLimit sets unavailable: true on Redis outage');
+
+      const outageRes = makeRes();
+      await securityAuditHandler({
+        headers: { 'x-forwarded-for': '198.51.100.223' },
+      }, outageRes.res);
+      assert(outageRes.getCode() === 503, 'Security audit returns HTTP 503 on Redis outage');
+      assert(outageRes.getBody()?.error?.includes('Service temporarily unavailable'), 'HTTP 503 error specifies service temporarily unavailable');
+      assert(!JSON.stringify(outageRes.getBody()).includes('mock_secret_token_12345'), 'Outage response never leaks Upstash token or credentials');
+    } finally {
+      globalThis.fetch = originalFetch;
+      if (prevEnvProdRate !== undefined) process.env.NODE_ENV = prevEnvProdRate;
+      else delete process.env.NODE_ENV;
+      if (prevRedisUrl !== undefined) process.env.UPSTASH_REDIS_REST_URL = prevRedisUrl;
+      else delete process.env.UPSTASH_REDIS_REST_URL;
+      if (prevRedisToken !== undefined) process.env.UPSTASH_REDIS_REST_TOKEN = prevRedisToken;
+      else delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    }
+
+    // 6. Security Invariant: vercel.json does NOT contain ALLOW_LOCAL_RATELIMIT_IN_PROD
+    const vercelJsonContent = fs.readFileSync(path.resolve(process.cwd(), 'vercel.json'), 'utf-8');
+    assert(!vercelJsonContent.includes('ALLOW_LOCAL_RATELIMIT_IN_PROD'), 'vercel.json does NOT contain ALLOW_LOCAL_RATELIMIT_IN_PROD');
   }
 
   // --------------------------------------------------------------------------

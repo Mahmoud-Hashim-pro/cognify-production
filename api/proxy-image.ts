@@ -13,6 +13,7 @@ import dns from 'node:dns/promises';
 import net from 'node:net';
 import { checkDistributedRateLimit } from './_lib/rateLimiter.js';
 import { getOrGenerateTraceId, attachTraceId } from './_lib/tracing.js';
+import { applyCorsHeaders } from './_lib/cors.js';
 
 // Trusted image provider allowlist — bypasses ad-hoc DNS queries for known CDNs
 const ALLOWED_IMAGE_DOMAINS = new Set([
@@ -146,14 +147,8 @@ export async function isSafeImageUrl(rawUrl: string): Promise<boolean> {
 }
 
 export default async function handler(req: any, res: any) {
-  // 1. CORS headers - images are public visual assets
-  res.setHeader?.('Access-Control-Allow-Origin', '*');
-  res.setHeader?.('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader?.('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    res.writeHead?.(204);
-    res.end?.();
+  // 1. CORS Guard
+  if (!applyCorsHeaders(req, res)) {
     return;
   }
 
@@ -184,6 +179,14 @@ export default async function handler(req: any, res: any) {
 
   const rateCheck = await checkDistributedRateLimit(`img_proxy:${clientIp}`, 120);
   if (!rateCheck.allowed) {
+    if (rateCheck.misconfigured) {
+      sendJsonResponse(500, { error: 'Server configuration error: Rate limiting backend is unconfigured' });
+      return;
+    }
+    if (rateCheck.unavailable) {
+      sendJsonResponse(503, { error: 'Service temporarily unavailable: Rate limiting service unreachable' });
+      return;
+    }
     res.setHeader?.('Retry-After', Math.ceil(rateCheck.resetMs / 1000).toString());
     sendJsonResponse(429, { error: 'Image proxy rate limit exceeded' });
     return;

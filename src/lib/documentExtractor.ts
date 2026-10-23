@@ -62,6 +62,59 @@ export const MAX_AUDIO_SIZE_BYTES = 50 * 1024 * 1024;    // 50 MB
 export const RECOMMENDED_CHUNK_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB
 
 /**
+ * Maximum binary size for direct serverless function attachments.
+ * Vercel enforces a 4.5 MB request body limit.
+ * With Base64 expansion (33%) and JSON envelope overhead, binary attachments
+ * sent directly to /api/gemini/generateAdaptiveResponse must stay <= 3.2 MB.
+ */
+export const MAX_DIRECT_ATTACHMENT_BYTES = Math.floor(3.2 * 1024 * 1024); // 3.2 MB
+
+/**
+ * Maximum character length for document text placed directly into prompt payload.
+ * The serverless handler enforces message.length <= 32,000 characters.
+ * Reserving ~8,000 characters for instruction persona, system instructions, and schema tags.
+ */
+export const MAX_PROMPT_TEXT_LENGTH = 24000;
+
+export interface DirectAttachmentValidationResult {
+  valid: boolean;
+  reason?: 'ATTACHMENT_EXCEEDS_SERVERLESS_LIMIT' | 'OK';
+  localizedMessage: {
+    ar: string;
+    en: string;
+    fr: string;
+  };
+}
+
+/**
+ * Validate binary attachment size against Vercel serverless function payload limits.
+ */
+export function validateDirectAttachmentSize(size: number, _category?: string): DirectAttachmentValidationResult {
+  if (size > MAX_DIRECT_ATTACHMENT_BYTES) {
+    const formatted = formatBytes(size);
+    const limitFormatted = formatBytes(MAX_DIRECT_ATTACHMENT_BYTES);
+    return {
+      valid: false,
+      reason: 'ATTACHMENT_EXCEEDS_SERVERLESS_LIMIT',
+      localizedMessage: {
+        ar: `حجم الملف (${formatted}) يتجاوز الحد الأقصى للنقل المباشر (${limitFormatted}). يرجى ضغط الصور أو استخدام مستند نصي بدلاً من المستندات الممسوحة ضوئياً.`,
+        en: `File size (${formatted}) exceeds direct serverless limit (${limitFormatted}). Please compress the file or use a text-based document.`,
+        fr: `La taille du fichier (${formatted}) dépasse la limite directe (${limitFormatted}). Veuillez compresser le fichier ou utiliser un document textuel.`,
+      },
+    };
+  }
+  return {
+    valid: true,
+    reason: 'OK',
+    localizedMessage: {
+      ar: 'حجم المرفق مناسب للنقل المباشر.',
+      en: 'Attachment size is suitable for direct transmission.',
+      fr: 'Taille du fichier adaptée au transfert direct.',
+    },
+  };
+}
+
+/**
  * Format bytes to readable string (e.g. "4.2 MB")
  */
 export function formatBytes(bytes: number): string {

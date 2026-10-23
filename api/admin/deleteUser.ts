@@ -144,6 +144,12 @@ export default async function deleteUserHandler(req: any, res: any) {
   const rateLimitKey = `admin_delete_user_${auth.uid || clientIp}`;
   const rateResult = await checkDistributedRateLimit(rateLimitKey, 10);
   if (!rateResult.allowed) {
+    if (rateResult.misconfigured) {
+      return res.status(500).json({ error: 'Server configuration error: Rate limiting backend is unconfigured' });
+    }
+    if (rateResult.unavailable) {
+      return res.status(503).json({ error: 'Service temporarily unavailable: Rate limiting service unreachable' });
+    }
     return res.status(429).json({ error: 'Too Many Requests: Rate limit exceeded (maximum 10 deletions per minute)' });
   }
 

@@ -119,6 +119,20 @@ export default async function handler(req: any, res: any) {
   const ipRate = await checkDistributedRateLimit(`sos:ip:${clientIp}`, 15);
 
   if (!userRate.allowed || !ipRate.allowed) {
+    if (userRate.misconfigured || ipRate.misconfigured) {
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error: Rate limiting backend is unconfigured.',
+        fallbackDirectCall: true,
+      });
+    }
+    if (userRate.unavailable || ipRate.unavailable) {
+      return res.status(503).json({
+        success: false,
+        error: 'Service temporarily unavailable: Rate limiting service unreachable.',
+        fallbackDirectCall: true,
+      });
+    }
     console.warn(`[SOS Rate Limit Exceeded]: UID=${authenticatedUid} IP=${clientIp}`);
     return res.status(429).json({
       success: false,

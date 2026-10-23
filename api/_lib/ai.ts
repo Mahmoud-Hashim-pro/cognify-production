@@ -868,6 +868,14 @@ export async function guard(
     res.setHeader('X-RateLimit-Remaining-IP', String(ipRateLimit.remaining));
   }
   if (!ipRateLimit.allowed) {
+    if (ipRateLimit.misconfigured) {
+      res.status(500).json({ error: 'Server configuration error: Rate limiting backend is unconfigured.' });
+      return false;
+    }
+    if (ipRateLimit.unavailable) {
+      res.status(503).json({ error: 'Service temporarily unavailable: Rate limiting service unreachable. Please retry shortly.' });
+      return false;
+    }
     if (typeof res.setHeader === 'function') {
       res.setHeader('Retry-After', Math.ceil(ipRateLimit.resetMs / 1000).toString());
     }
@@ -882,6 +890,14 @@ export async function guard(
     res.setHeader('X-RateLimit-Remaining-User', String(userRateLimit.remaining));
   }
   if (!userRateLimit.allowed) {
+    if (userRateLimit.misconfigured) {
+      res.status(500).json({ error: 'Server configuration error: Rate limiting backend is unconfigured.' });
+      return false;
+    }
+    if (userRateLimit.unavailable) {
+      res.status(503).json({ error: 'Service temporarily unavailable: Rate limiting service unreachable. Please retry shortly.' });
+      return false;
+    }
     if (typeof res.setHeader === 'function') {
       res.setHeader('Retry-After', Math.ceil(userRateLimit.resetMs / 1000).toString());
     }
