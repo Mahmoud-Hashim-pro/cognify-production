@@ -501,7 +501,7 @@ Respond with ONLY valid JSON strictly matching this schema:
             onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-400 hover:text-white disabled:opacity-30 text-xs font-bold transition-all"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
             {isAr ? 'السابق' : 'Previous'}
           </button>
 
@@ -530,7 +530,7 @@ Respond with ONLY valid JSON strictly matching this schema:
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-slate-400 hover:text-white disabled:opacity-30 text-xs font-bold transition-all"
           >
             {isAr ? 'التالي' : 'Next'}
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 rtl:rotate-180" />
           </button>
         </div>
       </div>

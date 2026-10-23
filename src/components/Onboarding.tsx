@@ -303,7 +303,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         disabled={!formData.language}
         className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-primary-press disabled:bg-surface-3 disabled:text-faint transition-all flex items-center justify-center gap-2 group"
       >
-        {getTranslation(formData.language, 'continue')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        {getTranslation(formData.language, 'continue')} <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
       </button>
     </motion.div>
   );
@@ -478,7 +478,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             </div>
             <span className="font-bold text-sm">{goal.label}</span>
             {formData.sustainabilityGoal === goal.id && (
-              <CheckCircle className="w-5 h-5 ml-auto text-success" />
+              <CheckCircle className="w-5 h-5 ms-auto text-success" />
             )}
           </button>
         ))}
@@ -488,7 +488,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         onClick={handleNextStep}
         className="w-full bg-[#0E0610] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-[#080409] transition-all flex items-center justify-center gap-2 group"
       >
-        {getTranslation(formData.language, "continue")} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        {getTranslation(formData.language, "continue")} <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
       </button>
     </motion.div>
   );
@@ -590,7 +590,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               className="w-full py-4 px-6 rounded-2xl bg-primary text-white font-bold text-sm shadow-xl shadow-primary/20 hover:bg-primary-press active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
             >
               <span>{localize(formData.language, "Start Learning Style Preview (10 Questions · 10 Mins)", "ابدأ استكشاف أسلوب التعلم (10 أسئلة · 10 دقائق)")}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
             </button>
 
             <button
@@ -972,7 +972,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2 group"
           >
             {localize(formData.language, "Continue to Final Review", "المتابعة للمراجعة النهائية")}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+            <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
           </button>
         </motion.div>
       );
@@ -1031,7 +1031,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             </span>
           ) : (
             <>
-              {getTranslation(formData.language, 'finish')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+              {getTranslation(formData.language, 'finish')} <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
             </>
           )}
         </button>

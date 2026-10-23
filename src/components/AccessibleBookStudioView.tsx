@@ -65,6 +65,8 @@ import { extractTextFromDocx } from '../lib/documentExtractor';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
+import { Breadcrumbs } from './ui/Breadcrumbs';
+import { getRouteBreadcrumbs } from '../lib/navigation';
 
 interface AccessibleBookStudioViewProps {
   profile: UserProfile;
@@ -403,7 +405,7 @@ export default function AccessibleBookStudioView({
   return (
     <div
       dir={metadata.language === 'ar' || metadata.language === 'mixed' ? 'rtl' : 'ltr'}
-      className={`flex-1 flex flex-col h-full overflow-hidden select-none transition-colors duration-300 ${
+      className={`flex-1 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
         isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'
       }`}
     >
@@ -416,27 +418,21 @@ export default function AccessibleBookStudioView({
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          {onNavigateBack && (
-            <button
-              type="button"
-              onClick={onNavigateBack}
-              aria-label={isArLocale ? 'رجوع للميزات' : 'Back to Hub'}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-600 outline-none shrink-0 ${
-                isDarkMode
-                  ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800'
-                  : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
-              }`}
-              title={isArLocale ? 'رجوع للميزات' : 'Back to Hub'}
-            >
-              <ArrowLeft className={`w-4 h-4 ${isArLocale ? 'rotate-180' : ''}`} />
-            </button>
-          )}
+          <Breadcrumbs
+            items={getRouteBreadcrumbs({ view: 'book_studio' }, profile?.language)}
+            onNavigate={(v) => {
+              if (v === 'disability' && onNavigateBack) onNavigateBack();
+            }}
+            onNavigateBack={onNavigateBack}
+            backLabel={isArLocale ? 'لوحة الميزات' : 'Hub'}
+            isDarkMode={isDarkMode}
+          />
 
-          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white shadow-md shrink-0">
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white shadow-md shrink-0 hidden md:flex">
             <BookOpen className="w-5 h-5" />
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 hidden lg:block">
             <h1 className="font-black text-sm sm:text-base leading-tight truncate">
               {localize(profile?.language, 'Accessible Book & Document Studio', 'استوديو الكتب والمستندات التعليمية الميسرة')}
             </h1>

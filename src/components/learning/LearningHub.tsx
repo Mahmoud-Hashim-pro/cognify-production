@@ -202,7 +202,7 @@ export const LearningHub: React.FC<LearningHubProps> = ({ profile, onMenuClick, 
               onClick={handleBackToHub}
               className="p-2.5 rounded-2xl bg-[#0E0610] hover:bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-white flex items-center gap-2 font-bold text-xs transition-all shadow-md active:scale-95"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
               <span>{isArabic ? 'العودة للمركز' : 'Back to Hub'}</span>
             </button>
           ) : (

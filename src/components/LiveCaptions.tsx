@@ -286,7 +286,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const speakText = useCallback((text: string) => {
     if (!text.trim()) return;
     if (!('speechSynthesis' in window)) {
-      setError("Speech output isn't supported on this browser.");
+      setError(isAr ? 'ميزة إخراج الصوت غير مدعومة في هذا المتصفح.' : "Speech output isn't supported on this browser.");
       return;
     }
     try {
@@ -339,7 +339,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError("Live captions need a supported browser such as Chrome, Edge, or Safari.");
+      setError(isAr ? 'تتطلب التسميات التوضيحية المباشرة متصفحاً مدعوماً مثل Chrome أو Edge أو Safari.' : "Live captions need a supported browser such as Chrome, Edge, or Safari.");
       return;
     }
     recognitionRef.current = new SpeechRecognition();
@@ -353,11 +353,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       // Map every error code to a clear message — otherwise captions just stop
       // mid-conversation with no explanation (common on hospital networks).
       const code = event?.error;
-      if (code === 'not-allowed' || code === 'service-not-allowed') setError("Microphone access denied. Enable permissions in your browser settings.");
-      else if (code === 'audio-capture') setError("No microphone found. Please connect one and try again.");
-      else if (code === 'network') setError("Speech service unreachable — check the internet connection.");
+      if (code === 'not-allowed' || code === 'service-not-allowed') setError(isAr ? 'تم رفض إذن الميكروفون. يرجى تفعيل الإذن من إعدادات المتصفح.' : "Microphone access denied. Enable permissions in your browser settings.");
+      else if (code === 'audio-capture') setError(isAr ? 'لم يتم العثور على ميكروفون. يرجى توصيل ميكروفون والمحاولة ثانية.' : "No microphone found. Please connect one and try again.");
+      else if (code === 'network') setError(isAr ? 'تعذر الاتصال بخدمة التعرف الصوتي — تحقق من اتصال الإنترنت.' : "Speech service unreachable — check the internet connection.");
       else if (code === 'no-speech' || code === 'aborted') { /* benign — no message */ }
-      else setError("Speech recognition stopped. Tap the mic to retry.");
+      else setError(isAr ? 'توقف التعرف على الصوت. اضغط على الميكروفون للمحاولة ثانية.' : "Speech recognition stopped. Tap the mic to retry.");
       setIsListening(false);
       stopAudioLevelTracking();
     };
@@ -609,10 +609,10 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             if (result?.trim()) {
               await processUtterance(result.trim());
             } else {
-              setError("No speech detected. Try speaking more clearly or adjusting your speech profile.");
+              setError(isAr ? 'لم يتم رصد صوت واضح. حاول التحدث بنبرة أوضح أو تعديل الملف الصوتي.' : "No speech detected. Try speaking more clearly or adjusting your speech profile.");
             }
           } catch (err) {
-            setError("Audio decoding failed. Check your microphone and try again.");
+            setError(isAr ? 'فشل فك ترميز الصوت. تحقق من الميكروفون وحاول ثانية.' : "Audio decoding failed. Check your microphone and try again.");
           } finally { setIsDecoding(false); }
         };
       };
@@ -628,7 +628,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError("Cannot access microphone. Check browser permissions.");
+      setError(isAr ? 'تعذر الوصول للميكروفون. يرجى التحقق من أذونات المتصفح.' : "Cannot access microphone. Check browser permissions.");
     }
   };
 
@@ -707,7 +707,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError("Cannot access microphone for calibration.");
+      setError(isAr ? 'تعذر الوصول للميكروفون لإجراء المعايرة.' : "Cannot access microphone for calibration.");
     }
   };
 
@@ -1080,7 +1080,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               <div className="mx-4 mb-2 px-4 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
                 <p className="text-xs text-red-300">{error}</p>
-                <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+                <button onClick={() => setError(null)} aria-label={isAr ? 'إغلاق رسالة الخطأ' : 'Dismiss error'} className="ms-auto text-red-400 hover:text-white p-1 rounded-lg"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
 
@@ -1445,9 +1445,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                       <span className="text-xs font-bold leading-tight line-clamp-2">{phrase}</span>
                     </motion.button>
                     {activeTab === 'favorites' && (
-                      <button onClick={e => { e.stopPropagation(); setFavorites(p => p.filter(f => f.id !== item.id)); }}
-                        className="absolute top-1 right-1 p-1 bg-rose-500/20 text-rose-400 hover:bg-rose-600 hover:text-white rounded-full opacity-0 group-hover:opacity-100 transition-all border border-rose-500/20">
-                        <X className="w-2.5 h-2.5" />
+                      <button
+                        type="button"
+                        onClick={e => { e.stopPropagation(); setFavorites(p => p.filter(f => f.id !== item.id)); }}
+                        aria-label="Remove favorite phrase"
+                        title="Remove favorite phrase"
+                        className="absolute top-1 right-1 min-h-[36px] min-w-[36px] flex items-center justify-center p-1 bg-rose-500/20 text-rose-400 hover:bg-rose-600 hover:text-white rounded-full opacity-0 group-hover:opacity-100 transition-all border border-rose-500/20 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-rose-400 outline-none cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -1463,8 +1468,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
           {/* ── Phoneme Pattern Training ── */}
           <div className="bg-neutral-950/40 p-4 rounded-2xl border border-purple-500/15 space-y-3">
-            <button onClick={() => setShowPatternsPanel(!showPatternsPanel)}
-              className="flex items-center justify-between w-full">
+            <button
+              type="button"
+              onClick={() => setShowPatternsPanel(!showPatternsPanel)}
+              aria-expanded={showPatternsPanel}
+              aria-label="Toggle phoneme pattern dictionary"
+              className="flex items-center justify-between w-full min-h-[44px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-xl px-1"
+            >
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-purple-400" />
                 <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">Phoneme Pattern Dictionary</span>
@@ -1512,9 +1522,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                         <span className="text-neutral-600 flex-shrink-0">→</span>
                         <span className="text-emerald-400 font-semibold truncate">{pat.translation}</span>
                       </div>
-                      <button onClick={() => setEuphoniaPatterns(prev => prev.filter(p => p.id !== pat.id))}
-                        className="text-neutral-600 hover:text-rose-400 ml-2 flex-shrink-0 opacity-0 group-hover/p:opacity-100 transition-opacity">
-                        <X className="w-3.5 h-3.5" />
+                      <button
+                        type="button"
+                        onClick={() => setEuphoniaPatterns(prev => prev.filter(p => p.id !== pat.id))}
+                        aria-label="Remove pattern"
+                        title="Remove pattern"
+                        className="text-neutral-600 hover:text-rose-400 ml-2 flex-shrink-0 opacity-0 group-hover/p:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-rose-400 rounded-lg p-1 transition-opacity outline-none"
+                      >
+                        <X className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
                     </div>
                   ))}
@@ -1565,8 +1580,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               <span className="text-xs font-black uppercase text-yellow-500 tracking-widest bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full">
                 Visual Board
               </span>
-              <button onClick={() => setShowBigMode(false)} className="p-3 rounded-full bg-bg-card/5 hover:bg-bg-card/10 border border-white/10">
-                <X className="w-6 h-6" />
+              <button
+                type="button"
+                onClick={() => setShowBigMode(false)}
+                aria-label="Close visual board"
+                title="Close visual board"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center p-3 rounded-full bg-bg-card/5 hover:bg-bg-card/10 border border-white/10 outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B] cursor-pointer"
+              >
+                <X className="w-6 h-6" aria-hidden="true" />
               </button>
             </div>
             <div className="flex-1 flex items-center justify-center text-center px-4">

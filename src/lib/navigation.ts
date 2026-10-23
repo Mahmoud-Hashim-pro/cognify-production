@@ -209,3 +209,131 @@ export function isSameRoute(a: RouteState, b: RouteState): boolean {
   }
   return true;
 }
+
+export interface BreadcrumbItem {
+  id: string;
+  label: string;
+  view: AppView;
+  tab?: DisabilityTab;
+  current?: boolean;
+}
+
+/**
+ * Returns human-readable page title for given RouteState and locale.
+ */
+export function getRouteTitle(route: RouteState, lang?: string): string {
+  const isAr = lang === 'Arabic' || lang === 'Egyptian Ammiya' || lang === 'ar';
+  
+  if (route.view === 'disability') {
+    switch (route.tab) {
+      case 'vision':
+        return isAr ? 'الرفيق البصري' : 'Visual Companion';
+      case 'deaf':
+      case 'bridge':
+      case 'radar':
+        return isAr ? 'استوديو لغة الإشارة والسمع 3D' : '3D Sign & Hearing Studio';
+      case 'caregiver':
+        return isAr ? 'بوابة المعلم والأسرة' : 'Caregiver & Educator Hub';
+      case 'orchestrator':
+        return isAr ? 'منسق الإعاقات المتعددة' : 'Cross-Disability Orchestrator';
+      case 'chat':
+        return isAr ? 'المعلم الذكي المهيأ' : 'Accessible AI Tutor';
+      case 'hub':
+      default:
+        return isAr ? 'لوحة الميزات الرئيسية' : 'Dashboard Hub';
+    }
+  }
+
+  switch (route.view) {
+    case 'book_studio':
+      return isAr ? 'استوديو الكتب والمستندات' : 'Accessible Book Studio';
+    case 'toolkit':
+      return isAr ? 'منظومة أدوات الوصول' : 'Accessibility Toolkit';
+    case 'chat':
+      return isAr ? 'المعلم الذكي المهيأ' : 'Accessible AI Tutor';
+    case 'profile':
+      return isAr ? 'جواز الإتاحة والملف الشخصي' : 'Accommodation Passport';
+    case 'settings':
+      return isAr ? 'إعدادات النظام واللغة' : 'System Settings';
+    case 'privacy_security':
+    case 'privacy':
+      return isAr ? 'الخصوصية وأمان البيانات' : 'Privacy & Security';
+    case 'support':
+      return isAr ? 'الدعم والمساعدة' : 'Accessible Support';
+    case 'admin':
+      return isAr ? 'لوحة الإدارة' : 'Admin Portal';
+    case 'video':
+      return isAr ? 'استوديو لغة الإشارة 3D' : '3D Sign Video Studio';
+    default:
+      return isAr ? 'لوحة الميزات الرئيسية' : 'Dashboard Hub';
+  }
+}
+
+/**
+ * Generates an informative screen-reader announcement when route changes.
+ */
+export function getRouteAnnouncement(route: RouteState, lang?: string): string {
+  const isAr = lang === 'Arabic' || lang === 'Egyptian Ammiya' || lang === 'ar';
+  const title = getRouteTitle(route, lang);
+
+  if (isAr) {
+    return `تم الانتقال إلى ${title}.`;
+  }
+  return `Navigated to ${title}.`;
+}
+
+/**
+ * Builds breadcrumbs hierarchy for deep screens.
+ */
+export function getRouteBreadcrumbs(route: RouteState, lang?: string): BreadcrumbItem[] {
+  const isAr = lang === 'Arabic' || lang === 'Egyptian Ammiya' || lang === 'ar';
+  const hubLabel = isAr ? 'لوحة الميزات' : 'Dashboard Hub';
+  
+  const rootBreadcrumb: BreadcrumbItem = {
+    id: 'hub',
+    label: hubLabel,
+    view: 'disability',
+    tab: 'hub',
+    current: route.view === 'disability' && (!route.tab || route.tab === 'hub'),
+  };
+
+  // If we are at the hub root, return single item
+  if (route.view === 'disability' && (!route.tab || route.tab === 'hub')) {
+    return [rootBreadcrumb];
+  }
+
+  const currentTitle = getRouteTitle(route, lang);
+  const currentBreadcrumb: BreadcrumbItem = {
+    id: route.tab ? `${route.view}-${route.tab}` : route.view,
+    label: currentTitle,
+    view: route.view,
+    tab: route.tab,
+    current: true,
+  };
+
+  return [rootBreadcrumb, currentBreadcrumb];
+}
+
+/**
+ * Safely navigates backwards using browser history if available,
+ * or cleanly falls back to the specified route to prevent leaving the application.
+ */
+export function smartNavigateBack(
+  onNavigateFallback?: (view: AppView, tab?: DisabilityTab) => void,
+  fallbackView: AppView = 'disability',
+  fallbackTab: DisabilityTab = 'hub'
+): void {
+  if (typeof window !== 'undefined') {
+    // If window.history has entries and referrer is Cognify origin
+    if (window.history.length > 1 && (document.referrer === '' || document.referrer.includes(window.location.host))) {
+      window.history.back();
+      return;
+    }
+  }
+  if (onNavigateFallback) {
+    onNavigateFallback(fallbackView, fallbackTab);
+  } else if (typeof window !== 'undefined') {
+    window.location.hash = buildHash({ view: fallbackView, tab: fallbackTab });
+  }
+}
+

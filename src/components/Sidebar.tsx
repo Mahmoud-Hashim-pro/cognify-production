@@ -3,13 +3,14 @@ import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
   User, Settings, LifeBuoy, MessageSquare, AlertCircle, 
-  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen
+  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen, LayoutDashboard
 } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { isAdminUser } from "../lib/roles";
 import { AppView } from "../lib/access";
 import type { DisabilityTab } from "./DisabilityModeView";
+import { BrandLogo } from "./ui/BrandLogo";
 
 interface SidebarProps {
   profile: UserProfile;
@@ -24,16 +25,6 @@ interface SidebarProps {
   onClose?: () => void;
   onLogout?: () => void;
 }
-
-// Cognify Assistive "constellation" logomark
-const Logo = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none">
-    <circle cx="6.5" cy="7" r="2.1" fill="currentColor" />
-    <circle cx="17" cy="6" r="2.1" fill="currentColor" opacity="0.85" />
-    <circle cx="13" cy="17.5" r="2.1" fill="currentColor" opacity="0.7" />
-    <path d="M8 8 12 16M8.4 6.7 15 6.1M15.4 7.6 13.4 15.6" stroke="currentColor" strokeWidth="1.25" opacity="0.5" />
-  </svg>
-);
 
 export default function Sidebar({ 
   profile, 
@@ -99,6 +90,13 @@ export default function Sidebar({
   // Dedicated Assistive Suites Navigation List
   const assistiveItems = [
     {
+      id: 'hub',
+      label: localize(profile.language, 'Dashboard Hub', 'لوحة الميزات الرئيسية'),
+      icon: LayoutDashboard,
+      action: () => navigateToDisabilityTab('hub'),
+      active: currentView === 'disability' && (activeDisabilityTab === 'hub' || !activeDisabilityTab),
+    },
+    {
       id: 'chat',
       label: localize(profile.language, 'Accessible AI Tutor', 'المساعد الذكي المهيأ'),
       icon: MessageSquare,
@@ -110,7 +108,7 @@ export default function Sidebar({
           setCurrentView('chat');
         }
       },
-      active: currentView === 'chat' || (currentView === 'disability' && (activeDisabilityTab === 'chat' || !activeDisabilityTab)),
+      active: currentView === 'chat' || (currentView === 'disability' && activeDisabilityTab === 'chat'),
     },
     {
       id: 'vision',
@@ -185,20 +183,12 @@ export default function Sidebar({
     } border-e backdrop-blur-2xl flex flex-col px-[18px] py-[22px]`}>
       {/* Brand & Mobile Close Button */}
       <div className="flex items-center justify-between px-1.5 pb-1">
-        <div className="flex items-center gap-3">
-          <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white shrink-0 shadow-md bg-gradient-to-br from-teal-600 to-teal-800 ring-1 ring-teal-500/30">
-            <Logo className="w-[20px] h-[20px]" />
-          </div>
-          <div className="leading-none">
-            <div className={`font-serif text-[23px] font-bold ${isDarkMode ? 'text-white' : 'text-stone-900'} tracking-tight flex items-center gap-1.5`}>
-              <span>Cognify</span>
-              <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-teal-950/60 text-teal-300 border-teal-800' : 'bg-teal-50 text-teal-900 border-teal-200'} border`}>A11y</span>
-            </div>
-            <div className={`text-xs ${isDarkMode ? 'text-stone-400' : 'text-stone-600'} font-medium mt-0.5`}>
-              {localize(profile.language, 'Assistive Technology Suite', 'منظومة ذوي الهمم والإتاحة')}
-            </div>
-          </div>
-        </div>
+        <BrandLogo
+          variant="horizontal"
+          size="md"
+          badgeText="A11y"
+          subtitle={localize(profile.language, 'Assistive Technology Suite', 'منظومة ذوي الهمم والإتاحة')}
+        />
         {onClose && (
           <button
             type="button"
@@ -366,7 +356,10 @@ export default function Sidebar({
         }`}>
           <button 
             type="button"
-            onClick={() => setCurrentView('profile')} 
+            onClick={() => {
+              onClose?.();
+              setCurrentView('profile');
+            }} 
             className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none rounded-xl" 
             title={localize(profile.language, 'View Profile', 'الملف الشخصي وجواز الإتاحة')}
             aria-label={localize(profile.language, 'View Profile and Accommodation Passport', 'الملف الشخصي وجواز الإتاحة')}
@@ -384,7 +377,10 @@ export default function Sidebar({
           </button>
           <button
             type="button"
-            onClick={() => setCurrentView('settings')}
+            onClick={() => {
+              onClose?.();
+              setCurrentView('settings');
+            }}
             className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
               currentView === 'settings'
                 ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500'

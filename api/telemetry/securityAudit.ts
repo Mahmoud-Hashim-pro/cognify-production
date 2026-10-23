@@ -118,6 +118,18 @@ export default async function handler(req: any, res: any) {
       res.setHeader('X-RateLimit-Remaining', String(rateLimit.remaining));
     }
     if (!rateLimit.allowed) {
+      if (rateLimit.misconfigured) {
+        return res.status(500).json({
+          success: false,
+          error: 'Server configuration error: Rate limiting backend is unconfigured.',
+        });
+      }
+      if (rateLimit.unavailable) {
+        return res.status(503).json({
+          success: false,
+          error: 'Service temporarily unavailable: Rate limiting service unreachable.',
+        });
+      }
       if (typeof res.setHeader === 'function') {
         res.setHeader('Retry-After', Math.ceil(rateLimit.resetMs / 1000).toString());
       }

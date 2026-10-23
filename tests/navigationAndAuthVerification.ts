@@ -19,6 +19,10 @@ import {
   STORAGE_KEYS,
   VALID_VIEWS,
   VALID_DISABILITY_TABS,
+  getRouteTitle,
+  getRouteAnnouncement,
+  getRouteBreadcrumbs,
+  smartNavigateBack,
 } from '../src/lib/navigation.js';
 import { canAccessView, homeViewFor, isAccessibilityUser } from '../src/lib/access.js';
 import { UserProfile } from '../src/types.js';
@@ -325,6 +329,60 @@ export async function runNavigationAndAuthVerification(): Promise<{ passed: numb
       assert(parsed.view === 'disability' && parsed.tab === tab,
         `Nested tab verification passes for tab: disability/${tab}`);
     }
+  }
+
+  // Test 13: Page Title & Screen Reader Announcement Generation (English & Arabic)
+  {
+    const hubTitleEn = getRouteTitle({ view: 'disability', tab: 'hub' }, 'English');
+    const hubTitleAr = getRouteTitle({ view: 'disability', tab: 'hub' }, 'Arabic');
+    assert(hubTitleEn === 'Dashboard Hub', 'getRouteTitle returns English Dashboard Hub title');
+    assert(hubTitleAr === 'لوحة الميزات الرئيسية', 'getRouteTitle returns Arabic Dashboard Hub title');
+
+    const visionTitleEn = getRouteTitle({ view: 'disability', tab: 'vision' }, 'English');
+    const visionTitleAr = getRouteTitle({ view: 'disability', tab: 'vision' }, 'Arabic');
+    assert(visionTitleEn === 'Visual Companion', 'getRouteTitle returns English Visual Companion title');
+    assert(visionTitleAr === 'الرفيق البصري', 'getRouteTitle returns Arabic Visual Companion title');
+
+    const studioTitleEn = getRouteTitle({ view: 'book_studio' }, 'English');
+    assert(studioTitleEn === 'Accessible Book Studio', 'getRouteTitle returns Accessible Book Studio for book_studio');
+
+    const annEn = getRouteAnnouncement({ view: 'book_studio' }, 'English');
+    const annAr = getRouteAnnouncement({ view: 'book_studio' }, 'Arabic');
+    assert(annEn.includes('Navigated to Accessible Book Studio'), 'getRouteAnnouncement contains English navigation notice');
+    assert(annAr.includes('تم الانتقال إلى'), 'getRouteAnnouncement contains Arabic navigation notice');
+  }
+
+  // Test 14: Breadcrumb Hierarchy Resolution
+  {
+    // 1. Root hub returns single breadcrumb marked current
+    const rootCrumbs = getRouteBreadcrumbs({ view: 'disability', tab: 'hub' }, 'English');
+    assert(rootCrumbs.length === 1, 'Root hub produces 1 breadcrumb item');
+    assert(rootCrumbs[0].current === true, 'Root hub item is marked as current');
+
+    // 2. Nested screen (Book Studio) returns [Hub, Book Studio]
+    const studioCrumbs = getRouteBreadcrumbs({ view: 'book_studio' }, 'English');
+    assert(studioCrumbs.length === 2, 'Deep screen produces 2 breadcrumb levels');
+    assert(studioCrumbs[0].id === 'hub' && studioCrumbs[0].view === 'disability', 'First breadcrumb points back to hub');
+    assert(studioCrumbs[1].view === 'book_studio' && studioCrumbs[1].current === true, 'Leaf breadcrumb is marked current');
+
+    // 3. Arabic locale produces Arabic labels
+    const arCrumbs = getRouteBreadcrumbs({ view: 'toolkit' }, 'Arabic');
+    assert(arCrumbs[0].label === 'لوحة الميزات', 'Arabic root breadcrumb label is localized');
+    assert(arCrumbs[1].label === 'منظومة أدوات الوصول', 'Arabic child breadcrumb label is localized');
+  }
+
+  // Test 15: Smart Back Navigation Fallback
+  {
+    let navigatedView: string | null = null;
+    let navigatedTab: string | null = null;
+
+    const mockNavigate = (view: any, tab?: any) => {
+      navigatedView = view;
+      navigatedTab = tab || null;
+    };
+
+    smartNavigateBack(mockNavigate, 'disability', 'hub');
+    assert(navigatedView === 'disability' && navigatedTab === 'hub', 'smartNavigateBack cleanly falls back to disability hub when history is empty');
   }
 
   console.log(`\nMilestone 31 Results: ${passed} Passed, ${failed} Failed`);

@@ -24,11 +24,11 @@ export function isAllowedOrigin(origin?: string): boolean {
     allowedOrigins.push(process.env.PRODUCTION_ORIGIN.trim().replace(/\/$/, ''));
   }
 
-  // 1. Configured custom origins (comma-separated)
+  // 1. Configured custom origins (comma-separated). Disallow wildcard in production.
   if (process.env.ALLOWED_ORIGINS) {
     const custom = process.env.ALLOWED_ORIGINS.split(',')
       .map((o) => o.trim().replace(/\/$/, ''))
-      .filter(Boolean);
+      .filter((o) => Boolean(o) && (process.env.NODE_ENV !== 'production' || o !== '*'));
     allowedOrigins.push(...custom);
   }
 
@@ -52,7 +52,7 @@ export function isAllowedOrigin(origin?: string): boolean {
 
   const lowerTarget = cleanOrigin.toLowerCase();
   return allowedOrigins.some(
-    (allowed) => allowed === '*' || allowed.toLowerCase() === lowerTarget
+    (allowed) => (process.env.NODE_ENV !== 'production' && allowed === '*') || allowed.toLowerCase() === lowerTarget
   );
 }
 
@@ -88,7 +88,9 @@ export function applyCorsHeaders(req: any, res: any): boolean {
     res.setHeader?.('Vary', 'Origin');
   } else {
     // Non-browser / same-origin / internal test requests without Origin header
-    if (process.env.NODE_ENV !== 'production') {
+    // When credentials (Authorization or Cookie) are present, never use wildcard '*'
+    const hasCredentials = Boolean(req.headers?.authorization || req.headers?.Authorization || req.headers?.cookie);
+    if (process.env.NODE_ENV !== 'production' && !hasCredentials) {
       res.setHeader?.('Access-Control-Allow-Origin', '*');
     } else if (process.env.PRODUCTION_ORIGIN) {
       res.setHeader?.('Access-Control-Allow-Origin', process.env.PRODUCTION_ORIGIN.trim().replace(/\/$/, ''));

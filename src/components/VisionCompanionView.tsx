@@ -39,6 +39,7 @@ import {
   CheckCircle2,
   SlidersHorizontal,
   Upload,
+  ShieldCheck,
 } from 'lucide-react';
 import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
@@ -106,7 +107,7 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     } catch {}
     return null;
   });
-  const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | null>(() => {
+  const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | 'uploaded' | null>(() => {
     try {
       const raw = sessionStorage.getItem('cognify_vision_last_observation');
       if (raw) {
@@ -665,7 +666,8 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   const describeScene = async (
     choiceLang?: 'ar' | 'en' | 'fr',
     forcedFrame?: string,
-    forcedAction?: 'summarize' | 'read'
+    forcedAction?: 'summarize' | 'read',
+    isUploadedPhoto: boolean = false
   ) => {
     // Battery and API quota protection: throttle captures occurring faster than 750ms
     const now = Date.now();
@@ -1123,7 +1125,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
             : 'Image may be blurry or dimly lit'
         );
       } else {
-        setObservationType(forcedFrame ? 'previous' : 'live');
+        setObservationType(isUploadedPhoto ? 'uploaded' : forcedFrame ? 'previous' : 'live');
         setObservationConfidenceReason('');
       }
       setObservationTimestamp(captureTimestamp);
@@ -1206,7 +1208,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
       const dataUrl = reader.result as string;
       setLastSnapshot(dataUrl);
       setStatus('ready');
-      describeScene(companionLang, dataUrl);
+      describeScene(companionLang, dataUrl, undefined, true);
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -1556,8 +1558,8 @@ Speak directly in natural, warm, concise conversational prose without any markdo
             </p>
             <p className="text-stone-300 text-xs mb-4 leading-relaxed font-medium">
               {t(
-                'If your browser blocked camera access: click the camera or lock icon in the address bar (next to localhost:3000), set Camera to "Allow", and refresh.',
-                'إذا حظر المتصفح الكاميرا: اضغط على أيقونة الكاميرا أو القفل في شريط العنوان (بجوار localhost:3000) واضبط الكاميرا على "السماح / Allow" ثم أعد تحميل الصفحة.'
+                'If your browser blocked camera access: click the camera or lock icon in the address bar, set Camera to "Allow", and refresh.',
+                'إذا حظر المتصفح الكاميرا: اضغط على أيقونة الكاميرا أو القفل في شريط المتصفح، واضبط الكاميرا على "السماح / Allow" ثم أعد تحميل الصفحة.'
               )}
             </p>
             <div className="flex flex-col gap-2.5">
@@ -1708,12 +1710,12 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     window.location.hash = '#disability/hub';
                   }
                 }}
-                aria-label={t('Back to Features Hub', 'العودة للميزات', 'Retour aux fonctionnalités')}
-                className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
-                title={t('Back to Features Hub', 'العودة لقائمة الميزات والأدوات', 'Retour aux fonctionnalités')}
+                aria-label={t('Back to Dashboard Hub', 'العودة للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
+                className="min-h-[44px] min-w-[44px] p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+                title={t('Back to Dashboard Hub', 'العودة للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
               >
                 <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-                <span className="hidden sm:inline">{t('Features', 'الميزات', 'Retour')}</span>
+                <span className="hidden sm:inline">{t('Dashboard', 'لوحة الميزات', 'Tableau de bord')}</span>
               </button>
 
             {/* Three Language Choices: Arabic, English, French */}
@@ -2171,6 +2173,17 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                         )}
                       </span>
                     )}
+                    {observationType === 'uploaded' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs font-semibold">
+                        <Upload className="w-3 h-3 text-blue-400" />
+                        <span>{companionLang === 'ar' ? 'صورة مرفوعة' : companionLang === 'fr' ? 'Photo importée' : 'Uploaded Photo'}</span>
+                        {observationTimestamp && (
+                          <span className="opacity-75 font-mono text-xs">
+                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        )}
+                      </span>
+                    )}
                     {observationType === 'previous' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold">
                         <Clock className="w-3 h-3 text-amber-400" />
@@ -2353,6 +2366,18 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                 >
                   {lastDescription}
                 </p>
+
+                {/* Safety Guidance Notice: Assistive tool only, not replacement for physical mobility aids */}
+                <div className="pt-2.5 mt-2 border-t border-white/10 flex items-start gap-2 text-[11px] text-amber-200/90 bg-amber-950/40 p-2.5 rounded-xl border border-amber-500/30">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">
+                    {companionLang === 'ar'
+                      ? 'تنبيه السلامة: المساعد البصري أداة رقمية مساعدة للوصف والإرشاد، ولا يُغني إطلاقاً عن العصا البيضاء أو كلب الإرشاد أو اتخاذ الحيطة والحذر الشخصي أثناء الحركة.'
+                      : companionLang === 'fr'
+                      ? "Consigne de sécurité : L'assistant visuel est une aide d'appoint au guidage et ne remplace en aucun cas la canne blanche ou la vigilance personnelle."
+                      : 'Safety Notice: The visual assistant is an assistive aid and must never replace a white cane, guide dog, or personal mobility vigilance.'}
+                  </p>
+                </div>
               </div>
             </motion.div>
           ))}

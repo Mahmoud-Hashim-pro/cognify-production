@@ -108,7 +108,7 @@ export const ExerciseFeedback: React.FC<ExerciseFeedbackProps> = ({
           }`}
         >
           <span>{isArabic ? 'السؤال التالي' : 'Next Question'}</span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
         </button>
       </div>
     </div>

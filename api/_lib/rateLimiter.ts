@@ -33,6 +33,8 @@ export interface RateLimitResult {
   remaining: number;
   resetMs: number;
   distributed?: boolean;
+  misconfigured?: boolean;
+  unavailable?: boolean;
 }
 
 function localRateLimit(identifier: string, maxPerMinute: number): RateLimitResult {
@@ -93,12 +95,16 @@ export async function checkDistributedRateLimit(
 
   if (!url || !token) {
     if (process.env.NODE_ENV === 'production' && process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD !== 'true') {
+      console.error(
+        '[rateLimiter] CRITICAL CONFIGURATION ERROR: UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be configured for distributed rate limiting in production.'
+      );
       return {
         allowed: false,
         limit: maxPerMinute,
         remaining: 0,
         resetMs: 60_000,
         distributed: false,
+        misconfigured: true,
       };
     }
     return localRateLimit(identifier, maxPerMinute);
@@ -141,7 +147,8 @@ export async function checkDistributedRateLimit(
       distributed: true,
     };
   } catch (error) {
-    console.error('[rateLimiter] Distributed limiter unavailable:', error);
+    const errorType = error instanceof Error ? error.name : 'UnknownError';
+    console.error(`[rateLimiter] Distributed rate limiter unavailable (${errorType}). Fail-closed enforced in production.`);
     if (process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD === 'true') {
       return localRateLimit(identifier, maxPerMinute);
     }
@@ -153,6 +160,7 @@ export async function checkDistributedRateLimit(
       remaining: 0,
       resetMs: 60_000,
       distributed: false,
+      unavailable: true,
     };
   }
 }

@@ -168,10 +168,13 @@ export function ToastContainer({ rtl = false }: ToastContainerProps) {
 
                 <div className="flex-shrink-0">
                   <button
+                    type="button"
                     onClick={() => removeToast(item.id)}
-                    className="p-1 rounded-full text-text-muted hover:text-text-main hover:bg-surface-3 transition focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-border"
+                    aria-label={rtl ? "إغلاق الإشعار" : "Dismiss notification"}
+                    title={rtl ? "إغلاق الإشعار" : "Dismiss notification"}
+                    className="min-h-[36px] min-w-[36px] p-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-3 transition flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <X className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>

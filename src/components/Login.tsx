@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RadioGroup, Radio } from 'react-aria-components/RadioGroup';
 import { AriaButton } from './ui/AriaButton';
+import { BrandLogo } from './ui/BrandLogo';
 import { signInWithGoogle, signInWithGoogleRedirect, loginWithEmail, registerWithEmail, auth, clearPreLoginState } from '../lib/firebase';
 import { checkAndClearSessionExpired } from '../lib/navigation';
 import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
@@ -408,22 +409,12 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
       {/* Top Navbar */}
       <header className="max-w-5xl mx-auto w-full flex items-center justify-between z-10 py-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-teal-700 dark:bg-teal-600 text-white p-0.5 shadow-md flex items-center justify-center">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-black text-stone-900 dark:text-white tracking-tight">Cognify</span>
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60">
-                {t("Inclusive Platform", "منصة التعلّم الشامل")}
-              </span>
-            </div>
-            <span className="text-[11px] text-stone-600 dark:text-stone-400 font-medium">
-              {t("Empowering autonomous & accessible learning", "تعلّم ذكي يتكيف مع قدراتك وأسلوبك المعرفي")}
-            </span>
-          </div>
-        </div>
+        <BrandLogo
+          variant="horizontal"
+          size="md"
+          badgeText={t("Inclusive Platform", "منصة التعلّم الشامل")}
+          subtitle={t("Empowering autonomous & accessible learning", "تعلّم ذكي يتكيف مع قدراتك وأسلوبك المعرفي")}
+        />
 
         {/* Language Switcher */}
         <div className="flex items-center gap-1 p-1 bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 rounded-full shadow-sm">
