@@ -1588,7 +1588,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="py-3 px-4 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                    className="py-3 px-4 rounded-2xl bg-cognify-focus hover:bg-cognify-focus text-slate-950 font-black text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
                   >
                     <Upload className="w-4 h-4" />
                     <span>{t('Upload Image', 'رفع صورة من جهازك')}</span>
@@ -1640,7 +1640,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         {status === 'starting-camera' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md z-20 p-6 text-center">
             <div className="p-6 rounded-3xl bg-stone-900/95 border border-stone-800 max-w-md w-full shadow-2xl flex flex-col items-center">
-              <Loader2 className="w-12 h-12 text-[#E5A93C] animate-spin mb-4" />
+              <Loader2 className="w-12 h-12 text-cognify-focus animate-spin mb-4" />
               <p className="text-white font-black text-base sm:text-lg mb-2">
                 {companionLang === 'ar'
                   ? 'جاري تشغيل الكاميرا والاتصال...'
@@ -1659,7 +1659,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-cognify-focus hover:bg-cognify-focus text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
                 >
                   <Upload className="w-4 h-4" />
                   <span>{companionLang === 'ar' ? 'رفع صورة من جهازك' : 'Upload photo'}</span>
@@ -1783,7 +1783,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border border-white/20 bg-black/75 hover:bg-black/90 text-white shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
               title={t('Upload photo from device for AI analysis', 'رفع صورة من جهازك للتحليل الصوتي الفوري', 'Importer une photo pour analyse')}
             >
-              <Upload className="w-4 h-4 text-[#E5A93C]" />
+              <Upload className="w-4 h-4 text-cognify-focus" />
               <span className="hidden xl:inline">{t('Upload Photo', 'رفع صورة', 'Image')}</span>
             </button>
 
@@ -1858,8 +1858,8 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
                   className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
                     navGuideMode
-                      ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/90 border-[#E5A93C]/40 text-black shadow-[#E5A93C]/20 animate-pulse'
-                      : 'bg-black/75 border-[#E5A93C]/40 text-white hover:bg-black/90'
+                      ? 'bg-gradient-to-r from-amber-400 via-cognify-focus to-rose-600/90 border-cognify-focus/40 text-black shadow-[#E5A93C]/20 animate-pulse'
+                      : 'bg-black/75 border-cognify-focus/40 text-white hover:bg-black/90'
                   }`}
                   title={t(
                     'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
@@ -1867,7 +1867,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     'Canne virtuelle : obstacles et marches avec vibrations haptiques'
                   )}
                 >
-                  <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-[#E5A93C]'}`} />
+                  <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-cognify-focus'}`} />
                   <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
                 </button>
 
@@ -1930,7 +1930,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
                   )}
                 >
-                  <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
+                  <FileText className="w-4 h-4 text-cognify-focus shrink-0" />
                   <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
                   <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-xs text-indigo-300 font-mono">PDF</span>
                 </button>
@@ -2087,10 +2087,10 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   <X className="w-5 h-5" strokeWidth={3} />
                 </button>
 
-                <div className="bg-[#120816]/95 backdrop-blur-2xl border-2 border-[#E5A93C]/60 text-white rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 ring-1 ring-[#E5A93C]/30">
-                  <div className="flex items-center justify-between gap-2 border-b border-[#4A1224]/80 pb-3">
-                    <div className="flex items-center gap-2 text-[#E5A93C]">
-                      <Sparkles className="w-5 h-5 text-[#E5A93C]" />
+                <div className="bg-[#120816]/95 backdrop-blur-2xl border-2 border-cognify-focus/60 text-white rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 ring-1 ring-[#E5A93C]/30">
+                  <div className="flex items-center justify-between gap-2 border-b border-cognify-border-dark/80 pb-3">
+                    <div className="flex items-center gap-2 text-cognify-focus">
+                      <Sparkles className="w-5 h-5 text-cognify-focus" />
                       <span className="font-black text-sm sm:text-base">
                         {companionLang === 'ar'
                           ? 'المعاينة التجريبية — الرفيق البصري'
@@ -2099,7 +2099,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                           : 'Guest Preview — Vision Companion'}
                       </span>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-xs font-semibold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-cognify-focus/20 border border-cognify-focus/40 text-cognify-focus text-xs font-semibold">
                       {companionLang === 'ar' ? 'تسجيل الدخول مطلوب' : companionLang === 'fr' ? 'Connexion requise' : 'Sign In Required'}
                     </span>
                   </div>
@@ -2118,16 +2118,16 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                         } catch {}
                         window.location.reload();
                       }}
-                      className="px-4 py-3 rounded-2xl bg-gradient-to-r from-[#E5A93C] to-[#d6982b] text-slate-950 font-black text-xs sm:text-sm hover:brightness-110 transition-all shadow-lg shadow-[#E5A93C]/20 flex items-center justify-center gap-2 active:scale-95 text-center"
+                      className="px-4 py-3 rounded-2xl bg-gradient-to-r from-cognify-focus to-cognify-focus text-slate-950 font-black text-xs sm:text-sm hover:brightness-110 transition-all shadow-lg shadow-[#E5A93C]/20 flex items-center justify-center gap-2 active:scale-95 text-center"
                     >
                       <span>{companionLang === 'ar' ? 'تسجيل الدخول / إنشاء حساب مجاني' : companionLang === 'fr' ? 'Se connecter / Compte gratuit' : 'Sign In / Create Free Account'}</span>
                     </button>
 
                     <button
                       onClick={() => playDemoSample(companionLang)}
-                      className="px-4 py-3 rounded-2xl bg-[#4A1224]/80 hover:bg-[#4A1224] border border-[#E5A93C]/40 text-[#E5A93C] font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95 text-center"
+                      className="px-4 py-3 rounded-2xl bg-cognify-surface-elevated/80 hover:bg-cognify-surface-elevated border border-cognify-focus/40 text-cognify-focus font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95 text-center"
                     >
-                      <Volume2 className="w-4 h-4 text-[#E5A93C] shrink-0" />
+                      <Volume2 className="w-4 h-4 text-cognify-focus shrink-0" />
                       <span>{companionLang === 'ar' ? 'اسمع عينة صوتية حية' : companionLang === 'fr' ? 'Écouter une démo vocale' : 'Hear Audio Demo Sample'}</span>
                     </button>
                   </div>
@@ -2670,7 +2670,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                 );
               }}
               aria-label={companionLang === 'ar' ? 'فتح استوديو المستندات وتلخيص المحاضرات والـ PDF' : companionLang === 'fr' ? 'Ouvrir le studio de documents et cours' : 'Open Document and Lecture Studio'}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-[#E5A93C]/30 text-[#E5A93C] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
+              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-cognify-focus/30 text-cognify-focus font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
               title={companionLang === 'ar' ? 'المستندات وتلخيص المحاضرات' : 'Docs & Lectures'}
             >
               <FileText className="w-4 h-4" />
@@ -2697,7 +2697,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               initial={{ y: 30, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 30, opacity: 0 }}
-              className="w-full max-w-sm bg-[#150917] rounded-3xl p-6 space-y-5 border border-[#4A1224]/60 shadow-2xl text-white text-center"
+              className="w-full max-w-sm bg-cognify-surface-dark rounded-3xl p-6 space-y-5 border border-cognify-border-dark/60 shadow-2xl text-white text-center"
             >
               <div className="space-y-1.5">
                 <h3 id="lang-picker-title" className="font-black text-lg">
@@ -2763,9 +2763,9 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-md bg-[#150917] rounded-3xl p-5 sm:p-6 space-y-4 border border-[#4A1224]/60 shadow-2xl text-white"
+              className="w-full sm:max-w-md bg-cognify-surface-dark rounded-3xl p-5 sm:p-6 space-y-4 border border-cognify-border-dark/60 shadow-2xl text-white"
             >
-              <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
+              <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-3">
                 <h3 id="save-dialog-title" className="font-bold text-base text-white flex items-center gap-2">
                   <BookmarkPlus className="w-5 h-5 text-amber-400" />
                   {companionLang === 'ar' ? 'احفظ العنصر أو الشخص باسم...' : companionLang === 'fr' ? 'Enregistrer cet élément comme...' : 'Remember this as...'}
@@ -2780,7 +2780,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               </div>
 
               {/* Type Switcher: Object vs Person */}
-              <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#080409] rounded-xl border border-[#4A1224]/60">
+              <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-cognify-bg-dark rounded-xl border border-cognify-border-dark/60">
                 <button
                   type="button"
                   role="tab"
@@ -2819,7 +2819,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                     ? (companionLang === 'ar' ? 'اسم الشخص (مثلاً: "ماما"، "أحمد"، "دكتور طارق")' : companionLang === 'fr' ? 'Nom de la personne (ex. "Maman", "Ahmed")' : 'Person name (e.g. "Mom", "Ahmed")')
                     : (companionLang === 'ar' ? 'مثلاً: "دوا الضغط" أو "مفاتيحي"' : companionLang === 'fr' ? 'ex. "Mes clés", "Médicament"' : 'e.g. "My Keys", "Coffee Mug"')
                 }
-                className="w-full px-4 py-3 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 focus:ring-2 focus:ring-primary outline-none text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-cognify-border-dark/50 bg-cognify-bg-dark text-white placeholder-slate-500 focus:ring-2 focus:ring-primary outline-none text-sm"
               />
 
               <div className="flex gap-2.5">
@@ -2860,9 +2860,9 @@ Speak directly in natural, warm, concise conversational prose without any markdo
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-lg bg-[#150917] rounded-3xl p-5 sm:p-6 space-y-4 border border-[#4A1224]/60 shadow-2xl text-white max-h-[85vh] flex flex-col"
+              className="w-full sm:max-w-lg bg-cognify-surface-dark rounded-3xl p-5 sm:p-6 space-y-4 border border-cognify-border-dark/60 shadow-2xl text-white max-h-[85vh] flex flex-col"
             >
-              <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
+              <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-3">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-emerald-400" />
                   <h3 id="spatial-dialog-title" className="font-bold text-base text-white">
@@ -2922,7 +2922,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                             ? 'Où est la télécommande ?'
                             : 'Where is the TV remote?'
                         }
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="flex-1 px-4 py-2.5 rounded-xl border border-cognify-border-dark/50 bg-cognify-bg-dark text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                       <button
                         type="button"
