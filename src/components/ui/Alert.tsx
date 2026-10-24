@@ -91,7 +91,7 @@ export const Alert: React.FC<AlertProps> = ({
           type="button"
           onClick={onDismiss}
           aria-label={dismissLabel}
-          className="p-1 rounded-lg text-cognify-text-secondary hover:text-cognify-text-primary dark:text-cognify-text-dark-secondary dark:hover:text-cognify-text-dark-primary hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-lg text-cognify-text-secondary hover:text-cognify-text-primary dark:text-cognify-text-dark-secondary dark:hover:text-cognify-text-dark-primary hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus"
         >
           <X className="w-4 h-4" aria-hidden="true" />
         </button>
