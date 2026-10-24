@@ -13,10 +13,9 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           'rounded-2xl transition-all duration-200 font-sans',
-          // Base surface & border
           'bg-cognify-surface-light dark:bg-cognify-surface-dark border border-cognify-border-light dark:border-cognify-border-dark text-cognify-text-primary dark:text-cognify-text-dark-primary',
           variant === 'default' && 'shadow-sm',
-          variant === 'elevated' && 'shadow-md border-stone-200 dark:border-stone-700/80 dark:bg-[#1A2335]',
+          variant === 'elevated' && 'shadow-md border-cognify-border-light dark:border-cognify-border-dark dark:bg-cognify-surface-elevated',
           variant === 'interactive' &&
             'cursor-pointer hover:border-cognify-teal/60 dark:hover:border-cognify-teal/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
           variant === 'highlighted' &&
@@ -43,7 +42,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttribut
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-base sm:text-lg font-bold tracking-tight text-stone-900 dark:text-white', className)}
+      className={cn('text-base sm:text-lg font-bold tracking-tight text-cognify-text-primary dark:text-cognify-text-dark-primary', className)}
       {...props}
     />
   )
@@ -54,7 +53,7 @@ export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTML
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn('text-xs sm:text-sm text-stone-500 dark:text-stone-400 leading-relaxed', className)}
+      className={cn('text-xs sm:text-sm text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-relaxed', className)}
       {...props}
     />
   )
