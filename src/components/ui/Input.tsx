@@ -40,7 +40,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className="block text-xs sm:text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary"
           >
             {label}
-            {required && <span className="text-red-500 ms-1" aria-hidden="true">*</span>}
+            {required && <span className="text-cognify-error-text-light dark:text-cognify-error-text-dark ms-1" aria-hidden="true">*</span>}
           </label>
         )}
 
@@ -69,7 +69,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'outline-none focus:ring-2 focus:ring-cognify-focus focus:border-transparent',
               // Normal vs Error border
               isInvalid
-                ? 'border-red-500 focus:ring-red-500'
+                ? 'border-cognify-error-text-light focus:ring-cognify-error-text-light dark:border-cognify-error-text-dark dark:focus:ring-cognify-error-text-dark'
                 : 'border-cognify-border-light dark:border-cognify-border-dark hover:border-cognify-text-secondary dark:hover:border-cognify-text-dark-secondary',
               // Icon spacing adjustments
               leftIcon && 'ps-10',
@@ -92,7 +92,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p
             id={errorId}
             role="alert"
-            className="text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5 mt-1"
+            className="text-xs font-semibold text-cognify-error-text-light dark:text-cognify-error-text-dark flex items-center gap-1.5 mt-1"
           >
             <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>{errorMessage}</span>
