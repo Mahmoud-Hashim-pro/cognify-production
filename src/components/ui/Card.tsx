@@ -14,11 +14,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           'rounded-2xl transition-all duration-200 font-sans',
           // Base surface & border
-          'bg-cognify-surface-light dark:bg-cognify-surface-dark border border-stone-200/80 dark:border-stone-800/80 text-cognify-text-primary dark:text-cognify-text-dark-primary',
+          'bg-cognify-surface-light dark:bg-cognify-surface-dark border border-cognify-border-light dark:border-cognify-border-dark text-cognify-text-primary dark:text-cognify-text-dark-primary',
           variant === 'default' && 'shadow-sm',
           variant === 'elevated' && 'shadow-md border-stone-200 dark:border-stone-700/80 dark:bg-[#1A2335]',
           variant === 'interactive' &&
-            'cursor-pointer hover:border-cognify-teal/60 dark:hover:border-cognify-teal/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 dark:focus-visible:ring-offset-cognify-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
+            'cursor-pointer hover:border-cognify-teal/60 dark:hover:border-cognify-teal/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
           variant === 'highlighted' &&
             'border-cognify-indigo/40 dark:border-cognify-indigo/60 bg-cognify-bg-light dark:bg-cognify-surface-elevated shadow-sm',
           className
@@ -72,7 +72,7 @@ export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('p-5 sm:p-6 pt-0 border-t border-stone-100 dark:border-stone-800/60 mt-4 flex items-center justify-between', className)}
+      className={cn('p-5 sm:p-6 pt-0 border-t border-cognify-border-light dark:border-cognify-border-dark mt-4 flex items-center justify-between', className)}
       {...props}
     />
   )
