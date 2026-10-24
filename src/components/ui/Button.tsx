@@ -68,7 +68,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             // Baseline flex layout & centering
             'inline-flex items-center justify-center font-sans transition-all duration-150 cursor-pointer select-none motion-reduce:transition-none motion-reduce:active:scale-100',
             // High-contrast WCAG 2.2 compliant focus ring
-            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-bg-dark dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-surface-light dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
             // Disabled & loading states
             'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none',
             // Variant & Size
