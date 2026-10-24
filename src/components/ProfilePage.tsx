@@ -331,7 +331,7 @@ export default function ProfilePage({
     <div 
       dir={isAr ? 'rtl' : 'ltr'} 
       className={`flex-1 min-h-screen overflow-y-auto ${
-        isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'
+        isDarkMode ? 'bg-cognify-bg-dark text-stone-100' : 'bg-cognify-bg-light text-stone-900'
       } p-4 sm:p-6 md:p-10 flex flex-col gap-6 md:gap-8 custom-scrollbar relative font-sans transition-colors duration-300`}
     >
       {/* Subtle Ambient Calm Glows (Teal/Emerald theme, no burgundy) */}
@@ -349,7 +349,7 @@ export default function ProfilePage({
               onClick={onNavigateBack}
               className={`p-2.5 mt-1 rounded-2xl border transition-all flex items-center gap-2 shrink-0 cursor-pointer active:scale-95 ${
                 isDarkMode 
-                  ? 'bg-[#121B1E] border-stone-800 hover:border-teal-700/60 hover:bg-[#162327] text-stone-300 hover:text-white' 
+                  ? 'bg-cognify-surface-dark border-stone-800 hover:border-teal-700/60 hover:bg-cognify-surface-dark text-stone-300 hover:text-white' 
                   : 'bg-white border-stone-200 hover:border-teal-600/40 hover:bg-stone-50 text-stone-700 hover:text-stone-950'
               }`}
               title={localize(profile.language, 'Back to AI Tutor', 'العودة للمرشد الذكي')}
@@ -364,7 +364,7 @@ export default function ProfilePage({
               onClick={onMenuClick}
               className={`p-2.5 mt-1 rounded-2xl border transition-all shrink-0 cursor-pointer active:scale-95 ${
                 isDarkMode 
-                  ? 'bg-[#121B1E] border-stone-800 hover:border-teal-700/60 hover:bg-[#162327] text-stone-300 hover:text-white' 
+                  ? 'bg-cognify-surface-dark border-stone-800 hover:border-teal-700/60 hover:bg-cognify-surface-dark text-stone-300 hover:text-white' 
                   : 'bg-white border-stone-200 hover:border-teal-600/40 hover:bg-stone-50 text-stone-700 hover:text-stone-950'
               }`}
               aria-label={localize(profile.language, 'Toggle menu', 'القائمة')}
@@ -401,7 +401,7 @@ export default function ProfilePage({
               onClick={toggleTheme}
               className={`p-2.5 rounded-2xl border transition-all cursor-pointer ${
                 isDarkMode 
-                  ? 'bg-[#121B1E] border-stone-800 hover:bg-[#162327] text-amber-400' 
+                  ? 'bg-cognify-surface-dark border-stone-800 hover:bg-cognify-surface-dark text-amber-400' 
                   : 'bg-white border-stone-200 hover:bg-stone-50 text-stone-700'
               }`}
               title={isDarkMode ? 'التبديل للوضع النهاري' : 'التبديل للوضع الليلي'}
@@ -432,7 +432,7 @@ export default function ProfilePage({
                 onClick={() => { setIsEditing(false); setEditedProfile(profile); }}
                 className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border font-bold text-xs transition-all active:scale-95 cursor-pointer ${
                   isDarkMode 
-                    ? 'bg-[#121B1E] border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800' 
+                    ? 'bg-cognify-surface-dark border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800' 
                     : 'bg-white border-stone-200 text-stone-600 hover:text-stone-900 hover:bg-stone-100'
                 }`}
               >
@@ -461,7 +461,7 @@ export default function ProfilePage({
               key={idx} 
               className={`rounded-3xl p-5 border transition-all shadow-sm ${
                 isDarkMode 
-                  ? 'bg-[#121B1E] border-stone-800 hover:border-teal-700/50' 
+                  ? 'bg-cognify-surface-dark border-stone-800 hover:border-teal-700/50' 
                   : 'bg-white border-stone-200 hover:border-teal-600/40'
               } flex items-center gap-4`}
             >
@@ -492,11 +492,11 @@ export default function ProfilePage({
           
           {/* Main User Card */}
           <div className={`p-6 sm:p-8 rounded-[32px] border shadow-sm backdrop-blur-xl flex flex-col items-center text-center ${
-            isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+            isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
           }`}>
             
             {/* Avatar Frame with Monogram fallback */}
-            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-[28px] bg-teal-900/20 dark:bg-[#162327] flex items-center justify-center mb-5 shadow-inner border-2 border-teal-600/30 relative group overflow-hidden">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-[28px] bg-teal-900/20 dark:bg-cognify-surface-dark flex items-center justify-center mb-5 shadow-inner border-2 border-teal-600/30 relative group overflow-hidden">
               {editedProfile.photoURL || profile.photoURL ? (
                 <img 
                   src={isEditing ? editedProfile.photoURL : profile.photoURL} 
@@ -528,7 +528,7 @@ export default function ProfilePage({
               )}
 
               {!isEditing && (
-                <div className="absolute -bottom-1 -end-1 bg-teal-600 text-white p-1.5 rounded-xl shadow-md border-2 border-white dark:border-[#121B1E] z-10" title="Verified Scholar Profile">
+                <div className="absolute -bottom-1 -end-1 bg-teal-600 text-white p-1.5 rounded-xl shadow-md border-2 border-white dark:border-cognify-border-dark z-10" title="Verified Scholar Profile">
                   <ShieldCheck className="w-4 h-4 text-white" aria-hidden="true" />
                 </div>
               )}
@@ -544,7 +544,7 @@ export default function ProfilePage({
                   <input 
                     aria-label={localize(profile.language, 'Full Name', 'الاسم الكامل')}
                     className={`w-full border rounded-xl px-3.5 py-2 text-center text-base font-bold outline-none focus:border-teal-500 transition-all ${
-                      isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                      isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                     }`}
                     value={editedProfile.name || ''}
                     onChange={(e) => handleChange('name', e.target.value)}
@@ -558,7 +558,7 @@ export default function ProfilePage({
                   <select 
                     aria-label={localize(profile.language, 'Education Level', 'المرحلة الدراسية')}
                     className={`w-full border rounded-xl px-3 py-2 text-center text-xs font-bold outline-none focus:border-teal-500 transition-all cursor-pointer ${
-                      isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                      isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                     }`}
                     value={editedProfile.educationLevel || 'University'}
                     onChange={(e) => handleChange('educationLevel', e.target.value)}
@@ -619,7 +619,7 @@ export default function ProfilePage({
                     value={editedProfile.language || 'Arabic'}
                     onChange={(e) => handleChange('language', e.target.value)}
                     className={`border rounded-lg px-2 py-1 text-xs font-bold outline-none focus:border-teal-500 ${
-                      isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                      isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                     }`}
                   >
                     {LANGUAGE_OPTIONS.map(opt => (
@@ -657,7 +657,7 @@ export default function ProfilePage({
                     value={editedProfile.accessibilityMode || 'None'}
                     onChange={(e) => handleChange('accessibilityMode', e.target.value as AccessibilityMode)}
                     className={`border rounded-lg px-2 py-1 text-xs font-bold outline-none focus:border-teal-500 ${
-                      isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                      isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                     }`}
                   >
                     <option value="None">{localize(profile.language, 'Standard (Standard AI)', 'قياسي (عام)')}</option>
@@ -697,7 +697,7 @@ export default function ProfilePage({
 
           {/* Sustainability & SDG Mission Card */}
           <div className={`p-6 sm:p-8 rounded-[32px] border shadow-sm backdrop-blur-xl ${
-            isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+            isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
           }`}>
             <h3 className="text-sm font-black uppercase tracking-wider text-stone-900 dark:text-white mb-4 flex items-center gap-2">
               <currentGoal.icon className="w-4 h-4 text-teal-600 dark:text-teal-400" />
@@ -713,7 +713,7 @@ export default function ProfilePage({
                       editedProfile.sustainabilityGoal === goal.id 
                         ? 'bg-teal-700 text-white border-teal-600 shadow-sm' 
                         : isDarkMode
-                          ? 'bg-[#162327] border-stone-700 text-stone-300 hover:border-teal-600/50'
+                          ? 'bg-cognify-surface-dark border-stone-700 text-stone-300 hover:border-teal-600/50'
                           : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-teal-600/40'
                     }`}
                   >
@@ -745,7 +745,7 @@ export default function ProfilePage({
           
           {/* Institution & Faculty Details Card */}
           <div className={`p-6 sm:p-8 md:p-10 rounded-[32px] border shadow-sm backdrop-blur-xl ${
-            isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+            isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
           }`}>
             <h3 className="text-lg font-black text-stone-900 dark:text-white mb-6 flex items-center gap-3">
               <span className="p-2 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-400">
@@ -822,7 +822,7 @@ export default function ProfilePage({
 
           {/* Recent Study Threads / Chat History */}
           <div className={`p-6 sm:p-8 md:p-10 rounded-[32px] border shadow-sm backdrop-blur-xl ${
-            isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+            isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
           }`}>
             <h3 className="text-lg font-black text-stone-900 dark:text-white mb-6 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -856,7 +856,7 @@ export default function ProfilePage({
                     key={t.id || i} 
                     className={`flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
                       isDarkMode 
-                        ? 'bg-[#162327]/80 hover:bg-[#162327] border-stone-800 hover:border-teal-700/50' 
+                        ? 'bg-cognify-surface-dark/80 hover:bg-cognify-surface-dark border-stone-800 hover:border-teal-700/50' 
                         : 'bg-stone-50 hover:bg-white border-stone-200 hover:border-teal-600/40 shadow-xs'
                     }`}
                     onClick={() => onNavigate?.('chat')}
@@ -885,7 +885,7 @@ export default function ProfilePage({
 
           {/* AI Guidance Feedback Hub */}
           <div className={`p-6 sm:p-8 md:p-10 rounded-[32px] border shadow-sm backdrop-blur-xl ${
-            isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+            isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
           }`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
@@ -970,7 +970,7 @@ export default function ProfilePage({
 
           {/* Guardian Consent & Privacy Center */}
           <div className={`p-6 sm:p-8 rounded-[32px] border shadow-sm backdrop-blur-xl ${
-            isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+            isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
           }`}>
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2.5 bg-teal-50 dark:bg-teal-950/60 rounded-xl text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800">
@@ -988,7 +988,7 @@ export default function ProfilePage({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className={`p-4 rounded-2xl border flex flex-col justify-between ${
-                isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'
+                isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
               }`}>
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -1022,7 +1022,7 @@ export default function ProfilePage({
               </div>
 
               <div className={`p-4 rounded-2xl border flex flex-col justify-between ${
-                isDarkMode ? 'bg-[#162327] border-stone-800' : 'bg-stone-50 border-stone-200'
+                isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
               }`}>
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -1117,11 +1117,11 @@ function ProfessionalDataField({
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             className={`w-full border rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 cursor-pointer transition-all ${
-              isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+              isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
             }`}
           >
             {options?.map(opt => (
-              <option key={opt} value={opt} className={isDarkMode ? 'bg-[#162327] text-white' : 'bg-white text-stone-900'}>
+              <option key={opt} value={opt} className={isDarkMode ? 'bg-cognify-surface-dark text-white' : 'bg-white text-stone-900'}>
                 {opt}
               </option>
             ))}
@@ -1129,7 +1129,7 @@ function ProfessionalDataField({
         ) : (
           <input 
             className={`w-full border rounded-xl px-3.5 py-2 text-xs font-bold outline-none focus:border-teal-500 transition-all ${
-              isDarkMode ? 'bg-[#162327] border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+              isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
             }`}
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
