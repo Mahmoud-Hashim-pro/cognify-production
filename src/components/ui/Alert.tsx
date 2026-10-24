@@ -23,31 +23,31 @@ const variantConfig: Record<
   }
 > = {
   info: {
-    containerClass: 'bg-blue-50 dark:bg-[#0B1E3B] border-blue-200 dark:border-blue-900/60',
-    icon: <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" aria-hidden="true" />,
-    titleColor: 'text-blue-900 dark:text-blue-100',
-    textColor: 'text-blue-800 dark:text-blue-200',
+    containerClass: 'bg-cognify-info-light dark:bg-cognify-info-dark border-cognify-info-text-light/20 dark:border-cognify-info-text-dark/30',
+    icon: <Info className="w-5 h-5 text-cognify-info-text-light dark:text-cognify-info-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-cognify-info-text-light dark:text-cognify-info-text-dark',
+    textColor: 'text-cognify-info-text-light dark:text-cognify-info-text-dark',
     role: 'status',
   },
   success: {
-    containerClass: 'bg-emerald-50 dark:bg-[#062B21] border-emerald-200 dark:border-emerald-900/60',
-    icon: <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" aria-hidden="true" />,
-    titleColor: 'text-emerald-900 dark:text-emerald-100',
-    textColor: 'text-emerald-800 dark:text-emerald-200',
+    containerClass: 'bg-cognify-success-light dark:bg-cognify-success-dark border-cognify-success-text-light/20 dark:border-cognify-success-text-dark/30',
+    icon: <CheckCircle2 className="w-5 h-5 text-cognify-success-text-light dark:text-cognify-success-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-cognify-success-text-light dark:text-cognify-success-text-dark',
+    textColor: 'text-cognify-success-text-light dark:text-cognify-success-text-dark',
     role: 'status',
   },
   warning: {
-    containerClass: 'bg-amber-50 dark:bg-[#2E1A05] border-amber-200 dark:border-amber-900/60',
-    icon: <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" aria-hidden="true" />,
-    titleColor: 'text-amber-900 dark:text-amber-100',
-    textColor: 'text-amber-800 dark:text-amber-200',
+    containerClass: 'bg-cognify-warning-light dark:bg-cognify-warning-dark border-cognify-warning-text-light/20 dark:border-cognify-warning-text-dark/30',
+    icon: <AlertTriangle className="w-5 h-5 text-cognify-warning-text-light dark:text-cognify-warning-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-cognify-warning-text-light dark:text-cognify-warning-text-dark',
+    textColor: 'text-cognify-warning-text-light dark:text-cognify-warning-text-dark',
     role: 'alert',
   },
   error: {
-    containerClass: 'bg-red-50 dark:bg-[#360909] border-red-200 dark:border-red-900/60',
-    icon: <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" aria-hidden="true" />,
-    titleColor: 'text-red-900 dark:text-red-100',
-    textColor: 'text-red-800 dark:text-red-200',
+    containerClass: 'bg-cognify-error-light dark:bg-cognify-error-dark border-cognify-error-text-light/20 dark:border-cognify-error-text-dark/30',
+    icon: <AlertCircle className="w-5 h-5 text-cognify-error-text-light dark:text-cognify-error-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-cognify-error-text-light dark:text-cognify-error-text-dark',
+    textColor: 'text-cognify-error-text-light dark:text-cognify-error-text-dark',
     role: 'alert',
   },
 };
@@ -91,7 +91,7 @@ export const Alert: React.FC<AlertProps> = ({
           type="button"
           onClick={onDismiss}
           aria-label={dismissLabel}
-          className="p-1 rounded-lg text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+          className="p-1 rounded-lg text-cognify-text-secondary hover:text-cognify-text-primary dark:text-cognify-text-dark-secondary dark:hover:text-cognify-text-dark-primary hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus"
         >
           <X className="w-4 h-4" aria-hidden="true" />
         </button>
