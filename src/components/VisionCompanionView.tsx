@@ -731,6 +731,11 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     const captureTimestamp = Date.now();
     lastObservationTimeRef.current = captureTimestamp;
 
+    // Clear the previous result and stop its speech as soon as a fresh scan starts.
+    // This prevents a stale description from being mistaken for the current camera view.
+    cancelSpeech();
+    setIsSpeaking(false);
+    setLastDescription('');
     setLastSnapshot(frame);
     setStatus('analyzing');
     const waitingMsg = lectureMode
