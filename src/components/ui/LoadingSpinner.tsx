@@ -18,7 +18,7 @@ const sizeClasses: Record<SpinnerSize, string> = {
 };
 
 const colorClasses: Record<SpinnerColor, string> = {
-  indigo: 'border-cognify-indigo/20 border-t-cognify-indigo dark:border-cognify-indigo-light/30 dark:border-t-cognify-info-text-dark',
+  indigo: 'border-cognify-indigo/20 border-t-cognify-indigo dark:border-cognify-indigo-light/30 dark:border-t-cognify-indigo-light',
   teal: 'border-cognify-teal/20 border-t-cognify-teal dark:border-cognify-teal/30 dark:border-t-cognify-teal-light',
   white: 'border-white/20 border-t-white',
   current: 'border-current/20 border-t-current',
