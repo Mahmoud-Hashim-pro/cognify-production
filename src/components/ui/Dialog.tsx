@@ -60,7 +60,7 @@ export const Dialog: React.FC<DialogProps> = ({
 
       if (e.key === 'Tab' && dialogRef.current) {
         const focusableElements = dialogRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button:not([disabled]):not([aria-hidden="true"]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([aria-hidden="true"])'
         );
         if (focusableElements.length === 0) return;
 
@@ -87,7 +87,7 @@ export const Dialog: React.FC<DialogProps> = ({
     const timeout = setTimeout(() => {
       if (dialogRef.current) {
         const focusable = dialogRef.current.querySelector<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), [tabindex="0"]'
+          'button:not([disabled]):not([aria-hidden="true"]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]:not([aria-hidden="true"])'
         );
         focusable?.focus();
       }
