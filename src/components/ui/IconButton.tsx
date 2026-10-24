@@ -50,7 +50,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         className={(renderProps) =>
           cn(
             'inline-flex items-center justify-center shrink-0 cursor-pointer transition-all duration-150',
-            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-bg-dark dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-surface-light dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
             'data-[pressed]:scale-[0.96] motion-reduce:transition-none motion-reduce:data-[pressed]:scale-100',
             'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none',
             variantStyles[variant],
