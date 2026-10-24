@@ -812,42 +812,42 @@ html.high-contrast button:focus-visible {
 }
 
 /* Neutralize legacy dark/burgundy/green surfaces in either theme. */
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#080409\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#0E0610\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#0D0610\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#0E1416\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#111622\\]"] {
+:is(:root:not(.dark), .dark) [class*="bg-[#080409]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#0E0610]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#0D0610]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#0E1416]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#111622]"] {
   background-color: var(--cognify-legacy-canvas) !important;
 }
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#150917\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#120614\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#18050E\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#1A0713\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#1C060F\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#1F0D22\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#162327\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#121B1E\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#171E2E\\]"] {
+:is(:root:not(.dark), .dark) [class*="bg-[#150917]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#120614]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#18050E]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#1A0713]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#1C060F]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#1F0D22]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#162327]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#121B1E]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#171E2E]"] {
   background-color: var(--cognify-legacy-surface) !important;
 }
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#4A1224\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#831843\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#2D0B16\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#2A102D\\]"],
-:is(:root:not(.dark), .dark) [class*="bg-\\[\\#25102a\\]"] {
+:is(:root:not(.dark), .dark) [class*="bg-[#4A1224]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#831843]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#2D0B16]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#2A102D]"],
+:is(:root:not(.dark), .dark) [class*="bg-[#25102a]"] {
   background-color: var(--cognify-legacy-elevated) !important;
 }
-:is(:root:not(.dark), .dark) [class*="border-\\[\\#4A1224\\]"],
-:is(:root:not(.dark), .dark) [class*="border-\\[\\#831843\\]"],
-:is(:root:not(.dark), .dark) [class*="border-\\[\\#2D0B16\\]"],
-:is(:root:not(.dark), .dark) [class*="border-\\[\\#121B1E\\]"] {
+:is(:root:not(.dark), .dark) [class*="border-[#4A1224]"],
+:is(:root:not(.dark), .dark) [class*="border-[#831843]"],
+:is(:root:not(.dark), .dark) [class*="border-[#2D0B16]"],
+:is(:root:not(.dark), .dark) [class*="border-[#121B1E]"] {
   border-color: var(--cognify-legacy-border) !important;
 }
-:is(:root:not(.dark), .dark) [class*="text-\\[\\#E5A93C\\]"],
-:is(:root:not(.dark), .dark) [class*="text-\\[\\#d6982b\\]"] {
+:is(:root:not(.dark), .dark) [class*="text-[#E5A93C]"],
+:is(:root:not(.dark), .dark) [class*="text-[#d6982b]"] {
   color: var(--color-cognify-focus, #F59E0B) !important;
 }
-:is(:root:not(.dark), .dark) [class*="text-\\[\\#4A1224\\]"],
-:is(:root:not(.dark), .dark) [class*="text-\\[\\#831843\\]"] {
+:is(:root:not(.dark), .dark) [class*="text-[#4A1224]"],
+:is(:root:not(.dark), .dark) [class*="text-[#831843]"] {
   color: var(--color-cognify-teal, #087F8C) !important;
 }
