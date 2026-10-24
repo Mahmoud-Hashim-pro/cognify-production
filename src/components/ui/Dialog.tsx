@@ -123,7 +123,7 @@ export const Dialog: React.FC<DialogProps> = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cn(
-          'relative w-full rounded-3xl bg-cognify-surface-light dark:bg-cognify-surface-dark border border-stone-200 dark:border-stone-800 text-cognify-text-primary dark:text-cognify-text-dark-primary shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
+          'relative w-full rounded-3xl bg-cognify-surface-light dark:bg-cognify-surface-dark border border-cognify-border-light dark:border-cognify-border-dark text-cognify-text-primary dark:text-cognify-text-dark-primary shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
           sizeClasses[size]
         )}
       >
