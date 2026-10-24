@@ -1746,7 +1746,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           onClick={() => handleSubmit(undefined, c.prompt)}
                           className={`p-4 rounded-3xl border border-cognify-border-dark/70 bg-gradient-to-br ${c.accent} bg-cognify-bg-dark/75 text-slate-300 hover:text-white transition-all shadow-xl backdrop-blur-2xl active:scale-[0.98] flex items-start gap-3.5 group cursor-pointer hover:-translate-y-1`}
                         >
-                          <span className="text-2xl p-2.5 rounded-2xl bg-[#0A0D1A] border border-white/10 group-hover:border-white/20 transition-all shrink-0 shadow-inner group-hover:scale-110">{c.icon}</span>
+                          <span className="text-2xl p-2.5 rounded-2xl bg-cognify-bg-dark border border-white/10 group-hover:border-white/20 transition-all shrink-0 shadow-inner group-hover:scale-110">{c.icon}</span>
                           <div className="min-w-0 flex-1">
                             <h4 className="font-black text-sm text-white group-hover:text-cognify-focus transition-colors">{c.title}</h4>
                             <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{c.desc}</p>
@@ -1816,7 +1816,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               >
                 {m.role === 'user' ? (
                   <div className="space-y-3 max-w-[90%] md:max-w-[80%]">
-                    <div className="bg-gradient-to-br from-[#3B0E1D] via-cognify-surface-elevated/90 to-[#230811] border border-cognify-indigo/60 text-white px-5 py-4 rounded-[26px] rounded-ee-md shadow-xl shadow-[#2D0B16]/50 backdrop-blur-xl text-[15px] leading-relaxed font-normal flex flex-col gap-2 ring-1 ring-[#E5A93C]/20">
+                    <div className="bg-gradient-to-br from-cognify-indigo-dark via-cognify-surface-elevated/90 to-cognify-bg-dark border border-cognify-indigo/60 text-white px-5 py-4 rounded-[26px] rounded-ee-md shadow-xl shadow-[#2D0B16]/50 backdrop-blur-xl text-[15px] leading-relaxed font-normal flex flex-col gap-2 ring-1 ring-[#E5A93C]/20">
                        {/* Legacy '[Signs: emoji]' lines are dropped */}
                        {(m.content || '').split('\n').filter((line) => !/^\[Signs:\s*.*\]$/i.test(line.trim())).map((line, i) => (
                          <span key={i}>{line}</span>
@@ -2296,7 +2296,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               style={{ right: 0, top: 0, bottom: 0, zIndex: 40 }}
               className={`bg-cognify-bg-dark/95 border-s border-amber-500/30 backdrop-blur-2xl overflow-y-auto flex flex-col shadow-2xl shrink-0 ${isEmbedded ? 'absolute' : 'absolute md:relative'}`}
             >
-              <div className="p-4 border-b border-amber-500/20 bg-[#17140e]/90 flex justify-between items-center shrink-0 backdrop-blur-md">
+              <div className="p-4 border-b border-amber-500/20 bg-cognify-surface-dark/90 flex justify-between items-center shrink-0 backdrop-blur-md">
                 <h3 className="font-black text-amber-300 flex items-center gap-2 text-sm tracking-wide">
                   <Lightbulb className="w-5 h-5 text-amber-400 animate-pulse" /> {getTranslation(profile.language, 'proactiveInsights')}
                 </h3>
@@ -2418,7 +2418,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           className={`px-2.5 py-1 min-h-[32px] rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer ${
                             isSelected
                               ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-sm ring-1 ring-amber-400/50'
-                              : 'bg-cognify-surface-dark text-slate-300 border-cognify-border-dark/70 hover:bg-[#25102a] hover:text-white'
+                              : 'bg-cognify-surface-dark text-slate-300 border-cognify-border-dark/70 hover:bg-cognify-surface-elevated hover:text-white'
                           }`}
                           title={localize(profile.language, st.descriptionEn, st.descriptionAr)}
                         >
