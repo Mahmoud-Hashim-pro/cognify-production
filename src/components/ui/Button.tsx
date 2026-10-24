@@ -31,8 +31,8 @@ const variantStyles: Record<ButtonVariant, string> = {
   secondary: 'bg-cognify-bg-light hover:bg-cognify-border-light text-cognify-text-primary dark:bg-cognify-surface-elevated dark:hover:bg-cognify-surface-dark dark:text-cognify-text-dark-primary shadow-sm',
   outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
   ghost: 'bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
-  danger: 'bg-cognify-error-text-light hover:bg-red-800 dark:bg-cognify-error-text-dark dark:hover:bg-red-500 text-white shadow-sm active:scale-[0.98]',
-  success: 'bg-cognify-success-text-light hover:bg-emerald-800 dark:bg-cognify-success-text-dark dark:hover:bg-emerald-400 text-white shadow-sm active:scale-[0.98]',
+  danger: 'bg-cognify-error-text-light hover:brightness-90 dark:bg-cognify-error-text-dark dark:hover:brightness-110 text-white shadow-sm active:scale-[0.98]',
+  success: 'bg-cognify-success-text-light hover:brightness-90 dark:bg-cognify-success-text-dark dark:hover:brightness-110 text-white shadow-sm active:scale-[0.98]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
