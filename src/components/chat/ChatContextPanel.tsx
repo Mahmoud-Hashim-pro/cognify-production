@@ -96,7 +96,7 @@ export default function ChatContextPanel({
         );
       case 'arxiv':
         return (
-          <div className="w-5 h-5 rounded-lg bg-[#4A1224]/40 border border-[#E5A93C]/30 flex items-center justify-center text-[#E5A93C]">
+          <div className="w-5 h-5 rounded-lg bg-[16395E]/40 border border-[0A96A5]/30 flex items-center justify-center text-[0A96A5]">
             <FileText className="w-3 h-3" />
           </div>
         );
@@ -112,7 +112,7 @@ export default function ChatContextPanel({
   return (
     <aside 
       aria-label="Context & Research Citations"
-      className="w-72 lg:w-80 shrink-0 h-full bg-[#0E0610]/95 border-l border-[#4A1224]/70 backdrop-blur-2xl flex flex-col justify-between p-4 z-20 transition-all select-none overflow-y-auto custom-scrollbar relative"
+      className="w-72 lg:w-80 shrink-0 h-full bg-[#0D2542] border-l border-[rgba(72,139,190,0.22)] backdrop-blur-2xl flex flex-col justify-between p-4 z-20 transition-all select-none overflow-y-auto custom-scrollbar relative"
     >
       {/* Collapsible Edge Arrow Button Pinned to Border */}
       {onClose && (
@@ -121,7 +121,7 @@ export default function ChatContextPanel({
           onClick={onClose}
           aria-label="Collapse Context"
           title={localize(profile.language, 'Collapse Context Panel', 'طي لوحة المصادر')}
-          className="hidden xl:flex absolute -start-3.5 top-1/2 -translate-y-1/2 z-30 w-7 h-12 bg-[#150917] border border-[#4A1224]/70 hover:border-[#E5A93C]/50 rounded-s-xl items-center justify-center text-slate-400 hover:text-[#E5A93C] shadow-xl transition-all active:scale-95 group cursor-pointer"
+          className="hidden xl:flex absolute -start-3.5 top-1/2 -translate-y-1/2 z-30 w-7 h-12 bg-[0A203A] border border-[16395E]/70 hover:border-[0A96A5]/50 rounded-s-xl items-center justify-center text-slate-400 hover:text-[0A96A5] shadow-xl transition-all active:scale-95 group cursor-pointer"
         >
           <ChevronRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform" />
         </button>
@@ -129,16 +129,16 @@ export default function ChatContextPanel({
 
       <div className="space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-[#4A1224]/50">
+        <div className="flex items-center justify-between pb-2 border-b border-[16395E]/50">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-xl bg-[#4A1224]/40 border border-[#E5A93C]/40 text-[#E5A93C] shadow-sm">
+            <div className="p-1.5 rounded-xl bg-[16395E]/40 border border-[0A96A5]/40 text-[0A96A5] shadow-sm">
               <Compass className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-100 flex items-center gap-1.5">
                 {localize(profile.language, 'Context & Citations', 'السياق والمصادر')}
               </h3>
-              <p className="text-[10px] text-[#E5A93C]/80 font-semibold">
+              <p className="text-[10px] text-[0A96A5]/80 font-semibold">
                 {localize(profile.language, 'Live Grounding Sources', 'مصادر التوثيق الحية')}
               </p>
             </div>
@@ -148,7 +148,7 @@ export default function ChatContextPanel({
               onClick={onClose}
               aria-label="Close Context"
               title={localize(profile.language, 'Collapse Context Panel', 'طي لوحة المصادر')}
-              className="p-1.5 text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30 rounded-lg transition-all"
+              className="p-1.5 text-slate-400 hover:text-[0A96A5] hover:bg-[16395E]/30 rounded-lg transition-all"
             >
               <ChevronRight className="w-4 h-4 rtl:rotate-180" />
             </button>
@@ -157,7 +157,7 @@ export default function ChatContextPanel({
 
         {/* Citation Source Cards */}
         <div className="space-y-2">
-          <div className="text-[10px] font-black uppercase tracking-wider text-[#E5A93C] px-1">
+          <div className="text-[10px] font-black uppercase tracking-wider text-[0A96A5] px-1">
             {localize(profile.language, 'Grounding & Evidence', 'المراجع والأدلة')}
           </div>
 
@@ -166,16 +166,16 @@ export default function ChatContextPanel({
               key={source.id}
               onClick={() => onCiteSource(source)}
               title={localize(profile.language, 'Click to ground explanation with this source', 'اضغط لتوثيق الشرح من هذا المصدر')}
-              className="p-3 rounded-2xl bg-[#150917]/90 border border-[#4A1224]/50 hover:border-[#E5A93C]/50 hover:bg-[#1C0B1E] transition-all cursor-pointer group shadow-sm"
+              className="p-3 rounded-2xl bg-[0A203A]/90 border border-[16395E]/50 hover:border-[0A96A5]/50 hover:bg-[#1C0B1E] transition-all cursor-pointer group shadow-sm"
             >
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   {getSourceIcon(source.type)}
-                  <span className="text-xs font-bold text-slate-200 group-hover:text-[#E5A93C] transition-colors">
+                  <span className="text-xs font-bold text-slate-200 group-hover:text-[0A96A5] transition-colors">
                     {source.name}
                   </span>
                 </div>
-                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#2D0B16] border border-[#4A1224]/60 text-[#E5A93C] shrink-0">
+                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#2D0B16] border border-[16395E]/60 text-[0A96A5] shrink-0">
                   {source.tag}
                 </span>
               </div>
@@ -188,14 +188,14 @@ export default function ChatContextPanel({
       </div>
 
       {/* Bottom Knowledge Map Progress Card */}
-      <div className="mt-4 pt-4 border-t border-[#4A1224]/50">
-        <div className="bg-[#150917]/90 border border-[#4A1224]/60 rounded-2xl p-3.5 shadow-xl backdrop-blur-xl space-y-3">
+      <div className="mt-4 pt-4 border-t border-[16395E]/50">
+        <div className="bg-[0A203A]/90 border border-[16395E]/60 rounded-2xl p-3.5 shadow-xl backdrop-blur-xl space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-[#E5A93C]" />
+              <BookOpen className="w-3.5 h-3.5 text-[0A96A5]" />
               {localize(profile.language, 'Knowledge Map Progress', 'تقدم خارطة المعرفة')}
             </span>
-            <span className="text-[10px] font-mono font-black text-[#E5A93C]">
+            <span className="text-[10px] font-mono font-black text-[0A96A5]">
               {masteredConcepts > 0 ? `+${masteredConcepts} Mastered` : 'Live Grounding'}
             </span>
           </div>
@@ -203,24 +203,24 @@ export default function ChatContextPanel({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400">
               <span>{localize(profile.language, 'Curriculum Mastery', 'إتقان المنهج')}</span>
-              <span className="font-mono text-[#E5A93C] font-bold">{curriculumMastery}%</span>
+              <span className="font-mono text-[0A96A5] font-bold">{curriculumMastery}%</span>
             </div>
-            <div className="w-full bg-[#0E0610] rounded-full h-2 overflow-hidden border border-[#4A1224]/50">
+            <div className="w-full bg-[0D2542] rounded-full h-2 overflow-hidden border border-[16395E]/50">
               <div 
-                className="h-full bg-gradient-to-r from-[#4A1224] via-[#831843] to-[#E5A93C] rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[16395E] via-[#831843] to-[0A96A5] rounded-full transition-all duration-500"
                 style={{ width: `${Math.max(curriculumMastery, 2)}%` }}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-1">
-            <div className="flex items-center gap-2 p-2 bg-[#0E0610] border border-[#4A1224]/50 rounded-xl">
-              <div className="w-2 h-2 rounded-full bg-[#E5A93C] animate-pulse" />
+            <div className="flex items-center gap-2 p-2 bg-[0D2542] border border-[16395E]/50 rounded-xl">
+              <div className="w-2 h-2 rounded-full bg-[0A96A5] animate-pulse" />
               <div className="text-[10px] text-slate-300 font-semibold truncate">
                 {totalConcepts > 0 ? `${masteredConcepts}/${totalConcepts} Mastered` : `${masteredConcepts} Mastered`}
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2 bg-[#0E0610] border border-[#4A1224]/50 rounded-xl">
+            <div className="flex items-center gap-2 p-2 bg-[0D2542] border border-[16395E]/50 rounded-xl">
               <div className="w-2 h-2 rounded-full bg-amber-400" />
               <div className="text-[10px] text-slate-300 font-semibold truncate">
                 {retentionRate > 0 ? `${retentionRate}% Retention` : '4 Verified Sources'}

@@ -25,7 +25,6 @@ import {
   saveReturnDestination,
   getReturnDestination,
   clearReturnDestination,
-  markSessionExpired,
   isSameRoute,
   RouteState,
   VALID_DISABILITY_TABS,
@@ -132,9 +131,7 @@ export default function App() {
   const [isGuestPreview, setIsGuestPreview] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     if (sessionStorage.getItem('cognify_exit_preview') === 'true') return false;
-    const isExplicit = sessionStorage.getItem('cognify_guest_preview') === 'disability';
-    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    return isExplicit || isLocalDev;
+    return sessionStorage.getItem('cognify_guest_preview') === 'disability';
   });
 
   const handleEnterGuestPreview = () => {
@@ -166,7 +163,10 @@ export default function App() {
     setProfileLoading(false);
     setCurrentView('disability');
     setDisabilityTab('hub');
-    window.location.hash = '#disability/hub';
+    window.location.hash = '';
+    if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
     toast.success(
       direction === 'rtl' ? 'تم تسجيل الخروج بنجاح' : 'Signed out successfully',
       direction === 'rtl' ? 'تسجيل الخروج' : 'Sign Out'
@@ -186,8 +186,7 @@ export default function App() {
     if (typeof window !== 'undefined') {
       if (sessionStorage.getItem('cognify_exit_preview') === 'true') return null;
       const isExplicit = sessionStorage.getItem('cognify_guest_preview') === 'disability';
-      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      if (isExplicit || isLocalDev) {
+      if (isExplicit) {
         return createGuestProfile();
       }
     }
@@ -428,9 +427,11 @@ export default function App() {
     const route = parseRoute(window.location.hash);
     const canonicalHash = buildHash(route);
 
-    // If there's no hash on load, replace with canonical hash without extra history entry
+    // If there's no hash on load, only set canonical hash if the user is already authenticated or in preview
     if (!window.location.hash || window.location.hash === '#') {
-      window.history.replaceState({ view: route.view, tab: route.tab }, '', canonicalHash);
+      if (isGuestPreview || user) {
+        window.history.replaceState({ view: route.view, tab: route.tab }, '', canonicalHash);
+      }
     }
 
     const handlePopState = (event: PopStateEvent) => {
@@ -1023,18 +1024,13 @@ export default function App() {
   }
 
   if (!user && !isGuestPreview) {
-    // Preserve unauthenticated deep-link or expired session destination before presenting Login
-    const currentRoute: RouteState = { view: currentView, tab: disabilityTab };
-    saveReturnDestination(currentRoute, window.location.hash);
-
-    // If user was previously known but auth state turned null unexpectedly (not explicit logout)
-    try {
-      const lastUid = localStorage.getItem('last_known_uid');
-      const isExplicitExit = sessionStorage.getItem('cognify_exit_preview') === 'true';
-      if (lastUid && !isExplicitExit) {
-        markSessionExpired();
-      }
-    } catch {}
+    // Preserve unauthenticated deep-link destination before presenting Login (only if an explicit non-root deep link was requested)
+    const rawHash = typeof window !== 'undefined' ? window.location.hash : '';
+    const cleanHash = rawHash.replace(/^[#/]+/, '').trim();
+    if (cleanHash && cleanHash !== 'disability/hub' && cleanHash !== 'hub' && cleanHash !== 'login') {
+      const currentRoute: RouteState = { view: currentView, tab: disabilityTab };
+      saveReturnDestination(currentRoute, rawHash);
+    }
 
     return <Login onDirectPreview={handleEnterGuestPreview} />;
   }
@@ -1089,6 +1085,7 @@ export default function App() {
               onStreamingUpdate={(text) => setCurrentAIResponse(text)}
               onSTTStateChange={setIsSTTActive}
               setProfile={setProfile}
+              onNavigateBack={() => navigateTo('disability')}
             />
           </>
         );
@@ -1163,12 +1160,23 @@ export default function App() {
         );
       case 'profile':
         return (
-          <ProfilePage
+          <DisabilityModeView
+            ref={chatRef}
             profile={activeProfile}
             onMenuClick={handleOpenMobileMenu}
-            onNavigateBack={handleBack}
+            onNavigate={navigateTo}
+            onQuestionEvaluated={updateQuestionHistory}
+            syncMessages={syncActiveThread}
+            externalMessage={externalMessage}
+            onStreamingUpdate={(text) => setCurrentAIResponse(text)}
+            onSTTStateChange={setIsSTTActive}
+            currentTab="progress"
+            onTabChange={(newTab) => {
+              if (newTab === 'progress') return;
+              setDisabilityTab(newTab);
+              navigateTo('disability');
+            }}
             setProfile={setProfile}
-            onNavigate={(v) => navigateTo(v)}
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
           />
@@ -1176,14 +1184,14 @@ export default function App() {
       case 'privacy_security':
       case 'privacy':
         return (
-          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-cognify-bg-dark text-stone-100' : 'bg-cognify-bg-light text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
+          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
             <header className="flex items-center gap-3 mb-6">
               <button
                 type="button"
                 onClick={handleBack}
                 aria-label={localize(activeProfile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
                 title={localize(activeProfile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
-                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-cognify-surface-dark border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
+                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                 <span className="text-xs font-bold hidden sm:inline">{localize(activeProfile.language, 'Back', 'رجوع')}</span>
@@ -1191,7 +1199,7 @@ export default function App() {
               <button 
                 type="button"
                 onClick={handleOpenMobileMenu}
-                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-cognify-surface-dark border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
+                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-[#162327] border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
                 aria-label={localize(activeProfile.language, 'Toggle menu', 'فتح القائمة الرئيسية')}
               >
                 <Menu className="w-6 h-6" />
@@ -1208,257 +1216,29 @@ export default function App() {
       case 'support':
         return <SupportCenter profile={activeProfile} onMenuClick={handleOpenMobileMenu} onNavigateBack={handleBack} />;
 
-      case 'settings': {
-        const ALL_SUPPORTED_LANGUAGES: { id: LanguagePreference; label: string; flag: string; nativeName: string }[] = [
-          { id: 'French', label: 'French', flag: '🇫🇷', nativeName: 'Français' },
-          { id: 'English', label: 'English', flag: '🇬🇧', nativeName: 'English' },
-          { id: 'Arabic', label: 'Arabic', flag: '🇸🇦', nativeName: 'العربية' },
-          { id: 'Egyptian Ammiya', label: 'Egyptian Ammiya', flag: '🇪🇬', nativeName: 'مصري' },
-          { id: 'Spanish', label: 'Spanish', flag: '🇪🇸', nativeName: 'Español' },
-          { id: 'German', label: 'German', flag: '🇩🇪', nativeName: 'Deutsch' },
-          { id: 'Italian', label: 'Italian', flag: '🇮🇹', nativeName: 'Italiano' },
-          { id: 'Portuguese', label: 'Portuguese', flag: '🇵🇹', nativeName: 'Português' },
-          { id: 'Russian', label: 'Russian', flag: '🇷🇺', nativeName: 'Русский' },
-          { id: 'Chinese', label: 'Chinese', flag: '🇨🇳', nativeName: '中文' },
-          { id: 'Japanese', label: 'Japanese', flag: '🇯🇵', nativeName: '日本語' },
-        ];
-
-        const handleLanguageChange = async (newLang: LanguagePreference) => {
-          if (!profile?.uid) return;
-          const previousLang = profile.language;
-          setProfile({ ...profile, language: newLang });
-          const path = `users/${profile.uid}`;
-          try {
-            await setDoc(doc(db, path), cleanDataForFirestore({ language: newLang }), { merge: true });
-            toast.success(
-              localize(newLang, 'Language updated successfully', 'تم تحديث اللغة بنجاح'),
-              localize(newLang, 'Language Selection', 'اختيار اللغة')
-            );
-          } catch (err) {
-            console.error('Failed to update language in settings:', err);
-            setProfile({ ...profile, language: previousLang });
-            toast.error(
-              localize(previousLang, 'Failed to update language. Please check your connection.', 'فشل تحديث اللغة. تحقق من اتصالك.'),
-              localize(previousLang, 'Update Error', 'خطأ في التحديث')
-            );
-          }
-        };
-
+      case 'settings':
         return (
-          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-cognify-bg-dark text-stone-100' : 'bg-cognify-bg-light text-stone-900'} relative overflow-hidden font-sans custom-scrollbar`}>
-            {/* Ambient Lighting Orbs - Serene Teal & Subtle Warm Amber */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 hidden md:block">
-              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[140px]" />
-              <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[140px]" />
-              <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-teal-600/10 rounded-full blur-[140px]" />
-            </div>
-
-            <header className="p-6 md:p-10 shrink-0 flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleBack}
-                aria-label={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
-                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-cognify-surface-dark border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
-                title={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
-              >
-                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-                <span className="text-xs font-bold hidden sm:inline">{localize(profile.language, 'Back', 'رجوع')}</span>
-              </button>
-              <button 
-                type="button"
-                onClick={handleOpenMobileMenu}
-                className={`min-h-[44px] min-w-[44px] p-2.5 ${isDarkMode ? 'text-stone-300 bg-cognify-surface-dark border-stone-800 hover:text-white hover:bg-stone-800' : 'text-stone-700 bg-white border-stone-200 hover:text-stone-950 hover:bg-stone-100'} shadow-sm border rounded-2xl active:scale-95 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]`}
-                aria-label={localize(profile.language, 'Toggle menu', 'فتح القائمة الرئيسية')}
-                title={localize(profile.language, 'Open Menu', 'فتح القائمة')}
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </header>
-            <div className="flex-1 flex items-center justify-center p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-              <div className={`${isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white shadow-2xl' : 'bg-white border-stone-200 text-stone-900 shadow-sm'} rounded-[32px] sm:rounded-[40px] border backdrop-blur-xl max-w-2xl w-full p-6 sm:p-8 md:p-12 space-y-8 my-auto`}>
-                <div className="text-center space-y-2">
-                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">{getTranslation(profile.language, 'settings')}</h2>
-                  <div className="h-1.5 w-20 bg-gradient-to-r from-teal-600 to-teal-400 mx-auto rounded-full shadow-md" />
-                </div>
-
-                {/* Language Selection Card */}
-                <div className={`p-5 sm:p-6 ${isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4`}>
-                  <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
-                    <Globe className="w-5 h-5" />
-                    <h3 className="text-sm font-black uppercase tracking-widest">
-                      {localize(profile.language, 'Language Selection', 'اختيار اللغة')}
-                    </h3>
-                  </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                    {localize(
-                      profile.language,
-                      'Choose your preferred system & AI communication language',
-                      'اختر لغة واجهة النظام والتواصل والتوجيه مع المساعد الذكي'
-                    )}
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
-                    {ALL_SUPPORTED_LANGUAGES.map((lang) => {
-                      const isSelected = profile.language === lang.id;
-                      return (
-                        <button
-                          key={lang.id}
-                          onClick={() => handleLanguageChange(lang.id)}
-                          className={`p-3 rounded-2xl border flex items-center justify-between transition-all active:scale-95 text-start cursor-pointer ${
-                            isSelected
-                              ? 'border-teal-600 bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 font-bold shadow-sm'
-                              : isDarkMode
-                                ? 'border-stone-800 bg-cognify-surface-dark text-stone-300 hover:border-teal-700/50 hover:text-white'
-                                : 'border-stone-200 bg-white text-stone-700 hover:border-teal-600/40 hover:text-stone-950'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-lg shrink-0">{lang.flag}</span>
-                            <div className="truncate">
-                              <p className="text-xs font-bold leading-none">{lang.nativeName}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5 truncate">{lang.label}</p>
-                            </div>
-                          </div>
-                          {isSelected && <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 ml-1" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Custom API Key Card */}
-                <div className={`p-5 sm:p-6 ${isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4`}>
-                  <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
-                    <Key className="w-5 h-5" />
-                    <h3 className="text-sm font-black uppercase tracking-widest">
-                      {localize(profile.language, 'AI Provider & Custom Key', 'مفتاح الذكاء الاصطناعي الخاص')}
-                    </h3>
-                  </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                    {localize(
-                      profile.language,
-                      'If hosting on static platforms (such as Vercel), you can paste your own Google Gemini or Groq API key here. It is stored securely on your local device and enables direct browser AI responses.',
-                      'إذا كنت تتصفح عبر استضافة ساكنة (مثل Vercel)، يمكنك وضع مفتاح Google Gemini أو Groq الخاص بك هنا. يُحفظ المفتاح بأمان محلياً على جهازك لتشغيل الذكاء الاصطناعي مباشرة.'
-                    )}
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="password"
-                      defaultValue={secureLoadKeySync('gemini')}
-                      id="cognify-custom-gemini-key-input"
-                      placeholder="AIzaSy... (Gemini API Key)"
-                      className={`flex-1 px-4 py-3 ${isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white placeholder-stone-500' : 'bg-white border-stone-200 text-stone-900 placeholder-stone-400'} border rounded-2xl text-xs font-mono focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20`}
-                    />
-                    <button
-                      onClick={async () => {
-                        const input = document.getElementById('cognify-custom-gemini-key-input') as HTMLInputElement | null;
-                        if (input) {
-                          const val = input.value.trim();
-                          try {
-                            if (val) {
-                              await secureSaveKey('gemini', val);
-                              toast.success(
-                                localize(profile.language, 'Gemini API Key encrypted & saved locally!', 'تم تشفير وحفظ مفتاح Gemini API بنجاح!'),
-                                localize(profile.language, 'Key Encrypted & Saved', 'تم التشفير والحفظ')
-                              );
-                            } else {
-                              secureRemoveKey('gemini');
-                              toast.info(
-                                localize(profile.language, 'Custom key removed. Using server default.', 'تم حذف المفتاح الخاص والعودة لافتراضي السيرفر.'),
-                                localize(profile.language, 'Key Removed', 'تم الحذف')
-                              );
-                            }
-                          } catch {
-                            toast.error(
-                              localize(profile.language, 'Could not save key (storage restricted).', 'تعذر حفظ المفتاح (التخزين المحلي معطل).'),
-                              localize(profile.language, 'Error', 'خطأ')
-                            );
-                          }
-                        }
-                      }}
-                      className="px-6 py-3 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-2xl text-xs uppercase tracking-wider shadow-sm active:scale-95 transition-all shrink-0 cursor-pointer"
-                    >
-                      {localize(profile.language, 'Save Key', 'حفظ المفتاح')}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className={`p-6 ${isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-3`}>
-                     <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
-                       <Settings className="w-5 h-5" />
-                       <h3 className="text-sm font-black uppercase tracking-widest">{localize(profile.language, 'Core Parameters', 'المعايير الأساسية')}</h3>
-                     </div>
-                     <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
-                       {localize(
-                         profile.language,
-                         'Fundamental configuration (IQ, Level, Role). These are recalibrated automatically based on your performance and institutional metadata.',
-                         'التكوين الأساسي (المستوى المعرفي، الدرجة، التخصص). تتم معايرتها تلقائياً وفق أدائك.'
-                       )}
-                     </p>
-                   </div>
-
-                   <div className={`p-6 ${isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4`}>
-                     <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
-                       {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-                       <h3 className="text-sm font-black uppercase tracking-widest">{localize(profile.language, 'Interface Theme', 'مظهر الواجهة')}</h3>
-                     </div>
-                     <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
-                       {localize(
-                         profile.language,
-                         'Switch between light and dark visual themes to reduce eye strain in low-light environments.',
-                         'التبديل بين الوضع الليلي والنهاري لتقليل إجهاد العين في الإضاءة الخافتة.'
-                       )}
-                     </p>
-                     <button
-                       onClick={toggleTheme}
-                       className={`w-full py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
-                         isDarkMode 
-                           ? 'bg-teal-950/60 border border-teal-800/60 text-teal-300 hover:bg-teal-900/60' 
-                           : 'bg-white border border-stone-200 text-stone-800 hover:bg-stone-100'
-                       }`}
-                     >
-                       {isDarkMode 
-                         ? localize(profile.language, '🌙 Dark Mode Active', '🌙 الوضع الليلي مفعل') 
-                         : localize(profile.language, '☀️ Light Mode Active', '☀️ الوضع النهاري مفعل')}
-                     </button>
-                   </div>
-
-                   {/* Privacy & Data Sovereignty Card */}
-                   <div className={`p-6 ${isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'} rounded-3xl border space-y-4 md:col-span-2`}>
-                     <div className="flex items-center gap-2 text-rose-500">
-                       <Shield className="w-5 h-5" />
-                       <h3 className="text-sm font-black uppercase tracking-widest">{localize(profile.language, 'Privacy & Data Sovereignty (GDPR / FERPA)', 'الخصوصية وسيادة البيانات')}</h3>
-                     </div>
-                     <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
-                       {localize(
-                         profile.language,
-                         'Export your complete machine-readable learning archive, inspect provenance of stored facts, reset adaptive AI preferences, or permanently delete your account and all cloud data.',
-                         'تصدير أرشيفك التعليمي الشامل، فحص مصادر الحقائق المحفوظة، إعادة ضبط تفضيلات الذكاء الاصطناعي، أو حذف حسابك وكافة بياناتك السحابية نهائياً.'
-                       )}
-                     </p>
-                     <button
-                       onClick={() => navigateTo('privacy')}
-                       className="py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer"
-                     >
-                       <Shield className="w-4 h-4" />
-                       <span>{localize(profile.language, 'Manage Privacy, Export & Erasure', 'إدارة الخصوصية والتصدير والحذف')}</span>
-                     </button>
-                   </div>
-                </div>
-
-                <button 
-                  onClick={() => navigateTo(homeViewFor(profile))}
-                  className="w-full py-4 bg-teal-700 hover:bg-teal-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  {isAccessibilityUser(profile)
-                    ? (isRTL(profile.language) ? 'العودة لمركز إمكانية الوصول' : localize(profile.language, 'Return to Accessibility Hub', 'العودة لمركز إمكانية الوصول'))
-                    : getTranslation(profile.language, 'returnToChat')}
-                </button>
-              </div>
-            </div>
-          </div>
+          <DisabilityModeView
+            ref={chatRef}
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigate={navigateTo}
+            onQuestionEvaluated={updateQuestionHistory}
+            syncMessages={syncActiveThread}
+            externalMessage={externalMessage}
+            onStreamingUpdate={(text) => setCurrentAIResponse(text)}
+            onSTTStateChange={setIsSTTActive}
+            currentTab="settings"
+            onTabChange={(newTab) => {
+              if (newTab === 'settings') return;
+              setDisabilityTab(newTab);
+              navigateTo('disability');
+            }}
+            setProfile={setProfile}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
+          />
         );
-      }
       default:
         return (
           <DisabilityModeView
@@ -1501,7 +1281,7 @@ export default function App() {
       )}
 
       <div
-        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-cognify-bg-dark text-stone-100' : 'bg-cognify-bg-light text-stone-900'} font-sans overflow-hidden selection:bg-teal-500/30 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
+        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} font-sans overflow-hidden selection:bg-teal-500/30 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
           profile?.accessibilityMode === 'Visual' ? 'text-lg contrast-125' : ''
         }`}
         dir={direction}
@@ -1512,7 +1292,7 @@ export default function App() {
         {/* WCAG 2.4.1 Skip to main content link */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2.5 focus:bg-cognify-focus focus:text-slate-950 focus:font-black focus:rounded-2xl focus:shadow-2xl focus:ring-4 focus:ring-[#E5A93C]/30 transition-all text-xs"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2.5 focus:bg-[#E5A93C] focus:text-slate-950 focus:font-black focus:rounded-2xl focus:shadow-2xl focus:ring-4 focus:ring-[#E5A93C]/30 transition-all text-xs"
         >
           {localize(profile?.language, 'Skip to main content', 'الانتقال إلى المحتوى الرئيسي')}
         </a>
@@ -1593,7 +1373,7 @@ export default function App() {
         <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
           <Suspense
             fallback={
-              <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-cognify-bg-dark text-teal-400">
+              <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
                 <Loader2 className="w-8 h-8 text-teal-400 animate-spin" aria-hidden="true" />
                 <span className="sr-only">Loading view...</span>
               </div>

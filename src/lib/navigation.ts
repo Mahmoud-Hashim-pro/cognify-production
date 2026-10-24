@@ -21,7 +21,8 @@ export type DisabilityTab =
   | 'radar'
   | 'caregiver'
   | 'deaf'
-  | 'orchestrator';
+  | 'orchestrator'
+  | 'progress';
 
 export interface RouteState {
   view: AppView;
@@ -37,7 +38,7 @@ export const VALID_VIEWS: readonly AppView[] = [
 ] as const;
 
 export const VALID_DISABILITY_TABS: readonly DisabilityTab[] = [
-  'hub', 'chat', 'vision', 'deaf', 'caregiver', 'orchestrator', 'org', 'settings', 'video', 'studio', 'bridge', 'radar'
+  'hub', 'chat', 'vision', 'deaf', 'caregiver', 'orchestrator', 'org', 'settings', 'video', 'studio', 'bridge', 'radar', 'progress'
 ] as const;
 
 export const STORAGE_KEYS = {

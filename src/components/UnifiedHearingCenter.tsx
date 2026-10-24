@@ -5,7 +5,7 @@ import {
   CameraOff,
   Volume2,
   Play,
-  Square,
+  Pause,
   RotateCcw,
   Sparkles,
   ArrowRight,
@@ -14,7 +14,16 @@ import {
   Bot,
   Hand,
   Mic,
-  MicOff
+  MicOff,
+  Settings,
+  Sliders,
+  Info,
+  Check,
+  X,
+  ShieldCheck,
+  RefreshCw,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
@@ -56,25 +65,25 @@ export default function UnifiedHearingCenter({
   const isMinorStudent = Boolean((profile.age && profile.age < 18) || (profile as any).isMinor);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(false);
 
-  // Helper for 100% dialect-responsive localization
+  // Helper for dialect-responsive localization
   const loc = useCallback(
     (en: string, ar: string) => (dialect === 'English' ? en : ar),
     [dialect]
   );
 
   // ───────────────────────────────────────────────────────────────────────────
-  // HALF 1: 3D SIGN AVATAR & AI TUTOR STATE
+  // RIGHT PANEL (3D SIGN AVATAR & AI TUTOR STATE)
   // ───────────────────────────────────────────────────────────────────────────
-  const [avatarWords, setAvatarWords] = useState<string[]>(['أهلا', 'بك']);
+  const [avatarWords, setAvatarWords] = useState<string[]>(['مرحبا']);
   const [isAvatarPlaying, setIsAvatarPlaying] = useState<boolean>(true);
-  const [currentSigningWord, setCurrentSigningWord] = useState<string>('أهلا');
+  const [currentSigningWord, setCurrentSigningWord] = useState<string>('مرحبا');
   const [aiQuestion, setAiQuestion] = useState<string>('');
   const [aiAnswer, setAiAnswer] = useState<string>(
     isEgyptian
-      ? 'أهلاً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
+      ? 'أهلاً بك! اكتب أي نص أو اسأل سؤالاً وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
       : isAr
-      ? 'مرحباً بك! اسألني أي سؤال دراسي أو عام وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
-      : 'Welcome! Ask me any question and I will explain it in 3D Sign Language and text.'
+      ? 'مرحباً بك! اكتب أي نص أو اسأل سؤالاً وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
+      : 'Welcome! Type any text or ask a question and I will explain it in 3D Sign Language and text.'
   );
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
   const [isQuestionVoiceActive, setIsQuestionVoiceActive] = useState<boolean>(false);
@@ -133,8 +142,6 @@ Question: "${q}"`;
           : 'Understood, I will explain this in sign language.';
       }
       setAiAnswer(cleanAnswer);
-
-      // Animate 3D Sign Avatar
       triggerAvatarSign(cleanAnswer);
       toast.success(
         loc('Answer generated & signed in 3D', 'تمت الإجابة والترجمة للغة الإشارة 3D')
@@ -148,7 +155,6 @@ Question: "${q}"`;
     }
   };
 
-  // Direct 3D script signing without waiting for AI pedagogical answer
   const handleDirectSignScript = (overrideText?: string) => {
     const text = (overrideText || aiQuestion).trim();
     if (!text) return;
@@ -161,7 +167,6 @@ Question: "${q}"`;
     );
   };
 
-  // Mic voice input for asking AI question
   const toggleQuestionVoice = () => {
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRec) {
@@ -197,13 +202,16 @@ Question: "${q}"`;
   };
 
   // ───────────────────────────────────────────────────────────────────────────
-  // HALF 2: CAMERA SIGN RECOGNITION (IN PLACE OF THE MICROPHONE) TO TEXT & SPEECH
+  // LEFT PANEL (CAMERA SIGN RECOGNITION TO TEXT & LIVE SPEECH)
   // ───────────────────────────────────────────────────────────────────────────
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [cameraStatus, setCameraStatus] = useState<string>('');
   const [detectedSign, setDetectedSign] = useState<string>('');
-  const [accumulatedText, setAccumulatedText] = useState<string>('');
+  const [accumulatedText, setAccumulatedText] = useState<string>('مرحباً، كيف حالك؟');
   const [isSpeakingCameraText, setIsSpeakingCameraText] = useState<boolean>(false);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
+  const [autoVoice, setAutoVoice] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -212,6 +220,10 @@ Question: "${q}"`;
   const cameraRef = useRef<MediaPipeCamera | null>(null);
   const lastDetectedSignRef = useRef<string>('');
   const lastSignTimeRef = useRef<number>(0);
+  const showSkeletonRef = useRef<boolean>(true);
+  showSkeletonRef.current = showSkeleton;
+  const autoVoiceRef = useRef<boolean>(false);
+  autoVoiceRef.current = autoVoice;
 
   // Gesture heuristic analyzer based on 21 MediaPipe hand landmarks
   const analyzeLandmarksGesture = useCallback((landmarks: Array<{ x: number; y: number; z: number }>): string | null => {
@@ -282,17 +294,19 @@ Question: "${q}"`;
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const landmarks = results.multiHandLandmarks[0];
 
-      // Draw skeleton connecting points
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 3;
-      ctx.fillStyle = '#f59e0b';
+      if (showSkeletonRef.current) {
+        // Draw skeleton connecting points in sleek cyan
+        ctx.strokeStyle = '#12CFE0';
+        ctx.lineWidth = 2.5;
+        ctx.fillStyle = '#10B8B0';
 
-      for (let i = 0; i < landmarks.length; i++) {
-        const x = landmarks[i].x * canvas.width;
-        const y = landmarks[i].y * canvas.height;
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, 2 * Math.PI);
-        ctx.fill();
+        for (let i = 0; i < landmarks.length; i++) {
+          const x = landmarks[i].x * canvas.width;
+          const y = landmarks[i].y * canvas.height;
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, 2 * Math.PI);
+          ctx.fill();
+        }
       }
 
       // Analyze gesture
@@ -312,12 +326,16 @@ Question: "${q}"`;
             const separator = prev.trim() ? ' ' : '';
             return prev + separator + recognized;
           });
+
+          if (autoVoiceRef.current) {
+            speak(recognized, dialect);
+          }
         }
       }
     } else {
       setDetectedSign('');
     }
-  }, [analyzeLandmarksGesture]);
+  }, [analyzeLandmarksGesture, dialect]);
 
   // Start Camera handler
   const handleStartCamera = async () => {
@@ -369,7 +387,7 @@ Question: "${q}"`;
       }
 
       setIsCameraActive(true);
-      setCameraStatus(loc('Live Camera Tracking', 'الكاميرا متصلة وترصد الإشارات'));
+      setCameraStatus(loc('Camera Active', 'الكاميرا تعمل'));
       triggerHapticAlert('single-pulse');
     } catch (err) {
       console.error('[SignCamera] Failed to open camera:', err);
@@ -407,11 +425,12 @@ Question: "${q}"`;
 
   // Speak accumulated camera text aloud in Live Audio
   const handleSpeakAccumulatedText = () => {
-    if (!accumulatedText.trim()) return;
+    const textToSpeak = accumulatedText.trim() || (isAr ? 'مرحباً، كيف حالك؟' : 'Hello, how are you?');
+    if (!textToSpeak) return;
     setIsSpeakingCameraText(true);
     triggerHapticAlert('single-pulse');
 
-    speak(accumulatedText.trim(), dialect, {
+    speak(textToSpeak, dialect, {
       rate: 1.0,
       onStart: () => setIsSpeakingCameraText(true),
       onEnd: () => setIsSpeakingCameraText(false),
@@ -419,503 +438,589 @@ Question: "${q}"`;
     });
   };
 
-  // Send accumulated camera text to the AI half
-  const handleSendToAiTutor = () => {
-    if (!accumulatedText.trim()) return;
-    setAiQuestion(accumulatedText.trim());
-    handleAskAi(accumulatedText.trim());
-    toast.success(loc('Sent to AI Avatar Tutor', 'تم إرسال السؤال للأفاتار 3D'));
-  };
-
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className={`flex-1 flex flex-col h-full overflow-hidden select-none transition-colors duration-300 ${
-        isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'
-      }`}
+      className="flex-1 flex flex-col h-full overflow-y-auto custom-scrollbar select-none bg-[#071B33] text-[#F4F7FB] p-3 sm:p-5 lg:p-6"
     >
-      {/* ── TOP HEADER ── */}
-      <header className={`px-4 py-2.5 border-b backdrop-blur-xl flex items-center justify-between gap-3 shrink-0 z-10 transition-colors duration-300 ${
-        isDarkMode
-          ? 'border-stone-800 bg-[#0E1416]/95 text-white'
-          : 'border-stone-200/90 bg-white/95 text-stone-900 shadow-sm'
-      }`}>
-        <div className="flex items-center gap-2.5">
-          {onNavigateBack && (
-            <button
-              type="button"
-              onClick={onNavigateBack}
-              aria-label={loc('Back to Hub', 'رجوع للرئيسية')}
-              className={`p-1.5 rounded-xl border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
-                isDarkMode
-                  ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800'
-                  : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
-              }`}
-              title={loc('Back to Hub', 'رجوع للرئيسية')}
-            >
-              <ArrowRight className={`w-4 h-4 ${isAr ? '' : 'rotate-180'}`} aria-hidden="true" />
-            </button>
-          )}
-          <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
-            isDarkMode
-              ? 'bg-teal-950/60 border-teal-800 text-teal-400'
-              : 'bg-teal-50 border-teal-200 text-teal-800'
-          }`}>
-            <Ear className="w-4 h-4" />
+      {/* ── TOP SUB-HEADER: TITLE & DIALECT SWITCHER (Matching Reference) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-5">
+        {/* Right Side in RTL: Icon + Main Title + Subtitle */}
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-[#0D2542] border border-[#12CFE0]/30 text-[#12CFE0] flex items-center justify-center shadow-[0_0_20px_rgba(18,207,224,0.15)] shrink-0">
+            <Ear className="w-6 h-6 text-[#12CFE0]" aria-hidden="true" />
           </div>
           <div>
-            <h1 className={`font-black text-sm leading-tight flex items-center gap-2 ${
-              isDarkMode ? 'text-white' : 'text-stone-900'
-            }`}>
-              <span>{loc('Unified 3D Sign & Hearing Studio', 'استوديو ومحطة لغة الإشارة 3D الموحدة')}</span>
+            <h1 className="text-xl sm:text-2xl font-black text-[#F4F7FB] tracking-tight leading-snug">
+              {loc('Sign Language Studio', 'استوديو لغة الإشارة')}
             </h1>
-            <p className={`text-[10px] ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
+            <p className="text-xs sm:text-sm text-[#A9BDD3] leading-relaxed">
               {loc(
-                '3D Sign Avatar translation & AI Tutor | Live camera sign recognition & speech',
-                'ترجمة النصوص وشرح الأفاتار 3D بالذكاء الاصطناعي | كاميرا قراءة الإشارات وتحويلها لصوت فوري'
+                'Translating texts and explaining ideas in sign language. Sign reading camera, and converting them to instant voice.',
+                'ترجمة النصوص وشرح الأفكار بلغة الإشارة. كاميرا قراءة الإشارات، وتحويلها لصوت فوري.'
               )}
             </p>
           </div>
         </div>
 
-        {/* Dialect Switcher */}
-        <div className={`flex items-center gap-1 border p-1 rounded-xl text-xs ${
-          isDarkMode
-            ? 'bg-[#162327] border-stone-800'
-            : 'bg-stone-100 border-stone-200'
-        }`}>
-          {(['Egyptian Ammiya', 'Arabic', 'English'] as Dialect[]).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDialect(d)}
-              className={`px-2 py-1 rounded-lg font-bold transition-all text-[11px] cursor-pointer ${
-                dialect === d
-                  ? 'bg-teal-700 text-white font-black shadow-sm'
-                  : isDarkMode
-                    ? 'text-stone-400 hover:text-stone-200'
-                    : 'text-stone-600 hover:text-stone-950'
+        {/* Left Side in RTL: Dialect Pills */}
+        <div
+          role="group"
+          aria-label={loc('Sign language dialect selection', 'اختيار لهجة لغة الإشارة')}
+          className="flex items-center gap-1.5 p-1 rounded-full bg-[#0D2542] border border-[#12CFE0]/20 self-start sm:self-auto shrink-0 shadow-inner"
+        >
+          {([
+            { id: 'Egyptian Ammiya' as const, labelEn: '🇪🇬 Egyptian', labelAr: 'مصري', icon: true },
+            { id: 'Arabic' as const, labelEn: '🇸🇦 Arabic', labelAr: 'عربي', icon: false },
+            { id: 'English' as const, labelEn: 'us EN', labelAr: 'us EN', icon: false },
+          ]).map((item) => {
+            const isSelected = dialect === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setDialect(item.id)}
+                aria-pressed={isSelected}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none ${
+                  isSelected
+                    ? 'bg-[#087F8C] text-white shadow-md shadow-[#087F8C]/30'
+                    : 'text-[#A9BDD3] hover:text-[#F4F7FB] hover:bg-[#102D4D]/60'
+                }`}
+              >
+                {item.icon && <Hand className="w-3.5 h-3.5 shrink-0 text-[#12CFE0]" aria-hidden="true" />}
+                <span>{dialect === 'English' ? item.labelEn : item.labelAr}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── TWO-COLUMN MAIN WORKSPACE (Camera Left, Avatar Right) ── */}
+      {/* Container forced to LTR so Column 1 is ALWAYS visual Left, Column 2 is visual Right */}
+      <div
+        style={{ direction: 'ltr' }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 flex-1 items-stretch"
+      >
+        {/* ══════════════════════════════════════════════════════════════════════
+            COLUMN 1 (VISUAL LEFT): SMART SIGN READING CAMERA WORKSPACE
+           ══════════════════════════════════════════════════════════════════════ */}
+        <section
+          dir={isAr ? 'rtl' : 'ltr'}
+          aria-label={loc('Sign Language Camera and Live Translation', 'كاميرا قراءة لغة الإشارة والترجمة الفورية')}
+          className="bg-[#0D2542] border border-[#12CFE0]/20 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xl relative overflow-hidden transition-all duration-300"
+        >
+          {/* Card Header: Camera Icon & Title (Right in RTL) + Status Badge (Left in RTL) */}
+          <div className="flex items-center justify-between pb-3 border-b border-[#12CFE0]/15 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#102D4D] border border-[#12CFE0]/30 text-[#12CFE0] flex items-center justify-center shrink-0">
+                <Camera className="w-5 h-5 text-[#12CFE0]" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#F4F7FB] leading-tight">
+                  {loc('Smart Sign Language Reading Camera', 'كاميرا قراءة لغة الإشارة الذكية')}
+                </h2>
+                <p className="text-[11px] text-[#A9BDD3] mt-0.5">
+                  {loc(
+                    'Point the camera at the person using sign language or in front of you to begin translation.',
+                    'قم بتوجيه الكاميرا نحو الشخص الذي يستخدم لغة الإشارة أو أمامك لبدء الترجمة.'
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Live Camera Status Pill */}
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 border transition-colors ${
+                isCameraActive
+                  ? 'bg-[#082344] text-[#12CFE0] border-[#12CFE0]/40'
+                  : 'bg-[#082344] text-[#A9BDD3] border-white/10'
               }`}
             >
-              {d === 'Egyptian Ammiya' ? '🇪🇬 مصري' : d === 'Arabic' ? '🇸🇦 فصحى' : '🇺🇸 EN'}
-            </button>
-          ))}
-        </div>
-      </header>
-
-      {/* ── BILATERAL SIGN LANGUAGE STATION: TWO CARDS ── */}
-      <main className={`flex-1 min-h-0 p-3 sm:p-4 pb-6 sm:pb-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 overflow-y-auto custom-scrollbar ${
-        isDarkMode ? 'bg-[#0E1416]' : 'bg-[#FAF8F5]'
-      }`}>
-
-        {/* ══════════════════════════════════════════════════════════════════════
-            CARD 1: THE 3D AVATAR & SCRIPT STUDIO (اسأل الذكاء الاصطناعي أو ترجم مباشرة)
-           ══════════════════════════════════════════════════════════════════════ */}
-        <div className={`border rounded-2xl p-3 sm:p-3.5 flex flex-col shadow-xl relative overflow-hidden group transition-colors duration-300 ${
-          isDarkMode
-            ? 'bg-[#121B1E] border-stone-800'
-            : 'bg-white border-stone-200 shadow-sm'
-        }`}>
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className={`flex items-center justify-between pb-2 border-b shrink-0 ${
-              isDarkMode ? 'border-stone-800/80' : 'border-stone-100'
-            }`}>
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                  isDarkMode ? 'bg-teal-950/60 text-teal-400 border border-teal-800' : 'bg-teal-50 text-teal-700 border border-teal-200'
-                }`}>
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className={`text-xs sm:text-sm font-black flex items-center gap-1.5 flex-wrap ${
-                    isDarkMode ? 'text-white' : 'text-stone-900'
-                  }`}>
-                    <span>{loc('3D Sign Avatar & Interactive Studio', 'أفاتار واستوديو لغة الإشارة 3D التفاعلي')}</span>
-                  </h2>
-                  <p className={`text-[10px] ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
-                    {loc('Type any script to sign directly, or ask AI to explain concepts in 3D', 'اكتب أي نص لترجمته للإشارة 3D مباشرة أو اسأل الذكاء الاصطناعي')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Avatar Controls */}
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsAvatarPlaying(!isAvatarPlaying)}
-                  aria-label={isAvatarPlaying ? loc('Pause 3D Avatar', 'إيقاف الأفاتار') : loc('Play 3D Avatar', 'تشغيل الأفاتار')}
-                  aria-pressed={isAvatarPlaying}
-                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
-                    isDarkMode
-                      ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white'
-                      : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
-                  }`}
-                  title={isAvatarPlaying ? loc('Pause', 'إيقاف مؤقت') : loc('Play', 'تشغيل')}
-                >
-                  {isAvatarPlaying ? <Square className="w-3.5 h-3.5" aria-hidden="true" /> : <Play className="w-3.5 h-3.5" aria-hidden="true" />}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReplayAvatar}
-                  aria-label={loc('Replay Sign Sequence', 'إعادة الحركة الإشارية')}
-                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
-                    isDarkMode
-                      ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-teal-400'
-                      : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-teal-700 hover:bg-stone-200'
-                  }`}
-                  title={loc('Replay Sign Sequence', 'إعادة الحركة الإشارية')}
-                >
-                  <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
-                </button>
-              </div>
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isCameraActive ? 'bg-[#10B981] animate-pulse' : 'bg-stone-500'
+                }`}
+                aria-hidden="true"
+              />
+              <span>
+                {isCameraActive
+                  ? loc('Camera Active', 'الكاميرا تعمل')
+                  : loc('Camera Idle', 'الكاميرا متوقفة')}
+              </span>
             </div>
+          </div>
 
-            {/* 3D Avatar Canvas */}
-            <div className={`w-full flex-1 h-[170px] sm:h-[190px] md:h-[210px] min-h-[140px] max-h-[240px] my-1.5 rounded-xl border relative overflow-hidden flex items-center justify-center ${
-              isDarkMode
-                ? 'bg-gradient-to-b from-[#0B1114] to-[#162327] border-stone-800'
-                : 'bg-gradient-to-b from-stone-900 to-stone-950 border-stone-300 shadow-inner'
-            }`}>
-              <React.Suspense
-                fallback={
-                  <div className="flex flex-col items-center justify-center text-stone-400 gap-2">
-                    <div className="w-7 h-7 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-                    <span className="text-xs font-bold">{loc('Loading 3D Avatar…', 'جاري تشغيل الأفاتار 3D...')}</span>
-                  </div>
-                }
-              >
-                <SignAvatar3D
-                  words={avatarWords}
-                  playing={isAvatarPlaying}
-                  onProgress={(idx) => setCurrentSigningWord(avatarWords[idx] || '')}
-                  onDone={() => setIsAvatarPlaying(false)}
-                  className="w-full h-full"
-                />
-              </React.Suspense>
+          {/* Camera Viewport Stage with Sleek Cyan Reticle Corners */}
+          <div className="relative w-full h-[280px] sm:h-[320px] md:h-[350px] my-3 rounded-2xl overflow-hidden bg-[#071B33] border border-[#12CFE0]/15 flex items-center justify-center shadow-inner">
+            {/* Corner Markers (Reticle brackets matching reference) */}
+            <div
+              className="absolute top-3.5 left-3.5 w-6 h-6 border-t-2 border-l-2 border-[#12CFE0] rounded-tl pointer-events-none z-10"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute top-3.5 right-3.5 w-6 h-6 border-t-2 border-r-2 border-[#12CFE0] rounded-tr pointer-events-none z-10"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute bottom-3.5 left-3.5 w-6 h-6 border-b-2 border-l-2 border-[#12CFE0] rounded-bl pointer-events-none z-10"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute bottom-3.5 right-3.5 w-6 h-6 border-b-2 border-r-2 border-[#12CFE0] rounded-br pointer-events-none z-10"
+              aria-hidden="true"
+            />
 
-              {/* Active Sign Ticker */}
-              <div className={`absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg backdrop-blur-md border text-xs ${
-                isDarkMode
-                  ? 'bg-[#0E1416]/90 border-stone-800'
-                  : 'bg-white/95 border-stone-200 text-stone-900 shadow-md'
-              }`}>
-                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
-                  {loc('Signing Word:', 'الكلمة المشارة:')}
+            {/* Actual Video Element */}
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              aria-label={loc('Sign language camera preview', 'معاينة كاميرا لغة الإشارة')}
+              className={`w-full h-full object-cover transform -scale-x-100 ${
+                isCameraActive ? 'block' : 'hidden'
+              }`}
+            />
+
+            {/* Canvas Overlay for hand tracking landmarks */}
+            <canvas
+              ref={canvasRef}
+              aria-hidden="true"
+              className={`absolute inset-0 w-full h-full pointer-events-none transform -scale-x-100 ${
+                isCameraActive ? 'block' : 'hidden'
+              }`}
+            />
+
+            {/* Inactive State Display */}
+            {!isCameraActive && (
+              <div className="flex flex-col items-center justify-center text-center p-4 max-w-sm gap-2">
+                <div className="w-14 h-14 rounded-2xl bg-[#0D2542] border border-[#12CFE0]/30 text-[#12CFE0] flex items-center justify-center shadow-md">
+                  <Hand className="w-7 h-7 text-[#12CFE0]" aria-hidden="true" />
+                </div>
+                <h3 className="text-sm font-bold text-[#F4F7FB]">
+                  {loc('Camera is Ready to Track Signs', 'الكاميرا جاهزة لقراءة لغة الإشارة')}
+                </h3>
+                <p className="text-xs text-[#A9BDD3] leading-relaxed">
+                  {loc(
+                    'Click "Start Camera" below to track hand gestures in real-time and translate them into text and voice.',
+                    'اضغط على زر "تشغيل الكاميرا" بالأسفل لرصد حركة اليدين وتحويلها فوراً إلى نصوص وأصوات مسموعة.'
+                  )}
+                </p>
+              </div>
+            )}
+
+            {/* Live Detected Sign Banner (Floating at bottom of preview) */}
+            {isCameraActive && (
+              <div className="absolute bottom-3 inset-x-3 flex items-center justify-between px-3 py-2 rounded-xl backdrop-blur-md bg-[#071B33]/85 border border-[#12CFE0]/30 text-xs shadow-lg z-10">
+                <span className="text-[11px] font-bold text-[#A9BDD3]">
+                  {cameraStatus || loc('Tracking Hands…', 'جاري رصد حركة اليدين…')}
                 </span>
-                <span className="font-black text-teal-400 text-xs tracking-wide">
-                  {currentSigningWord || avatarWords[0] || '---'}
+                <span className="font-extrabold text-[#12CFE0] text-xs tracking-wide">
+                  {detectedSign
+                    ? (isAr ? `🤟 رُصدت: ${detectedSign}` : `🤟 Detected: ${detectedSign}`)
+                    : loc('Position hands within camera frame', 'ضع يدك بوضوح داخل إطار الكاميرا')}
                 </span>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* AI Subtitles / Explanation Box */}
-            <div className={`p-2 rounded-xl border mb-1.5 min-h-[46px] max-h-[68px] overflow-y-auto custom-scrollbar flex flex-col justify-between shrink-0 ${
-              isDarkMode
-                ? 'bg-[#0B1114] border-stone-800/80 text-stone-200'
-                : 'bg-stone-50 border-stone-200 text-stone-900'
-            }`}>
-              <p className={`text-xs leading-relaxed font-medium ${isDarkMode ? 'text-stone-200' : 'text-stone-800'}`}>
-                {isAiLoading ? (
-                  <span className="text-teal-400 flex items-center gap-1.5 animate-pulse">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{loc('Generating answer & translating to 3D Sign...', 'جاري توليد الإجابة وترجمتها للإشارة 3D...')}</span>
-                  </span>
-                ) : (
-                  aiAnswer
-                )}
-              </p>
-              {!isAiLoading && (
-                <div className={`flex items-center justify-between pt-0.5 text-[10px] border-t mt-1 ${
-                  isDarkMode ? 'border-stone-800 text-stone-500' : 'border-stone-200 text-stone-600'
-                }`}>
-                  <span>{loc('✅ Ready', '✅ جاهز')}</span>
-                </div>
+          {/* Live Translation Result Area */}
+          <div className="space-y-1.5 mb-3">
+            {/* Title & Settings Icon */}
+            <div className="flex items-center justify-between text-xs text-[#A9BDD3] font-bold px-1">
+              <span className="flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5 text-[#12CFE0]" aria-hidden="true" />
+                <span>{loc('Instant Translation', 'الترجمة الفورية')}</span>
+              </span>
+              {accumulatedText.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setAccumulatedText('')}
+                  aria-label={loc('Clear translated text', 'مسح النص المترجم')}
+                  className="text-xs text-[#A9BDD3] hover:text-rose-400 flex items-center gap-1 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-[#12CFE0] rounded px-1"
+                >
+                  <Trash2 className="w-3 h-3" aria-hidden="true" />
+                  <span>{loc('Clear', 'مسح')}</span>
+                </button>
               )}
             </div>
 
-            {/* Script & Question Input Form (Pinned & Always Visible) */}
-            <div className="flex flex-col gap-1.5 pt-0.5 shrink-0 mt-auto">
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="text"
-                  value={aiQuestion}
-                  onChange={(e) => setAiQuestion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      if (e.shiftKey) handleAskAi();
-                      else handleDirectSignScript();
-                    }
-                  }}
-                  aria-label={loc(
-                    'Type any text to sign directly, or ask a question',
-                    'اكتب أي نص أو جملة للترجمة الفورية، أو اسأل سؤالاً'
-                  )}
-                  placeholder={loc(
-                    'Type any text to sign directly, or ask a question…',
-                    'اكتب أي نص أو جملة للترجمة الفورية، أو اسأل سؤالاً...'
-                  )}
-                  className={`flex-1 p-2 rounded-xl border text-xs focus:outline-none transition-all focus-visible:ring-2 focus-visible:ring-teal-400 ${
-                    isDarkMode
-                      ? 'bg-[#0B1114] border-stone-800 text-stone-100 placeholder:text-stone-500 focus:border-teal-500'
-                      : 'bg-white border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-teal-600 shadow-sm'
-                  }`}
-                />
-
-                {/* Voice button */}
-                <button
-                  type="button"
-                  onClick={toggleQuestionVoice}
-                  aria-label={isQuestionVoiceActive ? loc('Stop Voice Input', 'إيقاف الإملاء الصوتي') : loc('Speak by Voice', 'تحدث بالصوت')}
-                  aria-pressed={isQuestionVoiceActive}
-                  className={`p-2 rounded-xl border text-xs transition-colors cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
-                    isQuestionVoiceActive
-                      ? 'bg-rose-500 text-white border-rose-400 animate-pulse'
-                      : isDarkMode
-                        ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white'
-                        : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
-                  }`}
-                  title={loc('Speak by Voice', 'تحدث بالصوت')}
-                >
-                  {isQuestionVoiceActive ? <MicOff className="w-4 h-4" aria-hidden="true" /> : <Mic className="w-4 h-4" aria-hidden="true" />}
-                </button>
-              </div>
-
-              {/* Action Buttons: Direct Sign 🤟 + Ask AI ✨ */}
-              <div className="grid grid-cols-2 gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => handleDirectSignScript()}
-                  disabled={!aiQuestion.trim()}
-                  aria-label={loc('Sign this text directly in 3D avatar', 'ترجمة هذا النص مباشرة على الأفاتار 3D')}
-                  className="py-2 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
-                  title={loc('Sign this text directly in 3D avatar', 'ترجمة هذا النص مباشرة على الأفاتار 3D')}
-                >
-                  <Hand className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>{loc('Direct Sign 🤟', 'ترجمة للإشارة 🤟')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleAskAi()}
-                  disabled={!aiQuestion.trim() || isAiLoading}
-                  aria-label={loc('Ask AI and sign explanation', 'اسأل الذكاء الاصطناعي واعرض الشرح بالإشارة')}
-                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
-                  title={loc('Ask AI & sign explanation', 'اسأل الذكاء الاصطناعي واعرض الشرح بالإشارة')}
-                >
-                  <Sparkles className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>{loc('Ask AI & Sign ✨', 'اسأل واشرح ✨')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════════
-            CARD 2: THE CAMERA TO CONVERT SIGNS TO VOICE & TEXT
-           ══════════════════════════════════════════════════════════════════════ */}
-        <div className={`border rounded-2xl p-3 sm:p-3.5 flex flex-col shadow-xl relative overflow-hidden group transition-colors duration-300 ${
-          isDarkMode
-            ? 'bg-[#121B1E] border-stone-800'
-            : 'bg-white border-stone-200 shadow-sm'
-        }`}>
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className={`flex items-center justify-between pb-2 border-b shrink-0 ${
-              isDarkMode ? 'border-stone-800/80' : 'border-stone-100'
-            }`}>
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                  isDarkMode ? 'bg-teal-950/60 text-teal-400 border border-teal-800' : 'bg-teal-50 text-teal-700 border border-teal-200'
-                }`}>
-                  <Camera className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className={`text-xs sm:text-sm font-black flex items-center gap-1.5 ${
-                    isDarkMode ? 'text-white' : 'text-stone-900'
-                  }`}>
-                    <span>{loc('Live Camera Sign Recognition', 'كاميرا قراءة لغة الإشارة الذكية')}</span>
-                    {isCameraActive && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    )}
-                  </h2>
-                  <p className={`text-[10px] ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
-                    {loc('Open camera & sign with hands -> converts to text for AI', 'افتح الكاميرا وتكلم بلغة الإشارة -> تتحول فوراً لنص يُرسل للذكاء الاصطناعي')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Start / Stop Camera Button */}
-              <button
-                type="button"
-                onClick={isCameraActive ? handleStopCamera : handleStartCamera}
-                aria-label={isCameraActive ? loc('Stop Camera Sign Recognition', 'إيقاف كاميرا لغة الإشارة') : loc('Start Camera Sign Recognition', 'تشغيل كاميرا لغة الإشارة')}
-                aria-pressed={isCameraActive}
-                className={`py-1.5 px-3.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
-                  isCameraActive
-                    ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                    : 'bg-teal-700 hover:bg-teal-800 text-white'
+            {/* Output Box */}
+            <div className="bg-[#071B33] border border-[#12CFE0]/20 rounded-xl p-3.5 min-h-[56px] flex items-center justify-between gap-3 shadow-inner">
+              <p
+                className={`text-sm sm:text-base font-semibold leading-relaxed ${
+                  accumulatedText.trim() ? 'text-[#F4F7FB]' : 'text-[#A9BDD3]/60 font-normal text-xs'
                 }`}
               >
-                {isCameraActive ? (
-                  <>
-                    <CameraOff className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>{loc('Stop Camera', 'إيقاف الكاميرا')}</span>
-                  </>
+                {accumulatedText.trim() ||
+                  loc(
+                    'Recognized words from your camera signs will appear here…',
+                    'الكلام المترجم من إشارات يدك سيظهر هنا في الوقت الفعلي…'
+                  )}
+              </p>
+
+              {/* Instant TTS Speaker Icon Button */}
+              <button
+                type="button"
+                onClick={handleSpeakAccumulatedText}
+                aria-label={loc('Listen to translated voice', 'استمع إلى الترجمة الصوتية')}
+                className={`p-2 rounded-lg text-[#12CFE0] hover:text-white hover:bg-[#102D4D] transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none ${
+                  isSpeakingCameraText ? 'animate-bounce text-[#10B8B0]' : ''
+                }`}
+                title={loc('Speak text aloud', 'نطق النص')}
+              >
+                <Volume2 className="w-5 h-5" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons Row (Matching Reference) */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-1">
+            {/* Button 1: Camera Settings */}
+            <button
+              type="button"
+              onClick={() => setShowSettingsModal(true)}
+              aria-label={loc('Camera Settings', 'إعدادات الكاميرا')}
+              className="py-2.5 px-3 rounded-xl bg-[#102D4D] hover:bg-[#15385E] border border-[#12CFE0]/25 text-[#F4F7FB] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+            >
+              <Sliders className="w-4 h-4 text-[#12CFE0] shrink-0" aria-hidden="true" />
+              <span className="truncate">{loc('Camera Settings', 'إعدادات الكاميرا')}</span>
+            </button>
+
+            {/* Button 2 (Primary Center): Start / Stop Camera */}
+            <button
+              type="button"
+              onClick={isCameraActive ? handleStopCamera : handleStartCamera}
+              aria-pressed={isCameraActive}
+              aria-label={
+                isCameraActive
+                  ? loc('Stop Camera', 'إيقاف الكاميرا')
+                  : loc('Start Camera', 'تشغيل الكاميرا')
+              }
+              className="py-2.5 px-3 rounded-xl bg-[#087F8C] hover:bg-[#076D78] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-[#087F8C]/25 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+            >
+              {isCameraActive ? (
+                <>
+                  <CameraOff className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span className="truncate">{loc('Stop Camera', 'إيقاف الكاميرا')}</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span className="truncate">{loc('Start Camera', 'تشغيل الكاميرا')}</span>
+                </>
+              )}
+            </button>
+
+            {/* Button 3: Translated Voice */}
+            <button
+              type="button"
+              onClick={handleSpeakAccumulatedText}
+              aria-label={loc('Play translated voice', 'تشغيل الصوت المترجم')}
+              className="py-2.5 px-3 rounded-xl bg-[#102D4D] hover:bg-[#15385E] border border-[#12CFE0]/25 text-[#F4F7FB] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+            >
+              <Volume2 className="w-4 h-4 text-[#12CFE0] shrink-0" aria-hidden="true" />
+              <span className="truncate">{loc('Translated Voice', 'صوت مترجم')}</span>
+            </button>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            COLUMN 2 (VISUAL RIGHT): 3D SIGN AVATAR & TEXT-TO-SIGN WORKSPACE
+           ══════════════════════════════════════════════════════════════════════ */}
+        <section
+          dir={isAr ? 'rtl' : 'ltr'}
+          aria-label={loc('Interactive 3D Sign Language Avatar', 'الأفاتار ثلاثي الأبعاد التفاعلي')}
+          className="bg-[#0D2542] border border-[#12CFE0]/20 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xl relative overflow-hidden transition-all duration-300"
+        >
+          {/* Card Header: Avatar Icon & Title (Right in RTL) + Replay / Play buttons (Left in RTL) */}
+          <div className="flex items-center justify-between pb-3 border-b border-[#12CFE0]/15 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#102D4D] border border-[#12CFE0]/30 text-[#12CFE0] flex items-center justify-center shrink-0">
+                <Bot className="w-5 h-5 text-[#12CFE0]" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#F4F7FB] leading-tight">
+                  {loc('Interactive 3D Avatar', 'الأفاتار ثلاثي الأبعاد التفاعلي')}
+                </h2>
+                <p className="text-[11px] text-[#A9BDD3] mt-0.5">
+                  {loc(
+                    'Type any text or choose translations to render sign language with the avatar.',
+                    'اكتب أي نص أو اختر من الترجمات لترجمة الأفاتار إلى لغة الإشارة أو لأسئلتك الأصلي.'
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Playback Controls (Replay + Play/Pause) */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={handleReplayAvatar}
+                aria-label={loc('Replay sign animation', 'إعادة حركة الأفاتار')}
+                className="w-8 h-8 rounded-xl bg-[#102D4D] border border-[#12CFE0]/25 text-[#F4F7FB] hover:text-[#12CFE0] hover:border-[#12CFE0]/50 transition-colors flex items-center justify-center cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+                title={loc('Replay', 'إعادة')}
+              >
+                <RotateCcw className="w-4 h-4" aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsAvatarPlaying(!isAvatarPlaying)}
+                aria-label={
+                  isAvatarPlaying
+                    ? loc('Pause sign avatar', 'إيقاف الأفاتار مؤقتاً')
+                    : loc('Play sign avatar', 'تشغيل الأفاتار')
+                }
+                aria-pressed={isAvatarPlaying}
+                className="w-8 h-8 rounded-xl bg-[#102D4D] border border-[#12CFE0]/25 text-[#F4F7FB] hover:text-[#12CFE0] hover:border-[#12CFE0]/50 transition-colors flex items-center justify-center cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+                title={isAvatarPlaying ? loc('Pause', 'إيقاف مؤقت') : loc('Play', 'تشغيل')}
+              >
+                {isAvatarPlaying ? (
+                  <Pause className="w-4 h-4" aria-hidden="true" />
                 ) : (
-                  <>
-                    <Camera className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>{loc('Start Camera', 'تشغيل الكاميرا')}</span>
-                  </>
+                  <Play className="w-4 h-4" aria-hidden="true" />
                 )}
               </button>
             </div>
+          </div>
 
-            {/* Video Viewfinder Container */}
-            <div className={`w-full flex-1 h-[170px] sm:h-[190px] md:h-[210px] min-h-[140px] max-h-[240px] my-1.5 rounded-xl border relative overflow-hidden flex items-center justify-center ${
-              isDarkMode
-                ? 'bg-[#0B1114] border-stone-800'
-                : 'bg-stone-100 border-stone-200'
-            }`}>
-              {/* Actual Video Element */}
-              <video
-                ref={videoRef}
-                playsInline
-                muted
-                className={`w-full h-full object-cover transform -scale-x-100 ${isCameraActive ? 'block' : 'hidden'}`}
-              />
-
-              {/* Canvas Overlay for hand tracking landmarks */}
-              <canvas
-                ref={canvasRef}
-                className={`absolute inset-0 w-full h-full pointer-events-none transform -scale-x-100 ${isCameraActive ? 'block' : 'hidden'}`}
-              />
-
-              {/* Placeholder when camera is off */}
-              {!isCameraActive && (
-                <div className="flex flex-col items-center justify-center text-center p-3 gap-1.5">
-                  <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${
-                    isDarkMode
-                      ? 'bg-[#162327] border-stone-800 text-stone-400'
-                      : 'bg-stone-200/70 border-stone-300 text-stone-700'
-                  }`}>
-                    <Hand className="w-6 h-6 text-teal-500" />
-                  </div>
-                  <div>
-                    <p className={`text-xs font-black ${isDarkMode ? 'text-stone-200' : 'text-stone-900'}`}>
-                      {loc('Camera is ready', 'الكاميرا جاهزة للتشغيل')}
-                    </p>
-                    <p className={`text-[11px] mt-0.5 max-w-[280px] leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
-                      {loc(
-                        'Click "Start Camera" above and sign with your hands to convert into text for AI.',
-                        'اضغط على زر "تشغيل الكاميرا" أعلاه وتكلم بإشارات يدك لتتحول مباشرةً لنص وتُرسل للذكاء الاصطناعي.'
-                      )}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Live Detected Sign Banner */}
-              {isCameraActive && (
-                <div className={`absolute bottom-2 inset-x-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg backdrop-blur-md border text-xs ${
-                  isDarkMode
-                    ? 'bg-[#0E1416]/90 border-stone-800'
-                    : 'bg-white/95 border-stone-200 text-stone-900 shadow-md'
-                }`}>
-                  <span className={`text-[10px] font-bold ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
-                    {cameraStatus || loc('Tracking Hands…', 'جاري رصد حركة اليدين…')}
-                  </span>
-                  <span className="font-black text-emerald-500 text-xs tracking-wide">
-                    {detectedSign ? (isAr ? `🤟 رُصدت: ${detectedSign}` : `🤟 Detected: ${detectedSign}`) : loc('Wave hand in front of camera', 'لوح بيدك أمام الكاميرا')}
+          {/* 3D Sign Avatar Stage with Futuristic Cyan Ground Ring */}
+          <div className="relative w-full h-[280px] sm:h-[320px] md:h-[350px] my-3 rounded-2xl overflow-hidden bg-gradient-to-b from-[#071B33] to-[#0A223D] border border-[#12CFE0]/15 flex items-center justify-center shadow-inner">
+            <React.Suspense
+              fallback={
+                <div className="flex flex-col items-center justify-center text-[#A9BDD3] gap-2">
+                  <div className="w-8 h-8 border-2 border-[#12CFE0] border-t-transparent rounded-full animate-spin" />
+                  <span className="text-xs font-bold">
+                    {loc('Loading 3D Sign Avatar…', 'جاري تجهيز الأفاتار ثلاثي الأبعاد…')}
                   </span>
                 </div>
+              }
+            >
+              <SignAvatar3D
+                words={avatarWords}
+                playing={isAvatarPlaying}
+                onProgress={(idx) => setCurrentSigningWord(avatarWords[idx] || '')}
+                onDone={() => setIsAvatarPlaying(false)}
+                className="w-full h-full"
+              />
+            </React.Suspense>
+          </div>
+
+          {/* Current Word / Phrase Banner Card */}
+          <div className="bg-[#071B33] border border-[#12CFE0]/20 rounded-xl p-3.5 mb-3 shadow-inner">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-bold text-[#A9BDD3]">
+                {loc('Current Word:', 'الكلمة الحالية:')}
+              </span>
+              <span className="px-3.5 py-0.5 rounded-full text-xs font-black bg-[#082344] text-[#12CFE0] border border-[#12CFE0]/40 shadow-sm">
+                {currentSigningWord || avatarWords[0] || loc('Ready', 'مستعد')}
+              </span>
+            </div>
+            <p className="text-[11px] text-[#A9BDD3] leading-relaxed">
+              {loc(
+                'This word is currently being translated into sign language.',
+                'هذه الكلمة يتم ترجمتها الآن إلى لغة الإشارة.'
               )}
+            </p>
+          </div>
+
+          {/* Text Input Composer */}
+          <div className="flex items-center gap-2 mb-3">
+            {/* Voice Dictation Mic Button */}
+            <button
+              type="button"
+              onClick={toggleQuestionVoice}
+              aria-label={
+                isQuestionVoiceActive
+                  ? loc('Stop Voice Input', 'إيقاف الإملاء الصوتي')
+                  : loc('Speak by Voice', 'إملاء صوتي')
+              }
+              aria-pressed={isQuestionVoiceActive}
+              className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none ${
+                isQuestionVoiceActive
+                  ? 'bg-rose-600 text-white border-rose-400 animate-pulse'
+                  : 'bg-[#102D4D] border-[#12CFE0]/25 text-[#F4F7FB] hover:text-[#12CFE0] hover:border-[#12CFE0]/50'
+              }`}
+              title={loc('Voice input', 'إملاء صوتي')}
+            >
+              {isQuestionVoiceActive ? (
+                <MicOff className="w-5 h-5" aria-hidden="true" />
+              ) : (
+                <Mic className="w-5 h-5" aria-hidden="true" />
+              )}
+            </button>
+
+            {/* Input Field with Send Button */}
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={aiQuestion}
+                onChange={(e) => setAiQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (e.shiftKey) handleAskAi();
+                    else handleDirectSignScript();
+                  }
+                }}
+                aria-label={loc(
+                  'Type any sentence to translate to sign language or ask a question',
+                  'اكتب أي جملة للترجمة إلى لغة الإشارة أو اسأل سؤالاً'
+                )}
+                placeholder={loc(
+                  'Type any sentence to translate to sign language or ask a question…',
+                  'اكتب أي جملة للترجمة إلى لغة الإشارة أو اسأل سؤالاً...'
+                )}
+                className="w-full bg-[#071B33] border border-[#12CFE0]/25 rounded-xl py-2.5 px-4 text-xs sm:text-sm text-[#F4F7FB] placeholder:text-[#A9BDD3]/60 focus:outline-none focus:border-[#12CFE0] focus:ring-1 focus:ring-[#12CFE0] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => handleDirectSignScript()}
+                disabled={!aiQuestion.trim()}
+                aria-label={loc('Send for translation', 'إرسال للترجمة')}
+                className={`absolute top-1/2 -translate-y-1/2 ${
+                  isAr ? 'left-3' : 'right-3'
+                } p-1 text-[#12CFE0] hover:text-white disabled:opacity-30 transition-colors cursor-pointer focus:outline-none`}
+              >
+                <Send className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons Row (Matching Reference) */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1">
+            {/* Button 1: Ask & Explain */}
+            <button
+              type="button"
+              onClick={() => handleAskAi()}
+              disabled={!aiQuestion.trim() || isAiLoading}
+              aria-label={loc('Ask AI and explain in sign language', 'اسأل واشرح بلغة الإشارة')}
+              className="py-2.5 px-4 rounded-xl bg-[#102D4D] hover:bg-[#15385E] disabled:opacity-40 border border-[#12CFE0]/30 text-[#F4F7FB] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+            >
+              <Sparkles className="w-4 h-4 text-[#12CFE0] shrink-0" aria-hidden="true" />
+              <span className="truncate">{loc('Ask & Explain', 'اسأل واشرح')}</span>
+            </button>
+
+            {/* Button 2 (Primary): Translate to Sign */}
+            <button
+              type="button"
+              onClick={() => handleDirectSignScript()}
+              disabled={!aiQuestion.trim()}
+              aria-label={loc('Translate text to 3D sign language', 'ترجمة إلى إشارة')}
+              className="py-2.5 px-4 rounded-xl bg-[#087F8C] hover:bg-[#076D78] disabled:opacity-40 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#087F8C]/20 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+            >
+              <Hand className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="truncate">{loc('Translate to Sign', 'ترجمة إلى إشارة')}</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      {/* ── FULL-WIDTH BOTTOM ACCESSIBILITY TIP BANNER (Matching Reference) ── */}
+      <div className="w-full bg-[#0D2542] border border-[#12CFE0]/20 rounded-xl p-3 sm:p-3.5 flex items-center gap-3 text-xs sm:text-sm text-[#A9BDD3] mt-4 shadow-md">
+        <Info className="w-5 h-5 text-[#12CFE0] shrink-0" aria-hidden="true" />
+        <p className="leading-relaxed">
+          {loc(
+            'Tip: You can use the camera or enter text for real-time translation, and interact with the translation for extra explanation.',
+            'نصيحة: يمكنك استخدام الكاميرا أو إدخال النص للحصول على الترجمة الفورية، كما يمكنك التفاعل على الترجمة للحصول على شرح إضافي.'
+          )}
+        </p>
+      </div>
+
+      {/* ── CAMERA SETTINGS MODAL ── */}
+      {showSettingsModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="camera-settings-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+        >
+          <div
+            dir={isAr ? 'rtl' : 'ltr'}
+            className="w-full max-w-md bg-[#0D2542] border border-[#12CFE0]/30 rounded-2xl p-5 shadow-2xl text-[#F4F7FB]"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[#12CFE0]/20">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-[#12CFE0]" aria-hidden="true" />
+                <h3 id="camera-settings-title" className="font-bold text-base">
+                  {loc('Camera & Sign Recognition Settings', 'إعدادات الكاميرا والتعرف على الإشارات')}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                aria-label={loc('Close settings modal', 'إغلاق نافذة الإعدادات')}
+                className="p-1 rounded-lg text-[#A9BDD3] hover:text-white hover:bg-[#102D4D] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" aria-hidden="true" />
+              </button>
             </div>
 
-            {/* ── CONVERTED TEXT & AUDIO OUTPUT (تحتها يتحول الكلام لصوت أو نص) ── */}
-            <div className="flex flex-col gap-1.5 shrink-0 mt-auto">
-              {/* Text Box */}
-              <div className={`p-2 rounded-xl border min-h-[46px] max-h-[68px] overflow-y-auto custom-scrollbar flex flex-col justify-between shrink-0 ${
-                isDarkMode
-                  ? 'bg-[#0B1114] border-stone-800/80'
-                  : 'bg-stone-50 border-stone-200'
-              }`}>
-                <p className={`text-xs sm:text-sm font-black leading-relaxed ${
-                  accumulatedText.trim()
-                    ? isDarkMode ? 'text-teal-300' : 'text-teal-900'
-                    : 'text-stone-500 font-normal text-xs'
-                }`}>
-                  {accumulatedText.trim() ? (
-                    accumulatedText
-                  ) : (
-                    loc(
-                      'Recognized words from your camera signs will appear here…',
-                      'الكلام المترجم من إشارات يدك سيظهر هنا في الوقت الفعلي…'
-                    )
-                  )}
-                </p>
-
-                {accumulatedText.trim() && (
-                  <div className={`flex items-center justify-end pt-0.5 border-t text-[10px] ${
-                    isDarkMode ? 'border-stone-800 text-stone-400' : 'border-stone-200 text-stone-600'
-                  }`}>
-                    <button
-                      type="button"
-                      onClick={() => setAccumulatedText('')}
-                      aria-label={loc('Clear recognized words', 'مسح الكلمات المترجمة')}
-                      className="text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer font-bold focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none rounded"
-                    >
-                      <Trash2 className="w-3 h-3" aria-hidden="true" />
-                      <span>{loc('Clear', 'مسح')}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons: Live Audio + Send Question to AI (Pinned & Always Visible) */}
-              <div className="grid grid-cols-2 gap-2 shrink-0">
-                {/* 1. Live Audio Output */}
+            <div className="py-4 space-y-4">
+              {/* Option 1: Hand Skeleton Overlay */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#071B33] border border-[#12CFE0]/15">
+                <div>
+                  <p className="text-sm font-bold text-[#F4F7FB]">
+                    {loc('Show Hand Skeleton', 'إظهار الهيكل التتبعي لليد')}
+                  </p>
+                  <p className="text-xs text-[#A9BDD3]">
+                    {loc(
+                      'Displays real-time cyan joint tracking points on the camera view.',
+                      'يعرض نقاط تتبع مفاصل اليدين على الكاميرا باللون السماوي.'
+                    )}
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={handleSpeakAccumulatedText}
-                  disabled={!accumulatedText.trim()}
-                  aria-label={
-                    isSpeakingCameraText
-                      ? loc('Speaking recognized words', 'جاري نطق الكلمات المترجمة')
-                      : loc('Live audio playback of recognized signs', 'نطق الكلمات المترجمة بصوت حي مباشر')
-                  }
-                  aria-pressed={isSpeakingCameraText}
-                  className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
-                    isSpeakingCameraText
-                      ? 'bg-emerald-500 text-white animate-pulse'
-                      : 'bg-teal-700 hover:bg-teal-800 disabled:opacity-40 text-white'
+                  onClick={() => setShowSkeleton(!showSkeleton)}
+                  aria-pressed={showSkeleton}
+                  aria-label={loc('Toggle Hand Skeleton Overlay', 'تبديل إظهار هيكل اليد')}
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
+                    showSkeleton ? 'bg-[#087F8C] justify-end' : 'bg-stone-700 justify-start'
                   }`}
-                  title={loc('Live audio playback of recognized signs', 'نطق الكلمات المترجمة بصوت حي مباشر')}
                 >
-                  <Volume2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>
-                    {isSpeakingCameraText
-                      ? loc('Speaking… 🔊', 'جاري النطق… 🔊')
-                      : loc('Live Audio 🔊', 'صوت مباشر 🔊')}
-                  </span>
-                </button>
-
-                {/* 2. Send Question to AI Avatar */}
-                <button
-                  type="button"
-                  onClick={handleSendToAiTutor}
-                  disabled={!accumulatedText.trim() || isAiLoading}
-                  aria-label={loc('Send recognized text to AI Avatar', 'إرسال النص المترجم للأفاتار الذكي')}
-                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
-                >
-                  <Bot className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>{loc('Send to AI Avatar 🤖', 'إرسال للأفاتار 🤖')}</span>
+                  <span className="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform" />
                 </button>
               </div>
+
+              {/* Option 2: Auto Voice Signs */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[#071B33] border border-[#12CFE0]/15">
+                <div>
+                  <p className="text-sm font-bold text-[#F4F7FB]">
+                    {loc('Auto-Voice Recognized Signs', 'نطق فوري تلقائي للإشارات')}
+                  </p>
+                  <p className="text-xs text-[#A9BDD3]">
+                    {loc(
+                      'Automatically speaks recognized words out loud as they are detected.',
+                      'ينطق الكلمات المكتشفة بصوت آلي فور رصدها بالكاميرا.'
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAutoVoice(!autoVoice)}
+                  aria-pressed={autoVoice}
+                  aria-label={loc('Toggle Auto Voice Recognized Signs', 'تبديل النطق الفوري التلقائي')}
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
+                    autoVoice ? 'bg-[#087F8C] justify-end' : 'bg-stone-700 justify-start'
+                  }`}
+                >
+                  <span className="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform" />
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[#12CFE0]/20 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="py-2 px-5 rounded-xl bg-[#087F8C] hover:bg-[#076D78] text-white font-bold text-xs cursor-pointer shadow-md transition-all"
+              >
+                {loc('Done', 'تم')}
+              </button>
             </div>
           </div>
         </div>
-
-      </main>
+      )}
 
       {/* Minor Student Parental Consent Gate Modal */}
       <ParentalConsentModal
