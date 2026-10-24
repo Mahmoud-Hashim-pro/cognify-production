@@ -56,43 +56,43 @@
   --color-cognify-info-dark: #0B1E3B;
   --color-cognify-info-text-dark: #60A5FA;
 
-  --color-primary: #0D9488;
-  --color-primary-press: #0F766E;
-  --color-primary-soft: #CCFBF1;
-  --color-secondary: #5C5C68;
+  --color-primary: #243B73;
+  --color-primary-press: #1B2D59;
+  --color-primary-soft: #E8EDF8;
+  --color-secondary: #087F8C;
   --color-success: #15A06A;
   --color-warning: #D97706;
-  --color-accent: #0D9488;
-  --color-accent-soft: #CCFBF1;
+  --color-accent: #087F8C;
+  --color-accent-soft: #E0F4F5;
   --color-danger: #E5484D;
   --color-danger-soft: #FCEAEA;
-  --color-bg-main: #F3F3F6;
+  --color-bg-main: #F5F7FB;
   --color-bg-card: #FFFFFF;
-  --color-surface-2: #F7F7FA;
-  --color-surface-3: #ECECF0;
-  --color-text-main: #18181F;
-  --color-text-muted: #5C5C68;
-  --color-faint: #9090A0;
-  --color-border: #E6E6EB;
-  --color-border-2: #D8D8DF;
+  --color-surface-2: #EDF1F7;
+  --color-surface-3: #E2E8F0;
+  --color-text-main: #172033;
+  --color-text-muted: #475569;
+  --color-faint: #64748B;
+  --color-border: #E2E8F0;
+  --color-border-2: #CBD5E1;
 
   /* Overwrite low-contrast default slate tokens to guarantee WCAG AA (>= 4.5:1 on dark) */
   --color-slate-500: #94A3B8; /* Contrast 6.96:1 - Pass WCAG AA */
   --color-slate-600: #CBD5E1; /* High contrast pass (WCAG AAA) */
 
   /* Dignified Accessible Brand Palette for People of Determination */
-  --color-brand-warm: #111622;
+  --color-brand-warm: #243B73;
   --color-brand-surface: #171E2E;
   --color-brand-accent: #F59E0B;
   --color-brand-accent-glow: #FDE68A;
   --color-brand-calm: #10B981;
 
   /* Serene Teal & Warm Earth Identity */
-  --color-brand-burgundy: #0F766E;
-  --color-brand-wine: #0D9488;
-  --color-brand-ruby: #14B8A6;
-  --color-brand-gold: #0D9488;
-  --color-brand-gold-glow: #99F6E4;
+  --color-brand-burgundy: #243B73;
+  --color-brand-wine: #243B73;
+  --color-brand-ruby: #34529B;
+  --color-brand-gold: #087F8C;
+  --color-brand-gold-glow: #0AA5B6;
 }
 
 @layer base {
