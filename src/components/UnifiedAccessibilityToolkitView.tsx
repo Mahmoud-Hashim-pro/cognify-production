@@ -460,7 +460,7 @@ export default function UnifiedAccessibilityToolkitView({
         role="tablist"
         aria-label={localize(profile.language, 'Toolkit Categories', 'أقسام المنظومة الميسرة')}
         className={`px-3 py-2 border-b flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 ${
-          isDarkMode ? 'bg-[#141F23] border-stone-800' : 'bg-stone-50 border-stone-200'
+          isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
         }`}
       >
         {[
@@ -849,7 +849,7 @@ export default function UnifiedAccessibilityToolkitView({
                       </div>
 
                       {evidenceResult && (
-                        <div className={`p-4 rounded-xl ${isDarkMode ? 'bg-[#1A262B]' : 'bg-white border border-stone-200'} space-y-2`}>
+                        <div className={`p-4 rounded-xl ${isDarkMode ? 'bg-cognify-surface-dark' : 'bg-white border border-stone-200'} space-y-2`}>
                           <p className="text-sm font-bold text-white">{evidenceResult.answer}</p>
                           {evidenceResult.evidenceQuote && (
                             <blockquote className="border-s-2 border-indigo-500 ps-3 text-xs italic text-stone-300 my-2">
