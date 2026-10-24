@@ -20,7 +20,7 @@ const variantStyles: Record<IconButtonVariant, string> = {
   teal: 'bg-cognify-teal hover:bg-cognify-teal-dark text-white shadow-sm',
   ghost: 'bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
   outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
-  danger: 'bg-cognify-error-light hover:bg-red-100 text-cognify-error-text-light dark:bg-cognify-error-dark dark:hover:bg-red-900/60 dark:text-cognify-error-text-dark border border-cognify-error-light dark:border-cognify-error-dark',
+  danger: 'bg-cognify-error-light hover:brightness-95 text-cognify-error-text-light dark:bg-cognify-error-dark dark:hover:brightness-125 dark:text-cognify-error-text-dark border border-cognify-error-light dark:border-cognify-error-dark',
 };
 
 const sizeStyles: Record<IconButtonSize, string> = {
