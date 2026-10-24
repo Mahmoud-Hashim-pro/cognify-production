@@ -37,7 +37,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300"
+            className="block text-xs sm:text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary"
           >
             {label}
             {required && <span className="text-red-500 ms-1" aria-hidden="true">*</span>}
@@ -46,7 +46,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute start-3.5 pointer-events-none text-stone-400 dark:text-stone-500 flex items-center justify-center">
+            <div className="absolute start-3.5 pointer-events-none text-cognify-text-secondary dark:text-cognify-text-dark-secondary flex items-center justify-center">
               {leftIcon}
             </div>
           )}
@@ -64,7 +64,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // Minimum touch ergonomics (WCAG 2.5.5)
               'w-full min-h-[44px] px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150',
               // Base colors
-              'bg-cognify-surface-light dark:bg-cognify-surface-dark border text-cognify-text-primary dark:text-cognify-text-dark-primary placeholder:text-stone-400 dark:placeholder:text-stone-600',
+              'bg-cognify-surface-light dark:bg-cognify-surface-dark border text-cognify-text-primary dark:text-cognify-text-dark-primary placeholder:text-cognify-text-secondary dark:placeholder:text-cognify-text-dark-secondary',
               // Focus state: high contrast gold
               'outline-none focus:ring-2 focus:ring-cognify-focus focus:border-transparent',
               // Normal vs Error border
@@ -75,14 +75,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               leftIcon && 'ps-10',
               rightIcon && 'pe-10',
               // Disabled state
-              disabled && 'opacity-50 cursor-not-allowed bg-stone-100 dark:bg-stone-900',
+              disabled && 'opacity-50 cursor-not-allowed bg-cognify-bg-light dark:bg-cognify-bg-dark',
               className
             )}
             {...props}
           />
 
           {rightIcon && (
-            <div className="absolute end-3.5 pointer-events-none text-stone-400 dark:text-stone-500 flex items-center justify-center">
+            <div className="absolute end-3.5 pointer-events-none text-cognify-text-secondary dark:text-cognify-text-dark-secondary flex items-center justify-center">
               {rightIcon}
             </div>
           )}
@@ -100,7 +100,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ) : helperText ? (
           <p
             id={helperId}
-            className="text-xs text-stone-500 dark:text-stone-400 mt-1"
+            className="text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary mt-1"
           >
             {helperText}
           </p>
@@ -143,7 +143,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300"
+            className="block text-xs sm:text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary"
           >
             {label}
             {required && <span className="text-red-500 ms-1" aria-hidden="true">*</span>}
@@ -162,12 +162,12 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           }
           className={cn(
             'w-full p-3.5 rounded-xl text-sm font-medium transition-all duration-150',
-            'bg-cognify-surface-light dark:bg-cognify-surface-dark border text-cognify-text-primary dark:text-cognify-text-dark-primary placeholder:text-stone-400 dark:placeholder:text-stone-600',
+            'bg-cognify-surface-light dark:bg-cognify-surface-dark border text-cognify-text-primary dark:text-cognify-text-dark-primary placeholder:text-cognify-text-secondary dark:placeholder:text-cognify-text-dark-secondary',
             'outline-none focus:ring-2 focus:ring-cognify-focus focus:border-transparent',
             isInvalid
               ? 'border-red-500 focus:ring-red-500'
               : 'border-cognify-border-light dark:border-cognify-border-dark hover:border-cognify-text-secondary dark:hover:border-cognify-text-dark-secondary',
-            disabled && 'opacity-50 cursor-not-allowed bg-stone-100 dark:bg-stone-900',
+            disabled && 'opacity-50 cursor-not-allowed bg-cognify-bg-light dark:bg-cognify-bg-dark',
             className
           )}
           {...props}
@@ -185,7 +185,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         ) : helperText ? (
           <p
             id={helperId}
-            className="text-xs text-stone-500 dark:text-stone-400 mt-1"
+            className="text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary mt-1"
           >
             {helperText}
           </p>
