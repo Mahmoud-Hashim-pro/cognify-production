@@ -123,7 +123,7 @@ export const Dialog: React.FC<DialogProps> = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cn(
-          'relative w-full rounded-3xl bg-white dark:bg-[#171E2E] border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
+          'relative w-full rounded-3xl bg-cognify-surface-light dark:bg-cognify-surface-dark border border-stone-200 dark:border-stone-800 text-cognify-text-primary dark:text-cognify-text-dark-primary shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
           sizeClasses[size]
         )}
       >
@@ -151,7 +151,7 @@ export const Dialog: React.FC<DialogProps> = ({
             type="button"
             onClick={onClose}
             aria-label={effectiveDismissLabel}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-cognify-focus"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>

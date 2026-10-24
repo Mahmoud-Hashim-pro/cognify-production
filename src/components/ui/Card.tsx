@@ -14,13 +14,13 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           'rounded-2xl transition-all duration-200 font-sans',
           // Base surface & border
-          'bg-white dark:bg-[#171E2E] border border-stone-200/80 dark:border-stone-800/80 text-stone-900 dark:text-stone-100',
+          'bg-cognify-surface-light dark:bg-cognify-surface-dark border border-stone-200/80 dark:border-stone-800/80 text-cognify-text-primary dark:text-cognify-text-dark-primary',
           variant === 'default' && 'shadow-sm',
           variant === 'elevated' && 'shadow-md border-stone-200 dark:border-stone-700/80 dark:bg-[#1A2335]',
           variant === 'interactive' &&
-            'cursor-pointer hover:border-[#087F8C]/60 dark:hover:border-[#087F8C]/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#111622] motion-reduce:transition-none motion-reduce:active:scale-100',
+            'cursor-pointer hover:border-cognify-teal/60 dark:hover:border-cognify-teal/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 dark:focus-visible:ring-offset-cognify-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
           variant === 'highlighted' &&
-            'border-[#243B73]/40 dark:border-[#243B73]/60 bg-[#F5F7FB] dark:bg-[#1A2438] shadow-sm',
+            'border-cognify-indigo/40 dark:border-cognify-indigo/60 bg-cognify-bg-light dark:bg-cognify-surface-elevated shadow-sm',
           className
         )}
         {...props}

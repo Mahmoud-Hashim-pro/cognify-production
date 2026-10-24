@@ -12,8 +12,8 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  primary: 'bg-[#243B73]/10 text-[#243B73] border-[#243B73]/30 dark:bg-[#34529B]/20 dark:text-[#93C5FD] dark:border-[#34529B]/40',
-  teal: 'bg-[#087F8C]/10 text-[#087F8C] border-[#087F8C]/30 dark:bg-[#087F8C]/20 dark:text-[#5EEAD4] dark:border-[#087F8C]/40',
+  primary: 'bg-cognify-indigo/10 text-cognify-indigo border-cognify-indigo/30 dark:bg-cognify-indigo-light/20 dark:text-cognify-text-dark-primary dark:border-cognify-indigo-light/40',
+  teal: 'bg-cognify-teal/10 text-cognify-teal border-cognify-teal/30 dark:bg-cognify-teal/20 dark:text-cognify-teal-light dark:border-cognify-teal/40',
   success: 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
   warning: 'bg-amber-50 text-amber-900 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
   danger: 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800/60',

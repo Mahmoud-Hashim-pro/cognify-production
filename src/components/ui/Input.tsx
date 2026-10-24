@@ -64,13 +64,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // Minimum touch ergonomics (WCAG 2.5.5)
               'w-full min-h-[44px] px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150',
               // Base colors
-              'bg-white dark:bg-[#121B27] border text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600',
+              'bg-cognify-surface-light dark:bg-cognify-surface-dark border text-cognify-text-primary dark:text-cognify-text-dark-primary placeholder:text-stone-400 dark:placeholder:text-stone-600',
               // Focus state: high contrast gold
-              'outline-none focus:ring-2 focus:ring-[#F59E0B] focus:border-transparent',
+              'outline-none focus:ring-2 focus:ring-cognify-focus focus:border-transparent',
               // Normal vs Error border
               isInvalid
                 ? 'border-red-500 focus:ring-red-500'
-                : 'border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600',
+                : 'border-cognify-border-light dark:border-cognify-border-dark hover:border-cognify-text-secondary dark:hover:border-cognify-text-dark-secondary',
               // Icon spacing adjustments
               leftIcon && 'ps-10',
               rightIcon && 'pe-10',
@@ -162,11 +162,11 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           }
           className={cn(
             'w-full p-3.5 rounded-xl text-sm font-medium transition-all duration-150',
-            'bg-white dark:bg-[#121B27] border text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600',
-            'outline-none focus:ring-2 focus:ring-[#F59E0B] focus:border-transparent',
+            'bg-cognify-surface-light dark:bg-cognify-surface-dark border text-cognify-text-primary dark:text-cognify-text-dark-primary placeholder:text-stone-400 dark:placeholder:text-stone-600',
+            'outline-none focus:ring-2 focus:ring-cognify-focus focus:border-transparent',
             isInvalid
               ? 'border-red-500 focus:ring-red-500'
-              : 'border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600',
+              : 'border-cognify-border-light dark:border-cognify-border-dark hover:border-cognify-text-secondary dark:hover:border-cognify-text-dark-secondary',
             disabled && 'opacity-50 cursor-not-allowed bg-stone-100 dark:bg-stone-900',
             className
           )}
