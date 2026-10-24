@@ -2087,7 +2087,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
                   <X className="w-5 h-5" strokeWidth={3} />
                 </button>
 
-                <div className="bg-[#120816]/95 backdrop-blur-2xl border-2 border-cognify-focus/60 text-white rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 ring-1 ring-[#E5A93C]/30">
+                <div className="bg-cognify-surface-dark/95 backdrop-blur-2xl border-2 border-cognify-focus/60 text-white rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 ring-1 ring-[#E5A93C]/30">
                   <div className="flex items-center justify-between gap-2 border-b border-cognify-border-dark/80 pb-3">
                     <div className="flex items-center gap-2 text-cognify-focus">
                       <Sparkles className="w-5 h-5 text-cognify-focus" />
