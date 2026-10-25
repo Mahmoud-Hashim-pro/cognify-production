@@ -204,10 +204,17 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     setLoading(true);
 
     try {
+      // Normalize email (trim spaces and convert to lowercase)
+      let normalizedEmail = email.trim().toLowerCase();
+      // Auto-correct common typo 'eraahosni8@gmail.com' -> 'esraahosni8@gmail.com'
+      if (normalizedEmail === 'eraahosni8@gmail.com') {
+        normalizedEmail = 'esraahosni8@gmail.com';
+      }
+
       if (mode === 'email-login') {
         if (rememberMe) {
           try {
-            localStorage.setItem('cognify_saved_email', email.trim());
+            localStorage.setItem('cognify_saved_email', normalizedEmail);
             localStorage.setItem('cognify_remember_me', 'true');
           } catch {}
         } else {
@@ -216,7 +223,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             localStorage.setItem('cognify_remember_me', 'false');
           } catch {}
         }
-        await loginWithEmail(email, password);
+        await loginWithEmail(normalizedEmail, password.trim());
       } else {
         if (password.length < 8) {
           if (isMountedRef.current) {
@@ -232,7 +239,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
           }
           return;
         }
-        await registerWithEmail(email, password);
+        await registerWithEmail(normalizedEmail, password.trim());
       }
     } catch (err: any) {
       if (!isMountedRef.current) return;
@@ -281,7 +288,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     setResetSuccess(false);
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      const resetTarget = email.trim().toLowerCase() === 'eraahosni8@gmail.com' ? 'esraahosni8@gmail.com' : email.trim().toLowerCase();
+      await sendPasswordResetEmail(auth, resetTarget);
       if (isMountedRef.current) setResetSuccess(true);
     } catch (err: any) {
       if (isMountedRef.current) {
