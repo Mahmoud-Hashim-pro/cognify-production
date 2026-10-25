@@ -6,7 +6,7 @@ export type IconButtonVariant = 'default' | 'primary' | 'teal' | 'ghost' | 'outl
 export type IconButtonSize = 'sm' | 'md' | 'lg';
 
 export interface IconButtonProps extends Omit<ReactAriaButtonProps, 'children'> {
-  'aria-label': string; // Mandatory accessible name for screen readers
+  'aria-label': string;
   icon: React.ReactNode;
   variant?: IconButtonVariant;
   size?: IconButtonSize;
@@ -15,12 +15,12 @@ export interface IconButtonProps extends Omit<ReactAriaButtonProps, 'children'> 
 }
 
 const variantStyles: Record<IconButtonVariant, string> = {
-  default: 'bg-stone-100 hover:bg-stone-200 text-stone-700 dark:bg-stone-800 dark:hover:bg-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700',
-  primary: 'bg-[#243B73] hover:bg-[#1B2D59] text-white shadow-sm',
-  teal: 'bg-[#087F8C] hover:bg-[#06626C] text-white shadow-sm',
-  ghost: 'bg-transparent hover:bg-stone-100 dark:hover:bg-stone-800/70 text-stone-600 dark:text-stone-300',
-  outline: 'border border-stone-300 dark:border-stone-700 bg-transparent hover:bg-stone-100 dark:hover:bg-stone-800/60 text-stone-800 dark:text-stone-200',
-  danger: 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/40 dark:hover:bg-red-900/60 dark:text-red-300 border border-red-200 dark:border-red-800',
+  default: 'bg-cognify-bg-light hover:bg-cognify-border-light text-cognify-text-primary dark:bg-cognify-surface-elevated dark:hover:bg-cognify-surface-dark dark:text-cognify-text-dark-primary border border-cognify-border-light dark:border-cognify-border-dark',
+  primary: 'bg-cognify-indigo hover:bg-cognify-indigo-dark text-white shadow-sm',
+  teal: 'bg-cognify-teal hover:bg-cognify-teal-dark text-white shadow-sm',
+  ghost: 'bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
+  outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
+  danger: 'bg-cognify-error-light hover:brightness-95 text-cognify-error-text-light dark:bg-cognify-error-dark dark:hover:brightness-125 dark:text-cognify-error-text-dark border border-cognify-error-light dark:border-cognify-error-dark',
 };
 
 const sizeStyles: Record<IconButtonSize, string> = {
@@ -50,7 +50,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         className={(renderProps) =>
           cn(
             'inline-flex items-center justify-center shrink-0 cursor-pointer transition-all duration-150',
-            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-[#F59E0B] data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-[#111622] dark:data-[focus-visible]:ring-offset-[#111622]',
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-surface-light dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
             'data-[pressed]:scale-[0.96] motion-reduce:transition-none motion-reduce:data-[pressed]:scale-100',
             'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none',
             variantStyles[variant],

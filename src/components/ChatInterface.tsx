@@ -4,7 +4,7 @@ import { Message, UserProfile, Task, PedagogyStyle } from "../types";
 import { generateAdaptiveResponseStream, generateBenchmarkComparison, generateProactiveInsights, generateChatTitle } from "../services/gemini";
 import { geminiService } from "../services/geminiService";
 import { PEDAGOGY_STYLES } from "../lib/adaptiveLearning";
-import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, ArrowLeft, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
 
 import ChatBookmarksDrawer, { BookmarkedInsight } from "./chat/ChatBookmarksDrawer";
 import ChatErgonomicsBar, { FontScale } from "./chat/ChatErgonomicsBar";
@@ -30,6 +30,7 @@ import { detectProactiveOpportunities } from '../lib/proactiveAssistantEngine';
 import { generateLearningInsights } from '../lib/learningInsightsEngine';
 import { explainPedagogyChoice, type PedagogyStrategy } from '../lib/explainabilityEngine';
 import { encryptThreadMessages, decryptThreadMessages } from '../lib/userCryptoEngine';
+import { smartNavigateBack } from '../lib/navigation';
 
 // Three.js is heavy — only load the sign avatar when a deaf-mode user opens it.
 const SignAvatar3D = React.lazy(() => import("./SignAvatar3D"));
@@ -134,13 +135,21 @@ interface ChatInterfaceProps {
   isEmbedded?: boolean;
   onSTTStateChange?: (active: boolean) => void;
   setProfile?: (profile: UserProfile) => void;
+  onNavigateBack?: () => void;
 }
 
 export interface ChatInterfaceRef {
   toggleSTT: () => void;
 }
 
-const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ profile, onQuestionEvaluated, onMenuClick, syncMessages, externalMessage, onStreamingUpdate, isEmbedded, onSTTStateChange, setProfile }, ref) => {
+const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ profile, onQuestionEvaluated, onMenuClick, syncMessages, externalMessage, onStreamingUpdate, isEmbedded, onSTTStateChange, setProfile, onNavigateBack }, ref) => {
+  const handleBackToHub = () => {
+    if (onNavigateBack) {
+      onNavigateBack();
+    } else {
+      smartNavigateBack(undefined, 'disability', 'hub');
+    }
+  };
   const activeThread = profile.chatThreads?.find(t => t.id === profile.activeThreadId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState(() => {
@@ -1430,13 +1439,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   };
 
   return (
-    <div className={`flex-1 flex flex-col bg-[#080409] text-slate-100 overflow-hidden relative selection:bg-[#E5A93C]/30 selection:text-white ${isEmbedded ? 'h-full' : 'h-[var(--app-h,100dvh)]'}`}>
-      {/* Ambient background lighting orbs - Serene Teal & Ambient Gold */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 hidden md:block">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-teal-600/10 rounded-full blur-[140px]" />
-      </div>
+    <div className={`flex-1 flex flex-col bg-[#071B33] text-[#F4F7FB] overflow-hidden relative selection:bg-[#087F8C]/30 selection:text-white ${isEmbedded ? 'h-full' : 'h-[var(--app-h,100dvh)]'}`}>
 
       {/* File Preview Modal */}
       <AnimatePresence>
@@ -1445,70 +1448,78 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 sm:p-10"
+            className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
             onClick={(e) => {
               if (e.target === e.currentTarget) setPreviewFile(null);
             }}
           >
-            <div className="absolute top-6 right-6 sm:top-10 sm:right-10 flex gap-3">
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex gap-2">
               {previewFile.data && (
                 <>
                   <button 
-                    title="Narrate Document (Blind Accessibility)" 
+                    title="Narrate Document" 
                     onClick={() => readDocument(previewFile)} 
-                    className="text-white hover:text-emerald-300 transition-all bg-[#0E0610]/90 hover:bg-[#1a1f36] p-2.5 rounded-2xl backdrop-blur-xl border border-[#4A1224]/60 flex items-center gap-2 px-4 shadow-xl"
+                    className="text-[#F4F7FB] hover:text-white transition-colors bg-[#0D2542] hover:bg-[#087F8C] p-2.5 rounded-xl border border-[rgba(72,139,190,0.22)] flex items-center gap-2 px-3.5 shadow-lg text-xs font-semibold"
                   >
-                    <Volume2 className="w-5 h-5 text-emerald-400" />
-                    <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{localize(profile.language, 'Hear Content', 'استماع للمحتوى')}</span>
+                    <Volume2 className="w-4 h-4 text-[#0A96A5]" />
+                    <span className="hidden sm:inline">{localize(profile.language, 'Hear Content', 'استماع للمحتوى')}</span>
                   </button>
-                  <button title="Download" onClick={() => handleDownload(previewFile)} className="text-white hover:text-[#E5A93C] transition-all bg-[#0E0610]/90 hover:bg-[#1a1f36] p-2.5 rounded-2xl backdrop-blur-xl border border-[#4A1224]/60 shadow-xl">
-                    <Download className="w-5 h-5" />
+                  <button 
+                    title="Download" 
+                    onClick={() => handleDownload(previewFile)} 
+                    className="text-[#F4F7FB] hover:text-white transition-colors bg-[#0D2542] hover:bg-[#087F8C] p-2.5 rounded-xl border border-[rgba(72,139,190,0.22)] shadow-lg"
+                  >
+                    <Download className="w-4 h-4" />
                   </button>
                 </>
               )}
-              <button title="Close" onClick={() => setPreviewFile(null)} className="text-white hover:text-rose-400 transition-all bg-[#0E0610]/90 hover:bg-[#1a1f36] p-2.5 rounded-2xl backdrop-blur-xl border border-[#4A1224]/60 shadow-xl">
-                <X className="w-5 h-5" />
+              <button 
+                title="Close" 
+                onClick={() => setPreviewFile(null)} 
+                className="text-[#B7C8DA] hover:text-white transition-colors bg-[#0D2542] hover:bg-rose-600/80 p-2.5 rounded-xl border border-[rgba(72,139,190,0.22)] shadow-lg"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
             {previewFile.type.startsWith('image/') ? (
               <img
                 src={attSrc(previewFile)}
                 alt={previewFile.name}
-                className="max-w-full max-h-full object-contain shadow-2xl rounded-2xl border border-[#4A1224]/60"
+                className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-2xl border border-[rgba(72,139,190,0.22)] bg-[#0A203A]"
               />
             ) : previewFile.type.startsWith('video/') ? (
               <video
                 src={attSrc(previewFile)}
                 controls
                 autoPlay
-                className="max-w-full max-h-full shadow-2xl rounded-2xl border border-[#4A1224]/60"
+                className="max-w-full max-h-[85vh] shadow-2xl rounded-2xl border border-[rgba(72,139,190,0.22)] bg-[#0A203A]"
               />
             ) : (previewFile.type === 'application/pdf' || previewFile.name.toLowerCase().endsWith('.pdf')) && previewFile.data ? (
-              <div className="w-full max-w-5xl h-[86vh] flex flex-col bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-[28px] overflow-hidden shadow-2xl backdrop-blur-2xl">
-                <div className="p-4 bg-[#0E111D] border-b border-[#4A1224]/60 flex items-center justify-between gap-3 shrink-0">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="px-2.5 py-0.5 rounded-lg bg-rose-500/20 text-rose-400 text-xs font-black">PDF</span>
-                    <span className="text-sm font-bold text-white truncate max-w-md">{previewFile.name}</span>
+              <div className="w-full max-w-4xl h-[84vh] flex flex-col bg-[#0D2542] border border-[rgba(72,139,190,0.22)] rounded-2xl overflow-hidden shadow-2xl">
+                <div className="p-3 bg-[#0A203A] border-b border-[rgba(72,139,190,0.22)] flex items-center justify-between gap-3 shrink-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-xs font-bold">PDF</span>
+                    <span className="text-xs font-semibold text-[#F4F7FB] truncate max-w-md">{previewFile.name}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button 
                       onClick={() => readDocument(previewFile)} 
                       disabled={isReadingDocument}
-                      className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+                      className="px-3 py-1.5 bg-[#087F8C] hover:bg-[#0A96A5] text-[#F4F7FB] rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition-all cursor-pointer"
                     >
                       {isReadingDocument ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Volume2 className="w-3.5 h-3.5" />}
                       <span>{localize(profile.language, 'Narrate PDF', 'قراءة الـ PDF')}</span>
                     </button>
                     <button 
                       onClick={() => handleDownload(previewFile)} 
-                      className="p-1.5 bg-[#150917] hover:bg-slate-800 text-slate-300 hover:text-[#E5A93C] rounded-xl border border-[#4A1224]/60 transition-colors"
+                      className="p-1.5 bg-[#0D2542] hover:bg-[#087F8C] text-[#B7C8DA] hover:text-white rounded-xl border border-[rgba(72,139,190,0.22)] transition-colors"
                       title="Download"
                     >
                       <Download className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => setPreviewFile(null)} 
-                      className="p-1.5 bg-[#150917] hover:bg-slate-800 text-slate-300 hover:text-rose-400 rounded-xl border border-[#4A1224]/60 transition-colors"
+                      className="p-1.5 bg-[#0D2542] hover:bg-rose-600/80 text-[#B7C8DA] hover:text-white rounded-xl border border-[rgba(72,139,190,0.22)] transition-colors"
                       title="Close"
                     >
                       <X className="w-4 h-4" />
@@ -1518,41 +1529,37 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 <iframe
                   src={`data:application/pdf;base64,${previewFile.data}`}
                   title={previewFile.name}
-                  className="w-full flex-1 border-0 bg-[#150917]"
+                  className="w-full flex-1 border-0 bg-[#071B33]"
                 />
               </div>
             ) : (
-              <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 p-8 sm:p-12 rounded-[36px] max-w-2xl w-full text-center space-y-6 backdrop-blur-2xl shadow-2xl">
-                <div className="relative inline-block">
-                  <div className="w-20 h-20 rounded-3xl bg-[#4A1224]/40 border border-[#E5A93C]/30 flex items-center justify-center mx-auto shadow-lg shadow-[#E5A93C]/10">
-                    <FileText className="w-10 h-10 text-[#E5A93C]" />
-                  </div>
-                  <motion.div 
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="absolute inset-0 bg-[#4A1224]/30 blur-xl rounded-full"
-                  />
+              <div className="bg-[#0D2542] border border-[rgba(72,139,190,0.22)] p-6 sm:p-10 rounded-2xl max-w-lg w-full text-center space-y-4 shadow-2xl">
+                <div className="w-16 h-16 rounded-2xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center mx-auto text-[#0A96A5]">
+                  <FileText className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-white">{previewFile.name}</h3>
-                <p className="text-slate-400 font-medium text-xs sm:text-sm leading-relaxed">
+                <h3 className="text-lg font-bold text-[#F4F7FB]">{previewFile.name}</h3>
+                <p className="text-xs text-[#B7C8DA] leading-relaxed">
                   {localize(
                     profile.language,
-                    'Full AI document analysis active. Tap "Hear Content" to have the AI narrate this document.',
-                    'التحليل الذكي للمستند قيد العمل. اضغط "استماع للمحتوى" لسماع قراءة صوتية ذكية للملف.'
+                    'Document ready for AI analysis. Click "Hear Content" to have the tutor read it aloud.',
+                    'المستند جاهز للتحليل الذكي. اضغط "استماع للمحتوى" لسماعه صوتيًا.'
                   )}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                   <button 
+                <div className="flex justify-center gap-2 pt-2">
+                  <button 
                     onClick={() => readDocument(previewFile)} 
                     disabled={isReadingDocument}
-                    className="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
-                   >
-                     {isReadingDocument ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
-                     {localize(profile.language, 'Narrate Document', 'قراءة المستند')}
-                   </button>
-                   <button onClick={() => setPreviewFile(null)} className="px-6 py-3.5 bg-[#150917] border border-[#4A1224]/60 text-slate-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all">
-                     {localize(profile.language, 'Close Preview', 'إغلاق المعاينة')}
-                   </button>
+                    className="px-4 py-2 bg-[#087F8C] hover:bg-[#0A96A5] text-[#F4F7FB] rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition-all cursor-pointer"
+                  >
+                    {isReadingDocument ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
+                    <span>{localize(profile.language, 'Hear Content', 'استماع للمحتوى')}</span>
+                  </button>
+                  <button 
+                    onClick={() => setPreviewFile(null)} 
+                    className="px-4 py-2 bg-[#0A203A] border border-[rgba(72,139,190,0.22)] text-[#B7C8DA] hover:text-[#F4F7FB] rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    {localize(profile.language, 'Close', 'إغلاق')}
+                  </button>
                 </div>
               </div>
             )}
@@ -1560,50 +1567,119 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         )}
       </AnimatePresence>
 
-      {/* Header Info */}
-      {!isEmbedded && (
-        <div className="bg-white/95 dark:bg-[#121B1E]/95 border-b border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white backdrop-blur-2xl h-[64px] px-4 md:px-8 flex justify-between items-center z-10 shrink-0 shadow-sm">
-          <div className="flex items-center gap-3 md:gap-4">
-            <button 
-              onClick={onMenuClick}
-              className="p-2 -ms-2 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl active:scale-95 transition-all cursor-pointer"
-              aria-label="Toggle Sidebar Menu"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2.5">
-              <span className="font-serif font-black text-lg tracking-tight text-stone-900 dark:text-white flex items-center gap-1.5">
-                <span>Cognify</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800">2.0</span>
-              </span>
-              <span className="text-xs md:text-sm font-semibold text-teal-700 dark:text-teal-400 truncate max-w-[100px] xs:max-w-[140px] md:max-w-xs flex items-center gap-1.5">
-                <span className="text-stone-400">·</span> {activeThread?.title || localize(profile.language, 'AI Session', 'جلسة ذكية')}
+      {/* A. Compact Page Header */}
+      <header className="bg-[#071B33] border-b border-[rgba(72,139,190,0.22)] text-[#F4F7FB] h-[58px] px-3 sm:px-6 flex justify-between items-center z-10 shrink-0">
+        <div className="flex items-center gap-3">
+          {/* Back to Hub Button */}
+          <button
+            type="button"
+            onClick={handleBackToHub}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0D2542] hover:bg-[#087F8C]/20 border border-[rgba(72,139,190,0.22)] hover:border-[#1685B5] text-[#F4F7FB] text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] focus:outline-none cursor-pointer"
+            aria-label={localize(profile.language, 'Back to Hub', 'رجوع للرئيسية')}
+            title={localize(profile.language, 'Back to Hub', 'رجوع للرئيسية')}
+          >
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+            <span className="hidden xs:inline">{localize(profile.language, 'Back to Hub', 'رجوع للرئيسية')}</span>
+          </button>
+
+          {/* AI Tutor Title & Short Description */}
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-2">
+              <Bot className="w-4 h-4 text-[#087F8C] shrink-0" />
+              <h1 className="font-bold text-sm sm:text-base text-[#F4F7FB] leading-none truncate">
+                {localize(profile.language, 'AI Tutor', 'المعلم الذكي')}
+              </h1>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#087F8C]/20 text-[#0A96A5] border border-[#087F8C]/40 shrink-0">
+                Cognify
               </span>
             </div>
-            {profile.accessibilityMode !== 'None' && (
-              <button
-                onClick={handleDisableAccessibility}
-                title={localize(profile.language, 'Accessibility mode is on — click to turn it off', 'وضع الإتاحة شغّال — اضغط لإيقافه')}
-                aria-label={localize(profile.language, 'Turn off accessibility mode', 'إيقاف وضع الإتاحة')}
-                className="hidden sm:flex items-center gap-1.5 ps-3 pe-2 py-1 bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60 rounded-full text-[10px] font-black uppercase tracking-wider transition-all group shadow-sm cursor-pointer"
-              >
-                 <Accessibility className="w-3.5 h-3.5" /> {profile.accessibilityMode} {localize(profile.language, 'Mode', 'وضع')}
-                 <X className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
-              </button>
-            )}
-            {(profile.accessibilityMode === 'Vocal-Deaf' || profile.accessibilityMode === 'Sign-Only') && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-purple-500/15 text-purple-300 border border-purple-500/30 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-lg shadow-purple-500/10 animate-pulse">
-                 <Sparkles className="w-3.5 h-3.5 text-purple-400" /> {localize(profile.language, 'Sign Interpretation Active', 'ترجمة الإشارة نشطة')}
-              </div>
-            )}
+            <p className="text-[11px] text-[#8FA7BE] hidden sm:block truncate mt-0.5">
+              {localize(profile.language, 'Calm, adaptive study copilot', 'رفيق دراسي ذكي ومخصص وبدون مشتتات')}
+            </p>
           </div>
-          <div className="flex items-center gap-2" />
         </div>
-      )}
 
-      {/* 3-Column AI Study & Command Center Layout */}
+        {/* Header Right Actions */}
+        <div className="flex items-center gap-2">
+          {/* Search Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            className={`p-2 rounded-xl border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+              isSearchOpen ? 'bg-[#087F8C]/20 border-[#1685B5] text-[#F4F7FB]' : 'bg-[#0D2542] border-[rgba(72,139,190,0.22)] text-[#8FA7BE] hover:text-[#F4F7FB]'
+            }`}
+            aria-label={localize(profile.language, 'Search within this conversation', 'بحث داخل هذه المحادثة')}
+            title={localize(profile.language, 'Search within this conversation', 'بحث داخل هذه المحادثة')}
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          {/* Bookmarks Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsBookmarksOpen(true)}
+            className="relative p-2 rounded-xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] hover:border-[#1685B5] text-[#8FA7BE] hover:text-[#F4F7FB] transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+            aria-label={localize(profile.language, 'Saved insights', 'بنك الأفكار المحفوظة')}
+            title={localize(profile.language, 'Saved insights', 'بنك الأفكار المحفوظة')}
+          >
+            <Bookmark className="w-4 h-4" />
+            {bookmarkedInsights.length > 0 && (
+              <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-[#087F8C] text-white text-[9px] font-bold flex items-center justify-center">
+                {bookmarkedInsights.length}
+              </span>
+            )}
+          </button>
+
+          {/* Speech Dictation Language Selector pill */}
+          <button
+            type="button"
+            onClick={() => {
+              const langs: Array<'fr-FR' | 'en-US' | 'ar-EG'> = ['fr-FR', 'en-US', 'ar-EG'];
+              const nextIdx = (langs.indexOf(dictationLang) + 1) % langs.length;
+              const next = langs[nextIdx];
+              setDictationLang(next);
+              if (isListening && recognitionRef.current) {
+                try { recognitionRef.current.lang = next; } catch {}
+              }
+            }}
+            className="px-2.5 py-1.5 rounded-xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] hover:border-[#1685B5] text-[#B7C8DA] hover:text-[#F4F7FB] text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+            title={localize(profile.language, 'Click to switch dictation language (FR/EN/AR)', 'اضغط لتبديل لغة الاستماع')}
+          >
+            {dictationLang === 'fr-FR' ? '🇫🇷 FR' : dictationLang === 'ar-EG' ? '🇪🇬 AR' : '🇬🇧 EN'}
+          </button>
+
+          {/* Accessibility mode pill (if mode !== 'None') */}
+          {profile.accessibilityMode !== 'None' && (
+            <button
+              type="button"
+              onClick={handleDisableAccessibility}
+              title={localize(profile.language, 'Accessibility mode is on — click to turn it off', 'وضع الإتاحة شغّال — اضغط لإيقافه')}
+              aria-label={localize(profile.language, 'Turn off accessibility mode', 'إيقاف وضع الإتاحة')}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-[#087F8C]/15 text-[#0A96A5] border border-[#087F8C]/40 hover:bg-[#087F8C]/25 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              <Accessibility className="w-3.5 h-3.5" />
+              <span>{profile.accessibilityMode}</span>
+              <X className="w-3 h-3 opacity-60 hover:opacity-100" />
+            </button>
+          )}
+
+          {/* Mobile Menu Button */}
+          {onMenuClick && (
+            <button
+              type="button"
+              onClick={onMenuClick}
+              className="p-2 rounded-xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] text-[#8FA7BE] hover:text-[#F4F7FB] lg:hidden cursor-pointer"
+              aria-label="Toggle Sidebar Menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* Main 3-Column AI Study Center Layout */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
-        {/* Left Column: Workspace & Study Intelligence */}
+        {/* Left Column: Workspace Panel */}
         <div className={`shrink-0 z-30 transition-all ${
           showWorkspace 
             ? 'fixed inset-y-0 start-0 xl:static flex h-full' 
@@ -1625,1230 +1701,835 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           />
         </div>
 
-        {/* Center Column: Interactive Chat & Input Composer */}
-        <div className="flex flex-col flex-1 min-w-0 h-full relative overflow-hidden">
-          {/* Side panels can be opened cleanly and easily via the top toolbar icons */}
-
-          {/* Messages */}
-          <div className={`flex flex-col flex-1 min-h-0 overflow-hidden relative transition-colors duration-300 ${
-            isEyeComfort ? 'bg-[#0E111D] ring-1 ring-amber-500/10' : ''
-          }`}>
-            {/* In-Session Search Bar */}
-            <AnimatePresence>
-              {isSearchOpen && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="px-4 py-2.5 bg-[#12162B] border-b border-[#4A1224]/60 flex items-center justify-between gap-3 shadow-md z-20"
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <Search className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                    <input
-                      type="text"
-                      aria-label={localize(profile.language, 'Search within this conversation', 'بحث داخل هذه المحادثة')}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={localize(profile.language, 'Search within this conversation...', 'بحث داخل هذه المحادثة...')}
-                      className="bg-transparent text-white text-xs sm:text-sm w-full outline-none placeholder:text-slate-500 font-medium"
-                      autoFocus
-                    />
-                  </div>
-                  {searchQuery.trim() && (
-                    <span className="text-[11px] font-mono text-[#E5A93C] bg-[#4A1224]/40 border border-[#E5A93C]/30 px-2 py-0.5 rounded-lg shrink-0">
-                      {messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase())).length}{' '}
-                      {localize(profile.language, 'results', 'نتيجة')}
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      setSearchQuery('');
-                    }}
-                    className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-        {/* Screen-reader announcer for blind users: speaks the "thinking" status
-            and the FINAL AI reply (not every streamed token, to avoid spam). */}
-        <div className="sr-only" role="status" aria-live="assertive" aria-atomic="true">
-          {isLoading
-            ? getTranslation(profile.language, 'analyzing')
-            : ([...messages].reverse().find((m) => m.role !== 'user' && m.id !== 'welcome')?.content || '')}
-        </div>
-        <div ref={scrollRef} role="region" aria-label={getTranslation(profile.language, 'aiAssistant')} className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 flex flex-col items-center custom-scrollbar">
-        {messagesLoading && messages.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-             <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
-        ) : (
-          <div className="w-full max-w-3xl space-y-10">
-            {messages.filter((m) => m.role === 'user').length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center py-6 sm:py-10 space-y-7 w-full animate-fadeIn select-none">
-                {/* Futuristic Glowing AI Core Orb */}
-                <div className="relative">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-                    className="absolute -inset-4 bg-gradient-to-r from-[#4A1224]/40 via-[#831843]/30 to-[#E5A93C]/20 rounded-full blur-2xl opacity-70 -z-10"
-                  />
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-[#1A0C1D] via-[#2D0B16] to-[#150917] border-2 border-[#E5A93C]/40 flex items-center justify-center shadow-2xl shadow-[#E5A93C]/20 relative group">
-                    <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-[#E5A93C] group-hover:scale-110 transition-transform duration-300" />
-                    <div className="absolute inset-0 rounded-3xl bg-[#E5A93C]/10 animate-pulse pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Hero Title & Subtitle */}
-                <div className="space-y-2.5 max-w-xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#4A1224]/40 border border-[#E5A93C]/30 text-[#E5A93C] text-xs font-black uppercase tracking-wider mb-1 shadow-sm shadow-[#E5A93C]/20">
-                    <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-ping" />
-                    <span>{localize(profile.language, 'Adaptive Cognitive Tutor 2.0', 'المعلّم الإدراكي المتكيف 2.0')}</span>
-                  </div>
-                  <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
-                    {localize(profile.language, 'What are we mastering today?', 'ما الذي سنبدأ في إتقانه اليوم؟')}
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal max-w-md mx-auto">
-                    {localize(
-                      profile.language,
-                      'Your personalized AI academic copilot with step-by-step scaffolding, real-world analogies, and multi-modal sensory support.',
-                      'مساعدك الأكاديمي الذكي المخصص: شرح متدرج خطوة بخطوة، تشبيهات واقعية، ودعم متعدد الحواس لكافة الطلاب.'
-                    )}
-                  </p>
-                </div>
-
-                {/* 4 Powerful Interactive Study Cards */}
-                {(() => {
-                  const ar = isArabicLocale(profile.language);
-                  const f = profile.field || (ar ? 'تخصصك' : 'your topic');
-                  const cards = ar
-                    ? [
-                        { title: 'شرح المفاهيم المعقدة', desc: `شرح متدرج ومبسط في ${f} بأمثلة واقعية`, prompt: `اشرح لي أهم وأصعب مفهوم في ${f} بأسلوب مبسط ومتدرج مع تشبيه من الحياة اليومية.`, icon: '💡', accent: 'from-amber-500/20 to-orange-500/5 hover:border-amber-400/60' },
-                        { title: 'خطة دراسية ذكية للأسبوع', desc: 'جدول عملي لتنظيم وقتك ومذاكرتك للاختبارات', prompt: `اعمللي خطة مذاكرة أسبوعية واقعية ومنظمة لمراجعة مواد ${f} بكفاءة.`, icon: '📅', accent: 'from-amber-400/20 to-blue-500/5 hover:border-[#E5A93C]/60' },
-                        { title: 'تلخيص وتحليل ملفات PDF', desc: 'استخراج الأفكار، المعادلات، والنقاط المهمة', prompt: `لخص لي أهم النقاط الأكاديمية والأسئلة المتوقعة في السلايدات أو المحاضرة.`, icon: '📄', accent: 'from-emerald-500/20 to-teal-500/5 hover:border-emerald-400/60' },
-                        { title: 'اختبار تدريبي تفاعلي', desc: 'أسئلة ذكية لقياس الفهم الفعلي وتثبيت المعلومة', prompt: `اطرح عليّ 3 أسئلة تدريبية متدرجة الصعوبة في ${f} لاختبار مدى فهمي واستيعابي.`, icon: '🎯', accent: 'from-purple-500/20 to-indigo-500/5 hover:border-purple-400/60' },
-                      ]
-                    : [
-                        { title: 'Master Deep Concepts', desc: `Step-by-step scaffolding in ${f} with real analogies`, prompt: `Explain the most important core concept in ${f} using intuitive step-by-step analogies.`, icon: '💡', accent: 'from-amber-500/20 to-orange-500/5 hover:border-amber-400/60' },
-                        { title: '1-Week Study Roadmap', desc: 'Structured revision timetable for upcoming exams', prompt: `Create a realistic 7-day study plan to master ${f} efficiently.`, icon: '📅', accent: 'from-amber-400/20 to-blue-500/5 hover:border-[#E5A93C]/60' },
-                        { title: 'PDF & Lecture Synthesizer', desc: 'Extract key formulas, exam points and summaries', prompt: `Summarize the essential takeaways and key exam concepts for this topic.`, icon: '📄', accent: 'from-emerald-500/20 to-teal-500/5 hover:border-emerald-400/60' },
-                        { title: 'Interactive Quiz & Review', desc: 'Targeted recall questions with instant feedback', prompt: `Quiz me with 3 progressive questions in ${f} to verify my active retention.`, icon: '🎯', accent: 'from-purple-500/20 to-indigo-500/5 hover:border-purple-400/60' },
-                      ];
-                  return (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 w-full max-w-2xl text-start">
-                      {cards.map((c) => (
-                        <button
-                          key={c.title}
-                          type="button"
-                          onClick={() => handleSubmit(undefined, c.prompt)}
-                          className={`p-4 rounded-3xl border border-[#4A1224]/70 bg-gradient-to-br ${c.accent} bg-[#0E0610]/75 text-slate-300 hover:text-white transition-all shadow-xl backdrop-blur-2xl active:scale-[0.98] flex items-start gap-3.5 group cursor-pointer hover:-translate-y-1`}
-                        >
-                          <span className="text-2xl p-2.5 rounded-2xl bg-[#0A0D1A] border border-white/10 group-hover:border-white/20 transition-all shrink-0 shadow-inner group-hover:scale-110">{c.icon}</span>
-                          <div className="min-w-0 flex-1">
-                            <h4 className="font-black text-sm text-white group-hover:text-[#E5A93C] transition-colors">{c.title}</h4>
-                            <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{c.desc}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </div>
-            ) : (
-              <>
-                {/* Active Spaced Micro-Retrieval Warmup Banner */}
-                <RetentionWarmupBanner
-                  uid={profile.uid}
-                  retentionSchedules={studentState?.retentionSchedules}
-                  personalLearningModel={studentState?.personalLearningModel}
-                  language={profile.language}
-                  onStartRefresher={(conceptId) => {
-                    const isAr = isArabicLocale(profile.language);
-                    const isFr = profile.language === 'French';
-                    const refresherPrompt = isAr
-                      ? `أريد اختبار استرجاع سريع مدته 30 ثانية لتثبيت مفهوم (${conceptId}). اختبرني بسؤال مباشر.`
-                      : isFr
-                      ? `Je souhaite faire une réactivation rapide de 30 secondes pour consolider le concept (${conceptId}). Pose-moi une question.`
-                      : `I'd like a 30-second quick retrieval refresher to consolidate the concept (${conceptId}). Give me a quick question.`;
-                    handleSubmit(undefined, refresherPrompt);
-                  }}
-                />
-
-                {/* Proactive Assistant Opportunity or Grounded Insight Card */}
-                {activeProactiveOpportunity && (
-                  <ProactiveSuggestionCard
-                    opportunity={activeProactiveOpportunity}
-                    language={profile.language}
-                    onAccept={(prompt) => {
-                      handleSubmit(undefined, prompt);
-                    }}
-                  />
-                )}
-                {!activeProactiveOpportunity && activeGroundedInsight && (
-                  <ProactiveSuggestionCard
-                    insight={activeGroundedInsight}
-                    language={profile.language}
-                    onAccept={(prompt) => {
-                      handleSubmit(undefined, prompt);
-                    }}
-                  />
-                )}
-              </>
-            )}
-          <AnimatePresence mode="popLayout">
-            {messages.map((m) => (
-              <motion.div
-                key={m.id}
-                id={`msg-${m.id}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className={`flex flex-col w-full group transition-all ${
-                  searchQuery.trim() && m.content?.toLowerCase().includes(searchQuery.toLowerCase()) ? 'ring-2 ring-[#E5A93C]/60 rounded-3xl p-1 bg-[#E5A93C]/5' : ''
-                } ${
-                  isArabicLocale(profile.language)
-                    ? (m.role === 'user' ? 'items-start text-start' : 'items-end text-end')
-                    : (m.role === 'user' ? 'items-end text-end' : 'items-start text-start')
-                }`}
-              >
-                {m.role === 'user' ? (
-                  <div className="space-y-3 max-w-[90%] md:max-w-[80%]">
-                    <div className="bg-gradient-to-br from-[#3B0E1D] via-[#4A1224]/90 to-[#230811] border border-[#831843]/60 text-white px-5 py-4 rounded-[26px] rounded-ee-md shadow-xl shadow-[#2D0B16]/50 backdrop-blur-xl text-[15px] leading-relaxed font-normal flex flex-col gap-2 ring-1 ring-[#E5A93C]/20">
-                       {/* Legacy '[Signs: emoji]' lines are dropped */}
-                       {(m.content || '').split('\n').filter((line) => !/^\[Signs:\s*.*\]$/i.test(line.trim())).map((line, i) => (
-                         <span key={i}>{line}</span>
-                       ))}
-                    </div>
-                    {m.attachments?.length ? m.attachments.map((file, idx) => (
-                      <div key={`${m.id}-att-${idx}`} className="relative group max-w-sm">
-                        <button 
-                          onClick={() => file.data && setPreviewFile(file)}
-                          className={`w-full flex items-center gap-3 p-3 bg-[#150917] border border-[#4A1224]/60 rounded-2xl transition-all ${file.data ? 'hover:border-[#E5A93C]/60 hover:shadow-lg cursor-pointer' : 'opacity-80 cursor-default'}`}
-                        >
-                           {!file.data ? (
-                             <div className="w-10 h-10 shrink-0 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-                               <FileText className="w-5 h-5 text-orange-400" />
-                             </div>
-                           ) : file.type.startsWith('image/') ? (
-                             <div className="w-10 h-10 shrink-0 rounded-xl overflow-hidden bg-[#150917] border border-[#4A1224]/60">
-                               <img src={`data:${file.type};base64,${file.data}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                             </div>
-                           ) : file.type.startsWith('video/') ? (
-                             <div className="w-10 h-10 shrink-0 rounded-xl bg-[#150917] flex items-center justify-center border border-[#4A1224]/60 overflow-hidden relative">
-                               <video src={`data:${file.type};base64,${file.data}`} className="w-full h-full object-cover opacity-50" />
-                               <div className="absolute inset-0 flex items-center justify-center">
-                                 <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5"></div>
-                                </div>
-                             </div>
-                           ) : (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')) ? (
-                              <div className="w-10 h-10 shrink-0 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center">
-                                <span className="text-[11px] font-black text-rose-400">PDF</span>
-                              </div>
-                            ) : (
-                             <div className="w-10 h-10 shrink-0 rounded-xl bg-[#4A1224]/30 flex items-center justify-center border border-[#E5A93C]/20">
-                               <FileText className="w-5 h-5 text-[#E5A93C]" />
-                             </div>
-                           )}
-                           <div className="text-left flex-1 min-w-0">
-                             <p className="text-xs font-bold text-white truncate w-full">{file.name}</p>
-                             <p className={`text-[10px] font-black uppercase tracking-widest ${file.data ? 'text-slate-500' : 'text-orange-400'}`}>
-                               {file.data ? 'Click to View' : 'Media Expired'}
-                             </p>
-                           </div>
-                        </button>
-                        {file.data && (
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                readDocument(file);
-                              }}
-                              className="bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-emerald-400 p-2 rounded-xl transition-all"
-                              title={getTranslation(profile.language, 'hearContent')}
-                            >
-                              <Volume2 className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDownload(file);
-                              }}
-                              className="bg-[#150917] border border-[#4A1224]/60 text-slate-300 hover:text-[#E5A93C] p-2 rounded-xl transition-all"
-                              title="Download"
-                            >
-                              <Download className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )) : null}
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-lg border shadow-sm ${
-                        evaluateQuestionQuality(m.content) >= 8 ? 'bg-[#4A1224]/40 text-[#E5A93C] border-[#E5A93C]/30' :
-                        evaluateQuestionQuality(m.content) >= 5 ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
-                        'bg-slate-800/60 text-slate-400 border-[#4A1224]/50'
-                      }`}>
-                        {evaluateQuestionQuality(m.content) >= 8 ? getTranslation(profile.language, 'excellentQuestion') :
-                         evaluateQuestionQuality(m.content) >= 5 ? getTranslation(profile.language, 'goodQuestion') : getTranslation(profile.language, 'basicQuestion')}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-w-[92%] md:max-w-[88%] w-full">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-[#4A1224]/40 border border-[#E5A93C]/30 rounded-xl text-[#E5A93C] text-[11px] font-black uppercase tracking-wider">
-                        <Bot className="w-3.5 h-3.5 text-[#E5A93C]" />
-                        <span>{localize(profile.language, 'Cognify Guidance', 'إجابة كوجنيفي الذكية')}</span>
-                      </div>
-
-                      {/* Epistemic Pedagogy Badge & Explainability Trigger */}
-                      {(() => {
-                        const pStyle = m.pedagogyStyle || activePedagogyStyle;
-                        const pMeta = PEDAGOGY_STYLES.find(st => st.id === pStyle);
-                        if (!pMeta) return null;
-                        const isAr = isArabicLocale(profile.language);
-                        const isFr = profile.language === 'French';
-                        const label = isAr ? pMeta.labelAr : isFr ? (pMeta.id === 'analogies' ? 'Analogies' : pMeta.id === 'technical' ? 'Technique' : pMeta.id === 'scaffolded' ? 'Pas à pas' : 'Socratique') : pMeta.labelEn;
-                        const isExplainOpen = expandedExplainMessageId === m.id;
-
-                        return (
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span
-                              title={localize(profile.language, pMeta.descriptionEn, pMeta.descriptionAr)}
-                              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg border border-[#4A1224]/70 bg-[#2D0B16]/60 text-[#E5A93C] text-[10px] font-bold"
-                            >
-                              <span>{pMeta.id === 'analogies' ? '💡' : pMeta.id === 'technical' ? '⚡' : pMeta.id === 'scaffolded' ? '🪜' : '❓'}</span>
-                              <span>{label}</span>
-                            </span>
-
-
-                          </div>
-                        );
-                      })()}
-
-                      <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-lg border ${
-                        profile.level === 'Advanced' ? 'bg-[#4A1224]/50 text-[#E5A93C] border-[#831843]/60' :
-                        profile.level === 'Intermediate' ? 'bg-[#2D0B16]/50 text-amber-300 border-[#4A1224]/60' :
-                        'bg-[#1A0C1D] text-amber-200/80 border-[#4A1224]/40'
-                      }`}>
-                        {getTranslation(profile.language, 'difficultyLevel')}: {profile.level} ({profile.role})
-                      </span>
-                      {('speechSynthesis' in window) && (
-                        <button 
-                          onClick={() => handleSpeak(m)}
-                          className={`text-[10px] font-black uppercase transition-all px-2.5 py-1 rounded-xl border flex items-center gap-1.5 ${
-                            speakingMessageId === m.id
-                              ? 'bg-rose-600 text-white border-rose-500 shadow-sm shadow-rose-500/30 animate-pulse'
-                              : 'bg-[#150917] text-slate-300 hover:text-[#E5A93C] border-[#4A1224]/60 hover:border-[#E5A93C]/40'
-                          }`}
-                        >
-                          {speakingMessageId === m.id ? (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-                              {localize(profile.language, 'Stop', 'إيقاف')}
-                            </>
-                          ) : (
-                            <>
-                              <Volume2 className="w-3.5 h-3.5 text-[#E5A93C]" />
-                              {localize(profile.language, 'Speak', 'استماع')}
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="relative p-6 sm:p-7 rounded-[32px] bg-[#130816]/90 border border-[#4A1224]/60 text-slate-100 leading-relaxed adaptive-response text-base space-y-4 shadow-2xl backdrop-blur-2xl hover:border-[#E5A93C]/40 transition-all w-full group/bubble">
-                      {(profile.accessibilityMode === 'Vocal-Deaf' || profile.accessibilityMode === 'Sign-Only') && m.id !== 'welcome' && m.content?.trim() && (
-                        <div className="mb-4">
-                          <button
-                            onClick={() => setSigningId(signingId === m.id ? null : m.id)}
-                            aria-label={localize(profile.language, 'Show this reply in sign language', 'اعرض الرد بلغة الإشارة')}
-                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#4A1224]/60 to-[#831843]/40 border border-[#831843]/50 hover:border-[#E5A93C]/60 text-[#E5A93C] hover:text-white text-xs font-bold transition-all shadow-lg shadow-[#2D0B16]/40 active:scale-95"
-                          >
-                            <Accessibility className="w-4 h-4 text-[#E5A93C]" />
-                            {signingId === m.id
-                              ? localize(profile.language, 'Hide sign avatar', 'إخفاء الأفاتار')
-                              : localize(profile.language, 'Show in sign language', 'اعرض بلغة الإشارة')}
-                          </button>
-                          {signingId === m.id && (
-                            <div className="mt-3 h-64 sm:h-72 rounded-2xl overflow-hidden bg-[#0E0610] border border-[#4A1224]/60 relative shadow-2xl">
-                              <React.Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-slate-500 text-xs font-bold uppercase tracking-widest">Loading avatar…</div>}>
-                                <SignAvatar3D words={wordsForSigning(m.content)} playing={true} onDone={() => { /* stays on last pose */ }} />
-                              </React.Suspense>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <MarkdownMessage 
-                        content={m.content} 
-                        fontScale={fontScale}
-                        language={profile.language}
-                        onPrerequisiteClick={(prereqId) => {
-                          const isAr = isArabicLocale(profile.language);
-                          const isFr = profile.language === 'French';
-                          const text = isAr
-                            ? `أريد مراجعة المفهوم الأساسي (${prereqId}) أولاً قبل المتابعة.`
-                            : isFr
-                            ? `Je souhaite revoir le concept prérequis (${prereqId}) avant de continuer.`
-                            : `I'd like to review the prerequisite concept (${prereqId}) before moving on.`;
-                          handleSubmit(undefined, text);
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Assistant Attachments (Generated Images/Videos) */}
-                    {m.attachments && m.attachments.length > 0 && (
-                      <div className="flex flex-wrap gap-4 mt-4">
-                        {m.attachments.map((file, idx) => (
-                          <div key={`${m.id}-gen-att-${idx}`} className="relative group">
-                            <button
-                              onClick={() => attSrc(file) && setPreviewFile(file)}
-                              className={`flex flex-col items-center gap-2 p-2 bg-[#0E0610] border border-[#4A1224]/60 rounded-2xl transition-all overflow-hidden ${attSrc(file) ? 'hover:border-[#E5A93C]/60 hover:shadow-lg cursor-pointer' : 'opacity-80 cursor-default'}`}
-                            >
-                               {!attSrc(file) ? (
-                                 <div className="w-48 h-48 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 flex-col gap-2">
-                                   <FileText className="w-10 h-10 text-orange-400" />
-                                   <span className="text-[10px] font-black text-orange-400 uppercase">Media Expired</span>
-                                 </div>
-                               ) : file.type.startsWith('image/') ? (
-                                 <div className="w-48 h-48 rounded-xl overflow-hidden bg-[#150917] border border-[#4A1224]/60">
-                                   <img src={attSrc(file)} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                 </div>
-                               ) : file.type.startsWith('video/') ? (
-                                 <div className="w-48 h-48 rounded-xl bg-[#150917] flex items-center justify-center border border-[#4A1224]/60 overflow-hidden relative">
-                                   <video src={attSrc(file)} className="w-full h-full object-cover opacity-70" />
-                                   <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                     <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[15px] border-l-white border-b-[10px] border-b-transparent ml-1 drop-shadow-lg"></div>
-                                   </div>
-                                 </div>
-                               ) : null}
-                               <div className="text-center w-full px-2 py-1">
-                                 <p className="text-[11px] font-bold text-slate-200 truncate w-full">{file.name}</p>
-                                 <p className={`text-[9px] font-black uppercase tracking-widest mt-0.5 ${attSrc(file) ? 'text-slate-500' : 'text-orange-400'}`}>
-                                   {attSrc(file) ? 'Click to Enlarge' : 'Media Removed (Size Limit)'}
-                                 </p>
-                               </div>
-                            </button>
-                            {attSrc(file) && (
-                              <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    readDocument(file);
-                                  }}
-                                  className="bg-emerald-500/90 hover:bg-emerald-500 text-white p-2 rounded-xl backdrop-blur-sm transition-all shadow-md"
-                                  title="Hear Content"
-                                >
-                                  <Volume2 className="w-4 h-4" />
-                                </button>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDownload(file);
-                                  }}
-                                  className="bg-black/80 hover:bg-black p-2 rounded-xl text-white backdrop-blur-sm transition-all shadow-md"
-                                  title="Download"
-                                >
-                                  <Download className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Benchmark comparisons */}
-                    {m.comparisons && m.comparisons.map((comp, idx) => (
-                      <div key={idx} className="mt-4 p-6 bg-[#0E111D] text-slate-200 rounded-3xl border border-[#4A1224]/60 shadow-2xl">
-                        <div className="flex items-center gap-3 mb-4 border-b border-[#4A1224]/60 pb-3">
-                          <Scale className="w-5 h-5 text-[#E5A93C]" />
-                          <h4 className="font-black text-white tracking-widest uppercase text-xs">{comp.modelName}</h4>
-                        </div>
-                        <div className="space-y-3 text-xs opacity-90 font-mono leading-relaxed text-slate-300">
-                          {(comp.content || '').split('\n').map((line, lidx) => (
-                            <p key={lidx}>{line}</p>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-
-                    <div className={`mt-3 flex gap-2 items-center justify-end transition-opacity ${m.reaction ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                      <div className="flex items-center gap-1.5 mr-auto">
-                        <button
-                          onClick={() => handleReactToMessage(m.id, 'up')}
-                          className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 ${
-                            m.reaction === 'up'
-                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm shadow-emerald-500/20'
-                              : 'text-slate-400 bg-[#150917] border-[#4A1224]/60 hover:text-white hover:border-[#4A1224]/50'
-                          }`}
-                          title="Thumbs Up / Helpful"
-                        >
-                          <ThumbsUp className="w-3.5 h-3.5" />
-                          <span>{localize(profile.language, 'Helpful', 'مفيد')}</span>
-                        </button>
-                        <button
-                          onClick={() => handleReactToMessage(m.id, 'down')}
-                          className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 ${
-                            m.reaction === 'down'
-                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-sm shadow-rose-500/20'
-                              : 'text-slate-400 bg-[#150917] border-[#4A1224]/60 hover:text-white hover:border-[#4A1224]/50'
-                          }`}
-                          title="Thumbs Down / Unhelpful"
-                        >
-                          <ThumbsDown className="w-3.5 h-3.5" />
-                          <span>{localize(profile.language, 'Unhelpful', 'غير مفيد')}</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard?.writeText(m.content).then(
-                              () => toast.success(
-                                localize(profile.language, 'Copied', 'تم النسخ'),
-                              ),
-                              () => {},
-                            );
-                          }}
-                          className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 text-slate-400 bg-[#150917] border-[#4A1224]/60 hover:text-[#E5A93C] hover:border-[#E5A93C]/30"
-                          title={localize(profile.language, "Copy answer", "نسخ الإجابة")}
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>{localize(profile.language, 'Copy', 'نسخ')}</span>
-                        </button>
-
-                        {/* 1-Click Transform: Simplify (ELI5) */}
-                        <button
-                          type="button"
-                          onClick={() => handleSimplify(m)}
-                          className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 text-slate-400 bg-[#150917] border-[#4A1224]/60 hover:text-purple-300 hover:border-purple-500/30 active:scale-95 cursor-pointer"
-                          title={localize(profile.language, 'Explain this in simpler terms (ELI5)', 'شرح مبسط بدون أي تعقيد')}
-                        >
-                          <Zap className="w-3.5 h-3.5 text-purple-400" />
-                          <span>{localize(profile.language, 'Simplify', 'بسّط')}</span>
-                        </button>
-
-                        {/* 1-Click Bookmark / Save key insight */}
-                        <button
-                          type="button"
-                          onClick={() => handleToggleBookmark(m)}
-                          className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
-                            bookmarkedInsights.some((b) => b.messageId === m.id)
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-500/20'
-                              : 'text-slate-400 bg-[#150917] border-[#4A1224]/60 hover:text-amber-300 hover:border-amber-500/30'
-                          }`}
-                          title={localize(profile.language, 'Pin to saved insights', 'تثبيت في بنك الأفكار')}
-                        >
-                          <Bookmark className={`w-3.5 h-3.5 ${bookmarkedInsights.some((b) => b.messageId === m.id) ? 'fill-amber-400 text-amber-400' : 'text-slate-400'}`} />
-                          <span>{localize(profile.language, 'Pin', 'تثبيت')}</span>
-                        </button>
-                      </div>
-
-                      <button 
-                        onClick={() => handleCompareAI(m)}
-                        disabled={comparingId === m.id}
-                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#E5A93C] hover:border-[#E5A93C]/30 bg-[#150917] px-3 py-1.5 rounded-xl border border-[#4A1224]/60 transition-all flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {comparingId === m.id ? (
-                          <><Loader2 className="w-3.5 h-3.5 animate-spin text-[#E5A93C]" /> {localize(profile.language, 'Reviewing…', 'جاري المراجعة…')}</>
-                        ) : (
-                          <><Scale className="w-3.5 h-3.5 text-[#E5A93C]" /> {localize(profile.language, 'Second opinion', 'رأي تانٍ')}</>
-                        )}
-                      </button>
-                    </div>
-
-
-                </div>
-                )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-
-
-
-
-          {isLoading && (
-            <motion.div
-              key="streaming-block"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-3 w-full"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-lg border bg-[#4A1224]/40 text-[#E5A93C] border-[#E5A93C]/30">
-                  Level: {profile.level} ({profile.role})
-                </span>
-              </div>
-              
-              {streamingText ? (
-                <div className="p-6 sm:p-7 rounded-[32px] bg-[#0E0610]/90 border border-[#4A1224]/60 text-slate-100 leading-relaxed adaptive-response text-base space-y-4 shadow-2xl backdrop-blur-2xl">
-                  <MarkdownMessage content={streamingText} />
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 p-6 bg-[#0E0610]/70 rounded-2xl border border-[#E5A93C]/30 italic text-[#E5A93C] shadow-xl backdrop-blur-xl">
-                  <span className="flex items-center gap-1.5" aria-label="Assistant is typing">
-                    <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-bounce" />
-                  </span>
-                  <span className="font-bold tracking-wide">{getTranslation(profile.language, 'analyzing')}</span>
-                </div>
-              )}
-            </motion.div>
-          )}
-          </div>
-        )}
-        </div>
-
-        {/* Task Panel */}
-        <AnimatePresence>
-          {showTasks && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: isEmbedded ? '100%' : (window.innerWidth < 768 ? '100%' : 320), opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              style={{ right: 0, top: 0, bottom: 0, zIndex: 40 }}
-              className={`bg-[#0E111D]/95 border-s border-[#4A1224]/70 backdrop-blur-2xl overflow-y-auto flex flex-col shadow-2xl shrink-0 ${isEmbedded ? 'absolute' : 'absolute md:relative'}`}
-            >
-              <div className="p-4 border-b border-[#4A1224]/60 bg-[#0E0610]/90 flex justify-between items-center shrink-0 backdrop-blur-md">
-                <h3 className="font-black text-white flex items-center gap-2.5 text-sm tracking-wide">
-                  <ListTodo className="w-5 h-5 text-[#E5A93C]" /> Thread Tasks
-                </h3>
-                <button 
-                  onClick={() => setShowTasks(false)} 
-                  className="p-1.5 hover:bg-white/5 rounded-xl text-slate-400 hover:text-white transition-colors"
-                  aria-label="Close tasks panel"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="p-4 flex-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
-                <form onSubmit={handleAddTask} className="flex gap-2">
-                  <input
-                    type="text"
-                    id="new-task"
-                    name="new-task"
-                    aria-label="New task"
-                    value={newTaskInput}
-                    onChange={(e) => setNewTaskInput(e.target.value)}
-                    placeholder="New task..."
-                    className="flex-1 bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3.5 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#E5A93C]/60 focus:ring-1 focus:ring-[#E5A93C]/20 shadow-inner"
-                  />
-                  <button 
-                    type="submit" 
-                    disabled={!newTaskInput.trim()} 
-                    className="bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 hover:opacity-95 text-white p-2.5 rounded-xl disabled:opacity-40 transition-all shadow-md shadow-[#E5A93C]/20 active:scale-95"
-                    aria-label="Add task"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </form>
-                <div className="space-y-2">
-                  {currentThreadTasks.length === 0 ? (
-                     <div className="text-center p-6 text-slate-500 italic text-sm border border-dashed border-[#4A1224]/60 rounded-2xl bg-[#150917]/40">
-                       No tasks for this thread yet.
-                     </div>
-                  ) : (
-                    currentThreadTasks.map(task => (
-                      <div 
-                        key={task.id} 
-                        className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all ${
-                          task.completed 
-                            ? 'bg-[#150917]/60 border-[#4A1224]/50 opacity-60 text-slate-400' 
-                            : 'bg-[#0E0610] border-[#4A1224]/70 text-white shadow-lg shadow-black/20 hover:border-[#4A1224]/50'
-                        }`}
-                      >
-                        <button 
-                          onClick={() => handleToggleTask(task.id)} 
-                          className={`mt-0.5 shrink-0 transition-colors ${task.completed ? 'text-emerald-400' : 'text-slate-500 hover:text-[#E5A93C]'}`}
-                          aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
-                        >
-                          {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-                        </button>
-                        <p className={`flex-1 text-sm ${task.completed ? 'line-through text-slate-500' : 'text-slate-200 font-medium'}`}>
-                          {task.content}
-                        </p>
-                        <button 
-                          onClick={() => handleDeleteTask(task.id)} 
-                          className="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-xl transition-colors shrink-0"
-                          aria-label="Delete task"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Insights Panel */}
-        <AnimatePresence>
-          {showInsights && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: isEmbedded ? '100%' : (window.innerWidth < 768 ? '100%' : 340), opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              style={{ right: 0, top: 0, bottom: 0, zIndex: 40 }}
-              className={`bg-[#0E111D]/95 border-s border-amber-500/30 backdrop-blur-2xl overflow-y-auto flex flex-col shadow-2xl shrink-0 ${isEmbedded ? 'absolute' : 'absolute md:relative'}`}
-            >
-              <div className="p-4 border-b border-amber-500/20 bg-[#17140e]/90 flex justify-between items-center shrink-0 backdrop-blur-md">
-                <h3 className="font-black text-amber-300 flex items-center gap-2 text-sm tracking-wide">
-                  <Lightbulb className="w-5 h-5 text-amber-400 animate-pulse" /> {getTranslation(profile.language, 'proactiveInsights')}
-                </h3>
-                <button 
-                  onClick={() => setShowInsights(false)} 
-                  className="p-1.5 hover:bg-amber-500/10 rounded-xl text-amber-400/80 hover:text-amber-300 transition-colors"
-                  aria-label="Close insights panel"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="p-5 flex-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
-                {isGeneratingInsights ? (
-                  <div className="flex flex-col items-center justify-center p-8 text-amber-300 gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-                    <span className="text-sm font-medium text-amber-300/80">Analyzing thread & profile...</span>
-                  </div>
-                ) : (
-                  <>
-                    <div 
-                      className="p-6 rounded-3xl shadow-2xl text-slate-200 border border-amber-500/30 bg-[#0E0610]/90 backdrop-blur-xl leading-relaxed" 
-                      style={{ boxShadow: '0 10px 30px -5px rgba(251, 191, 36, 0.15)' }}
-                    >
-                      {insights ? (
-                        <div className="markdown-body font-medium text-slate-200">
-                          <Markdown>{insights}</Markdown>
-                        </div>
-                      ) : (
-                        <span className="text-slate-300 font-bold tracking-tight">Click refresh to generate new insights.</span>
-                      )}
-                    </div>
-                    
-                    <button 
-                      onClick={handleGenerateInsights}
-                      className="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20 active:scale-98"
-                    >
-                      <RefreshCw className="w-4 h-4" /> {getTranslation(profile.language, 'regenerateInsights')}
-                    </button>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Input Area — compact and pinned */}
-      <div className="shrink-0 py-1.5 px-2 sm:px-4 border-t border-[#4A1224]/60 bg-[#0E111D]/95 backdrop-blur-2xl relative shadow-[0_-10px_20px_-8px_rgba(0,0,0,0.5)] z-20">
-        <div className="max-w-2xl mx-auto space-y-1">
-
-          {/* Mouse Minimize / Expand Handle */}
-          <div className="flex items-center justify-center -mt-1 pb-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                setIsToolsExpanded(!isToolsExpanded);
-                setShowPedagogyPopover(false);
-                setShowQuickActionsPopover(false);
-              }}
-              className="group flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-semibold text-slate-500 hover:text-[#E5A93C] hover:bg-slate-800/70 transition-all cursor-pointer select-none"
-              title={isToolsExpanded ? (localize(profile.language, "Minimize composer height", "تصغير الارتفاع للوضع المدمج")) : (localize(profile.language, "Expand full toolbars", "توسيع شريط الأدوات بالكامل"))}
-              aria-label={isToolsExpanded ? "Minimize composer height" : "Expand composer toolbars"}
-            >
-              <span className="w-5 sm:w-8 h-0.5 rounded-full bg-slate-700 group-hover:bg-[#E5A93C] transition-colors" />
-              {isToolsExpanded ? (
-                <>
-                  <ChevronDown className="w-3 h-3 text-[#E5A93C] group-hover:translate-y-0.5 transition-transform" />
-                  <span>{localize(profile.language, 'Minimize', 'تصغير')}</span>
-                </>
-              ) : (
-                <>
-                  <ChevronUp className="w-3 h-3 text-slate-400 group-hover:text-[#E5A93C] group-hover:-translate-y-0.5 transition-transform" />
-                  <span className="text-slate-400 group-hover:text-[#E5A93C] transition-colors">{localize(profile.language, 'Tools & Styles', 'الأدوات والأنماط')}</span>
-                </>
-              )}
-              <span className="w-5 sm:w-8 h-0.5 rounded-full bg-slate-700 group-hover:bg-[#E5A93C] transition-colors" />
-            </button>
-          </div>
-
-          {/* Expanded Full Toolbars (when isToolsExpanded is true) */}
+        {/* Center Column: Conversation Area & Composer */}
+        <div className="flex flex-col flex-1 min-w-0 h-full relative overflow-hidden bg-[#071B33]">
+          
+          {/* In-Session Search Bar */}
           <AnimatePresence>
-            {isToolsExpanded && (
+            {isSearchOpen && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden space-y-1.5 pb-1"
+                className="px-4 py-2.5 bg-[#0D2542] border-b border-[rgba(72,139,190,0.22)] flex items-center justify-between gap-3 shadow-md z-20 shrink-0"
               >
-                {/* Quick-Action Study Command Toolbar */}
-                <ChatQuickActions
-                  profile={profile}
-                  onUploadDocument={() => fileInputRef.current?.click()}
-                  onQuickPrompt={(promptText) => handleSubmit(undefined, promptText)}
-                  disabled={isLoading}
-                />
-
-                {/* Top Bar: Adaptive Pedagogy Style Bar + France Travel Voice & Mic Language */}
-                <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar scrollbar-none py-0.5 px-1 bg-[#0E0610]/60 border border-[#4A1224]/50 rounded-2xl">
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[10px] text-amber-500 dark:text-amber-400 font-extrabold uppercase tracking-wider shrink-0 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      <span>{localize(profile.language, 'Pedagogy:', 'أسلوب الشرح:')}</span>
-                    </span>
-                    {PEDAGOGY_STYLES.map((st) => {
-                      const isSelected = activePedagogyStyle === st.id;
-                      const IconComponent =
-                        st.id === 'simplified' ? Sparkles :
-                        st.id === 'scaffolded' ? Layers :
-                        st.id === 'practical' ? Code :
-                        st.id === 'analogies' ? Lightbulb :
-                        st.id === 'socratic' ? HelpCircle : Cpu;
-
-                      return (
-                        <button
-                          key={st.id}
-                          type="button"
-                          onClick={() => handleSelectPedagogy(st.id)}
-                          className={`px-2.5 py-1 min-h-[32px] rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer ${
-                            isSelected
-                              ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-sm ring-1 ring-amber-400/50'
-                              : 'bg-[#150917] text-slate-300 border-[#4A1224]/70 hover:bg-[#25102a] hover:text-white'
-                          }`}
-                          title={localize(profile.language, st.descriptionEn, st.descriptionAr)}
-                        >
-                          <IconComponent className="w-3 h-3 shrink-0" />
-                          <span>{localize(profile.language, st.labelEn, st.labelAr)}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* France Travel Assistant & Mic Language Switcher */}
-                  <div className="flex items-center gap-2 shrink-0 ms-auto">
-                    <button
-                      type="button"
-                      onClick={() => setShowFrenchTravelAssistant(true)}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-black bg-gradient-to-r from-amber-500/15 to-orange-500/15 text-amber-300 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/25 active:scale-95 transition-all shadow-sm shrink-0"
-                      title={localize(profile.language, 'Open France Travel & Voice Assistant', 'فتح دليل ومترجم فرنسا الصوتي')}
-                    >
-                      <span>🇫🇷</span>
-                      <span className="hidden sm:inline">{localize(profile.language, 'France Guide', 'دليل فرنسا')}</span>
-                    </button>
-
-                    <div className="flex items-center bg-[#0E0610] border border-[#4A1224]/70 rounded-xl p-0.5 shadow-inner" title="Speech Recognition Language">
-                      {[
-                        { code: 'fr-FR' as const, label: '🇫🇷 FR' },
-                        { code: 'en-US' as const, label: '🇬🇧 EN' },
-                        { code: 'ar-EG' as const, label: '🇪🇬 AR' },
-                      ].map(({ code, label }) => (
-                        <button
-                          key={code}
-                          type="button"
-                          onClick={() => {
-                            setDictationLang(code);
-                            if (isListening && recognitionRef.current) {
-                              try { recognitionRef.current.lang = code; } catch {}
-                            }
-                          }}
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-lg transition-all ${
-                            dictationLang === code
-                              ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-white shadow-sm'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2 flex-1">
+                  <Search className="w-4 h-4 text-[#0A96A5] shrink-0" />
+                  <input
+                    type="text"
+                    aria-label={localize(profile.language, 'Search within this conversation', 'بحث داخل هذه المحادثة')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={localize(profile.language, 'Search within this conversation...', 'بحث داخل هذه المحادثة...')}
+                    className="bg-transparent text-[#F4F7FB] text-xs sm:text-sm w-full outline-none placeholder:text-[#8FA7BE] font-medium"
+                    autoFocus
+                  />
                 </div>
+                {searchQuery.trim() && (
+                  <span className="text-[11px] font-mono text-[#0A96A5] bg-[#0A203A] border border-[rgba(72,139,190,0.22)] px-2 py-0.5 rounded-lg shrink-0">
+                    {messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase())).length}{' '}
+                    {localize(profile.language, 'results', 'نتيجة')}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setSearchQuery('');
+                  }}
+                  className="text-[#8FA7BE] hover:text-[#F4F7FB] p-1 rounded-lg hover:bg-[#0A203A] transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Selected Files Preview Chips */}
-          <AnimatePresence>
-            {selectedFiles.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="flex flex-wrap gap-2 mb-1"
+          {/* Screen-reader announcer */}
+          <div className="sr-only" role="status" aria-live="assertive" aria-atomic="true">
+            {isLoading
+              ? getTranslation(profile.language, 'analyzing')
+              : ([...messages].reverse().find((m) => m.role !== 'user' && m.id !== 'welcome')?.content || '')}
+          </div>
+
+          {/* B. Main Conversation Surface Card */}
+          <div className="flex-1 min-h-0 flex flex-col max-w-4xl w-full mx-auto p-2 sm:p-4 overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col bg-[#0A203A] border border-[rgba(72,139,190,0.22)] rounded-2xl shadow-xl overflow-hidden relative">
+
+              {/* Scroll Container */}
+              <div 
+                ref={scrollRef} 
+                role="region" 
+                aria-label={getTranslation(profile.language, 'aiAssistant')} 
+                className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 flex flex-col items-center custom-scrollbar"
               >
-                {selectedFiles.map((file, i) => {
-                  const isImg = file.type.startsWith('image/');
-                  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-                  return (
-                    <div key={i} className="flex items-center gap-2 px-2.5 py-1 bg-[#0E0610] rounded-xl border border-[#4A1224]/60 group shadow-md backdrop-blur-md">
-                      {isImg && file.data ? (
-                        <img 
-                          src={`data:${file.type};base64,${file.data}`} 
-                          alt="" 
-                          className="w-5 h-5 rounded-md object-cover border border-[#4A1224]/50 shrink-0" 
-                        />
-                      ) : isPdf ? (
-                        <div className="w-5 h-5 rounded-md bg-rose-500/15 border border-rose-500/30 flex items-center justify-center shrink-0">
-                          <span className="text-[8px] font-black text-rose-400">PDF</span>
+                {messagesLoading && messages.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-[#087F8C] animate-spin" />
+                  </div>
+                ) : (
+                  <div className="w-full max-w-3xl space-y-6">
+
+                    {/* Empty Conversation / Welcome State */}
+                    {messages.filter((m) => m.role === 'user').length === 0 ? (
+                      <div className="flex flex-col items-center justify-center text-center py-8 sm:py-14 space-y-6 w-full animate-fadeIn select-none">
+                        {/* Calm Bot Avatar */}
+                        <div className="w-14 h-14 rounded-2xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] flex items-center justify-center text-[#087F8C] shadow-lg">
+                          <Bot className="w-7 h-7 text-[#0A96A5]" />
                         </div>
-                      ) : (
-                        <FileText className="w-3.5 h-3.5 text-[#E5A93C] shrink-0" />
-                      )}
-                      <span className="text-xs font-bold text-slate-200 truncate max-w-[120px]">{file.name}</span>
-                      <button 
-                        onClick={() => removeFile(i)} 
-                        className="text-slate-400 hover:text-rose-400 p-0.5 rounded hover:bg-rose-500/10 transition-colors"
-                        aria-label={`Remove ${file.name}`}
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>
 
-          {/* Click-away backdrop for Popovers */}
-          {(showPedagogyPopover || showQuickActionsPopover) && (
-            <div 
-              className="fixed inset-0 z-30" 
-              onClick={() => {
-                setShowPedagogyPopover(false);
-                setShowQuickActionsPopover(false);
-              }} 
-            />
-          )}
+                        {/* Welcome Heading & Subtitle */}
+                        <div className="space-y-2 max-w-lg">
+                          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#F4F7FB]">
+                            {localize(profile.language, 'Welcome to your AI Tutor', 'مرحبًا بك في المساعد التعليمي')}
+                          </h2>
+                          <p className="text-xs sm:text-sm text-[#B7C8DA] leading-relaxed max-w-md mx-auto">
+                            {localize(
+                              profile.language,
+                              "I'm here to help you understand lessons, solve problems, and sharpen your learning skills.",
+                              "أنا هنا لمساعدتك في فهم الدروس، وحل الأسئلة، وتطوير مهاراتك الدراسية."
+                            )}
+                          </p>
+                        </div>
 
-          {/* Single Compact Chat Rectangle Form (Matching Image 2) */}
-          <form onSubmit={handleSubmit} className="relative group">
-            <input
-              type="file"
-              id="chat-file-upload"
-              name="chat-file-upload"
-              aria-label="Attach images or PDF files"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              multiple
-              accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.webp,.txt"
-            />
-            <div className={`relative w-full rounded-2xl bg-[#130816]/95 border border-[#4A1224]/70 shadow-2xl backdrop-blur-2xl focus-within:border-[#E5A93C]/80 focus-within:ring-2 focus-within:ring-[#E5A93C]/20 ring-1 ring-[#E5A93C]/10 transition-all p-1.5 sm:p-2 flex flex-col justify-between ${isListening ? 'border-[#E5A93C] ring-4 ring-[#E5A93C]/30' : ''}`}>
-              
-              {/* Upper Section: Textarea Input */}
-              <div className="relative w-full flex items-center">
-                <textarea
-                  id="chat-composer"
-                  name="chat-composer"
-                  aria-label={getTranslation(profile.language, 'typeMessage')}
-                  rows={1}
-                  value={input + (interimTranscript ? (input ? " " : "") + interimTranscript : "")}
-                  onChange={(e) => setInput(e.target.value)}
-                  onInput={(e) => {
-                    const el = e.currentTarget;
-                    el.style.height = 'auto';
-                    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-                  }}
-                  onKeyDown={(e) => {
-                    // Enter sends, Shift+Enter inserts a newline
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      if (!isLoading && (input.trim() || selectedFiles.length > 0)) handleSubmit();
-                    }
-                  }}
-                  disabled={isLoading}
-                  placeholder={isListening ? (localize(profile.language, "Listening...", 'جاري الاستماع...')) : (localize(profile.language, "Ask Cognify or type a message...", "اسأل كوجنيفاي أو اكتب رسالتك..."))}
-                  className="w-full bg-transparent text-white border-0 px-2.5 pt-1 pb-0.5 outline-none placeholder:text-slate-500 disabled:opacity-50 relative z-0 resize-none min-h-[30px] max-h-28 leading-snug text-xs sm:text-sm font-normal custom-scrollbar"
-                />
+                        {/* 4 Compact Suggestions */}
+                        {(() => {
+                          const ar = isArabicLocale(profile.language);
+                          const f = profile.field || (ar ? 'تخصصك' : 'your topic');
+                          const suggestions = ar
+                            ? [
+                                { 
+                                  title: 'شرح درس', 
+                                  desc: `شرح مبسط وتدريجي في ${f}`, 
+                                  prompt: `اشرح لي أهم درس في ${f} بأسلوب مبسط وتدريجي مع أمثلة عملية وتشبيه واضح من واقع الحياة.`, 
+                                  icon: <Lightbulb className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                                { 
+                                  title: 'تلخيص مادة', 
+                                  desc: 'استخراج الأفكار الرئيسية والنقاط الجوهرية', 
+                                  prompt: `ساعدني في تلخيص أهم نقاط ومفاهيم مادة ${f} بشكل منظم وواضح.`, 
+                                  icon: <FileText className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                                { 
+                                  title: 'حل واجب', 
+                                  desc: 'توجيه خطوة بخطوة لفهم طريقة الحل', 
+                                  prompt: `ساعدني في فهم وحل مسألة دراسية في ${f} خطوة بخطوة مع توضيح طريقة التفكير.`, 
+                                  icon: <CheckCircle2 className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                                { 
+                                  title: 'مساعدة في المذاكرة', 
+                                  desc: 'أسئلة تدريبية تفاعلية لتثبيت المعلومة', 
+                                  prompt: `اطرح عليّ أسئلة تدريبية تفاعلية لاختبار فهمي وتثبيت المفاهيم في مادة ${f}.`, 
+                                  icon: <BrainCircuit className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                              ]
+                            : [
+                                { 
+                                  title: 'Explain a Lesson', 
+                                  desc: `Step-by-step guidance in ${f}`, 
+                                  prompt: `Explain an important lesson in ${f} in a clear, step-by-step manner with intuitive analogies.`, 
+                                  icon: <Lightbulb className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                                { 
+                                  title: 'Summarize a Subject', 
+                                  desc: 'Extract key points and core takeaways', 
+                                  prompt: `Help me summarize the core concepts and key takeaways of ${f} in a structured format.`, 
+                                  icon: <FileText className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                                { 
+                                  title: 'Homework & Problem Help', 
+                                  desc: 'Guided reasoning to solve problems step-by-step', 
+                                  prompt: `Guide me through solving a practice problem in ${f} step-by-step, clarifying each reasoning step.`, 
+                                  icon: <CheckCircle2 className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                                { 
+                                  title: 'Study & Review Assistance', 
+                                  desc: 'Interactive quiz questions to test retention', 
+                                  prompt: `Quiz me with progressive review questions in ${f} to verify my active retention.`, 
+                                  icon: <BrainCircuit className="w-4 h-4 text-[#0A96A5]" /> 
+                                },
+                              ];
+                          return (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl pt-2 text-start">
+                              {suggestions.map((c) => (
+                                <button
+                                  key={c.title}
+                                  type="button"
+                                  onClick={() => handleSubmit(undefined, c.prompt)}
+                                  className="p-3.5 rounded-xl border border-[rgba(72,139,190,0.22)] bg-[#0D2542] hover:bg-[#0D2542]/80 hover:border-[#087F8C] text-[#F4F7FB] transition-all flex items-center gap-3 text-start cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] active:scale-[0.99]"
+                                >
+                                  <span className="p-2 rounded-lg bg-[#0A203A] border border-[rgba(72,139,190,0.22)] shrink-0">
+                                    {c.icon}
+                                  </span>
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="font-semibold text-xs sm:text-sm text-[#F4F7FB]">{c.title}</h4>
+                                    <p className="text-[11px] text-[#8FA7BE] truncate mt-0.5">{c.desc}</p>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <>
+                        {/* Spaced Retention Warmup Banner */}
+                        <RetentionWarmupBanner
+                          uid={profile.uid}
+                          retentionSchedules={studentState?.retentionSchedules}
+                          personalLearningModel={studentState?.personalLearningModel}
+                          language={profile.language}
+                          onStartRefresher={(conceptId) => {
+                            const isAr = isArabicLocale(profile.language);
+                            const isFr = profile.language === 'French';
+                            const refresherPrompt = isAr
+                              ? `أريد اختبار استرجاع سريع مدته 30 ثانية لتثبيت مفهوم (${conceptId}). اختبرني بسؤال مباشر.`
+                              : isFr
+                              ? `Je souhaite faire une réactivation rapide de 30 secondes pour consolider le concept (${conceptId}). Pose-moi une question.`
+                              : `I'd like a 30-second quick retrieval refresher to consolidate the concept (${conceptId}). Give me a quick question.`;
+                            handleSubmit(undefined, refresherPrompt);
+                          }}
+                        />
 
-                {interimTranscript && (
-                  <div className="absolute end-3 top-2 pointer-events-none z-10">
-                    <span className="flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E5A93C] opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E5A93C]"></span>
-                    </span>
+                        {/* Proactive Assistant Opportunity or Grounded Insight Card */}
+                        {activeProactiveOpportunity && (
+                          <ProactiveSuggestionCard
+                            opportunity={activeProactiveOpportunity}
+                            language={profile.language}
+                            onAccept={(prompt) => {
+                              handleSubmit(undefined, prompt);
+                            }}
+                          />
+                        )}
+                        {!activeProactiveOpportunity && activeGroundedInsight && (
+                          <ProactiveSuggestionCard
+                            insight={activeGroundedInsight}
+                            language={profile.language}
+                            onAccept={(prompt) => {
+                              handleSubmit(undefined, prompt);
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+
+                    {/* Messages List */}
+                    <AnimatePresence mode="popLayout">
+                      {messages.map((m) => (
+                        <motion.div
+                          key={m.id}
+                          id={`msg-${m.id}`}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.98 }}
+                          className={`flex flex-col w-full group transition-all ${
+                            searchQuery.trim() && m.content?.toLowerCase().includes(searchQuery.toLowerCase()) ? 'ring-2 ring-[#0A96A5] rounded-2xl p-1 bg-[#087F8C]/10' : ''
+                          } ${
+                            isArabicLocale(profile.language)
+                              ? (m.role === 'user' ? 'items-start text-start' : 'items-end text-end')
+                              : (m.role === 'user' ? 'items-end text-end' : 'items-start text-start')
+                          }`}
+                        >
+                          {m.role === 'user' ? (
+                            <div className="space-y-2 max-w-[88%] sm:max-w-[78%]">
+                              <div className="bg-[#0D4564] border border-[#1685B5]/40 text-[#F4F7FB] px-5 py-3.5 rounded-2xl rounded-ee-sm shadow-md text-sm sm:text-[15px] leading-relaxed">
+                                {(m.content || '').split('\n').filter((line) => !/^[Signs:\s*.*]$/i.test(line.trim())).map((line, i) => (
+                                  <span key={i} className="block">{line}</span>
+                                ))}
+                              </div>
+                              {m.attachments?.length ? m.attachments.map((file, idx) => (
+                                <div key={`${m.id}-att-${idx}`} className="relative group max-w-sm">
+                                  <button 
+                                    onClick={() => file.data && setPreviewFile(file)}
+                                    className={`w-full flex items-center gap-3 p-2.5 bg-[#0D2542] border border-[rgba(72,139,190,0.22)] rounded-xl transition-all ${file.data ? 'hover:border-[#1685B5] hover:bg-[#0A203A] cursor-pointer' : 'opacity-80 cursor-default'}`}
+                                  >
+                                    <div className="w-9 h-9 shrink-0 rounded-lg overflow-hidden bg-[#0A203A] border border-[rgba(72,139,190,0.22)] flex items-center justify-center">
+                                      {file.type.startsWith('image/') && file.data ? (
+                                        <img src={`data:${file.type};base64,${file.data}`} className="w-full h-full object-cover" alt="" />
+                                      ) : (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')) ? (
+                                        <span className="text-[10px] font-bold text-rose-400">PDF</span>
+                                      ) : (
+                                        <FileText className="w-4 h-4 text-[#0A96A5]" />
+                                      )}
+                                    </div>
+                                    <div className="text-left flex-1 min-w-0">
+                                      <p className="text-xs font-semibold text-[#F4F7FB] truncate w-full">{file.name}</p>
+                                      <p className="text-[10px] text-[#8FA7BE]">
+                                        {file.data ? 'Click to View' : 'Media Expired'}
+                                      </p>
+                                    </div>
+                                  </button>
+                                </div>
+                              )) : null}
+                            </div>
+                          ) : (
+                            <div className="space-y-3 max-w-[94%] sm:max-w-[90%] w-full">
+                              {/* Assistant Header Row */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#0D2542] border border-[rgba(72,139,190,0.22)] rounded-lg text-[#0A96A5] text-[11px] font-bold">
+                                  <Bot className="w-3.5 h-3.5 text-[#087F8C]" />
+                                  <span>{localize(profile.language, 'AI Tutor', 'المعلم الذكي')}</span>
+                                </div>
+
+                                {(() => {
+                                  const pStyle = m.pedagogyStyle || activePedagogyStyle;
+                                  const pMeta = PEDAGOGY_STYLES.find(st => st.id === pStyle);
+                                  if (!pMeta) return null;
+                                  return (
+                                    <span
+                                      title={localize(profile.language, pMeta.descriptionEn, pMeta.descriptionAr)}
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[rgba(72,139,190,0.22)] bg-[#0A203A] text-[#B7C8DA] text-[10px] font-medium"
+                                    >
+                                      <span>{pMeta.id === 'analogies' ? '💡' : pMeta.id === 'scaffolded' ? '🪜' : '⚡'}</span>
+                                      <span>{localize(profile.language, pMeta.labelEn, pMeta.labelAr)}</span>
+                                    </span>
+                                  );
+                                })()}
+
+                                {'speechSynthesis' in window && (
+                                  <button 
+                                    onClick={() => handleSpeak(m)}
+                                    className={`text-[10px] font-bold transition-all px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                      speakingMessageId === m.id
+                                        ? 'bg-rose-600 text-white border-rose-500 shadow-sm animate-pulse'
+                                        : 'bg-[#0D2542] text-[#B7C8DA] hover:text-[#F4F7FB] border-[rgba(72,139,190,0.22)] hover:border-[#1685B5]'
+                                    }`}
+                                  >
+                                    <Volume2 className="w-3.5 h-3.5" />
+                                    <span>{speakingMessageId === m.id ? localize(profile.language, 'Stop', 'إيقاف') : localize(profile.language, 'Speak', 'استماع')}</span>
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Assistant Message Bubble */}
+                              <div className="p-5 sm:p-6 rounded-2xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] text-[#F4F7FB] leading-relaxed text-sm sm:text-base space-y-4 shadow-md hover:border-[#1685B5] transition-colors w-full">
+                                {(profile.accessibilityMode === 'Vocal-Deaf' || profile.accessibilityMode === 'Sign-Only') && m.id !== 'welcome' && m.content?.trim() && (
+                                  <div className="mb-3">
+                                    <button
+                                      onClick={() => setSigningId(signingId === m.id ? null : m.id)}
+                                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 text-[#0A96A5] hover:text-white text-xs font-bold transition-all"
+                                    >
+                                      <Accessibility className="w-4 h-4 text-[#0A96A5]" />
+                                      {signingId === m.id
+                                        ? localize(profile.language, 'Hide sign avatar', 'إخفاء الأفاتار')
+                                        : localize(profile.language, 'Show in sign language', 'اعرض بلغة الإشارة')}
+                                    </button>
+                                    {signingId === m.id && (
+                                      <div className="mt-2 h-64 sm:h-72 rounded-xl overflow-hidden bg-[#071B33] border border-[rgba(72,139,190,0.22)] relative">
+                                        <React.Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#8FA7BE] text-xs font-bold">Loading avatar…</div>}>
+                                          <SignAvatar3D words={wordsForSigning(m.content)} playing={true} onDone={() => {}} />
+                                        </React.Suspense>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                <MarkdownMessage 
+                                  content={m.content} 
+                                  fontScale={fontScale}
+                                  language={profile.language}
+                                  onPrerequisiteClick={(prereqId) => {
+                                    const isAr = isArabicLocale(profile.language);
+                                    const isFr = profile.language === 'French';
+                                    const text = isAr
+                                      ? `أريد مراجعة المفهوم الأساسي (${prereqId}) أولاً قبل المتابعة.`
+                                      : isFr
+                                      ? `Je souhaite revoir le concept prérequis (${prereqId}) avant de continuer.`
+                                      : `I'd like to review the prerequisite concept (${prereqId}) before moving on.`;
+                                    handleSubmit(undefined, text);
+                                  }}
+                                />
+                              </div>
+
+                              {/* Assistant Attachments */}
+                              {m.attachments && m.attachments.length > 0 && (
+                                <div className="flex flex-wrap gap-3 mt-3">
+                                  {m.attachments.map((file, idx) => (
+                                    <div key={`${m.id}-gen-att-${idx}`} className="relative group">
+                                      <button
+                                        onClick={() => attSrc(file) && setPreviewFile(file)}
+                                        className={`flex flex-col items-center gap-1.5 p-2 bg-[#0D2542] border border-[rgba(72,139,190,0.22)] rounded-xl transition-all overflow-hidden ${attSrc(file) ? 'hover:border-[#1685B5] cursor-pointer' : 'opacity-80 cursor-default'}`}
+                                      >
+                                        {file.type.startsWith('image/') && attSrc(file) ? (
+                                          <div className="w-40 h-40 rounded-lg overflow-hidden bg-[#0A203A]">
+                                            <img src={attSrc(file)} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="" />
+                                          </div>
+                                        ) : null}
+                                        <div className="text-center w-full px-1">
+                                          <p className="text-[11px] font-semibold text-[#F4F7FB] truncate max-w-[160px]">{file.name}</p>
+                                        </div>
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Assistant Message Actions Toolbar */}
+                              <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleReactToMessage(m.id, 'up')}
+                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                    m.reaction === 'up'
+                                      ? 'bg-[#087F8C]/20 text-[#0A96A5] border-[#087F8C]'
+                                      : 'text-[#8FA7BE] bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:text-[#F4F7FB] hover:border-[#1685B5]'
+                                  }`}
+                                  title={localize(profile.language, 'Helpful', 'مفيد')}
+                                >
+                                  <ThumbsUp className="w-3.5 h-3.5" />
+                                  <span>{localize(profile.language, 'Helpful', 'مفيد')}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleReactToMessage(m.id, 'down')}
+                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                    m.reaction === 'down'
+                                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/50'
+                                      : 'text-[#8FA7BE] bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:text-[#F4F7FB] hover:border-[#1685B5]'
+                                  }`}
+                                  title={localize(profile.language, 'Unhelpful', 'غير مفيد')}
+                                >
+                                  <ThumbsDown className="w-3.5 h-3.5" />
+                                  <span>{localize(profile.language, 'Unhelpful', 'غير مفيد')}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard?.writeText(m.content).then(
+                                      () => toast.success(localize(profile.language, 'Copied', 'تم النسخ'))
+                                    );
+                                  }}
+                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#8FA7BE] bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:text-[#F4F7FB] hover:border-[#1685B5] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
+                                  title={localize(profile.language, 'Copy answer', 'نسخ الإجابة')}
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                  <span>{localize(profile.language, 'Copy', 'نسخ')}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSimplify(m)}
+                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#8FA7BE] bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:text-[#0A96A5] hover:border-[#087F8C] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
+                                  title={localize(profile.language, 'Explain this in simpler terms (ELI5)', 'شرح مبسط بدون أي تعقيد')}
+                                >
+                                  <Zap className="w-3.5 h-3.5 text-[#0A96A5]" />
+                                  <span>{localize(profile.language, 'Simplify', 'بسّط')}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleBookmark(m)}
+                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                    bookmarkedInsights.some((b) => b.messageId === m.id)
+                                      ? 'bg-[#087F8C]/20 text-[#0A96A5] border-[#087F8C]'
+                                      : 'text-[#8FA7BE] bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:text-[#0A96A5] hover:border-[#087F8C]'
+                                  }`}
+                                  title={localize(profile.language, 'Pin to saved insights', 'تثبيت في بنك الأفكار')}
+                                >
+                                  <Bookmark className={`w-3.5 h-3.5 ${bookmarkedInsights.some((b) => b.messageId === m.id) ? 'fill-current text-[#0A96A5]' : ''}`} />
+                                  <span>{localize(profile.language, 'Pin', 'تثبيت')}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCompareAI(m)}
+                                  disabled={comparingId === m.id}
+                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#8FA7BE] bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:text-[#F4F7FB] hover:border-[#1685B5] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] disabled:opacity-50"
+                                >
+                                  <Scale className="w-3.5 h-3.5" />
+                                  <span>{comparingId === m.id ? localize(profile.language, 'Reviewing…', 'جاري المراجعة…') : localize(profile.language, 'Second opinion', 'رأي تانٍ')}</span>
+                                </button>
+                              </div>
+
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+
+                    {/* Loading / Typing State */}
+                    {isLoading && (
+                      <div className="space-y-3 w-full animate-fadeIn">
+                        {streamingText ? (
+                          <div className="p-5 sm:p-6 rounded-2xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] text-[#F4F7FB] leading-relaxed text-sm sm:text-base space-y-4 shadow-md">
+                            <MarkdownMessage content={streamingText} />
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3 p-4 bg-[#0D2542] rounded-2xl border border-[rgba(72,139,190,0.22)] text-[#B7C8DA] text-xs font-semibold">
+                            <span className="flex items-center gap-1.5" aria-label="Assistant is typing">
+                              <span className="w-2 h-2 rounded-full bg-[#087F8C] animate-bounce [animation-delay:-0.3s]" />
+                              <span className="w-2 h-2 rounded-full bg-[#087F8C] animate-bounce [animation-delay:-0.15s]" />
+                              <span className="w-2 h-2 rounded-full bg-[#087F8C] animate-bounce" />
+                            </span>
+                            <span>{getTranslation(profile.language, 'analyzing')}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                   </div>
                 )}
               </div>
 
-              {/* Lower Section: Action Bar inside the Single Rectangle */}
-              <div className="flex items-center justify-between gap-1 pt-0.5 px-0.5 border-t border-[#4A1224]/50 mt-0.5">
-                
-                {/* Left Side: + File Attach, Pedagogy Pill, Tools Pill */}
-                <div className="flex items-center gap-1">
-                  {/* + Attach File Button */}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    aria-label="Attach images or PDF files"
-                    title={localize(profile.language, 'Attach images or PDF documents', 'إرفاق صور أو مستندات PDF')}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30 transition-all border border-transparent hover:border-[#4A1224]/60"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+              {/* C. Fixed Conversation Composer (Anchored at Bottom) */}
+              <div className="shrink-0 p-2 sm:p-3 bg-[#0A203A] border-t border-[rgba(72,139,190,0.22)]">
+                <div className="w-full space-y-2">
 
-                  {/* Active Pedagogy Dropdown Pill */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowPedagogyPopover(!showPedagogyPopover);
-                        setShowQuickActionsPopover(false);
-                      }}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#1C0B1E] hover:bg-[#2A102D] text-[#E5A93C] border border-[#4A1224]/70 text-[10px] font-bold transition-all shadow-sm active:scale-95"
-                      title={localize(profile.language, "Change teaching style", "تغيير أسلوب الشرح")}
-                    >
-                      <span className="truncate max-w-[85px] sm:max-w-[115px]">
-                        ⚡ {localize(profile.language, activePedagogyMeta.labelEn, activePedagogyMeta.labelAr)}
-                      </span>
-                      <ChevronDown className={`w-2.5 h-2.5 text-slate-400 transition-transform ${showPedagogyPopover ? 'rotate-180 text-[#E5A93C]' : ''}`} />
-                    </button>
-
-                    {/* Floating Pedagogy Popover Menu */}
-                    <AnimatePresence>
-                      {showPedagogyPopover && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute bottom-full mb-2 start-0 w-64 bg-[#140816] border border-[#4A1224]/80 rounded-2xl p-2 shadow-2xl backdrop-blur-2xl z-40 space-y-1"
-                        >
-                          <div className="px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#E5A93C] border-b border-[#4A1224]/60 pb-1.5 mb-1">
-                            {localize(profile.language, 'Pedagogy Style', 'أسلوب الشرح')}
+                  {/* Selected Files Preview Chips */}
+                  <AnimatePresence>
+                    {selectedFiles.length > 0 && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="flex flex-wrap gap-2 px-1"
+                      >
+                        {selectedFiles.map((file, i) => (
+                          <div key={i} className="flex items-center gap-2 px-2.5 py-1 bg-[#0D2542] rounded-xl border border-[rgba(72,139,190,0.22)] shadow-sm">
+                            <FileText className="w-3.5 h-3.5 text-[#0A96A5] shrink-0" />
+                            <span className="text-xs font-medium text-[#F4F7FB] truncate max-w-[140px]">{file.name}</span>
+                            <button 
+                              type="button"
+                              onClick={() => removeFile(i)} 
+                              className="text-[#8FA7BE] hover:text-rose-400 p-0.5 rounded transition-colors"
+                              aria-label={`Remove ${file.name}`}
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
                           </div>
-                          {PEDAGOGY_STYLES.map((st) => {
-                            const isSelected = activePedagogyStyle === st.id;
-                            return (
-                              <button
-                                key={st.id}
-                                type="button"
-                                onClick={() => {
-                                  handleSelectPedagogy(st.id);
-                                  setShowPedagogyPopover(false);
-                                }}
-                                className={`w-full text-start px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex flex-col gap-0.5 ${
-                                  isSelected
-                                    ? 'bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/50'
-                                    : 'text-slate-300 hover:bg-[#4A1224]/30 hover:text-white'
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span>{localize(profile.language, st.labelEn, st.labelAr)}</span>
-                                  {isSelected && <span className="text-[#E5A93C] text-xs">✓</span>}
-                                </div>
-                                <span className="text-[10px] text-slate-400 font-normal leading-tight">
-                                  {localize(profile.language, st.descriptionEn, st.descriptionAr)}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* AI Quick Tools Popover Pill */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowQuickActionsPopover(!showQuickActionsPopover);
-                        setShowPedagogyPopover(false);
-                      }}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#1C0B1E] hover:bg-[#2A102D] text-slate-300 hover:text-[#E5A93C] border border-[#4A1224]/70 text-[10px] font-bold transition-all shadow-sm active:scale-95"
-                      title={localize(profile.language, "Quick study tools", "أدوات دراسية سريعة")}
-                    >
-                      <Sparkles className="w-2.5 h-2.5 text-[#E5A93C] shrink-0" />
-                      <span className="hidden xs:inline sm:inline">{localize(profile.language, 'Tools', 'الأدوات')}</span>
-                      <ChevronDown className={`w-2.5 h-2.5 text-slate-400 transition-transform ${showQuickActionsPopover ? 'rotate-180 text-[#E5A93C]' : ''}`} />
-                    </button>
-
-                    {/* Floating Quick Tools Popover Menu */}
-                    <AnimatePresence>
-                      {showQuickActionsPopover && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute bottom-full mb-2 start-0 w-64 bg-[#140816] border border-[#4A1224]/80 rounded-2xl p-2 shadow-2xl backdrop-blur-2xl z-40 space-y-1 ring-1 ring-[#E5A93C]/20"
-                        >
-                          <div className="px-2 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#E5A93C] border-b border-[#4A1224]/50 pb-1.5 mb-1">
-                            {localize(profile.language, 'Quick AI Tools', 'أدوات الذكاء الاصطناعي')}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              fileInputRef.current?.click();
-                              setShowQuickActionsPopover(false);
-                            }}
-                            className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-[#4A1224]/30 hover:text-[#E5A93C] flex items-center gap-2.5 transition-all"
-                          >
-                            <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                            <span>{localize(profile.language, 'Analyze Document / PDF', 'تحليل مستند / PDF')}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleSubmit(undefined, isArabic ? 'أنشئ بطاقات استذكار تفاعلية (Flashcards) مع أسئلة وإجابات مركزة تلخص أهم المفاهيم التي شرحتها لي الآن.' : 'Generate active recall flashcards with clear questions and answers summarizing the key concepts we just discussed.');
-                              setShowQuickActionsPopover(false);
-                            }}
-                            className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-[#4A1224]/30 hover:text-[#E5A93C] flex items-center gap-2.5 transition-all"
-                          >
-                            <Layers className="w-4 h-4 text-amber-300 shrink-0" />
-                            <span>{localize(profile.language, 'Generate Flashcards', 'إنشاء بطاقات استذكار')}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleSubmit(undefined, isArabic ? 'أعطني 3 مسائل تدريبية متدرجة الصعوبة لاختبار فهمي لما تعلمته للتو، مع تلميحات توجيهية لحل كل مسألة.' : 'Give me 3 progressive practice exercises/problems based on this topic, with guided hints for solving each one.');
-                              setShowQuickActionsPopover(false);
-                            }}
-                            className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-[#4A1224]/30 hover:text-[#E5A93C] flex items-center gap-2.5 transition-all"
-                          >
-                            <BrainCircuit className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                            <span>{localize(profile.language, 'Practice Problems', 'مسائل تدريبية')}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleSubmit(undefined, isArabic ? 'أعد شرح الفكرة الأخيرة بأسلوب مبسط جداً ومن زاوية مختلفة، واستخدم تشبيهاً واقعياً من الحياة اليومية.' : 'Please re-explain the last concept using a fresh perspective and an intuitive, real-world analogy.');
-                              setShowQuickActionsPopover(false);
-                            }}
-                            className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-[#4A1224]/30 hover:text-[#E5A93C] flex items-center gap-2.5 transition-all"
-                          >
-                            <RotateCcw className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span>{localize(profile.language, 'Re-explain', 'إعادة الشرح بأسلوب آخر')}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleSubmit(undefined, isArabic ? 'لخص لي هذا الموضوع في 3 نقاط جوهرية مركزة وواضحة جداً (Key Takeaways).' : 'Summarize the core takeaways of this topic into 3 crisp, essential bullet points.');
-                              setShowQuickActionsPopover(false);
-                            }}
-                            className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-[#4A1224]/30 hover:text-[#E5A93C] flex items-center gap-2.5 transition-all"
-                          >
-                            <Lightbulb className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                            <span>{localize(profile.language, 'Key Takeaways', 'الخلاصة وأهم النقاط')}</span>
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-
-                {/* Right Side: France Guide, Language Cycle, Mic, Send / Stop */}
-                <div className="flex items-center gap-1">
-                  {/* France Guide Button */}
-                  <button
-                    type="button"
-                    onClick={() => setShowFrenchTravelAssistant(true)}
-                    className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-black bg-gradient-to-r from-[#4A1224]/60 to-[#831843]/40 text-[#E5A93C] border border-[#831843]/50 hover:border-[#E5A93C]/60 hover:bg-[#4A1224]/80 active:scale-95 transition-all shadow-sm shrink-0"
-                    title={localize(profile.language, 'Open France Travel Assistant', 'دليل ومترجم فرنسا')}
-                  >
-                    <span>🇫🇷</span>
-                    <span className="hidden md:inline text-[9px]">{localize(profile.language, 'Guide', 'دليل')}</span>
-                  </button>
-
-                  {/* Dictation Language Cycle Pill */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const langs: Array<'fr-FR' | 'en-US' | 'ar-EG'> = ['fr-FR', 'en-US', 'ar-EG'];
-                      const nextIdx = (langs.indexOf(dictationLang) + 1) % langs.length;
-                      const next = langs[nextIdx];
-                      setDictationLang(next);
-                      if (isListening && recognitionRef.current) {
-                        try { recognitionRef.current.lang = next; } catch {}
-                      }
-                    }}
-                    className="text-[9px] font-black px-1.5 py-0.5 rounded-lg bg-[#1C0B1E] hover:bg-[#2A102D] text-[#E5A93C] border border-[#4A1224]/70 transition-all shrink-0"
-                    title={localize(profile.language, 'Click to switch speech language (FR/EN/AR)', 'اضغط لتبديل لغة الاستماع (فرنسي/إنجليزي/عربي)')}
-                  >
-                    {dictationLang === 'fr-FR' ? '🇫🇷 FR' : dictationLang === 'ar-EG' ? '🇪🇬 AR' : '🇬🇧 EN'}
-                  </button>
-
-                  {/* Speech Dictation Mic Button */}
-                  <button
-                    type="button"
-                    onClick={toggleListening}
-                    aria-label={isListening ? localize(profile.language, "Stop voice input", "إيقاف الإدخال الصوتي") : localize(profile.language, "Start voice input", "بدء الإدخال الصوتي")}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all shrink-0 ${
-                      isListening ? 'text-rose-400 bg-rose-500/20 border border-rose-500/40 animate-pulse shadow-md shadow-rose-500/20' : 'text-slate-400 hover:text-[#E5A93C] hover:bg-[#4A1224]/30'
-                    }`}
-                    title={isListening ? "Listening... (Tap to stop)" : "Tap to Speak (Voice Input)"}
-                  >
-                    {isListening ? (
-                      <MicOff className="w-3.5 h-3.5" />
-                    ) : (
-                      <Mic className="w-3.5 h-3.5" />
+                        ))}
+                      </motion.div>
                     )}
-                  </button>
+                  </AnimatePresence>
 
-                  {/* Send or Stop Generation Button */}
-                  {isLoading ? (
-                    <button
-                      type="button"
-                      onClick={() => { stopRef.current = true; abortRef.current?.abort(); }}
-                      title={localize(profile.language, "Stop generating", "إيقاف التوليد")}
-                      aria-label={localize(profile.language, "Stop generating", "إيقاف التوليد")}
-                      className="w-8 h-8 bg-[#1A0C1D] border border-[#4A1224]/60 text-[#E5A93C] rounded-xl flex items-center justify-center hover:bg-[#2A102D] transition-all shadow-sm active:scale-95 shrink-0"
-                    >
-                      <Square className="w-3.5 h-3.5 fill-current" />
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={!input.trim() && selectedFiles.length === 0}
-                      aria-label={localize(profile.language, "Send message", "إرسال")}
-                      className="w-8 h-8 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold rounded-xl flex items-center justify-center hover:brightness-110 disabled:from-[#1A0C1D] disabled:to-[#1A0C1D] disabled:text-slate-600 disabled:border disabled:border-[#4A1224]/50 disabled:shadow-none transition-all shadow-md shadow-[#E5A93C]/25 active:scale-95 shrink-0"
-                    >
-                      <Send className="w-3.5 h-3.5 text-slate-950" />
-                    </button>
+                  {/* Popovers backdrop */}
+                  {(showPedagogyPopover || showQuickActionsPopover) && (
+                    <div 
+                      className="fixed inset-0 z-30" 
+                      onClick={() => {
+                        setShowPedagogyPopover(false);
+                        setShowQuickActionsPopover(false);
+                      }} 
+                    />
                   )}
+
+                  {/* Composer Container Card */}
+                  <form onSubmit={handleSubmit} className="relative group">
+                    <input
+                      type="file"
+                      id="chat-file-upload"
+                      name="chat-file-upload"
+                      aria-label="Attach images or PDF files"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                      multiple
+                      accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.webp,.txt"
+                    />
+
+                    <div className={`relative w-full rounded-2xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] focus-within:border-[#1685B5] focus-within:ring-2 focus-within:ring-[#1685B5]/20 transition-all p-2 flex flex-col justify-between ${isListening ? 'ring-2 ring-rose-500/50' : ''}`}>
+                      
+                      {/* Upper Row: Attachment Button, Textarea, Mic Button, Send Button */}
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        {/* Attachment Button (min 44x44px target) */}
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          aria-label={localize(profile.language, 'Attach images or PDF files', 'إرفاق صور أو مستندات')}
+                          title={localize(profile.language, 'Attach images or PDF files', 'إرفاق صور أو مستندات')}
+                          className="w-10 h-10 min-w-[40px] rounded-xl flex items-center justify-center text-[#8FA7BE] hover:text-[#F4F7FB] hover:bg-[#0A203A] transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+                        >
+                          <Paperclip className="w-4 h-4" />
+                        </button>
+
+                        {/* Message Input Textarea */}
+                        <textarea
+                          id="chat-composer"
+                          name="chat-composer"
+                          rows={1}
+                          aria-label={getTranslation(profile.language, 'typeMessage')}
+                          placeholder={isListening ? (localize(profile.language, "Listening...", 'جاري الاستماع...')) : (localize(profile.language, "Ask Cognify or type a message...", "اسأل كوجنيفاي أو اكتب رسالتك..."))}
+                          value={input + (interimTranscript ? (input ? " " : "") + interimTranscript : "")}
+                          onChange={(e) => setInput(e.target.value)}
+                          onInput={(e) => {
+                            const el = e.currentTarget;
+                            el.style.height = 'auto';
+                            el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              if (!isLoading && (input.trim() || selectedFiles.length > 0)) handleSubmit();
+                            }
+                          }}
+                          disabled={isLoading}
+                          className="flex-1 bg-transparent text-[#F4F7FB] placeholder-[#8FA7BE] border-0 px-2 py-1.5 outline-none resize-none min-h-[36px] max-h-32 text-sm leading-relaxed custom-scrollbar disabled:opacity-50"
+                        />
+
+                        {/* Microphone Button (min 44x44px target) */}
+                        <button
+                          type="button"
+                          onClick={toggleListening}
+                          aria-label={isListening ? localize(profile.language, "Stop voice input", "إيقاف الإدخال الصوتي") : localize(profile.language, "Start voice input", "بدء الإدخال الصوتي")}
+                          title={isListening ? "Listening... (Tap to stop)" : "Tap to Speak (Voice Input)"}
+                          className={`w-10 h-10 min-w-[40px] rounded-xl flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+                            isListening 
+                              ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse' 
+                              : 'text-[#8FA7BE] hover:text-[#F4F7FB] hover:bg-[#0A203A]'
+                          }`}
+                        >
+                          {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                        </button>
+
+                        {/* Send or Stop Generation Button */}
+                        {isLoading ? (
+                          <button
+                            type="button"
+                            onClick={() => { stopRef.current = true; abortRef.current?.abort(); }}
+                            title={localize(profile.language, "Stop generating", "إيقاف التوليد")}
+                            aria-label={localize(profile.language, "Stop generating", "إيقاف التوليد")}
+                            className="w-10 h-10 min-w-[40px] rounded-xl bg-[#0D4564] text-[#F4F7FB] hover:bg-[#0A203A] border border-[rgba(72,139,190,0.22)] flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+                          >
+                            <Square className="w-3.5 h-3.5 fill-current" />
+                          </button>
+                        ) : (
+                          <button
+                            type="submit"
+                            disabled={!input.trim() && selectedFiles.length === 0}
+                            aria-label={localize(profile.language, "Send message", "إرسال")}
+                            className="w-10 h-10 min-w-[40px] rounded-xl bg-[#087F8C] hover:bg-[#0A96A5] text-[#F4F7FB] disabled:bg-[#43566B] disabled:text-[#8FA7BE] disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-md active:scale-95 focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+                          >
+                            <Send className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Lower Section: Compact Tools Bar Underneath the Input */}
+                      <div className="flex items-center justify-between gap-2 pt-2 px-1 border-t border-[rgba(72,139,190,0.15)] mt-1.5 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* Step-by-Step / Pedagogy Mode Pill */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowPedagogyPopover(!showPedagogyPopover);
+                                setShowQuickActionsPopover(false);
+                              }}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+                                showPedagogyPopover
+                                  ? 'bg-[#087F8C]/20 border-[#1685B5] text-[#F4F7FB]'
+                                  : 'bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:border-[#1685B5] text-[#B7C8DA]'
+                              }`}
+                              title={localize(profile.language, "Change teaching style", "تغيير أسلوب الشرح")}
+                            >
+                              <span>{activePedagogyMeta.id === 'scaffolded' ? '🪜' : activePedagogyMeta.id === 'analogies' ? '💡' : '⚡'}</span>
+                              <span className="truncate max-w-[100px] sm:max-w-[130px]">
+                                {localize(profile.language, activePedagogyMeta.labelEn, activePedagogyMeta.labelAr)}
+                              </span>
+                              <ChevronDown className={`w-2.5 h-2.5 text-[#8FA7BE] transition-transform ${showPedagogyPopover ? 'rotate-180 text-[#0A96A5]' : ''}`} />
+                            </button>
+
+                            {/* Floating Pedagogy Popover Menu */}
+                            <AnimatePresence>
+                              {showPedagogyPopover && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                  transition={{ duration: 0.15 }}
+                                  className="absolute bottom-full mb-2 start-0 w-64 bg-[#0D2542] border border-[rgba(72,139,190,0.22)] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
+                                >
+                                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#0A96A5] border-b border-[rgba(72,139,190,0.22)] pb-1 mb-1">
+                                    {localize(profile.language, 'Pedagogy Style', 'أسلوب الشرح')}
+                                  </div>
+                                  {PEDAGOGY_STYLES.map((st) => {
+                                    const isSelected = activePedagogyStyle === st.id;
+                                    return (
+                                      <button
+                                        key={st.id}
+                                        type="button"
+                                        onClick={() => {
+                                          handleSelectPedagogy(st.id);
+                                          setShowPedagogyPopover(false);
+                                        }}
+                                        className={`w-full text-start px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex flex-col gap-0.5 cursor-pointer ${
+                                          isSelected
+                                            ? 'bg-[#087F8C]/20 text-[#0A96A5] border border-[#087F8C]/40'
+                                            : 'text-[#B7C8DA] hover:bg-[#0A203A] hover:text-[#F4F7FB]'
+                                        }`}
+                                      >
+                                        <div className="flex items-center justify-between">
+                                          <span>{localize(profile.language, st.labelEn, st.labelAr)}</span>
+                                          {isSelected && <span className="text-[#0A96A5] text-xs">✓</span>}
+                                        </div>
+                                        <span className="text-[10px] text-[#8FA7BE] font-normal leading-tight">
+                                          {localize(profile.language, st.descriptionEn, st.descriptionAr)}
+                                        </span>
+                                      </button>
+                                    );
+                                  })}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+
+                          {/* Quick Tools Popover Pill */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowQuickActionsPopover(!showQuickActionsPopover);
+                                setShowPedagogyPopover(false);
+                              }}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+                                showQuickActionsPopover
+                                  ? 'bg-[#087F8C]/20 border-[#1685B5] text-[#F4F7FB]'
+                                  : 'bg-[#0A203A] border-[rgba(72,139,190,0.22)] hover:border-[#1685B5] text-[#B7C8DA]'
+                              }`}
+                              title={localize(profile.language, "Quick study tools", "أدوات دراسية سريعة")}
+                            >
+                              <Sparkles className="w-3 h-3 text-[#0A96A5]" />
+                              <span>{localize(profile.language, 'Tools', 'الأدوات')}</span>
+                              <ChevronDown className={`w-2.5 h-2.5 text-[#8FA7BE] transition-transform ${showQuickActionsPopover ? 'rotate-180 text-[#0A96A5]' : ''}`} />
+                            </button>
+
+                            {/* Floating Quick Tools Popover Menu */}
+                            <AnimatePresence>
+                              {showQuickActionsPopover && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                  transition={{ duration: 0.15 }}
+                                  className="absolute bottom-full mb-2 start-0 w-64 bg-[#0D2542] border border-[rgba(72,139,190,0.22)] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
+                                >
+                                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#0A96A5] border-b border-[rgba(72,139,190,0.22)] pb-1 mb-1">
+                                    {localize(profile.language, 'Quick AI Tools', 'أدوات الذكاء الاصطناعي')}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      fileInputRef.current?.click();
+                                      setShowQuickActionsPopover(false);
+                                    }}
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#B7C8DA] hover:bg-[#0A203A] hover:text-[#F4F7FB] flex items-center gap-2 transition-all cursor-pointer"
+                                  >
+                                    <FileText className="w-4 h-4 text-[#0A96A5] shrink-0" />
+                                    <span>{localize(profile.language, 'Analyze Document / PDF', 'تحليل مستند / PDF')}</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleSubmit(undefined, isArabic ? 'أنشئ بطاقات استذكار تفاعلية (Flashcards) مع أسئلة وإجابات مركزة تلخص أهم المفاهيم التي شرحتها لي الآن.' : 'Generate active recall flashcards with clear questions and answers summarizing the key concepts we just discussed.');
+                                      setShowQuickActionsPopover(false);
+                                    }}
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#B7C8DA] hover:bg-[#0A203A] hover:text-[#F4F7FB] flex items-center gap-2 transition-all cursor-pointer"
+                                  >
+                                    <Layers className="w-4 h-4 text-[#0A96A5] shrink-0" />
+                                    <span>{localize(profile.language, 'Generate Flashcards', 'إنشاء بطاقات استذكار')}</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleSubmit(undefined, isArabic ? 'أعطني 3 مسائل تدريبية متدرجة الصعوبة لاختبار فهمي لما تعلمته للتو، مع تلميحات توجيهية لحل كل مسألة.' : 'Give me 3 progressive practice exercises/problems based on this topic, with guided hints for solving each one.');
+                                      setShowQuickActionsPopover(false);
+                                    }}
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#B7C8DA] hover:bg-[#0A203A] hover:text-[#F4F7FB] flex items-center gap-2 transition-all cursor-pointer"
+                                  >
+                                    <BrainCircuit className="w-4 h-4 text-[#0A96A5] shrink-0" />
+                                    <span>{localize(profile.language, 'Practice Problems', 'مسائل تدريبية')}</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleSubmit(undefined, isArabic ? 'أعد شرح الفكرة الأخيرة بأسلوب مبسط جداً ومن زاوية مختلفة، واستخدم تشبيهاً واقعياً من الحياة اليومية.' : 'Please re-explain the last concept using a fresh perspective and an intuitive, real-world analogy.');
+                                      setShowQuickActionsPopover(false);
+                                    }}
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#B7C8DA] hover:bg-[#0A203A] hover:text-[#F4F7FB] flex items-center gap-2 transition-all cursor-pointer"
+                                  >
+                                    <RotateCcw className="w-4 h-4 text-[#0A96A5] shrink-0" />
+                                    <span>{localize(profile.language, 'Re-explain', 'إعادة الشرح بأسلوب آخر')}</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleSubmit(undefined, isArabic ? 'لخص لي هذا الموضوع في 3 نقاط جوهرية مركزة وواضحة جداً (Key Takeaways).' : 'Summarize the core takeaways of this topic into 3 crisp, essential bullet points.');
+                                      setShowQuickActionsPopover(false);
+                                    }}
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#B7C8DA] hover:bg-[#0A203A] hover:text-[#F4F7FB] flex items-center gap-2 transition-all cursor-pointer"
+                                  >
+                                    <Lightbulb className="w-4 h-4 text-[#0A96A5] shrink-0" />
+                                    <span>{localize(profile.language, 'Key Takeaways', 'الخلاصة وأهم النقاط')}</span>
+                                  </button>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+
+                          {/* Study Workspace Toggle Button */}
+                          <button
+                            type="button"
+                            onClick={() => setShowWorkspace(!showWorkspace)}
+                            className={`hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                              showWorkspace
+                                ? 'bg-[#087F8C]/20 border-[#1685B5] text-[#F4F7FB]'
+                                : 'bg-[#0A203A] border-[rgba(72,139,190,0.22)] text-[#8FA7BE] hover:text-[#B7C8DA]'
+                            }`}
+                            title={localize(profile.language, 'Open Study Workspace', 'فتح مساحة الدراسة')}
+                          >
+                            <FolderGit2 className="w-3 h-3 text-[#0A96A5]" />
+                            <span>{localize(profile.language, 'Workspace', 'مساحة العمل')}</span>
+                          </button>
+                        </div>
+
+                        {/* Right secondary actions */}
+                        <div className="flex items-center gap-1.5 ms-auto">
+                          {/* France Guide Button */}
+                          <button
+                            type="button"
+                            onClick={() => setShowFrenchTravelAssistant(true)}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#0A203A] border border-[rgba(72,139,190,0.22)] hover:border-[#1685B5] text-[#B7C8DA] hover:text-[#F4F7FB] transition-colors cursor-pointer"
+                            title={localize(profile.language, 'Open France Travel Assistant', 'دليل ومترجم فرنسا')}
+                          >
+                            <span>🇫🇷</span>
+                            <span className="hidden sm:inline">{localize(profile.language, 'France Guide', 'دليل فرنسا')}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </form>
+
+                  {/* Disclaimer */}
+                  <p className="text-center text-[10px] text-[#8FA7BE] tracking-wide">
+                    {localize(profile.language, 'Cognify can make mistakes. Check important information.', 'كوجنيفاي ممكن يخطئ. راجِع المعلومات المهمة.')}
+                  </p>
                 </div>
-
               </div>
-            </div>
-          </form>
 
-          <p className="text-center text-[10px] text-slate-500 mt-0.5 px-2 tracking-wide font-medium">
-            {localize(profile.language, 'Cognify can make mistakes. Check important information.', 'كوجنيفاي ممكن يخطئ. راجِع المعلومات المهمة.')}
-          </p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Right Column: Context & Citations Panel */}
+        <div className={`shrink-0 z-30 transition-all ${
+          showContext 
+            ? 'fixed inset-y-0 end-0 xl:static flex h-full' 
+            : 'hidden'
+        }`}>
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm xl:hidden -z-10" 
+            onClick={() => setShowContext(false)} 
+          />
+          <ChatContextPanel
+            profile={profile}
+            studentState={studentState}
+            isOpen={showContext}
+            onClose={() => setShowContext(false)}
+            onCiteSource={handleCiteSource}
+            messageCount={messages.length}
+          />
         </div>
       </div>
-      {/* End Center Column */}
-      </div>
 
-      {/* Right Column: Context & Citations */}
-      <div className={`shrink-0 z-30 transition-all ${
-        showContext 
-          ? 'fixed inset-y-0 end-0 xl:static flex h-full' 
-          : 'hidden'
-      }`}>
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm xl:hidden -z-10" 
-          onClick={() => setShowContext(false)} 
-        />
-        <ChatContextPanel
-          profile={profile}
-          studentState={studentState}
-          isOpen={showContext}
-          onClose={() => setShowContext(false)}
-          onCiteSource={handleCiteSource}
-          messageCount={messages.length}
-        />
-      </div>
-    </div>
-    {/* End 3-Column AI Study Center Layout */}
-
-      {/* Bookmarks & Saved Insights Drawer */}
+      {/* Bookmarks Drawer */}
       <ChatBookmarksDrawer
         isOpen={isBookmarksOpen}
         onClose={() => setIsBookmarksOpen(false)}
@@ -2860,9 +2541,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
       {/* French Travel & Voice Assistant Modal */}
       {showFrenchTravelAssistant && (
-        <div className="fixed inset-0 z-50 bg-[#080409]/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
-          <div className="bg-[#0E0610] rounded-3xl border border-[#4A1224]/70 shadow-[0_20px_70px_rgba(45,11,22,0.6)] ring-1 ring-[#E5A93C]/20 w-full max-w-5xl h-[92vh] flex flex-col overflow-hidden relative">
-            <React.Suspense fallback={<div className="p-8 text-center text-[#E5A93C]">Chargement...</div>}>
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
+          <div className="bg-[#0D2542] rounded-2xl border border-[rgba(72,139,190,0.22)] shadow-2xl ring-1 ring-[#1685B5]/20 w-full max-w-5xl h-[92vh] flex flex-col overflow-hidden relative">
+            <React.Suspense fallback={<div className="p-8 text-center text-[#0A96A5]">Chargement...</div>}>
               <FrenchTravelVoiceAssistant
                 profile={profile}
                 onNavigateBack={() => setShowFrenchTravelAssistant(false)}
@@ -2871,6 +2552,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           </div>
         </div>
       )}
+
     </div>
   );
 });

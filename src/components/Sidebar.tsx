@@ -168,7 +168,7 @@ export default function Sidebar({
           ? 'bg-teal-950/60 border border-teal-600/50 text-teal-300 font-bold shadow-sm'
           : 'bg-teal-50 border border-teal-600/40 text-teal-900 font-bold shadow-sm'
         : isDarkMode
-          ? 'text-stone-300 hover:bg-[#162327] hover:text-white border border-transparent hover:border-teal-700/40 active:scale-[0.98]'
+          ? 'text-stone-300 hover:bg-cognify-surface-dark hover:text-white border border-transparent hover:border-teal-700/40 active:scale-[0.98]'
           : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950 border border-transparent hover:border-stone-200 active:scale-[0.98]'
     }`;
   const navIcon = (_active: boolean) => `w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-110 group-focus-visible:scale-110 text-teal-700 dark:text-teal-400`;
@@ -178,8 +178,8 @@ export default function Sidebar({
   return (
     <div className={`w-[284px] max-w-[85vw] h-full shrink-0 ${
       isDarkMode 
-        ? 'bg-[#0E1416]/98 text-stone-200 border-stone-800' 
-        : 'bg-[#FAF8F5]/98 text-stone-800 border-stone-200'
+        ? 'bg-cognify-bg-dark/98 text-stone-200 border-stone-800' 
+        : 'bg-cognify-bg-light/98 text-stone-800 border-stone-200'
     } border-e backdrop-blur-2xl flex flex-col px-[18px] py-[22px]`}>
       {/* Brand & Mobile Close Button */}
       <div className="flex items-center justify-between px-1.5 pb-1">
@@ -277,7 +277,7 @@ export default function Sidebar({
               return (
                 <div key={t.id} className={`group flex items-center gap-1 rounded-xl transition-all ${
                   active 
-                    ? isDarkMode ? 'bg-[#162327] border border-teal-800' : 'bg-teal-50 border border-teal-200'
+                    ? isDarkMode ? 'bg-cognify-surface-dark border border-teal-800' : 'bg-teal-50 border border-teal-200'
                     : isDarkMode ? 'hover:bg-stone-800/40 border border-transparent' : 'hover:bg-stone-100 border border-transparent'
                 }`}>
                   <button
@@ -322,7 +322,7 @@ export default function Sidebar({
             aria-label={isDarkMode ? localize(profile.language, 'Switch to Light Theme', 'التبديل إلى الوضع الفاتح') : localize(profile.language, 'Switch to Dark Theme', 'التبديل إلى الوضع الداكن')}
             className={`flex-1 flex items-center justify-center gap-[7px] min-h-[44px] py-2.5 rounded-xl border ${
               isDarkMode 
-                ? 'border-stone-800 bg-[#162327] text-stone-200 hover:text-white hover:bg-stone-800' 
+                ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:text-white hover:bg-stone-800' 
                 : 'border-stone-200 bg-white text-stone-800 hover:text-stone-950 hover:bg-stone-100'
             } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
           >
@@ -335,7 +335,7 @@ export default function Sidebar({
               onChange={(e) => handleChange('language', e.target.value)}
               className={`w-full h-full min-h-[44px] appearance-none cursor-pointer text-center py-2.5 px-2 rounded-xl border ${
                 isDarkMode
-                  ? 'border-stone-800 bg-[#162327] text-stone-200 hover:border-teal-500 focus:border-teal-500 [color-scheme:dark]'
+                  ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:border-teal-500 focus:border-teal-500 [color-scheme:dark]'
                   : 'border-stone-200 bg-white text-stone-800 hover:border-teal-500 focus:border-teal-500 [color-scheme:light]'
               } text-xs font-semibold transition-all outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
               aria-label={localize(profile.language, 'Select Language', 'اختر اللغة')}
@@ -348,7 +348,7 @@ export default function Sidebar({
         </div>
 
         <div className={`flex items-center gap-2.5 w-full px-2.5 min-h-[50px] py-1.5 rounded-2xl border ${
-          isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+          isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
         } backdrop-blur-md transition-all ${
           currentView === 'profile' || currentView === 'settings' 
             ? 'border-teal-600 shadow-sm'
@@ -400,7 +400,7 @@ export default function Sidebar({
             aria-label={localize(profile.language, 'Open Live Captions', 'فتح الكابشن المباشر')}
             className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] py-2.5 rounded-xl border ${
               isDarkMode 
-                ? 'border-stone-800 bg-[#162327] text-stone-200 hover:bg-stone-800 hover:border-teal-700' 
+                ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:bg-stone-800 hover:border-teal-700' 
                 : 'border-stone-200 bg-white text-stone-800 hover:bg-stone-100 hover:border-teal-400'
             } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
           >

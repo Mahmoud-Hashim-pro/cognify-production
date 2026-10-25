@@ -114,6 +114,7 @@
     "qs": "^6.16.0",
     "tsx": {
       "esbuild": "$esbuild"
-    }
+    },
+    "body-parser": "^1.20.9"
   }
 }

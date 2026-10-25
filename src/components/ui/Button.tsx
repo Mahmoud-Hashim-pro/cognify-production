@@ -3,14 +3,14 @@ import { Button as ReactAriaButton, type ButtonProps as ReactAriaButtonProps } f
 import { cn } from '../../lib/utils';
 import { Loader2 } from 'lucide-react';
 
-export type ButtonVariant = 
-  | 'primary'   // Deep Indigo (#243B73)
-  | 'teal'      // Academic Teal (#087F8C)
-  | 'secondary' // Neutral Slate / Elevated Surface
-  | 'outline'   // Subtle 1px border
-  | 'ghost'     // Transparent with gentle hover
-  | 'danger'    // Error Crimson
-  | 'success';  // Calm Emerald
+export type ButtonVariant =
+  | 'primary'
+  | 'teal'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'danger'
+  | 'success';
 
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -26,13 +26,13 @@ export interface ButtonProps extends ReactAriaButtonProps {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-[#243B73] hover:bg-[#1B2D59] text-white shadow-sm active:scale-[0.98]',
-  teal: 'bg-[#087F8C] hover:bg-[#06626C] text-white shadow-sm active:scale-[0.98]',
-  secondary: 'bg-stone-200/80 hover:bg-stone-300/80 text-stone-900 dark:bg-stone-800 dark:hover:bg-stone-700 dark:text-stone-100 shadow-sm',
-  outline: 'border border-stone-300 dark:border-stone-700 bg-transparent hover:bg-stone-100 dark:hover:bg-stone-800/60 text-stone-800 dark:text-stone-200',
-  ghost: 'bg-transparent hover:bg-stone-100 dark:hover:bg-stone-800/60 text-stone-700 dark:text-stone-300',
-  danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm active:scale-[0.98]',
-  success: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm active:scale-[0.98]',
+  primary: 'bg-cognify-indigo hover:bg-cognify-indigo-dark text-white shadow-sm active:scale-[0.98]',
+  teal: 'bg-cognify-teal hover:bg-cognify-teal-dark text-white shadow-sm active:scale-[0.98]',
+  secondary: 'bg-cognify-bg-light hover:bg-cognify-border-light text-cognify-text-primary dark:bg-cognify-surface-elevated dark:hover:bg-cognify-surface-dark dark:text-cognify-text-dark-primary shadow-sm',
+  outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
+  ghost: 'bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
+  danger: 'bg-cognify-error-text-light hover:brightness-90 dark:bg-cognify-error-text-dark dark:hover:brightness-110 text-white shadow-sm active:scale-[0.98]',
+  success: 'bg-cognify-success-text-light hover:brightness-90 dark:bg-cognify-success-text-dark dark:hover:brightness-110 text-white shadow-sm active:scale-[0.98]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -65,13 +65,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
         className={(renderProps) =>
           cn(
-            // Baseline flex layout & centering
             'inline-flex items-center justify-center font-sans transition-all duration-150 cursor-pointer select-none motion-reduce:transition-none motion-reduce:active:scale-100',
-            // High-contrast WCAG 2.2 compliant focus ring
-            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-[#F59E0B] data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-[#111622] dark:data-[focus-visible]:ring-offset-[#111622]',
-            // Disabled & loading states
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-surface-light dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
             'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none',
-            // Variant & Size
             variantStyles[variant],
             sizeStyles[size],
             typeof className === 'function' ? className(renderProps) : className

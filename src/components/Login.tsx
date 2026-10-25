@@ -1,134 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RadioGroup, Radio } from 'react-aria-components/RadioGroup';
-import { AriaButton } from './ui/AriaButton';
-import { BrandLogo } from './ui/BrandLogo';
-import { signInWithGoogle, signInWithGoogleRedirect, loginWithEmail, registerWithEmail, auth, clearPreLoginState } from '../lib/firebase';
-import { checkAndClearSessionExpired } from '../lib/navigation';
-import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Chrome, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, 
-  ArrowLeft, ArrowRight, 
-  Sparkles, Tag, ChevronDown, LockKeyhole, Globe,
-  Brain, GraduationCap, Heart, Check, Ear, Activity, Zap, Compass, Accessibility
+  signInWithGoogle, 
+  signInWithGoogleRedirect, 
+  loginWithEmail, 
+  registerWithEmail, 
+  auth, 
+  clearPreLoginState 
+} from '../lib/firebase';
+import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
+import { 
+  Mail, 
+  LockKeyhole, 
+  Eye, 
+  EyeOff, 
+  ArrowRight, 
+  AlertCircle, 
+  Loader2, 
+  Chrome, 
+  Accessibility, 
+  Heart, 
+  Users, 
+  UserPlus, 
+  LogIn, 
+  CheckCircle2, 
+  Sparkles 
 } from 'lucide-react';
-import type { AccessibilityMode } from '../types';
-
-type AccountPath = 'Normal' | 'Graduation Project' | 'Special Needs';
-type DisabilityOption = 'Visual' | 'Hearing';
-
-const DISABILITY_MODE_MAP: Record<DisabilityOption, AccessibilityMode> = {
-  'Visual': 'Visual',
-  'Hearing': 'Vocal-Deaf',
-};
-
-const DISABILITY_LABEL_MAP: Record<DisabilityOption, string> = {
-  'Visual': 'Visual Impairment',
-  'Hearing': 'Hearing Impairment',
-};
-
-// Each Special Needs accessibility feature, tagged with which disability chip(s) it's the primary match for.
-// Selecting a chip brings its matching feature(s) to the top and marks them as the "FOCUS" for that mode,
-// instead of the panel always defaulting to showing Vision Companion first regardless of selection.
-// Kept in sync with the real modules in DisabilityModeView.tsx's MODULES array —
-// titles/descriptions here must match what the user actually lands in, not a
-// generic marketing paraphrase, or the onboarding preview misrepresents the app.
-const SPECIAL_NEEDS_FEATURES: {
-  key: string;
-  Icon: typeof Sparkles;
-  title: { en: string; ar: string };
-  description: { en: string; ar: string };
-  matches: DisabilityOption[];
-}[] = [
-  {
-    key: 'vision',
-    Icon: Eye,
-    title: { en: 'Visual Companion (AI Eyes)', ar: 'الرفيق البصري الذكي (عيون الذكاء الاصطناعي)' },
-    description: { en: 'Audio description, currency reader (EGP & global), color matcher, and spatial obstacle guidance', ar: 'وصف صوتي فوري، قراءة العملات والجنيه المصري، تنسيق ألوان الملابس، وحفظ الذاكرة المكانية' },
-    matches: ['Visual'],
-  },
-  {
-    key: 'chat',
-    Icon: Brain,
-    title: { en: 'Accessible AI Tutor', ar: 'المساعد التعليمي المهيأ للإتاحة' },
-    description: { en: 'Adaptive multi-modal tutor tailored to your pace, with high contrast & screen-reader support', ar: 'مساعد تعليمي ذكي مهيأ بالكامل لقارئات الشاشة، تباين لوني فائق، وتدرج معرفي مرن' },
-    matches: ['Visual', 'Hearing'],
-  },
-  {
-    key: 'sign-language',
-    Icon: Ear,
-    title: { en: 'Unified Deaf & Hearing Center', ar: 'منظومة الصم وضعاف السمع الشاملة' },
-    description: { en: '3D sign language avatar, live speech captions, express AAC cards, and sound hazard radar', ar: 'أفاتار إشارة 3D، تفريغ كلام مباشر، بطاقات تواصل سريعة، ورادار بيئي للأصوات والمخاطر' },
-    matches: ['Hearing'],
-  },
-  {
-    key: 'video',
-    Icon: Sparkles,
-    title: { en: 'Sign Video Studio', ar: 'استوديو ترجمة الفيديو للغة الإشارة' },
-    description: { en: 'Convert educational videos and speech into continuous 3D sign language animations', ar: 'تحويل الفيديوهات والشروح الصوتية إلى لغة إشارة ثلاثية الأبعاد متزامنة' },
-    matches: ['Hearing'],
-  },
-  {
-    key: 'settings',
-    Icon: Globe,
-    title: { en: 'Accessibility Passport & Dialects', ar: 'جواز الإتاحة واللغات' },
-    description: { en: '11 languages & dialects including Egyptian Ammiya, plus sensory profiles', ar: '11 لغة ولهجة ومنها المصري، مع ضبط جواز الإتاحة وملفات الحواس الشخصية' },
-    matches: [],
-  },
-];
-
-function getSpecialNeedsFeatures(
-  selected: DisabilityOption,
-  t: (en: string, ar: string) => string
-) {
-  return SPECIAL_NEEDS_FEATURES
-    .map((f) => ({
-      key: f.key,
-      Icon: f.Icon,
-      title: t(f.title.en, f.title.ar),
-      description: t(f.description.en, f.description.ar),
-      isPrimary: f.matches.includes(selected),
-    }))
-    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
-}
-
-const DISABILITY_MODALITIES: {
-  id: DisabilityOption;
-  titleEn: string;
-  titleAr: string;
-  badgeEn: string;
-  badgeAr: string;
-  descEn: string;
-  descAr: string;
-  icon: typeof Eye;
-  focusTagEn: string;
-  focusTagAr: string;
-}[] = [
-  {
-    id: 'Visual',
-    titleEn: 'Visual Impairment & Blind',
-    titleAr: 'المكفوفين وضعاف البصر',
-    badgeEn: 'AI Eyes & Audio',
-    badgeAr: 'عيون اصطناعية وصوت',
-    descEn: 'Conversational audio eyes: currency reader (EGP & global), clothes color matching, face memory, and obstacle avoidance.',
-    descAr: 'رفيق صوتي فوري، قراءة العملات الورقية والجنيه، تنسيق ألوان الملابس، التعرف على الوجوه، والملاحة اللمسية.',
-    icon: Eye,
-    focusTagEn: 'Currency · Colors · Faces · Haptics',
-    focusTagAr: 'قارئ العملات · الملابس · الوجوه · الاهتزاز',
-  },
-  {
-    id: 'Hearing',
-    titleEn: 'Deaf & Hard of Hearing',
-    titleAr: 'الصم وضعاف السمع',
-    badgeEn: '3D Sign & Radar',
-    badgeAr: 'إشارة 3D ورادار',
-    descEn: 'Unified hearing center: 3D sign avatar, live speech captions, express AAC cards, and hazard sound radar.',
-    descAr: 'المركز السمعي الموحد: أفاتار إشارة ثلاثي الأبعاد، تفريغ كلام مباشر، بطاقات تواصل، ورادار للأصوات والمخاطر.',
-    icon: Ear,
-    focusTagEn: '3D Sign · Captions · Radar · Studio',
-    focusTagAr: 'إشارة 3D · كابشن فوري · رادار مخاطر · استوديو',
-  },
-];
 
 interface LoginProps {
   onDirectPreview?: () => void;
@@ -142,30 +38,32 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     return 'en';
   });
 
-  const [mode, setMode] = useState<'path-selection' | 'email-login' | 'email-register' | 'reset-password'>('path-selection');
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [mode, setMode] = useState<'email-login' | 'email-register' | 'reset-password'>('email-login');
+  
+  const [email, setEmail] = useState(() => {
+    try {
+      return localStorage.getItem('cognify_saved_email') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      return localStorage.getItem('cognify_remember_me') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showRedirectOption, setShowRedirectOption] = useState(false);
-
-  const [accountPath, setAccountPath] = useState<AccountPath>('Special Needs');
-  const [hoveredDisability, setHoveredDisability] = useState<DisabilityOption | null>(null);
-  const [selectedDisability, setSelectedDisability] = useState<DisabilityOption>('Visual');
-  const activePreviewDisability = hoveredDisability || selectedDisability;
-
-  const [showHelp, setShowHelp] = useState(false);
-  const [sessionExpiredNotice] = useState<boolean>(() => checkAndClearSessionExpired());
-  const [isInIframe] = useState(() => {
-    try {
-      return window.self !== window.top;
-    } catch {
-      return true;
-    }
-  });
 
   const isRtl = lang === 'ar';
   const t = (en: string, ar: string) => (lang === 'ar' ? ar : en);
@@ -182,14 +80,13 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     isMountedRef.current = true;
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as any });
 
-    // Catch any redirect result or domain error when returning from signInWithRedirect
     getRedirectResult(auth).catch((err: any) => {
-      console.warn("Google Redirect Result:", err);
+      console.warn('Google Redirect Result:', err);
       if (isMountedRef.current && err) {
         if (err.code === 'auth/unauthorized-domain') {
-          setError(t("Google Login requires an authorized domain. Please use Email & Password below.", "تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام الإيميل وكلمة المرور بالأسفل."));
+          setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
         } else if (err.code !== 'auth/credential-already-in-use') {
-          setError(err?.message?.replace("Firebase: ", "") || t("Google Sign-In failed. Please try again or use Email.", "تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد."));
+          setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please try again or use Email.', 'تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد.'));
         }
       }
     });
@@ -200,31 +97,18 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     };
   }, []);
 
-  const handleContinuePath = () => {
-    clearPreLoginState();
-    try {
-      sessionStorage.removeItem('cognify_exit_preview');
-      localStorage.setItem('preLoginAccountPath', 'Special Needs');
-      localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
-      localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
-      localStorage.setItem('cognify_default_disability_tab', 'chat');
-    } catch (err) {
-      console.warn("LocalStorage unavailable in current context:", err);
-    }
-    setMode('email-login');
-  };
-
   const handleDirectPreview = () => {
+    clearPreLoginState();
     try {
       sessionStorage.removeItem('cognify_exit_preview');
       sessionStorage.setItem('cognify_guest_preview', 'disability');
       localStorage.setItem('preLoginAccountPath', 'Special Needs');
-      localStorage.setItem('preLoginAccessibilityMode', DISABILITY_MODE_MAP[selectedDisability] || 'Visual');
-      localStorage.setItem('preLoginDisability', DISABILITY_LABEL_MAP[selectedDisability] || 'Visual Impairment');
-      localStorage.setItem('cognify_default_disability_tab', 'chat');
-      window.location.hash = '#disability';
+      localStorage.setItem('preLoginAccessibilityMode', 'Visual');
+      localStorage.setItem('preLoginDisability', 'Visual Impairment');
+      localStorage.setItem('cognify_default_disability_tab', 'hub');
+      window.location.hash = '#disability/hub';
     } catch (err) {
-      console.warn("Direct preview error:", err);
+      console.warn('Direct preview error:', err);
     }
     if (onDirectPreview) {
       onDirectPreview();
@@ -233,23 +117,18 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     }
   };
 
-  const validateUniversityEmail = (e: string) => {
-    return !!e && /^[^\s@]+@[^\s@]+\.edu(\.[^\s@]+)?$/i.test(e.trim());
-  };
-
   const handleGoogleRedirectAuth = async () => {
     if (loading) return;
     setError(null);
     setLoading(true);
-    setShowHelp(false);
     try {
       await signInWithGoogleRedirect();
     } catch (err: any) {
       if (!isMountedRef.current) return;
       if (err.code === 'auth/unauthorized-domain') {
-        setError(t("Google Login requires an authorized domain. Please use Email & Password below.", "تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام الإيميل وكلمة المرور بالأسفل."));
+        setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
       } else {
-        setError(err?.message?.replace("Firebase: ", "") || t("Google Sign-In failed. Please use Email & Password.", "تعذر تسجيل الدخول عبر جوجل. يرجى استخدام البريد وكلمة المرور."));
+        setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please use Email & Password.', 'تعذر تسجيل الدخول عبر جوجل. يرجى استخدام البريد وكلمة المرور.'));
       }
       setLoading(false);
     }
@@ -259,15 +138,13 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     if (loading) return;
     setError(null);
     setLoading(true);
-    setShowHelp(false);
 
-    // Strict 10s watchdog so Google popup never hangs the UI if blocked by browser or network
     if (authTimeoutRef.current) clearTimeout(authTimeoutRef.current);
     authTimeoutRef.current = setTimeout(() => {
       if (isMountedRef.current) {
         setLoading(false);
         setShowRedirectOption(true);
-        setError(t("Google Sign-In timed out or was blocked by browser. Click Direct Google Sign-In below or use Email.", "استغرق تسجيل جوجل وقتاً طويلاً أو تم حظره بواسطة المتصفح. اضغط على تسجيل جوجل المباشر بالأسفل أو استخدم البريد."));
+        setError(t('Google Sign-In timed out or was blocked by browser. Click Direct Google Sign-In below or use Email.', 'استغرق تسجيل جوجل وقتاً طويلاً أو تم حظره بواسطة المتصفح. اضغط على تسجيل جوجل المباشر أدناه أو استخدم البريد.'));
       }
     }, 10000);
 
@@ -282,11 +159,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       } else if (err.code === 'auth/popup-closed-by-user') {
         setShowRedirectOption(true);
         setError(t(
-          "Authorization window was closed or blocked by browser policy (COOP). Click Direct Google Sign-In below without popups.",
-          "تم إغلاق نافذة المصادقة أو حظرها بواسطة سياسة المتصفح (COOP). يمكنك الضغط على تسجيل جوجل المباشر بالأسفل بدون نوافذ منبثقة."
+          'Authorization window was closed or blocked by browser policy (COOP). Click Direct Google Sign-In below without popups.',
+          'تم إغلاق نافذة المصادقة أو حظرها بواسطة المتصفح. يمكنك الضغط على تسجيل جوجل المباشر أدناه بدون نوافذ منبثقة.'
         ));
       } else if (err.code === 'auth/popup-blocked') {
-        // Popups are blocked by the browser. Seamlessly fallback to redirect flow!
         try {
           await signInWithGoogleRedirect();
           return;
@@ -294,16 +170,16 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
           setShowRedirectOption(true);
           setError(
             t(
-              "Pop-up was blocked by your browser. Please click Direct Google Sign-In below or use Email & Password.",
-              "قام المتصفح بحظر النافذة المنبثقة (Pop-up Blocked). يرجى الضغط على تسجيل جوجل المباشر بالأسفل أو استخدام البريد وكلمة المرور."
+              'Pop-up was blocked by your browser. Please click Direct Google Sign-In below or use Email & Password.',
+              'قام المتصفح بحظر النافذة المنبثقة. يرجى الضغط على تسجيل جوجل المباشر أدناه أو استخدام البريد وكلمة المرور.'
             )
           );
         }
       } else if (err.code === 'auth/unauthorized-domain') {
-        setError(t("Google Login requires an authorized domain. Please use Email & Password below.", "تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام الإيميل وكلمة المرور بالأسفل."));
+        setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
       } else {
         setShowRedirectOption(true);
-        setError(err?.message?.replace("Firebase: ", "") || t("Google Sign-In failed. Please use Direct Google Sign-In or Email below.", "تعذر تسجيل الدخول عبر جوجل. يرجى استخدام تسجيل جوجل المباشر أو البريد أدناه."));
+        setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please use Direct Google Sign-In or Email below.', 'تعذر تسجيل الدخول عبر جوجل. يرجى استخدام تسجيل جوجل المباشر أو البريد أدناه.'));
       }
     } finally {
       if (authTimeoutRef.current) clearTimeout(authTimeoutRef.current);
@@ -320,18 +196,29 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
     try {
       if (mode === 'email-login') {
+        if (rememberMe) {
+          try {
+            localStorage.setItem('cognify_saved_email', email.trim());
+            localStorage.setItem('cognify_remember_me', 'true');
+          } catch {}
+        } else {
+          try {
+            localStorage.removeItem('cognify_saved_email');
+            localStorage.setItem('cognify_remember_me', 'false');
+          } catch {}
+        }
         await loginWithEmail(email, password);
       } else {
         if (password.length < 8) {
           if (isMountedRef.current) {
-            setError(t("Password must be at least 8 characters.", "كلمة المرور يجب أن تكون 8 أحرف على الأقل."));
+            setError(t('Password must be at least 8 characters.', 'كلمة المرور يجب أن تكون 8 خانات على الأقل.'));
             setLoading(false);
           }
           return;
         }
         if (password !== confirmPassword) {
           if (isMountedRef.current) {
-            setError(t("Passwords don't match. Please re-enter them.", "كلمتا المرور غير متطابقتين."));
+            setError(t("Passwords don't match. Please re-enter them.", 'كلمتا المرور غير متطابقتين. يرجى إعادة إدخالهما.'));
             setLoading(false);
           }
           return;
@@ -344,11 +231,11 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       const rawMsg = err?.message || '';
       let msg = '';
       if (code === 'auth/network-request-failed') {
-        msg = t("Network error — check your connection and try again.", "خطأ في الاتصال بالإنترنت — يرجى التحقق من الشبكة وإعادة المحاولة.");
+        msg = t('Network error — check your connection and try again.', 'خطأ في الاتصال بالإنترنت — يرجى التحقق من الشبكة وإعادة المحاولة.');
       } else if (code === 'auth/email-already-in-use') {
-        msg = t("This email is already registered. Try signing in instead.", "هذا البريد مسجل بالفعل. يرجى التبديل لتبويب تسجيل الدخول.");
+        msg = t('This email is already registered. Try signing in instead.', 'هذا البريد مسجل بالفعل. يرجى التبديل لتسجيل الدخول.');
       } else if (code === 'auth/weak-password') {
-        msg = t("Password is too weak — use at least 8 characters.", "كلمة المرور ضعيفة — يرجى استخدام 8 خانات على الأقل.");
+        msg = t('Password is too weak — use at least 8 characters.', 'كلمة المرور ضعيفة — يرجى استخدام 8 خانات على الأقل.');
       } else if (
         code === 'auth/invalid-credential' ||
         code === 'auth/wrong-password' ||
@@ -359,12 +246,12 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       ) {
         msg = t(
           "Incorrect email or password. Please verify your credentials or click 'Forgot Password?' to reset.",
-          "البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التأكد من كلمة المرور أو الضغط على 'نسيت كلمة المرور؟' لاستعادتها."
+          "البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التأكد من البيانات أو الضغط على 'نسيت كلمة المرور؟' لاستعادتها."
         );
       } else if (code === 'auth/too-many-requests') {
-        msg = t("Too many attempts. Please wait a few moments or reset your password.", "تم حظر المحاولات مؤقتاً بسبب تكرار المحاولة. انتظر دقيقة أو استخدم استعادة كلمة المرور.");
+        msg = t('Too many attempts. Please wait a few moments or reset your password.', 'تم تعليق المحاولات مؤقتاً بسبب تكرار المحاولة. انتظر دقيقة أو استخدم استعادة كلمة المرور.');
       } else {
-        msg = rawMsg.replace("Firebase: ", "");
+        msg = rawMsg.replace('Firebase: ', '');
       }
       setError(msg);
     } finally {
@@ -377,7 +264,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setError(t("Please enter your email address.", "يرجى كتابة البريد الإلكتروني."));
+      setError(t('Please enter your email address.', 'يرجى كتابة البريد الإلكتروني.'));
       return;
     }
     setError(null);
@@ -389,7 +276,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       if (isMountedRef.current) setResetSuccess(true);
     } catch (err: any) {
       if (isMountedRef.current) {
-        setError((err?.message || String(err) || '').replace("Firebase: ", ""));
+        setError((err?.message || String(err) || '').replace('Firebase: ', ''));
       }
     } finally {
       if (isMountedRef.current) {
@@ -399,583 +286,461 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0E1416] text-stone-900 dark:text-stone-100 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8 font-sans relative overflow-x-hidden selection:bg-teal-500/30 selection:text-teal-950 dark:selection:text-teal-100 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Background ambient lighting - Warm serene glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden hidden md:block">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-teal-500/10 dark:bg-teal-500/5 rounded-full blur-[140px]" />
-        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-teal-400/10 dark:bg-teal-400/5 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-teal-600/10 dark:bg-teal-600/5 rounded-full blur-[140px]" />
+    <div
+      className="min-h-screen bg-[#071426] text-[#F7FAFF] flex flex-col justify-between p-4 sm:p-6 lg:p-10 font-sans relative overflow-x-hidden selection:bg-[#087F8C]/40 selection:text-white"
+      dir={isRtl ? 'rtl' : 'ltr'}
+    >
+      {/* Background ambient lighting — Deep Blue and Academic Teal Identity */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        <div className="absolute -top-40 -start-40 w-[600px] h-[600px] bg-[#102F5B]/30 rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -end-40 w-[550px] h-[550px] bg-[#087F8C]/15 rounded-full blur-[160px]" />
+        <div className="absolute -bottom-40 start-1/4 w-[650px] h-[650px] bg-[#1E4D8F]/20 rounded-full blur-[180px]" />
       </div>
 
       {/* Top Navbar */}
-      <header className="max-w-5xl mx-auto w-full flex items-center justify-between z-10 py-3 mb-4">
-        <BrandLogo
-          variant="horizontal"
-          size="md"
-          badgeText={t("Inclusive Platform", "منصة التعلّم الشامل")}
-          subtitle={t("Empowering autonomous & accessible learning", "تعلّم ذكي يتكيف مع قدراتك وأسلوبك المعرفي")}
-        />
+      <header className="max-w-7xl mx-auto w-full flex items-center justify-between z-10 py-2 sm:py-3 mb-4 sm:mb-8">
+        {/* Cognify Brand & Subtitle */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#087F8C] to-[#10B8B0] flex items-center justify-center shadow-lg shadow-[#087F8C]/30 text-white shrink-0">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="6" cy="12" r="3" fill="currentColor" fillOpacity="0.25" />
+              <circle cx="18" cy="6" r="3" fill="currentColor" fillOpacity="0.25" />
+              <circle cx="18" cy="18" r="3" fill="currentColor" fillOpacity="0.25" />
+              <path d="M8.7 10.7l6.6-3.4M8.7 13.3l6.6 3.4" />
+            </svg>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl sm:text-2xl font-black tracking-tight text-white leading-none">
+              Cognify
+            </span>
+            <span className="text-[11px] sm:text-xs text-[#C1CCDA] font-semibold mt-1">
+              {t('Inclusive Learning Platform', 'منصة التعلّم الشامل')}
+            </span>
+          </div>
+        </div>
 
-        {/* Language Switcher */}
-        <div className="flex items-center gap-1 p-1 bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 rounded-full shadow-sm">
+        {/* EN / AR Language Switcher */}
+        <div
+          role="group"
+          aria-label={t('Language Selector', 'اختيار اللغة')}
+          className="flex items-center gap-1 p-1 bg-[#071A36] border border-[#29466A] rounded-full shadow-md"
+        >
           <button
+            type="button"
             onClick={() => setLang('en')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'en' ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+            aria-pressed={lang === 'en'}
+            className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] ${
+              lang === 'en'
+                ? 'bg-[#087F8C] text-white shadow-sm'
+                : 'text-[#C1CCDA] hover:text-white hover:bg-[#102F5B]/60'
+            }`}
           >
             EN
           </button>
           <button
+            type="button"
             onClick={() => setLang('ar')}
-            className={`px-3 py-1 rounded-full text-xs font-black transition-all ${lang === 'ar' ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+            aria-pressed={lang === 'ar'}
+            className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] ${
+              lang === 'ar'
+                ? 'bg-[#087F8C] text-white shadow-sm'
+                : 'text-[#C1CCDA] hover:text-white hover:bg-[#102F5B]/60'
+            }`}
           >
             AR
           </button>
         </div>
       </header>
 
-      {/* Session Expired Reassurance Notice */}
-      {sessionExpiredNotice && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="max-w-xl w-full mx-auto mb-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 flex items-center gap-3 shadow-sm animate-fade-in"
-        >
-          <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
-          <div className="text-xs sm:text-sm font-medium leading-relaxed">
-            <p className="font-bold">{t("Session Expired", "انتهت صلاحية الجلسة")}</p>
-            <p>{t(
-              "Your session expired. Please sign in again — your target screen and draft work will be automatically restored.",
-              "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى وسيتم نقلك تلقائياً لوجهتك السابقة واستعادة تقدمك."
-            )}</p>
-          </div>
-        </div>
-      )}
+      {/* Main 3-Zone Composition: Branding/Headline + Illustration + Sign-in Card */}
+      <main className="max-w-7xl mx-auto w-full z-10 my-auto py-2 sm:py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          {/* ── ZONE A & B: WELCOME MESSAGE, BENEFITS & INCLUSIVE ILLUSTRATION ── */}
+          <div className="lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-8 text-start">
+            
+            {/* Headline and Supporting Description */}
+            <div className="space-y-3 sm:space-y-4">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.2]">
+                {isRtl ? (
+                  <>
+                    طاقات حقيقية.<br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B8B0] via-[#5EEAD4] to-[#087F8C]">
+                      تمكين بلا حدود.
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Real People.<br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B8B0] via-[#5EEAD4] to-[#087F8C]">
+                      Real Potential.
+                    </span>
+                  </>
+                )}
+              </h1>
 
-      {/* Main Content Area */}
-      <main className="max-w-5xl mx-auto w-full z-10 space-y-4">
-        <AnimatePresence mode="wait">
-          {mode === 'path-selection' ? (
-            <motion.div
-              key="path-selection"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              className="space-y-4"
-            >
-              {/* Hero Title Header */}
-              <div className="space-y-2 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-teal-50 dark:bg-teal-950/40 border border-teal-200/70 dark:border-teal-800/60 text-teal-800 dark:text-teal-300 shadow-sm">
-                  <Accessibility className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                  <span>{t("Adaptive Learning Ecosystem · Inclusive Design", "بيئة التعلّم التكيفية الشاملة · استقلالية كاملة")}</span>
+              <p className="text-sm sm:text-base text-[#C1CCDA] font-medium leading-relaxed max-w-xl">
+                {t(
+                  'Cognify empowers learners of all abilities with personalized, accessible, and flexible learning experiences.',
+                  'تمكّن كوجنيفاي المتعلمين بمختلف قدراتهم من خلال تجارب تعلّم مخصصة، ميسرة، ومرنة تواكب وتيرتك واحتياجاتك.'
+                )}
+              </p>
+            </div>
+
+            {/* Three Compact Benefit Items */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-1">
+              {/* Item 1: Accessible by Design */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#071A36]/80 border border-[#29466A]/80 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#102F5B] border border-[#29466A] flex items-center justify-center text-[#10B8B0] shrink-0">
+                  <Accessibility className="w-5 h-5" aria-hidden="true" />
                 </div>
+                <span className="text-xs sm:text-[13px] font-bold text-[#F7FAFF] leading-snug">
+                  {t('Accessible by Design', 'تصميم ميسر بالكامل')}
+                </span>
+              </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-stone-900 dark:text-white tracking-tight leading-tight">
-                  {isRtl ? (
-                    <>أهلاً بك في <span className="text-teal-700 dark:text-teal-400">كوجنيفاي</span> — تعلّم بأسلوبك ووفق وتيرتك الخاصة.</>
-                  ) : (
-                    <>Welcome to <span className="text-teal-700 dark:text-teal-400">Cognify</span> — Learn independently, your way.</>
-                  )}
-                </h1>
+              {/* Item 2: Personalized Learning */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#071A36]/80 border border-[#29466A]/80 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#102F5B] border border-[#29466A] flex items-center justify-center text-[#10B8B0] shrink-0">
+                  <Heart className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <span className="text-xs sm:text-[13px] font-bold text-[#F7FAFF] leading-snug">
+                  {t('Personalized Learning', 'تعلّم تكيفي مخصص')}
+                </span>
+              </div>
 
-                <p className="text-xs sm:text-[13px] text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                  {t(
-                    "An inclusive, humane digital platform designed around your strengths, pacing, and sensory preferences.",
-                    "منصة تعليمية إنسانية مصممة لتلائم وتيرتك واحتياجاتك المعرفية، وتضع أدوات الإتاحة والراحة في متناولك من أول نظرة."
-                  )}
+              {/* Item 3: A More Inclusive Future */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#071A36]/80 border border-[#29466A]/80 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#102F5B] border border-[#29466A] flex items-center justify-center text-[#10B8B0] shrink-0">
+                  <Users className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <span className="text-xs sm:text-[13px] font-bold text-[#F7FAFF] leading-snug">
+                  {t('A More Inclusive Future', 'مستقبل أكثر شمولاً')}
+                </span>
+              </div>
+            </div>
+
+            {/* ── FLOATING SEAMLESS ILLUSTRATION WITH ATMOSPHERIC NAVY/TEAL GLOW ── */}
+            <div className="relative mt-3 sm:mt-6 w-full max-w-xl flex items-center justify-center">
+              {/* Subtle atmospheric navy and teal aura gradients behind the illustration (no cards or borders) */}
+              <div 
+                className="absolute inset-0 -m-4 sm:-m-8 bg-gradient-to-tr from-[#087F8C]/15 via-[#10B8B0]/10 to-transparent rounded-full blur-3xl -z-10 pointer-events-none" 
+                aria-hidden="true" 
+              />
+              <div 
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-radial from-[#102F5B]/30 via-[#087F8C]/10 to-transparent rounded-full blur-2xl -z-10 pointer-events-none" 
+                aria-hidden="true" 
+              />
+              
+              {/* Floating Transparent Illustration (unframed, blends naturally into background) */}
+              <img
+                src="/assets/inclusive-learners-illustration.png"
+                alt={t(
+                  'Illustration of diverse learners with disabilities studying collaboratively using assistive technology',
+                  'رسم تعبيري لمتعلمين ذوي قدرات متنوعة يدرسون بشكل تعاوني باستخدام التقنيات المساندة'
+                )}
+                className="w-full h-auto object-contain max-h-[260px] sm:max-h-[340px] drop-shadow-[0_12px_24px_rgba(7,20,38,0.7)] select-none transition-transform duration-700 hover:scale-[1.015]"
+                loading="eager"
+                width={1376}
+                height={768}
+              />
+            </div>
+
+          </div>
+
+          {/* ── ZONE C: SIGN-IN CARD ── */}
+          <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
+            <div className="w-full max-w-md bg-[#0A1F3D] border border-[#29466A] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50 relative text-start">
+              
+              {/* Form Card Header */}
+              <div className="space-y-1.5 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  {mode === 'email-login'
+                    ? t('Welcome Back', 'أهلاً بك مجدداً')
+                    : mode === 'email-register'
+                    ? t('Create Your Profile', 'إنشاء حسابك الجديد')
+                    : t('Reset Password', 'استعادة كلمة المرور')}
+                </h2>
+                <p className="text-xs sm:text-sm text-[#C1CCDA] font-medium leading-relaxed">
+                  {mode === 'email-login'
+                    ? t('Sign in to continue your learning journey', 'سجّل دخولك لمتابعة رحلتك التعليمية')
+                    : mode === 'email-register'
+                    ? t('Join our inclusive and accessible platform', 'انضم لمنصتنا التعليمية الميسرة والشاملة')
+                    : t('Enter your email to receive recovery instructions', 'أدخل بريدك الإلكتروني لتلقي رابط الاستعادة')}
                 </p>
               </div>
 
-              {/* Main Interactive Modality Card - Split View */}
-              <div className="bg-white dark:bg-[#121B1E] border border-stone-200/90 dark:border-stone-800 rounded-[28px] overflow-hidden shadow-xl dark:shadow-2xl">
-                {/* Top Strip */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700" />
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-4 sm:p-5 lg:p-6">
-                  {/* Left Column: LIVE MODALITY OVERVIEW */}
-                  <div className="lg:col-span-7 flex flex-col justify-between space-y-3">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full animate-pulse bg-teal-500" />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-stone-700 dark:text-stone-300">
-                            {t("INCLUSIVE LEARNING SUITE", "معاينة إمكانيات المسار المختار")}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border-teal-200/70 dark:border-teal-800/60">
-                          {t("Assistive Suite Unlocked", "منظومة التقنيات المفتوحة")}
-                        </span>
+              {/* Password Reset Mode Success State */}
+              {mode === 'reset-password' && resetSuccess ? (
+                <div className="p-4 bg-teal-500/15 border border-teal-500/30 rounded-2xl text-teal-200 text-xs sm:text-sm font-bold space-y-3">
+                  <div className="flex items-center gap-2 text-teal-300">
+                    <CheckCircle2 className="w-5 h-5 text-teal-400" />
+                    <span>{t('Reset link sent! Please check your inbox.', 'تم إرسال رابط إعادة التعيين! يرجى التحقق من بريدك.')}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setMode('email-login'); setResetSuccess(false); setError(null); }}
+                    className="block text-[#10B8B0] hover:text-[#5EEAD4] pt-2 font-black cursor-pointer underline outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
+                  >
+                    {t('Return to Sign In', 'العودة لتسجيل الدخول')}
+                  </button>
+                </div>
+              ) : mode === 'reset-password' ? (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label htmlFor="reset-email" className="text-xs font-bold text-[#F7FAFF]">
+                      {t('Email Address', 'البريد الإلكتروني')}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-slate-500">
+                        <Mail className="w-4 h-4" aria-hidden="true" />
                       </div>
-
-                      {/* Dynamic Summary Card */}
-                      <div className="bg-stone-50/80 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 rounded-2xl p-3.5 sm:p-4 space-y-3">
-                        <AnimatePresence mode="wait">
-                          {(() => {
-                            const currentModality = DISABILITY_MODALITIES.find((m) => m.id === activePreviewDisability) || DISABILITY_MODALITIES[0];
-                            const ModalityIcon = currentModality.icon;
-                            return (
-                              <motion.div
-                                key={currentModality.id}
-                                initial={{ opacity: 0, y: 6 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -6 }}
-                                transition={{ duration: 0.2 }}
-                                className="space-y-3"
-                              >
-                                {/* Modality Title & Header Badge */}
-                                <div className="flex items-start gap-3">
-                                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all shadow-sm bg-teal-700 text-white font-black">
-                                    <ModalityIcon className="w-5 h-5" />
-                                  </div>
-
-                                  <div className="flex-1 min-w-0">
-                                    <h3 className="text-sm sm:text-base font-black text-stone-900 dark:text-white tracking-tight leading-snug flex items-center gap-2 flex-wrap">
-                                      <span>{t(currentModality.titleEn, currentModality.titleAr)}</span>
-                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60 shrink-0">
-                                        {t(currentModality.badgeEn, currentModality.badgeAr)}
-                                      </span>
-                                    </h3>
-                                    <p className="text-[11px] sm:text-xs text-stone-600 dark:text-stone-300 font-medium mt-0.5 leading-relaxed">
-                                      {t(currentModality.descEn, currentModality.descAr)}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="h-px bg-stone-200 dark:bg-stone-800 w-full" />
-
-                                {/* Eye-catching Feature Highlights */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                  {getSpecialNeedsFeatures(activePreviewDisability, t).slice(0, 4).map((feature) => (
-                                    <div
-                                      key={feature.key}
-                                      className={`p-2.5 sm:p-3 rounded-xl border flex items-start gap-2.5 transition-all ${
-                                        feature.isPrimary
-                                          ? 'bg-teal-50/80 dark:bg-teal-950/30 border-teal-300/60 dark:border-teal-700/60'
-                                          : 'bg-white dark:bg-[#121B1E] border-stone-200 dark:border-stone-800/80'
-                                      }`}
-                                    >
-                                      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                                        feature.isPrimary ? 'bg-teal-700 text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
-                                      }`}>
-                                        <feature.Icon className="w-3.5 h-3.5" />
-                                      </div>
-                                      <div className="min-w-0">
-                                        <div className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5 leading-snug">
-                                          <span className="truncate">{feature.title}</span>
-                                          {feature.isPrimary && (
-                                            <span className="px-1.5 py-0.2 rounded-full text-[8px] font-black tracking-wider bg-teal-700 text-white shrink-0">
-                                              {t('ACTIVE', 'نشط')}
-                                            </span>
-                                          )}
-                                        </div>
-                                        {feature.isPrimary && (
-                                          <div className="text-[10px] sm:text-[11px] text-stone-600 dark:text-stone-300 leading-tight mt-0.5 line-clamp-2">{feature.description}</div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </motion.div>
-                            );
-                          })()}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-
-                    {/* Bottom Feature Pill Indicator */}
-                    <div className="space-y-1.5 pt-0.5">
-                      <div className="flex items-center gap-2 text-xs font-bold">
-                        <span className="inline-flex items-center gap-1.5 text-teal-700 dark:text-teal-400">
-                          <Check className="w-3.5 h-3.5" /> {t("Accessibility Standard:", "معايير الإتاحة:")}
-                        </span>
-                        <span className="text-stone-600 dark:text-stone-400 font-semibold text-[11px] sm:text-xs">
-                          {t("WCAG 2.2 AA Compliant · Keyboard Navigable · Screen Reader Optimized", "معايير WCAG 2.2 AA العالمية · تنقل كامل بلوحة المفاتيح · متوافق مع قارئات الشاشة")}
-                        </span>
-                      </div>
+                      <input
+                        id="reset-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                      />
                     </div>
                   </div>
 
-                  {/* Right Column: CHOOSE YOUR ASSISTIVE FOCUS */}
-                  <div className="lg:col-span-5 flex flex-col justify-between space-y-4 lg:border-s lg:border-stone-200 dark:lg:border-stone-800 lg:ps-6">
-                    <div className="space-y-3">
-                      <div>
-                        <h2 className="text-base sm:text-lg font-black text-stone-900 dark:text-white tracking-tight">
-                          {t("Select Learning Focus", "اختر المسار المساند الأساسي")}
-                        </h2>
-                        <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-                          {t("All assistive modules remain unlocked and accessible.", "كافة الأدوات المساندة تظل مفتوحة ومتاحة لك دائماً.")}
-                        </p>
-                      </div>
-
-                      {/* Modality Selector Cards */}
-                      <RadioGroup
-                        value={selectedDisability}
-                        onChange={(val) => setSelectedDisability(val as DisabilityOption)}
-                        aria-label={t("Select Assistive Focus", "اختر المسار المساند")}
-                        className="space-y-2.5 relative outline-none"
-                      >
-                        {DISABILITY_MODALITIES.map((modality) => {
-                          const ModalityIcon = modality.icon;
-                          return (
-                            <Radio
-                              key={modality.id}
-                              value={modality.id}
-                              onMouseEnter={() => setHoveredDisability(modality.id)}
-                              onMouseLeave={() => setHoveredDisability(null)}
-                              className={({ isSelected, isFocusVisible }) =>
-                                `relative z-10 w-full flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all duration-200 outline-none ${
-                                  isSelected
-                                    ? 'bg-teal-50/80 dark:bg-teal-950/40 border-teal-600 dark:border-teal-500 ring-2 ring-teal-600/30 shadow-sm scale-[1.01]'
-                                    : 'bg-white dark:bg-[#121B1E] border-stone-200 dark:border-stone-800 hover:border-teal-300 dark:hover:border-teal-700'
-                                } ${isFocusVisible ? 'ring-2 ring-teal-600 ring-offset-2 ring-offset-white dark:ring-offset-[#0E1416]' : ''}`
-                              }
-                            >
-                              {({ isSelected }) => (
-                                <>
-                                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                                    isSelected
-                                      ? 'bg-teal-700 text-white font-black'
-                                      : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
-                                  }`}>
-                                    <ModalityIcon className="w-5 h-5" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-1.5">
-                                      <span className={`text-xs sm:text-sm font-black transition-colors ${isSelected ? 'text-teal-800 dark:text-teal-300' : 'text-stone-900 dark:text-white'}`}>
-                                        {t(modality.titleEn, modality.titleAr)}
-                                      </span>
-                                      <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${
-                                        isSelected
-                                          ? 'bg-teal-700 text-white border-teal-700'
-                                          : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700'
-                                      }`}>
-                                        {t(modality.badgeEn, modality.badgeAr)}
-                                      </span>
-                                    </div>
-                                    <p className="text-[11px] text-stone-600 dark:text-stone-400 font-medium mt-0.5 leading-snug">
-                                      {t(modality.focusTagEn, modality.focusTagAr)}
-                                    </p>
-                                  </div>
-                                  <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                    isSelected
-                                      ? 'bg-teal-700 text-white ring-2 ring-teal-700/30'
-                                      : 'border border-stone-300 dark:border-stone-700'
-                                  }`}>
-                                    {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                                  </div>
-                                </>
-                              )}
-                            </Radio>
-                          );
-                        })}
-                      </RadioGroup>
+                  {error && (
+                    <div role="alert" className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs font-bold flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" aria-hidden="true" />
+                      <span>{error}</span>
                     </div>
+                  )}
 
-                    {/* Action Buttons Row */}
-                    <div className="space-y-2 pt-1">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 px-6 bg-[#087F8C] hover:bg-[#10B8B0] active:bg-[#06626C] text-white font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#087F8C]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : t('Send Reset Link', 'إرسال رابط الاستعادة')}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setMode('email-login'); setError(null); }}
+                    className="w-full text-center text-xs text-[#C1CCDA] hover:text-[#10B8B0] font-bold py-1 cursor-pointer outline-none focus-visible:underline"
+                  >
+                    {t('Back to Sign In', 'العودة لتسجيل الدخول')}
+                  </button>
+                </form>
+              ) : (
+                /* Primary Authentication Form (Login or Register) */
+                <form onSubmit={handleManualAuth} className="space-y-4">
+                  {/* Email Field */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="auth-email" className="text-xs font-bold text-[#F7FAFF]">
+                      {t('Email Address', 'البريد الإلكتروني')}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-slate-500">
+                        <Mail className="w-4 h-4" aria-hidden="true" />
+                      </div>
+                      <input
+                        id="auth-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password Field */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="auth-password" className="text-xs font-bold text-[#F7FAFF]">
+                      {t('Password', 'كلمة المرور')}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-slate-500">
+                        <LockKeyhole className="w-4 h-4" aria-hidden="true" />
+                      </div>
+                      <input
+                        id="auth-password"
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        autoComplete={mode === 'email-login' ? 'current-password' : 'new-password'}
+                        placeholder={t('Enter your password', 'أدخل كلمة المرور')}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                      />
                       <button
                         type="button"
-                        onClick={handleDirectPreview}
-                        className="w-full py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-md shadow-teal-700/20 active:scale-[0.98] transition-all cursor-pointer"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? t('Hide password', 'إخفاء كلمة المرور') : t('Show password', 'إظهار كلمة المرور')}
+                        aria-pressed={showPassword}
+                        className="absolute inset-y-0 end-0 pe-3.5 flex items-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer outline-none focus-visible:text-[#087F8C]"
                       >
-                        <Sparkles className="w-4 h-4" />
-                        <span>{t("Direct Student Access (No Sign-In Needed) ✦", "دخول فوري كطالب (بدون تسجيل) ✦")}</span>
-                      </button>
-
-                      <AriaButton
-                        onPress={handleContinuePath}
-                        className="w-full py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.98] outline-none bg-stone-100 hover:bg-stone-200 dark:bg-stone-800/80 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 cursor-pointer"
-                      >
-                        <span>{t("Sign In / Create Account", "تسجيل الدخول / إنشاء حساب")}</span>
-                        <ArrowRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
-                      </AriaButton>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            /* Unified Direct Auth Screen */
-            <motion.div
-              key="auth-flow"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="max-w-md mx-auto w-full bg-white dark:bg-[#121B1E] border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 rounded-[28px] p-6 sm:p-8 shadow-xl space-y-5"
-            >
-              {/* Header with Selected Path & Back Button */}
-              <div className="flex items-center justify-between pb-1">
-                <button
-                  onClick={() => { setMode('path-selection'); setError(null); }}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-stone-500 hover:text-stone-900 dark:hover:text-white transition-colors cursor-pointer"
-                >
-                  <ArrowLeft className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
-                  <span>{t("Back", "رجوع")}</span>
-                </button>
-
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-stone-100 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300">
-                  <span>{t("Assistive Suite:", "نوع الإتاحة:")}</span>
-                  <strong className="text-teal-700 dark:text-teal-400">
-                    {DISABILITY_LABEL_MAP[selectedDisability] || selectedDisability}
-                  </strong>
-                </div>
-              </div>
-
-              {mode === 'reset-password' ? (
-                /* Reset Password View */
-                <div className="space-y-4 text-start">
-                  <div className="space-y-1">
-                    <h2 className="text-xl font-black text-stone-900 dark:text-white tracking-tight">{t("Reset Password", "إعادة تعيين كلمة المرور")}</h2>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">{t("Enter your email to receive recovery instructions.", "أدخل بريدك الإلكتروني لإرسال رابط الاستعادة.")}</p>
-                  </div>
-
-                  {resetSuccess ? (
-                    <div className="p-4 bg-teal-50 dark:bg-teal-950/30 border border-teal-300 dark:border-teal-700 rounded-2xl text-teal-800 dark:text-teal-300 text-xs font-bold space-y-2">
-                      <p>{t("Reset link sent! Please check your inbox.", "تم إرسال رابط إعادة التعيين! يرجى التحقق من بريدك.")}</p>
-                      <button
-                        onClick={() => { setMode('email-login'); setResetSuccess(false); setError(null); }}
-                        className="block text-teal-700 dark:text-teal-400 hover:underline pt-2 font-black cursor-pointer"
-                      >
-                        {t("Return to Sign In", "العودة لتسجيل الدخول")}
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                  ) : (
-                    <form onSubmit={handleResetPassword} className="space-y-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Email Address", "البريد الإلكتروني")}</label>
+                  </div>
+
+                  {/* Confirm Password (when registering) */}
+                  {mode === 'email-register' && (
+                    <div className="space-y-1.5">
+                      <label htmlFor="auth-confirm-password" className="text-xs font-bold text-[#F7FAFF]">
+                        {t('Confirm Password', 'تأكيد كلمة المرور')}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-slate-500">
+                          <LockKeyhole className="w-4 h-4" aria-hidden="true" />
+                        </div>
                         <input
-                          type="email"
+                          id="auth-confirm-password"
+                          type={showPassword ? 'text' : 'password'}
                           required
-                          placeholder="name@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-3 px-4 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327]"
+                          autoComplete="new-password"
+                          placeholder={t('Confirm your password', 'أعد إدخال كلمة المرور')}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                         />
                       </div>
+                    </div>
+                  )}
 
-                      {error && (
-                        <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-500 text-xs font-bold flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          <span>{error}</span>
-                        </div>
-                      )}
+                  {/* Remember me & Forgot Password Options (Login Mode) */}
+                  {mode === 'email-login' && (
+                    <div className="flex items-center justify-between text-xs pt-0.5">
+                      <label className="flex items-center gap-2 cursor-pointer select-none text-[#C1CCDA] hover:text-white transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="w-4 h-4 rounded text-[#087F8C] focus:ring-[#10B8B0] accent-[#087F8C] cursor-pointer"
+                        />
+                        <span>{t('Remember me', 'تذكرني')}</span>
+                      </label>
 
                       <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-3.5 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-teal-700/20 disabled:opacity-50 cursor-pointer"
+                        type="button"
+                        onClick={() => { setMode('reset-password'); setError(null); }}
+                        className="text-[#10B8B0] hover:text-[#5EEAD4] font-bold transition-colors cursor-pointer outline-none focus-visible:underline"
                       >
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto text-white" /> : t("Send Reset Link", "إرسال رابط الاستعادة")}
+                        {t('Forgot password?', 'نسيت كلمة المرور؟')}
                       </button>
-                    </form>
+                    </div>
                   )}
-                </div>
-              ) : (
-                /* Unified Tabs (Sign In / Create Account) */
-                <div className="space-y-4 text-start">
-                  <div className="space-y-1 text-center">
-                    <h2 className="text-xl font-black text-stone-900 dark:text-white tracking-tight">
-                      {mode === 'email-login' ? t("Welcome Back", "أهلاً بك مجدداً") : t("Create Your Profile", "إنشاء حسابك الجديد")}
-                    </h2>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">
-                      {mode === 'email-login'
-                        ? t("Sign in to access your personalized mentor.", "سجّل دخولك للوصول إلى مساعدك الدراسي المخصص.")
-                        : t("Get started with your tailored learning calibration.", "ابدأ رحلتك التعليمية المخصصة لمعايرتك.")}
-                    </p>
+
+                  {/* Error Notification */}
+                  {error && (
+                    <div role="alert" className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs font-bold flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" aria-hidden="true" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  {/* Primary Teal Sign-in / Create Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 px-6 bg-[#087F8C] hover:bg-[#10B8B0] active:bg-[#06626C] text-white font-black text-sm rounded-xl transition-all shadow-lg shadow-[#087F8C]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <span>{mode === 'email-login' ? t('Sign In', 'تسجيل الدخول') : t('Create Account', 'إنشاء الحساب')}</span>
+                        <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} aria-hidden="true" />
+                      </>
+                    )}
+                  </button>
+
+                  {/* "or" Divider */}
+                  <div className="relative flex items-center justify-center my-3">
+                    <div className="border-t border-[#29466A] w-full" />
+                    <span className="bg-[#0A1F3D] px-3 text-[11px] font-bold text-[#C1CCDA] uppercase tracking-wider">
+                      {t('or', 'أو')}
+                    </span>
                   </div>
 
-                  {/* Tab Selector */}
-                  <div className="grid grid-cols-2 gap-1 p-1 bg-stone-100 dark:bg-[#162327] border border-stone-200 dark:border-stone-800 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => { setMode('email-login'); setError(null); }}
-                      className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
-                        mode === 'email-login'
-                          ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm font-black'
-                          : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
-                      }`}
-                    >
-                      {t("Sign In", "تسجيل الدخول")}
-                    </button>
+                  {/* Secondary Action: Create Account / Switch to Login */}
+                  {mode === 'email-login' ? (
                     <button
                       type="button"
                       onClick={() => { setMode('email-register'); setError(null); }}
-                      className={`py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
-                        mode === 'email-register'
-                          ? 'bg-teal-700 dark:bg-teal-600 text-white shadow-sm font-black'
-                          : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
-                      }`}
+                      className="w-full py-3 px-6 rounded-xl border border-[#29466A] hover:border-[#10B8B0] bg-[#102F5B]/30 hover:bg-[#102F5B]/60 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
                     >
-                      {t("Create Account", "إنشاء حساب")}
+                      <UserPlus className="w-4 h-4 text-[#10B8B0]" aria-hidden="true" />
+                      <span>{t('Create Account', 'إنشاء حساب جديد')}</span>
                     </button>
-                  </div>
-
-                  {/* Form */}
-                  <form onSubmit={handleManualAuth} className="space-y-3.5">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Email Address", "البريد الإلكتروني")}</label>
-                      <div className="relative">
-                        <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 ${isRtl ? 'right-3' : 'left-3'}`} />
-                        <input
-                          type="email"
-                          required
-                          placeholder="name@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className={`w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-2.5 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327] ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Password", "كلمة المرور")}</label>
-                      <div className="relative">
-                        <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 ${isRtl ? 'right-3' : 'left-3'}`} />
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          required
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className={`w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-2.5 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327] ${isRtl ? 'pr-9 pl-9' : 'pl-9 pr-9'}`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className={`absolute top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer ${isRtl ? 'left-3' : 'right-3'}`}
-                        >
-                          {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {mode === 'email-register' && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="space-y-1"
-                      >
-                        <label className="text-[10px] font-black uppercase tracking-wider text-stone-600 dark:text-stone-400">{t("Confirm Password", "تأكيد كلمة المرور")}</label>
-                        <div className="relative">
-                          <Lock className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 ${isRtl ? 'right-3' : 'left-3'}`} />
-                          <input
-                            type="password"
-                            required
-                            placeholder="••••••••"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`w-full bg-stone-50 dark:bg-[#162327] border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 text-xs rounded-xl py-2.5 outline-none focus:border-teal-600 focus:bg-white dark:focus:bg-[#162327] ${isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'}`}
-                          />
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {mode === 'email-login' && (
-                      <div className="flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => { setMode('reset-password'); setError(null); }}
-                          className="text-[11px] font-bold text-teal-700 dark:text-teal-400 hover:underline cursor-pointer"
-                        >
-                          {t("Forgot Password?", "نسيت كلمة المرور؟")}
-                        </button>
-                      </div>
-                    )}
-
-                    {error && (
-                      <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold space-y-2">
-                        <div className="flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          <span>{error}</span>
-                        </div>
-                        {showRedirectOption && (
-                          <button
-                            type="button"
-                            onClick={handleGoogleRedirectAuth}
-                            disabled={loading}
-                            className="w-full py-2 px-3 bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 text-teal-900 dark:text-teal-300 border border-teal-300/40 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] cursor-pointer"
-                          >
-                            <Globe className="w-3.5 h-3.5" />
-                            <span>{t("Click Here for Direct Google Sign-In", "اضغط هنا لتسجيل الدخول المباشر")}</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-
+                  ) : (
                     <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full py-3.5 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-teal-700/20 disabled:opacity-50 cursor-pointer"
+                      type="button"
+                      onClick={() => { setMode('email-login'); setError(null); }}
+                      className="w-full py-3 px-6 rounded-xl border border-[#29466A] hover:border-[#10B8B0] bg-[#102F5B]/30 hover:bg-[#102F5B]/60 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
                     >
-                      {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin mx-auto text-white" />
-                      ) : mode === 'email-login' ? (
-                        t("Sign In", "تسجيل الدخول")
-                      ) : (
-                        t("Create Profile", "إنشاء الحساب")
-                      )}
+                      <LogIn className="w-4 h-4 text-[#10B8B0]" aria-hidden="true" />
+                      <span>{t('Back to Sign In', 'العودة لتسجيل الدخول')}</span>
                     </button>
-                  </form>
+                  )}
 
-                  {/* Or Continue With Google */}
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="h-px bg-stone-200 dark:bg-stone-800 flex-1" />
-                    <span className="text-[10px] font-black text-stone-500 uppercase tracking-widest">{t("Or", "أو")}</span>
-                    <div className="h-px bg-stone-200 dark:bg-stone-800 flex-1" />
-                  </div>
-
-                  <div className="space-y-2">
+                  {/* Secondary Social Login & Direct Guest Preview */}
+                  <div className="flex flex-col gap-2 pt-2 border-t border-[#29466A]/60 mt-4">
                     <button
                       type="button"
                       onClick={handleGoogleAuth}
                       disabled={loading}
-                      className="w-full h-11 flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-900 dark:text-white rounded-xl transition-all font-black uppercase tracking-wider text-xs shadow-sm border border-stone-200 dark:border-stone-700 disabled:opacity-50 active:scale-[0.98] cursor-pointer"
+                      className="w-full py-2.5 px-4 rounded-xl border border-[#29466A] bg-[#071A36] hover:bg-[#102F5B]/50 text-[#F7FAFF] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
                     >
-                      {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-white" />
-                      ) : (
-                        <Chrome className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                      )}
-                      <span>{t("Continue with Google", "المتابعة عبر جوجل")}</span>
+                      <Chrome className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+                      <span>{t('Continue with Google', 'المتابعة بحساب جوجل')}</span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={handleGoogleRedirectAuth}
-                      disabled={loading}
-                      className={`w-full py-2.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                        showRedirectOption
-                          ? 'bg-teal-50 dark:bg-teal-950/40 border-teal-300 text-teal-900 dark:text-teal-300 hover:bg-teal-100'
-                          : 'bg-white dark:bg-[#121B1E] border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-teal-400'
-                      }`}
-                    >
-                      <Globe className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t("Direct Google Sign-In (No Popups)", "تسجيل الدخول المباشر بجوجل")}</span>
-                    </button>
+                    {showRedirectOption && (
+                      <button
+                        type="button"
+                        onClick={handleGoogleRedirectAuth}
+                        disabled={loading}
+                        className="w-full py-2 px-3 text-[11px] text-amber-300 hover:text-amber-200 underline font-semibold cursor-pointer"
+                      >
+                        {t('Direct Google Sign-In (No Pop-ups)', 'تسجيل جوجل المباشر (بدون نوافذ منبثقة)')}
+                      </button>
+                    )}
 
-                    {/* Instant Direct Student Access (bypass password friction) */}
-                    <div className="pt-2">
+                    {onDirectPreview && (
                       <button
                         type="button"
                         onClick={handleDirectPreview}
-                        className="w-full py-2.5 px-3 rounded-xl border border-teal-600/30 bg-teal-50/60 hover:bg-teal-100/70 dark:bg-teal-950/30 dark:hover:bg-teal-900/40 text-teal-800 dark:text-teal-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98]"
+                        className="text-[11px] text-[#C1CCDA] hover:text-[#10B8B0] transition-colors py-1 cursor-pointer underline text-center outline-none focus-visible:ring-1 focus-visible:ring-[#10B8B0]"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                        <span>{t("Direct Student Access (Instant Preview)", "دخول فوري كطالب (تخطي التسجيل)")}</span>
+                        {t('Explore Cognify as Guest (Direct Preview)', 'استكشف كوجنيفاي كزائر (معاينة مباشرة)')}
                       </button>
-                    </div>
+                    )}
                   </div>
-                </div>
+                </form>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+            </div>
+          </div>
+
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="max-w-6xl mx-auto w-full text-center py-4 z-10">
-        <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <LockKeyhole className="w-3.5 h-3.5 text-slate-600" />
-          <span>{t("Secure access · Firebase Auth", "تسجيل دخول آمن ومشفّر · Firebase Auth")}</span>
+      {/* ── ZONE 3: ACCESSIBILITY ASSURANCE FOOTER ── */}
+      <footer className="max-w-7xl mx-auto w-full z-10 pt-6 pb-2 text-start">
+        <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#071A36]/90 border border-[#29466A] text-xs sm:text-[13px] text-[#F7FAFF] shadow-sm backdrop-blur-xs">
+          <div className="w-6 h-6 rounded-full bg-[#087F8C] flex items-center justify-center text-white shrink-0">
+            <Accessibility className="w-3.5 h-3.5" aria-hidden="true" />
+          </div>
+          <span className="font-medium">
+            {t(
+              'Cognify supports assistive technologies and is built with accessibility in mind.',
+              'كوجنيفاي تدعم التقنيات المساندة ومصممة بأعلى معايير الإتاحة العالمية.'
+            )}
+          </span>
         </div>
       </footer>
     </div>

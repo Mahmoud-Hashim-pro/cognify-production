@@ -194,8 +194,8 @@ const WORD_ALIASES: Record<string, string> = {
 /* Rig                                                                 */
 /* ------------------------------------------------------------------ */
 
-const ACCENT = 0x2563eb; // Cognify primary
-const ACCENT_SOFT = 0x60a5fa;
+const ACCENT = 0x12cfe0; // Cognify bright cyan accent (#12CFE0)
+const ACCENT_SOFT = 0x67e8f9; // Soft cyan glow
 
 interface FingerRig {
   joints: THREE.Group[]; // [proximal, middle, distal]
@@ -528,7 +528,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
 
-    const hemi = new THREE.HemisphereLight(0xbfd7ff, 0x0b1120, 0.9);
+    const hemi = new THREE.HemisphereLight(0xbfd7ff, 0x071b33, 0.95);
     scene.add(hemi);
     const key = new THREE.DirectionalLight(0xffffff, 1.5);
     key.position.set(-1.4, 2.2, 2.4);

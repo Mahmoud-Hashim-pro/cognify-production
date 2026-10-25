@@ -60,7 +60,7 @@ export const Dialog: React.FC<DialogProps> = ({
 
       if (e.key === 'Tab' && dialogRef.current) {
         const focusableElements = dialogRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button:not([disabled]):not([aria-hidden="true"]), a[href]:not([aria-hidden="true"]), input:not([disabled]):not([aria-hidden="true"]), select:not([disabled]):not([aria-hidden="true"]), textarea:not([disabled]):not([aria-hidden="true"]), [tabindex]:not([tabindex="-1"]):not([aria-hidden="true"])'
         );
         if (focusableElements.length === 0) return;
 
@@ -87,7 +87,7 @@ export const Dialog: React.FC<DialogProps> = ({
     const timeout = setTimeout(() => {
       if (dialogRef.current) {
         const focusable = dialogRef.current.querySelector<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), [tabindex="0"]'
+          'button:not([disabled]):not([aria-hidden="true"]), a[href]:not([aria-hidden="true"]), input:not([disabled]):not([aria-hidden="true"]), select:not([disabled]):not([aria-hidden="true"]), textarea:not([disabled]):not([aria-hidden="true"]), [tabindex="0"]:not([aria-hidden="true"])'
         );
         focusable?.focus();
       }
@@ -123,23 +123,23 @@ export const Dialog: React.FC<DialogProps> = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cn(
-          'relative w-full rounded-3xl bg-white dark:bg-[#171E2E] border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
+          'relative w-full rounded-3xl bg-cognify-surface-light dark:bg-cognify-surface-dark border border-cognify-border-light dark:border-cognify-border-dark text-cognify-text-primary dark:text-cognify-text-dark-primary shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
           sizeClasses[size]
         )}
       >
         {/* Header */}
-        <div className="p-5 sm:p-6 pb-4 border-b border-stone-100 dark:border-stone-800/80 flex items-start justify-between gap-4">
+        <div className="p-5 sm:p-6 pb-4 border-b border-cognify-border-light dark:border-cognify-border-dark flex items-start justify-between gap-4">
           <div className="space-y-1 min-w-0">
             <h2
               id={titleId}
-              className="text-lg sm:text-xl font-bold tracking-tight text-stone-900 dark:text-white"
+              className="text-lg sm:text-xl font-bold tracking-tight text-cognify-text-primary dark:text-cognify-text-dark-primary"
             >
               {title}
             </h2>
             {description && (
               <p
                 id={descId}
-                className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 leading-relaxed"
+                className="text-xs sm:text-sm text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-relaxed"
               >
                 {description}
               </p>
@@ -151,7 +151,7 @@ export const Dialog: React.FC<DialogProps> = ({
             type="button"
             onClick={onClose}
             aria-label={effectiveDismissLabel}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-cognify-text-secondary hover:text-cognify-text-primary dark:text-cognify-text-dark-secondary dark:hover:text-cognify-text-dark-primary hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
