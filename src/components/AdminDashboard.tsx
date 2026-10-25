@@ -14,7 +14,7 @@ import {
   Crown, UserMinus, Brain, Heart, GraduationCap,
   Accessibility, Eye, User as UserIcon, Copy, Download,
   Building2, X, Sliders, FileJson, BarChart2,
-  ArrowLeft, Database, Terminal, Key, Check
+  ArrowLeft, Database, Terminal, Key, Check, AlertCircle
 } from "lucide-react";
 import { sectionOf } from "../lib/access";
 import { USER_SUBCOLLECTIONS } from "../types/privacySecurity";
@@ -91,6 +91,7 @@ const sanitizeCsvCell = (val: unknown): string => {
 export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }: AdminDashboardProps) {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usersError, setUsersError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sectionFilter, setSectionFilter] = useState<AccountPath | 'all'>('all');
   const [roleFilter, setRoleFilter] = useState<'all' | 'superadmin' | 'normal'>('all');
@@ -243,9 +244,15 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
       uniqueUsersData.sort((a, b) => getLatestTime(b) - getLatestTime(a));
 
       setUsers(uniqueUsersData);
+      setUsersError(null);
       setLoading(false);
     }, (error) => {
       setLoading(false);
+      const isPermissionDenied = (error as any)?.code === 'permission-denied' || String(error).includes('permission-denied') || String(error).includes('Missing or insufficient permissions');
+      const errorMsg = isPermissionDenied
+        ? 'Directory access restricted by Firestore security rules. Ensure your admin email is verified in Firebase Authentication.'
+        : ((error as any)?.message || 'Failed to load user records from Firestore.');
+      setUsersError(errorMsg);
       try {
         handleFirestoreError(error, OperationType.LIST, "users");
       } catch (e) {
@@ -844,6 +851,15 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
           {/* ════ VIEW 1: DIRECTORY ════ */}
           {adminView === 'directory' && (
             <div className="space-y-6 animate-in fade-in duration-200">
+              {usersError && (
+                <div role="alert" className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex items-start gap-3 backdrop-blur-xl">
+                  <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 text-sm">
+                    <p className="font-bold mb-0.5">Directory Data Notice</p>
+                    <p className="text-xs text-amber-300/90 leading-relaxed">{usersError}</p>
+                  </div>
+                </div>
+              )}
               {/* Super Admin Team Section */}
               <section className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6">
                 <div className="flex items-center justify-between gap-3 mb-5">
