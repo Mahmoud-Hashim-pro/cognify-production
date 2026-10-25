@@ -25,11 +25,11 @@ import {
   Sun, Moon, Home, Compass, Activity,
   ScanLine, Banknote, Palette, Users, FileText, FileCheck, Volume2,
   GraduationCap, History, Clock, Trash2, Play, FileUp, Download, ExternalLink,
-  RotateCcw, Search, X, Database
+  RotateCcw, Search, X, Database, LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
-import { db, cleanDataForFirestore } from '../lib/firebase';
+import { db, cleanDataForFirestore, logout } from '../lib/firebase';
 import { toast } from './Toast';
 import type { ChatInterfaceRef } from './ChatInterface';
 import { 
@@ -106,6 +106,7 @@ interface DisabilityModeViewProps {
   setProfile?: (profile: UserProfile) => void;
   isDarkMode?: boolean;
   toggleTheme?: () => void;
+  onLogout?: () => void;
 }
 
 /**
@@ -219,6 +220,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   setProfile,
   isDarkMode = true,
   toggleTheme,
+  onLogout,
 }, ref) {
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => {
     const directTab = currentTab || detectDirectDisabilityTab(profile);
@@ -989,6 +991,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-[#C4D3E5]" />
           </button>
+
+          {/* Header Log Out Button */}
+          <button
+            type="button"
+            onClick={async () => {
+              if (onLogout) onLogout();
+              else await logout();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+            title={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+            aria-label={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+          >
+            <LogOut className="w-4 h-4 rtl:rotate-180 text-rose-400" />
+            <span className="text-xs font-bold hidden sm:inline">
+              {localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+            </span>
+          </button>
         </div>
       </header>
 
@@ -1107,6 +1126,31 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 'تدعم تقنيات المساعدة والوصول الشامل مع مراعاة إمكانية الوصول للجميع.'
               )}
             </p>
+          </div>
+
+          {/* Desktop Sidebar Bottom Footer: User Info & Log Out */}
+          <div className="pt-3 mt-3 border-t border-[#16395E] flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#1769B0] to-[#087F8C] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-[#F5F8FF] truncate">{profile.name || 'User'}</p>
+                <p className="text-[10px] text-[#A9C4DD] truncate">{profile.email || ''}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                if (onLogout) onLogout();
+                else await logout();
+              }}
+              className="p-2 rounded-xl text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rose-400 shrink-0"
+              title={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+              aria-label={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+            >
+              <LogOut className="w-4 h-4 rtl:rotate-180" />
+            </button>
           </div>
         </aside>
 
@@ -1253,6 +1297,33 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       'مصممة لكل متعلم مع تباين عالي وملاحة تيسيرية متوافقة.'
                     )}
                   </p>
+                </div>
+
+                {/* Mobile Drawer Bottom User & Log Out */}
+                <div className="pt-4 border-t border-[#16395E] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1769B0] to-[#087F8C] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                      {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[#F5F8FF] truncate">{profile.name || 'User'}</p>
+                      <p className="text-[10px] text-[#A9C4DD] truncate">{profile.email || ''}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsMobileSidebarOpen(false);
+                      if (onLogout) onLogout();
+                      else await logout();
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rose-400 shrink-0"
+                    title={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+                    aria-label={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+                  >
+                    <LogOut className="w-4 h-4 rtl:rotate-180" />
+                    <span className="text-xs font-bold">{localize(profile.language, 'Log Out', 'خروج')}</span>
+                  </button>
                 </div>
               </motion.aside>
             </>

@@ -1258,6 +1258,7 @@ export default function App() {
             setProfile={setProfile}
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
+            onLogout={handleLogout}
           />
         );
       default:
@@ -1277,6 +1278,7 @@ export default function App() {
             setProfile={setProfile}
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
+            onLogout={handleLogout}
           />
         );
     }
