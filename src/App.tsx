@@ -1212,7 +1212,28 @@ export default function App() {
           </div>
         );
       case 'admin':
-        return <AdminDashboard profile={activeProfile} onMenuClick={handleOpenMobileMenu} onNavigateBack={handleBack} />;
+        return (
+          <DisabilityModeView
+            ref={chatRef}
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigate={navigateTo}
+            onQuestionEvaluated={updateQuestionHistory}
+            syncMessages={syncActiveThread}
+            externalMessage={externalMessage}
+            onStreamingUpdate={(text) => setCurrentAIResponse(text)}
+            onSTTStateChange={setIsSTTActive}
+            currentTab="admin"
+            onTabChange={(newTab) => {
+              if (newTab === 'admin') return;
+              setDisabilityTab(newTab);
+              navigateTo('disability');
+            }}
+            setProfile={setProfile}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
+          />
+        );
       case 'support':
         return <SupportCenter profile={activeProfile} onMenuClick={handleOpenMobileMenu} onNavigateBack={handleBack} />;
 

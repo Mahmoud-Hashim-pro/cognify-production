@@ -22,7 +22,7 @@ const MODE_META: Record<AccessibilityMode, { label: string; cls: string }> = {
   'Speech': { label: 'Speech', cls: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' },
   'Vocal-Deaf': { label: 'Vocal-Deaf', cls: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' },
   'Sign-Only': { label: 'Sign-Only', cls: 'bg-purple-500/20 text-purple-300 border border-purple-500/30' },
-  'None': { label: 'Standard', cls: 'bg-slate-800 text-slate-400 border border-[#4A1224]/50' },
+  'None': { label: 'Standard', cls: 'bg-slate-800 text-slate-400 border border-[#16395E]/50' },
 };
 
 function daysSinceActive(u?: UserProfile | null): number {
@@ -201,9 +201,9 @@ export default function AdminAccessibilityTab({
           { label: 'Special Needs Learners', value: a11yAll.length, Icon: Accessibility, cls: 'bg-rose-500/15 text-rose-400 border border-rose-500/30' },
           { label: 'Active in Last 7 Days', value: a11yActive7, Icon: Activity, cls: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' },
           { label: 'Sign Language Learners', value: a11ySigners, Icon: Ear, cls: 'bg-purple-500/15 text-purple-400 border border-purple-500/30' },
-          { label: 'Active in Last 30 Days', value: a11yNew30, Icon: CheckCircle2, cls: 'bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30' },
+          { label: 'Active in Last 30 Days', value: a11yNew30, Icon: CheckCircle2, cls: 'bg-[#16395E]/40 text-[#00AEB8] border border-[#00AEB8]/30' },
         ].map(({ label, value, Icon, cls }) => (
-          <div key={label} className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
+          <div key={label} className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
             <div className={`p-3 rounded-2xl ${cls}`}>
               <Icon className="w-6 h-6" />
             </div>
@@ -233,7 +233,7 @@ export default function AdminAccessibilityTab({
               <a
                 key={u.uid}
                 href={`mailto:${u.email}?subject=Cognify Accessibility Check-in`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0E0610]/95 border border-amber-500/40 rounded-xl text-xs font-bold text-slate-200 hover:border-amber-400 transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#082344]/95 border border-amber-500/40 rounded-xl text-xs font-bold text-slate-200 hover:border-amber-400 transition-colors"
               >
                 <Mail className="w-3.5 h-3.5 text-amber-400" />
                 {u.name || u.email?.split('@')[0]}
@@ -251,7 +251,7 @@ export default function AdminAccessibilityTab({
 
       {/* Weekly Activity & Breakdowns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6">
+        <section className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6">
           <h3 className="text-sm font-black text-white uppercase tracking-tight mb-4">By Registered Disability</h3>
           <div className="space-y-3.5">
             {disabilityCounts.map(({ key, count }) => {
@@ -270,13 +270,13 @@ export default function AdminAccessibilityTab({
           </div>
         </section>
 
-        <section className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6">
+        <section className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6">
           <h3 className="text-sm font-black text-white uppercase tracking-tight mb-4">By Active Operational Mode</h3>
           <div className="flex flex-wrap gap-2.5">
             {modeCounts.map(({ mode, count }) => (
               <span key={mode} className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black ${MODE_META[mode].cls}`}>
                 {MODE_META[mode].label}
-                <span className="bg-[#080409]/60 px-2 py-0.5 rounded-lg font-mono text-white">{count}</span>
+                <span className="bg-[#061A33]/60 px-2 py-0.5 rounded-lg font-mono text-white">{count}</span>
               </span>
             ))}
           </div>
@@ -295,12 +295,12 @@ export default function AdminAccessibilityTab({
             placeholder="Search accessibility users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-[#0E0610]/90 border border-[#4A1224]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-rose-500 outline-none"
+            className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-rose-500 outline-none"
           />
         </div>
         <button
           onClick={copyA11yEmails}
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#150917] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded-2xl border border-[#4A1224]/50 transition-colors shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#0D2542] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded-2xl border border-[#16395E]/50 transition-colors shrink-0"
         >
           <Copy className="w-4 h-4" /> Copy All Emails
         </button>

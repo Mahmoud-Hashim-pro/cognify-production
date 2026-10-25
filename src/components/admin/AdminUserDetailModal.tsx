@@ -90,10 +90,10 @@ export default function AdminUserDetailModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="user-detail-modal-title"
-        className="bg-[#150917] border border-[#4A1224]/60 rounded-[32px] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"
+        className="bg-[#0D2542] border border-[#16395E]/60 rounded-[32px] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"
       >
         {/* Modal Header */}
-        <div className="p-6 border-b border-[#4A1224]/60 flex items-center justify-between bg-[#080409]/60">
+        <div className="p-6 border-b border-[#16395E]/60 flex items-center justify-between bg-[#061A33]/60">
           <div className="flex items-center gap-3.5 min-w-0">
             {/* User Avatar with Zoom Lightbox Trigger */}
             <div
@@ -109,10 +109,10 @@ export default function AdminUserDetailModal({
                 <img
                   src={user.photoURL}
                   alt={user.name || 'User Avatar'}
-                  className="w-14 h-14 rounded-2xl object-cover border-2 border-[#E5A93C]/40 shadow-lg group-hover:scale-105 transition-transform bg-slate-800"
+                  className="w-14 h-14 rounded-2xl object-cover border-2 border-[#00AEB8]/40 shadow-lg group-hover:scale-105 transition-transform bg-slate-800"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-2xl bg-[#4A1224]/60 text-[#E5A93C] font-black text-xl flex items-center justify-center border border-[#E5A93C]/40">
+                <div className="w-14 h-14 rounded-2xl bg-[#16395E]/60 text-[#00AEB8] font-black text-xl flex items-center justify-center border border-[#00AEB8]/40">
                   {(user.name || user.email || '?').charAt(0).toUpperCase()}
                 </div>
               )}
@@ -135,7 +135,7 @@ export default function AdminUserDetailModal({
                 <button
                   type="button"
                   onClick={() => copyToClipboard(user.uid, `Firebase UID copied: ${user.uid}`)}
-                  className="inline-flex items-center gap-1 font-mono text-[10px] text-slate-400 hover:text-[#E5A93C] bg-slate-800/80 px-2 py-0.5 rounded transition-colors"
+                  className="inline-flex items-center gap-1 font-mono text-[10px] text-slate-400 hover:text-[#00AEB8] bg-slate-800/80 px-2 py-0.5 rounded transition-colors"
                   title="Copy Firebase UID"
                 >
                   <span>UID: {user.uid.slice(0, 12)}…</span>
@@ -155,7 +155,7 @@ export default function AdminUserDetailModal({
         </div>
 
         {/* Modal Tabs */}
-        <div className="flex border-b border-[#4A1224]/60 bg-[#0E0610]/95 px-6 gap-2">
+        <div className="flex border-b border-[#16395E]/60 bg-[#082344]/95 px-6 gap-2">
           {[
             { id: 'profile', label: 'Overview & Details', icon: UserIcon },
             { id: 'logins', label: userLoginHistory.length > 0 ? `Logins (${userLoginHistory.length})` : 'Login History', icon: Globe },
@@ -167,7 +167,7 @@ export default function AdminUserDetailModal({
               key={id}
               onClick={() => setModalTab(id as any)}
               className={`flex items-center gap-1.5 py-3.5 px-3.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                modalTab === id ? 'border-[#E5A93C] text-[#E5A93C]' : 'border-transparent text-slate-400 hover:text-white'
+                modalTab === id ? 'border-[#00AEB8] text-[#00AEB8]' : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
               <Icon className="w-3.5 h-3.5" /> {label}
@@ -204,7 +204,7 @@ export default function AdminUserDetailModal({
                 {user.photoURL && (
                   <button
                     onClick={() => onOpenPhotoLightbox(user.photoURL!, user)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0E0610]/90 hover:bg-slate-800 text-[#E5A93C] border border-[#E5A93C]/30 rounded-xl text-xs font-bold transition-all shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#082344]/90 hover:bg-slate-800 text-[#00AEB8] border border-[#00AEB8]/30 rounded-xl text-xs font-bold transition-all shrink-0"
                   >
                     <Eye className="w-3.5 h-3.5" /> View Photo
                   </button>
@@ -213,26 +213,26 @@ export default function AdminUserDetailModal({
 
               {/* Key Stats Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-[#080409] p-4 rounded-2xl border border-[#4A1224]/60">
+                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Points</div>
-                  <div className="text-xl font-black text-[#E5A93C] mt-1 font-mono">{user.points || 0}</div>
+                  <div className="text-xl font-black text-[#00AEB8] mt-1 font-mono">{user.points || 0}</div>
                 </div>
-                <div className="bg-[#080409] p-4 rounded-2xl border border-[#4A1224]/60">
+                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Cognitive Score</div>
                   <div className="text-xl font-black text-white mt-1 font-mono">{user.iqScore || '--'}</div>
                 </div>
-                <div className="bg-[#080409] p-4 rounded-2xl border border-[#4A1224]/60">
+                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Cognitive Level</div>
                   <div className="text-sm font-black text-white mt-1.5 uppercase">{user.level || 'Intermediate'}</div>
                 </div>
-                <div className="bg-[#080409] p-4 rounded-2xl border border-[#4A1224]/60">
+                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Section</div>
                   <div className="text-sm font-black text-white mt-1.5">{sectionOf(user)}</div>
                 </div>
               </div>
 
               {/* Academic & Bio Info */}
-              <div className="bg-[#080409] p-5 rounded-2xl border border-[#4A1224]/60 space-y-3.5 text-xs font-medium">
+              <div className="bg-[#061A33] p-5 rounded-2xl border border-[#16395E]/60 space-y-3.5 text-xs font-medium">
                 <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Academic &amp; System Info</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div><span className="text-slate-400">University:</span> <span className="font-bold text-white">{user.university || 'N/A'}</span></div>
@@ -277,7 +277,7 @@ export default function AdminUserDetailModal({
                   {user.lastIp && (
                     <div>
                       <span className="text-slate-400">Last IP:</span>{' '}
-                      <span className="font-mono text-[#E5A93C] font-bold text-[11px] bg-[#150917] px-2 py-0.5 rounded border border-[#4A1224]/60">
+                      <span className="font-mono text-[#00AEB8] font-bold text-[11px] bg-[#0D2542] px-2 py-0.5 rounded border border-[#16395E]/60">
                         {user.lastIp}
                       </span>
                     </div>
@@ -297,13 +297,13 @@ export default function AdminUserDetailModal({
                     <div><span className="text-slate-400">Active Mode:</span> <span className="font-bold text-amber-400">{user.accessibilityMode}</span></div>
                   )}
                   {user.organization && (
-                    <div><span className="text-slate-400">Organization:</span> <span className="font-bold text-[#E5A93C]">{user.organization}</span></div>
+                    <div><span className="text-slate-400">Organization:</span> <span className="font-bold text-[#00AEB8]">{user.organization}</span></div>
                   )}
                 </div>
               </div>
 
               {/* Admin Actions */}
-              <div className="bg-[#080409] p-5 rounded-2xl border border-[#4A1224]/60 space-y-3">
+              <div className="bg-[#061A33] p-5 rounded-2xl border border-[#16395E]/60 space-y-3">
                 <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Admin Adjustments</h4>
                 <div className="flex flex-wrap items-center gap-2.5">
                   {/* Role Promotion / Demotion */}
@@ -343,14 +343,14 @@ export default function AdminUserDetailModal({
                       <button
                         onClick={() => onUpdatePoints(user, 50)}
                         disabled={busyUid === user.uid}
-                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 text-xs font-bold rounded-xl hover:bg-[#E5A93C] transition-colors disabled:opacity-50"
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 text-xs font-bold rounded-xl hover:bg-[#00AEB8] transition-colors disabled:opacity-50"
                       >
                         +50 Points
                       </button>
                       <button
                         onClick={() => onUpdatePoints(user, -50)}
                         disabled={busyUid === user.uid}
-                        className="px-3.5 py-1.5 bg-[#150917] border border-[#4A1224]/50 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50"
+                        className="px-3.5 py-1.5 bg-[#0D2542] border border-[#16395E]/50 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50"
                       >
                         -50 Points
                       </button>
@@ -358,7 +358,7 @@ export default function AdminUserDetailModal({
                         value={user.level || 'Intermediate'}
                         onChange={(e) => onUpdateCognitiveLevel(user, e.target.value as CognitiveLevel)}
                         disabled={busyUid === user.uid}
-                        className="bg-[#150917] border border-[#4A1224]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+                        className="bg-[#0D2542] border border-[#16395E]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer"
                       >
                         <option value="Basic">Level: Basic</option>
                         <option value="Intermediate">Level: Intermediate</option>
@@ -370,7 +370,7 @@ export default function AdminUserDetailModal({
                     value={user.country && user.country !== 'Unknown' && user.country !== 'N/A' ? user.country : ''}
                     onChange={(e) => onUpdateCountry(user, e.target.value)}
                     disabled={busyUid === user.uid}
-                    className="bg-[#150917] border border-[#4A1224]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+                    className="bg-[#0D2542] border border-[#16395E]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer"
                     title="Set or update user's country"
                   >
                     <option value="" disabled>Set Country...</option>
@@ -382,7 +382,7 @@ export default function AdminUserDetailModal({
                   </select>
                   <a
                     href={`mailto:${user.email}?subject=Message from Cognify Admin`}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-700 transition-colors border border-[#4A1224]/50"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-700 transition-colors border border-[#16395E]/50"
                   >
                     <Mail className="w-3.5 h-3.5" /> Send Email
                   </a>
@@ -403,7 +403,7 @@ export default function AdminUserDetailModal({
                   </p>
                 </div>
                 {loadingLogins && (
-                  <div className="flex items-center gap-2 text-xs text-[#E5A93C]">
+                  <div className="flex items-center gap-2 text-xs text-[#00AEB8]">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     <span>Fetching logs…</span>
                   </div>
@@ -420,7 +420,7 @@ export default function AdminUserDetailModal({
                         className={`p-4 rounded-2xl border transition-all ${
                           isLatest
                             ? 'bg-emerald-950/20 border-emerald-500/30'
-                            : 'bg-[#080409] border-[#4A1224]/60'
+                            : 'bg-[#061A33] border-[#16395E]/60'
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
@@ -460,9 +460,9 @@ export default function AdminUserDetailModal({
                   })}
                 </div>
               ) : (
-                <div className="p-6 bg-[#080409] border border-[#4A1224]/60 rounded-2xl space-y-3">
+                <div className="p-6 bg-[#061A33] border border-[#16395E]/60 rounded-2xl space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
+                    <div className="p-2.5 rounded-xl bg-[#16395E]/30 text-[#00AEB8] border border-[#00AEB8]/20">
                       <Globe className="w-5 h-5" />
                     </div>
                     <div>
@@ -509,7 +509,7 @@ export default function AdminUserDetailModal({
               {user.chatThreads && user.chatThreads.length > 0 ? (
                 <div className="space-y-2">
                   {user.chatThreads.map((thread) => (
-                    <div key={thread.id} className="p-4 bg-[#080409] border border-[#4A1224]/60 rounded-2xl space-y-1">
+                    <div key={thread.id} className="p-4 bg-[#061A33] border border-[#16395E]/60 rounded-2xl space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-white">{thread.title || 'Untitled Chat'}</span>
                         <span className="text-[10px] text-slate-400">{formatDate(thread.updatedAt)}</span>
@@ -532,7 +532,7 @@ export default function AdminUserDetailModal({
               {user.tasks && user.tasks.length > 0 ? (
                 <div className="space-y-2">
                   {user.tasks.map((task) => (
-                    <div key={task.id} className="flex items-center gap-3 p-3.5 bg-[#080409] border border-[#4A1224]/60 rounded-2xl text-xs">
+                    <div key={task.id} className="flex items-center gap-3 p-3.5 bg-[#061A33] border border-[#16395E]/60 rounded-2xl text-xs">
                       <div className={`p-1.5 rounded-lg ${task.completed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
                         {task.completed ? <Check className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                       </div>
@@ -555,12 +555,12 @@ export default function AdminUserDetailModal({
                 <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Firestore Document JSON</h4>
                 <button
                   onClick={() => copyToClipboard(JSON.stringify(user, null, 2), 'JSON copied to clipboard')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white rounded-lg transition-colors border border-[#4A1224]/50"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white rounded-lg transition-colors border border-[#16395E]/50"
                 >
                   <Copy className="w-3 h-3" /> Copy JSON
                 </button>
               </div>
-              <pre className="p-4 bg-[#080409] text-emerald-400 font-mono text-xs rounded-2xl overflow-x-auto border border-[#4A1224]/60 max-h-96 custom-scrollbar">
+              <pre className="p-4 bg-[#061A33] text-emerald-400 font-mono text-xs rounded-2xl overflow-x-auto border border-[#16395E]/60 max-h-96 custom-scrollbar">
                 {JSON.stringify(user, null, 2)}
               </pre>
             </div>

@@ -39,12 +39,12 @@ export default function AdminAnalyticsTab({ users }: AdminAnalyticsTabProps) {
     <div className="space-y-6 animate-in fade-in duration-200">
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Registered Users', value: users.length, Icon: Users, cls: 'bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30' },
+          { label: 'Total Registered Users', value: users.length, Icon: Users, cls: 'bg-[#16395E]/40 text-[#00AEB8] border border-[#00AEB8]/30' },
           { label: 'Active in Last 24h', value: users.filter(u => daysSinceActive(u) <= 1).length, Icon: Sparkles, cls: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' },
           { label: 'Active in Last 7 Days', value: users.filter(u => daysSinceActive(u) <= 7).length, Icon: Activity, cls: 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30' },
           { label: 'Special Needs Learners', value: a11yCount, Icon: Heart, cls: 'bg-rose-500/15 text-rose-400 border border-rose-500/30' },
         ].map(({ label, value, Icon, cls }) => (
-          <div key={label} className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
+          <div key={label} className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
             <div className={`p-3 rounded-2xl ${cls}`}>
               <Icon className="w-6 h-6" />
             </div>
@@ -58,9 +58,9 @@ export default function AdminAnalyticsTab({ users }: AdminAnalyticsTabProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Cognitive Stage Breakdown */}
-        <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6">
+        <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6">
           <h3 className="text-sm font-black text-white uppercase tracking-tight mb-4 flex items-center gap-2">
-            <Brain className="w-4 h-4 text-[#E5A93C]" /> Cognitive Stages
+            <Brain className="w-4 h-4 text-[#00AEB8]" /> Cognitive Stages
           </h3>
           <div className="space-y-3.5">
             {(['Basic', 'Intermediate', 'Advanced'] as CognitiveLevel[]).map(lvl => {
@@ -73,7 +73,7 @@ export default function AdminAnalyticsTab({ users }: AdminAnalyticsTabProps) {
                     <span className="text-slate-400 font-mono">{count} ({pct}%)</span>
                   </div>
                   <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    <div className="h-full bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 rounded-full transition-all" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
@@ -82,7 +82,7 @@ export default function AdminAnalyticsTab({ users }: AdminAnalyticsTabProps) {
         </div>
 
         {/* Account Paths */}
-        <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6">
+        <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6">
           <h3 className="text-sm font-black text-white uppercase tracking-tight mb-4 flex items-center gap-2">
             <GraduationCap className="w-4 h-4 text-amber-400" /> Enrolment Paths
           </h3>
@@ -107,7 +107,7 @@ export default function AdminAnalyticsTab({ users }: AdminAnalyticsTabProps) {
         </div>
 
         {/* Language Preferences */}
-        <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6">
+        <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6">
           <h3 className="text-sm font-black text-white uppercase tracking-tight mb-4 flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-emerald-400" /> Language Preferences
           </h3>
