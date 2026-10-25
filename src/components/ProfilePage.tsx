@@ -107,14 +107,14 @@ function getInitials(name?: string, email?: string): string {
 function formatActivityDate(dateVal: any, isAr: boolean): string {
   try {
     const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return isAr ? '28 أكتوبر 2024' : 'Oct 28, 2024';
+    if (isNaN(d.getTime())) return isAr ? 'تاريخ سابق' : 'Previous date';
     return d.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
   } catch {
-    return isAr ? '28 أكتوبر 2024' : 'Oct 28, 2024';
+    return isAr ? 'تاريخ سابق' : 'Previous date';
   }
 }
 
@@ -139,51 +139,52 @@ export default function ProfilePage({
 
   // Real Mastery Calculation
   const masteryRecords = useMemo(() => Object.values(studentState?.conceptMastery || {}), [studentState?.conceptMastery]);
+  const hasMasteryData = masteryRecords.length > 0 || (profile.questionScore !== undefined && profile.questionScore > 0);
   const computedMastery = useMemo(() => {
     if (masteryRecords.length > 0) {
       const sum = masteryRecords.reduce((acc, c) => acc + (c.accuracy || 0), 0);
-      return Math.min(100, Math.max(10, Math.round((sum / masteryRecords.length) * 100)));
+      return Math.min(100, Math.max(0, Math.round((sum / masteryRecords.length) * 100)));
     }
     if (profile.questionScore && profile.questionScore > 0) {
       return Math.round(profile.questionScore);
     }
-    return 78; // Academic baseline matching reference
+    return 0; // Real 0% when no assessments completed
   }, [masteryRecords, profile.questionScore]);
 
   // Real Subject Curriculum Breakdown
   const subjectProgress = useMemo(() => {
-    const getAvgAccuracy = (conceptIds: string[], defaultPct: number) => {
+    const getAvgAccuracy = (conceptIds: string[]) => {
       const matching = masteryRecords.filter(m => conceptIds.includes(m.conceptId));
       if (matching.length > 0) {
         const sum = matching.reduce((acc, m) => acc + (m.accuracy || 0), 0);
-        return Math.min(100, Math.max(10, Math.round((sum / matching.length) * 100)));
+        return Math.min(100, Math.max(0, Math.round((sum / matching.length) * 100)));
       }
-      return defaultPct;
+      return 0;
     };
 
     return [
       {
         nameEn: 'Computer Science Fundamentals',
         nameAr: 'أسس علوم الحاسب والبرمجة',
-        percentage: getAvgAccuracy(['variables_types', 'control_flow', 'functions'], 85),
+        percentage: getAvgAccuracy(['variables_types', 'control_flow', 'functions']),
         gradient: 'from-[#087F8C] to-[#18C6C3]',
       },
       {
         nameEn: 'Data Structures & Algorithms',
         nameAr: 'هياكل البيانات والخوارزميات',
-        percentage: getAvgAccuracy(['memory_addresses', 'data_structures', 'binary_trees', 'algorithmic_complexity'], 72),
+        percentage: getAvgAccuracy(['memory_addresses', 'data_structures', 'binary_trees', 'algorithmic_complexity']),
         gradient: 'from-[#1769B0] to-[#00AEB8]',
       },
       {
         nameEn: 'Web Development',
         nameAr: 'تطوير تطبيقات الويب والواجهات',
-        percentage: getAvgAccuracy(['web_development', 'http_protocols', 'dom_manipulation'], 68),
+        percentage: getAvgAccuracy(['web_development', 'http_protocols', 'dom_manipulation']),
         gradient: 'from-[#087F8C] to-[#18C6C3]',
       },
       {
         nameEn: 'Database Systems',
         nameAr: 'أنظمة قواعد البيانات وإدارتها',
-        percentage: getAvgAccuracy(['database_systems', 'sql_queries', 'normalization'], 80),
+        percentage: getAvgAccuracy(['database_systems', 'sql_queries', 'normalization']),
         gradient: 'from-[#00AEB8] to-[#18C6C3]',
       },
     ];
@@ -217,37 +218,12 @@ export default function ProfilePage({
       return profile.chatThreads.slice(-4).reverse().map((t, idx) => ({
         date: formatActivityDate(t.updatedAt || Date.now() - idx * 86400000 * 2, isAr),
         activity: t.title || (isAr ? 'جلسة إرشاد ذكي' : 'AI Tutor Session'),
-        result: idx % 2 === 0 ? 'Completed' : '85%',
-        resultType: idx % 2 === 0 ? 'completed' : 'score',
+        result: isAr ? 'مكتمل' : 'Completed',
+        resultType: 'completed',
       }));
     }
 
-    return [
-      {
-        date: isAr ? '28 أكتوبر 2024' : 'Oct 28, 2024',
-        activity: isAr ? 'اختبار تطبيقي في هياكل البيانات' : 'Data Structures Practice Quiz',
-        result: '85%',
-        resultType: 'score',
-      },
-      {
-        date: isAr ? '26 أكتوبر 2024' : 'Oct 26, 2024',
-        activity: isAr ? 'درس تفاعلي في تطوير الويب' : 'Web Development Lesson',
-        result: isAr ? 'مكتمل' : 'Completed',
-        resultType: 'completed',
-      },
-      {
-        date: isAr ? '24 أكتوبر 2024' : 'Oct 24, 2024',
-        activity: isAr ? 'تكليف أنظمة قواعد البيانات' : 'Database Systems Assignment',
-        result: '72%',
-        resultType: 'score',
-      },
-      {
-        date: isAr ? '22 أكتوبر 2024' : 'Oct 22, 2024',
-        activity: isAr ? 'اختبار قصير في علوم الحاسب' : 'Computer Science Quiz',
-        result: '90%',
-        resultType: 'score',
-      },
-    ];
+    return []; // No fabricated activities
   }, [realEvents, profile.chatThreads, isAr]);
 
   const studentDisplayName = formatHumanDisplayName(profile.name, profile.email);
@@ -271,8 +247,8 @@ export default function ProfilePage({
     ? `${profile.level} • 6th Semester`
     : localize(profile.language, 'Year 3 • 6th Semester', 'السنة الثالثة • الفصل السادس');
 
-  const sessionCount = Math.max(profile.chatThreads?.length || 0, 18);
-  const knowledgePoints = profile.points ?? 246;
+  const sessionCount = profile.chatThreads?.length || 0;
+  const knowledgePoints = profile.points ?? 0;
 
   const handleSave = async () => {
     setSaving(true);
@@ -844,7 +820,9 @@ export default function ProfilePage({
                         {computedMastery}%
                       </span>
                       <span className="text-[11px] font-semibold text-[#B8C7D9] mt-0.5">
-                        {localize(profile.language, 'Overall Progress', 'التقدم العام')}
+                        {hasMasteryData
+                          ? localize(profile.language, 'Overall Progress', 'التقدم العام')
+                          : localize(profile.language, 'No Data Yet', 'لا توجد بيانات بعد')}
                       </span>
                     </div>
                   </div>
@@ -909,27 +887,35 @@ export default function ProfilePage({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#16395E]/50">
-                    {activities.map((act, index) => (
-                      <tr key={index} className="hover:bg-[#082344]/50 transition-colors">
-                        <td className="py-3.5 px-3 text-[#B8C7D9] font-medium whitespace-nowrap">
-                          {act.date}
-                        </td>
-                        <td className="py-3.5 px-3 text-[#F4F7FB] font-semibold">
-                          {act.activity}
-                        </td>
-                        <td className="py-3.5 px-3 text-end whitespace-nowrap">
-                          {act.resultType === 'completed' ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#087F8C]/25 text-[#18C6C3] border border-[#087F8C]/40">
-                              {act.result}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#00AEB8]/20 text-[#10B8B0] border border-[#00AEB8]/30">
-                              {act.result}
-                            </span>
-                          )}
+                    {activities.length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className="py-8 text-center text-xs text-[#B8C7D9]/70">
+                          {localize(profile.language, 'No learning activity recorded yet. Start a study session to track your progress!', 'لم يتم تسجيل أنشطة تعليمية حتى الآن. ابدأ جلسة دراسية جديدة لتسجيل تقدمك!')}
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      activities.map((act, index) => (
+                        <tr key={index} className="hover:bg-[#082344]/50 transition-colors">
+                          <td className="py-3.5 px-3 text-[#B8C7D9] font-medium whitespace-nowrap">
+                            {act.date}
+                          </td>
+                          <td className="py-3.5 px-3 text-[#F4F7FB] font-semibold">
+                            {act.activity}
+                          </td>
+                          <td className="py-3.5 px-3 text-end whitespace-nowrap">
+                            {act.resultType === 'completed' ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#087F8C]/25 text-[#18C6C3] border border-[#087F8C]/40">
+                                {act.result}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#00AEB8]/20 text-[#10B8B0] border border-[#00AEB8]/30">
+                                {act.result}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
