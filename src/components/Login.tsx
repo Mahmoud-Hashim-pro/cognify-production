@@ -84,7 +84,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       console.warn('Google Redirect Result:', err);
       if (isMountedRef.current && err) {
         if (err.code === 'auth/unauthorized-domain') {
-          setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
+          setError(t('Google Login requires an authorized domain. Please use Email & Password below or click Continue as Guest.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أو الدخول المباشر كمعاينة.'));
         } else if (err.code !== 'auth/credential-already-in-use') {
           setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please try again or use Email.', 'تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد.'));
         }
@@ -287,7 +287,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
   return (
     <div
-      className="min-h-screen bg-[#071426] text-[#F7FAFF] flex flex-col justify-between p-4 sm:p-6 lg:p-10 font-sans relative overflow-x-hidden selection:bg-[#087F8C]/40 selection:text-white"
+      className="min-h-screen bg-[#071426] text-[#F7FAFF] flex flex-col justify-start p-3 sm:p-6 font-sans relative overflow-y-auto selection:bg-[#087F8C]/40 selection:text-white"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Background ambient lighting — Deep Blue and Academic Teal Identity */}
@@ -353,15 +353,15 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       </header>
 
       {/* Main 3-Zone Composition: Branding/Headline + Illustration + Sign-in Card */}
-      <main className="max-w-7xl mx-auto w-full z-10 my-auto py-2 sm:py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <main className="max-w-7xl mx-auto w-full z-10 py-1 sm:py-3 flex-1 flex flex-col justify-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start lg:items-center">
           
           {/* ── ZONE A & B: WELCOME MESSAGE, BENEFITS & INCLUSIVE ILLUSTRATION ── */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-8 text-start">
             
             {/* Headline and Supporting Description */}
             <div className="space-y-3 sm:space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.2]">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
                 {isRtl ? (
                   <>
                     طاقات حقيقية.<br />
@@ -439,7 +439,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   'Illustration of diverse learners with disabilities studying collaboratively using assistive technology',
                   'رسم تعبيري لمتعلمين ذوي قدرات متنوعة يدرسون بشكل تعاوني باستخدام التقنيات المساندة'
                 )}
-                className="w-full h-auto object-contain max-h-[260px] sm:max-h-[340px] drop-shadow-[0_12px_24px_rgba(7,20,38,0.7)] select-none transition-transform duration-700 hover:scale-[1.015]"
+                className="w-full h-auto object-contain max-h-[200px] sm:max-h-[260px] drop-shadow-[0_12px_24px_rgba(7,20,38,0.7)] select-none transition-transform duration-700 hover:scale-[1.015]"
                 loading="eager"
                 width={1376}
                 height={768}
@@ -450,11 +450,11 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
           {/* ── ZONE C: SIGN-IN CARD ── */}
           <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
-            <div className="w-full max-w-md bg-[#0A1F3D] border border-[#29466A] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50 relative text-start">
+            <div className="w-full max-w-md bg-[#0A1F3D] border border-[#29466A] rounded-3xl p-5 sm:p-7 shadow-2xl shadow-black/50 relative text-start">
               
               {/* Form Card Header */}
-              <div className="space-y-1.5 mb-6">
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <div className="space-y-1 mb-4">
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                   {mode === 'email-login'
                     ? t('Welcome Back', 'أهلاً بك مجدداً')
                     : mode === 'email-register'
@@ -503,7 +503,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                       />
                     </div>
                   </div>
@@ -533,7 +533,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                 </form>
               ) : (
                 /* Primary Authentication Form (Login or Register) */
-                <form onSubmit={handleManualAuth} className="space-y-4">
+                <form onSubmit={handleManualAuth} className="space-y-3">
                   {/* Email Field */}
                   <div className="space-y-1.5">
                     <label htmlFor="auth-email" className="text-xs font-bold text-[#F7FAFF]">
@@ -551,7 +551,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                       />
                     </div>
                   </div>
@@ -573,7 +573,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder={t('Enter your password', 'أدخل كلمة المرور')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                       />
                       <button
                         type="button"
@@ -605,7 +605,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                           placeholder={t('Confirm your password', 'أعد إدخال كلمة المرور')}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                          className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                         />
                       </div>
                     </div>
@@ -636,9 +636,21 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
                   {/* Error Notification */}
                   {error && (
-                    <div role="alert" className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs font-bold flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" aria-hidden="true" />
-                      <span>{error}</span>
+                    <div role="alert" className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs font-bold space-y-2.5">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" aria-hidden="true" />
+                        <span>{error}</span>
+                      </div>
+                      {onDirectPreview && (
+                        <button
+                          type="button"
+                          onClick={handleDirectPreview}
+                          className="w-full py-2 px-3 rounded-lg bg-[#087F8C] hover:bg-[#10B8B0] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                        >
+                          <span>{t('Continue as Guest (Instant Access)', 'الدخول المباشر للمنصة كمعاينة فورية')}</span>
+                          <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
                     </div>
                   )}
 
@@ -714,9 +726,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       <button
                         type="button"
                         onClick={handleDirectPreview}
-                        className="text-[11px] text-[#C1CCDA] hover:text-[#10B8B0] transition-colors py-1 cursor-pointer underline text-center outline-none focus-visible:ring-1 focus-visible:ring-[#10B8B0]"
+                        className="w-full py-2.5 px-4 rounded-xl border border-teal-500/40 bg-teal-500/15 hover:bg-teal-500/25 text-[#10B8B0] hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] shadow-sm"
                       >
-                        {t('Explore Cognify as Guest (Direct Preview)', 'استكشف كوجنيفاي كزائر (معاينة مباشرة)')}
+                        <Sparkles className="w-3.5 h-3.5 text-[#10B8B0]" aria-hidden="true" />
+                        <span>{t('Explore Platform as Guest (Instant Access)', 'الدخول المباشر للمنصة (معاينة فورية بدون تسجيل)')}</span>
                       </button>
                     )}
                   </div>
