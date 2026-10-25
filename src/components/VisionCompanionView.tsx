@@ -488,15 +488,21 @@ If no clear text is visible, say "No clear text detected, try moving closer". Do
       if (targetLang === 'ar') {
         prompt = `${langMandate}أنت رفيق ومساعد بصري ذكي يتحدث بصوته لشخص كفيف أو ضعيف البصر عبر الكاميرا.
 انظر بدقة متناهية إلى ما يظهر أمام الكاميرا الآن، وقدم وصفاً مكانياً دقيقاً ومفيداً عملياً بالترتيب التالي:
-1. الأمان أولاً: اذكر فوراً أي عائق مباشر أو خطر في مسار الحركة. إذا كان المسار سالكاً، قل جملة تطمينية بسيطة ("المسار مفتوح أمامك").
-2. العناصر الأساسية ومواقعها: صف الأشياء البارزة ومواقعها النسبية (مثلاً: "على الطاولة أمامك لابتوب وكوب ماء على يمينك").
+1. الأمان والمخاطر: ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر ("المسار مفتوح وآمن أمامك").
+2. العناصر الأساسية: ثم صف الأشخاص والأشياء البارزة ومواقعها النسبية.
 3. قراءة النصوص واللافتات: اقرأ أي نصوص أو عناوين ظاهرة بدقة.
 4. الإيجاز والوضوح: تحدث بلغة عربية عامية سهلة وطبيعية وودودة، بدون أي نجوم ماركداون (**) أو شرطات أو عناوين روبوتية لكي يُنطق الشرح صوتياً بسلاسة.`;
+      } else if (targetLang === 'fr') {
+        prompt = `${langMandate}Vous êtes un assistant visuel expert parlant à voix haute pour une personne aveugle ou malvoyante via sa caméra.
+1. Sécurité et dangers : S'il n'y a aucun danger, commencez directement par rassurer la personne ("Aucun danger devant vous").
+2. Objets et agencement : Décrivez les personnes, objets clés et leurs positions relatives.
+3. Texte visible : Lisez fidèlement les panneaux, étiquettes ou textes visibles.
+4. Concision et ton : Fournissez 2 à 3 phrases claires, naturelles et fluides, sans astérisques markdown (**) ni titres robotiques pour une synthèse vocale limpide.`;
       } else {
         prompt = `${langMandate}You are an expert visual companion speaking aloud to a blind or low-vision user through their camera.
 Examine what is visible in front of the camera right now with utmost precision:
-1. Safety First: State immediately if any immediate obstacle or hazard is present. If clear, reassure the user ("Area in front of you is clear").
-2. Main Objects & Layout: Describe people, key objects, and their relative positions.
+1. Safety & Hazards: If there are no hazards, start directly with reassuring words ("Area in front of you is clear").
+2. Main Objects & Layout: Describe people, objects, and their relative positions.
 3. Visible Text: Read any signs, labels, or visible text word-for-word.
 4. Brevity & Tone: Deliver 2-3 crisp, natural, conversational sentences without markdown asterisks (**) or robotic headings so speech is smooth.`;
       }
