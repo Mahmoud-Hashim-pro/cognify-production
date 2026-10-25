@@ -62,7 +62,8 @@ async function recordIncidentAuditLog(
   bearerToken?: string | null
 ) {
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0347404066';
-  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/emergency_incidents?documentId=${incidentData.incidentId}`;
+  const databaseId = process.env.FIREBASE_DATABASE_ID || process.env.VITE_FIREBASE_DATABASE_ID || '(default)';
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents/emergency_incidents?documentId=${incidentData.incidentId}`;
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (bearerToken) {

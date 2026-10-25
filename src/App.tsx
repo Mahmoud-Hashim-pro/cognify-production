@@ -374,11 +374,17 @@ export default function App() {
     // Initial check
     applyTheme(mediaQuery);
 
+    if (!mediaQuery) return;
+
     // Listen for system preference changes
     const handler = (e: MediaQueryListEvent) => applyTheme(e);
-    mediaQuery.addEventListener('change', handler);
-
-    return () => mediaQuery.removeEventListener('change', handler);
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+    } else if (typeof (mediaQuery as any).addListener === 'function') {
+      (mediaQuery as any).addListener(handler);
+      return () => (mediaQuery as any).removeListener(handler);
+    }
   }, []);
 
   // Sync manual state change (when user clicks toggle)
