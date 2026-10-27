@@ -12,7 +12,7 @@
     "lint": "tsc --noEmit && eslint . --max-warnings=0",
     "fix": "npx eslint . --fix",
     "check:fix": "node scripts/check-and-fix.mjs",
-    "test:unit": "npx tsx tests/runAllTests.ts",
+    "test:unit": "npx tsx tests/runAllTests.ts && npx tsx tests/phase8TestingStrategyVerification.ts",
     "test:golden": "npx tsx tests/goldenAdaptiveScenario.ts",
     "test:api-adaptive": "npx tsx tests/realAdaptiveApiVerification.ts",
     "test:plm": "npx tsx tests/personalLearningModelVerification.ts",
@@ -61,7 +61,8 @@
     "test": "npx tsx tests/runAllTests.ts && npx tsx tests/securityThreatModelVerification.ts && npx tsx tests/apiCorsAuthHardeningVerification.ts && npx tsx tests/productionObservabilityVerification.ts && npm run test:benchmarks && npm run test:validation && npx tsx tests/privacySecurityVerification.ts && npx tsx tests/pedagogicalEvaluationVerification.ts && npx tsx tests/aiQualityVerification.ts && npx tsx tests/resilienceVerification.ts && npx tsx tests/businessTenancyVerification.ts && npx tsx tests/developerApiVerification.ts && npx tsx tests/teacherIntelligenceVerification.ts && npx tsx tests/parentIntelligenceVerification.ts && npx tsx tests/institutionalIntelligenceVerification.ts && npx tsx tests/retentionProductVerification.ts && npx tsx tests/spatialMemory2Verification.ts && npx tsx tests/multimodalIntelligenceVerification.ts && npx tsx tests/accessibilityIntelligenceVerification.ts && npx tsx tests/goldenAdaptiveScenario.ts && npx tsx tests/realAdaptiveApiVerification.ts && npx tsx tests/personalLearningModelVerification.ts && npx tsx tests/learningProfileContractVerification.ts && npx tsx tests/explainabilityEngineVerification.ts && npx tsx tests/proactiveInsightsVerification.ts && npx tsx tests/imageSynthesisVerification.ts && npx tsx tests/e2eFullUserCycle.ts",
     "report": "npx tsx scripts/generateTestReport.ts",
     "package": "powershell -ExecutionPolicy Bypass -File scripts/package_master.ps1",
-    "verify:package": "powershell -ExecutionPolicy Bypass -File scripts/verify_zip.ps1"
+    "verify:package": "powershell -ExecutionPolicy Bypass -File scripts/verify_zip.ps1",
+    "test:phase8": "npx tsx tests/phase8TestingStrategyVerification.ts"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",
