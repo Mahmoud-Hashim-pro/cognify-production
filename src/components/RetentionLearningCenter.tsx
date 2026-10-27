@@ -76,7 +76,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
   onScheduleUpdated,
   lang = 'ar',
 }) => {
-  const effectiveSchedules = (schedules && Object.keys(schedules).length > 0) ? schedules : DEFAULT_SAMPLE_SCHEDULES;
+  const effectiveSchedules = (schedules && Object.keys(schedules).length > 0) ? schedules : {};
   const isAr = lang === 'ar';
   const [activeTab, setActiveTab] = useState<'due_today' | 'upcoming' | 'mastered' | 'at_risk'>('due_today');
   const [dashboardData, setDashboardData] = useState<RetentionDashboardData>({
@@ -92,6 +92,18 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [reviewResult, setReviewResult] = useState<MicroReviewResult | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
+
+  // Dismiss modal on Escape key for keyboard accessibility
+  useEffect(() => {
+    if (!activeReviewItem) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCloseModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeReviewItem]);
 
   useEffect(() => {
     const data = categorizeRetentionState(effectiveSchedules, undefined, Date.now());
@@ -117,7 +129,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
     const elapsed = Date.now() - startTime;
     setSelectedOption(index);
 
-    const currentSchedule: RetentionSchedule = schedules[activeReviewItem.conceptId] || {
+    const currentSchedule: RetentionSchedule = effectiveSchedules[activeReviewItem.conceptId] || {
       conceptId: activeReviewItem.conceptId,
       repetitions: activeReviewItem.repetitions,
       intervalDays: activeReviewItem.intervalDays,
@@ -352,7 +364,12 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
 
       {/* Interactive Micro-Review Modal */}
       {activeReviewItem && activeQuestion && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isAr ? 'مراجعة تثبيت الذاكرة المصغرة' : 'Cognitive Micro-Retention Drill'}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+        >
           <div className="w-full max-w-lg rounded-3xl bg-[#0E0610] border border-[#4A1224]/60 p-6 shadow-2xl text-slate-100 animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[#4A1224]/60">

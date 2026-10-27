@@ -1,5 +1,5 @@
 import { localize, isArabicLocale } from '../lib/translations';
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { UserProfile, UserRole, EducationLevel, CognitiveDomainScores, IqAssessmentRecord, CognitiveLevel } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -60,10 +60,10 @@ const LANGUAGES = [
 ];
 
 const SUSTAINABILITY_GOALS = [
-  { id: 'climate', label: 'Climate Action', icon: <Globe className="w-5 h-5 text-emerald-500" /> },
-  { id: 'health', label: 'Good Health & Well-being', icon: <Heart className="w-5 h-5 text-red-500" /> },
-  { id: 'quality-edu', label: 'Quality Education', icon: <GraduationCap className="w-5 h-5 text-primary" /> },
-  { id: 'zero-hunger', label: 'Zero Hunger / Sustainable Food', icon: <Sprout className="w-5 h-5 text-accent" /> }
+  { id: 'climate', labelEn: 'Climate Action', labelAr: 'العمل المناخي والاستدامة', icon: <Globe className="w-5 h-5 text-emerald-500" /> },
+  { id: 'health', labelEn: 'Good Health & Well-being', labelAr: 'الصحة الجيدة والرفاه', icon: <Heart className="w-5 h-5 text-red-500" /> },
+  { id: 'quality-edu', labelEn: 'Quality Education', labelAr: 'التعليم الجيد المنصف', icon: <GraduationCap className="w-5 h-5 text-primary" /> },
+  { id: 'zero-hunger', labelEn: 'Zero Hunger / Sustainable Food', labelAr: 'القضاء على الجوع والغذاء المستدام', icon: <Sprout className="w-5 h-5 text-accent" /> }
 ];
 
 export default function Onboarding({ onComplete, user }: OnboardingProps) {
@@ -72,7 +72,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
 
   const [formData, setFormData] = useState<Partial<UserProfile>>({
     email: user?.email || auth.currentUser?.email || "",
-    accountPath: (localStorage.getItem('preLoginAccountPath') as any) || "Special Needs",
+    accountPath: (localStorage.getItem('preLoginAccountPath') as any) || "Normal",
     universityEmail: localStorage.getItem('preLoginUniEmail') || "",
     // University/Faculty <select> elements fall back to displaying "Other"
     // whenever the stored value isn't in the list (see the value= logic on
@@ -110,44 +110,12 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
   } | null>(null);
 
   const iqAnswersRef = useRef(iqAnswers);
+  const iqStartTimeRef = useRef<number | null>(null);
   useEffect(() => {
     iqAnswersRef.current = iqAnswers;
   }, [iqAnswers]);
 
-  // Special-needs accounts skip straight to a ready profile (no assessment).
-  useEffect(() => {
-    if (formData.accountPath === 'Special Needs') {
-      const disabilityType = formData.disabilityType || localStorage.getItem('preLoginDisability') || 'Other';
-
-      const preLoginMode = localStorage.getItem('preLoginAccessibilityMode') as UserProfile['accessibilityMode'] | null;
-      let accessibilityMode: UserProfile['accessibilityMode'] = preLoginMode || 'None';
-      if (accessibilityMode === 'None') {
-        if (disabilityType === 'Visual Impairment') {
-          accessibilityMode = 'Visual';
-        } else if (disabilityType === 'Hearing Impairment') {
-          accessibilityMode = 'Vocal-Deaf';
-        } else if (disabilityType === 'Speech Impairment') {
-          accessibilityMode = 'Speech';
-        }
-      }
-
-      try {
-        const mappedTab = accessibilityMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-        localStorage.setItem('cognify_default_disability_tab', mappedTab);
-      } catch {}
-
-      onComplete({
-        ...formData,
-        accountPath: 'Special Needs',
-        disabilityType: disabilityType,
-        accessibilityMode: accessibilityMode,
-        level: 'Basic',
-        onboardingComplete: true
-      });
-    }
-  }, [formData.accountPath]);
-
-  // 10-Minute Overall Countdown Timer for Cognitive Assessment
+    // 10-Minute Overall Countdown Timer for Cognitive Assessment
   useEffect(() => {
     if (step !== 4 || iqStep !== 'active') return;
 
@@ -193,10 +161,10 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     }
   };
 
-  const finishIqTest = (answers: Record<string, string>) => {
-    const elapsed = iqStartTime ? Math.min(600, Math.round((Date.now() - iqStartTime) / 1000)) : (600 - iqTotalSecondsLeft);
+  const finishIqTest = useCallback((answers: Record<string, string>) => {
+    const startTime = iqStartTimeRef.current;
+    const elapsed = startTime ? Math.min(600, Math.max(1, Math.round((Date.now() - startTime) / 1000))) : (600 - iqTotalSecondsLeft);
     const result = calculateStandardizedIq(answers, elapsed);
-    // Decouple academic level from IQ score: preserve existing level or default to Intermediate
     const studentLevel: CognitiveLevel = formData.level || 'Intermediate';
 
     const record: IqAssessmentRecord = {
@@ -223,16 +191,18 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
       level: prev.level || 'Intermediate',
       lastIqTestDate: record.date,
       iqAssessmentHistory: [record],
+      iqAssessmentSkipped: false,
     }));
 
     setIqStep('result');
-  };
+  }, [formData.level, iqTotalSecondsLeft]);
 
   const skipIqTest = () => {
     setFormData((prev) => ({
       ...prev,
       iqScore: 100,
       level: 'Intermediate',
+      iqAssessmentSkipped: true,
       cognitiveDomains: {
         fluidReasoning: 70,
         quantitativeLogic: 70,
@@ -476,7 +446,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             <div className={`p-2 rounded-lg ${formData.sustainabilityGoal === goal.id ? 'bg-white shadow-sm' : 'bg-surface-2'}`}>
               {goal.icon}
             </div>
-            <span className="font-bold text-sm">{goal.label}</span>
+            <span className="font-bold text-sm">{localize(formData.language, goal.labelEn, goal.labelAr)}</span>
             {formData.sustainabilityGoal === goal.id && (
               <CheckCircle className="w-5 h-5 ms-auto text-success" />
             )}
@@ -1006,7 +976,11 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           {formData.iqScore ? (
             <div className="flex items-center justify-between text-xs pb-2 border-b border-border/50">
               <span className="text-text-muted font-medium">{isRtl ? 'تمرين الرشاقة الذهنية' : 'Mental Agility Baseline'}</span>
-              <span className="font-bold text-indigo-500 bg-indigo-500/10 px-2.5 py-0.5 rounded-full">{formData.iqScore} pts</span>
+              <span className="font-bold text-indigo-500 bg-indigo-500/10 px-2.5 py-0.5 rounded-full">
+                {formData.iqAssessmentSkipped
+                  ? (isRtl ? 'تقديري (تم التخطي)' : 'Estimated (Skipped)')
+                  : `${formData.iqScore} pts`}
+              </span>
             </div>
           ) : null}
           <div className="flex items-center justify-between text-xs pb-2 border-b border-border/50">

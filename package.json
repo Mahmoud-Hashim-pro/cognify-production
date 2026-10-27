@@ -111,7 +111,7 @@
   },
   "overrides": {
     "@grpc/grpc-js": "^1.13.6",
-    "qs": "^6.16.0",
+    "qs": "^6.17.0",
     "tsx": {
       "esbuild": "$esbuild"
     }

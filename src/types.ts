@@ -136,6 +136,7 @@ export interface UserProfile {
   work?: string;
   jobTitle?: string;
   iqScore?: number;
+  iqAssessmentSkipped?: boolean;
   lastQuizDate?: string;
   points: number;
   quizDuration?: number; // in seconds

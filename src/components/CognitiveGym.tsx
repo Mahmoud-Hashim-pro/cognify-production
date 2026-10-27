@@ -112,6 +112,10 @@ export default function CognitiveGym({
   const [gngTrials, setGngTrials] = useState<GoNoGoTrial[]>([]);
   const [gngCurrentIdx, setGngCurrentIdx] = useState<number>(0);
   const [gngResponses, setGngResponses] = useState<{ trialId: string; userClicked: boolean; reactionTimeMs: number }[]>([]);
+  const gngResponsesRef = useRef(gngResponses);
+  useEffect(() => {
+    gngResponsesRef.current = gngResponses;
+  }, [gngResponses]);
   const [gngResult, setGngResult] = useState<GoNoGoResult | null>(null);
   const trialStartTimeRef = useRef<number>(0);
   const gngTimerRef = useRef<any>(null);
@@ -130,7 +134,7 @@ export default function CognitiveGym({
 
     if (gngCurrentIdx >= gngTrials.length) {
       // Completed session
-      const evaluation = evaluateGoNoGoPerformance(gngTrials, gngResponses);
+      const evaluation = evaluateGoNoGoPerformance(gngTrials, gngResponsesRef.current);
       setGngResult(evaluation);
       setGngState('completed');
       awardPoints(evaluation.score > 70 ? 30 : 15, 'gonogo_inhibitory_control');
@@ -190,6 +194,15 @@ export default function CognitiveGym({
   const [wmUserSequence, setWmUserSequence] = useState<number[]>([]);
   const [wmLevel, setWmLevel] = useState<number>(3);
   const [wmIsReverse, setWmIsReverse] = useState<boolean>(false);
+  const wmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (wmIntervalRef.current) clearInterval(wmIntervalRef.current);
+      if (wmTimeoutRef.current) clearTimeout(wmTimeoutRef.current);
+    };
+  }, []);
 
   const startMemoryGrid = () => {
     const round = generateMemoryGridSequence(wmLevel, 3, wmIsReverse);

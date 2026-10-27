@@ -7,6 +7,7 @@ import {
   IQ_QUESTION_BATTERY,
   calculateStandardizedIq,
   checkIqCooldownEligibility,
+  getIqCooldownDays,
   IqQuestion,
   COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
   COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
@@ -61,6 +62,14 @@ export default function IqAssessmentModal({
 
   const isMountedRef = useRef(true);
   const timerRef = useRef<any>(null);
+  const userAnswersRef = useRef(userAnswers);
+  useEffect(() => {
+    userAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+  const elapsedTotalRef = useRef(elapsedTotal);
+  useEffect(() => {
+    elapsedTotalRef.current = elapsedTotal;
+  }, [elapsedTotal]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -98,6 +107,13 @@ export default function IqAssessmentModal({
     };
   }, [step, currentIdx]);
 
+  // Auto-advance when question timer expires
+  useEffect(() => {
+    if (step === 'active' && secondsLeft === 0) {
+      handleNextQuestion();
+    }
+  }, [secondsLeft, step]);
+
   if (!isOpen) return null;
 
   const currentQ: IqQuestion | undefined = IQ_QUESTION_BATTERY[currentIdx];
@@ -130,8 +146,8 @@ export default function IqAssessmentModal({
     if (timerRef.current) clearInterval(timerRef.current);
 
     const { iqScore, domainScores, recommendedPersona } = calculateStandardizedIq(
-      userAnswers,
-      elapsedTotal
+      userAnswersRef.current,
+      elapsedTotalRef.current
     );
 
     const newRecord: IqAssessmentRecord = {
@@ -163,8 +179,7 @@ export default function IqAssessmentModal({
       try {
         setIsSubmitting(true);
         const nextDate = new Date();
-        const exponent = Math.min(4, Math.max(0, historyCount));
-        const cooldownDays = 7 * Math.pow(2, exponent);
+        const cooldownDays = getIqCooldownDays(historyCount + 1);
         nextDate.setTime(nextDate.getTime() + cooldownDays * 24 * 60 * 60 * 1000);
 
         const computedLevel: CognitiveLevel =
@@ -183,7 +198,7 @@ export default function IqAssessmentModal({
         };
 
         await updateDoc(doc(db, 'users', profile.uid), cleanDataForFirestore(updates));
-        onIqUpdated(iqScore, domainScores, computedLevel);
+        onIqUpdated?.(iqScore, domainScores, computedLevel);
 
         toast.success(
           localize(
@@ -353,7 +368,7 @@ export default function IqAssessmentModal({
                 <p className="font-bold text-white mb-1">
                   {localize(profile.language, 'Assessment Guidelines:', 'إرشادات الاختبار:')}
                 </p>
-                <p>• {localize(profile.language, '12 standardized items (takes ~6-8 minutes).', '12 عنصراً معيارياً (يستغرق ~6-8 دقائق).')}</p>
+                <p>• {localize(profile.language, `${IQ_QUESTION_BATTERY.length} standardized items (takes ~6-8 minutes).`, `${IQ_QUESTION_BATTERY.length} عنصراً معيارياً (يستغرق ~6-8 دقائق).`)}</p>
                 <p>• {localize(profile.language, 'Each question has an individual countdown timer.', 'لكل سؤال مؤقت زمني مخصص ينقل للسؤال التالي تلقائياً.')}</p>
                 <p>• {localize(profile.language, 'Your AI persona will automatically calibrate to your result.', 'سيتكيف أسلوب المساعد الذكي تلقائياً مع نتيجتك.')}</p>
               </div>
