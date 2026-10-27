@@ -276,6 +276,12 @@ export const logout = async () => {
   try {
     PER_USER_LOCAL_KEYS.forEach((k) => localStorage.removeItem(k));
     sessionStorage.clear();
+    // Purge memory cache prefixes to prevent cross-user cache leakage
+    Object.keys(localStorage).forEach((k) => {
+      if (k.startsWith('cognify_student_memory_') || k.startsWith('cognify_spatial_v2_') || k.startsWith('cognify_learning_events_')) {
+        localStorage.removeItem(k);
+      }
+    });
   } catch { /* storage unavailable */ }
   await signOut(auth);
 };

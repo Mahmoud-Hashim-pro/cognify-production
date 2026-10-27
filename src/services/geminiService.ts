@@ -43,6 +43,7 @@ async function callGemini(parts: any[]): Promise<string> {
       method: "POST",
       headers,
       body: JSON.stringify({ parts }),
+      signal: AbortSignal.timeout(30000)
     });
     if (res.ok && (res.headers.get("Content-Type") || "").includes("application/json")) {
       const d = await res.json();

@@ -13,7 +13,8 @@ export async function pruneOldLoginHistory(uid: string): Promise<void> {
   try {
     const q = query(
       collection(db, 'users', uid, 'loginHistory'),
-      orderBy('timestamp', 'desc')
+      orderBy('timestamp', 'desc'),
+      limit(100)
     );
     const snap = await getDocs(q);
     if (snap.empty || snap.docs.length <= 10) return;

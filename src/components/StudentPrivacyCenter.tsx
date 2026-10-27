@@ -4,7 +4,7 @@ import { UserProfile, StudentMemory } from '../types';
 import { StudentState, getStudentStateManager } from '../lib/studentStateEngine';
 import { localize, isArabicLocale } from '../lib/translations';
 import { db, auth } from '../lib/firebase';
-import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, query, limit } from 'firebase/firestore';
 import { deleteUser, signOut } from 'firebase/auth';
 import { getLearningEventHistory } from '../lib/learningEvents';
 import { getSpatialObjects } from '../lib/spatialMemoryEngine';
@@ -53,14 +53,14 @@ export default function StudentPrivacyCenter({
       // 3. Fetch conversational threads
       const threads: any[] = [];
       try {
-        const threadsSnap = await getDocs(collection(db, 'users', profile.uid, 'threads'));
+        const threadsSnap = await getDocs(query(collection(db, 'users', profile.uid, 'threads'), limit(500)));
         threadsSnap.forEach((d) => threads.push({ id: d.id, ...d.data() }));
       } catch {}
 
       // 4. Fetch academic goals
       const goals: any[] = [];
       try {
-        const goalsSnap = await getDocs(collection(db, 'users', profile.uid, 'goals'));
+        const goalsSnap = await getDocs(query(collection(db, 'users', profile.uid, 'goals'), limit(500)));
         goalsSnap.forEach((d) => goals.push({ id: d.id, ...d.data() }));
       } catch {}
 
