@@ -28,6 +28,7 @@ import { speak as speakText, cancelSpeech, hasFrenchVoice } from '../lib/tts';
 import { localize, isArabicLocale } from '../lib/translations';
 import { UserProfile } from '../types';
 import { geminiService } from '../services/geminiService';
+import { toast } from './Toast';
 
 export interface FrenchTravelVoiceAssistantProps {
   profile: UserProfile;
@@ -404,7 +405,7 @@ export default function FrenchTravelVoiceAssistant({
     cancelSpeech();
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRec) {
-      alert(localize(profile.language, 'Speech recognition is not supported in this browser.', 'التعرف على الصوت غير مدعوم في هذا المتصفح.'));
+      toast.warning(localize(profile.language, 'Speech recognition is not supported in this browser.', 'التعرف على الصوت غير مدعوم في هذا المتصفح.'), localize(profile.language, 'Unsupported', 'غير مدعوم'));
       return;
     }
 

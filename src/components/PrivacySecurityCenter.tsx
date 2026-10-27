@@ -26,6 +26,7 @@ import { doc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { deleteUser, signOut } from 'firebase/auth';
 import { USER_SUBCOLLECTIONS, type AuditLogEntry, type CascadeErasureManifest } from '../types/privacySecurity';
+import { toast } from './Toast';
 
 interface PrivacySecurityCenterProps {
   currentStudent?: StudentState;
@@ -133,7 +134,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
       );
       setAuditChain(prev => [...prev, auditEntry]);
     } catch (err: any) {
-      alert(err.message || 'DP Budget Error');
+      toast.error(err.message || 'DP Budget Error', isArabic ? 'خطأ في ميزانية الخصوصية' : 'Differential Privacy Error');
     }
   };
 
@@ -213,7 +214,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         console.warn('[handleExecuteErasure] Remote cascade deletion incomplete:', remoteFailures);
         setErasureManifest(null);
         setErasureConfirmed(false);
-        alert(
+        toast.error(
           isArabic
             ? `فشل المحو الكامل. لم يتم إصدار إيصال نجاح. الأخطاء: ${remoteFailures.slice(0, 3).join('; ')}`
             : `Complete erasure failed. No success receipt was issued. Failures: ${remoteFailures.slice(0, 3).join('; ')}`
@@ -274,7 +275,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
           ...manifest,
           status: 'partial'
         });
-        alert(
+        toast.error(
           isArabic
             ? 'تم حذف بيانات Firestore لكن تعذر حذف حساب تسجيل الدخول. لم يكتمل المحو.'
             : 'Firestore data was deleted, but the authentication account could not be deleted. Erasure is partial.'

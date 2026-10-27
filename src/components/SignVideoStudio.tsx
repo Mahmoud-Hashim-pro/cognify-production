@@ -9,6 +9,7 @@ import { Hands, Results } from "@mediapipe/hands";
 import { Camera as MediaPipeCamera } from "@mediapipe/camera_utils";
 import type { SignClassifier } from "../lib/signClassifier";
 import { speak, cancelSpeech } from "../lib/tts";
+import { toast } from "./Toast";
 
 interface SignVideoStudioProps {
   profile: UserProfile;
@@ -326,7 +327,7 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
       recognition.start();
       setIsRecording(true);
     } else {
-      alert("Speech recognition is not supported in this browser.");
+      toast.warning(isArabicLocale(profile.language) ? "التعرف على الصوت غير مدعوم في هذا المتصفح." : "Speech recognition is not supported in this browser.", isArabicLocale(profile.language) ? "غير مدعوم" : "Unsupported");
     }
   };
 
@@ -400,7 +401,7 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
       directStreamRef.current?.getTracks().forEach((t) => t.stop());
       directStreamRef.current = null;
       setIsRecordingDirectAudio(false);
-      alert("Microphone connection failed.");
+      toast.error(isArabicLocale(profile.language) ? "فشل الاتصال بالميكروفون. يرجى التحقق من الأذونات." : "Microphone connection failed. Please check permissions.", isArabicLocale(profile.language) ? "خطأ الميكروفون" : "Microphone Error");
     }
   };
 

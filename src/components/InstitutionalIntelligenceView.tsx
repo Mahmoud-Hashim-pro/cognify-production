@@ -18,6 +18,7 @@ import {
 import type { StudentState } from '../types/studentState';
 import type { InstitutionalDashboardData } from '../types/institution';
 import { compileInstitutionalDashboard } from '../lib/institutionalIntelligence';
+import { toast } from './Toast';
 
 interface InstitutionalIntelligenceViewProps {
   institutionId?: string;
@@ -197,6 +198,38 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
   }, [institutionId, institutionName, cohorts]);
 
   const isBenchmarkDataset = !studentCohortsByDept || Object.keys(studentCohortsByDept).length === 0;
+
+  const handleExportDossier = () => {
+    try {
+      const report = {
+        standard: dashboardData.accreditation.accreditationStandard,
+        evaluationPeriod: dashboardData.accreditation.evaluationPeriod,
+        generatedAt: new Date().toISOString(),
+        institutionName,
+        institutionId,
+        outcomesAttainment: dashboardData.accreditation.outcomesAttainment,
+        continuousImprovementLoop: dashboardData.accreditation.continuousImprovementLoop,
+      };
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ABET_Accreditation_Dossier_${dashboardData.accreditation.evaluationPeriod.replace(/[^a-zA-Z0-9]/g, '_')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(
+        isAr ? 'تم تصدير ملف الاعتماد الأكاديمي (ABET Dossier) بنجاح.' : 'ABET Accreditation Dossier exported successfully.',
+        isAr ? 'تم التصدير' : 'Export Complete'
+      );
+    } catch {
+      toast.error(
+        isAr ? 'فشل تصدير ملف الاعتماد الأكاديمي.' : 'Failed to export accreditation dossier.',
+        isAr ? 'خطأ' : 'Export Failed'
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#080409] text-slate-100 p-4 sm:p-8" dir={isAr ? 'rtl' : 'ltr'}>
@@ -553,7 +586,8 @@ export const InstitutionalIntelligenceView: React.FC<InstitutionalIntelligenceVi
                 </div>
 
                 <button
-                  onClick={() => alert(isAr ? 'جاري تصدير التقرير الأكاديمي...' : 'Exporting Accreditation PDF...')}
+                  onClick={handleExportDossier}
+                  aria-label={isAr ? 'تصدير التقرير الأكاديمي' : 'Export ABET Dossier'}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-white text-sm font-semibold hover:opacity-90 transition w-fit"
                 >
                   <Download className="w-4 h-4" />
