@@ -207,6 +207,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                     type="checkbox"
                     checked={selectedScopes.includes(sc)}
                     onChange={() => toggleScope(sc)}
+                    aria-label={`API Scope ${sc}`}
                     className="rounded bg-slate-800 border-[#4A1224]/50 text-[#E5A93C] focus:ring-0"
                   />
                   <span className="font-mono">{sc}</span>
@@ -295,6 +296,8 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
               type="text"
               value={webhookUrl}
               onChange={e => setWebhookUrl(e.target.value)}
+              aria-label="Webhook Endpoint URL"
+              placeholder="https://api.example.com/webhook"
               className="w-full p-2.5 bg-[#0E0610] border border-[#4A1224]/60 rounded-xl text-xs font-mono text-white outline-none focus:border-purple-500/50"
             />
           </div>

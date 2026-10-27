@@ -423,6 +423,8 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                 min="0"
                 max="99"
                 value={sandboxPre}
+                aria-label={isArabic ? 'درجة الاختبار القبلي بالنسبة المئوية' : 'Pre-test score percentage'}
+                aria-valuetext={`${sandboxPre}%`}
                 onChange={e => setSandboxPre(Number(e.target.value))}
                 className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-400"
               />
@@ -435,6 +437,8 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                 min="0"
                 max="100"
                 value={sandboxPost}
+                aria-label={isArabic ? 'درجة الاختبار البعدي بالنسبة المئوية' : 'Post-test score percentage'}
+                aria-valuetext={`${sandboxPost}%`}
                 onChange={e => setSandboxPost(Number(e.target.value))}
                 className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
               />

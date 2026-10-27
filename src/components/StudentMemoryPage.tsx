@@ -603,6 +603,7 @@ export default function StudentMemoryPage({
           <input
             type="text"
             value={newGoal}
+            aria-label={localize(profile.language, 'Add learning goal', 'إضافة هدف تعليمي جديد')}
             onChange={(e) => setNewGoal(e.target.value)}
             placeholder={localize(
               profile.language,
@@ -672,6 +673,7 @@ export default function StudentMemoryPage({
           <input
             type="text"
             value={newPreference}
+            aria-label={localize(profile.language, 'Add study preference', 'إضافة تفضيل دراسي جديد')}
             onChange={(e) => setNewPreference(e.target.value)}
             placeholder={localize(
               profile.language,
@@ -747,6 +749,7 @@ export default function StudentMemoryPage({
           <input
             type="text"
             value={newConfirmedInfo}
+            aria-label={localize(profile.language, 'Add verified fact or background detail', 'إضافة معلومة مؤكدة جديدة')}
             onChange={(e) => setNewConfirmedInfo(e.target.value)}
             placeholder={localize(
               profile.language,

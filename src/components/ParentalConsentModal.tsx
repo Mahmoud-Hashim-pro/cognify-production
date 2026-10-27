@@ -297,6 +297,7 @@ export default function ParentalConsentModal({
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
+                  aria-label={isAr ? 'الكاميرا ومعالم الوجه' : 'Camera and facial landmarks'}
                   checked={allowCamera}
                   onChange={(e) => setAllowCamera(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -312,6 +313,7 @@ export default function ParentalConsentModal({
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
+                  aria-label={isAr ? 'الميكروفون' : 'Microphone'}
                   checked={allowMic}
                   onChange={(e) => setAllowMic(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -327,6 +329,7 @@ export default function ParentalConsentModal({
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
+                  aria-label={isAr ? 'تتبع حركة بؤبؤ العين والتثبيت' : 'Gaze tracking and dwell calibration'}
                   checked={allowGaze}
                   onChange={(e) => setAllowGaze(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -342,6 +345,7 @@ export default function ParentalConsentModal({
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
+                  aria-label={isAr ? 'المساعد التعليمي التكيفي بالذكاء الاصطناعي' : 'Adaptive educational tutoring with AI models'}
                   checked={allowAi}
                   onChange={(e) => setAllowAi(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -362,6 +366,7 @@ export default function ParentalConsentModal({
               <input
                 type="checkbox"
                 required
+                aria-label={isAr ? 'الموافقة على شروط معالجة البيانات وسياسة الخصوصية' : 'Agreement to data processing terms and privacy policy'}
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
                 className="mt-0.5 rounded text-amber-500 focus:ring-0 bg-[#080409] border-[#4A1224]"

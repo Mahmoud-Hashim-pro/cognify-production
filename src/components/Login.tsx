@@ -635,6 +635,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         <input
                           type="checkbox"
                           checked={rememberMe}
+                          aria-label={t('Remember me on this device', 'تذكر تسجيل دخولي على هذا الجهاز')}
                           onChange={(e) => setRememberMe(e.target.checked)}
                           className="w-4 h-4 rounded text-[#087F8C] focus:ring-[#10B8B0] accent-[#087F8C] cursor-pointer"
                         />

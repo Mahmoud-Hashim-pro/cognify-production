@@ -414,6 +414,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     min="0"
                     max="100"
                     value={testMetric}
+                    aria-label={isArabic ? 'القيمة الخام الأصلية' : 'Raw query test metric'}
+                    aria-valuetext={`${testMetric}%`}
                     onChange={e => setTestMetric(Number(e.target.value))}
                     className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
                   />
@@ -430,6 +432,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     max="2.0"
                     step="0.1"
                     value={epsilon}
+                    aria-label={isArabic ? 'معامل الخصوصية التفاضلية إبسيلون' : 'Differential privacy parameter epsilon'}
+                    aria-valuetext={`epsilon ${epsilon}`}
                     onChange={e => setEpsilon(Number(e.target.value))}
                     className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
                   />
@@ -610,6 +614,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <label className="flex items-center gap-3 cursor-pointer text-xs text-slate-300">
                   <input
                     type="checkbox"
+                    aria-label={isArabic ? 'تأكيد الرغبة في محو جميع بيانات الطالب بشكل نهائي لا رجعة فيه' : 'Confirm irrevocable erasure of all student data'}
                     checked={erasureConfirmed}
                     onChange={e => setErasureConfirmed(e.target.checked)}
                     className="w-4 h-4 rounded bg-slate-800 border-[#4A1224]/50 text-rose-500 focus:ring-0"

@@ -218,6 +218,7 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('Title (e.g. ML Assignment 2)', 'العنوان (مثلاً تكليف ML 2)')}
+                aria-label={t('Task title', 'عنوان المهمة')}
                 onKeyDown={(e) => e.key === 'Enter' && addTask()}
                 className="bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all"
               />
@@ -225,6 +226,7 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
                 placeholder={t('Course (optional)', 'المادة (اختياري)')}
+                aria-label={t('Course name', 'اسم المادة')}
                 className="bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all"
               />
               <select
@@ -242,6 +244,7 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
+                aria-label={t('Due date', 'تاريخ الاستحقاق')}
                 className="bg-[#150917] border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all [color-scheme:dark]"
               />
             </div>

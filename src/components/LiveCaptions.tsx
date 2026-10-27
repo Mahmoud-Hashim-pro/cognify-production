@@ -950,6 +950,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                           autoFocus
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
+                          aria-label={isAr ? 'تعديل التسمية التوضيحية' : 'Edit caption text'}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') saveEditSegment(seg);
                             if (e.key === 'Escape') setEditingId(null);
@@ -1318,7 +1319,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                   <span className="text-neutral-400">Silence Threshold</span>
                   <span className="text-emerald-400 font-mono">{(pauseThreshold / 1000).toFixed(1)}s</span>
                 </div>
-                <input type="range" min="1000" max="6500" step="500" value={pauseThreshold}
+                <input type="range" min="1000" max="6500" step="500" aria-label="Silence threshold" aria-valuetext={`${(pauseThreshold / 1000).toFixed(1)}s`} value={pauseThreshold}
                   onChange={e => setPauseThreshold(Number(e.target.value))}
                   className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
                 <p className="text-[10px] text-neutral-600">Extend for stutters/blocks</p>
@@ -1329,7 +1330,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     <span className="text-neutral-400">Voice Rate</span>
                     <span className="text-purple-400 font-mono">{speechRate.toFixed(1)}x</span>
                   </div>
-                  <input type="range" min="0.5" max="1.8" step="0.1" value={speechRate}
+                  <input type="range" min="0.5" max="1.8" step="0.1" aria-label="Voice rate" aria-valuetext={`${speechRate.toFixed(1)}x`} value={speechRate}
                     onChange={e => setSpeechRate(Number(e.target.value))}
                     className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500" />
                 </div>
@@ -1338,7 +1339,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     <span className="text-neutral-400">Voice Pitch</span>
                     <span className="text-purple-400 font-mono">{speechPitch.toFixed(1)}</span>
                   </div>
-                  <input type="range" min="0.5" max="1.5" step="0.1" value={speechPitch}
+                  <input type="range" min="0.5" max="1.5" step="0.1" aria-label="Voice pitch" aria-valuetext={`${speechPitch.toFixed(1)}`} value={speechPitch}
                     onChange={e => setSpeechPitch(Number(e.target.value))}
                     className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500" />
                 </div>

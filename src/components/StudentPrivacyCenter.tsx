@@ -413,7 +413,7 @@ export default function StudentPrivacyCenter({
             </p>
 
             <div className="space-y-1.5 pt-2">
-              <label className="text-[11px] font-bold text-slate-400">
+              <label htmlFor="confirm-account-deletion" className="text-[11px] font-bold text-slate-400">
                 {L(
                   `Type "${profile.email || 'DELETE'}" to confirm permanent erasure:`,
                   `اكتب "${profile.email || 'DELETE'}" لتأكيد الحذف النهائي:`

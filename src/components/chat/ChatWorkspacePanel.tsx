@@ -221,6 +221,7 @@ export default function ChatWorkspacePanel({
           <form onSubmit={handleAddSubject} className="p-2.5 bg-[0A203A] border border-[16395E]/70 rounded-2xl space-y-2 ring-1 ring-[0A96A5]/20 animate-in fade-in duration-150">
             <input
               type="text"
+              aria-label={localize(profile.language, 'Subject name', 'اسم المادة أو المقرر')}
               value={newSubjectName}
               onChange={(e) => setNewSubjectName(e.target.value)}
               placeholder={localize(profile.language, 'Subject name (e.g. Algorithms)', 'اسم المادة (مثل الخوارزميات)')}

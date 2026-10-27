@@ -518,11 +518,13 @@ export default function ProfilePage({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-start">
               <div>
-                <label className="text-xs font-bold text-[#18C6C3] block mb-1.5">
+                <label htmlFor="profile-full-name" className="text-xs font-bold text-[#18C6C3] block mb-1.5">
                   {localize(profile.language, 'Full Name', 'الاسم الكامل')}
                 </label>
                 <input 
+                  id="profile-full-name"
                   type="text"
+                  aria-label={localize(profile.language, 'Full Name', 'الاسم الكامل')}
                   value={editedProfile.name || ''}
                   onChange={(e) => handleChange('name', e.target.value)}
                   placeholder={studentDisplayName}
@@ -641,7 +643,7 @@ export default function ProfilePage({
                   <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity text-white">
                     <Camera className="w-5 h-5 text-[#18C6C3] mb-1" />
                     <span className="text-[10px] font-bold">{localize(profile.language, 'Change', 'تغيير')}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                    <input id="profile-photo-upload" type="file" accept="image/*" className="hidden" aria-label={localize(profile.language, 'Upload profile photo', 'رفع صورة الملف الشخصي')} onChange={handlePhotoUpload} />
                   </label>
                 )}
 

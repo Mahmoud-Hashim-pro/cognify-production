@@ -753,6 +753,7 @@ export default function CognitiveGym({
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
                       type="checkbox"
+                      aria-label={localize(profile.language, 'Reverse Span (Harder)', 'الترتيب العكسي (تحدي أعلى)')}
                       checked={wmIsReverse}
                       onChange={e => setWmIsReverse(e.target.checked)}
                       className="rounded bg-slate-800 border-slate-700 text-indigo-600"
@@ -1007,6 +1008,7 @@ export default function CognitiveGym({
                 <input
                   type="text"
                   value={taskInput}
+                  aria-label={localize(profile.language, 'Task description to slice into steps', 'المهمة الدراسية لتقسيمها إلى خطوات')}
                   onChange={e => setTaskInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSliceTask()}
                   placeholder={localize(
@@ -1191,6 +1193,8 @@ export default function CognitiveGym({
                       max="1"
                       step="0.05"
                       value={noiseVolume}
+                      aria-label={localize(profile.language, 'Ambient noise volume', 'مستوى صوت الضوضاء المهدئة')}
+                      aria-valuetext={`${Math.round(noiseVolume * 100)}%`}
                       onChange={e => handleVolumeChange(parseFloat(e.target.value))}
                       className="w-full accent-indigo-500 bg-slate-800 rounded-lg h-2"
                     />
@@ -1234,6 +1238,8 @@ export default function CognitiveGym({
                   min="0"
                   max="20"
                   value={tenFrameInput}
+                  aria-label={localize(profile.language, 'Ten-frame number input', 'إدخال رقم إطار العشرة')}
+                  aria-valuetext={`${tenFrameInput}`}
                   onChange={e => setTenFrameInput(parseInt(e.target.value, 10))}
                   className="w-full accent-emerald-500 bg-slate-800 rounded-lg h-2"
                 />

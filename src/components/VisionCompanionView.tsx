@@ -1064,6 +1064,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               value={labelInput}
               onChange={(e) => setLabelInput(e.target.value)}
               placeholder={t('e.g. My study desk, Front door key...', 'مثال: مكتبي، مفاتيح الشقة...')}
+              aria-label={companionLang === 'ar' ? (isSavingPerson ? 'اسم الشخص أو الصديق' : 'اسم المكان أو الشيء') : (isSavingPerson ? 'Person or friend name' : 'Object or location label')}
               className="w-full px-4 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] text-sm outline-none focus:border-[#00AEB8]"
               autoFocus
             />

@@ -122,11 +122,13 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               {/* Title */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+                <label htmlFor="add-goal-title" className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
                   {isArabic ? 'اسم الهدف' : 'Goal Title'} *
                 </label>
                 <input
+                  id="add-goal-title"
                   type="text"
+                  aria-label={isArabic ? 'اسم الهدف' : 'Goal Title'}
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder={isArabic ? 'مثال: تعلم تعلم الآلة' : 'e.g. Learn Machine Learning'}
@@ -173,11 +175,13 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+                  <label htmlFor="add-goal-deadline" className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
                     {isArabic ? 'الموعد النهائي' : 'Deadline'} *
                   </label>
                   <input
+                    id="add-goal-deadline"
                     type="date"
+                    aria-label={isArabic ? 'الموعد النهائي' : 'Deadline'}
                     value={form.deadline}
                     onChange={(e) => setForm({ ...form, deadline: e.target.value })}
                     min={new Date().toISOString().split('T')[0]}
