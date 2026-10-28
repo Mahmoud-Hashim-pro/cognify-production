@@ -67,7 +67,17 @@ export interface FeedbackRecordedPayload {
 }
 
 export function isGuestUser(uid?: string | null): boolean {
-  return !uid || uid === 'guest' || uid === 'anonymous' || uid === 'demo';
+  if (!uid) return true;
+  const lower = uid.toLowerCase().trim();
+  return (
+    lower === 'guest' ||
+    lower === 'guest-explorer' ||
+    lower === 'guest_child' ||
+    lower === 'anonymous' ||
+    lower.startsWith('demo') ||
+    lower.startsWith('test_') ||
+    lower.startsWith('student_test_')
+  );
 }
 
 type EventListener = (event: LearningEvent) => void;

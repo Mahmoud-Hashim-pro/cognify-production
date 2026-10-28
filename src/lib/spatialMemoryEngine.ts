@@ -17,6 +17,7 @@ import { doc, setDoc, getDoc, collection, getDocs, deleteField, query, limit } f
 import { encryptSpatialRecord, decryptSpatialRecord, encryptData, decryptData } from './userCryptoEngine';
 
 export type {
+  SpatialObjectRecord,
   SpatialObjectIdentity,
   SpatialLocationObservation,
   SpatialDisambiguationResult,
@@ -27,6 +28,12 @@ const STORAGE_PREFIX = 'cognify_spatial_memory_';
 
 // In-memory per-user cache for rapid query responses
 const userSpatialCache: Map<string, SpatialObjectRecord[]> = new Map();
+
+/** Clear in-memory spatial cache (for testing and session termination) */
+export function clearSpatialCache(uid?: string): void {
+  if (uid) userSpatialCache.delete(uid);
+  else userSpatialCache.clear();
+}
 
 /**
  * Object definitions and keyword dictionaries across EN, AR, and FR
@@ -195,6 +202,8 @@ export function extractSpatialObjectsFromVision(
   lang: 'en' | 'ar' | 'fr' = 'en'
 ): SpatialObjectRecord[] {
   if (!description || !uid) return [];
+  // Never attempt extraction on AI failure or warning messages
+  if (description.includes('⚠️') || description.includes('Service Unavailable') || description.includes('GEMINI_API_KEY')) return [];
   const lower = description.toLowerCase();
   const detected: SpatialObjectRecord[] = [];
   const now = Date.now();
@@ -414,7 +423,7 @@ export async function saveSpatialObject(uid: string, record: SpatialObjectRecord
 
   // Persist to Firestore under owner-only subcollection with Zero-Knowledge encryption
   try {
-    if (typeof window !== 'undefined' && db && record.id) {
+    if (typeof window !== 'undefined' && db && record.id && !(record as any).isEncryptedPlaceholder) {
       const objRef = doc(db, `users/${uid}/spatialObjects/${record.id}`);
       const encryptedDoc = await encryptSpatialRecord(record, uid);
       await setDoc(objRef, cleanDataForFirestore(encryptedDoc), { merge: true });

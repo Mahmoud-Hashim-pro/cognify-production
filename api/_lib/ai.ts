@@ -21,7 +21,22 @@ import { logTelemetry } from './telemetry.js';
 const splitKeys = (raw?: string): string[] =>
   (raw || '').split(/[,\s]+/).map((k) => k.trim()).filter(Boolean);
 
-export const GEMINI_KEYS = () => splitKeys(process.env.GEMINI_API_KEY);
+export const AI_ERROR_CODES = {
+  SERVER_CONFIG_MISSING: 'SERVER_CONFIG_MISSING',
+  PROVIDER_OVERLOADED: 'PROVIDER_OVERLOADED',
+  QUOTA_EXCEEDED: 'QUOTA_EXCEEDED',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+} as const;
+
+export const GEMINI_KEYS = () => {
+  const raw =
+    process.env.GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.GOOGLE_GEMINI_API_KEY ||
+    '';
+  return splitKeys(raw);
+};
 export const NVIDIA_KEYS = () => splitKeys(process.env.NVIDIA_API_KEY);
 export const GROQ_KEYS = () => splitKeys(process.env.GROQ_API_KEY);
 export const XAI_KEYS = () => splitKeys(process.env.XAI_API_KEY);
@@ -48,7 +63,7 @@ export const orderedFallbackKeys = (category: TaskCategory = 'fast'): string[] =
 
 // Prefer the explicit Flash release: it is consistently quick for normal chat,
 // while "latest" can switch behind the alias and introduce avoidable latency.
-export const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
+export const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
 export const GEMINI_MODEL = GEMINI_MODELS[0];
 
 /** Endpoint + model for an OpenAI-compatible key, resolved by its prefix. */
@@ -668,45 +683,77 @@ export function buildOpenAIMessages(message: string, system: string, history: Ms
 export async function geminiFetch(
   path: string,
   body: string,
-  opts: { stream?: boolean; category?: TaskCategory | string; timeoutMs?: number } = {},
+  opts: { stream?: boolean; category?: TaskCategory | string; timeoutMs?: number; byokKey?: string } = {},
 ): Promise<{ res: Response | null; status: number }> {
-  const keys = GEMINI_KEYS();
+  const keys = opts.byokKey ? [opts.byokKey] : GEMINI_KEYS();
   let lastStatus = 0;
   // Adaptive timeout: 60s for large multimodal/audio payloads, 25s for standard vision/chat
   const reqTimeoutMs = opts.timeoutMs ?? (body.length > 500_000 || opts.category === 'transcription' ? 60000 : 25000);
 
+  const envPresent = Boolean(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GEMINI_API_KEY);
+  const authPath = opts.byokKey ? 'BYOK' : (keys.length > 0 ? 'server key' : 'none');
+  console.log(`[Cognify AI Diagnostic: Fetch] Expected env present: ${envPresent} (GEMINI_API_KEY: ${Boolean(process.env.GEMINI_API_KEY)}, VITE_GEMINI_API_KEY: ${Boolean(process.env.VITE_GEMINI_API_KEY)}, GOOGLE_API_KEY: ${Boolean(process.env.GOOGLE_API_KEY)}), Auth path selected: ${authPath}`);
+
   for (const model of GEMINI_MODELS) {
     for (const key of keys.length ? keys : ['']) {
       if (!key) break;
+      // Use clean URL without ?key= parameter to prevent key leakage in URLs, server logs, and proxies
       const url =
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:${path}` +
-        (opts.stream ? '?alt=sse&key=' : '?key=') + key;
-      const t0 = Date.now();
-      let r: Response;
-      try {
-        r = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body,
-          signal: AbortSignal.timeout(reqTimeoutMs),
-        });
-      } catch (err) {
-        lastStatus = 0;
-        logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: false, error: String(err) });
-        continue;
+        (opts.stream ? '?alt=sse' : '');
+
+      const maxKeyRetries = 2;
+      for (let attempt = 0; attempt <= maxKeyRetries; attempt++) {
+        const t0 = Date.now();
+        let r: Response;
+        try {
+          r = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': key,
+            },
+            body,
+            signal: AbortSignal.timeout(reqTimeoutMs),
+          });
+        } catch (err) {
+          lastStatus = 0;
+          console.log(`[Cognify AI Diagnostic: Response] Network error during Gemini fetch: ${err instanceof Error ? err.name : 'UnknownError'}`);
+          logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: false, error: String(err) });
+          break;
+        }
+
+        const googleStatus = r.status;
+        if (!r.ok) {
+          let sanitizedError = `HTTP_${googleStatus}`;
+          try {
+            const errJson = await r.clone().json();
+            sanitizedError = errJson?.error?.status || (typeof errJson?.error?.message === 'string' ? errJson.error.message.slice(0, 100) : `HTTP_${googleStatus}`);
+          } catch {
+            sanitizedError = `HTTP_${googleStatus}`;
+          }
+          console.log(`[Cognify AI Diagnostic: Response] Google HTTP status: ${googleStatus}, Sanitized provider status: ${sanitizedError}`);
+        } else {
+          console.log(`[Cognify AI Diagnostic: Response] Google HTTP status: ${googleStatus} (OK)`);
+        }
+        logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: r.ok, status: r.status });
+        if (r.ok && (!opts.stream || r.body)) return { res: r, status: r.status };
+        lastStatus = r.status;
+        // 400 = bad request payload — another key/model won't help.
+        if (r.status === 400) return { res: null, status: 400 };
+        // 429/503 = rate limit or temporary provider overload -> exponential backoff with jitter before retry
+        if (r.status === 429 || r.status === 503) {
+          if (attempt < maxKeyRetries) {
+            const delay = Math.min(2500, Math.pow(2, attempt + 1) * 300) + Math.floor(Math.random() * 250);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            continue;
+          }
+          break;
+        }
+        // 401/403 = bad key or exhausted quota — try next key in the pool.
+        if (r.status === 401 || r.status === 403) break;
+        break;
       }
-      logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: r.ok, status: r.status });
-      if (r.ok && (!opts.stream || r.body)) return { res: r, status: r.status };
-      lastStatus = r.status;
-      // 400 = bad request payload — another key/model won't help.
-      if (r.status === 400) return { res: null, status: 400 };
-      // 429/503 = rate limit or temporary provider overload -> jittered backoff before next key
-      if (r.status === 429 || r.status === 503) {
-        await new Promise((resolve) => setTimeout(resolve, 200 + Math.floor(Math.random() * 200)));
-        continue;
-      }
-      // 401/403 = bad key or exhausted quota — try next key in the pool.
-      if (r.status === 401 || r.status === 403) continue;
     }
   }
   return { res: null, status: lastStatus };
@@ -770,13 +817,13 @@ export async function fallbackChat(messages: any[], category: TaskCategory = 'fa
 }
 
 /** One-shot text generation: Gemini first, then the OpenAI-compatible fallbacks. */
-export async function generateText(prompt: string, system?: string): Promise<string> {
+export async function generateText(prompt: string, system?: string, opts: { byokKey?: string } = {}): Promise<string> {
   const body = JSON.stringify({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
     generationConfig: { temperature: 0.7, topP: 0.95 },
   });
-  const { res } = await geminiFetch('generateContent', body);
+  const { res } = await geminiFetch('generateContent', body, { byokKey: opts.byokKey });
   if (res) {
     const j: any = await res.json().catch(() => null);
     const txt = j?.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -852,12 +899,24 @@ export async function guard(
   }
   req.authenticatedUid = auth.uid;
 
-  // 2. Provider Key Check
-  if (!GEMINI_KEYS().length && !FALLBACK_KEYS().length) {
+  // 2. Provider Key Check (Server Environment Keys or Secure Client BYOK Header)
+  const clientByok = (req.headers?.['x-byok-gemini-key'] || req.headers?.['x-goog-api-key'] || '').toString().trim();
+  const hasServerKeys = GEMINI_KEYS().length > 0 || FALLBACK_KEYS().length > 0;
+  const hasValidClientByok = Boolean(clientByok && clientByok.length >= 10);
+  const authPath = hasValidClientByok ? 'BYOK' : (hasServerKeys ? 'server key' : 'none');
+  const envPresent = Boolean(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GEMINI_API_KEY);
+  console.log(`[Cognify AI Diagnostic: Guard] Expected env present: ${envPresent}, Selected auth path: ${authPath}`);
+
+  if (!hasServerKeys && !hasValidClientByok) {
     res.status(503).json({
-      error: 'No AI provider key configured on the server. Set GEMINI_API_KEY (and optionally GROQ_API_KEY / XAI_API_KEY) in the Vercel project environment variables.',
+      error: 'No active AI key configured on server or in client Settings. Please configure GEMINI_API_KEY in server environment or enter your personal Gemini API key in Settings.',
+      code: 'SERVER_CONFIG_MISSING',
     });
     return false;
+  }
+
+  if (hasValidClientByok) {
+    req.byokKey = clientByok;
   }
 
   // 3. IP Rate Limiting (DDoS & Scraper Defense: 100 requests/minute)

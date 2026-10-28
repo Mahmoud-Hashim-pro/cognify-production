@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Download, Trash2, CheckCircle2, AlertTriangle, Database, Info, FileText, UserX, Loader2 } from 'lucide-react';
+import { Shield, Download, Trash2, CheckCircle2, AlertTriangle, Database, Info, FileText, UserX, Loader2, ArrowLeft } from 'lucide-react';
 import { UserProfile, StudentMemory } from '../types';
 import { StudentState, getStudentStateManager } from '../lib/studentStateEngine';
 import { localize, isArabicLocale } from '../lib/translations';
@@ -235,9 +235,12 @@ export default function StudentPrivacyCenter({
         {onClose && (
           <button
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-all"
+            aria-label={L('Back to App', 'العودة للتطبيق')}
+            title={L('Back to App', 'العودة للتطبيق')}
+            className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
           >
-            {L('Back to App', 'العودة للتطبيق')}
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-teal-400" />
+            <span>{L('Back to App', 'العودة للتطبيق')}</span>
           </button>
         )}
       </div>

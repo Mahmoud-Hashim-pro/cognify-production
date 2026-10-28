@@ -91,7 +91,7 @@ export default async function handler(req: any, res: any) {
     const finalResult = await deduplicateInflight(cacheKey, async () => {
       const body = JSON.stringify({ contents: [{ role: 'user', parts }] });
       const timeoutMs = isAudio ? 60000 : 25000;
-      const { res: gres } = await geminiFetch('generateContent', body, { category, timeoutMs });
+      const { res: gres } = await geminiFetch('generateContent', body, { category, timeoutMs, byokKey: req.byokKey });
       if (gres) {
         const j: any = await gres.json().catch(() => null);
         const txt = j?.candidates?.[0]?.content?.parts?.[0]?.text || '';

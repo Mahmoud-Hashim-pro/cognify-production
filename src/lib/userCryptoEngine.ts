@@ -332,6 +332,111 @@ export function clearUserEncryptionCache(): void {
 }
 
 /**
+ * Derives the legacy deterministic AES-256-GCM key used in earlier releases.
+ * Does not depend on the randomized localStorage device vault secret, enabling
+ * seamless backward compatibility for records created before the vault was introduced,
+ * or across devices prior to vault synchronization.
+ */
+export async function deriveLegacyUserEncryptionKey(
+  userId: string,
+  customPassphrase?: string
+): Promise<CryptoKey> {
+  const effectivePassphrase = customPassphrase || getUserCustomPassphrase(userId);
+  const cacheKey = `legacy_v10:${userId}:${effectivePassphrase || 'default'}`;
+  const cachedKey = userKeyCache.get(cacheKey);
+  if (cachedKey) return cachedKey;
+
+  const subtle = getSubtle();
+  const encoder = new TextEncoder();
+
+  // Check if legacy salt exists in storage
+  let saltBytes: Uint8Array | null = null;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const storedSalt = window.localStorage.getItem(`cognify_salt_${userId}`);
+      if (storedSalt) saltBytes = base64ToBuffer(storedSalt);
+    } catch {}
+  }
+
+  if (!saltBytes) {
+    // Deterministic fallback seed
+    const rawSeed = encoder.encode(`cognify_zero_knowledge_v10_${userId}_spatial_chat_salt`);
+    const hashBuffer = await subtle.digest('SHA-256', rawSeed);
+    saltBytes = new Uint8Array(hashBuffer).slice(0, 16);
+  }
+
+  const secretString = effectivePassphrase
+    ? `${userId}:${effectivePassphrase}:cognify_e2e_v10`
+    : `cognify_identity_vault:${userId}:device_held_secret_token_v1`;
+
+  const rawKeyMaterial = encoder.encode(secretString);
+
+  const baseKey = await subtle.importKey(
+    'raw',
+    rawKeyMaterial,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+
+  const derivedKey = await subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: saltBytes,
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+
+  userKeyCache.set(cacheKey, derivedKey);
+  return derivedKey;
+}
+
+/**
+ * Resolves candidate keys to try for decrypting a record.
+ * 1. Primary active key (current device vault or passphrase).
+ * 2. Deterministic legacy v10 key (for backwards compatibility).
+ * 3. Alternate mode (if customPassphrase mode was active, also try device vault, and vice versa).
+ */
+export async function getCandidateDecryptionKeys(
+  userId: string,
+  customPassphrase?: string
+): Promise<Array<{ key: CryptoKey; label: string }>> {
+  const candidates: Array<{ key: CryptoKey; label: string }> = [];
+
+  // 1. Primary key (current v11 derivation)
+  try {
+    const primaryKey = await deriveUserEncryptionKey(userId, customPassphrase);
+    candidates.push({ key: primaryKey, label: 'primary' });
+  } catch {}
+
+  // 2. Legacy deterministic v10 key
+  try {
+    const legacyKey = await deriveLegacyUserEncryptionKey(userId, customPassphrase);
+    candidates.push({ key: legacyKey, label: 'legacy_v10' });
+  } catch {}
+
+  // 3. Fallback: if customPassphrase is supplied or configured, also try without passphrase (pure device vault)
+  const effectivePassphrase = customPassphrase || getUserCustomPassphrase(userId);
+  if (effectivePassphrase) {
+    try {
+      const vaultKey = await deriveUserEncryptionKey(userId, undefined);
+      candidates.push({ key: vaultKey, label: 'device_vault_nopass' });
+    } catch {}
+    try {
+      const legacyNoPass = await deriveLegacyUserEncryptionKey(userId, undefined);
+      candidates.push({ key: legacyNoPass, label: 'legacy_v10_nopass' });
+    } catch {}
+  }
+
+  return candidates;
+}
+
+/**
  * Encrypts any JSON-serializable data with AES-256-GCM.
  */
 export async function encryptData<T>(
@@ -373,6 +478,8 @@ export async function encryptData<T>(
 /**
  * Decrypts AES-256-GCM ciphertext payload back into typed object.
  * Returns payload as-is if it is not encrypted (backward compatibility).
+ * Tries multiple key derivation candidates (current device vault + legacy deterministic v10)
+ * to prevent data loss across devices or storage wipes.
  */
 export async function decryptData<T>(
   payload: any,
@@ -389,20 +496,33 @@ export async function decryptData<T>(
   }
 
   const subtle = getSubtle();
-  const key = await deriveUserEncryptionKey(userId, customPassphrase);
-
   const iv = base64ToBuffer(payload.iv);
   const ciphertext = base64ToBuffer(payload.ciphertext);
 
-  const decryptedBuffer = await subtle.decrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    ciphertext
-  );
+  const candidates = await getCandidateDecryptionKeys(userId, customPassphrase);
 
-  const decoder = new TextDecoder();
-  const jsonString = decoder.decode(decryptedBuffer);
-  return JSON.parse(jsonString) as T;
+  let lastError: any = null;
+  for (const candidate of candidates) {
+    try {
+      const decryptedBuffer = await subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        candidate.key,
+        ciphertext
+      );
+      const decoder = new TextDecoder();
+      const jsonString = decoder.decode(decryptedBuffer);
+      return JSON.parse(jsonString) as T;
+    } catch (err: any) {
+      lastError = err;
+      // OperationError: tag check failed with this key; proceed to next candidate
+    }
+  }
+
+  const failureError = new Error(`[userCryptoEngine] Decryption failed: OperationError (tried ${candidates.length} candidate keys)`);
+  (failureError as any).name = 'OperationError';
+  (failureError as any).triedKeyCount = candidates.length;
+  (failureError as any).version = payload.version;
+  throw failureError;
 }
 
 /**
@@ -439,6 +559,7 @@ export async function encryptThreadMessages(
 /**
  * Decrypts an incoming Firestore thread document into Message[] array.
  * Handles both legacy plaintext `{ messages: [...] }` and `{ encrypted: true, ... }`.
+ * Preserves message history metadata even if encrypted on a different device.
  */
 export async function decryptThreadMessages(
   rawDocData: any,
@@ -452,13 +573,13 @@ export async function decryptThreadMessages(
       const decrypted = await decryptData<Message[]>(rawDocData, userId);
       return Array.isArray(decrypted) ? decrypted : [];
     } catch (err) {
-      console.error('[userCryptoEngine] Failed to decrypt thread document:', err);
+      console.warn('[userCryptoEngine] Thread document encrypted with inaccessible key. Preserving conversation placeholder:', (err as any)?.message || err);
       return [
         {
           id: 'decrypt_error',
           role: 'assistant',
-          content: '🔒 Message content encrypted with a different key or corrupted.',
-          timestamp: new Date().toISOString(),
+          content: '🔒 Message history was encrypted in another session or on a different device. You can sync your device vault recovery key in Settings to view this conversation.',
+          timestamp: rawDocData.updatedAt || new Date().toISOString(),
         },
       ];
     }
@@ -495,6 +616,9 @@ export async function encryptSpatialRecord(
 /**
  * Decrypts an incoming spatial object document from Firestore.
  * Handles both encrypted records and legacy plaintext records.
+ * If decryption fails (e.g. created on another device without synced vault key),
+ * returns a safe non-destructive placeholder preserving the original encrypted payload
+ * without crashing or deleting the record.
  */
 export async function decryptSpatialRecord(
   rawDocData: any,
@@ -507,8 +631,23 @@ export async function decryptSpatialRecord(
       const decrypted = await decryptData<SpatialObjectRecord>(rawDocData, userId);
       return decrypted;
     } catch (err) {
-      console.error('[userCryptoEngine] Failed to decrypt spatial object:', err);
-      return null;
+      console.warn('[userCryptoEngine] Spatial object encrypted with inaccessible key. Preserving record payload.');
+      // Return a non-destructive locked placeholder preserving original metadata & encrypted payload
+      const placeholder: SpatialObjectRecord = {
+        id: rawDocData.id || `encrypted_${Date.now()}`,
+        uid: userId,
+        category: (rawDocData.category as any) || 'object',
+        objectName: rawDocData.category
+          ? `🔒 Protected ${rawDocData.category} (Encrypted on another device)`
+          : '🔒 Protected Item (Encrypted on another device)',
+        confidence: 1.0,
+        timestamp: rawDocData.updatedAt || new Date().toISOString(),
+        lastSeenTimestamp: Date.now(),
+        notes: 'This object was encrypted on another device or prior session. Sync device vault key in Settings to decrypt.',
+        isEncryptedPlaceholder: true,
+        rawEncryptedPayload: rawDocData,
+      } as any;
+      return placeholder;
     }
   }
 

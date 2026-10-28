@@ -45,6 +45,8 @@ import {
 import { getSpatialObjects } from '../lib/spatialMemoryEngine';
 import { speak } from '../lib/tts';
 
+import { parseRoute } from '../lib/navigation';
+import type { VisualToolId } from './VisionCompanionView';
 const VisionCompanionView = React.lazy(() => import('./VisionCompanionView'));
 const ChatInterface = React.lazy(() => import('./ChatInterface'));
 const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
@@ -107,6 +109,7 @@ interface DisabilityModeViewProps {
   isDarkMode?: boolean;
   toggleTheme?: () => void;
   onLogout?: () => void;
+  initialTool?: VisualToolId;
 }
 
 /**
@@ -203,6 +206,7 @@ interface FeatureCardItem {
     handleSelectTab: (tab: DisabilityTab) => void;
     onNavigate?: (view: any, tab?: any) => void;
     setShowPassportModal: (show: boolean) => void;
+    openVisualTool?: (tool: VisualToolId) => void;
   }) => void;
 }
 
@@ -221,7 +225,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   isDarkMode = true,
   toggleTheme,
   onLogout,
+  initialTool = 'scene',
 }, ref) {
+  const [selectedVisualTool, setSelectedVisualTool] = useState<VisualToolId>(initialTool);
+
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => {
     const directTab = currentTab || detectDirectDisabilityTab(profile);
     return directTab;
@@ -234,6 +241,19 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   
   // Saved data states for category (Saved Results and Recent Activity)
   const [recentDocs, setRecentDocs] = useState<SavedBookStudioItem[]>([]);
+
+  useEffect(() => {
+    const handleSyncHashTool = () => {
+      const hash = window.location.hash;
+      const parsed = parseRoute(hash);
+      if (parsed.tab === 'vision' && parsed.params?.tool) {
+        setSelectedVisualTool(parsed.params.tool as VisualToolId);
+        setActiveTab('vision');
+      }
+    };
+    window.addEventListener('hashchange', handleSyncHashTool);
+    return () => window.removeEventListener('hashchange', handleSyncHashTool);
+  }, []);
   const [recentActivities, setRecentActivities] = useState<ToolkitActivityItem[]>([]);
   const [spatialObjects, setSpatialObjects] = useState<any[]>([]);
   
@@ -314,10 +334,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     }
   }, [currentTab, activeTab]);
 
-  // Tell parent which tab is active
-  useEffect(() => { 
-    onTabChange?.(activeTab); 
-  }, [activeTab, onTabChange]);
+  // Tab changes are dispatched on user interaction in handleSelectTab
 
   const lastProfileModeRef = useRef<string>(profile?.accessibilityMode || '');
   useEffect(() => {
@@ -354,6 +371,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       }
     }
   }, [profile, setProfile, onTabChange]);
+
+  const openVisualTool = React.useCallback((toolId: VisualToolId) => {
+    setSelectedVisualTool(toolId);
+    handleSelectTab('vision');
+  }, [handleSelectTab]);
 
   const handleNavigateBack = React.useCallback(() => {
     if (activeTab !== 'hub') {
@@ -456,7 +478,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       tagsAr: ['وصف المشهد', 'تنبيه العوائق', 'توجيه صوتي'],
       Icon: Eye,
       isFeatured: true,
-      action: ({ handleSelectTab }) => handleSelectTab('vision'),
+      action: ({ openVisualTool, handleSelectTab }) => {
+        if (openVisualTool) openVisualTool('scene');
+        else handleSelectTab('vision');
+      },
     },
     {
       id: 'currency_reader',
@@ -472,7 +497,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       tagsAr: ['جنيه / دولار / يورو / ريال', 'نطق القيمة', 'فحص فوري'],
       Icon: Banknote,
       isFeatured: true,
-      action: ({ handleSelectTab }) => handleSelectTab('vision'),
+      action: ({ openVisualTool, handleSelectTab }) => {
+        if (openVisualTool) openVisualTool('currency');
+        else handleSelectTab('vision');
+      },
     },
     {
       id: 'color_matcher',
@@ -488,7 +516,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       tagsAr: ['لون الملابس', 'فحص التباين', 'جودة الإضاءة'],
       Icon: Palette,
       isFeatured: true,
-      action: ({ handleSelectTab }) => handleSelectTab('vision'),
+      action: ({ openVisualTool, handleSelectTab }) => {
+        if (openVisualTool) openVisualTool('color');
+        else handleSelectTab('vision');
+      },
     },
     {
       id: 'live_speech_captions',
@@ -594,7 +625,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       tagsAr: ['استرجاع المقتنيات', 'معالم الغرفة', 'توجيه مكاني'],
       Icon: Compass,
       isFeatured: false,
-      action: ({ handleSelectTab }) => handleSelectTab('vision'),
+      action: ({ openVisualTool, handleSelectTab }) => {
+        if (openVisualTool) openVisualTool('object');
+        else handleSelectTab('vision');
+      },
     },
     {
       id: 'person_recognition',
@@ -610,7 +644,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       tagsAr: ['جهات مسجلة', 'تنبيه القرب', 'نطق الاسم'],
       Icon: Users,
       isFeatured: false,
-      action: ({ handleSelectTab }) => handleSelectTab('vision'),
+      action: ({ openVisualTool, handleSelectTab }) => {
+        if (openVisualTool) openVisualTool('face');
+        else handleSelectTab('vision');
+      },
     },
     {
       id: 'ocr_sign_reader',
@@ -626,9 +663,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       tagsAr: ['عربي وإنجليزي', 'لافتات وشاشات', 'تشغيل صوتي'],
       Icon: FileCheck,
       isFeatured: false,
-      action: ({ onNavigate, handleSelectTab }) => {
-        if (onNavigate) (onNavigate as any)('toolkit');
-        else handleSelectTab('hub');
+      action: ({ openVisualTool, handleSelectTab }) => {
+        if (openVisualTool) openVisualTool('read');
+        else handleSelectTab('vision');
       },
     },
     {
@@ -877,7 +914,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           <div 
             onClick={() => {
               if (activeTab !== 'hub') handleSelectTab('hub');
-              else if (onNavigate) (onNavigate as any)('learning');
             }}
             className="flex items-center gap-2.5 cursor-pointer group"
           >
@@ -991,23 +1027,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-[#C4D3E5]" />
           </button>
-
-          {/* Header Log Out Button */}
-          <button
-            type="button"
-            onClick={async () => {
-              if (onLogout) onLogout();
-              else await logout();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
-            title={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
-            aria-label={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
-          >
-            <LogOut className="w-4 h-4 rtl:rotate-180 text-rose-400" />
-            <span className="text-xs font-bold hidden sm:inline">
-              {localize(profile.language, 'Log Out', 'تسجيل الخروج')}
-            </span>
-          </button>
         </div>
       </header>
 
@@ -1046,25 +1065,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               <span>{localize(profile.language, 'Visual Assistant', 'المساعد البصري')}</span>
             </button>
 
-            {/* Learning Path */}
-            <button
-              type="button"
-              onClick={() => {
-                if (onNavigate) (onNavigate as any)('learning');
-              }}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#C4D3E5] hover:text-[#F5F8FF] hover:bg-[#071F3C] transition-all cursor-pointer text-start"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>{localize(profile.language, 'Learning Path', 'مسار التعلم')}</span>
-            </button>
+
 
             {/* My Progress */}
             <button
               type="button"
               onClick={() => {
+                handleSelectTab('progress');
                 if (onNavigate) (onNavigate as any)('profile');
               }}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#C4D3E5] hover:text-[#F5F8FF] hover:bg-[#071F3C] transition-all cursor-pointer text-start"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-start ${activeTab === 'progress' ? 'bg-[#10B8B0] text-slate-950 font-bold shadow-sm' : 'text-[#C4D3E5] hover:text-[#F5F8FF] hover:bg-[#071F3C]'}`}
             >
               <Activity className="w-4 h-4" />
               <span>{localize(profile.language, 'My Progress', 'تقدمي')}</span>
@@ -1197,7 +1207,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       onClick={() => {
                         setIsMobileSidebarOpen(false);
                         if (activeTab !== 'hub') handleSelectTab('hub');
-                        else if (onNavigate) (onNavigate as any)('learning');
                       }}
                       className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-[#C4D3E5] hover:text-[#F5F8FF] hover:bg-[#071F3C]"
                     >
@@ -1215,24 +1224,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       <Layers className="w-4 h-4" />
                       <span>{localize(profile.language, 'Accessibility Tools', 'أدوات الإتاحة')}</span>
                     </button>
+
                     <button
                       type="button"
                       onClick={() => {
                         setIsMobileSidebarOpen(false);
-                        if (onNavigate) (onNavigate as any)('learning');
-                      }}
-                      className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-[#C4D3E5] hover:text-[#F5F8FF] hover:bg-[#071F3C]"
-                    >
-                      <Compass className="w-4 h-4" />
-                      <span>{localize(profile.language, 'Learning Path', 'مسار التعلم')}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMobileSidebarOpen(false);
+                        handleSelectTab('progress');
                         if (onNavigate) (onNavigate as any)('profile');
                       }}
-                      className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-[#C4D3E5] hover:text-[#F5F8FF] hover:bg-[#071F3C]"
+                      className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold ${activeTab === 'progress' ? 'bg-[#10B8B0] text-slate-950 font-bold' : 'text-[#C4D3E5] hover:text-[#F5F8FF] hover:bg-[#071F3C]'}`}
                     >
                       <Activity className="w-4 h-4" />
                       <span>{localize(profile.language, 'My Progress', 'تقدمي الدراسي')}</span>
@@ -1495,15 +1495,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               key={card.id}
                               role="button"
                               tabIndex={0}
-                              onClick={() => card.action({ handleSelectTab, onNavigate, setShowPassportModal })}
+                              onClick={() => card.action({ handleSelectTab, onNavigate, setShowPassportModal, openVisualTool })}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                   e.preventDefault();
-                                  card.action({ handleSelectTab, onNavigate, setShowPassportModal });
+                                  card.action({ handleSelectTab, onNavigate, setShowPassportModal, openVisualTool });
                                 }
                               }}
                               aria-label={localize(profile.language, card.titleEn, card.titleAr)}
-                              className="group relative flex flex-col justify-between p-5 rounded-2xl bg-[#071F3C] border border-[#16395E] hover:border-[#10B8B0]/60 hover:-translate-y-1 transition-all duration-200 cursor-pointer shadow-md hover:shadow-xl hover:shadow-[#087F8C]/15 outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] text-start"
+                              className="group relative flex flex-col justify-between p-5 rounded-2xl bg-[#071F3C] border border-[#16395E] hover:border-[#10B8B0]/60 hover:-translate-y-1 transition-all duration-200 cursor-pointer shadow-md hover:shadow-xl hover:shadow-[#087F8C]/15 outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] text-start last:col-span-2 sm:last:col-span-1"
                             >
                               <div className="space-y-3.5">
                                 {/* Top Row: Icon Container + Chevron Action Button */}
@@ -1832,7 +1832,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     <div className="w-8 h-8 border-2 border-[#10B8B0] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
-                  <VisionCompanionView profile={profile} setProfile={setProfile} onNavigateBack={handleNavigateBack} />
+                  <VisionCompanionView
+                    profile={profile}
+                    setProfile={setProfile}
+                    onNavigateBack={handleNavigateBack}
+                    initialTool={selectedVisualTool}
+                    onToolChange={setSelectedVisualTool}
+                  />
                 </React.Suspense>
               </motion.div>
             )}
@@ -1918,7 +1924,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     <div className="w-8 h-8 border-2 border-[#10B8B0] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
-                  <OrgDashboard profile={profile} />
+                  <OrgDashboard profile={profile} onNavigateBack={handleNavigateBack} />
                 </React.Suspense>
               </motion.div>
             )}
@@ -1958,9 +1964,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'progress' && (
               <motion.div
                 key="progress-profile-view"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
               >
@@ -1985,9 +1991,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'settings' && (
               <motion.div
                 key="settings-view"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
               >

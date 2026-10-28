@@ -30,6 +30,10 @@ export async function getAuthHeaders(forceRefresh = false): Promise<Record<strin
   } catch (err) {
     console.warn('[Cognify] Failed to retrieve Firebase ID token:', err);
   }
+  const byok = secureLoadKeySync('gemini');
+  if (byok) {
+    headers['x-byok-gemini-key'] = byok;
+  }
   return headers;
 }
 
@@ -117,6 +121,7 @@ function providerFor(key: string): {
 // "not probed yet"; a non-OK/HTML response flips it to false, which now only
 // disables pointless retries (there is no in-browser key path to fall back to).
 let backendUp: boolean | null = null;
+let serverAiConfigured: boolean | null = null;
 
 // Known-good Gemini model IDs, tried in order — the first that responds wins.
 // (There is NO "gemini-3.5-flash"; using a non-existent model 404s silently.)
@@ -354,12 +359,14 @@ async function* generateGroqStream(
 
 // Retry transient Gemini errors (503 overloaded / 429 rate-limited) with
 // exponential backoff, rotating across keys if more than one is configured.
+// Keys are passed exclusively via standard headers ('x-goog-api-key') to prevent key leakage in URLs and browser history.
 async function fetchGeminiWithRetry(
   url: string,
   init: RequestInit,
   retries = 3,
 ): Promise<Response> {
-  let res = await fetch(url, init);
+  const cleanUrl = url.replace(/[?&]key=[^&]+/, '').replace(/\?$/, '');
+  let res = await fetch(cleanUrl, init);
   let attempt = 0;
   let keyIdx = 0;
   while ((res.status === 503 || res.status === 429) && attempt < retries) {
@@ -371,9 +378,10 @@ async function fetchGeminiWithRetry(
     const keys = getGeminiKeys();
     if (keys.length > 1) {
       keyIdx = (keyIdx + 1) % keys.length;
-      url = url.replace(/([?&]key=)[^&]+/, `$1${keys[keyIdx]}`);
+      const headers = { ...((init.headers as Record<string, string>) || {}), 'x-goog-api-key': keys[keyIdx] };
+      init = { ...init, headers };
     }
-    res = await fetch(url, init);
+    res = await fetch(cleanUrl, init);
   }
   return res;
 }
@@ -416,10 +424,13 @@ Write a short markdown comparison (bullets are fine) in ${profile.language || 'E
   if (apiKey) {
     try {
       const response = await fetchGeminiWithRetry(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
           body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] }),
         },
       );
@@ -477,10 +488,13 @@ export async function generateProactiveInsights(
   if (apiKey) {
     try {
       const response = await fetchGeminiWithRetry(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
           body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] }),
         },
       );
@@ -547,10 +561,13 @@ Assistant: ${aiReply.slice(0, 500)}`;
   if (apiKey) {
     try {
       const res = await fetchGeminiWithRetry(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
           body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] }),
         },
       );
@@ -585,9 +602,12 @@ export async function generateLogicResponse(
     if (apiKey) {
       try {
         const prompt = `You are a Logic Tutor on ${moduleName}.\nUser Profile: ${JSON.stringify(profile)}\nUser: ${message}`;
-        const response = await fetchGeminiWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
+        const response = await fetchGeminiWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
           body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
         });
         if (response.ok) {
@@ -838,10 +858,13 @@ ${otherThreadsSummary}
   let res: Response | null = null;
   let lastStatus = 0; // real HTTP status of the last failed attempt (res is null on failure)
   for (const model of GEMINI_MODELS) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
     const r = await fetchGeminiWithRetry(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
       body,
       signal
     });
@@ -956,14 +979,19 @@ export async function* generateAdaptiveResponseStream(
   signal?: AbortSignal,
   studentState?: any
 ) {
-  // Once we know there's no backend, go straight to the direct path.
-  if (backendUp === false) {
+  // If we know backend is down or server keys are missing, go straight to direct BYOK client path
+  if (backendUp === false || serverAiConfigured === false) {
     const apiKey = geminiPrimaryKey();
     if (apiKey) { yield* generateAdaptiveResponseStreamClient(message, profile, history, attachments, apiKey, signal, studentState); return; }
     const groqKey = groqPrimaryKey();
     if (groqKey) { yield* generateGroqStream(message, profile, history, groqKey, signal, studentState); return; }
     const ar = isArabicLocale(profile.language);
-    yield { text: ar ? '⚠️ مفيش مفتاح ذكاء اصطناعي متفعّل.' : '⚠️ No AI key configured.', done: true, error: true };
+    const msg = serverAiConfigured === false
+      ? (ar
+          ? '⚠️ خدمة الذكاء الاصطناعي السحابية غير مهيأة على السيرفر (لم يتم ضبط مفتاح GEMINI_API_KEY). يمكنك إضافة مفتاحك الخاص في صفحة الإعدادات لتفعيل التحليل مباشرة.'
+          : '⚠️ Server AI credentials not configured (GEMINI_API_KEY missing). Please configure your API key in Settings.')
+      : (ar ? '⚠️ مفيش مفتاح ذكاء اصطناعي متفعّل.' : '⚠️ No AI key configured.');
+    yield { text: msg, done: true, error: true };
     return;
   }
   try {
@@ -992,6 +1020,47 @@ export async function* generateAdaptiveResponseStream(
     const isHtml = res.headers.get('Content-Type')?.includes('text/html') || false;
     let isMissingBackend = isHtml || res.status === 404;
 
+    // If server returned 503/429, inspect whether it's missing server key or temporary provider overload
+    let serverErrorData: any = null;
+    if (!res.ok && res.status === 503) {
+      try {
+        serverErrorData = await res.clone().json();
+      } catch {}
+
+      const isConfigMissing = serverErrorData?.code === 'SERVER_CONFIG_MISSING' ||
+        (typeof serverErrorData?.error === 'string' && serverErrorData.error.toLowerCase().includes('no ai provider key'));
+
+      if (isConfigMissing) {
+        serverAiConfigured = false;
+        // Direct seamless fallback to client BYOK if present
+        const apiKey = geminiPrimaryKey();
+        if (apiKey) {
+          yield* generateAdaptiveResponseStreamClient(message, profile, history, attachments, apiKey, signal, studentState);
+          return;
+        }
+        const groqKey = groqPrimaryKey();
+        if (groqKey) {
+          yield* generateGroqStream(message, profile, history, groqKey, signal, studentState);
+          return;
+        }
+      } else if (!signal?.aborted) {
+        // Transient provider overload (upstream 503): retry up to 2 times with jittered exponential backoff
+        for (let retryCount = 1; retryCount <= 2; retryCount++) {
+          const delay = Math.min(2500, Math.pow(2, retryCount) * 400) + Math.floor(Math.random() * 250);
+          await new Promise((r) => setTimeout(r, delay));
+          if (signal?.aborted) break;
+          try {
+            res = await fetch('/api/gemini/generateAdaptiveResponseStream', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ message, profile, history, attachments, studentState }),
+              signal
+            });
+            if (res.ok) break;
+          } catch {}
+        }
+      }
+    }
 
     if (!res.ok || isMissingBackend) {
       if (isMissingBackend) {
@@ -1045,12 +1114,22 @@ export async function* generateAdaptiveResponseStream(
           yield { text: `⚠️ **${authErrMsg}**`, done: true, error: true };
           return;
         } else if (res.status === 503) {
-          const serviceErrMsg = isArabic 
-            ? "فشل الاتصال: مفتاح الذكاء الاصطناعي غير متوفر على السيرفر أو أن الخدمة مجهدة حالياً (503). يمكنك وضع مفتاحك الخاص في الإعدادات."
-            : isFrench
-            ? "Service IA indisponible : Aucune clé API configurée sur le serveur ou service surchargé (503). Vous pouvez renseigner votre clé dans les Paramètres."
-            : "AI service unavailable: No active API key found on server or provider is overloaded (503). You can configure your own key in Settings.";
-          toast.error(serviceErrMsg, isArabic ? "الخدمة غير متوفرة" : "AI Service Unavailable");
+          const isConfigMissing = serverErrorData?.code === 'SERVER_CONFIG_MISSING' ||
+            (typeof serverErrorData?.error === 'string' && serverErrorData.error.toLowerCase().includes('no ai provider key'));
+
+          const serviceErrMsg = isConfigMissing
+            ? isArabic
+              ? "خدمة الذكاء الاصطناعي السحابية غير مهيأة على السيرفر (لم يتم ضبط مفتاح GEMINI_API_KEY). يمكنك إضافة مفتاحك الخاص في صفحة الإعدادات لتفعيل التحليل مباشرة."
+              : isFrench
+              ? "Le service IA n'est pas configuré sur le serveur (clé GEMINI_API_KEY manquante). Vous pouvez renseigner votre clé personnelle dans les Paramètres pour activer l'analyse."
+              : "Server AI credentials not configured (GEMINI_API_KEY missing). You can add your personal Gemini API key in Settings to enable direct analysis."
+            : isArabic
+              ? "مزود خدمة الذكاء الاصطناعي مجهد حالياً بسبب كثرة الطلبات (503). يرجى إعادة المحاولة بعد ثوانٍ قليلة أو إدخال مفتاحك الخاص في الإعدادات."
+              : isFrench
+              ? "Le fournisseur d'IA est temporairement surchargé (503). Veuillez réessayer dans quelques instants ou renseigner votre clé dans les Paramètres."
+              : "AI provider is temporarily overloaded (503). Please retry in a few moments or configure your personal key in Settings.";
+
+          toast.error(serviceErrMsg, isArabic ? (isConfigMissing ? "مفتاح السيرفر غير مهيأ" : "الخدمة مجهدة") : (isConfigMissing ? "Server AI Key Missing" : "AI Service Overloaded"));
           yield { text: `⚠️ **${serviceErrMsg}**`, done: true, error: true };
           return;
         } else if (res.status >= 500) {
@@ -1090,6 +1169,7 @@ The server is currently busy or re-establishing cloud connection. Please try aga
     }
 
     backendUp = true; // backend is real — keep using it
+    serverAiConfigured = true;
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder("utf-8");

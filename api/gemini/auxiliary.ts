@@ -47,7 +47,7 @@ Respond in this EXACT format, in ${isAr ? 'Arabic' : 'English'}:
 ## Critique
 [Briefly: what the original did well, and what yours does better or differently.]`;
 
-    const txt = await generateText(prompt);
+    const txt = await generateText(prompt, undefined, { byokKey: req.byokKey });
     res.status(200).json({
       result: txt || (isAr ? 'تعذّر توليد المراجعة. جرّب تاني.' : 'Could not generate the review. Please try again.'),
     });
@@ -83,7 +83,7 @@ export async function logicResponseHandler(req: any, res: any) {
       systemInstruction: { parts: [{ text: system }] },
       generationConfig: { temperature: 0.7, topP: 0.95 },
     });
-    const { res: gres } = await geminiFetch('generateContent', body);
+    const { res: gres } = await geminiFetch('generateContent', body, { byokKey: req.byokKey });
     if (gres) {
       const j: any = await gres.json().catch(() => null);
       const txt = j?.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -126,7 +126,7 @@ Write in ${isAr ? 'Arabic' : 'English'}. Be concrete — no generic advice, no p
 Conversation:
 ${convo || '(no recent messages)'}`;
 
-    const txt = await generateText(prompt);
+    const txt = await generateText(prompt, undefined, { byokKey: req.byokKey });
     res.status(200).json({
       result: txt || (isAr ? 'واصل الاستذكار وحل التمارين لجمع المزيد من الرؤى الدراسية! 🚀' : 'Keep studying and solving exercises to unlock more personalized insights! 🚀'),
     });

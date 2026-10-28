@@ -2,7 +2,7 @@ import { localize, isArabicLocale } from '../lib/translations';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { UserProfile, AccessibilityPassport, LanguagePreference, PedagogyStyle } from '../types';
 import { 
-  Settings, UserCheck, BookOpen, Volume2, ShieldCheck, 
+  Settings, Key, ArrowLeft, UserCheck, BookOpen, Volume2, ShieldCheck, 
   Globe, MessageSquare, SlidersHorizontal, User, Play, 
   RotateCcw, LogOut, CheckCircle2, ChevronDown, Check,
   AlertCircle, Loader2, Gauge, Activity, Sun, Moon, Contrast, 
@@ -13,6 +13,7 @@ import { db, cleanDataForFirestore } from '../lib/firebase';
 import { logout } from '../lib/firebase';
 import { toast } from './Toast';
 import { speak } from '../lib/tts';
+import { secureLoadKeySync, secureSaveKey } from '../lib/cryptoShield';
 
 export interface StudentSettingsViewProps {
   profile: UserProfile;
@@ -56,6 +57,68 @@ export default function StudentSettingsView({
   const isAr = isArabicLocale(profile.language);
 
   // ── Settings State ──
+  // Card E: AI API Key (Bring Your Own Key)
+  const [apiKeyInput, setApiKeyInput] = useState<string>(() => {
+    try {
+      return secureLoadKeySync('gemini') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
+  const [savedApiKey, setSavedApiKey] = useState<string>(() => {
+    try {
+      return secureLoadKeySync('gemini') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [isSavingKey, setIsSavingKey] = useState<boolean>(false);
+
+  const handleSaveApiKey = async () => {
+    setIsSavingKey(true);
+    try {
+      const trimmed = apiKeyInput.trim();
+      await secureSaveKey('gemini', trimmed);
+      setSavedApiKey(trimmed);
+      if (trimmed) {
+        toast.success(
+          isAr ? 'تم تشفير وحفظ مفتاح Gemini بنجاح' : 'Gemini API Key encrypted and saved securely',
+          isAr ? 'حفظ المفتاح' : 'API Key Saved'
+        );
+      } else {
+        toast.info(
+          isAr ? 'تم مسح مفتاح Gemini' : 'Gemini API Key removed',
+          isAr ? 'إلغاء المفتاح' : 'API Key Removed'
+        );
+      }
+    } catch (err) {
+      console.error('Failed to save API key:', err);
+      toast.error(
+        isAr ? 'تعذر حفظ المفتاح، يرجى المحاولة ثانية' : 'Failed to save API key securely',
+        isAr ? 'خطأ في الحفظ' : 'Save Error'
+      );
+    } finally {
+      setIsSavingKey(false);
+    }
+  };
+
+  const handleClearApiKey = async () => {
+    setIsSavingKey(true);
+    try {
+      await secureSaveKey('gemini', '');
+      setApiKeyInput('');
+      setSavedApiKey('');
+      toast.info(
+        isAr ? 'تمت إزالة المفتاح الخاص' : 'Personal API key removed',
+        isAr ? 'إزالة المفتاح' : 'Key Removed'
+      );
+    } catch (err) {
+      console.error('Failed to clear API key:', err);
+    } finally {
+      setIsSavingKey(false);
+    }
+  };
   // Card A: Accessibility
   const [fontSizeScale, setFontSizeScale] = useState<'normal' | 'medium' | 'large' | 'extra-large'>(
     () => profile.accessibilityPassport?.fontSizeScale || 'medium'
@@ -358,13 +421,29 @@ export default function StudentSettingsView({
       <div className="max-w-7xl mx-auto space-y-6 pb-20">
 
         {/* ── PAGE HEADER (Exact Match with Reference) ── */}
-        <div className="space-y-1 text-start">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-black text-[#F4F7FB] tracking-tight">
-              {localize(profile.language, 'Settings', 'الإعدادات')}
-            </h1>
-            <div className="w-8 h-8 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center text-[#00AEB8] shrink-0">
-              <Settings className="w-4 h-4 text-[#00AEB8]" />
+        <div className="space-y-2 text-start">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              {onNavigateBack && (
+                <button
+                  type="button"
+                  onClick={onNavigateBack}
+                  aria-label={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
+                  title={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
+                  className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#082344] hover:bg-[#0D2542] border border-[#16395E] hover:border-[#10B8B0]/50 text-[#C4D3E5] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
+                >
+                  <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#10B8B0]" />
+                  <span className="text-xs font-bold">{localize(profile.language, 'Back', 'رجوع')}</span>
+                </button>
+              )}
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl sm:text-3xl font-black text-[#F4F7FB] tracking-tight">
+                  {localize(profile.language, 'Settings', 'الإعدادات')}
+                </h1>
+                <div className="w-8 h-8 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center text-[#00AEB8] shrink-0">
+                  <Settings className="w-4 h-4 text-[#00AEB8]" />
+                </div>
+              </div>
             </div>
           </div>
           <p className="text-xs sm:text-sm text-[#A9C4DD] font-medium leading-relaxed">
@@ -1088,6 +1167,105 @@ export default function StudentSettingsView({
 
           </div>
 
+
+          {/* ═════════════════════════════════════════════════════════════════
+              CARD E: AI SERVICE & API KEY (BYOK - مفتاح الذكاء الاصطناعي)
+             ═════════════════════════════════════════════════════════════════ */}
+          <div className="col-span-1 lg:col-span-2 bg-[#0D2542] border border-[rgba(56,139,190,0.35)] rounded-[28px] p-6 sm:p-8 space-y-6 shadow-lg text-start flex flex-col justify-between">
+            <div>
+              {/* Card Header */}
+              <div className="border-b border-[#16395E] pb-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2.5 text-[#00AEB8]">
+                    <Key className="w-5 h-5 text-[#00AEB8]" />
+                    <h2 className="text-lg font-bold text-[#F4F7FB]">
+                      {localize(profile.language, 'AI Service & API Key (BYOK)', 'خدمة الذكاء الاصطناعي ومفتاحك الخاص')}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[#A9C4DD] mt-1 font-medium">
+                    {localize(
+                      profile.language,
+                      'Configure your personal Google Gemini API key for guaranteed uptime and direct AI processing.',
+                      'أدخل مفتاح Google Gemini الخاص بك لتفعيل المعالجة الفورية المباشرة وتجنب أي ضغط على السيرفر.'
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {savedApiKey ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                      <Check className="w-3.5 h-3.5" />
+                      <span>{localize(profile.language, 'Personal Key Configured', 'مفتاح خاص مفعّل')}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#082344] border border-[#16395E] text-[#A9C4DD]">
+                      <span>{localize(profile.language, 'Using Server Key', 'استخدام مفتاح السيرفر')}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Input Row */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="setting-gemini-key" className="text-sm font-bold text-[#F4F7FB] block">
+                    {localize(profile.language, 'Google Gemini API Key', 'مفتاح Google Gemini API')}
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="setting-gemini-key"
+                      type={showApiKey ? 'text' : 'password'}
+                      value={apiKeyInput}
+                      onChange={(e) => setApiKeyInput(e.target.value)}
+                      placeholder="AIzaSy..."
+                      autoComplete="off"
+                      spellCheck="false"
+                      className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#F4F7FB] font-mono focus:outline-none focus:border-[#00AEB8] placeholder:text-[#A9C4DD]/40 pe-11"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                      aria-label={showApiKey ? localize(profile.language, 'Hide API key', 'إخفاء المفتاح') : localize(profile.language, 'Show API key', 'إظهار المفتاح')}
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-[#A9C4DD] hover:text-[#00AEB8] transition-colors p-1"
+                    >
+                      {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#A9C4DD] leading-relaxed">
+                    {localize(
+                      profile.language,
+                      'Your key is encrypted and stored locally in your browser. It is never transmitted to any third-party server.',
+                      'يتم تشفير المفتاح وحفظه محلياً في متصفحك فقط. لن يتم إرساله لأي خوادم خارجية.'
+                    )}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleSaveApiKey}
+                    disabled={isSavingKey}
+                    className="px-6 py-2.5 rounded-xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
+                  >
+                    {isSavingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{localize(profile.language, 'Save Key', 'حفظ المفتاح')}</span>
+                  </button>
+
+                  {savedApiKey && (
+                    <button
+                      type="button"
+                      onClick={handleClearApiKey}
+                      disabled={isSavingKey}
+                      className="px-5 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    >
+                      {localize(profile.language, 'Remove Key', 'إزالة المفتاح')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

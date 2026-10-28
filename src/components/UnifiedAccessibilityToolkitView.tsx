@@ -39,6 +39,10 @@ import {
   RotateCcw,
   Gauge,
   X,
+  Banknote,
+  Palette,
+  Users,
+  ScanLine,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
@@ -503,6 +507,159 @@ export default function UnifiedAccessibilityToolkitView({
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'see_understand' && (
             <div className="space-y-6">
+              {/* Visual Assistant Live Camera Tools Suite Card */}
+              <div
+                className={`p-6 rounded-3xl border ${
+                  isDarkMode ? 'bg-[#121B1E] border-teal-800/40' : 'bg-teal-50/50 border-teal-200'
+                } shadow-sm space-y-5`}
+                data-testid="visual-camera-tools-suite-card"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 border-teal-500/20">
+                  <div>
+                    <h2 className="text-base font-bold flex items-center gap-2 text-teal-600 dark:text-teal-400">
+                      <Camera className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                      <span>
+                        {localize(
+                          profile.language,
+                          'Visual Assistant & Live Camera Tools',
+                          'المساعد البصري وأدوات الكاميرا الحية للمكفوفين'
+                        )}
+                      </span>
+                    </h2>
+                    <p className="text-xs text-stone-400 mt-1">
+                      {localize(
+                        profile.language,
+                        'Instant AI vision tools with full camera capture, audio announcements, and specialized detectors.',
+                        'أدوات رؤية ذكية فورية عبر الكاميرا الحية: التعرف على العملات، النصوص واللافتات، تنسيق الألوان، ورصد المحيط.'
+                      )}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.location.hash = '#disability/vision/scene';
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 min-h-[44px]"
+                    aria-label={localize(profile.language, 'Launch full camera vision companion', 'فتح المساعد البصري الكامل بالكاميرا')}
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>{localize(profile.language, 'Open Vision Camera', 'فتح كاميرا المساعد البصري')}</span>
+                  </button>
+                </div>
+
+                {/* Grid of Specialized Camera Visual Tools */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[
+                    {
+                      id: 'currency',
+                      titleAr: 'قارئ العملات والنقود',
+                      titleEn: 'Cash & Currency Reader',
+                      descAr: 'التعرف على فئات النقود ونطق قيمتها فوراً (EGP / USD / EUR / SAR).',
+                      descEn: 'Identifies banknotes and coins with high accuracy and spoken denomination.',
+                      icon: Banknote,
+                      btnAr: 'تشغيل كاميرا العملات',
+                      btnEn: 'Open Currency Camera',
+                      badge: 'EGP / USD / EUR',
+                    },
+                    {
+                      id: 'read',
+                      titleAr: 'قارئ النصوص واللافتات',
+                      titleEn: 'Instant Text OCR Reader',
+                      descAr: 'استخراج وقراءة النصوص المطبوعة وعلامات الشوارع بصوت مسموع.',
+                      descEn: 'Reads printed text, signs, labels, and notices out loud in real time.',
+                      icon: ScanLine,
+                      btnAr: 'تشغيل كاميرا قراءة النصوص',
+                      btnEn: 'Open Text OCR Camera',
+                      badge: 'OCR & Signs',
+                    },
+                    {
+                      id: 'color',
+                      titleAr: 'فحص وتنسيق الألوان',
+                      titleEn: 'Color & Outfit Matcher',
+                      descAr: 'فحص تدرجات الألوان للملابس والمقتنيات وتنسيق الأطقم المتوافقة.',
+                      descEn: 'Identifies clothing colors and recommends complementary outfit matches.',
+                      icon: Palette,
+                      btnAr: 'تشغيل كاميرا فحص الألوان',
+                      btnEn: 'Open Color Camera',
+                      badge: 'Outfits & Colors',
+                    },
+                    {
+                      id: 'scene',
+                      titleAr: 'وصف المشهد والبيئة',
+                      titleEn: 'Scene Description',
+                      descAr: 'وصف شامل للبيئة المحيطة، وتحديد العوائق والممرات الآمنة.',
+                      descEn: 'Detailed spatial narration of surroundings, obstacles, and path safety.',
+                      icon: Eye,
+                      btnAr: 'تشغيل كاميرا المشهد',
+                      btnEn: 'Open Scene Camera',
+                      badge: 'Surroundings',
+                    },
+                    {
+                      id: 'object',
+                      titleAr: 'كشف ورصد العناصر',
+                      titleEn: 'Spatial Object Finder',
+                      descAr: 'البحث عن المفاتيح، الهواتف، والعناصر المفقودة بنظام عقارب الساعة.',
+                      descEn: 'Locates missing personal items with clock-face directional hints.',
+                      icon: Sparkles,
+                      btnAr: 'تشغيل كاميرا كشف العناصر',
+                      btnEn: 'Open Object Finder Camera',
+                      badge: 'Clock Position',
+                    },
+                    {
+                      id: 'face',
+                      titleAr: 'التعرف على الأشخاص والوجوه',
+                      titleEn: 'Person & Face Radar',
+                      descAr: 'رصد الأشخاص في مجال الرؤية ومسافتهم وتعابير وجوههم.',
+                      descEn: 'Detects approaching people, estimated distance, and facial expressions.',
+                      icon: Users,
+                      btnAr: 'تشغيل كاميرا الوجوه',
+                      btnEn: 'Open Person Radar Camera',
+                      badge: 'Proximity',
+                    },
+                  ].map((tool) => {
+                    const ToolIcon = tool.icon;
+                    return (
+                      <div
+                        key={tool.id}
+                        className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${
+                          isDarkMode
+                            ? 'bg-stone-900/60 border-stone-800 hover:border-teal-500/50'
+                            : 'bg-white border-stone-200 hover:border-teal-400'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                              <ToolIcon className="w-5 h-5" />
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                              {tool.badge}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 mb-1">
+                            {localize(profile.language, tool.titleEn, tool.titleAr)}
+                          </h3>
+                          <p className="text-xs text-stone-400 line-clamp-2 mb-3">
+                            {localize(profile.language, tool.descEn, tool.descAr)}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.location.hash = `#disability/vision/${tool.id}`;
+                          }}
+                          className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-teal-600/15 hover:bg-teal-600 hover:text-white text-teal-600 dark:text-teal-400 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 min-h-[44px]"
+                          aria-label={localize(profile.language, tool.btnEn, tool.btnAr)}
+                        >
+                          <Camera className="w-4 h-4" />
+                          <span>{localize(profile.language, tool.btnEn, tool.btnAr)}</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'

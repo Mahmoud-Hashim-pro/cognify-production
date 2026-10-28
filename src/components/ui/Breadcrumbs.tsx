@@ -40,7 +40,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
         <button
           type="button"
           onClick={onNavigateBack}
-          aria-label={backLabel || 'Go back to previous screen'}
+          aria-label={backLabel ? `${backLabel} · Back` : 'Go back to previous screen'}
           title={backLabel || 'Go back'}
           className={`min-h-[44px] min-w-[44px] p-2.5 rounded-xl border flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B] ${
             isDarkMode
