@@ -15,6 +15,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  limit,
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType, cleanDataForFirestore } from './firebase';
 import { Goal, Milestone, GoalStatus } from '../types';
@@ -69,7 +70,7 @@ const goalDoc = (uid: string, goalId: string) =>
 export async function getGoals(uid: string): Promise<Goal[]> {
   const path = `users/${uid}/goals`;
   try {
-    const q = query(goalsCol(uid), orderBy('createdAt', 'desc'));
+    const q = query(goalsCol(uid), orderBy('createdAt', 'desc'), limit(100));
     const snap = await getDocs(q);
     return snap.docs.map((d) => d.data() as Goal);
   } catch (err) {
@@ -89,7 +90,7 @@ export function subscribeToGoals(
 ): () => void {
   const path = `users/${uid}/goals`;
   try {
-    const q = query(goalsCol(uid), orderBy('createdAt', 'desc'));
+    const q = query(goalsCol(uid), orderBy('createdAt', 'desc'), limit(100));
     return onSnapshot(
       q,
       (snap) => {

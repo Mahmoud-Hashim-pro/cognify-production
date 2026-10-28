@@ -112,6 +112,10 @@ export default function CognitiveGym({
   const [gngTrials, setGngTrials] = useState<GoNoGoTrial[]>([]);
   const [gngCurrentIdx, setGngCurrentIdx] = useState<number>(0);
   const [gngResponses, setGngResponses] = useState<{ trialId: string; userClicked: boolean; reactionTimeMs: number }[]>([]);
+  const gngResponsesRef = useRef(gngResponses);
+  useEffect(() => {
+    gngResponsesRef.current = gngResponses;
+  }, [gngResponses]);
   const [gngResult, setGngResult] = useState<GoNoGoResult | null>(null);
   const trialStartTimeRef = useRef<number>(0);
   const gngTimerRef = useRef<any>(null);
@@ -130,7 +134,7 @@ export default function CognitiveGym({
 
     if (gngCurrentIdx >= gngTrials.length) {
       // Completed session
-      const evaluation = evaluateGoNoGoPerformance(gngTrials, gngResponses);
+      const evaluation = evaluateGoNoGoPerformance(gngTrials, gngResponsesRef.current);
       setGngResult(evaluation);
       setGngState('completed');
       awardPoints(evaluation.score > 70 ? 30 : 15, 'gonogo_inhibitory_control');
@@ -190,6 +194,15 @@ export default function CognitiveGym({
   const [wmUserSequence, setWmUserSequence] = useState<number[]>([]);
   const [wmLevel, setWmLevel] = useState<number>(3);
   const [wmIsReverse, setWmIsReverse] = useState<boolean>(false);
+  const wmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (wmIntervalRef.current) clearInterval(wmIntervalRef.current);
+      if (wmTimeoutRef.current) clearTimeout(wmTimeoutRef.current);
+    };
+  }, []);
 
   const startMemoryGrid = () => {
     const round = generateMemoryGridSequence(wmLevel, 3, wmIsReverse);
@@ -740,6 +753,7 @@ export default function CognitiveGym({
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
                       type="checkbox"
+                      aria-label={localize(profile.language, 'Reverse Span (Harder)', 'الترتيب العكسي (تحدي أعلى)')}
                       checked={wmIsReverse}
                       onChange={e => setWmIsReverse(e.target.checked)}
                       className="rounded bg-slate-800 border-slate-700 text-indigo-600"
@@ -994,6 +1008,7 @@ export default function CognitiveGym({
                 <input
                   type="text"
                   value={taskInput}
+                  aria-label={localize(profile.language, 'Task description to slice into steps', 'المهمة الدراسية لتقسيمها إلى خطوات')}
                   onChange={e => setTaskInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSliceTask()}
                   placeholder={localize(
@@ -1178,6 +1193,8 @@ export default function CognitiveGym({
                       max="1"
                       step="0.05"
                       value={noiseVolume}
+                      aria-label={localize(profile.language, 'Ambient noise volume', 'مستوى صوت الضوضاء المهدئة')}
+                      aria-valuetext={`${Math.round(noiseVolume * 100)}%`}
                       onChange={e => handleVolumeChange(parseFloat(e.target.value))}
                       className="w-full accent-indigo-500 bg-slate-800 rounded-lg h-2"
                     />
@@ -1221,6 +1238,8 @@ export default function CognitiveGym({
                   min="0"
                   max="20"
                   value={tenFrameInput}
+                  aria-label={localize(profile.language, 'Ten-frame number input', 'إدخال رقم إطار العشرة')}
+                  aria-valuetext={`${tenFrameInput}`}
                   onChange={e => setTenFrameInput(parseInt(e.target.value, 10))}
                   className="w-full accent-emerald-500 bg-slate-800 rounded-lg h-2"
                 />

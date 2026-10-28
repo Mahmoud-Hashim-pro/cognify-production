@@ -244,12 +244,14 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t('Course name (e.g. CS101)', 'اسم المادة (مثلاً خوارزميات)')}
+                aria-label={t('Course name', 'اسم المادة')}
                 className="flex-1 min-w-[180px] bg-[#150917]/80 border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all"
               />
               <input
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
                 placeholder={t('Semester', 'الترم')}
+                aria-label={t('Semester', 'الترم الدراسي')}
                 className="w-36 bg-[#150917]/80 border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all"
               />
               <input
@@ -359,6 +361,7 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                 max="4.0"
                 value={targetGpaInput}
                 onChange={(e) => setTargetGpaInput(e.target.value)}
+                aria-label={isAr ? 'المعدل التراكمي المستهدف' : 'Target CGPA'}
                 className="w-full bg-[#0E0610] border border-[#E5A93C]/40 rounded-xl px-3 py-1.5 text-sm font-mono text-[#E5A93C] font-bold focus:outline-none"
               />
             </div>
@@ -372,6 +375,7 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                 max="24"
                 value={plannedCreditsInput}
                 onChange={(e) => setPlannedCreditsInput(e.target.value)}
+                aria-label={isAr ? 'ساعات الفصل القادم' : 'Planned Credits'}
                 className="w-full bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-3 py-1.5 text-sm font-mono text-white font-bold focus:outline-none"
               />
             </div>

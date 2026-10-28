@@ -28,6 +28,7 @@ import { speak as speakText, cancelSpeech, hasFrenchVoice } from '../lib/tts';
 import { localize, isArabicLocale } from '../lib/translations';
 import { UserProfile } from '../types';
 import { geminiService } from '../services/geminiService';
+import { toast } from './Toast';
 
 export interface FrenchTravelVoiceAssistantProps {
   profile: UserProfile;
@@ -404,7 +405,7 @@ export default function FrenchTravelVoiceAssistant({
     cancelSpeech();
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRec) {
-      alert(localize(profile.language, 'Speech recognition is not supported in this browser.', 'التعرف على الصوت غير مدعوم في هذا المتصفح.'));
+      toast.warning(localize(profile.language, 'Speech recognition is not supported in this browser.', 'التعرف على الصوت غير مدعوم في هذا المتصفح.'), localize(profile.language, 'Unsupported', 'غير مدعوم'));
       return;
     }
 
@@ -967,6 +968,7 @@ Return STRICT JSON:
             <div className="relative">
               <input
                 type="text"
+                aria-label={localize(profile.language, 'Search travel phrases in French, Arabic or English', 'البحث في عبارات السفر بالفرنسية أو العربية أو الإنجليزية')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={localize(
@@ -1136,6 +1138,11 @@ Return STRICT JSON:
         <div
           role="dialog"
           aria-modal="true"
+          aria-label={localize(
+            profile.language,
+            'Fullscreen French Flashcard',
+            'بطاقة المحادثة الفرنسية بملء الشاشة'
+          )}
           className="fixed inset-0 z-50 bg-[#080409]/98 backdrop-blur-2xl flex flex-col justify-between p-6 md:p-12 animate-fadeIn"
         >
           <div className="flex items-center justify-between">

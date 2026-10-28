@@ -689,6 +689,7 @@ export default function CrossDisabilityOrchestrator({
                     type="text"
                     defaultValue={isAr ? 'مرحبا' : 'HELLO'}
                     id="morse-test-input"
+                    aria-label={isAr ? 'نص اختبار الاهتزازات اللمسية ومورس' : 'Tactile vibration and Morse test text'}
                     className="flex-1 px-3 py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-xs sm:text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#E5A93C]/30"
                   />
                   <button

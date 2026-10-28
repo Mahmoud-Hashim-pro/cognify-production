@@ -13,6 +13,11 @@
 
 import { execSync } from 'child_process';
 import process from 'process';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '..');
 
 const args = process.argv.slice(2);
 const fastMode = args.includes('--fast');
@@ -39,6 +44,7 @@ function runStep(name, command, options = {}) {
   process.stdout.write(`${colors.bright}▶ ${name}...${colors.reset} `);
   try {
     execSync(command, {
+      cwd: projectRoot,
       stdio: options.verbose ? 'inherit' : 'pipe',
       encoding: 'utf-8',
       env: { ...process.env, FORCE_COLOR: 'true' },
@@ -49,8 +55,8 @@ function runStep(name, command, options = {}) {
   } catch (err) {
     const duration = ((Date.now() - start) / 1000).toFixed(1);
     const errText = (err.stdout?.toString() || '') + (err.stderr?.toString() || '');
-    if (options.allowNetworkError && (/failed, reason:|audit endpoint returned an error|ENOTFOUND|ETIMEDOUT|ECONNRESET/i.test(errText))) {
-      console.log(`${colors.yellow}⚠️ SKIPPED (npm registry network timeout)${colors.reset} ${colors.dim}(${duration}s)${colors.reset}`);
+    if (options.allowNetworkError && (/failed, reason:|audit endpoint returned an error|ENOTFOUND|ETIMEDOUT|ECONNRESET|ENOLOCK/i.test(errText))) {
+      console.log(`${colors.yellow}⚠️ SKIPPED (audit network/lockfile note)${colors.reset} ${colors.dim}(${duration}s)${colors.reset}`);
       return true;
     }
     console.log(`${colors.red}✗ FAILED${colors.reset} ${colors.dim}(${duration}s)${colors.reset}`);
@@ -65,6 +71,11 @@ async function main() {
   const startTime = Date.now();
   const results = [];
 
+  // Determine local tsc executable
+  const tscBin = process.platform === 'win32'
+    ? path.join(projectRoot, 'node_modules', '.bin', 'tsc.cmd')
+    : path.join(projectRoot, 'node_modules', '.bin', 'tsc');
+
   // 1. Auto-Fix ESLint Issues
   console.log(`${colors.dim}Step 1: Code Quality & Auto-Formatting${colors.reset}`);
   const lintFixed = runStep('ESLint Auto-Fix (eslint . --fix)', 'npx eslint . --fix');
@@ -77,7 +88,7 @@ async function main() {
 
   // 2. Strict TypeScript Compilation Check
   console.log(`\n${colors.dim}Step 2: Strict Type-Check (Zero Any/Contract Discrepancies)${colors.reset}`);
-  const tscOk = runStep('TypeScript Strict Check (tsc --noEmit)', 'npx tsc --noEmit');
+  const tscOk = runStep('TypeScript Strict Check (tsc --noEmit)', `"${tscBin}" --noEmit`);
   results.push({ name: 'TypeScript Strict Check', ok: tscOk });
 
   // 3. Dependency Security Audit
@@ -99,10 +110,10 @@ async function main() {
 
   // Auto-stage modified files if inside a git repo
   try {
-    const stagedCheck = execSync('git status --porcelain', { encoding: 'utf-8' });
+    const stagedCheck = execSync('git status --porcelain', { cwd: projectRoot, encoding: 'utf-8' });
     if (stagedCheck && stagedCheck.trim()) {
       // If run before commit, auto-stage any files touched by eslint --fix
-      execSync('git add -u', { stdio: 'ignore' });
+      execSync('git add -u', { cwd: projectRoot, stdio: 'ignore' });
     }
   } catch {
     // Non-git directory or no changes

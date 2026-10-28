@@ -22,7 +22,8 @@ export type DisabilityTab =
   | 'caregiver'
   | 'deaf'
   | 'orchestrator'
-  | 'progress';
+  | 'progress'
+  | 'admin';
 
 export interface RouteState {
   view: AppView;
@@ -38,7 +39,7 @@ export const VALID_VIEWS: readonly AppView[] = [
 ] as const;
 
 export const VALID_DISABILITY_TABS: readonly DisabilityTab[] = [
-  'hub', 'chat', 'vision', 'deaf', 'caregiver', 'orchestrator', 'org', 'settings', 'video', 'studio', 'bridge', 'radar', 'progress'
+  'hub', 'chat', 'vision', 'deaf', 'caregiver', 'orchestrator', 'org', 'settings', 'video', 'studio', 'bridge', 'radar', 'progress', 'admin'
 ] as const;
 
 export const STORAGE_KEYS = {
@@ -71,6 +72,7 @@ export function parseRoute(hashString: string): RouteState {
   // Handle direct aliases
   if (clean === 'privacy') return { view: 'privacy_security' };
   if (clean === 'intelligence') return { view: 'profile' };
+  if (clean === 'admin' || clean === 'users' || clean === 'database') return { view: 'admin' };
 
   // Handle direct disability tab shorthands (e.g. #vision, #deaf, #hub, #book_studio, #toolkit)
   if (clean === 'toolkit' || clean === 'assistant' || clean === 'scanner' || clean === 'stickers') return { view: 'toolkit' };

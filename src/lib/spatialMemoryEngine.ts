@@ -13,7 +13,7 @@ import {
   SpatialCorrection,
 } from '../types/spatialMemory2';
 import { db, cleanDataForFirestore } from './firebase';
-import { doc, setDoc, getDoc, collection, getDocs, deleteField } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, deleteField, query, limit } from 'firebase/firestore';
 import { encryptSpatialRecord, decryptSpatialRecord, encryptData, decryptData } from './userCryptoEngine';
 
 export type {
@@ -301,7 +301,7 @@ export function getSpatialObjects(uid: string): SpatialObjectRecord[] {
 export async function loadSpatialObjectsFromFirestore(uid: string): Promise<SpatialObjectRecord[]> {
   if (!uid || typeof window === 'undefined' || !db) return getSpatialObjects(uid);
   try {
-    const colRef = collection(db, `users/${uid}/spatialObjects`);
+    const colRef = query(collection(db, `users/${uid}/spatialObjects`), limit(150));
     const snap = await getDocs(colRef);
     if (snap.empty) return getSpatialObjects(uid);
 

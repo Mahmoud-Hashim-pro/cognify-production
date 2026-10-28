@@ -6,6 +6,7 @@ import ProgressBar from '../shared/ProgressBar';
 import ExerciseFeedback from '../shared/ExerciseFeedback';
 import { Volume2, BookOpen, Mic, MicOff, Sparkles, VolumeX, Repeat, CheckCircle2 } from 'lucide-react';
 import { learningAudio } from '../../../lib/learningAudio';
+import { toast } from '../../Toast';
 
 interface ReadingModuleProps {
   userId: string;
@@ -85,7 +86,7 @@ export const ReadingModule: React.FC<ReadingModuleProps> = ({
   const handleSpeechPronounce = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert(isArabic ? 'متصفحك لا يدعم التعرف على الصوت مباشرة.' : 'Speech Recognition is not supported in this browser.');
+      toast.warning(isArabic ? 'متصفحك لا يدعم التعرف على الصوت مباشرة.' : 'Speech Recognition is not supported in this browser.', isArabic ? 'غير مدعوم' : 'Unsupported');
       return;
     }
 

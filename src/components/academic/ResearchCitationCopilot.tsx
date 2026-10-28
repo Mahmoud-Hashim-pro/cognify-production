@@ -316,6 +316,8 @@ Provide an honest, constructive 3-point diagnostic:
                   type="text"
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
+                  placeholder="2024"
+                  aria-label={isAr ? 'سنة النشر' : 'Year'}
                   className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none font-mono"
                 />
               </div>

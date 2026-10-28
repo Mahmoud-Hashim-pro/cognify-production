@@ -4,12 +4,13 @@ import { UserProfile, AccessibilityPassport, LanguagePreference, PedagogyStyle }
 import { 
   Settings, UserCheck, BookOpen, Volume2, ShieldCheck, 
   Globe, MessageSquare, SlidersHorizontal, User, Play, 
-  RotateCcw, CheckCircle2, ChevronDown, Check,
+  RotateCcw, LogOut, CheckCircle2, ChevronDown, Check,
   AlertCircle, Loader2, Gauge, Activity, Sun, Moon, Contrast, 
   EyeOff, Monitor, Save, Sparkles, VolumeX, Eye
 } from 'lucide-react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
+import { logout } from '../lib/firebase';
 import { toast } from './Toast';
 import { speak } from '../lib/tts';
 
@@ -40,7 +41,7 @@ function formatSavedTime(date: Date, isAr: boolean): string {
       ? `${day} ${month} ${year} - ${hours}:${minutes} ${period}`
       : `${month} ${day}, ${year} - ${hours}:${minutes} ${period}`;
   } catch {
-    return isAr ? '25 أكتوبر 2024 - 12:30 م' : 'Oct 25, 2024 - 12:30 PM';
+    return isAr ? 'تم الحفظ' : 'Saved';
   }
 }
 
@@ -125,12 +126,29 @@ export default function StudentSettingsView({
   });
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  // Sync contrast mode when isDarkMode prop changes
+  const profileRef = useRef(profile);
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
+
+  // Sync contrast mode when isDarkMode prop changes (contrastMode removed from deps to prevent re-render loop)
   useEffect(() => {
     if (contrastMode !== 'contrast') {
       setContrastMode(isDarkMode ? 'dark' : 'light');
     }
-  }, [isDarkMode, contrastMode]);
+  }, [isDarkMode]);
+
+  // Clean up debounced save timeout and speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Apply root font scale & motion reduction
   useEffect(() => {
@@ -173,9 +191,10 @@ export default function StudentSettingsView({
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(async () => {
       try {
+        const currentProfile = profileRef.current;
         const pedStyle: PedagogyStyle = newDetail === 'concise' ? 'simplified' : newDetail === 'detailed' ? 'socratic' : 'scaffolded';
         
-        const existingPassport = profile.accessibilityPassport || {
+        const existingPassport = currentProfile.accessibilityPassport || {
           primaryMode: profile.accessibilityMode || 'None',
           primaryCategory: profile.accessibilityMode || 'Multiple',
           highContrast: false,
@@ -198,7 +217,7 @@ export default function StudentSettingsView({
         };
 
         const updatedProfile: UserProfile = {
-          ...profile,
+          ...currentProfile,
           language: newInterfaceLang,
           level: newLevel,
           preferredPedagogyStyle: pedStyle,
@@ -208,8 +227,8 @@ export default function StudentSettingsView({
 
         if (setProfile) setProfile(updatedProfile);
 
-        if (profile.uid && profile.uid !== 'guest-explorer') {
-          await setDoc(doc(db, `users/${profile.uid}`), cleanDataForFirestore(updatedProfile), { merge: true });
+        if (currentProfile.uid && currentProfile.uid !== 'guest-explorer') {
+          await setDoc(doc(db, `users/${currentProfile.uid}`), cleanDataForFirestore(updatedProfile), { merge: true });
         }
 
         const now = new Date();
@@ -302,26 +321,33 @@ export default function StudentSettingsView({
       accessibilityPassport: defaultPassport,
     };
 
-    if (setProfile) setProfile(resetProfile);
-    if (profile.uid && profile.uid !== 'guest-explorer') {
-      await setDoc(doc(db, `users/${profile.uid}`), cleanDataForFirestore(resetProfile), { merge: true });
-    }
-
-    const now = new Date();
-    const formatted = formatSavedTime(now, isAr);
-    setLastSavedStr(formatted);
     try {
-      localStorage.setItem('cognify_settings_last_saved', formatted);
-      localStorage.setItem('cognify_settings_voice', defaultVoice);
-      localStorage.setItem('cognify_settings_audio_quality', defaultQuality);
-      localStorage.setItem('cognify_font_scale', defaultScale);
-      localStorage.setItem('cognify_high_contrast', 'false');
-      localStorage.setItem('cognify_reduce_motion', 'false');
-      localStorage.setItem('cognify_auto_save_settings', 'true');
-    } catch {}
+      if (setProfile) setProfile(resetProfile);
+      const activeUid = profileRef.current.uid;
+      if (activeUid && activeUid !== 'guest-explorer') {
+        await setDoc(doc(db, `users/${activeUid}`), cleanDataForFirestore(resetProfile), { merge: true });
+      }
 
-    setSaveStatus('saved');
-    toast.success(localize(profile.language, 'Preferences restored to defaults', 'تمت استعادة الإعدادات الافتراضية بنجاح'));
+      const now = new Date();
+      const formatted = formatSavedTime(now, isAr);
+      setLastSavedStr(formatted);
+      try {
+        localStorage.setItem('cognify_settings_last_saved', formatted);
+        localStorage.setItem('cognify_settings_voice', defaultVoice);
+        localStorage.setItem('cognify_settings_audio_quality', defaultQuality);
+        localStorage.setItem('cognify_font_scale', defaultScale);
+        localStorage.setItem('cognify_high_contrast', 'false');
+        localStorage.setItem('cognify_reduce_motion', 'false');
+        localStorage.setItem('cognify_auto_save_settings', 'true');
+      } catch {}
+
+      setSaveStatus('saved');
+      toast.success(localize(profile.language, 'Preferences restored to defaults', 'تمت استعادة الإعدادات الافتراضية بنجاح'));
+    } catch (err) {
+      console.error('Failed to restore defaults:', err);
+      setSaveStatus('error');
+      toast.error(localize(profile.language, 'Failed to restore default settings', 'فشل استعادة الإعدادات الافتراضية'));
+    }
   };
 
   return (
@@ -476,6 +502,7 @@ export default function StudentSettingsView({
                       type="button"
                       role="switch"
                       aria-checked={screenReader}
+                      aria-label={localize(profile.language, 'Screen Reader', 'قارئ الشاشة')}
                       onClick={() => {
                         const next = !screenReader;
                         setScreenReader(next);
@@ -519,6 +546,7 @@ export default function StudentSettingsView({
                       type="button"
                       role="switch"
                       aria-checked={reduceMotion}
+                      aria-label={localize(profile.language, 'Reduce Motion', 'تقليل الحركة')}
                       onClick={() => {
                         const next = !reduceMotion;
                         setReduceMotion(next);
@@ -922,6 +950,7 @@ export default function StudentSettingsView({
                       type="button"
                       role="switch"
                       aria-checked={autoSave}
+                      aria-label={localize(profile.language, 'Auto-save Settings', 'الحفظ التلقائي للإعدادات')}
                       onClick={() => {
                         const next = !autoSave;
                         setAutoSave(next);
@@ -969,6 +998,42 @@ export default function StudentSettingsView({
                       className="px-5 py-2 rounded-xl bg-[#082344] border border-[#16395E] hover:border-[#00AEB8]/60 text-xs font-bold text-[#F4F7FB] hover:text-[#00AEB8] transition-all cursor-pointer active:scale-95"
                     >
                       {localize(profile.language, 'Restore', 'استعادة')}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Row 3: Account Sign Out / Log Out */}
+                <div className="flex items-center justify-between gap-4 pt-3 border-t border-[#16395E]/60">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                      <LogOut className="w-5 h-5 text-rose-400 rtl:rotate-180" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-sm font-bold text-[#F4F7FB] block truncate">
+                        {localize(profile.language, 'Sign Out / Log Out', 'تسجيل الخروج من الحساب')}
+                      </span>
+                      <p className="text-xs text-[#A9C4DD] mt-0.5 line-clamp-1">
+                        {profile.email || localize(profile.language, 'Sign out safely from your active session', 'إنهاء الجلسة الحالية والرجوع لشاشة الدخول')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Sign Out Button */}
+                  <div className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await logout();
+                        } catch (err) {
+                          console.error('Logout error:', err);
+                          toast.error(localize(profile.language, 'Failed to log out safely', 'فشل تسجيل الخروج، يرجى المحاولة مرة أخرى'));
+                        }
+                      }}
+                      className="px-4 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-xs font-bold text-rose-300 hover:text-white transition-all cursor-pointer active:scale-95 flex items-center gap-2"
+                    >
+                      <LogOut className="w-3.5 h-3.5 rtl:rotate-180" />
+                      <span>{localize(profile.language, 'Log Out', 'تسجيل الخروج')}</span>
                     </button>
                   </div>
                 </div>

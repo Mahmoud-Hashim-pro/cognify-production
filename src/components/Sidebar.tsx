@@ -2,7 +2,7 @@ import { localize, isArabicLocale, getTranslation } from '../lib/translations';
 import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
-  User, Settings, LifeBuoy, MessageSquare, AlertCircle, 
+  User, Settings, LifeBuoy, MessageSquare, AlertCircle, Database, 
   LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen, LayoutDashboard
 } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
@@ -236,13 +236,13 @@ export default function Sidebar({
           <button
             type="button"
             onClick={() => { onClose?.(); setCurrentView('admin'); }}
-            className={navBtn(currentView === 'admin') + ' relative mt-2'}
-            aria-current={currentView === 'admin' ? 'page' : undefined}
+            className={navBtn(currentView === 'admin' || (currentView === 'disability' && activeDisabilityTab === 'admin')) + ' relative mt-2'}
+            aria-current={currentView === 'admin' || (currentView === 'disability' && activeDisabilityTab === 'admin') ? 'page' : undefined}
           >
-            <AlertCircle className={navIcon(currentView === 'admin')} aria-hidden="true" />
-            {localize(profile.language, 'Admin Portal', 'لوحة الإدارة')}
+            <Database className={navIcon(currentView === 'admin')} aria-hidden="true" />
+            {localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}
             <span className={`ms-auto text-xs font-semibold ${isDarkMode ? 'text-stone-300 bg-stone-800 border-stone-700' : 'text-stone-800 bg-stone-100 border-stone-300'} border px-2 py-0.5 rounded-md`}>
-              {localize(profile.language, 'Staff', 'مقيّد')}
+              {localize(profile.language, 'Admin', 'مشرف')}
             </span>
           </button>
         )}

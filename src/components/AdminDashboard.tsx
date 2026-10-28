@@ -14,7 +14,7 @@ import {
   Crown, UserMinus, Brain, Heart, GraduationCap,
   Accessibility, Eye, User as UserIcon, Copy, Download,
   Building2, X, Sliders, FileJson, BarChart2,
-  ArrowLeft, Database, Terminal, Key, Check
+  ArrowLeft, Database, Terminal, Key, Check, AlertCircle
 } from "lucide-react";
 import { sectionOf } from "../lib/access";
 import { USER_SUBCOLLECTIONS } from "../types/privacySecurity";
@@ -91,6 +91,7 @@ const sanitizeCsvCell = (val: unknown): string => {
 export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }: AdminDashboardProps) {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usersError, setUsersError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sectionFilter, setSectionFilter] = useState<AccountPath | 'all'>('all');
   const [roleFilter, setRoleFilter] = useState<'all' | 'superadmin' | 'normal'>('all');
@@ -243,9 +244,15 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
       uniqueUsersData.sort((a, b) => getLatestTime(b) - getLatestTime(a));
 
       setUsers(uniqueUsersData);
+      setUsersError(null);
       setLoading(false);
     }, (error) => {
       setLoading(false);
+      const isPermissionDenied = (error as any)?.code === 'permission-denied' || String(error).includes('permission-denied') || String(error).includes('Missing or insufficient permissions');
+      const errorMsg = isPermissionDenied
+        ? 'Directory access restricted by Firestore security rules. Ensure your admin email is verified in Firebase Authentication.'
+        : ((error as any)?.message || 'Failed to load user records from Firestore.');
+      setUsersError(errorMsg);
       try {
         handleFirestoreError(error, OperationType.LIST, "users");
       } catch (e) {
@@ -597,7 +604,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
 
   if (!isAdmin) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#080409] text-slate-100 p-6">
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#061A33] text-slate-100 p-6">
         <ShieldAlert className="w-16 h-16 text-rose-500 mb-4" />
         <h2 className="text-2xl font-black uppercase tracking-tighter">Access Denied</h2>
         <p className="text-slate-400 font-medium text-sm mt-2">You do not have administrative privileges.</p>
@@ -608,7 +615,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
   return (
     <div
       data-security-zone={adminView === 'database' ? 'database-dashboard' : 'admin-dashboard'}
-      className="flex-1 flex flex-col bg-[#080409] text-slate-100 relative overflow-hidden custom-scrollbar font-sans selection:bg-emerald-500/30 selection:text-emerald-300 min-h-screen"
+      className="flex-1 flex flex-col bg-[#061A33] text-slate-100 relative overflow-hidden custom-scrollbar font-sans selection:bg-emerald-500/30 selection:text-emerald-300 min-h-screen"
     >
       {/* Background Nagm Gradient Accents */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -662,11 +669,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
       )}
 
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
-      <header className="flex items-center gap-4 p-5 md:p-8 shrink-0 border-b border-[#4A1224]/60 bg-[#080409]/80 backdrop-blur-xl shadow-lg z-20">
+      <header className="flex items-center gap-4 p-5 md:p-8 shrink-0 border-b border-[#16395E]/60 bg-[#061A33]/80 backdrop-blur-xl shadow-lg z-20">
         {onNavigateBack && (
           <button
             onClick={onNavigateBack}
-            className="p-2.5 text-slate-400 hover:text-slate-100 bg-[#0E0610]/90 hover:bg-slate-800/90 border border-[#4A1224]/50/70 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+            className="p-2.5 text-slate-400 hover:text-slate-100 bg-[#082344]/90 hover:bg-slate-800/90 border border-[#16395E]/50/70 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
             title="Back to Assistant / العودة للمساعد"
           >
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -677,7 +684,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
           onClick={onMenuClick}
           aria-label="Toggle menu"
           title="Open Menu"
-          className="p-2.5 text-slate-400 hover:text-slate-100 bg-[#0E0610]/90 hover:bg-slate-800/90 border border-[#4A1224]/50/70 rounded-xl active:scale-95 shrink-0"
+          className="p-2.5 text-slate-400 hover:text-slate-100 bg-[#082344]/90 hover:bg-slate-800/90 border border-[#16395E]/50/70 rounded-xl active:scale-95 shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -700,7 +707,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               ) : adminView === 'resilience' ? (
                 <Activity className="w-6 h-6 text-emerald-400" />
               ) : (
-                <Users className="w-6 h-6 text-[#E5A93C]" />
+                <Users className="w-6 h-6 text-[#00AEB8]" />
               )}
             </div>
             <div>
@@ -729,11 +736,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
 
           {/* Navigation Tabs Pill */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1 p-1 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-2xl backdrop-blur-md overflow-x-auto custom-scrollbar">
+            <div className="flex items-center gap-1 p-1 bg-[#082344]/95 border border-[#16395E]/60 rounded-2xl backdrop-blur-md overflow-x-auto custom-scrollbar">
               <button
                 onClick={() => setAdminView('directory')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                  adminView === 'directory' ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  adminView === 'directory' ? 'bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 <Users className="w-3.5 h-3.5" /> Directory
@@ -816,7 +823,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
 
             {/* Cloud Firestore Status Pill */}
             {isAdmin && (
-              <div className="hidden xl:flex items-center gap-2 px-3 py-2 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-xl text-xs font-bold text-slate-300 shadow-inner">
+              <div className="hidden xl:flex items-center gap-2 px-3 py-2 bg-[#082344]/95 border border-[#16395E]/60 rounded-xl text-xs font-bold text-slate-300 shadow-inner">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -844,8 +851,17 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
           {/* ════ VIEW 1: DIRECTORY ════ */}
           {adminView === 'directory' && (
             <div className="space-y-6 animate-in fade-in duration-200">
+              {usersError && (
+                <div role="alert" className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex items-start gap-3 backdrop-blur-xl">
+                  <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 text-sm">
+                    <p className="font-bold mb-0.5">Directory Data Notice</p>
+                    <p className="text-xs text-amber-300/90 leading-relaxed">{usersError}</p>
+                  </div>
+                </div>
+              )}
               {/* Super Admin Team Section */}
-              <section className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6">
+              <section className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6">
                 <div className="flex items-center justify-between gap-3 mb-5">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded-2xl">
@@ -885,7 +901,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                               src={a.photoURL}
                               alt={a.name || 'Super Admin Avatar'}
                               onError={() => setFailedAvatarUrls(prev => ({ ...prev, [a.photoURL!]: true }))}
-                              className="w-10 h-10 rounded-2xl object-cover border border-amber-500/40 hover:border-[#E5A93C] transition-all shadow-md bg-slate-800"
+                              className="w-10 h-10 rounded-2xl object-cover border border-amber-500/40 hover:border-[#00AEB8] transition-all shadow-md bg-slate-800"
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-black text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40">
@@ -941,11 +957,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   aria-pressed={sectionFilter === 'all'}
                   className={`flex items-center gap-4 p-5 rounded-3xl border text-left transition-all backdrop-blur-xl ${
                     sectionFilter === 'all'
-                      ? 'bg-[#4A1224]/40 border-[#E5A93C]/50 ring-2 ring-[#E5A93C]/20 shadow-xl'
-                      : 'bg-[#0E0610]/70 border-[#4A1224]/60 hover:border-[#4A1224]/50'
+                      ? 'bg-[#16395E]/40 border-[#00AEB8]/50 ring-2 ring-[#00AEB8]/20 shadow-xl'
+                      : 'bg-[#082344]/70 border-[#16395E]/60 hover:border-[#16395E]/50'
                   }`}
                 >
-                  <div className="p-3 rounded-2xl bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/30">
+                  <div className="p-3 rounded-2xl bg-[#16395E]/60 text-[#00AEB8] border border-[#00AEB8]/30">
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
@@ -968,7 +984,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                       className={`flex items-center gap-4 p-5 rounded-3xl border text-left transition-all backdrop-blur-xl ${
                         active
                           ? 'bg-slate-800/80 border-slate-600 ring-2 ring-white/10 shadow-xl'
-                          : 'bg-[#0E0610]/70 border-[#4A1224]/60 hover:border-[#4A1224]/50'
+                          : 'bg-[#082344]/70 border-[#16395E]/60 hover:border-[#16395E]/50'
                       }`}
                     >
                       <div className={`p-3 rounded-2xl ${meta.cls}`}>
@@ -993,10 +1009,10 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                       placeholder="Search by name, email, UID, faculty, disability..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-[#0E0610]/90 border border-[#4A1224]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#E5A93C]/30 focus:border-[#E5A93C] outline-none transition-all"
+                      className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#00AEB8]/30 focus:border-[#00AEB8] outline-none transition-all"
                     />
                   </div>
-                  <div className="flex items-center gap-1.5 p-1 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-2xl overflow-x-auto custom-scrollbar">
+                  <div className="flex items-center gap-1.5 p-1 bg-[#082344]/95 border border-[#16395E]/60 rounded-2xl overflow-x-auto custom-scrollbar">
                     <button
                       onClick={() => setRoleFilter('all')}
                       className={`px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
@@ -1044,7 +1060,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                         key={sec}
                         onClick={() => setSectionFilter(sec)}
                         className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
-                          sectionFilter === sec ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                          sectionFilter === sec ? 'bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                         }`}
                       >
                         {sec === 'all' ? 'All' : SECTION_META[sec].label}
@@ -1056,7 +1072,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <button
                     onClick={copyAllDirectoryEmails}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#150917] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded-xl border border-[#4A1224]/50 transition-all shadow-md active:scale-95"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#0D2542] hover:bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded-xl border border-[#16395E]/50 transition-all shadow-md active:scale-95"
                   >
                     <Copy className="w-3.5 h-3.5" /> Copy Emails
                   </button>
@@ -1078,15 +1094,15 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               {/* User Directory Table */}
               {loading ? (
                 <div className="flex flex-col items-center justify-center p-24">
-                  <Loader2 className="w-10 h-10 text-[#E5A93C] animate-spin" />
+                  <Loader2 className="w-10 h-10 text-[#00AEB8] animate-spin" />
                   <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-4">Loading directory...</p>
                 </div>
               ) : (
-                <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl overflow-hidden">
+                <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-[#0E0610]/95 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-[#4A1224]/60">
+                        <tr className="bg-[#082344]/95 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-[#16395E]/60">
                           <th className="p-4">User &amp; Profile Photo</th>
                           <th className="p-4">Section &amp; Disability</th>
                           <th className="p-4">System Role</th>
@@ -1124,10 +1140,10 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                       src={u.photoURL}
                                       alt={u.name || 'User Avatar'}
                                       onError={() => setFailedAvatarUrls(prev => ({ ...prev, [u.photoURL!]: true }))}
-                                      className="w-10 h-10 rounded-2xl object-cover border border-[#4A1224]/60 group-hover/avatar:border-[#E5A93C] group-hover/avatar:scale-105 transition-all shadow-md bg-slate-800"
+                                      className="w-10 h-10 rounded-2xl object-cover border border-[#16395E]/60 group-hover/avatar:border-[#00AEB8] group-hover/avatar:scale-105 transition-all shadow-md bg-slate-800"
                                     />
                                   ) : (
-                                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-[#4A1224]/60 text-[#E5A93C] shadow-inner">
+                                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-[#16395E]/60 text-[#00AEB8] shadow-inner">
                                       {(u.name || u.email || '?').charAt(0).toUpperCase()}
                                     </div>
                                   )}
@@ -1138,7 +1154,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                 </div>
 
                                 <div className="min-w-0">
-                                  <div className="font-bold text-white group-hover:text-[#E5A93C] transition-colors flex items-center gap-1.5 truncate">
+                                  <div className="font-bold text-white group-hover:text-[#00AEB8] transition-colors flex items-center gap-1.5 truncate">
                                     <span className="truncate">{u.name || u.email?.split('@')[0] || 'Unnamed User'}</span>
                                     {presence.status === 'online' && (
                                       <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
@@ -1148,12 +1164,12 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                     <Sliders className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                                   </div>
                                   <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="font-mono text-[10px] text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-[#4A1224]/50/50" title={u.uid}>
+                                    <span className="font-mono text-[10px] text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-[#16395E]/50/50" title={u.uid}>
                                       {u.uid.slice(0, 8)}…
                                     </span>
                                     <button
                                       onClick={(e) => { e.stopPropagation(); copyToClipboard(u.uid, `UID copied: ${u.uid}`); }}
-                                      className="text-slate-500 hover:text-[#E5A93C] p-0.5 transition-colors"
+                                      className="text-slate-500 hover:text-[#00AEB8] p-0.5 transition-colors"
                                       title="Copy Firebase UID"
                                     >
                                       {copiedText === u.uid ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
@@ -1186,7 +1202,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                     <Crown className="w-3 h-3 text-amber-400" /> Super Admin User
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-800/90 text-slate-300 border border-[#4A1224]/50/70">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-800/90 text-slate-300 border border-[#16395E]/50/70">
                                     <UserIcon className="w-3 h-3 text-slate-400" /> Normal User
                                   </span>
                                 )}
@@ -1222,7 +1238,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                 <button
                                   onClick={() => setSelectedUserForModal(u)}
                                   title="Inspect full profile &amp; details"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-[#4A1224]/50 transition-colors"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-[#16395E]/50 transition-colors"
                                 >
                                   <Sliders className="w-3 h-3" /> Details
                                 </button>
@@ -1247,7 +1263,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                       <Crown className="w-3 h-3 text-amber-400" /> Founder
                                     </span>
                                   ) : norm(profile.email) === norm(u.email) ? (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 text-slate-400 border border-[#4A1224]/50 text-[10px] font-bold uppercase tracking-widest rounded-lg">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 text-slate-400 border border-[#16395E]/50 text-[10px] font-bold uppercase tracking-widest rounded-lg">
                                       (You)
                                     </span>
                                   ) : canManageSuperAdmin(profile, u) ? (
@@ -1379,12 +1395,12 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
           onClick={closePhotoLightbox}
         >
           <div
-            className="relative max-w-lg w-full bg-[#150917] border border-[#4A1224]/60 rounded-3xl overflow-hidden shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200"
+            className="relative max-w-lg w-full bg-[#0D2542] border border-[#16395E]/60 rounded-3xl overflow-hidden shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+                <div className="p-2 rounded-xl bg-[#16395E]/40 text-[#00AEB8] border border-[#00AEB8]/30">
                   <Eye className="w-5 h-5" />
                 </div>
                 <div>
@@ -1405,7 +1421,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               </button>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden bg-[#080409] border border-[#4A1224]/60 flex items-center justify-center p-2 min-h-[280px]">
+            <div className="relative rounded-2xl overflow-hidden bg-[#061A33] border border-[#16395E]/60 flex items-center justify-center p-2 min-h-[280px]">
               {photoLightboxUrl && !failedAvatarUrls[photoLightboxUrl] ? (
                 <img
                   src={photoLightboxUrl}
@@ -1414,7 +1430,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   className="max-h-[60vh] max-w-full rounded-xl object-contain shadow-2xl"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-3xl flex items-center justify-center font-black text-3xl bg-slate-800 border border-[#4A1224]/50 text-[#E5A93C]">
+                <div className="w-24 h-24 rounded-3xl flex items-center justify-center font-black text-3xl bg-slate-800 border border-[#16395E]/50 text-[#00AEB8]">
                   {(photoLightboxUser?.name || photoLightboxUser?.email || '?').charAt(0).toUpperCase()}
                 </div>
               )}
@@ -1437,13 +1453,13 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   href={photoLightboxUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-colors border border-[#4A1224]/50"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-colors border border-[#16395E]/50"
                 >
                   Open Original
                 </a>
                 <button
                   onClick={() => copyToClipboard(photoLightboxUrl, 'Photo URL copied')}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 hover:bg-[#E5A93C] text-slate-950 rounded-xl text-xs font-black transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 hover:bg-[#00AEB8] text-slate-950 rounded-xl text-xs font-black transition-colors"
                 >
                   <Copy className="w-3 h-3" /> Copy URL
                 </button>

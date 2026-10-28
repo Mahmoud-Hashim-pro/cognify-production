@@ -589,6 +589,7 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
+                  aria-label={isAr ? 'بحث عن طالب في مصفوفة المتابعة' : 'Search student in heatmap matrix'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={isAr ? 'بحث عن طالب في المصفوفة...' : 'Search student in heatmap...'}

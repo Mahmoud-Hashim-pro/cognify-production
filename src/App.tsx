@@ -374,11 +374,17 @@ export default function App() {
     // Initial check
     applyTheme(mediaQuery);
 
+    if (!mediaQuery) return;
+
     // Listen for system preference changes
     const handler = (e: MediaQueryListEvent) => applyTheme(e);
-    mediaQuery.addEventListener('change', handler);
-
-    return () => mediaQuery.removeEventListener('change', handler);
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+    } else if (typeof (mediaQuery as any).addListener === 'function') {
+      (mediaQuery as any).addListener(handler);
+      return () => (mediaQuery as any).removeListener(handler);
+    }
   }, []);
 
   // Sync manual state change (when user clicks toggle)
@@ -1212,7 +1218,28 @@ export default function App() {
           </div>
         );
       case 'admin':
-        return <AdminDashboard profile={activeProfile} onMenuClick={handleOpenMobileMenu} onNavigateBack={handleBack} />;
+        return (
+          <DisabilityModeView
+            ref={chatRef}
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigate={navigateTo}
+            onQuestionEvaluated={updateQuestionHistory}
+            syncMessages={syncActiveThread}
+            externalMessage={externalMessage}
+            onStreamingUpdate={(text) => setCurrentAIResponse(text)}
+            onSTTStateChange={setIsSTTActive}
+            currentTab="admin"
+            onTabChange={(newTab) => {
+              if (newTab === 'admin') return;
+              setDisabilityTab(newTab);
+              navigateTo('disability');
+            }}
+            setProfile={setProfile}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
+          />
+        );
       case 'support':
         return <SupportCenter profile={activeProfile} onMenuClick={handleOpenMobileMenu} onNavigateBack={handleBack} />;
 
@@ -1237,6 +1264,7 @@ export default function App() {
             setProfile={setProfile}
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
+            onLogout={handleLogout}
           />
         );
       default:
@@ -1256,6 +1284,7 @@ export default function App() {
             setProfile={setProfile}
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
+            onLogout={handleLogout}
           />
         );
     }

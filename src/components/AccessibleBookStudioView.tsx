@@ -580,6 +580,7 @@ export default function AccessibleBookStudioView({
                   onChange={handleFileUpload}
                   className="hidden"
                   id="book-studio-file-upload"
+                  aria-label={isArLocale ? 'رفع ملف المستند' : 'Upload document file'}
                 />
                 <button
                   type="button"
@@ -663,7 +664,7 @@ export default function AccessibleBookStudioView({
                     </label>
                     <input
                       type="text"
-                      value={metadata.title}
+                      id="book-meta-title" aria-label={isArLocale ? 'عنوان الكتاب أو المستند' : 'Document Title'} value={metadata.title}
                       onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -678,7 +679,7 @@ export default function AccessibleBookStudioView({
                     </label>
                     <input
                       type="text"
-                      value={metadata.subtitle || ''}
+                      id="book-meta-subtitle" aria-label={isArLocale ? 'العنوان الفرعي أو الوحدة' : 'Subtitle or Unit'} value={metadata.subtitle || ''}
                       onChange={(e) => setMetadata({ ...metadata, subtitle: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -693,7 +694,7 @@ export default function AccessibleBookStudioView({
                     </label>
                     <input
                       type="text"
-                      value={metadata.author}
+                      id="book-meta-author" aria-label={isArLocale ? 'المؤلف أو المعلم' : 'Author or Teacher'} value={metadata.author}
                       onChange={(e) => setMetadata({ ...metadata, author: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -707,7 +708,7 @@ export default function AccessibleBookStudioView({
                     </label>
                     <input
                       type="text"
-                      value={metadata.subject}
+                      id="book-meta-subject" aria-label={isArLocale ? 'المادة التخصصية' : 'Subject'} value={metadata.subject}
                       onChange={(e) => setMetadata({ ...metadata, subject: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -721,7 +722,7 @@ export default function AccessibleBookStudioView({
                     </label>
                     <input
                       type="text"
-                      value={metadata.gradeLevel}
+                      id="book-meta-grade" aria-label={isArLocale ? 'المرحلة أو الصف الدراسي' : 'Grade or Educational Level'} value={metadata.gradeLevel}
                       onChange={(e) => setMetadata({ ...metadata, gradeLevel: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -940,6 +941,8 @@ export default function AccessibleBookStudioView({
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
+                      id="book-meta-cover"
+                      aria-label={isArLocale ? 'إدراج صفحة غلاف كاملة' : 'Include Title Cover Page'}
                       checked={metadata.includeCoverPage}
                       onChange={(e) => setMetadata({ ...metadata, includeCoverPage: e.target.checked })}
                       className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
@@ -952,6 +955,8 @@ export default function AccessibleBookStudioView({
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
+                      id="book-meta-toc"
+                      aria-label={isArLocale ? 'إدراج فهرس محتويات' : 'Include Table of Contents'}
                       checked={metadata.includeTableOfContents}
                       onChange={(e) => setMetadata({ ...metadata, includeTableOfContents: e.target.checked })}
                       className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
@@ -964,6 +969,8 @@ export default function AccessibleBookStudioView({
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
+                      id="book-meta-answer-key"
+                      aria-label={isArLocale ? 'إدراج ملحق نموذج الإجابة' : 'Include Answer Key Appendix'}
                       checked={metadata.includeAnswerKey}
                       onChange={(e) => setMetadata({ ...metadata, includeAnswerKey: e.target.checked })}
                       className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
@@ -1108,10 +1115,11 @@ export default function AccessibleBookStudioView({
                                 <div className="flex items-center gap-2 text-[10px]">
                                   <span className="text-stone-400">{isArLocale ? 'الدرجات:' : 'Marks:'}</span>
                                   <input
-                                    type="number"
-                                    min="1"
-                                    max="50"
-                                    value={q.points || 1}
+                      type="number"
+                      min="1"
+                      max="50"
+                      aria-label={isArLocale ? 'درجات السؤال' : 'Question points'}
+                      value={q.points || 1}
                                     onChange={(e) => {
                                       const pts = parseInt(e.target.value, 10) || 1;
                                       setSections((prev) =>

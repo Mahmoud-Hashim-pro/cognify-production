@@ -862,7 +862,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!files) return;
 
     if (!profile.uid) {
-         alert("Please login first");
+         toast.warning(isArabicLocale(profile.language) ? 'يرجى تسجيل الدخول أولاً لإرفاق المستندات والملفات.' : 'Please log in first to attach files.', isArabicLocale(profile.language) ? 'مطلوب تسجيل الدخول' : 'Authentication Required');
          return;
     }
 

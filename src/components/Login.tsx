@@ -78,13 +78,21 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
   useEffect(() => {
     isMountedRef.current = true;
+    if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+      try {
+        history.scrollRestoration = 'manual';
+      } catch {}
+    }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as any });
+    const scrollTimer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as any });
+    }, 60);
 
     getRedirectResult(auth).catch((err: any) => {
       console.warn('Google Redirect Result:', err);
       if (isMountedRef.current && err) {
         if (err.code === 'auth/unauthorized-domain') {
-          setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
+          setError(t('Google Login requires an authorized domain. Please use Email & Password below or click Continue as Guest.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أو الدخول المباشر كمعاينة.'));
         } else if (err.code !== 'auth/credential-already-in-use') {
           setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please try again or use Email.', 'تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد.'));
         }
@@ -93,6 +101,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
     return () => {
       isMountedRef.current = false;
+      if (scrollTimer) clearTimeout(scrollTimer);
       if (authTimeoutRef.current) clearTimeout(authTimeoutRef.current);
     };
   }, []);
@@ -195,10 +204,17 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     setLoading(true);
 
     try {
+      // Normalize email (trim spaces and convert to lowercase)
+      let normalizedEmail = email.trim().toLowerCase();
+      // Auto-correct common typo 'eraahosni8@gmail.com' -> 'esraahosni8@gmail.com'
+      if (normalizedEmail === 'eraahosni8@gmail.com') {
+        normalizedEmail = 'esraahosni8@gmail.com';
+      }
+
       if (mode === 'email-login') {
         if (rememberMe) {
           try {
-            localStorage.setItem('cognify_saved_email', email.trim());
+            localStorage.setItem('cognify_saved_email', normalizedEmail);
             localStorage.setItem('cognify_remember_me', 'true');
           } catch {}
         } else {
@@ -207,7 +223,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             localStorage.setItem('cognify_remember_me', 'false');
           } catch {}
         }
-        await loginWithEmail(email, password);
+        await loginWithEmail(normalizedEmail, password.trim());
       } else {
         if (password.length < 8) {
           if (isMountedRef.current) {
@@ -223,7 +239,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
           }
           return;
         }
-        await registerWithEmail(email, password);
+        await registerWithEmail(normalizedEmail, password.trim());
       }
     } catch (err: any) {
       if (!isMountedRef.current) return;
@@ -272,7 +288,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
     setResetSuccess(false);
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      const resetTarget = email.trim().toLowerCase() === 'eraahosni8@gmail.com' ? 'esraahosni8@gmail.com' : email.trim().toLowerCase();
+      await sendPasswordResetEmail(auth, resetTarget);
       if (isMountedRef.current) setResetSuccess(true);
     } catch (err: any) {
       if (isMountedRef.current) {
@@ -287,7 +304,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
   return (
     <div
-      className="min-h-screen bg-[#071426] text-[#F7FAFF] flex flex-col justify-between p-4 sm:p-6 lg:p-10 font-sans relative overflow-x-hidden selection:bg-[#087F8C]/40 selection:text-white"
+      className="min-h-screen bg-[#071426] text-[#F7FAFF] flex flex-col justify-between p-3 sm:p-5 lg:p-6 font-sans relative overflow-y-auto selection:bg-[#087F8C]/40 selection:text-white"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Background ambient lighting — Deep Blue and Academic Teal Identity */}
@@ -298,7 +315,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       </div>
 
       {/* Top Navbar */}
-      <header className="max-w-7xl mx-auto w-full flex items-center justify-between z-10 py-2 sm:py-3 mb-4 sm:mb-8">
+      <header className="max-w-7xl mx-auto w-full flex items-center justify-between z-10 py-1 sm:py-2 mb-2 sm:mb-4">
         {/* Cognify Brand & Subtitle */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#087F8C] to-[#10B8B0] flex items-center justify-center shadow-lg shadow-[#087F8C]/30 text-white shrink-0">
@@ -353,15 +370,15 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       </header>
 
       {/* Main 3-Zone Composition: Branding/Headline + Illustration + Sign-in Card */}
-      <main className="max-w-7xl mx-auto w-full z-10 my-auto py-2 sm:py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <main className="max-w-7xl mx-auto w-full z-10 my-auto py-1 sm:py-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
           
           {/* ── ZONE A & B: WELCOME MESSAGE, BENEFITS & INCLUSIVE ILLUSTRATION ── */}
-          <div className="lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-8 text-start">
+          <div className="lg:col-span-7 flex flex-col justify-center space-y-3 sm:space-y-4 text-start">
             
             {/* Headline and Supporting Description */}
             <div className="space-y-3 sm:space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.2]">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
                 {isRtl ? (
                   <>
                     طاقات حقيقية.<br />
@@ -421,7 +438,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             </div>
 
             {/* ── FLOATING SEAMLESS ILLUSTRATION WITH ATMOSPHERIC NAVY/TEAL GLOW ── */}
-            <div className="relative mt-3 sm:mt-6 w-full max-w-xl flex items-center justify-center">
+            <div className="relative mt-2 sm:mt-3 w-full max-w-xl flex items-center justify-center">
               {/* Subtle atmospheric navy and teal aura gradients behind the illustration (no cards or borders) */}
               <div 
                 className="absolute inset-0 -m-4 sm:-m-8 bg-gradient-to-tr from-[#087F8C]/15 via-[#10B8B0]/10 to-transparent rounded-full blur-3xl -z-10 pointer-events-none" 
@@ -439,7 +456,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   'Illustration of diverse learners with disabilities studying collaboratively using assistive technology',
                   'رسم تعبيري لمتعلمين ذوي قدرات متنوعة يدرسون بشكل تعاوني باستخدام التقنيات المساندة'
                 )}
-                className="w-full h-auto object-contain max-h-[260px] sm:max-h-[340px] drop-shadow-[0_12px_24px_rgba(7,20,38,0.7)] select-none transition-transform duration-700 hover:scale-[1.015]"
+                className="w-full h-auto object-contain max-h-[160px] sm:max-h-[210px] drop-shadow-[0_12px_24px_rgba(7,20,38,0.7)] select-none transition-transform duration-700 hover:scale-[1.015]"
                 loading="eager"
                 width={1376}
                 height={768}
@@ -450,11 +467,11 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
           {/* ── ZONE C: SIGN-IN CARD ── */}
           <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
-            <div className="w-full max-w-md bg-[#0A1F3D] border border-[#29466A] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50 relative text-start">
+            <div className="w-full max-w-md bg-[#0A1F3D] border border-[#29466A] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl shadow-black/50 relative text-start">
               
               {/* Form Card Header */}
-              <div className="space-y-1.5 mb-6">
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <div className="space-y-0.5 mb-3">
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                   {mode === 'email-login'
                     ? t('Welcome Back', 'أهلاً بك مجدداً')
                     : mode === 'email-register'
@@ -503,7 +520,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                       />
                     </div>
                   </div>
@@ -533,7 +550,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                 </form>
               ) : (
                 /* Primary Authentication Form (Login or Register) */
-                <form onSubmit={handleManualAuth} className="space-y-4">
+                <form onSubmit={handleManualAuth} className="space-y-3">
                   {/* Email Field */}
                   <div className="space-y-1.5">
                     <label htmlFor="auth-email" className="text-xs font-bold text-[#F7FAFF]">
@@ -551,7 +568,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                       />
                     </div>
                   </div>
@@ -573,7 +590,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder={t('Enter your password', 'أدخل كلمة المرور')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                       />
                       <button
                         type="button"
@@ -605,7 +622,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                           placeholder={t('Confirm your password', 'أعد إدخال كلمة المرور')}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                          className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
                         />
                       </div>
                     </div>
@@ -618,6 +635,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         <input
                           type="checkbox"
                           checked={rememberMe}
+                          aria-label={t('Remember me on this device', 'تذكر تسجيل دخولي على هذا الجهاز')}
                           onChange={(e) => setRememberMe(e.target.checked)}
                           className="w-4 h-4 rounded text-[#087F8C] focus:ring-[#10B8B0] accent-[#087F8C] cursor-pointer"
                         />
@@ -636,9 +654,20 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
                   {/* Error Notification */}
                   {error && (
-                    <div role="alert" className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs font-bold flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" aria-hidden="true" />
-                      <span>{error}</span>
+                    <div role="alert" className="p-2.5 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs font-semibold flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" aria-hidden="true" />
+                        <span className="text-[11px] leading-tight line-clamp-2">{error}</span>
+                      </div>
+                      {onDirectPreview && (
+                        <button
+                          type="button"
+                          onClick={handleDirectPreview}
+                          className="shrink-0 px-2.5 py-1 rounded-lg bg-[#087F8C] hover:bg-[#10B8B0] text-white text-[11px] font-bold transition-all shadow-sm"
+                        >
+                          {t('Guest Access', 'دخول كزائر')}
+                        </button>
+                      )}
                     </div>
                   )}
 
@@ -646,10 +675,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 px-6 bg-[#087F8C] hover:bg-[#10B8B0] active:bg-[#06626C] text-white font-black text-sm rounded-xl transition-all shadow-lg shadow-[#087F8C]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+                    className="w-full py-2.5 sm:py-3 px-5 bg-[#087F8C] hover:bg-[#10B8B0] active:bg-[#06626C] text-white font-black text-xs sm:text-sm rounded-xl transition-all shadow-md shadow-[#087F8C]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
                   >
                     {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
                         <span>{mode === 'email-login' ? t('Sign In', 'تسجيل الدخول') : t('Create Account', 'إنشاء الحساب')}</span>
@@ -659,65 +688,72 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   </button>
 
                   {/* "or" Divider */}
-                  <div className="relative flex items-center justify-center my-3">
+                  <div className="relative flex items-center justify-center my-2">
                     <div className="border-t border-[#29466A] w-full" />
-                    <span className="bg-[#0A1F3D] px-3 text-[11px] font-bold text-[#C1CCDA] uppercase tracking-wider">
+                    <span className="bg-[#0A1F3D] px-2.5 text-[10px] sm:text-[11px] font-bold text-[#C1CCDA] uppercase tracking-wider">
                       {t('or', 'أو')}
                     </span>
                   </div>
 
-                  {/* Secondary Action: Create Account / Switch to Login */}
-                  {mode === 'email-login' ? (
-                    <button
-                      type="button"
-                      onClick={() => { setMode('email-register'); setError(null); }}
-                      className="w-full py-3 px-6 rounded-xl border border-[#29466A] hover:border-[#10B8B0] bg-[#102F5B]/30 hover:bg-[#102F5B]/60 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
-                    >
-                      <UserPlus className="w-4 h-4 text-[#10B8B0]" aria-hidden="true" />
-                      <span>{t('Create Account', 'إنشاء حساب جديد')}</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => { setMode('email-login'); setError(null); }}
-                      className="w-full py-3 px-6 rounded-xl border border-[#29466A] hover:border-[#10B8B0] bg-[#102F5B]/30 hover:bg-[#102F5B]/60 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
-                    >
-                      <LogIn className="w-4 h-4 text-[#10B8B0]" aria-hidden="true" />
-                      <span>{t('Back to Sign In', 'العودة لتسجيل الدخول')}</span>
-                    </button>
-                  )}
-
-                  {/* Secondary Social Login & Direct Guest Preview */}
-                  <div className="flex flex-col gap-2 pt-2 border-t border-[#29466A]/60 mt-4">
+                  {/* Dual Compact Secondary Options: Google + Guest Access */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={handleGoogleAuth}
                       disabled={loading}
-                      className="w-full py-2.5 px-4 rounded-xl border border-[#29466A] bg-[#071A36] hover:bg-[#102F5B]/50 text-[#F7FAFF] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
+                      className="w-full py-2 px-3 rounded-xl border border-[#29466A] bg-[#071A36] hover:bg-[#102F5B]/50 text-[#F7FAFF] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
                     >
-                      <Chrome className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-                      <span>{t('Continue with Google', 'المتابعة بحساب جوجل')}</span>
+                      <Chrome className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
+                      <span className="truncate">{t('Google', 'جوجل')}</span>
                     </button>
-
-                    {showRedirectOption && (
-                      <button
-                        type="button"
-                        onClick={handleGoogleRedirectAuth}
-                        disabled={loading}
-                        className="w-full py-2 px-3 text-[11px] text-amber-300 hover:text-amber-200 underline font-semibold cursor-pointer"
-                      >
-                        {t('Direct Google Sign-In (No Pop-ups)', 'تسجيل جوجل المباشر (بدون نوافذ منبثقة)')}
-                      </button>
-                    )}
 
                     {onDirectPreview && (
                       <button
                         type="button"
                         onClick={handleDirectPreview}
-                        className="text-[11px] text-[#C1CCDA] hover:text-[#10B8B0] transition-colors py-1 cursor-pointer underline text-center outline-none focus-visible:ring-1 focus-visible:ring-[#10B8B0]"
+                        className="w-full py-2 px-3 rounded-xl border border-teal-500/40 bg-teal-500/15 hover:bg-teal-500/25 text-[#10B8B0] hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] shadow-sm"
                       >
-                        {t('Explore Cognify as Guest (Direct Preview)', 'استكشف كوجنيفاي كزائر (معاينة مباشرة)')}
+                        <Sparkles className="w-3.5 h-3.5 text-[#10B8B0] shrink-0" aria-hidden="true" />
+                        <span className="truncate">{t('Guest Access', 'دخول كزائر')}</span>
                       </button>
+                    )}
+                  </div>
+
+                  {showRedirectOption && (
+                    <button
+                      type="button"
+                      onClick={handleGoogleRedirectAuth}
+                      disabled={loading}
+                      className="w-full py-1 text-center text-[11px] text-amber-300 hover:text-amber-200 underline font-semibold cursor-pointer"
+                    >
+                      {t('Direct Google Sign-In (No Pop-ups)', 'تسجيل جوجل المباشر (بدون نوافذ منبثقة)')}
+                    </button>
+                  )}
+
+                  {/* Account Switcher Footer Link */}
+                  <div className="text-center text-xs text-[#C1CCDA] pt-1 border-t border-[#29466A]/40 mt-2">
+                    {mode === 'email-login' ? (
+                      <span>
+                        {t("Don't have an account?", 'ليس لديك حساب؟')}{' '}
+                        <button
+                          type="button"
+                          onClick={() => { setMode('email-register'); setError(null); }}
+                          className="text-[#10B8B0] hover:text-[#5EEAD4] font-bold cursor-pointer underline ms-1 outline-none focus-visible:ring-1 focus-visible:ring-[#10B8B0]"
+                        >
+                          {t('Create Account', 'إنشاء حساب جديد')}
+                        </button>
+                      </span>
+                    ) : (
+                      <span>
+                        {t('Already have an account?', 'لديك حساب بالفعل؟')}{' '}
+                        <button
+                          type="button"
+                          onClick={() => { setMode('email-login'); setError(null); }}
+                          className="text-[#10B8B0] hover:text-[#5EEAD4] font-bold cursor-pointer underline ms-1 outline-none focus-visible:ring-1 focus-visible:ring-[#10B8B0]"
+                        >
+                          {t('Sign In', 'تسجيل الدخول')}
+                        </button>
+                      </span>
                     )}
                   </div>
                 </form>
@@ -730,7 +766,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       </main>
 
       {/* ── ZONE 3: ACCESSIBILITY ASSURANCE FOOTER ── */}
-      <footer className="max-w-7xl mx-auto w-full z-10 pt-6 pb-2 text-start">
+      <footer className="max-w-7xl mx-auto w-full z-10 pt-2 pb-1 text-start">
         <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#071A36]/90 border border-[#29466A] text-xs sm:text-[13px] text-[#F7FAFF] shadow-sm backdrop-blur-xs">
           <div className="w-6 h-6 rounded-full bg-[#087F8C] flex items-center justify-center text-white shrink-0">
             <Accessibility className="w-3.5 h-3.5" aria-hidden="true" />

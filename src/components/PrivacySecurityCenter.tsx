@@ -26,6 +26,7 @@ import { doc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { deleteUser, signOut } from 'firebase/auth';
 import { USER_SUBCOLLECTIONS, type AuditLogEntry, type CascadeErasureManifest } from '../types/privacySecurity';
+import { toast } from './Toast';
 
 interface PrivacySecurityCenterProps {
   currentStudent?: StudentState;
@@ -133,7 +134,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
       );
       setAuditChain(prev => [...prev, auditEntry]);
     } catch (err: any) {
-      alert(err.message || 'DP Budget Error');
+      toast.error(err.message || 'DP Budget Error', isArabic ? 'خطأ في ميزانية الخصوصية' : 'Differential Privacy Error');
     }
   };
 
@@ -213,7 +214,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         console.warn('[handleExecuteErasure] Remote cascade deletion incomplete:', remoteFailures);
         setErasureManifest(null);
         setErasureConfirmed(false);
-        alert(
+        toast.error(
           isArabic
             ? `فشل المحو الكامل. لم يتم إصدار إيصال نجاح. الأخطاء: ${remoteFailures.slice(0, 3).join('; ')}`
             : `Complete erasure failed. No success receipt was issued. Failures: ${remoteFailures.slice(0, 3).join('; ')}`
@@ -274,7 +275,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
           ...manifest,
           status: 'partial'
         });
-        alert(
+        toast.error(
           isArabic
             ? 'تم حذف بيانات Firestore لكن تعذر حذف حساب تسجيل الدخول. لم يكتمل المحو.'
             : 'Firestore data was deleted, but the authentication account could not be deleted. Erasure is partial.'
@@ -413,6 +414,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     min="0"
                     max="100"
                     value={testMetric}
+                    aria-label={isArabic ? 'القيمة الخام الأصلية' : 'Raw query test metric'}
+                    aria-valuetext={`${testMetric}%`}
                     onChange={e => setTestMetric(Number(e.target.value))}
                     className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
                   />
@@ -429,6 +432,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     max="2.0"
                     step="0.1"
                     value={epsilon}
+                    aria-label={isArabic ? 'معامل الخصوصية التفاضلية إبسيلون' : 'Differential privacy parameter epsilon'}
+                    aria-valuetext={`epsilon ${epsilon}`}
                     onChange={e => setEpsilon(Number(e.target.value))}
                     className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
                   />
@@ -609,6 +614,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <label className="flex items-center gap-3 cursor-pointer text-xs text-slate-300">
                   <input
                     type="checkbox"
+                    aria-label={isArabic ? 'تأكيد الرغبة في محو جميع بيانات الطالب بشكل نهائي لا رجعة فيه' : 'Confirm irrevocable erasure of all student data'}
                     checked={erasureConfirmed}
                     onChange={e => setErasureConfirmed(e.target.checked)}
                     className="w-4 h-4 rounded bg-slate-800 border-[#4A1224]/50 text-rose-500 focus:ring-0"

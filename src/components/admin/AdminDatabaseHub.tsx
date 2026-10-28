@@ -307,7 +307,7 @@ export default function AdminDatabaseHub({
 
   if (!isAdmin) {
     return (
-      <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-amber-500/30 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
+      <div className="backdrop-blur-xl bg-[#082344]/70 border border-amber-500/30 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
         <div className="w-16 h-16 rounded-3xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
           <Lock className="w-8 h-8" />
         </div>
@@ -322,7 +322,7 @@ export default function AdminDatabaseHub({
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* 1. Header & Control Ribbon (Nagm Replication) */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#4A1224]/60 pb-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#16395E]/60 pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
             <span>Admin</span>
@@ -348,7 +348,7 @@ export default function AdminDatabaseHub({
           <button
             onClick={pingDatabase}
             disabled={isPingingDb}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#150917] hover:bg-slate-800 text-amber-400 border border-amber-500/30 text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#0D2542] hover:bg-slate-800 text-amber-400 border border-amber-500/30 text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
           >
             {isPingingDb ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 text-amber-400" />}
             Test Ping
@@ -357,7 +357,7 @@ export default function AdminDatabaseHub({
           <button
             onClick={handleRunDeepDiagnostics}
             disabled={isDeepDiagnosing}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#150917] hover:bg-slate-800 text-indigo-400 border border-indigo-500/30 text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#0D2542] hover:bg-slate-800 text-indigo-400 border border-indigo-500/30 text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
           >
             {isDeepDiagnosing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Activity className="w-3.5 h-3.5 text-indigo-400" />}
             Deep Diagnostics
@@ -368,7 +368,7 @@ export default function AdminDatabaseHub({
             className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all border ${
               autoRefreshInterval === '30s'
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-extrabold'
-                : 'bg-[#150917] hover:bg-slate-800 text-slate-400 border-[#4A1224]/60'
+                : 'bg-[#0D2542] hover:bg-slate-800 text-slate-400 border-[#16395E]/60'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -380,7 +380,7 @@ export default function AdminDatabaseHub({
             onClick={pingDatabase}
             title="Refresh Now"
             aria-label="Refresh database status now"
-            className="p-2 bg-[#150917] hover:bg-slate-800 text-slate-300 border border-[#4A1224]/60 rounded-xl transition-all hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
+            className="p-2 bg-[#0D2542] hover:bg-slate-800 text-slate-300 border border-[#16395E]/60 rounded-xl transition-all hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
           >
             <RefreshCw className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -408,13 +408,13 @@ export default function AdminDatabaseHub({
         </div>
 
         <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400 shrink-0 flex-wrap">
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#080409]/80 border border-[#4A1224]/60">
-            <Clock className="w-3 h-3 text-[#E5A93C]" /> Uptime: Live
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#061A33]/80 border border-[#16395E]/60">
+            <Clock className="w-3 h-3 text-[#00AEB8]" /> Uptime: Live
           </span>
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#080409]/80 border border-[#4A1224]/60">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#061A33]/80 border border-[#16395E]/60">
             <Lock className="w-3 h-3 text-emerald-400" /> SSL TLSv1.3
           </span>
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#080409]/80 border border-[#4A1224]/60">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#061A33]/80 border border-[#16395E]/60">
             <ShieldCheck className="w-3 h-3 text-indigo-400" /> Auth: RS256 Active
           </span>
         </div>
@@ -435,8 +435,8 @@ export default function AdminDatabaseHub({
       </div>
 
       {/* 4. DevTools & Intrusion Sentinel (Nagm Image 1 & 4) */}
-      <section className="backdrop-blur-xl bg-[#150917]/70 border border-rose-500/30 shadow-2xl rounded-3xl p-6 md:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4A1224]/60 pb-5">
+      <section className="backdrop-blur-xl bg-[#0D2542]/70 border border-rose-500/30 shadow-2xl rounded-3xl p-6 md:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#16395E]/60 pb-5">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-rose-500/15 text-rose-400 border border-rose-500/30">
               <ShieldAlert className="w-6 h-6" />
@@ -456,7 +456,7 @@ export default function AdminDatabaseHub({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#080409] border border-[#4A1224]/60 text-xs font-bold text-slate-300">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#061A33] border border-[#16395E]/60 text-xs font-bold text-slate-300">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
               Live Feed
             </span>
@@ -465,17 +465,17 @@ export default function AdminDatabaseHub({
 
         {/* 4 Sentinel KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-4">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Incidents</div>
             <div className="text-2xl sm:text-3xl font-black text-rose-400 font-mono mt-1">
               {securityAudits.length > 0 ? securityAudits.length : 89}
             </div>
           </div>
 
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-4">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Detected IPs</span>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#150917] text-slate-400 border border-[#4A1224]/60">
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#0D2542] text-slate-400 border border-[#16395E]/60">
                 Wi-Fi / NAT ⓘ
               </span>
             </div>
@@ -487,14 +487,14 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-4">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Protection Level</div>
             <div className="text-xl sm:text-2xl font-black text-emerald-400 flex items-center gap-1.5 mt-1">
               <Lock className="w-4 h-4" /> Zero-Trust
             </div>
           </div>
 
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-4">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Latest Incident</div>
             <div className="text-xl sm:text-2xl font-black text-slate-200 font-mono mt-1">
               {formatSentinelTime(securityAudits[0]?.timestampMs || Date.now() - 3600000 * 3)}
@@ -503,10 +503,10 @@ export default function AdminDatabaseHub({
         </div>
 
         {/* Sentinel Incidents Table */}
-        <div className="overflow-x-auto custom-scrollbar border border-[#4A1224]/60 rounded-2xl bg-[#080409]/60">
+        <div className="overflow-x-auto custom-scrollbar border border-[#16395E]/60 rounded-2xl bg-[#061A33]/60">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#4A1224]/60 text-[10px] font-black uppercase tracking-wider text-slate-400 bg-[#080409]">
+              <tr className="border-b border-[#16395E]/60 text-[10px] font-black uppercase tracking-wider text-slate-400 bg-[#061A33]">
                 <th className="py-3 px-4">Identity / User</th>
                 <th className="py-3 px-4">IP Address ⓘ</th>
                 <th className="py-3 px-4">Event / Trigger</th>
@@ -550,7 +550,7 @@ export default function AdminDatabaseHub({
                       {formatSentinelTime(inc.timestampMs)}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#150917] text-slate-300 border border-[#4A1224]/50 font-mono">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#0D2542] text-slate-300 border border-[#16395E]/50 font-mono">
                         RECORDED <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                       </span>
                     </td>
@@ -567,7 +567,7 @@ export default function AdminDatabaseHub({
           </span>
           <button
             onClick={() => setSentinelExpanded(!sentinelExpanded)}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#080409] hover:bg-slate-800 text-xs font-bold text-slate-300 border border-[#4A1224]/60 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#061A33] hover:bg-slate-800 text-xs font-bold text-slate-300 border border-[#16395E]/60 transition-colors"
           >
             {sentinelExpanded ? (
               <>Collapse (5) <ChevronUp className="w-3.5 h-3.5" /></>
@@ -579,8 +579,8 @@ export default function AdminDatabaseHub({
       </section>
 
       {/* 5. Resource Quotas & Max Limit Headroom (Nagm Image 2) */}
-      <section className="backdrop-blur-xl bg-[#150917]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#4A1224]/60 pb-5">
+      <section className="backdrop-blur-xl bg-[#0D2542]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#16395E]/60 pb-5">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
               <Sliders className="w-6 h-6" />
@@ -608,13 +608,13 @@ export default function AdminDatabaseHub({
               <button
                 type="button"
                 onClick={() => setIsClusterTierDropdownOpen(!isClusterTierDropdownOpen)}
-                className="px-3 py-1.5 rounded-xl bg-[#080409] hover:bg-slate-800 active:bg-[#150917] border border-[#4A1224]/60 hover:border-emerald-500/50 text-slate-200 font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md group select-none"
+                className="px-3 py-1.5 rounded-xl bg-[#061A33] hover:bg-slate-800 active:bg-[#0D2542] border border-[#16395E]/60 hover:border-emerald-500/50 text-slate-200 font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md group select-none"
                 aria-expanded={isClusterTierDropdownOpen}
                 aria-haspopup="true"
                 title="Click to view cluster tier specifications or compare with Blaze Plan"
               >
                 <span className="flex items-center gap-1.5">
-                  <span className={`w-2 h-2 rounded-full ${selectedClusterTier === 'spark' ? 'bg-emerald-400 animate-pulse' : 'bg-[#E5A93C]'}`} />
+                  <span className={`w-2 h-2 rounded-full ${selectedClusterTier === 'spark' ? 'bg-emerald-400 animate-pulse' : 'bg-[#00AEB8]'}`} />
                   <span>
                     {selectedClusterTier === 'spark'
                       ? 'Firebase Spark Plan (1 GiB / 50k Reads / 20k Writes)'
@@ -631,7 +631,7 @@ export default function AdminDatabaseHub({
 
             {/* Dropdown Menu */}
             {isClusterTierDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-[#080409]/95 backdrop-blur-2xl border border-[#4A1224]/60 rounded-2xl shadow-2xl p-3 space-y-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-[#061A33]/95 backdrop-blur-2xl border border-[#16395E]/60 rounded-2xl shadow-2xl p-3 space-y-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                 <div className="text-[11px] font-black uppercase tracking-wider text-slate-400 px-2 pt-1 pb-0.5 flex items-center justify-between">
                   <span>Available Cluster Tiers</span>
                   <span className="text-emerald-400 font-mono">Live Google Cloud</span>
@@ -647,7 +647,7 @@ export default function AdminDatabaseHub({
                   className={`w-full text-left p-3 rounded-xl border transition-all flex flex-col gap-1.5 cursor-pointer ${
                     selectedClusterTier === 'spark'
                       ? 'bg-emerald-500/10 border-emerald-500/40 text-white'
-                      : 'bg-[#0E0610]/70 hover:bg-[#150917] border-[#4A1224]/60 text-slate-300'
+                      : 'bg-[#082344]/70 hover:bg-[#0D2542] border-[#16395E]/60 text-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -680,21 +680,21 @@ export default function AdminDatabaseHub({
                   }}
                   className={`w-full text-left p-3 rounded-xl border transition-all flex flex-col gap-1.5 cursor-pointer ${
                     selectedClusterTier === 'blaze'
-                      ? 'bg-[#4A1224]/30 border-[#E5A93C]/40 text-white'
-                      : 'bg-[#0E0610]/70 hover:bg-[#150917] border-[#4A1224]/60 text-slate-300'
+                      ? 'bg-[#16395E]/30 border-[#00AEB8]/40 text-white'
+                      : 'bg-[#082344]/70 hover:bg-[#0D2542] border-[#16395E]/60 text-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-xs flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-[#E5A93C]" />
+                      <Zap className="w-3.5 h-3.5 text-[#00AEB8]" />
                       Firebase Blaze Plan (Pay-as-you-go)
                     </span>
                     {selectedClusterTier === 'blaze' ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#16395E]/60 text-[#00AEB8] border border-[#00AEB8]/30">
                         Viewing
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-slate-400 border border-[#4A1224]/50">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-slate-400 border border-[#16395E]/50">
                         Auto-scaling
                       </span>
                     )}
@@ -704,12 +704,12 @@ export default function AdminDatabaseHub({
                     <div>• Uncapped reads & writes ($0.06 / 100k reads)</div>
                     <div>• 1,000,000 concurrent client connections</div>
                   </div>
-                  <div className="text-[10px] text-[#E5A93C] font-semibold mt-0.5">
+                  <div className="text-[10px] text-[#00AEB8] font-semibold mt-0.5">
                     ⚡ Production auto-scale: No daily request throttles.
                   </div>
                 </button>
 
-                <div className="pt-1 border-t border-[#4A1224]/60 flex items-center justify-between px-2 text-[11px]">
+                <div className="pt-1 border-t border-[#16395E]/60 flex items-center justify-between px-2 text-[11px]">
                   <span className="text-slate-500">Manage plan in Google Cloud:</span>
                   <a
                     href="https://console.firebase.google.com/project/_/usage"
@@ -727,7 +727,7 @@ export default function AdminDatabaseHub({
 
         {/* 4 Hero Headroom Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Storage Limit</span>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -745,7 +745,7 @@ export default function AdminDatabaseHub({
                   {selectedClusterTier === 'blaze' ? '/ Pay-as-you-go' : '/ 1,024 MB max'}
                 </span>
               </div>
-              <div className="h-2 w-full bg-[#150917] rounded-full overflow-hidden border border-[#4A1224]/60 mt-2 p-0.5">
+              <div className="h-2 w-full bg-[#0D2542] rounded-full overflow-hidden border border-[#16395E]/60 mt-2 p-0.5">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all"
                   style={{
@@ -764,7 +764,7 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pool Concurrency</span>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -778,7 +778,7 @@ export default function AdminDatabaseHub({
                   {selectedClusterTier === 'blaze' ? '/ 1,000,000 pool max' : '/ 100 pool max'}
                 </span>
               </div>
-              <div className="h-2 w-full bg-[#150917] rounded-full overflow-hidden border border-[#4A1224]/60 mt-2 p-0.5">
+              <div className="h-2 w-full bg-[#0D2542] rounded-full overflow-hidden border border-[#16395E]/60 mt-2 p-0.5">
                 <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: '1%' }} />
               </div>
             </div>
@@ -788,7 +788,7 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Write Quota Headroom</span>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -806,7 +806,7 @@ export default function AdminDatabaseHub({
                   {selectedClusterTier === 'blaze' ? '/ Auto-scaling ($0.18/100k)' : '/ 20,000 / day'}
                 </span>
               </div>
-              <div className="h-2 w-full bg-[#150917] rounded-full overflow-hidden border border-[#4A1224]/60 mt-2 p-0.5">
+              <div className="h-2 w-full bg-[#0D2542] rounded-full overflow-hidden border border-[#16395E]/60 mt-2 p-0.5">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all"
                   style={{
@@ -825,7 +825,7 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Latency SLA Buffer</span>
               <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border ${
@@ -851,7 +851,7 @@ export default function AdminDatabaseHub({
                 </span>
                 <span className="text-xs font-bold text-slate-500 font-mono">/ 500 ms SLA</span>
               </div>
-              <div className="h-2 w-full bg-[#150917] rounded-full overflow-hidden border border-[#4A1224]/60 mt-2 p-0.5">
+              <div className="h-2 w-full bg-[#0D2542] rounded-full overflow-hidden border border-[#16395E]/60 mt-2 p-0.5">
                 <div
                   className={`h-full rounded-full transition-all ${
                     (dbHealth?.latencyMs || 0) < 300
@@ -871,9 +871,9 @@ export default function AdminDatabaseHub({
           </div>
         </div>
 
-        <div className="pt-3 border-t border-[#4A1224]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+        <div className="pt-3 border-t border-[#16395E]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-2">
-            <Info className="w-3.5 h-3.5 text-[#E5A93C] shrink-0" />
+            <Info className="w-3.5 h-3.5 text-[#00AEB8] shrink-0" />
             <span>
               <strong className="text-white">Threshold Policy:</strong> Alerts automatically fire if storage exceeds 80%, active pool exceeds 60%, or latency exceeds 400ms.
             </span>
@@ -888,7 +888,7 @@ export default function AdminDatabaseHub({
 
       {/* 6. Secondary Quick KPIs (Nagm Image 2 & 3) */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Query Latency (Ping)</span>
             <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
@@ -921,7 +921,7 @@ export default function AdminDatabaseHub({
           </div>
         </div>
 
-        <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Connections</span>
             <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
@@ -932,13 +932,13 @@ export default function AdminDatabaseHub({
             <span className="text-2xl font-black text-white font-mono">1</span>
             <span className="text-xs text-slate-400 ml-1.5 font-mono">/ 100 total</span>
           </div>
-          <div className="text-[11px] text-[#E5A93C] flex items-center gap-1 font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#E5A93C] animate-pulse" />
+          <div className="text-[11px] text-[#00AEB8] flex items-center gap-1 font-bold">
+            <span className="w-2 h-2 rounded-full bg-[#00AEB8] animate-pulse" />
             Firestore Client Sync (99 idle)
           </div>
         </div>
 
-        <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Allocated Storage</span>
             <div className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -955,7 +955,7 @@ export default function AdminDatabaseHub({
           </div>
         </div>
 
-        <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Stored Records</span>
             <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-400 border border-purple-500/30">
@@ -976,9 +976,9 @@ export default function AdminDatabaseHub({
 
       {/* 7. Split Grid: Core Collections Inventory + Engine Architecture (Nagm Image 3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 backdrop-blur-xl bg-[#150917]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6 space-y-4 flex flex-col justify-between">
+        <div className="lg:col-span-2 backdrop-blur-xl bg-[#0D2542]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6 space-y-4 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3 mb-3">
+            <div className="flex items-center justify-between border-b border-[#16395E]/60 pb-3 mb-3">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-indigo-400" />
                 <h4 className="text-sm font-black uppercase text-white tracking-wider">Core Collections Inventory</h4>
@@ -989,7 +989,7 @@ export default function AdminDatabaseHub({
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[#4A1224]/60 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <tr className="border-b border-[#16395E]/60 text-[10px] font-black uppercase tracking-wider text-slate-400">
                     <th className="py-2.5 px-3">Model / Collection</th>
                     <th className="py-2.5 px-3">System Path</th>
                     <th className="py-2.5 px-3">Doc Count</th>
@@ -1019,9 +1019,9 @@ export default function AdminDatabaseHub({
           </div>
         </div>
 
-        <div className="backdrop-blur-xl bg-[#150917]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6 flex flex-col justify-between space-y-4">
+        <div className="backdrop-blur-xl bg-[#0D2542]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6 flex flex-col justify-between space-y-4">
           <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#4A1224]/60 pb-3">
+            <div className="flex items-center gap-2 border-b border-[#16395E]/60 pb-3">
               <Server className="w-4 h-4 text-indigo-400" />
               <h4 className="text-sm font-black uppercase text-white tracking-wider">Engine &amp; Cluster Architecture</h4>
             </div>
@@ -1099,8 +1099,8 @@ export default function AdminDatabaseHub({
       )}
 
       {/* Firebase Spark Plan (Free Tier) & Live HTTPS Limits Monitor */}
-      <section className="backdrop-blur-xl bg-[#150917]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#4A1224]/60 pb-5">
+      <section className="backdrop-blur-xl bg-[#0D2542]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#16395E]/60 pb-5">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30">
@@ -1166,16 +1166,16 @@ export default function AdminDatabaseHub({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#150917] border border-[#4A1224]/60 text-slate-300">
-              🤖 AI Gemini: <strong className="text-[#E5A93C] font-mono">{httpMetrics.byCategory.gemini}</strong>
+            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#0D2542] border border-[#16395E]/60 text-slate-300">
+              🤖 AI Gemini: <strong className="text-[#00AEB8] font-mono">{httpMetrics.byCategory.gemini}</strong>
             </span>
-            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#150917] border border-[#4A1224]/60 text-slate-300">
+            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#0D2542] border border-[#16395E]/60 text-slate-300">
               🛡️ Audits: <strong className="text-indigo-400 font-mono">{httpMetrics.byCategory.telemetry}</strong>
             </span>
-            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#150917] border border-[#4A1224]/60 text-slate-300">
+            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#0D2542] border border-[#16395E]/60 text-slate-300">
               🔥 Firestore: <strong className="text-amber-400 font-mono">{httpMetrics.byCategory.firebase}</strong>
             </span>
-            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#150917] border border-[#4A1224]/60 text-slate-300">
+            <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#0D2542] border border-[#16395E]/60 text-slate-300">
               🌐 APIs: <strong className="text-emerald-400 font-mono">{httpMetrics.byCategory.internal + httpMetrics.byCategory.external}</strong>
             </span>
             <button
@@ -1203,7 +1203,7 @@ export default function AdminDatabaseHub({
               className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
                 quotaCategoryFilter === f.id
                   ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                  : 'bg-[#080409]/80 text-slate-400 hover:text-white border border-[#4A1224]/60'
+                  : 'bg-[#061A33]/80 text-slate-400 hover:text-white border border-[#16395E]/60'
               }`}
             >
               {f.label}
@@ -1227,7 +1227,7 @@ export default function AdminDatabaseHub({
             return (
               <div
                 key={item.id}
-                className="bg-[#080409]/80 border border-[#4A1224]/60 hover:border-[#4A1224]/60 rounded-2xl p-5 flex flex-col justify-between space-y-4 transition-all hover:shadow-xl group"
+                className="bg-[#061A33]/80 border border-[#16395E]/60 hover:border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-4 transition-all hover:shadow-xl group"
               >
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -1254,7 +1254,7 @@ export default function AdminDatabaseHub({
                   </div>
 
                   <div className="space-y-1">
-                    <div className="h-2 w-full bg-[#150917] rounded-full overflow-hidden border border-[#4A1224]/60 p-0.5">
+                    <div className="h-2 w-full bg-[#0D2542] rounded-full overflow-hidden border border-[#16395E]/60 p-0.5">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${barBg}`}
                         style={{ width: `${Math.min(100, Math.max(2, item.percentUsed))}%` }}
@@ -1276,7 +1276,7 @@ export default function AdminDatabaseHub({
         </div>
 
         {/* Spark Plan Footnote */}
-        <div className="p-4 bg-[#080409]/60 border border-[#4A1224]/50 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+        <div className="p-4 bg-[#061A33]/60 border border-[#16395E]/50 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-2.5">
             <Info className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
@@ -1295,8 +1295,8 @@ export default function AdminDatabaseHub({
       </section>
 
       {/* 9. Database Administration Actions */}
-      <section className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#4A1224]/60 pb-4">
+      <section className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#16395E]/60 pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               <Terminal className="w-5 h-5" />
@@ -1320,7 +1320,7 @@ export default function AdminDatabaseHub({
             <button
               type="button"
               onClick={handleDownloadFullBackup}
-              className="flex flex-col items-start p-4 bg-[#080409]/80 hover:bg-slate-800/80 border border-[#4A1224]/60 hover:border-emerald-500/40 rounded-2xl transition-all group text-left cursor-pointer"
+              className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-emerald-500/40 rounded-2xl transition-all group text-left cursor-pointer"
             >
               <Download className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform mb-2" />
               <span className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
@@ -1334,9 +1334,9 @@ export default function AdminDatabaseHub({
           <button
             type="button"
             onClick={exportAllCsv}
-            className="flex flex-col items-start p-4 bg-[#080409]/80 hover:bg-slate-800/80 border border-[#4A1224]/60 hover:border-[#E5A93C]/40 rounded-2xl transition-all group text-left cursor-pointer"
+            className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-[#00AEB8]/40 rounded-2xl transition-all group text-left cursor-pointer"
           >
-            <FileJson className="w-5 h-5 text-[#E5A93C] group-hover:scale-110 transition-transform mb-2" />
+            <FileJson className="w-5 h-5 text-[#00AEB8] group-hover:scale-110 transition-transform mb-2" />
             <span className="text-xs font-black uppercase text-white tracking-wider">Export Database CSV</span>
             <span className="text-[11px] text-slate-400 mt-1">Excel-compatible UTF-8 spreadsheet of user accounts</span>
           </button>
@@ -1345,7 +1345,7 @@ export default function AdminDatabaseHub({
             type="button"
             onClick={handleCleanCache}
             disabled={isCleaningCache}
-            className="flex flex-col items-start p-4 bg-[#080409]/80 hover:bg-slate-800/80 border border-[#4A1224]/60 hover:border-amber-500/40 rounded-2xl transition-all group disabled:opacity-50 text-left cursor-pointer"
+            className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-amber-500/40 rounded-2xl transition-all group disabled:opacity-50 text-left cursor-pointer"
           >
             {isCleaningCache ? (
               <Loader2 className="w-5 h-5 text-amber-400 animate-spin mb-2" />
@@ -1359,7 +1359,7 @@ export default function AdminDatabaseHub({
           <button
             type="button"
             onClick={handleDownloadAuditReport}
-            className="flex flex-col items-start p-4 bg-[#080409]/80 hover:bg-slate-800/80 border border-[#4A1224]/60 hover:border-indigo-500/40 rounded-2xl transition-all group text-left cursor-pointer"
+            className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-indigo-500/40 rounded-2xl transition-all group text-left cursor-pointer"
           >
             <BookOpen className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform mb-2" />
             <span className="text-xs font-black uppercase text-white tracking-wider">Generate Audit Report (.md)</span>
@@ -1369,10 +1369,10 @@ export default function AdminDatabaseHub({
       </section>
 
       {/* 10. Firestore Document & Chat Inspector */}
-      <section className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#4A1224]/60 pb-4">
+      <section className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-6 md:p-8 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#16395E]/60 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+            <div className="p-2.5 rounded-2xl bg-[#16395E]/40 text-[#00AEB8] border border-[#00AEB8]/30">
               <Search className="w-5 h-5" />
             </div>
             <div>
@@ -1391,7 +1391,7 @@ export default function AdminDatabaseHub({
               placeholder="Search UID, email, name..."
               value={dbSearchTerm}
               onChange={(e) => setDbSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-[#080409] border border-[#4A1224]/60 rounded-xl text-xs text-white placeholder:text-slate-500 outline-none focus:border-[#E5A93C] transition-all font-mono"
+              className="w-full pl-9 pr-8 py-2 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-white placeholder:text-slate-500 outline-none focus:border-[#00AEB8] transition-all font-mono"
             />
             {dbSearchTerm && (
               <button
@@ -1407,10 +1407,10 @@ export default function AdminDatabaseHub({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 pt-2">
           {/* User Selection List */}
-          <div className="bg-[#080409]/80 border border-[#4A1224]/60 rounded-2xl p-2 max-h-[560px] overflow-y-auto custom-scrollbar divide-y divide-slate-800/40 space-y-1">
+          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-2 max-h-[560px] overflow-y-auto custom-scrollbar divide-y divide-slate-800/40 space-y-1">
             <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center justify-between">
               <span>User Accounts ({inspectedUsersList.length})</span>
-              <span className="font-mono text-[#E5A93C]">Live Sync</span>
+              <span className="font-mono text-[#00AEB8]">Live Sync</span>
             </div>
             {inspectedUsersList.map((u) => {
               const isSelected = inspectedDoc?.uid === u.uid;
@@ -1425,8 +1425,8 @@ export default function AdminDatabaseHub({
                   }}
                   className={`w-full text-left p-3 rounded-xl text-xs transition-all flex items-center justify-between gap-2 cursor-pointer ${
                     isSelected
-                      ? 'bg-[#4A1224]/40 border border-[#E5A93C]/40 text-white shadow-lg'
-                      : 'hover:bg-[#150917] border border-transparent text-slate-300'
+                      ? 'bg-[#16395E]/40 border border-[#00AEB8]/40 text-white shadow-lg'
+                      : 'hover:bg-[#0D2542] border border-transparent text-slate-300'
                   }`}
                 >
                   <div className="min-w-0 flex-1">
@@ -1437,11 +1437,11 @@ export default function AdminDatabaseHub({
                     <div className="font-mono text-[9px] text-slate-600 truncate mt-0.5">{u.uid}</div>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#150917] text-slate-400 border border-[#4A1224]/60 uppercase font-bold">
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#0D2542] text-slate-400 border border-[#16395E]/60 uppercase font-bold">
                       {u.role || 'Student'}
                     </span>
                     {chatsCount > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-[#E5A93C] bg-[#4A1224]/30 border border-[#E5A93C]/30 px-1.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-[#00AEB8] bg-[#16395E]/30 border border-[#00AEB8]/30 px-1.5 py-0.5 rounded-full">
                         <MessageSquare className="w-2.5 h-2.5" />
                         {chatsCount} {chatsCount === 1 ? 'chat' : 'chats'}
                       </span>
@@ -1458,12 +1458,12 @@ export default function AdminDatabaseHub({
           </div>
 
           {/* Document & Chat Viewer */}
-          <div className="lg:col-span-2 bg-[#080409] border border-[#4A1224]/60 rounded-2xl p-5 flex flex-col min-h-[460px] max-h-[560px] overflow-hidden">
+          <div className="lg:col-span-2 bg-[#061A33] border border-[#16395E]/60 rounded-2xl p-5 flex flex-col min-h-[460px] max-h-[560px] overflow-hidden">
             {inspectedDoc ? (
               <div className="flex flex-col h-full">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#4A1224]/60 pb-3 mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#16395E]/60 pb-3 mb-3">
                   <div className="min-w-0">
-                    <div className="font-mono text-xs text-[#E5A93C] font-bold truncate flex items-center gap-1.5">
+                    <div className="font-mono text-xs text-[#00AEB8] font-bold truncate flex items-center gap-1.5">
                       <span>users/{inspectedDoc.uid}</span>
                     </div>
                     <div className="text-[11px] text-slate-400 truncate">
@@ -1472,13 +1472,13 @@ export default function AdminDatabaseHub({
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    <div className="flex items-center p-0.5 bg-[#150917] border border-[#4A1224]/60 rounded-xl text-xs">
+                    <div className="flex items-center p-0.5 bg-[#0D2542] border border-[#16395E]/60 rounded-xl text-xs">
                       <button
                         type="button"
                         onClick={() => setInspectedDocTab('chats')}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                           inspectedDocTab === 'chats'
-                            ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 shadow-sm'
+                            ? 'bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 shadow-sm'
                             : 'text-slate-400 hover:text-white'
                         }`}
                       >
@@ -1490,7 +1490,7 @@ export default function AdminDatabaseHub({
                         onClick={() => setInspectedDocTab('json')}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                           inspectedDocTab === 'json'
-                            ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 shadow-sm'
+                            ? 'bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 shadow-sm'
                             : 'text-slate-400 hover:text-white'
                         }`}
                       >
@@ -1502,7 +1502,7 @@ export default function AdminDatabaseHub({
                     <button
                       type="button"
                       onClick={() => copyToClipboard(JSON.stringify(sanitizeDocumentForInspector(inspectedDoc), null, 2), 'Document JSON copied to clipboard')}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#150917] hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold rounded-xl border border-[#4A1224]/60 transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#0D2542] hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold rounded-xl border border-[#16395E]/60 transition-all cursor-pointer"
                       title="Copy full JSON"
                     >
                       <Copy className="w-3 h-3" /> Copy
@@ -1511,7 +1511,7 @@ export default function AdminDatabaseHub({
                     <button
                       type="button"
                       onClick={() => handleDownloadUserJson(inspectedDoc)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#4A1224]/30 hover:bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/30 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#16395E]/30 hover:bg-[#16395E]/60 text-[#00AEB8] border border-[#00AEB8]/30 text-xs font-bold rounded-xl transition-all cursor-pointer"
                       title="Download User JSON File"
                     >
                       <Download className="w-3 h-3" /> JSON
@@ -1538,8 +1538,8 @@ export default function AdminDatabaseHub({
                                 key={thread.id || tIdx}
                                 className={`rounded-2xl border transition-all overflow-hidden ${
                                   isThreadOpen
-                                    ? 'bg-[#0E0610]/95 border-[#E5A93C]/40'
-                                    : 'bg-[#150917]/40 hover:bg-[#150917]/70 border-[#4A1224]/60'
+                                    ? 'bg-[#082344]/95 border-[#00AEB8]/40'
+                                    : 'bg-[#0D2542]/40 hover:bg-[#0D2542]/70 border-[#16395E]/60'
                                 }`}
                               >
                                 <button
@@ -1549,7 +1549,7 @@ export default function AdminDatabaseHub({
                                 >
                                   <div className="min-w-0 flex-1">
                                     <div className="font-bold text-white text-xs flex items-center gap-2">
-                                      <MessageSquare className="w-3.5 h-3.5 text-[#E5A93C] shrink-0" />
+                                      <MessageSquare className="w-3.5 h-3.5 text-[#00AEB8] shrink-0" />
                                       <span className="truncate">{thread.title || `Session #${tIdx + 1}`}</span>
                                     </div>
                                     {thread.lastMessageSnippet && (
@@ -1560,7 +1560,7 @@ export default function AdminDatabaseHub({
                                     <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono mt-2">
                                       <span>Updated: {thread.updatedAt ? new Date(thread.updatedAt).toLocaleDateString() : 'Recent'}</span>
                                       {thread.messages && (
-                                        <span className="text-[#E5A93C]">{thread.messages.length} messages</span>
+                                        <span className="text-[#00AEB8]">{thread.messages.length} messages</span>
                                       )}
                                     </div>
                                   </div>
@@ -1570,7 +1570,7 @@ export default function AdminDatabaseHub({
                                 </button>
 
                                 {isThreadOpen && (
-                                  <div className="p-3 pt-0 border-t border-[#4A1224]/50 mt-1 space-y-2.5">
+                                  <div className="p-3 pt-0 border-t border-[#16395E]/50 mt-1 space-y-2.5">
                                     {thread.messages && thread.messages.length > 0 ? (
                                       <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar p-1">
                                         {thread.messages.map((msg: any, mIdx: number) => {
@@ -1580,7 +1580,7 @@ export default function AdminDatabaseHub({
                                               key={mIdx}
                                               className={`p-3 rounded-xl text-xs leading-relaxed ${
                                                 isUserMsg
-                                                  ? 'bg-[#080409] border border-[#4A1224]/60 text-slate-200 ml-4'
+                                                  ? 'bg-[#061A33] border border-[#16395E]/60 text-slate-200 ml-4'
                                                   : 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-100 mr-4'
                                               }`}
                                             >
@@ -1598,7 +1598,7 @@ export default function AdminDatabaseHub({
                                         })}
                                       </div>
                                     ) : (
-                                      <div className="p-3 bg-[#080409] rounded-xl text-slate-400 text-xs font-mono">
+                                      <div className="p-3 bg-[#061A33] rounded-xl text-slate-400 text-xs font-mono">
                                         Thread ID: {thread.id} · Messages synced under active conversation context.
                                       </div>
                                     )}
@@ -1613,7 +1613,7 @@ export default function AdminDatabaseHub({
                       <div className="space-y-3">
                         <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center justify-between">
                           <span>Global Chat History ({inspectedDoc.chatHistory.length} messages)</span>
-                          <span className="text-[#E5A93C] font-mono">Active Thread</span>
+                          <span className="text-[#00AEB8] font-mono">Active Thread</span>
                         </div>
                         <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar p-1">
                           {inspectedDoc.chatHistory.map((msg: any, mIdx: number) => {
@@ -1623,7 +1623,7 @@ export default function AdminDatabaseHub({
                                 key={mIdx}
                                 className={`p-3 rounded-xl text-xs leading-relaxed ${
                                   isUserMsg
-                                    ? 'bg-[#080409] border border-[#4A1224]/60 text-slate-200 ml-4'
+                                    ? 'bg-[#061A33] border border-[#16395E]/60 text-slate-200 ml-4'
                                     : 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-100 mr-4'
                                 }`}
                               >
@@ -1643,7 +1643,7 @@ export default function AdminDatabaseHub({
                       </div>
                     ) : (
                       <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-3 text-slate-500 my-auto">
-                        <div className="w-12 h-12 rounded-2xl bg-[#150917] border border-[#4A1224]/60 flex items-center justify-center text-slate-400">
+                        <div className="w-12 h-12 rounded-2xl bg-[#0D2542] border border-[#16395E]/60 flex items-center justify-center text-slate-400">
                           <MessageSquare className="w-6 h-6" />
                         </div>
                         <div className="font-bold text-white text-xs">No Chat Threads Saved</div>
@@ -1653,7 +1653,7 @@ export default function AdminDatabaseHub({
                         <button
                           type="button"
                           onClick={() => setInspectedDocTab('json')}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#150917] hover:bg-slate-800 text-[#E5A93C] text-xs font-bold rounded-xl border border-[#4A1224]/50 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0D2542] hover:bg-slate-800 text-[#00AEB8] text-xs font-bold rounded-xl border border-[#16395E]/50 transition-colors cursor-pointer"
                         >
                           <FileJson className="w-3.5 h-3.5" /> View Raw Document JSON
                         </button>
@@ -1664,7 +1664,7 @@ export default function AdminDatabaseHub({
 
                 {inspectedDocTab === 'json' && (
                   <div className="flex-1 overflow-hidden flex flex-col">
-                    <pre className="font-mono text-xs text-emerald-300 overflow-auto flex-1 custom-scrollbar p-4 bg-[#080409] rounded-xl border border-[#4A1224]/60 leading-relaxed selection:bg-emerald-500/30 selection:text-emerald-100">
+                    <pre className="font-mono text-xs text-emerald-300 overflow-auto flex-1 custom-scrollbar p-4 bg-[#061A33] rounded-xl border border-[#16395E]/60 leading-relaxed selection:bg-emerald-500/30 selection:text-emerald-100">
                       {JSON.stringify(sanitizeDocumentForInspector(inspectedDoc), null, 2)}
                     </pre>
                   </div>
@@ -1672,7 +1672,7 @@ export default function AdminDatabaseHub({
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-xs text-center p-8 space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-[#150917] border border-[#4A1224]/60 flex items-center justify-center text-slate-400">
+                <div className="w-12 h-12 rounded-2xl bg-[#0D2542] border border-[#16395E]/60 flex items-center justify-center text-slate-400">
                   <FileJson className="w-6 h-6" />
                 </div>
                 <div className="font-bold text-white text-xs">No Account Selected</div>

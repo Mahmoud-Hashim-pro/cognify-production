@@ -107,7 +107,7 @@ export default function AdminSecurityTab({
 
   if (!isInspectOwner) {
     return (
-      <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-rose-500/30 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
+      <div className="backdrop-blur-xl bg-[#082344]/70 border border-rose-500/30 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
         <div className="w-16 h-16 rounded-3xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
           <Lock className="w-8 h-8" />
         </div>
@@ -123,7 +123,7 @@ export default function AdminSecurityTab({
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* Security Metrics Cards */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-rose-500/30 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
+        <div className="backdrop-blur-xl bg-[#082344]/70 border border-rose-500/30 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-rose-500/15 text-rose-400 border border-rose-500/30">
             <ShieldAlert className="w-6 h-6" />
           </div>
@@ -137,8 +137,8 @@ export default function AdminSecurityTab({
           </div>
         </div>
 
-        <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+        <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-[#16395E]/40 text-[#00AEB8] border border-[#00AEB8]/30">
             <Globe className="w-6 h-6" />
           </div>
           <div>
@@ -149,7 +149,7 @@ export default function AdminSecurityTab({
           </div>
         </div>
 
-        <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
+        <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30">
             <Terminal className="w-6 h-6" />
           </div>
@@ -161,7 +161,7 @@ export default function AdminSecurityTab({
           </div>
         </div>
 
-        <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
+        <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl p-5 flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-purple-500/15 text-purple-400 border border-purple-500/30">
             <Sliders className="w-6 h-6" />
           </div>
@@ -187,12 +187,12 @@ export default function AdminSecurityTab({
             </span>
           </div>
 
-          <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-[#4A1224]/50">
+          <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-[#16395E]/50">
             {filteredAudits.length} {filteredAudits.length === securityAudits.length ? 'activities' : `of ${securityAudits.length} activities`}
           </span>
 
           {auditLimit > 50 && (
-            <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-[#4A1224]/60 text-[#E5A93C] border border-[#E5A93C]/40">
+            <span className="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-[#16395E]/60 text-[#00AEB8] border border-[#00AEB8]/40">
               All Records Loaded (500 max)
             </span>
           )}
@@ -203,8 +203,8 @@ export default function AdminSecurityTab({
             onClick={handleShowAllActivities}
             className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 ${
               auditLimit > 50 && !securitySearchTerm && securityUserFilter === 'all' && securityTriggerFilter === 'all'
-                ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 shadow-[#E5A93C]/20 ring-2 ring-[#E5A93C] font-extrabold'
-                : 'bg-slate-800 hover:bg-slate-700 text-[#E5A93C] border border-[#E5A93C]/30'
+                ? 'bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 shadow-[#00AEB8]/20 ring-2 ring-[#00AEB8] font-extrabold'
+                : 'bg-slate-800 hover:bg-slate-700 text-[#00AEB8] border border-[#00AEB8]/30'
             }`}
             title="Reset all filters and load all activities from database"
           >
@@ -224,7 +224,7 @@ export default function AdminSecurityTab({
       </div>
 
       {/* Filter and Search Bar for Users and Activities */}
-      <div className="backdrop-blur-xl bg-[#150917]/70 border border-[#4A1224]/70 shadow-xl rounded-2xl p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+      <div className="backdrop-blur-xl bg-[#0D2542]/70 border border-[#16395E]/70 shadow-xl rounded-2xl p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[240px]">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -233,7 +233,7 @@ export default function AdminSecurityTab({
             placeholder="Search users, emails, UIDs, IPs, routes, or details..."
             value={securitySearchTerm}
             onChange={(e) => setSecuritySearchTerm(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 bg-[#080409] border border-[#4A1224]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#E5A93C] focus:ring-1 focus:ring-[#E5A93C]/30 transition-all font-mono"
+            className="w-full pl-10 pr-9 py-2.5 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all font-mono"
           />
           {securitySearchTerm && (
             <button
@@ -252,7 +252,7 @@ export default function AdminSecurityTab({
           <select
             value={securityUserFilter}
             onChange={(e) => setSecurityUserFilter(e.target.value)}
-            className="w-full px-3 py-2.5 bg-[#080409] border border-[#4A1224]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-[#E5A93C] focus:ring-1 focus:ring-[#E5A93C]/30 transition-all cursor-pointer font-bold"
+            className="w-full px-3 py-2.5 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all cursor-pointer font-bold"
           >
             <option value="all">All Users ({uniqueAuditUsers.length})</option>
             {uniqueAuditUsers.map((u) => (
@@ -269,7 +269,7 @@ export default function AdminSecurityTab({
           <select
             value={securityTriggerFilter}
             onChange={(e) => setSecurityTriggerFilter(e.target.value)}
-            className="w-full px-3 py-2.5 bg-[#080409] border border-[#4A1224]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-[#E5A93C] focus:ring-1 focus:ring-[#E5A93C]/30 transition-all cursor-pointer font-bold"
+            className="w-full px-3 py-2.5 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all cursor-pointer font-bold"
           >
             <option value="all">All Triggers ({securityAudits.length})</option>
             <option value="devtools_inspect_shortcut">
@@ -301,11 +301,11 @@ export default function AdminSecurityTab({
       </div>
 
       {/* Inspect Audit Incidents Table */}
-      <div className="backdrop-blur-xl bg-[#0E0610]/70 border border-[#4A1224]/60 shadow-2xl rounded-3xl overflow-hidden">
+      <div className="backdrop-blur-xl bg-[#082344]/70 border border-[#16395E]/60 shadow-2xl rounded-3xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#0E0610]/95 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-[#4A1224]/60">
+              <tr className="bg-[#082344]/95 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-[#16395E]/60">
                 <th className="p-4">User / Perpetrator</th>
                 <th className="p-4">Client Public IP</th>
                 <th className="p-4">Inspect Trigger</th>
@@ -322,7 +322,7 @@ export default function AdminSecurityTab({
                     : record.eventType === 'contextmenu_inspect'
                     ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
                     : record.eventType === 'devtools_opened'
-                    ? 'bg-[#4A1224]/60 text-[#E5A93C] border-[#E5A93C]/40'
+                    ? 'bg-[#16395E]/60 text-[#00AEB8] border-[#00AEB8]/40'
                     : 'bg-amber-500/20 text-amber-300 border-amber-500/40';
 
                 return (
@@ -341,7 +341,7 @@ export default function AdminSecurityTab({
                         <span className="font-mono text-[10px] text-slate-500">UID: {record.uid}</span>
                         <button
                           onClick={() => setSecurityUserFilter(record.uid || record.email || 'anonymous')}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-[#E5A93C] hover:text-[#E5A93C] transition-colors"
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-[#00AEB8] hover:text-[#00AEB8] transition-colors"
                           title={`Filter all activities for ${record.name || record.email}`}
                         >
                           <Filter className="w-2.5 h-2.5" /> Filter User
@@ -349,7 +349,7 @@ export default function AdminSecurityTab({
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="inline-flex items-center gap-1.5 font-mono text-xs font-black bg-[#080409] border border-[#4A1224]/60 px-2.5 py-1 rounded-lg text-emerald-400">
+                      <span className="inline-flex items-center gap-1.5 font-mono text-xs font-black bg-[#061A33] border border-[#16395E]/60 px-2.5 py-1 rounded-lg text-emerald-400">
                         {record.ip}
                         <button
                           onClick={() => copyToClipboard(record.ip, `IP ${record.ip} copied`)}
@@ -360,7 +360,7 @@ export default function AdminSecurityTab({
                         </button>
                         <button
                           onClick={() => setSecuritySearchTerm(record.ip)}
-                          className="text-slate-500 hover:text-[#E5A93C] transition-colors"
+                          className="text-slate-500 hover:text-[#00AEB8] transition-colors"
                           title="Filter by this IP address"
                         >
                           <Search className="w-3 h-3" />
@@ -397,7 +397,7 @@ export default function AdminSecurityTab({
                         <p className="text-xs text-slate-400">Try adjusting your search query, selected user, or trigger type.</p>
                         <button
                           onClick={handleShowAllActivities}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95"
                         >
                           <Layers className="w-3.5 h-3.5" />
                           Show All Activities

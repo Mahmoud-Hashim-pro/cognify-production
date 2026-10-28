@@ -363,9 +363,11 @@ async function fetchGeminiWithRetry(
   let attempt = 0;
   let keyIdx = 0;
   while ((res.status === 503 || res.status === 429) && attempt < retries) {
-    // Short wait — we rotate to a fresh key each retry, so no long backoff is needed.
-    await new Promise((r) => setTimeout(r, 250));
     attempt++;
+    // Exponential backoff with full jitter: (2^attempt * 250ms) + random jitter up to 200ms
+    const baseDelay = Math.min(2500, Math.pow(2, attempt) * 250);
+    const jitter = Math.floor(Math.random() * 200);
+    await new Promise((r) => setTimeout(r, baseDelay + jitter));
     const keys = getGeminiKeys();
     if (keys.length > 1) {
       keyIdx = (keyIdx + 1) % keys.length;

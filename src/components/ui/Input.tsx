@@ -56,6 +56,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={id}
             disabled={disabled}
             required={required}
+            aria-label={props['aria-label'] || (typeof label === 'string' ? label : undefined)}
             aria-invalid={isInvalid}
             aria-describedby={
               isInvalid ? errorId : helperText ? helperId : undefined

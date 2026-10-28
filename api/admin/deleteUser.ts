@@ -90,7 +90,8 @@ export async function verifySuperAdminPrivileges(
   // 5. Check caller's own Firestore user document (/users/{callerUid})
   // Since every authenticated user can read their own document per firestore.rules, this query is authorized.
   try {
-    const callerDocUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${auth.uid}`;
+    const databaseId = process.env.FIREBASE_DATABASE_ID || process.env.VITE_FIREBASE_DATABASE_ID || '(default)';
+    const callerDocUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents/users/${auth.uid}`;
     const callerRes = await fetch(callerDocUrl, {
       headers: {
         'Authorization': `Bearer ${bearerToken}`,
@@ -132,6 +133,7 @@ export default async function deleteUserHandler(req: any, res: any) {
   }
 
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0347404066';
+  const databaseId = process.env.FIREBASE_DATABASE_ID || process.env.VITE_FIREBASE_DATABASE_ID || '(default)';
 
   // 2. Authorization Guard: verify caller possesses Super Admin privileges
   const hasSuperAdminPrivileges = await verifySuperAdminPrivileges(auth, bearerToken, projectId);
@@ -182,7 +184,7 @@ export default async function deleteUserHandler(req: any, res: any) {
 
   // 6. Safety Guard: Inspect target document in Firestore to prevent UID-only deletion bypass
   try {
-    const targetDocUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${targetUid}`;
+    const targetDocUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents/users/${targetUid}`;
     const targetDocRes = await fetch(targetDocUrl, { headers: firestoreHeaders });
     if (targetDocRes.ok) {
       const targetData = await targetDocRes.json();
@@ -213,7 +215,7 @@ export default async function deleteUserHandler(req: any, res: any) {
 
         do {
           const pageTokenParam = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '';
-          const listUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${targetUid}/${sub}?pageSize=100${pageTokenParam}`;
+          const listUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents/users/${targetUid}/${sub}?pageSize=100${pageTokenParam}`;
           const listRes = await fetch(listUrl, { headers: firestoreHeaders });
 
           if (!listRes.ok) {
@@ -261,7 +263,7 @@ export default async function deleteUserHandler(req: any, res: any) {
     }
 
     // Delete root user document only after attempting every subcollection.
-    const userDocUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${targetUid}`;
+    const userDocUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents/users/${targetUid}`;
     const userDelRes = await fetch(userDocUrl, {
       method: 'DELETE',
       headers: firestoreHeaders,

@@ -260,6 +260,15 @@ export const IQ_QUESTION_BATTERY: IqQuestion[] = [
  * Test 4: 56 days
  * Test 5+: capped at 112 days
  */
+/**
+ * Calculates exponential cooldown interval in days between cognitive assessments.
+ * Starts at 7 days, doubles with each subsequent assessment up to 112 days (7 * 2^4).
+ */
+export function getIqCooldownDays(historyCount: number): number {
+  const exponent = Math.min(4, Math.max(0, historyCount - 1));
+  return 7 * Math.pow(2, exponent);
+}
+
 export function checkIqCooldownEligibility(
   historyCount: number,
   lastTestDateIso?: string
@@ -274,8 +283,7 @@ export function checkIqCooldownEligibility(
   }
 
   // Calculate exponential interval in days
-  const exponent = Math.min(4, Math.max(0, historyCount - 1)); // Caps at 7 * 2^4 = 112 days
-  const cooldownDays = 7 * Math.pow(2, exponent);
+  const cooldownDays = getIqCooldownDays(historyCount);
 
   const lastDate = new Date(lastTestDateIso);
   const nextEligibleTime = lastDate.getTime() + cooldownDays * 24 * 60 * 60 * 1000;

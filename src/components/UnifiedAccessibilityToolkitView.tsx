@@ -552,6 +552,8 @@ export default function UnifiedAccessibilityToolkitView({
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   className="hidden"
+                  id="pecs-sticker-upload"
+                  aria-label={isAr ? 'رفع صورة لبطاقة التواصل المرئي' : 'Upload PECS card image'}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) handleProcessStickerFile(f);
@@ -810,7 +812,7 @@ export default function UnifiedAccessibilityToolkitView({
                     <label className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm">
                       <FileUp className="w-3.5 h-3.5" />
                       <span>{localize(profile.language, 'Upload PDF / DOCX', 'رفع مستند')}</span>
-                      <input type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handlePdfUpload} />
+                      <input type="file" accept=".pdf,.docx,.txt" className="hidden" aria-label={localize(profile.language, 'Upload PDF or Word document', 'رفع مستند PDF أو وورد')} onChange={handlePdfUpload} />
                     </label>
                   </div>
 

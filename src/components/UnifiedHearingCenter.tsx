@@ -410,6 +410,14 @@ Question: "${q}"`;
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    if (handsRef.current) {
+      try {
+        handsRef.current.close();
+      } catch {
+        // ignore
+      }
+      handsRef.current = null;
+    }
     setIsCameraActive(false);
     setCameraStatus('');
     setDetectedSign('');

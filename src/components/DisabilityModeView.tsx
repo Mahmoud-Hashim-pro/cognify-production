@@ -25,11 +25,11 @@ import {
   Sun, Moon, Home, Compass, Activity,
   ScanLine, Banknote, Palette, Users, FileText, FileCheck, Volume2,
   GraduationCap, History, Clock, Trash2, Play, FileUp, Download, ExternalLink,
-  RotateCcw, Search, X
+  RotateCcw, Search, X, Database, LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
-import { db, cleanDataForFirestore } from '../lib/firebase';
+import { db, cleanDataForFirestore, logout } from '../lib/firebase';
 import { toast } from './Toast';
 import type { ChatInterfaceRef } from './ChatInterface';
 import { 
@@ -55,6 +55,8 @@ const DeafEcosystemView = React.lazy(() => import('./DeafEcosystemView'));
 const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
 const ProfilePage = React.lazy(() => import('./ProfilePage'));
 const StudentSettingsView = React.lazy(() => import('./StudentSettingsView'));
+const AdminDashboard = React.lazy(() => import('./AdminDashboard'));
+import { isAdminUser } from '../lib/roles';
 import { isAccessibilityUser } from '../lib/access';
 import { getTranslation, isArabicLocale } from '../lib/translations';
 
@@ -71,7 +73,8 @@ export type DisabilityTab =
   | 'caregiver'
   | 'deaf'
   | 'orchestrator'
-  | 'progress';
+  | 'progress'
+  | 'admin';
 
 export type DashboardCategory =
   | 'all'
@@ -103,6 +106,7 @@ interface DisabilityModeViewProps {
   setProfile?: (profile: UserProfile) => void;
   isDarkMode?: boolean;
   toggleTheme?: () => void;
+  onLogout?: () => void;
 }
 
 /**
@@ -216,6 +220,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   setProfile,
   isDarkMode = true,
   toggleTheme,
+  onLogout,
 }, ref) {
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => {
     const directTab = currentTab || detectDirectDisabilityTab(profile);
@@ -233,6 +238,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   const [spatialObjects, setSpatialObjects] = useState<any[]>([]);
   
   const isOrgStaff = !!profile?.isOrgManager && !!(profile?.organization || '').trim();
+  const isAdmin = isAdminUser(profile);
 
   // Load saved results and recent activity from persistent stores
   const loadSavedData = useCallback(() => {
@@ -797,7 +803,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       isFeatured: false,
       action: ({ handleSelectTab }: { handleSelectTab: (tab: DisabilityTab) => void }) => handleSelectTab('org'),
     }] : []),
-  ], [isOrgStaff]);
+    ...(isAdmin ? [{
+      id: 'users_database_hub',
+      category: 'study' as const,
+      legacyCategory: 'accessibility_settings',
+      categoryLabelEn: 'Administration',
+      categoryLabelAr: 'الإدارة والنظام',
+      titleEn: 'Users & Database Hub',
+      titleAr: 'إدارة المستخدمين وقاعدة البيانات',
+      descEn: 'Inspect registered users, manage roles, monitor database health, and view user analytics.',
+      descAr: 'عرض سجل المستخدمين المسجلين، إدارة الصلاحيات والأدوار، ومراقبة صحة ونسخ قاعدة البيانات فيرستور.',
+      tagsEn: ['User Directory', 'Firestore DB', 'Roles & Permissions', 'Live Presence'],
+      tagsAr: ['دليل المستخدمين', 'قاعدة بيانات فيرستور', 'الأدوار والصلاحيات', 'المستخدمون النشطون'],
+      Icon: Database,
+      isFeatured: true,
+      action: ({ handleSelectTab }: { handleSelectTab: (tab: DisabilityTab) => void }) => handleSelectTab('admin'),
+    }] : []),
+  ], [isOrgStaff, isAdmin]);
 
   // Filter features based on selectedCategory, searchQuery, and showAllToolsInAllView
   const displayCards = useMemo(() => {
@@ -969,6 +991,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-[#C4D3E5]" />
           </button>
+
+          {/* Header Log Out Button */}
+          <button
+            type="button"
+            onClick={async () => {
+              if (onLogout) onLogout();
+              else await logout();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+            title={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+            aria-label={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+          >
+            <LogOut className="w-4 h-4 rtl:rotate-180 text-rose-400" />
+            <span className="text-xs font-bold hidden sm:inline">
+              {localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+            </span>
+          </button>
         </div>
       </header>
 
@@ -1044,6 +1083,30 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               <Settings className="w-4 h-4" />
               <span>{localize(profile.language, 'Settings', 'الإعدادات')}</span>
             </button>
+
+            {/* Users & Database (Admin Only) */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => handleSelectTab('admin')}
+                aria-current={activeTab === 'admin' ? 'page' : undefined}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
+                  activeTab === 'admin'
+                    ? 'font-bold bg-[#00AEB8] text-[#061A33] shadow-md shadow-[#00AEB8]/30 border border-[#00AEB8]/40'
+                    : 'font-semibold text-[#00AEB8] hover:text-[#F5F8FF] hover:bg-[#071F3C] border border-[#00AEB8]/20 bg-[#00AEB8]/5'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Database className="w-4 h-4" />
+                  <span>{localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
+                </div>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                  activeTab === 'admin' ? 'bg-[#061A33] text-[#00AEB8]' : 'bg-[#00AEB8]/20 text-[#00AEB8]'
+                }`}>
+                  {localize(profile.language, 'Admin', 'مشرف')}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Bottom Sidebar Accessibility Reassurance Badge */}
@@ -1063,6 +1126,31 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 'تدعم تقنيات المساعدة والوصول الشامل مع مراعاة إمكانية الوصول للجميع.'
               )}
             </p>
+          </div>
+
+          {/* Desktop Sidebar Bottom Footer: User Info & Log Out */}
+          <div className="pt-3 mt-3 border-t border-[#16395E] flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#1769B0] to-[#087F8C] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-[#F5F8FF] truncate">{profile.name || 'User'}</p>
+                <p className="text-[10px] text-[#A9C4DD] truncate">{profile.email || ''}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                if (onLogout) onLogout();
+                else await logout();
+              }}
+              className="p-2 rounded-xl text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rose-400 shrink-0"
+              title={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+              aria-label={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+            >
+              <LogOut className="w-4 h-4 rtl:rotate-180" />
+            </button>
           </div>
         </aside>
 
@@ -1164,6 +1252,33 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       <Settings className="w-4 h-4" />
                       <span>{localize(profile.language, 'Settings', 'الإعدادات')}</span>
                     </button>
+
+                    {/* Users & Database (Admin Only) */}
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileSidebarOpen(false);
+                          handleSelectTab('admin');
+                        }}
+                        aria-current={activeTab === 'admin' ? 'page' : undefined}
+                        className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs transition-all cursor-pointer text-start ${
+                          activeTab === 'admin'
+                            ? 'font-bold bg-[#00AEB8] text-[#061A33] shadow-md'
+                            : 'font-semibold text-[#00AEB8] hover:text-[#F5F8FF] hover:bg-[#071F3C] border border-[#00AEB8]/20 bg-[#00AEB8]/5'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Database className="w-4 h-4" />
+                          <span>{localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
+                        </div>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                          activeTab === 'admin' ? 'bg-[#061A33] text-[#00AEB8]' : 'bg-[#00AEB8]/20 text-[#00AEB8]'
+                        }`}>
+                          {localize(profile.language, 'Admin', 'مشرف')}
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -1182,6 +1297,33 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       'مصممة لكل متعلم مع تباين عالي وملاحة تيسيرية متوافقة.'
                     )}
                   </p>
+                </div>
+
+                {/* Mobile Drawer Bottom User & Log Out */}
+                <div className="pt-4 border-t border-[#16395E] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1769B0] to-[#087F8C] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                      {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[#F5F8FF] truncate">{profile.name || 'User'}</p>
+                      <p className="text-[10px] text-[#A9C4DD] truncate">{profile.email || ''}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsMobileSidebarOpen(false);
+                      if (onLogout) onLogout();
+                      else await logout();
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rose-400 shrink-0"
+                    title={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+                    aria-label={localize(profile.language, 'Log Out', 'تسجيل الخروج')}
+                  >
+                    <LogOut className="w-4 h-4 rtl:rotate-180" />
+                    <span className="text-xs font-bold">{localize(profile.language, 'Log Out', 'خروج')}</span>
+                  </button>
                 </div>
               </motion.aside>
             </>
@@ -1962,6 +2104,29 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     onNavigate={onNavigate}
                     isDarkMode={isDarkMode}
                     toggleTheme={toggleTheme}
+                  />
+                </React.Suspense>
+              </motion.div>
+            )}
+
+            {activeTab === 'admin' && isAdmin && (
+              <motion.div
+                key="admin-view"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
+              >
+                <React.Suspense fallback={
+                  <div className="flex-1 flex items-center justify-center p-8 text-[#C4D3E5]">
+                    <div className="w-8 h-8 border-2 border-[#10B8B0] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                }>
+                  <AdminDashboard
+                    profile={profile}
+                    onMenuClick={() => setIsMobileSidebarOpen(true)}
+                    onNavigateBack={handleNavigateBack}
                   />
                 </React.Suspense>
               </motion.div>

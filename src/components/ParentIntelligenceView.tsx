@@ -538,11 +538,13 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
                 </p>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <label htmlFor="child-uid-input" className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     {isAr ? 'معرف الطالب (Student UID / Code)' : 'Student UID / Code'}
                   </label>
                   <input
+                    id="child-uid-input"
                     type="text"
+                    aria-label={isAr ? 'معرف أو بريد الطالب' : 'Student UID or Email'}
                     value={childIdInput}
                     onChange={(e) => setChildIdInput(e.target.value)}
                     placeholder="e.g. std_usr_998124 or student email"

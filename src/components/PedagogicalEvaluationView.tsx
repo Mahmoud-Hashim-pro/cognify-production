@@ -20,6 +20,7 @@ import {
   classifyHakeTier,
   evaluatePedagogicalABTrial
 } from '../lib/pedagogicalEvaluationEngine';
+import { toast } from './Toast';
 
 interface PedagogicalEvaluationViewProps {
   isArabic?: boolean;
@@ -28,6 +29,29 @@ interface PedagogicalEvaluationViewProps {
 export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps> = ({
   isArabic = false
 }) => {
+  const [promotedStrategies, setPromotedStrategies] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('cognify_promoted_pedagogies');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handlePromoteStrategy = (conceptTitle: string, strategy: string) => {
+    const updated = { ...promotedStrategies, [conceptTitle]: strategy };
+    setPromotedStrategies(updated);
+    try {
+      localStorage.setItem('cognify_promoted_pedagogies', JSON.stringify(updated));
+    } catch {}
+    toast.success(
+      isArabic
+        ? `تمت ترقية استراتيجية "${strategy}" لتكون الافتراضية لمفهوم "${conceptTitle}" بنجاح!`
+        : `Successfully promoted "${strategy}" as the default pedagogy for "${conceptTitle}"!`,
+      isArabic ? 'تمت الترقية' : 'Strategy Promoted'
+    );
+  };
+
   // Mock A/B Experiments
   const [experiments, setExperiments] = useState<PedagogicalABExperiment[]>(() => {
     // Experiment 1: Worked Example vs Socratic on C Pointers (Highly Significant)
@@ -362,11 +386,22 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                 </div>
 
                 <button
-                  onClick={() => alert(`Promoted ${activeExp.promotionRecommendation?.recommendedStrategy} to default for ${activeExp.conceptTitle}!`)}
-                  className="shrink-0 py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20"
+                  onClick={() => {
+                    if (activeExp.promotionRecommendation) {
+                      handlePromoteStrategy(activeExp.conceptTitle, activeExp.promotionRecommendation.recommendedStrategy);
+                    }
+                  }}
+                  className={`shrink-0 py-2.5 px-4 font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-lg ${
+                    activeExp.promotionRecommendation && promotedStrategies[activeExp.conceptTitle] === activeExp.promotionRecommendation.recommendedStrategy
+                      ? 'bg-emerald-600 text-white shadow-emerald-500/10'
+                      : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
+                  }`}
+                  aria-label={isArabic ? 'ترقية الاستراتيجية البيداغوجية' : 'Promote Pedagogical Strategy'}
                 >
                   <Zap className="w-3.5 h-3.5" />
-                  {isArabic ? 'ترقية الاستراتيجية الآن' : 'Promote Strategy'}
+                  {activeExp.promotionRecommendation && promotedStrategies[activeExp.conceptTitle] === activeExp.promotionRecommendation.recommendedStrategy
+                    ? (isArabic ? 'الاستراتيجية مُفعّلة ✓' : 'Strategy Active ✓')
+                    : (isArabic ? 'ترقية الاستراتيجية الآن' : 'Promote Strategy')}
                 </button>
               </div>
             )}
@@ -388,6 +423,8 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                 min="0"
                 max="99"
                 value={sandboxPre}
+                aria-label={isArabic ? 'درجة الاختبار القبلي بالنسبة المئوية' : 'Pre-test score percentage'}
+                aria-valuetext={`${sandboxPre}%`}
                 onChange={e => setSandboxPre(Number(e.target.value))}
                 className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-400"
               />
@@ -400,6 +437,8 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                 min="0"
                 max="100"
                 value={sandboxPost}
+                aria-label={isArabic ? 'درجة الاختبار البعدي بالنسبة المئوية' : 'Post-test score percentage'}
+                aria-valuetext={`${sandboxPost}%`}
                 onChange={e => setSandboxPost(Number(e.target.value))}
                 className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
               />
