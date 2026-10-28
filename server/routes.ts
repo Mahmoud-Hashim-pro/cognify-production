@@ -48,7 +48,7 @@ geminiRouter.use(async (req, res, next) => {
           body: JSON.stringify(req.body || {}),
         });
 
-        if (prodRes.status !== 404 && prodRes.status !== 502) {
+        if (prodRes.ok) {
           res.status(prodRes.status);
           for (const [key, val] of prodRes.headers.entries()) {
             if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(key.toLowerCase())) {
