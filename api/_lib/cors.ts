@@ -66,7 +66,7 @@ export function applyCorsHeaders(req: any, res: any): boolean {
   const origin = req.headers?.origin || req.headers?.Origin;
 
   res.setHeader?.('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader?.('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader?.('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-byok-gemini-key, x-goog-api-key');
   res.setHeader?.('Access-Control-Max-Age', '86400');
 
   if (origin) {

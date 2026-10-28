@@ -94,7 +94,11 @@ export async function checkDistributedRateLimit(
   const token = UPSTASH_TOKEN();
 
   if (!url || !token) {
-    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD !== 'true') {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      process.env.ALLOW_LOCAL_RATELIMIT_IN_PROD !== 'true' &&
+      process.env.VERCEL !== '1'
+    ) {
       console.error(
         '[rateLimiter] CRITICAL CONFIGURATION ERROR: UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be configured for distributed rate limiting in production.'
       );

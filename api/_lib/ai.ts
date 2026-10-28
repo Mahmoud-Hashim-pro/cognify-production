@@ -863,7 +863,7 @@ export async function readBody(req: any): Promise<any> {
 }
 
 import { verifyRequestAuth } from './authGuard.js';
-import { checkDistributedRateLimit } from './rateLimiter.js';
+import { checkDistributedRateLimit, checkRateLimit } from './rateLimiter.js';
 import { applyCorsHeaders } from './cors.js';
 import { checkAndConsumeQuota, type AssistiveQuotaCategory } from './usageQuotaEngine.js';
 
@@ -921,16 +921,15 @@ export async function guard(
 
   // 3. IP Rate Limiting (DDoS & Scraper Defense: 100 requests/minute)
   const clientIp = req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown_ip';
-  const ipRateLimit = await checkDistributedRateLimit(`ip:${clientIp}`, 100);
+  let ipRateLimit = await checkDistributedRateLimit(`ip:${clientIp}`, 100);
+  if (ipRateLimit.misconfigured) {
+    ipRateLimit = checkRateLimit(`ip:${clientIp}`, 100);
+  }
   if (typeof res.setHeader === 'function') {
     res.setHeader('X-RateLimit-Limit-IP', '100');
     res.setHeader('X-RateLimit-Remaining-IP', String(ipRateLimit.remaining));
   }
   if (!ipRateLimit.allowed) {
-    if (ipRateLimit.misconfigured) {
-      res.status(500).json({ error: 'Server configuration error: Rate limiting backend is unconfigured.' });
-      return false;
-    }
     if (ipRateLimit.unavailable) {
       res.status(503).json({ error: 'Service temporarily unavailable: Rate limiting service unreachable. Please retry shortly.' });
       return false;
@@ -943,16 +942,15 @@ export async function guard(
   }
 
   // 4. User-Level Rate Limiting (Account Quota Defense: 60 requests/minute baseline)
-  const userRateLimit = await checkDistributedRateLimit(`user:${auth.uid}`, 60);
+  let userRateLimit = await checkDistributedRateLimit(`user:${auth.uid}`, 60);
+  if (userRateLimit.misconfigured) {
+    userRateLimit = checkRateLimit(`user:${auth.uid}`, 60);
+  }
   if (typeof res.setHeader === 'function') {
     res.setHeader('X-RateLimit-Limit-User', '60');
     res.setHeader('X-RateLimit-Remaining-User', String(userRateLimit.remaining));
   }
   if (!userRateLimit.allowed) {
-    if (userRateLimit.misconfigured) {
-      res.status(500).json({ error: 'Server configuration error: Rate limiting backend is unconfigured.' });
-      return false;
-    }
     if (userRateLimit.unavailable) {
       res.status(503).json({ error: 'Service temporarily unavailable: Rate limiting service unreachable. Please retry shortly.' });
       return false;

@@ -324,17 +324,20 @@ export default function VisionCompanionView({
   const isMountedRef = useRef<boolean>(true);
   const cameraSessionIdRef = useRef<number>(0);
   const isAcquiringCameraRef = useRef<boolean>(false);
+  const activeAcquisitionPromiseRef = useRef<Promise<any> | null>(null);
   const cameraReadinessCleanupRef = useRef<(() => void) | null>(null);
 
   // Lifecycle: Automatically start camera on mount and safely cleanup tracks on unmount
   useEffect(() => {
     isMountedRef.current = true;
+    isAcquiringCameraRef.current = false;
     if (!showConsentModal) {
       startCamera();
     }
     return () => {
       isMountedRef.current = false;
       cameraSessionIdRef.current++;
+      isAcquiringCameraRef.current = false;
       cameraReadinessCleanupRef.current?.();
       cameraReadinessCleanupRef.current = null;
       if (streamRef.current) {
@@ -569,9 +572,6 @@ export default function VisionCompanionView({
 
   const startCamera = useCallback(
     async (mode: 'environment' | 'user' = facingMode) => {
-      if (isAcquiringCameraRef.current) {
-        return;
-      }
       if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         setStatus('unsupported');
         setAnnounce(companionLang === 'ar' ? 'يتطلب تشغيل الكاميرا اتصالاً آمناً (HTTPS).' : 'Camera requires a secure HTTPS connection.');
@@ -582,177 +582,198 @@ export default function VisionCompanionView({
         setAnnounce(companionLang === 'ar' ? 'متصفحك الحالي لا يدعم الوصول للكاميرا.' : 'Your browser does not support camera access.');
         return;
       }
+
+      // Serialize acquisitions to prevent concurrent hardware lockouts and NotReadableError
+      const sessionId = ++cameraSessionIdRef.current;
+      if (activeAcquisitionPromiseRef.current) {
+        try {
+          await activeAcquisitionPromiseRef.current;
+        } catch {}
+      }
+
+      if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
+        return;
+      }
+
       cameraReadinessCleanupRef.current?.();
       cameraReadinessCleanupRef.current = null;
       isAcquiringCameraRef.current = true;
-      const sessionId = ++cameraSessionIdRef.current;
       setStatus('starting-camera');
-      try {
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((tr) => tr.stop());
-          streamRef.current = null;
-        }
-        const stream = await getUserMediaSafe(mode);
 
-        if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
-          stream.getTracks().forEach((tr) => tr.stop());
-          return;
-        }
+      let currentPromise: Promise<void> | null = null;
+      currentPromise = (async () => {
+        try {
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach((tr) => tr.stop());
+            streamRef.current = null;
+          }
+          const stream = await getUserMediaSafe(mode);
 
-        streamRef.current = stream;
-        const video = videoRef.current;
-        if (video) {
-          video.srcObject = stream;
-          video.muted = true;
-          video.playsInline = true;
-          video.setAttribute('playsinline', 'true');
-          video.setAttribute('muted', 'true');
+          if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
+            stream.getTracks().forEach((tr) => tr.stop());
+            return;
+          }
 
-          let isResolved = false;
-          let pollTimer: ReturnType<typeof setInterval> | null = null;
+          streamRef.current = stream;
+          const video = videoRef.current;
+          if (video) {
+            video.srcObject = stream;
+            video.muted = true;
+            video.playsInline = true;
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('muted', 'true');
 
-          const finalizeReady = () => {
-            if (isResolved) return;
-            if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) return;
-            isResolved = true;
-            if (pollTimer) {
-              clearInterval(pollTimer);
-              pollTimer = null;
-            }
-            if (video) {
-              video.removeEventListener('loadedmetadata', checkDimensions);
-              video.removeEventListener('canplay', checkDimensions);
-              video.removeEventListener('loadeddata', checkDimensions);
-              video.removeEventListener('playing', checkDimensions);
-              video.removeEventListener('timeupdate', checkDimensions);
-            }
-            setStatus('ready');
-            const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeToolRef.current) || VISUAL_TOOLS[0];
-            const toolCapLabel = companionLang === 'ar' ? activeToolConfig.captureBtnAr : companionLang === 'fr' ? activeToolConfig.captureBtnFr : activeToolConfig.captureBtnEn;
-            setAnnounce(
-              companionLang === 'ar'
-                ? `الكاميرا جاهزة. اضغط على «${toolCapLabel}» للفحص الفوري.`
-                : `Camera ready. Click "${toolCapLabel}" to analyze.`
-            );
-          };
+            let isResolved = false;
+            let pollTimer: ReturnType<typeof setInterval> | null = null;
 
-          const checkDimensions = () => {
-            const v = videoRef.current;
-            if (v && v.videoWidth > 0 && v.videoHeight > 0) {
-              finalizeReady();
-            }
-          };
+            const finalizeReady = () => {
+              if (isResolved) return;
+              if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) return;
+              isResolved = true;
+              if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+              }
+              if (video) {
+                video.removeEventListener('loadedmetadata', checkDimensions);
+                video.removeEventListener('canplay', checkDimensions);
+                video.removeEventListener('loadeddata', checkDimensions);
+                video.removeEventListener('playing', checkDimensions);
+                video.removeEventListener('timeupdate', checkDimensions);
+              }
+              setStatus('ready');
+              const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeToolRef.current) || VISUAL_TOOLS[0];
+              const toolCapLabel = companionLang === 'ar' ? activeToolConfig.captureBtnAr : companionLang === 'fr' ? activeToolConfig.captureBtnFr : activeToolConfig.captureBtnEn;
+              setAnnounce(
+                companionLang === 'ar'
+                  ? `الكاميرا جاهزة. اضغط على «${toolCapLabel}» للفحص الفوري.`
+                  : `Camera ready. Click "${toolCapLabel}" to analyze.`
+              );
+            };
 
-          const markReady = () => {
-            const v = videoRef.current;
-            if (v && v.videoWidth > 0 && v.videoHeight > 0) {
-              finalizeReady();
-            } else {
-              checkDimensions();
-            }
-          };
-
-          cameraReadinessCleanupRef.current = () => {
-            if (pollTimer) {
-              clearInterval(pollTimer);
-              pollTimer = null;
-            }
-            if (video) {
-              video.removeEventListener('loadedmetadata', checkDimensions);
-              video.removeEventListener('canplay', checkDimensions);
-              video.removeEventListener('loadeddata', checkDimensions);
-              video.removeEventListener('playing', checkDimensions);
-              video.removeEventListener('timeupdate', checkDimensions);
-            }
-          };
-
-          video.addEventListener('loadedmetadata', checkDimensions);
-          video.addEventListener('canplay', checkDimensions);
-          video.addEventListener('loadeddata', checkDimensions);
-          video.addEventListener('playing', checkDimensions);
-          video.addEventListener('timeupdate', checkDimensions);
-
-          video.onloadedmetadata = () => markReady();
-          video.oncanplay = () => markReady();
-
-          if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
-            markReady();
-          } else {
-            let checkCount = 0;
-            pollTimer = setInterval(() => {
-              checkCount++;
+            const checkDimensions = () => {
               const v = videoRef.current;
               if (v && v.videoWidth > 0 && v.videoHeight > 0) {
                 finalizeReady();
-              } else if (checkCount >= 8) { // after ~400ms of active stream
-                if (stream.active && stream.getVideoTracks().some((t) => t.readyState === 'live')) {
+              }
+            };
+
+            const markReady = () => {
+              const v = videoRef.current;
+              if (v && v.videoWidth > 0 && v.videoHeight > 0) {
+                finalizeReady();
+              } else {
+                checkDimensions();
+              }
+            };
+
+            cameraReadinessCleanupRef.current = () => {
+              if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+              }
+              if (video) {
+                video.removeEventListener('loadedmetadata', checkDimensions);
+                video.removeEventListener('canplay', checkDimensions);
+                video.removeEventListener('loadeddata', checkDimensions);
+                video.removeEventListener('playing', checkDimensions);
+                video.removeEventListener('timeupdate', checkDimensions);
+              }
+            };
+
+            video.addEventListener('loadedmetadata', checkDimensions);
+            video.addEventListener('canplay', checkDimensions);
+            video.addEventListener('loadeddata', checkDimensions);
+            video.addEventListener('playing', checkDimensions);
+            video.addEventListener('timeupdate', checkDimensions);
+
+            video.onloadedmetadata = () => markReady();
+            video.oncanplay = () => markReady();
+
+            if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+              markReady();
+            } else {
+              let checkCount = 0;
+              pollTimer = setInterval(() => {
+                checkCount++;
+                const v = videoRef.current;
+                if (v && v.videoWidth > 0 && v.videoHeight > 0) {
                   finalizeReady();
-                } else if (checkCount >= 30) {
-                  if (pollTimer) {
-                    clearInterval(pollTimer);
-                    pollTimer = null;
+                } else if (checkCount >= 8) { // after ~400ms of active stream
+                  if (stream.active && stream.getVideoTracks().some((t) => t.readyState === 'live')) {
+                    finalizeReady();
+                  } else if (checkCount >= 30) {
+                    if (pollTimer) {
+                      clearInterval(pollTimer);
+                      pollTimer = null;
+                    }
                   }
                 }
-              }
-            }, 50);
-          }
+              }, 50);
+            }
 
-          video.play().catch((playErr) => {
-            console.warn('Video auto-play warning:', playErr);
-          });
-        } else if (isMountedRef.current && sessionId === cameraSessionIdRef.current) {
-          setStatus('ready');
-        }
-      } catch (camErr: any) {
-        if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
-          return;
-        }
-        console.warn('Camera failed or timed out:', camErr);
-        if (isMountedRef.current) {
-          const errName = camErr?.name || '';
-          const errMsg = camErr?.message || '';
-          if (errMsg === 'CAMERA_TIMEOUT') {
-            setStatus('timeout');
-            setAnnounce(
-              companionLang === 'ar'
-                ? 'استغرقت الكاميرا وقتاً طويلاً للاستجابة. يرجى التأكد من السماح بإذن الكاميرا ثم الضغط على إعادة المحاولة.'
-                : companionLang === 'fr'
-                ? 'Le délai d\'attente de la caméra a expiré. Veuillez autoriser l\'accès et réessayer.'
-                : 'Camera request timed out. Please allow camera permissions and click Retry.'
-            );
-          } else if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
-            setStatus('camera-denied');
-            setAnnounce(
-              companionLang === 'ar'
-                ? 'تم حظر إذن الكاميرا. اضغط على رمز القفل بالمتصفح للسماح بالكاميرا، أو ارفع صورة.'
-                : 'Camera permission denied. Please allow access in browser or upload an image.'
-            );
-          } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError' || errMsg === 'NO_CAMERA_FOUND') {
-            setStatus('no-camera');
-            setAnnounce(
-              companionLang === 'ar'
-                ? 'لم يتم العثور على كاميرا في هذا الجهاز. يمكنك توصيل كاميرا أو رفع صورة.'
-                : 'No camera found on this device. You can connect a webcam or upload a photo.'
-            );
-          } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
-            setStatus('camera-in-use');
-            setAnnounce(
-              companionLang === 'ar'
-                ? 'الكاميرا قيد الاستخدام بواسطة تطبيق آخر. يرجى إغلاق التطبيقات الأخرى وإعادة المحاولة.'
-                : 'Camera is currently in use by another app. Please close other camera apps and retry.'
-            );
-          } else {
-            setStatus('camera-denied');
-            setAnnounce(
-              companionLang === 'ar'
-                ? 'تعذر تشغيل الكاميرا. يمكنك إعادة المحاولة أو رفع صورة.'
-                : 'Camera access unavailable. You can retry or upload an image.'
-            );
+            video.play().catch((playErr) => {
+              console.warn('Video auto-play warning:', playErr);
+            });
+          } else if (isMountedRef.current && sessionId === cameraSessionIdRef.current) {
+            setStatus('ready');
+          }
+        } catch (camErr: any) {
+          if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
+            return;
+          }
+          console.warn('Camera failed or timed out:', camErr);
+          if (isMountedRef.current) {
+            const errName = camErr?.name || '';
+            const errMsg = camErr?.message || '';
+            if (errMsg === 'CAMERA_TIMEOUT') {
+              setStatus('timeout');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'استغرقت الكاميرا وقتاً طويلاً للاستجابة. يرجى التأكد من السماح بإذن الكاميرا ثم الضغط على إعادة المحاولة.'
+                  : companionLang === 'fr'
+                  ? 'Le délai d\'attente de la caméra a expiré. Veuillez autoriser l\'accès et réessayer.'
+                  : 'Camera request timed out. Please allow camera permissions and click Retry.'
+              );
+            } else if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
+              setStatus('camera-denied');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'تم حظر إذن الكاميرا. اضغط على رمز القفل بالمتصفح للسماح بالكاميرا، أو ارفع صورة.'
+                  : 'Camera permission denied. Please allow access in browser or upload an image.'
+              );
+            } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError' || errMsg === 'NO_CAMERA_FOUND') {
+              setStatus('no-camera');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'لم يتم العثور على كاميرا في هذا الجهاز. يمكنك توصيل كاميرا أو رفع صورة.'
+                  : 'No camera found on this device. You can connect a webcam or upload a photo.'
+              );
+            } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
+              setStatus('camera-in-use');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'الكاميرا قيد الاستخدام بواسطة تطبيق آخر. يرجى إغلاق التطبيقات الأخرى وإعادة المحاولة.'
+                  : 'Camera is currently in use by another app. Please close other camera apps and retry.'
+              );
+            } else {
+              setStatus('camera-denied');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'تعذر تشغيل الكاميرا. يمكنك إعادة المحاولة أو رفع صورة.'
+                  : 'Camera access unavailable. You can retry or upload an image.'
+              );
+            }
+          }
+        } finally {
+          isAcquiringCameraRef.current = false;
+          if (activeAcquisitionPromiseRef.current === currentPromise) {
+            activeAcquisitionPromiseRef.current = null;
           }
         }
-      } finally {
-        isAcquiringCameraRef.current = false;
-      }
+      })();
+      activeAcquisitionPromiseRef.current = currentPromise;
+      await currentPromise;
     },
     [facingMode, companionLang]
   );
