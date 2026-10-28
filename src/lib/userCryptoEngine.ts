@@ -433,6 +433,31 @@ export async function getCandidateDecryptionKeys(
     } catch {}
   }
 
+  // 4. Deterministic vault seed candidate (for cross-device legacy compatibility)
+  try {
+    const subtle = getSubtle();
+    const encoder = new TextEncoder();
+    const detSecret = new Uint8Array(await subtle.digest('SHA-256', encoder.encode(`cognify_device_seed_${userId}`)));
+    const uidBytes = encoder.encode(`cognify_device_salt_v11_${userId}`);
+    const combined = new Uint8Array(detSecret.length + uidBytes.length);
+    combined.set(detSecret, 0);
+    combined.set(uidBytes, detSecret.length);
+    const saltBytes = new Uint8Array(await subtle.digest('SHA-256', combined)).slice(0, 16);
+    const prefix = encoder.encode(`cognify_device_bound_key:${userId}:`);
+    const rawKeyMaterial = new Uint8Array(prefix.length + detSecret.length);
+    rawKeyMaterial.set(prefix, 0);
+    rawKeyMaterial.set(detSecret, prefix.length);
+    const baseKey = await subtle.importKey('raw', rawKeyMaterial, { name: 'PBKDF2' }, false, ['deriveKey']);
+    const detKey = await subtle.deriveKey(
+      { name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' },
+      baseKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+    candidates.push({ key: detKey, label: 'deterministic_vault' });
+  } catch {}
+
   return candidates;
 }
 
@@ -620,6 +645,8 @@ export async function encryptSpatialRecord(
  * returns a safe non-destructive placeholder preserving the original encrypted payload
  * without crashing or deleting the record.
  */
+let hasWarnedSpatialKeyMismatch = false;
+
 export async function decryptSpatialRecord(
   rawDocData: any,
   userId: string
@@ -631,7 +658,10 @@ export async function decryptSpatialRecord(
       const decrypted = await decryptData<SpatialObjectRecord>(rawDocData, userId);
       return decrypted;
     } catch (err) {
-      console.warn('[userCryptoEngine] Spatial object encrypted with inaccessible key. Preserving record payload.');
+      if (!hasWarnedSpatialKeyMismatch) {
+        hasWarnedSpatialKeyMismatch = true;
+        console.warn('[userCryptoEngine] Spatial objects encrypted with inaccessible key. Preserving record payload.');
+      }
       // Return a non-destructive locked placeholder preserving original metadata & encrypted payload
       const placeholder: SpatialObjectRecord = {
         id: rawDocData.id || `encrypted_${Date.now()}`,

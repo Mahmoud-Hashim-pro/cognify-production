@@ -24,6 +24,56 @@ export const geminiRouter = express.Router();
 // Enforce security guard (Bearer token verification + rate limiting) on all AI endpoints
 geminiRouter.use(async (req, res, next) => {
   if (req.method === 'POST') {
+    const hasServerKeys = Boolean(
+      process.env.GEMINI_API_KEY ||
+      process.env.VITE_GEMINI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      process.env.GEMINI_API_KEYS
+    );
+    const clientByok = (req.headers?.['x-byok-gemini-key'] || req.headers?.['x-goog-api-key'] || '').toString().trim();
+
+    // If running in local Express mode without server keys and without client BYOK,
+    // seamlessly proxy to production Vercel deployment using the user's authenticated Bearer token.
+    if (!hasServerKeys && (!clientByok || clientByok.length < 10) && req.headers?.authorization) {
+      try {
+        const prodOrigin = process.env.PRODUCTION_ORIGIN || 'https://my-cognify-app.vercel.app';
+        const targetUrl = `${prodOrigin}/api/gemini${req.path}`;
+        const prodRes = await fetch(targetUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Origin': prodOrigin,
+            'Authorization': req.headers.authorization,
+          },
+          body: JSON.stringify(req.body || {}),
+        });
+
+        if (prodRes.status !== 404 && prodRes.status !== 502) {
+          res.status(prodRes.status);
+          for (const [key, val] of prodRes.headers.entries()) {
+            if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(key.toLowerCase())) {
+              res.setHeader(key, val);
+            }
+          }
+          if (prodRes.body) {
+            const reader = prodRes.body.getReader();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              res.write(value);
+            }
+            res.end();
+            return;
+          }
+          const text = await prodRes.text();
+          res.send(text);
+          return;
+        }
+      } catch (proxyErr) {
+        // Fall back to standard local guard if proxy fails
+      }
+    }
+
     const allowed = await guard(req, res);
     if (!allowed) return;
   }
