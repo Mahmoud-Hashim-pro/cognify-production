@@ -29,6 +29,8 @@ import {
   RouteState,
   VALID_DISABILITY_TABS,
   smartNavigateBack,
+  recordInAppNavigation,
+  resetInAppNavigationCount,
 } from "./lib/navigation";
 import { RouteAnnouncer } from "./components/ui/RouteAnnouncer";
 import { isAdminUser } from "./lib/roles";
@@ -88,7 +90,7 @@ const UnifiedAccessibilityToolkitView = lazyWithRetry(() => import("./components
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
   'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'admin', 'support', 'privacy_security',
-  'learning', 'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
+  'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
 ] as const;
@@ -150,6 +152,7 @@ export default function App() {
   };
 
   const handleLogout = async () => {
+    resetInAppNavigationCount();
     setIsMobileMenuOpen(false);
     try {
       sessionStorage.removeItem('cognify_guest_preview');
@@ -481,6 +484,7 @@ export default function App() {
 
     const newHash = buildHash(targetRoute);
     window.history.pushState({ view: targetRoute.view, tab: targetRoute.tab }, '', newHash);
+    recordInAppNavigation();
     setCurrentView(targetRoute.view);
     if (targetRoute.tab) {
       setDisabilityTab(targetRoute.tab);
@@ -1091,7 +1095,7 @@ export default function App() {
               onStreamingUpdate={(text) => setCurrentAIResponse(text)}
               onSTTStateChange={setIsSTTActive}
               setProfile={setProfile}
-              onNavigateBack={() => navigateTo('disability')}
+              onNavigateBack={handleBack}
             />
           </>
         );
@@ -1108,7 +1112,11 @@ export default function App() {
             onStreamingUpdate={(text) => setCurrentAIResponse(text)}
             onSTTStateChange={setIsSTTActive}
             currentTab="deaf"
-            onTabChange={setDisabilityTab}
+            onTabChange={(newTab) => {
+              if (newTab === 'deaf') return;
+              setDisabilityTab(newTab);
+              navigateTo('disability');
+            }}
             setProfile={setProfile}
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
@@ -1179,8 +1187,12 @@ export default function App() {
             currentTab="progress"
             onTabChange={(newTab) => {
               if (newTab === 'progress') return;
-              setDisabilityTab(newTab);
-              navigateTo('disability');
+              if (newTab === 'settings') {
+                navigateTo('settings');
+              } else {
+                setDisabilityTab(newTab);
+                navigateTo('disability', newTab);
+              }
             }}
             setProfile={setProfile}
             isDarkMode={isDarkMode}
@@ -1258,8 +1270,12 @@ export default function App() {
             currentTab="settings"
             onTabChange={(newTab) => {
               if (newTab === 'settings') return;
-              setDisabilityTab(newTab);
-              navigateTo('disability');
+              if (newTab === 'progress') {
+                navigateTo('profile');
+              } else {
+                setDisabilityTab(newTab);
+                navigateTo('disability', newTab);
+              }
             }}
             setProfile={setProfile}
             isDarkMode={isDarkMode}

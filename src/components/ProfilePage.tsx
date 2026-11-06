@@ -769,14 +769,7 @@ export default function ProfilePage({
                   </h3>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => onNavigate?.('learning')}
-                  className="text-xs font-semibold text-[#18C6C3] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{localize(profile.language, 'View Details', 'عرض التفاصيل')}</span>
-                  <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
-                </button>
+
               </div>
 
               {/* Progress Body: Radial Meter (Left) + Subject Progress Bars (Right) */}

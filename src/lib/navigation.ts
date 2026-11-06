@@ -33,7 +33,7 @@ export interface RouteState {
 
 export const VALID_VIEWS: readonly AppView[] = [
   'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'admin', 'support', 'privacy_security',
-  'learning', 'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
+  'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
 ] as const;
@@ -74,7 +74,27 @@ export function parseRoute(hashString: string): RouteState {
   if (clean === 'intelligence') return { view: 'profile' };
   if (clean === 'admin' || clean === 'users' || clean === 'database') return { view: 'admin' };
 
-  // Handle direct disability tab shorthands (e.g. #vision, #deaf, #hub, #book_studio, #toolkit)
+  // Handle direct visual tool shortcuts (e.g. #currency, #cash, #money, #color, #object, #ocr, #face)
+  if (['currency', 'cash', 'money', 'banknotes'].includes(clean)) {
+    return { view: 'disability', tab: 'vision', params: { tool: 'currency' } };
+  }
+  if (['color', 'colors', 'outfit'].includes(clean)) {
+    return { view: 'disability', tab: 'vision', params: { tool: 'color' } };
+  }
+  if (['object', 'objects', 'locator', 'items'].includes(clean)) {
+    return { view: 'disability', tab: 'vision', params: { tool: 'object' } };
+  }
+  if (['face', 'person', 'faces', 'people'].includes(clean)) {
+    return { view: 'disability', tab: 'vision', params: { tool: 'face' } };
+  }
+  if (['read', 'ocr', 'text', 'signs'].includes(clean)) {
+    return { view: 'disability', tab: 'vision', params: { tool: 'read' } };
+  }
+  if (clean === 'scene') {
+    return { view: 'disability', tab: 'vision', params: { tool: 'scene' } };
+  }
+
+  // Handle direct disability tab shorthands (e.g. #vision, #deaf, #hub, #progress, #book_studio, #toolkit)
   if (clean === 'toolkit' || clean === 'assistant' || clean === 'scanner' || clean === 'stickers') return { view: 'toolkit' };
   if (clean === 'studio' || clean === 'book_studio' || clean === 'book-studio' || clean === 'books') return { view: 'book_studio' };
   if (clean === 'vision') return { view: 'disability', tab: 'vision' };
@@ -82,14 +102,23 @@ export function parseRoute(hashString: string): RouteState {
   if (clean === 'hub') return { view: 'disability', tab: 'hub' };
   if (clean === 'caregiver') return { view: 'disability', tab: 'caregiver' };
   if (clean === 'orchestrator') return { view: 'disability', tab: 'orchestrator' };
+  if (clean === 'progress' || clean === 'my_progress' || clean === 'my-progress') return { view: 'profile', tab: 'progress' };
 
   // Split view and sub-tab if formatted as view/tab (e.g. disability/vision)
   const segments = clean.split('/').filter(Boolean);
-  const primaryView = segments[0] as AppView;
+  const rawView = segments[0];
+  if (rawView === 'vision') {
+    const subTool = segments[1] || 'scene';
+    return { view: 'disability', tab: 'vision', params: { tool: subTool } };
+  }
+  const primaryView = rawView as AppView;
 
   if (primaryView === 'disability') {
     const rawTab = segments[1] as DisabilityTab | undefined;
     if (rawTab && (VALID_DISABILITY_TABS as readonly string[]).includes(rawTab)) {
+      if (rawTab === 'vision' && segments[2]) {
+        return { view: 'disability', tab: 'vision', params: { tool: segments[2] } };
+      }
       return { view: 'disability', tab: rawTab };
     }
     return { view: 'disability', tab: 'hub' };
@@ -113,6 +142,9 @@ export function parseRoute(hashString: string): RouteState {
 export function buildHash(route: RouteState): string {
   if (route.view === 'disability') {
     if (route.tab && route.tab !== 'hub') {
+      if (route.tab === 'vision' && route.params?.tool && route.params.tool !== 'scene') {
+        return `#disability/vision/${route.params.tool}`;
+      }
       return `#disability/${route.tab}`;
     }
     return '#disability/hub';
@@ -321,18 +353,33 @@ export function getRouteBreadcrumbs(route: RouteState, lang?: string): Breadcrum
  * Safely navigates backwards using browser history if available,
  * or cleanly falls back to the specified route to prevent leaving the application.
  */
+let inAppNavigationCount = 0;
+
+export function recordInAppNavigation(): void {
+  inAppNavigationCount++;
+}
+
+export function getInAppNavigationCount(): number {
+  return inAppNavigationCount;
+}
+
+export function resetInAppNavigationCount(): void {
+  inAppNavigationCount = 0;
+}
+
 export function smartNavigateBack(
   onNavigateFallback?: (view: AppView, tab?: DisabilityTab) => void,
   fallbackView: AppView = 'disability',
   fallbackTab: DisabilityTab = 'hub'
 ): void {
-  if (typeof window !== 'undefined') {
-    // If window.history has entries and referrer is Cognify origin
-    if (window.history.length > 1 && (document.referrer === '' || document.referrer.includes(window.location.host))) {
-      window.history.back();
-      return;
-    }
+  // Only use browser history if we have confirmed in-app history steps to avoid navigating out or to Login
+  if (typeof window !== 'undefined' && inAppNavigationCount > 0 && window.history.length > 1) {
+    inAppNavigationCount--;
+    window.history.back();
+    return;
   }
+
+  // Otherwise, deterministically fall back to parent/dashboard view without risking logout or external navigation
   if (onNavigateFallback) {
     onNavigateFallback(fallbackView, fallbackTab);
   } else if (typeof window !== 'undefined') {

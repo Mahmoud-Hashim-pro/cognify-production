@@ -923,7 +923,7 @@ async function benchmarkPillar5AccessibilityOverlayIsolation() {
 
   // Verify DisabilityModeView tab synchronization (DisabilityModeView.tsx lines 56-62)
   const disViewSource = fs.readFileSync(path.resolve('src/components/DisabilityModeView.tsx'), 'utf-8');
-  const hasTabNotify = disViewSource.includes('onTabChange?.(activeTab)');
+  const hasTabNotify = disViewSource.includes('onTabChange?.(activeTab)') || disViewSource.includes('onTabChange?.(targetTab)');
   assert(hasTabNotify, 'DisabilityModeView notifies parent via onTabChange to synchronize active camera tool');
 }
 

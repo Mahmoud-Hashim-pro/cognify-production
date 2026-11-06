@@ -140,10 +140,10 @@ export default function Sidebar({
     },
     {
       id: 'profile',
-      label: localize(profile.language, 'Accommodation Passport', 'جواز الإتاحة والملف الشخصي'),
+      label: localize(profile.language, 'My Progress & Passport', 'تقدمي التعليمي وجواز الإتاحة'),
       icon: User,
-      action: () => { onClose?.(); setCurrentView('profile'); },
-      active: currentView === 'profile',
+      action: () => { onClose?.(); onSelectDisabilityTab?.('progress'); setCurrentView('profile'); },
+      active: currentView === 'profile' || (currentView === 'disability' && activeDisabilityTab === 'progress'),
     },
     {
       id: 'privacy_security',

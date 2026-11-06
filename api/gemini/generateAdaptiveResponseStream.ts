@@ -30,6 +30,7 @@ async function streamFallback(
   category: TaskCategory,
   attachments: any[],
   send: (obj: any) => void,
+  byokKey?: string,
 ): Promise<string> {
   let full = '';
   outer: for (const key of orderedFallbackKeys(category)) {
@@ -109,6 +110,7 @@ async function streamGemini(
   system: string,
   category: TaskCategory,
   send: (obj: any) => void,
+  byokKey?: string,
 ): Promise<string> {
   let full = '';
   const t0 = Date.now();
@@ -124,7 +126,7 @@ async function streamGemini(
         maxOutputTokens: category === 'fast' ? 1024 : 2048,
       },
     });
-    const { res: gres } = await geminiFetch('streamGenerateContent', body, { stream: true, category });
+    const { res: gres } = await geminiFetch('streamGenerateContent', body, { stream: true, category, byokKey });
 
     if (gres && gres.body) {
       const reader = (gres.body as any).getReader();
@@ -256,12 +258,12 @@ export default async function handler(req: any, res: any) {
         // fall back to Gemini streaming if that produced nothing.
         full = await streamFallback(buildOpenAIMessages(message, system, safeHistory), category, safeAttachments, send);
         if (!full) {
-          full = await streamGemini(message, safeHistory, safeAttachments, system, category, send);
+          full = await streamGemini(message, safeHistory, safeAttachments, system, category, send, req.byokKey);
         }
       } else {
         // "fast" and "vision": Gemini first (native multimodal handles
         // vision directly), OpenAI-compatible chain as the fallback.
-        full = await streamGemini(message, safeHistory, safeAttachments, system, category, send);
+        full = await streamGemini(message, safeHistory, safeAttachments, system, category, send, req.byokKey);
         if (!full) {
           full = await streamFallback(buildOpenAIMessages(message, system, safeHistory), category, safeAttachments, send);
         }

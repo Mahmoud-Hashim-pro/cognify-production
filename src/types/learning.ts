@@ -70,6 +70,8 @@ export interface LearningProfile {
   audioEnabled?: boolean;
   speechRate?: number;
   dyslexiaFont?: boolean;
+  lastExerciseId?: string;
+  lastExerciseTimestamp?: number;
 }
 
 export interface MistakeItem {

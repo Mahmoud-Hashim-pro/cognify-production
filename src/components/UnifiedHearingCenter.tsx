@@ -8,6 +8,7 @@ import {
   Pause,
   RotateCcw,
   Sparkles,
+  ArrowLeft,
   ArrowRight,
   Send,
   Trash2,
@@ -455,6 +456,18 @@ Question: "${q}"`;
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-5">
         {/* Right Side in RTL: Icon + Main Title + Subtitle */}
         <div className="flex items-center gap-3">
+          {onNavigateBack && (
+            <button
+              type="button"
+              onClick={onNavigateBack}
+              aria-label={loc('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
+              title={loc('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
+              className="min-h-[44px] min-w-[44px] p-2.5 rounded-2xl bg-[#0D2542] hover:bg-[#102D4D] border border-[#12CFE0]/30 hover:border-[#12CFE0] text-[#12CFE0] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
+            >
+              <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+              <span className="text-xs font-bold hidden sm:inline">{loc('Back', 'رجوع')}</span>
+            </button>
+          )}
           <div className="w-11 h-11 rounded-2xl bg-[#0D2542] border border-[#12CFE0]/30 text-[#12CFE0] flex items-center justify-center shadow-[0_0_20px_rgba(18,207,224,0.15)] shrink-0">
             <Ear className="w-6 h-6 text-[#12CFE0]" aria-hidden="true" />
           </div>

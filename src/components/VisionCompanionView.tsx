@@ -1,17 +1,13 @@
 /**
- * Visual Companion (الرفيق البصري) — Life-assistant full-screen camera tool
- * for blind and visually impaired users.
- *
- * Capabilities:
- * 1. Full-screen camera viewport with floating ergonomic accessible HUD.
- * 2. Two distinct language choices: Arabic (عربي) and English.
- * 3. Automatic "Repeat Aloud" audio readout (TTS) immediately upon generation.
- * 4. "Remember this as..." feature for persistent object & face recognition.
+ * Visual Companion (الرفيق البصري / المساعد البصري)
+ * Life-assistant camera tool for blind and visually impaired users.
+ * Reference-matched UI implementation with dark navy palette and teal primary action.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Camera,
+  CameraOff,
   Volume2,
   VolumeX,
   BookmarkPlus,
@@ -34,12 +30,25 @@ import {
   Compass,
   FileText,
   ArrowLeft,
+  ArrowRight,
   RefreshCw,
   Clock,
   CheckCircle2,
   SlidersHorizontal,
   Upload,
   ShieldCheck,
+  Play,
+  Eye,
+  Mic,
+  MicOff,
+  HelpCircle,
+  MessageSquare,
+  Send,
+  Layers,
+  Settings2,
+  Copy,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
@@ -57,18 +66,234 @@ import {
   loadSpatialObjectsFromFirestore,
 } from '../lib/spatialMemoryEngine';
 
+export type VisualToolId = 'scene' | 'currency' | 'read' | 'color' | 'object' | 'face';
+
+export interface VisualToolConfig {
+  id: VisualToolId;
+  titleEn: string;
+  titleAr: string;
+  titleFr: string;
+  shortDescEn: string;
+  shortDescAr: string;
+  shortDescFr: string;
+  captureBtnEn: string;
+  captureBtnAr: string;
+  captureBtnFr: string;
+  openCamBtnEn: string;
+  openCamBtnAr: string;
+  openCamBtnFr: string;
+  uploadBtnEn: string;
+  uploadBtnAr: string;
+  uploadBtnFr: string;
+  Icon: React.ComponentType<{ className?: string }>;
+  badgeEn: string;
+  badgeAr: string;
+  badgeFr: string;
+  keyboardShortcut: string;
+  memoryType: 'object' | 'person';
+  waitingEn: string;
+  waitingAr: string;
+  waitingFr: string;
+  demoSampleEn: string;
+  demoSampleAr: string;
+  demoSampleFr: string;
+}
+
+export const VISUAL_TOOLS: VisualToolConfig[] = [
+  {
+    id: 'scene',
+    titleEn: 'Visual Assistant & Safety',
+    titleAr: 'المساعد البصري ووصف المشهد',
+    titleFr: 'Assistant Visuel & Sécurité',
+    shortDescEn: 'Describes surroundings, alerts to obstacles, and guides indoor/outdoor navigation.',
+    shortDescAr: 'وصف فوري للمحيط وتنبيه من العوائق وتوجيه آمن للحركة الداخلية والخارجية.',
+    shortDescFr: 'Description de l\'environnement, détection d\'obstacles et guidage sécurisé.',
+    captureBtnEn: 'What is in front of me now?',
+    captureBtnAr: 'ماذا أمامي الآن؟',
+    captureBtnFr: 'Que se passe-t-il devant moi ?',
+    openCamBtnEn: 'Open Camera for Scene Vision',
+    openCamBtnAr: 'تشغيل الكاميرا لوصف المشهد',
+    openCamBtnFr: 'Activer la caméra pour la scène',
+    uploadBtnEn: 'Upload Scene Image',
+    uploadBtnAr: 'رفع صورة مشهد',
+    uploadBtnFr: 'Téléverser une image de scène',
+    Icon: Eye,
+    badgeEn: 'Scene & Safety',
+    badgeAr: 'وصف المشهد والأمان',
+    badgeFr: 'Scène & Sécurité',
+    keyboardShortcut: 'V',
+    memoryType: 'object',
+    waitingEn: 'Analyzing scene and preparing voice description...',
+    waitingAr: 'جاري تحليل المشهد ووصفه صوتياً...',
+    waitingFr: 'Analyse de la scène en cours...',
+    demoSampleEn: 'The image shows a study desk with a green potted plant in a white pot, books, and a blue mug. Lighting is natural and clear for indoor study.',
+    demoSampleAr: 'تظهر الصورة على مكتب دراسة يحتوي على نبات أخضر في أصيص أبيض، وكتب مع مكتبية، وكوب أزرق على الطاولة. الإضاءة طبيعية ومناسبة للاستخدام في بيئة داخلية.',
+    demoSampleFr: 'L\'image montre un bureau d\'étude avec une plante verte dans un pot blanc, des livres et une tasse bleue. L\'éclairage est naturel et bien adapté.',
+  },
+  {
+    id: 'currency',
+    titleEn: 'Cash & Banknote Reader',
+    titleAr: 'قارئ العملات والنقود',
+    titleFr: 'Lecteur de Monnaie et Billets',
+    shortDescEn: 'Identifies banknotes and coins with high accuracy (EGP, USD, EUR, SAR).',
+    shortDescAr: 'يتعرف على فئات العملات النقدية الورقية وينطق قيمتها فوراً بدقة عالية.',
+    shortDescFr: 'Identifie les coupures et billets avec grande précision (EGP, USD, EUR, SAR).',
+    captureBtnEn: 'Identify Banknote / Cash',
+    captureBtnAr: 'فحص وقراءة العملة',
+    captureBtnFr: 'Identifier le billet',
+    openCamBtnEn: 'Open Camera for Cash Reader',
+    openCamBtnAr: 'تشغيل الكاميرا لقراءة العملات',
+    openCamBtnFr: 'Activer la caméra pour les billets',
+    uploadBtnEn: 'Upload Banknote Image',
+    uploadBtnAr: 'رفع صورة عملة نقدية',
+    uploadBtnFr: 'Téléverser un billet',
+    Icon: Banknote,
+    badgeEn: 'Cash & Currency (EGP/USD/EUR/SAR)',
+    badgeAr: 'نقود وعملات',
+    badgeFr: 'Billets & Devises',
+    keyboardShortcut: 'C',
+    memoryType: 'object',
+    waitingEn: 'Identifying banknote denomination and currency...',
+    waitingAr: 'جاري فحص وقراءة فئة العملة النقدية...',
+    waitingFr: 'Identification de la coupure en cours...',
+    demoSampleEn: 'Banknote detected: Two Hundred Egyptian Pounds (200 EGP). The bill is genuine and in good condition with the denomination clearly visible.',
+    demoSampleAr: 'تم فحص العملة: مئتا جنيه مصري (200 ج.م). العملة الورقية واضحة المعالم وبحالة جيدة والفئة محددة بدقة.',
+    demoSampleFr: 'Billet identifié : deux cents livres égyptiennes (200 EGP). La coupure est authentique et en bon état.',
+  },
+  {
+    id: 'read',
+    titleEn: 'Printed Text & Sign OCR',
+    titleAr: 'قراءة النصوص واللافتات (OCR)',
+    titleFr: 'Lecture de Textes & Panneaux',
+    shortDescEn: 'Instant text recognition from classroom whiteboards, medicine boxes, signs, and books.',
+    shortDescAr: 'استخراج وقراءة النصوص المطبوعة واللافتات والسبورة وعبوات الأدوية صوتياً.',
+    shortDescFr: 'Reconnaissance instantanée des textes imprimés, panneaux et documents.',
+    captureBtnEn: 'Read Text Aloud',
+    captureBtnAr: 'قراءة النص واللافتات',
+    captureBtnFr: 'Lire le texte à voix haute',
+    openCamBtnEn: 'Open Camera for Text OCR',
+    openCamBtnAr: 'تشغيل الكاميرا لقراءة النصوص',
+    openCamBtnFr: 'Activer la caméra pour la lecture',
+    uploadBtnEn: 'Upload Document or Sign',
+    uploadBtnAr: 'رفع صورة نص أو لافتة',
+    uploadBtnFr: 'Téléverser un document ou panneau',
+    Icon: FileText,
+    badgeEn: 'Text & Signs OCR',
+    badgeAr: 'نصوص ولافتات OCR',
+    badgeFr: 'Texte & Enseignes',
+    keyboardShortcut: 'T',
+    memoryType: 'object',
+    waitingEn: 'Reading text and extracting content...',
+    waitingAr: 'جاري قراءة النص واستخراج المحتوى...',
+    waitingFr: 'Lecture du texte visible...',
+    demoSampleEn: 'Text read: Lecture room 204. Advanced Cognitive Computing. Lecture begins on Sunday at 10:00 AM.',
+    demoSampleAr: 'النص المكتوب: قاعة المحاضرات 204. الحوسبة المعرفية المتقدمة. موعد المحاضرة القادمة يوم الأحد الساعة العاشرة صباحاً.',
+    demoSampleFr: 'Texte lu : Salle de cours 204. Informatique cognitive avancée. Cours dimanche à dix heures.',
+  },
+  {
+    id: 'color',
+    titleEn: 'Color & Outfit Matcher',
+    titleAr: 'فحص وتنسيق الألوان',
+    titleFr: 'Harmonie des Couleurs & Tenue',
+    shortDescEn: 'Identifies garment colors, patterns, and recommends coordinated complementary outfits.',
+    shortDescAr: 'فحص درجات ألوان الملابس والمقتنيات وتقديم نصائح لتنسيق الألوان المتناسقة.',
+    shortDescFr: 'Détecte les nuances de vêtements et conseille des associations harmonieuses.',
+    captureBtnEn: 'Detect Color & Match Outfit',
+    captureBtnAr: 'فحص وتنسيق الألوان',
+    captureBtnFr: 'Analyser la tenue et les couleurs',
+    openCamBtnEn: 'Open Camera for Color Matcher',
+    openCamBtnAr: 'تشغيل الكاميرا لفحص الألوان',
+    openCamBtnFr: 'Activer la caméra pour les couleurs',
+    uploadBtnEn: 'Upload Garment Image',
+    uploadBtnAr: 'رفع صورة ملابس',
+    uploadBtnFr: 'Téléverser un vêtement',
+    Icon: Palette,
+    badgeEn: 'Garment & Color Harmony',
+    badgeAr: 'الألوان والملابس',
+    badgeFr: 'Couleurs & Tenue',
+    keyboardShortcut: 'K',
+    memoryType: 'object',
+    waitingEn: 'Analyzing garment colors, patterns, and styling...',
+    waitingAr: 'جاري فحص درجات الألوان وتنسيق المظهر...',
+    waitingFr: 'Analyse des couleurs et du style vestimentaire...',
+    demoSampleEn: 'The shirt is navy blue with fine white stripes. It coordinates perfectly with beige, grey, or khaki trousers for a formal or casual look.',
+    demoSampleAr: 'القميص لونه كحلي داكن مقلم بخطوط بيضاء رفيعة، ويتناسق بشكل ممتاز مع بنطال بلون بيج أو رمادي فاتح لمظهر أنيق ومتناسق.',
+    demoSampleFr: 'La chemise est bleu marine à fines rayures blanches. Elle s\'associe parfaitement avec un pantalon beige ou gris clair.',
+  },
+  {
+    id: 'object',
+    titleEn: 'Spatial Memory & Item Finder',
+    titleAr: 'الذاكرة المكانية وكشف الأشياء',
+    titleFr: 'Localisateur d\'Objets & Espace',
+    shortDescEn: 'Locates keys, wallets, phones, and glasses with spatial clock-face hints.',
+    shortDescAr: 'تحديد أماكن المفاتيح والنظارات والمحفظة بنظام اتجاه عقارب الساعة والمسافة.',
+    shortDescFr: 'Localise les clés, portefeuilles et téléphones avec repères spatiaux.',
+    captureBtnEn: 'Locate Objects & Items',
+    captureBtnAr: 'كشف مكان الأشياء',
+    captureBtnFr: 'Localiser les objets proches',
+    openCamBtnEn: 'Open Camera for Item Finder',
+    openCamBtnAr: 'تشغيل الكاميرا للبحث عن الأشياء',
+    openCamBtnFr: 'Activer la caméra pour les objets',
+    uploadBtnEn: 'Upload Room Image',
+    uploadBtnAr: 'رفع صورة للبحث عن الغرض',
+    uploadBtnFr: 'Téléverser une vue de la pièce',
+    Icon: Compass,
+    badgeEn: 'Spatial Object Recall',
+    badgeAr: 'الأشياء والمقتنيات',
+    badgeFr: 'Objets Spatiaux',
+    keyboardShortcut: 'O',
+    memoryType: 'object',
+    waitingEn: 'Scanning room landmarks and detecting personal objects...',
+    waitingAr: 'جاري البحث عن الأشياء ومعالم المكان...',
+    waitingFr: 'Recherche des objets et repères spatiaux...',
+    demoSampleEn: 'Item located: Your key ring is at 2 o\'clock, approximately 40 centimeters away on the table next to the laptop. The space ahead is clear.',
+    demoSampleAr: 'تم العثور على الغرض: ميدالية مفاتيحك موجودة عند اتجاه الساعة 2 على بعد حوالي 40 سم على الطاولة بجوار اللابتوب، والمسار أمام يدك سالك.',
+    demoSampleFr: 'Objet localisé : votre trousseau de clés se trouve à deux heures, à environ quarante centimètres sur la table à côté de l\'ordinateur.',
+  },
+  {
+    id: 'face',
+    titleEn: 'Person & Face Recognition',
+    titleAr: 'التعرف على الأشخاص والوجوه',
+    titleFr: 'Reconnaissance de Personnes',
+    shortDescEn: 'Recognizes people entering camera view, distance, facial expressions, and clothing.',
+    shortDescAr: 'التعرف على الأشخاص في مجال الرؤية ومسافتهم وتعابير وجوههم وملابسهم.',
+    shortDescFr: 'Reconnaît les personnes dans le champ, la distance et les expressions.',
+    captureBtnEn: 'Recognize Person in Frame',
+    captureBtnAr: 'التعرف على الأشخاص',
+    captureBtnFr: 'Reconnaître la personne',
+    openCamBtnEn: 'Open Camera for Person Recognition',
+    openCamBtnAr: 'تشغيل الكاميرا للتعرف على الأشخاص',
+    openCamBtnFr: 'Activer la caméra pour les visages',
+    uploadBtnEn: 'Upload Person Image',
+    uploadBtnAr: 'رفع صورة شخص',
+    uploadBtnFr: 'Téléverser une photo de personne',
+    Icon: Users,
+    badgeEn: 'Person & Proximity',
+    badgeAr: 'الأشخاص والوجوه',
+    badgeFr: 'Personnes & Proximité',
+    keyboardShortcut: 'P',
+    memoryType: 'person',
+    waitingEn: 'Detecting people and matching recognized faces...',
+    waitingAr: 'جاري التعرف على الشخص والوجوه الظاهرة...',
+    waitingFr: 'Détection des personnes et visages...',
+    demoSampleEn: 'A person is standing directly in front of you at about two meters distance, smiling and greeting you, wearing a dark green jacket.',
+    demoSampleAr: 'يقف شخص أمامك مباشرة على مسافة مترين تقريباً، يبتسم ويرحب بك، ويرتدي سترة بلون زيتي داكن.',
+    demoSampleFr: 'Une personne se tient directement devant vous à environ deux mètres, souriante et portant une veste vert foncé.',
+  },
+];
+
 interface VisionCompanionViewProps {
   profile: UserProfile;
   setProfile?: (profile: UserProfile) => void;
   onNavigateBack?: () => void;
+  initialTool?: VisualToolId;
+  onToolChange?: (tool: VisualToolId) => void;
 }
 
-type Status = 'idle' | 'starting-camera' | 'ready' | 'analyzing' | 'camera-denied' | 'unsupported';
+type Status = 'idle' | 'starting-camera' | 'ready' | 'analyzing' | 'camera-denied' | 'no-camera' | 'camera-in-use' | 'unsupported' | 'timeout';
 
 const isArabicLang = (lang?: string) => isArabicLocale(lang);
 
-// Remembers the user's chosen Visual Companion language across visits,
-// so it's only asked once instead of defaulting to English every time.
 const COMPANION_LANG_STORAGE_KEY = 'cognify_vision_companion_lang';
 
 export { cleanVisionDescription } from '../lib/visionCleaner';
@@ -79,7 +304,13 @@ import DocumentStudioModal from './DocumentStudioModal';
 import SpatialMemoryTrajectoryView from './SpatialMemoryTrajectoryView';
 import ParentalConsentModal from './ParentalConsentModal';
 
-export default function VisionCompanionView({ profile, setProfile, onNavigateBack }: VisionCompanionViewProps) {
+export default function VisionCompanionView({
+  profile,
+  setProfile,
+  onNavigateBack,
+  initialTool = 'scene',
+  onToolChange,
+}: VisionCompanionViewProps) {
   const isMinorStudent = Boolean((profile.age && profile.age < 18) || (profile as any).isMinor);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(
     Boolean(isMinorStudent && !profile.parentalConsent?.verified)
@@ -91,12 +322,43 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMountedRef = useRef<boolean>(true);
+  const cameraSessionIdRef = useRef<number>(0);
+  const isAcquiringCameraRef = useRef<boolean>(false);
+  const activeAcquisitionPromiseRef = useRef<Promise<any> | null>(null);
+  const cameraReadinessCleanupRef = useRef<(() => void) | null>(null);
+
+  // Lifecycle: Automatically start camera on mount and safely cleanup tracks on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    isAcquiringCameraRef.current = false;
+    if (!showConsentModal) {
+      startCamera();
+    }
+    return () => {
+      isMountedRef.current = false;
+      cameraSessionIdRef.current++;
+      isAcquiringCameraRef.current = false;
+      cameraReadinessCleanupRef.current?.();
+      cameraReadinessCleanupRef.current = null;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((tr) => tr.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      if (activeAbortControllerRef.current) {
+        activeAbortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   // Monotonically increasing request ID & in-flight tracking to reject stale scene descriptions
   const activeRequestIdRef = useRef<number>(0);
   const lastObservationTimeRef = useRef<number>(0);
   const activeAbortControllerRef = useRef<AbortController | null>(null);
   const lastCaptureAttemptRef = useRef<number>(0);
+
   const [observationTimestamp, setObservationTimestamp] = useState<number | null>(() => {
     try {
       const raw = sessionStorage.getItem('cognify_vision_last_observation');
@@ -107,6 +369,7 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     } catch {}
     return null;
   });
+
   const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | 'uploaded' | null>(() => {
     try {
       const raw = sessionStorage.getItem('cognify_vision_last_observation');
@@ -116,15 +379,6 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
       }
     } catch {}
     return null;
-  });
-  const [observationConfidenceReason, setObservationConfidenceReason] = useState<string>('');
-  const [verbosity, setVerbosity] = useState<'concise' | 'detailed'>('concise');
-  const [experienceMode, setExperienceMode] = useState<'beginner' | 'advanced'>(() => {
-    try {
-      return (localStorage.getItem('cognify_vision_exp_mode') as any) || 'advanced';
-    } catch {
-      return 'advanced';
-    }
   });
 
   const [status, setStatus] = useState<Status>('starting-camera');
@@ -141,42 +395,14 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
   const [lastSnapshot, setLastSnapshot] = useState<string | null>(null);
   const [announce, setAnnounce] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [isSavingPerson, setIsSavingPerson] = useState(false);
   const [labelInput, setLabelInput] = useState('');
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showGuestAuthCard, setShowGuestAuthCard] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
-  // Low-vision font scaling: 'normal' | 'large' | 'extralarge'
-  const [textSize, setTextSize] = useState<'normal' | 'large' | 'extralarge'>(() => {
-    try {
-      return (localStorage.getItem('cognify_vision_font_size') as any) || 'normal';
-    } catch {
-      return 'normal';
-    }
-  });
-
-  // Read Mode: focuses the AI on reading visible text or summarizing lectures/documents.
-  const [readMode, setReadMode] = useState(false);
-  // Read Action: 'summarize' for lecture & document summaries, 'read' for verbatim word-for-word reading.
-  const [readAction, setReadAction] = useState<'summarize' | 'read'>('summarize');
-
-  // Shopping Assistant Mode
-  const [shoppingMode, setShoppingMode] = useState(false);
-  // Instant Currency Reader Mode (قارئ العملات والنقود)
-  const [currencyMode, setCurrencyMode] = useState(false);
-  // Face & Familiar Person Recognition Mode (التعرف على الوجوه والمقربين)
-  const [faceMode, setFaceMode] = useState(false);
-  // Color & Outfit Matcher Mode (مساعد تناسق الملابس والألوان)
-  const [outfitMode, setOutfitMode] = useState(false);
-  // Virtual White Cane & Indoor Haptic Navigation Mode (العصا والملاحة الاهتزازية)
-  const [navGuideMode, setNavGuideMode] = useState(false);
-  // Lecture & Blackboard Scanner Mode (سكانر المحاضرات والسبورة الجامعية)
-  const [lectureMode, setLectureMode] = useState(false);
-
-  // Saving memory as person vs object
-  const [isSavingPerson, setIsSavingPerson] = useState(false);
-
-  // Supported languages: Arabic, English, French
+  // Supported languages: Arabic, English, French (Declared early for child callbacks)
   const [companionLang, setCompanionLang] = useState<'ar' | 'en' | 'fr'>(() => {
     if (typeof window !== 'undefined') {
       const saved = window.localStorage.getItem(COMPANION_LANG_STORAGE_KEY);
@@ -184,283 +410,10 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     }
     if (isArabicLang(profile?.language)) return 'ar';
     if (profile?.language === 'French' || (profile?.language as unknown as string) === 'fr') return 'fr';
-    return 'ar'; // neutral placeholder while the first-launch picker is shown
+    return 'ar';
   });
 
-  const announceFeature = useCallback((titleAr: string, titleEn: string, titleFr: string, isActive: boolean) => {
-    const text = companionLang === 'ar'
-      ? (isActive ? `تم تفعيل ${titleAr}` : `تم إيقاف ${titleAr}`)
-      : companionLang === 'fr'
-      ? (isActive ? `Mode ${titleFr} activé` : `Mode ${titleFr} désactivé`)
-      : (isActive ? `${titleEn} mode activated` : `${titleEn} mode deactivated`);
-
-    const voiceLang = companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English';
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
-    }
-    speak(text, voiceLang as any);
-  }, [companionLang]);
-
-  const toggleTextSize = useCallback(() => {
-    setTextSize((prev) => {
-      const next = prev === 'normal' ? 'large' : prev === 'large' ? 'extralarge' : 'normal';
-      try {
-        localStorage.setItem('cognify_vision_font_size', next);
-      } catch {}
-      const msg = companionLang === 'ar'
-        ? (next === 'normal' ? 'حجم الخط عادي' : next === 'large' ? 'حجم الخط كبير' : 'حجم الخط كبير جداً')
-        : companionLang === 'fr'
-        ? (next === 'normal' ? 'Taille du texte standard' : next === 'large' ? 'Grande taille de texte' : 'Très grande taille de texte')
-        : (next === 'normal' ? 'Standard text size' : next === 'large' ? 'Large text size' : 'Extra large text size');
-      speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
-      return next;
-    });
-  }, [companionLang]);
-
-  const resetAllModes = useCallback(() => {
-    setReadMode(false);
-    setShoppingMode(false);
-    setCurrencyMode(false);
-    setFaceMode(false);
-    setOutfitMode(false);
-    setNavGuideMode(false);
-    setLectureMode(false);
-  }, []);
-
-  const toggleReadMode = useCallback(() => {
-    setReadMode((prev) => {
-      const next = !prev;
-      if (next) {
-        setShoppingMode(false);
-        setCurrencyMode(false);
-        setFaceMode(false);
-        setOutfitMode(false);
-        setNavGuideMode(false);
-        setLectureMode(false);
-      }
-      announceFeature('قارئ النصوص والكتب والروشتات', 'Document and Text Reader', 'Lecture de Documents', next);
-      return next;
-    });
-  }, [announceFeature]);
-
-  const toggleLectureMode = useCallback(() => {
-    setLectureMode((prev) => {
-      const next = !prev;
-      if (next) {
-        setReadMode(false);
-        setShoppingMode(false);
-        setCurrencyMode(false);
-        setFaceMode(false);
-        setOutfitMode(false);
-        setNavGuideMode(false);
-      }
-      announceFeature('سكانر المحاضرات والسبورة الجامعية', 'Lecture and Board Scanner', 'Scanner de Cours et Tableau', next);
-      return next;
-    });
-  }, [announceFeature]);
-
-  const toggleShoppingMode = useCallback(() => {
-    setShoppingMode((prev) => {
-      const next = !prev;
-      if (next) {
-        setReadMode(false);
-        setCurrencyMode(false);
-        setFaceMode(false);
-        setOutfitMode(false);
-        setNavGuideMode(false);
-        setLectureMode(false);
-      }
-      announceFeature('مساعد فحص المنتجات والتسوق', 'Shopping and Product Scanner', 'Assistant Shopping', next);
-      return next;
-    });
-  }, [announceFeature]);
-
-  const toggleCurrencyMode = useCallback(() => {
-    setCurrencyMode((prev) => {
-      const next = !prev;
-      if (next) {
-        setReadMode(false);
-        setShoppingMode(false);
-        setFaceMode(false);
-        setOutfitMode(false);
-        setNavGuideMode(false);
-        setLectureMode(false);
-      }
-      announceFeature('قارئ العملات والنقود المصرية', 'Egyptian Currency Reader', 'Lecteur de Monnaie', next);
-      return next;
-    });
-  }, [announceFeature]);
-
-  const toggleFaceMode = useCallback(() => {
-    setFaceMode((prev) => {
-      const next = !prev;
-      if (next) {
-        setReadMode(false);
-        setShoppingMode(false);
-        setCurrencyMode(false);
-        setOutfitMode(false);
-        setNavGuideMode(false);
-        setLectureMode(false);
-      }
-      announceFeature('التعرف على الوجوه والمقربين', 'Face Recognition and Familiar People', 'Reconnaissance Faciale', next);
-      return next;
-    });
-  }, [announceFeature]);
-
-  const toggleOutfitMode = useCallback(() => {
-    setOutfitMode((prev) => {
-      const next = !prev;
-      if (next) {
-        setReadMode(false);
-        setShoppingMode(false);
-        setCurrencyMode(false);
-        setFaceMode(false);
-        setNavGuideMode(false);
-        setLectureMode(false);
-      }
-      announceFeature('فحص وتنسيق ألوان الملابس', 'Color and Outfit Matcher', 'Style et Couleurs', next);
-      return next;
-    });
-  }, [announceFeature]);
-
-  const toggleNavGuideMode = useCallback(() => {
-    setNavGuideMode((prev) => {
-      const next = !prev;
-      if (next) {
-        setReadMode(false);
-        setShoppingMode(false);
-        setCurrencyMode(false);
-        setFaceMode(false);
-        setOutfitMode(false);
-        setLectureMode(false);
-      }
-      announceFeature('العصا الذكية وتنبيهات المسافات', 'Smart White Cane Navigation', 'Canne Virtuelle', next);
-      return next;
-    });
-  }, [announceFeature]);
-
-  // Tracks whether the description is currently being spoken aloud, so the
-  // same button can toggle between "play" and "stop" the voice.
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
-  // Has the user ever picked a language before (this device)? If not, show
-  // the first-launch language picker instead of silently defaulting to English.
-  const [langChosen, setLangChosen] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && window.localStorage.getItem(COMPANION_LANG_STORAGE_KEY)) {
-      return true;
-    }
-    if (isArabicLang(profile?.language) || profile?.language === 'French') return true;
-    return false;
-  });
-
-  const chooseLang = useCallback((lang: 'ar' | 'en' | 'fr') => {
-    setCompanionLang(lang);
-    setLangChosen(true);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(COMPANION_LANG_STORAGE_KEY, lang);
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-      }
-    }
-    const voice = lang === 'ar' ? 'Arabic' : lang === 'fr' ? 'French' : 'English';
-    const spoken = lang === 'ar' ? 'تم تفعيل اللغة العربية' : lang === 'fr' ? 'Langue française activée' : 'English language activated';
-    speak(spoken, voice as any);
-    if (setProfile && profile) {
-      setProfile({ ...profile, language: lang === 'ar' ? 'Egyptian Ammiya' : lang === 'fr' ? 'French' : 'English' });
-    }
-  }, [profile, setProfile]);
-
-  const playDemoSample = useCallback((lang: 'ar' | 'en' | 'fr' = companionLang) => {
-    let sampleText = '';
-    if (currencyMode) {
-      sampleText =
-        lang === 'ar'
-          ? 'ورقة نقدية فئة خمسين جنيهاً مصرياً، الورقة سليمة وجاهزة للاستخدام.'
-          : lang === 'fr'
-          ? 'Billet de cinquante Livres Égyptiennes, en excellent état.'
-          : 'Fifty Egyptian Pounds banknote, in crisp condition.';
-    } else if (navGuideMode) {
-      sampleText =
-        lang === 'ar'
-          ? 'المسار سالك أمامك لحوالي ثلاث خطوات. انتبه، يوجد كرسي على يسارك عند الساعة العاشرة، وباب الغرفة مفتوح على بعد مترين.'
-          : lang === 'fr'
-          ? 'Chemin dégagé sur environ trois pas. Attention, une chaise sur votre gauche à dix heures, porte ouverte à deux mètres.'
-          : 'Clear pathway ahead for three steps. Caution, chair on your left at 10 o\'clock, doorway open two meters ahead.';
-    } else if (faceMode) {
-      sampleText =
-        lang === 'ar'
-          ? 'شخص يقف أمامك على بعد متر ونصف، في أواخر العشرينات يرتدي نظارة ويبتسم إليك.'
-          : lang === 'fr'
-          ? 'Une personne se tient devant vous à un mètre et demi, fin vingtaine, portant des lunettes et vous souriant.'
-          : 'A person is standing one and a half meters in front of you, late twenties, wearing glasses and smiling at you.';
-    } else if (shoppingMode) {
-      sampleText =
-        lang === 'ar'
-          ? 'علبة لبن جهينة كامل الدسم سعة واحد لتر، تاريخ الصلاحية ساري حتى نهاية الشهر القادم.'
-          : lang === 'fr'
-          ? 'Brique de lait entier un litre, date de péremption valide jusqu\'au mois prochain.'
-          : 'One liter full cream milk carton, expiration date valid through next month.';
-    } else if (readMode) {
-      sampleText =
-        lang === 'ar'
-          ? 'المفيد من هذا المستند: موعد المحاضرة القادمة يوم الأحد الساعة العاشرة صباحاً في القاعة الرئيسية.'
-          : lang === 'fr'
-          ? 'L\'essentiel : le prochain cours aura lieu dimanche à dix heures dans l\'amphithéâtre principal.'
-          : 'Core takeaway: next lecture is scheduled for Sunday at 10:00 AM in the main auditorium.';
-    } else {
-      sampleText =
-        lang === 'ar'
-          ? 'مفيش أخطار حواليك. قدامك مكتب عمل عليه لابتوب مفتوح وكوب ماء على يمينك، والمسار أمامك سالك تماماً.'
-          : lang === 'fr'
-          ? 'Aucun danger autour de vous. Devant vous se trouve un bureau avec un ordinateur portable ouvert et un verre d\'eau sur votre droite, le passage est libre.'
-          : 'No hazards around you. Directly in front of you is a work desk with an open laptop and a cup of water on your right, the pathway is clear.';
-    }
-
-    setShowGuestAuthCard(false);
-    setLastDescription(sampleText);
-    setStatus('ready');
-    setAnnounce(sampleText);
-
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
-    }
-
-    const voiceLang = lang === 'ar' ? 'Arabic' : lang === 'fr' ? 'French' : 'English';
-    setTimeout(() => {
-      speak(sampleText, voiceLang, {
-        onStart: () => setIsSpeaking(true),
-        onEnd: () => setIsSpeaking(false),
-      });
-    }, 60);
-  }, [companionLang, currencyMode, navGuideMode, faceMode, shoppingMode, readMode]);
-
-  // Spatial memory drawer state
-  const [showSpatialMemory, setShowSpatialMemory] = useState(false);
-  const [showTrajectoryV2, setShowTrajectoryV2] = useState(false);
-  const [spatialRecords, setSpatialRecords] = useState<SpatialObjectRecord[]>(() =>
-    profile?.uid ? getSpatialObjects(profile.uid) : []
-  );
-  const [spatialQueryInput, setSpatialQueryInput] = useState('');
-  const [spatialQueryResult, setSpatialQueryResult] = useState<string | null>(null);
-
-  // ── Document & Lecture Studio State ──
-  const [showDocStudio, setShowDocStudio] = useState(false);
-
-  // Hydrate spatial objects from owner-only encrypted Firestore subcollection
-  useEffect(() => {
-    if (profile?.uid) {
-      loadSpatialObjectsFromFirestore(profile.uid).then((records) => {
-        if (isMountedRef.current && records && records.length > 0) {
-          setSpatialRecords(records);
-        }
-      });
-    }
-  }, [profile?.uid]);
-
-  const memories = profile?.visionMemories || [];
+  const isAr = companionLang === 'ar';
 
   const t = useCallback(
     (en: string, ar: string, fr?: string) => {
@@ -471,11 +424,83 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     [companionLang]
   );
 
+  // Active Visual Tool
+  const [activeTool, setActiveTool] = useState<VisualToolId>(initialTool || 'scene');
+  const activeToolRef = useRef<VisualToolId>(activeTool);
+  activeToolRef.current = activeTool;
+  const [readMode, setReadMode] = useState(initialTool === 'read');
+  const [currencyMode, setCurrencyMode] = useState(initialTool === 'currency');
+  const [faceMode, setFaceMode] = useState(initialTool === 'face');
+  const [outfitMode, setOutfitMode] = useState(initialTool === 'color');
+  const [navGuideMode, setNavGuideMode] = useState(false);
+  const [shoppingMode, setShoppingMode] = useState(false);
+  const [lectureMode, setLectureMode] = useState(false);
+  const [readAction, setReadAction] = useState<'summarize' | 'read'>('summarize');
+
+  // Assistive UX Modes & Controls (Beginner vs Advanced, Detail Level, Speech Rate)
+  const [userMode, setUserMode] = useState<'beginner' | 'advanced'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('cognify_vision_user_mode');
+      if (saved === 'beginner' || saved === 'advanced') return saved;
+    }
+    return 'beginner';
+  });
+
+  const [detailLevel, setDetailLevel] = useState<'concise' | 'standard' | 'detailed'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('cognify_vision_detail_level');
+      if (saved === 'concise' || saved === 'standard' || saved === 'detailed') return saved;
+    }
+    return 'standard';
+  });
+
+  const [speechRate, setSpeechRate] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('cognify_vision_speech_rate');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed >= 0.5 && parsed <= 2.0) return parsed;
+      }
+    }
+    return 1.0;
+  });
+
+  // Follow-Up Q&A about current image
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [followUpQuestion, setFollowUpQuestion] = useState('');
+  const [followUpHistory, setFollowUpHistory] = useState<{ role: 'user' | 'assistant'; text: string; timestamp: number }[]>([]);
+  const [isAnsweringFollowUp, setIsAnsweringFollowUp] = useState(false);
+
+  // Scene Comparison (Change Detection vs Previous Observation)
+  const [comparisonResult, setComparisonResult] = useState<string | null>(null);
+  const [isComparingScene, setIsComparingScene] = useState(false);
+  const previousDescriptionRef = useRef<string>('');
+
+  // Voice Command System (Web Speech Recognition)
+  const [isVoiceCommandsActive, setIsVoiceCommandsActive] = useState(false);
+  const [lastVoiceCommand, setLastVoiceCommand] = useState<string>('');
+  const voiceRecognitionRef = useRef<any>(null);
+
+  // Targeted Object Query & Saved Memories
+  const [targetItemQuery, setTargetItemQuery] = useState('');
+  const [memorySearchQuery, setMemorySearchQuery] = useState('');
+  const [selectedMemoryCategory, setSelectedMemoryCategory] = useState<'all' | 'person' | 'object' | 'document'>('all');
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [copiedText, setCopiedText] = useState(false);
+
+  // Camera acquisition helper with prompt detection, proper timer cleanup, and prevention of retry cascades
   const getUserMediaSafe = async (mode: 'environment' | 'user'): Promise<MediaStream> => {
-    // Attempt progressive constraint relaxation:
-    // 1. High quality with ideal facing mode (works on mobile back camera and desktop webcams)
-    // 2. Standard 720p with ideal facing mode
-    // 3. Simple video: true (universal fallback)
+    let isPrompting = true; // Default true so all browsers (including Safari/iOS without permission query) get full 45s
+    if (typeof navigator !== 'undefined' && navigator.permissions?.query) {
+      try {
+        const perm = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        isPrompting = perm.state === 'prompt';
+      } catch {}
+    }
+
+    // Give users ample time (45s) for interactive system permission prompts and device spin-up
+    const timeoutDuration = isPrompting ? 45000 : 20000;
+
     const attempts: MediaStreamConstraints[] = [
       {
         video: {
@@ -499,20 +524,43 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
 
     let lastError: any = null;
     for (const constraints of attempts) {
+      let timerId: ReturnType<typeof setTimeout> | null = null;
+      let hasTimedOut = false;
+
       try {
-        const stream = await Promise.race([
-          navigator.mediaDevices.getUserMedia(constraints),
-          new Promise<MediaStream>((_, reject) =>
-            setTimeout(() => reject(new Error('CAMERA_TIMEOUT')), 20000)
-          ),
-        ]);
+        const stream = await new Promise<MediaStream>((resolve, reject) => {
+          timerId = setTimeout(() => {
+            hasTimedOut = true;
+            reject(new Error('CAMERA_TIMEOUT'));
+          }, timeoutDuration);
+
+          navigator.mediaDevices.getUserMedia(constraints)
+            .then((s) => {
+              if (timerId) clearTimeout(timerId);
+              if (hasTimedOut) {
+                // If user granted permission late, immediately stop tracks to prevent leaked camera access
+                s.getTracks().forEach((tr) => tr.stop());
+                return;
+              }
+              resolve(s);
+            })
+            .catch((err) => {
+              if (timerId) clearTimeout(timerId);
+              if (!hasTimedOut) {
+                reject(err);
+              }
+            });
+        });
+
         if (stream && stream.getVideoTracks().length > 0) {
           return stream;
         }
       } catch (err: any) {
         lastError = err;
-        console.warn('getUserMedia attempt failed, trying fallback...', err?.name || err?.message);
-        // If user explicitly denied permission, do not keep trying other constraints
+        // If timeout occurred, DO NOT cascade into attempt 2 and 3 — user is likely still prompted or camera hardware is unresponsive
+        if (err?.message === 'CAMERA_TIMEOUT') {
+          break;
+        }
         if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
           throw err;
         }
@@ -524,86 +572,351 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
 
   const startCamera = useCallback(
     async (mode: 'environment' | 'user' = facingMode) => {
-      if (!navigator.mediaDevices?.getUserMedia) {
+      if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         setStatus('unsupported');
+        setAnnounce(companionLang === 'ar' ? 'يتطلب تشغيل الكاميرا اتصالاً آمناً (HTTPS).' : 'Camera requires a secure HTTPS connection.');
         return;
       }
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setStatus('unsupported');
+        setAnnounce(companionLang === 'ar' ? 'متصفحك الحالي لا يدعم الوصول للكاميرا.' : 'Your browser does not support camera access.');
+        return;
+      }
+
+      // Serialize acquisitions to prevent concurrent hardware lockouts and NotReadableError
+      const sessionId = ++cameraSessionIdRef.current;
+      if (activeAcquisitionPromiseRef.current) {
+        try {
+          await activeAcquisitionPromiseRef.current;
+        } catch {}
+      }
+
+      if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
+        return;
+      }
+
+      cameraReadinessCleanupRef.current?.();
+      cameraReadinessCleanupRef.current = null;
+      isAcquiringCameraRef.current = true;
       setStatus('starting-camera');
-      try {
-        streamRef.current?.getTracks().forEach((tr) => tr.stop());
-        const stream = await getUserMediaSafe(mode);
 
-        if (!isMountedRef.current) {
-          stream.getTracks().forEach((tr) => tr.stop());
-          return;
-        }
+      let currentPromise: Promise<void> | null = null;
+      currentPromise = (async () => {
+        try {
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach((tr) => tr.stop());
+            streamRef.current = null;
+          }
+          const stream = await getUserMediaSafe(mode);
 
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play().catch((playErr) => {
-            console.warn('Video auto-play warning:', playErr);
-          });
-        }
-        if (isMountedRef.current) {
-          setStatus('ready');
-          setAnnounce(
-            companionLang === 'ar'
-              ? 'الكاميرا جاهزة بملء الشاشة. اضغط الزرار لسماع وصف ما أمامك.'
-              : 'Full-screen camera ready. Tap either button to describe what is in front of you.'
-          );
-        }
-      } catch (camErr: any) {
-        console.warn('Camera failed or timed out:', camErr);
-        if (isMountedRef.current) {
-          setStatus('camera-denied');
-          if (camErr?.name === 'NotAllowedError' || camErr?.name === 'PermissionDeniedError') {
-            setAnnounce(
-              companionLang === 'ar'
-                ? 'تم رفض إذن الكاميرا من المتصفح. يمكنك تفعيلها من شريط العنوان أو رفع صورة مباشرة.'
-                : 'Camera permission was denied. You can enable it in the address bar or upload a photo directly.'
-            );
+          if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
+            stream.getTracks().forEach((tr) => tr.stop());
+            return;
+          }
+
+          streamRef.current = stream;
+          const video = videoRef.current;
+          if (video) {
+            video.srcObject = stream;
+            video.muted = true;
+            video.playsInline = true;
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('muted', 'true');
+
+            let isResolved = false;
+            let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+            const finalizeReady = () => {
+              if (isResolved) return;
+              if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) return;
+              isResolved = true;
+              if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+              }
+              if (video) {
+                video.removeEventListener('loadedmetadata', checkDimensions);
+                video.removeEventListener('canplay', checkDimensions);
+                video.removeEventListener('loadeddata', checkDimensions);
+                video.removeEventListener('playing', checkDimensions);
+                video.removeEventListener('timeupdate', checkDimensions);
+              }
+              setStatus('ready');
+              const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeToolRef.current) || VISUAL_TOOLS[0];
+              const toolCapLabel = companionLang === 'ar' ? activeToolConfig.captureBtnAr : companionLang === 'fr' ? activeToolConfig.captureBtnFr : activeToolConfig.captureBtnEn;
+              setAnnounce(
+                companionLang === 'ar'
+                  ? `الكاميرا جاهزة. اضغط على «${toolCapLabel}» للفحص الفوري.`
+                  : `Camera ready. Click "${toolCapLabel}" to analyze.`
+              );
+            };
+
+            const checkDimensions = () => {
+              const v = videoRef.current;
+              if (v && v.videoWidth > 0 && v.videoHeight > 0) {
+                finalizeReady();
+              }
+            };
+
+            const markReady = () => {
+              const v = videoRef.current;
+              if (v && v.videoWidth > 0 && v.videoHeight > 0) {
+                finalizeReady();
+              } else {
+                checkDimensions();
+              }
+            };
+
+            cameraReadinessCleanupRef.current = () => {
+              if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+              }
+              if (video) {
+                video.removeEventListener('loadedmetadata', checkDimensions);
+                video.removeEventListener('canplay', checkDimensions);
+                video.removeEventListener('loadeddata', checkDimensions);
+                video.removeEventListener('playing', checkDimensions);
+                video.removeEventListener('timeupdate', checkDimensions);
+              }
+            };
+
+            video.addEventListener('loadedmetadata', checkDimensions);
+            video.addEventListener('canplay', checkDimensions);
+            video.addEventListener('loadeddata', checkDimensions);
+            video.addEventListener('playing', checkDimensions);
+            video.addEventListener('timeupdate', checkDimensions);
+
+            video.onloadedmetadata = () => markReady();
+            video.oncanplay = () => markReady();
+
+            if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+              markReady();
+            } else {
+              let checkCount = 0;
+              pollTimer = setInterval(() => {
+                checkCount++;
+                const v = videoRef.current;
+                if (v && v.videoWidth > 0 && v.videoHeight > 0) {
+                  finalizeReady();
+                } else if (checkCount >= 8) { // after ~400ms of active stream
+                  if (stream.active && stream.getVideoTracks().some((t) => t.readyState === 'live')) {
+                    finalizeReady();
+                  } else if (checkCount >= 30) {
+                    if (pollTimer) {
+                      clearInterval(pollTimer);
+                      pollTimer = null;
+                    }
+                  }
+                }
+              }, 50);
+            }
+
+            video.play().catch((playErr) => {
+              console.warn('Video auto-play warning:', playErr);
+            });
+          } else if (isMountedRef.current && sessionId === cameraSessionIdRef.current) {
+            setStatus('ready');
+          }
+        } catch (camErr: any) {
+          if (!isMountedRef.current || sessionId !== cameraSessionIdRef.current) {
+            return;
+          }
+          console.warn('Camera failed or timed out:', camErr);
+          if (isMountedRef.current) {
+            const errName = camErr?.name || '';
+            const errMsg = camErr?.message || '';
+            if (errMsg === 'CAMERA_TIMEOUT') {
+              setStatus('timeout');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'استغرقت الكاميرا وقتاً طويلاً للاستجابة. يرجى التأكد من السماح بإذن الكاميرا ثم الضغط على إعادة المحاولة.'
+                  : companionLang === 'fr'
+                  ? 'Le délai d\'attente de la caméra a expiré. Veuillez autoriser l\'accès et réessayer.'
+                  : 'Camera request timed out. Please allow camera permissions and click Retry.'
+              );
+            } else if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
+              setStatus('camera-denied');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'تم حظر إذن الكاميرا. اضغط على رمز القفل بالمتصفح للسماح بالكاميرا، أو ارفع صورة.'
+                  : 'Camera permission denied. Please allow access in browser or upload an image.'
+              );
+            } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError' || errMsg === 'NO_CAMERA_FOUND') {
+              setStatus('no-camera');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'لم يتم العثور على كاميرا في هذا الجهاز. يمكنك توصيل كاميرا أو رفع صورة.'
+                  : 'No camera found on this device. You can connect a webcam or upload a photo.'
+              );
+            } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
+              setStatus('camera-in-use');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'الكاميرا قيد الاستخدام بواسطة تطبيق آخر. يرجى إغلاق التطبيقات الأخرى وإعادة المحاولة.'
+                  : 'Camera is currently in use by another app. Please close other camera apps and retry.'
+              );
+            } else {
+              setStatus('camera-denied');
+              setAnnounce(
+                companionLang === 'ar'
+                  ? 'تعذر تشغيل الكاميرا. يمكنك إعادة المحاولة أو رفع صورة.'
+                  : 'Camera access unavailable. You can retry or upload an image.'
+              );
+            }
+          }
+        } finally {
+          isAcquiringCameraRef.current = false;
+          if (activeAcquisitionPromiseRef.current === currentPromise) {
+            activeAcquisitionPromiseRef.current = null;
           }
         }
-      }
+      })();
+      activeAcquisitionPromiseRef.current = currentPromise;
+      await currentPromise;
     },
     [facingMode, companionLang]
   );
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    unlockSpeechSynthesis();
-    if (!isMinorStudent || profile.parentalConsent?.verified) {
-      startCamera();
-    } else {
-      setStatus('camera-denied');
-      setAnnounce(
-        companionLang === 'ar'
-          ? 'يتطلب استخدام الكاميرا للطلاب القاصرين موافقة ولي الأمر الرسمية.'
-          : 'Parental or guardian consent is required before camera activation for minor students.'
-      );
-    }
-    return () => {
-      isMountedRef.current = false;
-      activeAbortControllerRef.current?.abort();
-      activeAbortControllerRef.current = null;
-      streamRef.current?.getTracks().forEach((tr) => tr.stop());
+  const stopCamera = useCallback(() => {
+    cameraReadinessCleanupRef.current?.();
+    cameraReadinessCleanupRef.current = null;
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
-      cancelSpeech();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setStatus('idle');
+    setAnnounce(
+      companionLang === 'ar'
+        ? 'تم إيقاف الكاميرا.'
+        : companionLang === 'fr'
+        ? 'Caméra arrêtée.'
+        : 'Camera stopped.'
+    );
+  }, [companionLang]);
 
-  // isFullscreen used to be set synchronously and optimistically right when
-  // the button was pressed — before requestFullscreen()'s promise even
-  // resolved. If the browser denied the request, or the user exited via the
-  // OS/Escape key (not our own button), that left the state permanently
-  // wrong: stuck showing "exit fullscreen" while the app wasn't actually
-  // fullscreen (or vice versa), with a mismatched layout class applied.
-  // Tracking the real browser event is the only way this can't drift.
+  const handleSwitchTool = useCallback((toolId: VisualToolId) => {
+    setActiveTool(toolId);
+    setReadMode(toolId === 'read');
+    setCurrencyMode(toolId === 'currency');
+    setFaceMode(toolId === 'face');
+    setOutfitMode(toolId === 'color');
+    onToolChange?.(toolId);
+
+    const tool = VISUAL_TOOLS.find((t) => t.id === toolId);
+    if (tool) {
+      const toolName = companionLang === 'ar' ? tool.titleAr : companionLang === 'fr' ? tool.titleFr : tool.titleEn;
+      const msg = companionLang === 'ar' ? `تم تفعيل أداة: ${toolName}` : `Activated ${toolName}`;
+      setAnnounce(msg);
+    }
+
+    if (!streamRef.current || !streamRef.current.active || status === 'idle') {
+      startCamera();
+    }
+  }, [companionLang, onToolChange, status, startCamera]);
+
+  useEffect(() => {
+    if (initialTool && initialTool !== activeTool) {
+      setActiveTool(initialTool);
+      setReadMode(initialTool === 'read');
+      setCurrencyMode(initialTool === 'currency');
+      setFaceMode(initialTool === 'face');
+      setOutfitMode(initialTool === 'color');
+    }
+  }, [initialTool]);
+
+  // Spatial memory state
+  const [showSpatialMemory, setShowSpatialMemory] = useState(false);
+  const [spatialRecords, setSpatialRecords] = useState<SpatialObjectRecord[]>(() =>
+    profile?.uid ? getSpatialObjects(profile.uid) : []
+  );
+  const [spatialQueryInput, setSpatialQueryInput] = useState('');
+  const [spatialQueryResult, setSpatialQueryResult] = useState<string | null>(null);
+  const [showDocStudio, setShowDocStudio] = useState(false);
+
+  useEffect(() => {
+    if (profile?.uid) {
+      loadSpatialObjectsFromFirestore(profile.uid).then((records) => {
+        if (isMountedRef.current && records && records.length > 0) {
+          setSpatialRecords(records);
+        }
+      });
+    }
+  }, [profile?.uid]);
+
+  const memories = profile?.visionMemories || [];
+
+  const filteredMemories = useMemo(() => {
+    return memories.filter((m) => {
+      const matchesCat =
+        selectedMemoryCategory === 'all' ||
+        (selectedMemoryCategory === 'person' && m.memoryType === 'person') ||
+        (selectedMemoryCategory === 'object' && (m.memoryType === 'object' || !m.memoryType)) ||
+        (selectedMemoryCategory === 'document' && m.memoryType === 'document');
+      const matchesSearch =
+        !memorySearchQuery.trim() ||
+        m.label.toLowerCase().includes(memorySearchQuery.toLowerCase()) ||
+        m.description.toLowerCase().includes(memorySearchQuery.toLowerCase());
+      return matchesCat && matchesSearch;
+    });
+  }, [memories, selectedMemoryCategory, memorySearchQuery]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        (e.target as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        handleSwitchTool('currency');
+        describeScene(companionLang, undefined, undefined, false, 'currency');
+      } else if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        handleSwitchTool('read');
+        describeScene(companionLang, undefined, 'read', false, 'read');
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        cancelSpeech();
+        setIsSpeaking(false);
+      } else if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault();
+        handleSwitchTool('scene');
+        describeScene(companionLang, undefined, undefined, false, 'scene');
+      } else if (e.key === 'o' || e.key === 'O') {
+        e.preventDefault();
+        handleSwitchTool('object');
+        describeScene(companionLang, undefined, undefined, false, 'object');
+      } else if (e.key === 'p' || e.key === 'P' || e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        handleSwitchTool('face');
+        describeScene(companionLang, undefined, undefined, false, 'face');
+      } else if (e.key === 'k' || e.key === 'K') {
+        e.preventDefault();
+        handleSwitchTool('color');
+        describeScene(companionLang, undefined, undefined, false, 'color');
+      } else if (e.key === '?') {
+        e.preventDefault();
+        setShowShortcutsModal((prev) => !prev);
+      } else if (e.key === 'Escape') {
+        setShowShortcutsModal(false);
+        setShowFollowUp(false);
+        setShowSaveDialog(false);
+        setShowSpatialMemory(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [companionLang, handleSwitchTool, status]);
+
   useEffect(() => {
     const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onFsChange);
@@ -612,11 +925,6 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      // Optimistic UI update; if the real Fullscreen API is unavailable or
-      // denied, this doubles as the CSS-simulated fullscreen fallback. If it
-      // succeeds, the fullscreenchange listener above just confirms the same
-      // value again — if it's denied, we stay on the CSS fallback rather
-      // than silently doing nothing.
       setIsFullscreen(true);
       containerRef.current?.requestFullscreen?.().catch(() => {});
     } else {
@@ -631,12 +939,262 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     startCamera(next);
   };
 
+  const toggleUserMode = () => {
+    const next = userMode === 'beginner' ? 'advanced' : 'beginner';
+    setUserMode(next);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('cognify_vision_user_mode', next);
+    }
+    const msg = companionLang === 'ar'
+      ? (next === 'advanced' ? 'تم تفعيل الوضع المتقدم مع كامل الأدوات والتحكم.' : 'تم تفعيل وضع المبتدئ البسيط.')
+      : (next === 'advanced' ? 'Advanced mode enabled with all tools and controls.' : 'Beginner mode enabled.');
+    setAnnounce(msg);
+    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+  };
+
+  const handleSelectLang = (lang: 'ar' | 'en' | 'fr') => {
+    setCompanionLang(lang);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(COMPANION_LANG_STORAGE_KEY, lang);
+    }
+    const msg = lang === 'ar' ? 'تم ضبط اللغة على العربية.' : lang === 'fr' ? 'Langue définie sur le français.' : 'Language set to English.';
+    setAnnounce(msg);
+  };
+
+  const handleSpeechRateChange = (newRate: number) => {
+    setSpeechRate(newRate);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('cognify_vision_speech_rate', String(newRate));
+    }
+    const msg = companionLang === 'ar' ? `سرعة الصوت: ${newRate}x` : `Speech speed: ${newRate}x`;
+    setAnnounce(msg);
+    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: newRate });
+  };
+
+  const handleDetailLevelChange = (newLevel: 'concise' | 'standard' | 'detailed') => {
+    setDetailLevel(newLevel);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('cognify_vision_detail_level', newLevel);
+    }
+    const msg = companionLang === 'ar'
+      ? (newLevel === 'concise' ? 'تم ضبط الوصف على الموجز.' : newLevel === 'detailed' ? 'تم ضبط الوصف على المفصل.' : 'تم ضبط الوصف على القياسي.')
+      : `Detail level set to ${newLevel}.`;
+    setAnnounce(msg);
+  };
+
+  const compareWithPreviousScene = async () => {
+    if (!lastSnapshot) {
+      toast.info(companionLang === 'ar' ? 'يرجى التقاط مشهد أولاً للمقارنة.' : 'Please capture a scene first to compare.');
+      return;
+    }
+    const prevDesc = previousDescriptionRef.current || sessionStorage.getItem('cognify_vision_last_observation');
+    if (!prevDesc) {
+      const msg = companionLang === 'ar'
+        ? 'لا يوجد مشهد سابق مسجل للمقارنة معه بعد. التقط مشهداً ثانياً وسأقارنه لك.'
+        : 'No previous scene recorded yet. Capture another frame and I will compare them.';
+      toast.info(msg);
+      speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      return;
+    }
+
+    setIsComparingScene(true);
+    setAnnounce(companionLang === 'ar' ? 'جاري مقارنة المشهد الحالي مع المشهد السابق...' : 'Comparing current scene with previous observation...');
+
+    const cleanData = lastSnapshot.replace(/^data:[^;]+;base64,/, '');
+    const langMandate = companionLang === 'en'
+      ? 'CRITICAL MANDATE: You MUST reply entirely in English. Do NOT use any Arabic characters.\n'
+      : companionLang === 'fr'
+      ? 'DIRECTIVE CRITIQUE : Vous DEVEZ répondre entièrement en français.\n'
+      : 'توجيه حاسم: تحدث باللغة العربية الواضحة والسهلة والودودة.\n';
+
+    const comparePrompt = `${langMandate}أنت مساعد بصري متخصص في مقارنة التغييرات المكانية لمساعدة شخص كفيف على إدراك ما استجد في المكان.
+الوصف السابق للمكان: "${typeof prevDesc === 'string' ? prevDesc : (prevDesc as any)?.description || ''}"
+الصورة الحالية ملتقطة الآن أمام الكاميرا.
+تعليمات المقارنة:
+1. اذكر التغييرات الواضحة فقط (أشخاص دخلوا أو خرجوا، أشياء تم تحريكها، عوائق استجدت).
+2. إذا كان المشهد متطابقاً دون تغيير ملحوظ، قل مباشرة: "لا توجد تغييرات ملحوظة في المشهد أمامك، الوضع كما هو."
+3. تحدث في جملتين فقط بلغة طبيعية وودودة بدون أي نجوم ماركداون (**).`;
+
+    try {
+      const res = await generateAdaptiveResponse(
+        comparePrompt,
+        { ...profile, language: companionLang === 'ar' ? 'Egyptian Ammiya' : companionLang === 'fr' ? 'French' : 'English' },
+        [],
+        [{ name: `compare_${Date.now()}.jpg`, type: 'image/jpeg', data: cleanData }]
+      );
+      const cleaned = cleanVisionDescription(res, companionLang);
+      setComparisonResult(cleaned);
+      setAnnounce(cleaned);
+      speak(cleaned, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', {
+        rate: speechRate,
+        onStart: () => setIsSpeaking(true),
+        onEnd: () => setIsSpeaking(false),
+      });
+    } catch (err) {
+      const errCompare = companionLang === 'ar' ? 'تعذرت المقارنة حالياً، يرجى المحاولة ثانية.' : 'Could not compare scenes right now.';
+      setComparisonResult(errCompare);
+      speak(errCompare, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+    } finally {
+      setIsComparingScene(false);
+    }
+  };
+
+  const handleAskFollowUp = async (customQ?: string) => {
+    const query = customQ || followUpQuestion;
+    if (!query.trim() || !lastSnapshot || isAnsweringFollowUp) return;
+    setFollowUpQuestion('');
+    setIsAnsweringFollowUp(true);
+    const userMsg = query.trim();
+    setFollowUpHistory((prev) => [...prev, { role: 'user', text: userMsg, timestamp: Date.now() }]);
+
+    const cleanData = lastSnapshot.replace(/^data:[^;]+;base64,/, '');
+    const langMandate = companionLang === 'en'
+      ? 'CRITICAL MANDATE: You MUST reply entirely in English. Do NOT use any Arabic characters.\n'
+      : companionLang === 'fr'
+      ? 'DIRECTIVE CRITIQUE : Vous DEVEZ répondre entièrement en français.\n'
+      : 'توجيه حاسم: تحدث باللغة العربية الواضحة والسهلة والودودة.\n';
+
+    const followUpPrompt = `${langMandate}أنت مساعد بصري متخصص يجيب عن استفسار شخص كفيف حول الصورة الملتقطة المعروضة أمامه الآن بدقة وأمانة.
+الوصف الأساسي السابق للصورة: "${lastDescription}"
+سؤال المستخدم: "${userMsg}"
+تعليمات الإجابة:
+1. أجب بصدق واختصار بناءً على تفاصيل الصورة فقط.
+2. حدد موضع الأشياء بالساعة التقديرية (مثلاً: على يمينك، عند الساعة 3).
+3. إذا كان الشيء غير مرئي بالصورة قل ذلك صراحة واقترح توجيه الكاميرا.
+تحدث في جملة أو جملتين بأسلوب ودود بدون نجوم ماركداون (**).`;
+
+    try {
+      const ans = await generateAdaptiveResponse(
+        followUpPrompt,
+        { ...profile, language: companionLang === 'ar' ? 'Egyptian Ammiya' : companionLang === 'fr' ? 'French' : 'English' },
+        [],
+        [{ name: `qa_${Date.now()}.jpg`, type: 'image/jpeg', data: cleanData }]
+      );
+      const cleaned = cleanVisionDescription(ans, companionLang);
+      setFollowUpHistory((prev) => [...prev, { role: 'assistant', text: cleaned, timestamp: Date.now() }]);
+      setAnnounce(cleaned);
+      const voiceLang = companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English';
+      speak(cleaned, voiceLang, { rate: speechRate, onStart: () => setIsSpeaking(true), onEnd: () => setIsSpeaking(false) });
+    } catch (err) {
+      const errMsg = companionLang === 'ar' ? 'تعذر الإجابة على السؤال حالياً، يرجى المحاولة ثانية.' : 'Could not answer follow-up question right now.';
+      setFollowUpHistory((prev) => [...prev, { role: 'assistant', text: errMsg, timestamp: Date.now() }]);
+      speak(errMsg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+    } finally {
+      setIsAnsweringFollowUp(false);
+    }
+  };
+
+  const toggleVoiceCommands = () => {
+    if (isVoiceCommandsActive) {
+      try { voiceRecognitionRef.current?.stop(); } catch {}
+      setIsVoiceCommandsActive(false);
+      const stopMsg = companionLang === 'ar' ? 'تم إيقاف الاستماع للأوامر الصوتية.' : 'Voice commands stopped.';
+      setAnnounce(stopMsg);
+      toast.info(stopMsg);
+      return;
+    }
+
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRec) {
+      const unsuppMsg = companionLang === 'ar' ? 'التعرف الصوتي غير مدعوم في متصفحك.' : 'Speech recognition is not supported in this browser.';
+      toast.error(unsuppMsg);
+      setAnnounce(unsuppMsg);
+      speak(unsuppMsg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      return;
+    }
+
+    try {
+      const rec = new SpeechRec();
+      rec.continuous = true;
+      rec.interimResults = false;
+      rec.lang = companionLang === 'ar' ? 'ar-EG' : companionLang === 'fr' ? 'fr-FR' : 'en-US';
+
+      rec.onresult = (event: any) => {
+        const lastIndex = event.results.length - 1;
+        const transcript = (event.results[lastIndex][0].transcript || '').trim().toLowerCase();
+        setLastVoiceCommand(transcript);
+        triggerHapticAlert('single-pulse');
+
+        if (/ماذا|مشهد|أمام|شوف|انظر|look|scene|what/i.test(transcript)) {
+          handleSwitchTool('scene');
+          describeScene(companionLang, undefined, undefined, false, 'scene');
+        } else if (/اقرأ|نص|ورقة|كتاب|قراءة|read|text|ocr/i.test(transcript)) {
+          handleSwitchTool('read');
+          describeScene(companionLang, undefined, 'read', false, 'read');
+        } else if (/فلوس|نقود|عملة|جنيه|cash|money|currency|banknote/i.test(transcript)) {
+          handleSwitchTool('currency');
+          describeScene(companionLang, undefined, undefined, false, 'currency');
+        } else if (/ألوان|لون|ملابس|لبس|color|outfit/i.test(transcript)) {
+          handleSwitchTool('color');
+          describeScene(companionLang, undefined, undefined, false, 'color');
+        } else if (/ابحث|مكان|أين|دور|غرض|شيء|find|locate|object|item/i.test(transcript)) {
+          handleSwitchTool('object');
+          describeScene(companionLang, undefined, undefined, false, 'object');
+        } else if (/شخص|ناس|وجوه|وجه|مين|person|face|who/i.test(transcript)) {
+          handleSwitchTool('face');
+          describeScene(companionLang, undefined, undefined, false, 'face');
+        } else if (/اسكت|توقف|وقف|اصمت|stop|quiet|silence/i.test(transcript)) {
+          cancelSpeech();
+          setIsSpeaking(false);
+        } else if (/أعد|كرر|سمعني|ثاني|ثانية|repeat|replay/i.test(transcript)) {
+          replaySpeech();
+        } else if (/احفظ|ذاكرة|save|remember/i.test(transcript)) {
+          openSaveDialog();
+        } else if (/رجوع|ارجع|خروج|back|exit/i.test(transcript)) {
+          onNavigateBack?.();
+        } else if (showFollowUp) {
+          handleAskFollowUp(transcript);
+        }
+      };
+
+      rec.onerror = (e: any) => {
+        console.warn('Voice command recognition error:', e);
+        setIsVoiceCommandsActive(false);
+      };
+      rec.onend = () => {
+        if (isMountedRef.current && isVoiceCommandsActive) {
+          try { rec.start(); } catch {}
+        } else {
+          setIsVoiceCommandsActive(false);
+        }
+      };
+
+      rec.start();
+      voiceRecognitionRef.current = rec;
+      setIsVoiceCommandsActive(true);
+      triggerHapticAlert('double-pulse');
+      const startMsg = companionLang === 'ar' ? 'الاستماع للأوامر الصوتية مفعّل. تحدث بأمرك الآن.' : 'Listening for voice commands. Speak now.';
+      setAnnounce(startMsg);
+      toast.success(startMsg);
+    } catch (err) {
+      console.error('Failed to start voice recognition:', err);
+      setIsVoiceCommandsActive(false);
+    }
+  };
+
+  const deleteMemory = async (memoryId: string) => {
+    if (!profile?.uid) return;
+    const updated = memories.filter((m) => m.id !== memoryId);
+    if (setProfile) setProfile({ ...profile, visionMemories: updated });
+    const msg = companionLang === 'ar' ? 'تم حذف العنصر من الذاكرة.' : 'Memory deleted.';
+    setAnnounce(msg);
+    toast.info(msg);
+    try {
+      await setDoc(
+        doc(db, `users/${profile.uid}`),
+        { visionMemories: cleanDataForFirestore(updated) },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error('Failed to sync memory deletion:', err);
+    }
+  };
+
   const captureFrame = (): string | null => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return null;
 
-    // Wake up video playback if unexpectedly paused
     if (video.paused && !video.ended) {
       video.play().catch(() => {});
     }
@@ -663,13 +1221,43 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
     return canvas.toDataURL('image/jpeg', 0.85);
   };
 
+  const playDemoSample = useCallback((lang: 'ar' | 'en' | 'fr' = companionLang, targetTool: VisualToolId = activeTool) => {
+    const currentToolDef = VISUAL_TOOLS.find((t) => t.id === targetTool) || VISUAL_TOOLS[0];
+    const sampleText =
+      lang === 'ar'
+        ? currentToolDef.demoSampleAr
+        : lang === 'fr'
+        ? currentToolDef.demoSampleFr
+        : currentToolDef.demoSampleEn;
+
+    setShowGuestAuthCard(false);
+    setLastDescription(sampleText);
+    setStatus('ready');
+    setAnnounce(sampleText);
+    setObservationTimestamp(Date.now());
+    setObservationType('previous');
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    }
+
+    const voiceLang = lang === 'ar' ? 'Arabic' : lang === 'fr' ? 'French' : 'English';
+    setTimeout(() => {
+      speak(sampleText, voiceLang, {
+        onStart: () => setIsSpeaking(true),
+        onEnd: () => setIsSpeaking(false),
+      });
+    }, 60);
+  }, [companionLang, activeTool]);
+
   const describeScene = async (
     choiceLang?: 'ar' | 'en' | 'fr',
     forcedFrame?: string,
     forcedAction?: 'summarize' | 'read',
-    isUploadedPhoto: boolean = false
+    isUploadedPhoto: boolean = false,
+    forcedTool?: VisualToolId
   ) => {
-    // Battery and API quota protection: throttle captures occurring faster than 750ms
     const now = Date.now();
     if (now - lastCaptureAttemptRef.current < 750) {
       return;
@@ -678,48 +1266,56 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
 
     const targetLang = choiceLang || companionLang;
     setCompanionLang(targetLang);
-    const activeReadAction = forcedAction || readAction;
+    const effectiveTool = forcedTool || (forcedAction === 'read' ? 'read' : activeTool);
+    if (forcedTool && forcedTool !== activeTool) {
+      setActiveTool(forcedTool);
+    }
+    const activeReadAction = forcedAction || (effectiveTool === 'read' ? 'read' : readAction);
     if (forcedAction) setReadAction(forcedAction);
 
-    // 1. PRIME SPEECH SYNTHESIS IMMEDIATELY ON REAL USER CLICK
     unlockSpeechSynthesis();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.resume();
-        const primeUtterance = new SpeechSynthesisUtterance('');
-        primeUtterance.volume = 0;
-        window.speechSynthesis.speak(primeUtterance);
-      } catch {
-        /* ignore */
-      }
+      } catch {}
+    }
+
+    if (!forcedFrame && status === 'starting-camera') {
+      const waitMsg =
+        targetLang === 'ar'
+          ? 'جاري تجهيز الكاميرا، يرجى الانتظار ثوانٍ معدودة ثم المحاولة مجدداً.'
+          : 'Camera is still warming up, please wait a moment and try again.';
+      toast.info(waitMsg);
+      speak(waitMsg, targetLang === 'ar' ? 'Arabic' : 'English');
+      return;
     }
 
     if (!forcedFrame && status !== 'ready' && status !== 'analyzing') {
       const errNoCam =
         targetLang === 'ar'
-          ? 'الكاميرا غير متاحة حالياً، يرجى السماح بالوصول للكاميرا.'
-          : targetLang === 'fr'
-          ? "La caméra n'est pas disponible. Veuillez autoriser l'accès à la caméra."
-          : 'Camera is not available. Please allow camera access.';
-      speak(errNoCam, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
-      fileInputRef.current?.click();
+          ? 'الكاميرا غير متاحة حالياً. يرجى تفعيل إذن الكاميرا وإعادة المحاولة أو استخدام زر رفع صورة يدوياً.'
+          : 'Camera is not available. Please allow camera access, retry, or select Upload Image.';
+      toast.info(errNoCam);
+      speak(errNoCam, targetLang === 'ar' ? 'Arabic' : 'English');
       return;
     }
 
-    const frame = forcedFrame || captureFrame();
+    let frame = forcedFrame || captureFrame();
+    if (!frame && !forcedFrame && videoRef.current && videoRef.current.readyState >= 1) {
+      // Allow a brief moment for video frame buffer to decode
+      await new Promise((r) => setTimeout(r, 200));
+      frame = captureFrame();
+    }
     if (!frame) {
       const errNoFrame =
         targetLang === 'ar'
-          ? 'تعذر التقاط صورة الكاميرا، يرجى المحاولة ثانية.'
-          : targetLang === 'fr'
-          ? "Impossible de capturer l'image de la caméra, veuillez réessayer."
-          : 'Could not capture the camera frame, please try again.';
-      speak(errNoFrame, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
-      fileInputRef.current?.click();
+          ? 'تعذر التقاط إطار واضح من الكاميرا حالياً. يرجى التأكد من تشغيل الكاميرا وإعادة المحاولة أو رفع صورة.'
+          : 'Could not capture a valid camera frame. Please ensure camera is active and retry or upload an image.';
+      toast.warning(errNoFrame);
+      speak(errNoFrame, targetLang === 'ar' ? 'Arabic' : 'English');
       return;
     }
 
-    // Cancel superseded in-flight request before launching new analysis
     if (activeAbortControllerRef.current) {
       activeAbortControllerRef.current.abort();
       activeAbortControllerRef.current = null;
@@ -733,75 +1329,14 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
 
     setLastSnapshot(frame);
     setStatus('analyzing');
-    const waitingMsg = lectureMode
-      ? targetLang === 'ar'
-        ? 'بفحص السبورة وشريحة المحاضرة فوراً...'
+    const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === effectiveTool) || VISUAL_TOOLS[0];
+    const waitingMsg =
+      targetLang === 'ar'
+        ? activeToolConfig.waitingAr
         : targetLang === 'fr'
-        ? 'Analyse du tableau et des diapositives de cours...'
-        : 'Scanning lecture board, slides, and formulas...'
-      : currencyMode
-      ? targetLang === 'ar'
-        ? 'بفحص العملة والنقود فوراً...'
-        : targetLang === 'fr'
-        ? 'Identification du billet et de la devise...'
-        : 'Identifying banknote and currency value...'
-      : faceMode
-      ? targetLang === 'ar'
-        ? 'بتعرف على الأشخاص والوجوه قدامك...'
-        : targetLang === 'fr'
-        ? 'Reconnaissance des visages et des personnes...'
-        : 'Recognizing faces and people in front of you...'
-      : outfitMode
-      ? targetLang === 'ar'
-        ? 'بفحص ألوان الملابس وتناسقها...'
-        : targetLang === 'fr'
-        ? 'Analyse des couleurs et de l\'harmonie vestimentaire...'
-        : 'Analyzing clothes, colors, and outfit harmony...'
-      : navGuideMode
-      ? targetLang === 'ar'
-        ? 'بفحص المسار والممر لكشف العوائق...'
-        : targetLang === 'fr'
-        ? 'Balayage du chemin et détection des obstacles...'
-        : 'Scanning pathway and detecting obstacles...'
-      : shoppingMode
-      ? targetLang === 'ar'
-        ? 'بتعرف على المنتج والأسعار قدامك...'
-        : targetLang === 'fr'
-        ? 'Identification du produit et des prix...'
-        : 'Identifying product and pricing in front of you...'
-      : readMode
-      ? activeReadAction === 'summarize'
-        ? targetLang === 'ar'
-          ? 'بستخرج المفيد وخلاصة الكلام...'
-          : targetLang === 'fr'
-          ? 'Extraction de l\'essentiel et de la conclusion...'
-          : 'Extracting key takeaways and bottom line...'
-        : targetLang === 'ar'
-        ? 'بقرا النص اللي قدامك...'
-        : targetLang === 'fr'
-        ? 'Je lis le texte devant vous...'
-        : 'Reading the text in front of you...'
-      : targetLang === 'ar'
-      ? 'بحلل اللي قدامك في الكاميرا...'
-      : targetLang === 'fr'
-      ? "J'analyse ce qui se trouve devant vous..."
-      : "Analyzing what's in front of you...";
+        ? activeToolConfig.waitingFr
+        : activeToolConfig.waitingEn;
     setAnnounce(waitingMsg);
-
-    const knownPeople = memories.filter((m) => m.memoryType === 'person');
-    const knownPeopleContext = knownPeople.length
-      ? `\n\nFamily & Friends saved by user (announce if person matches):\n${knownPeople
-          .slice(-15)
-          .map((m) => `- "${m.label}": ${m.description}`)
-          .join('\n')}`
-      : '';
-
-    const knownContext = memories.length
-      ? `\n\nContext — objects/people previously saved by the user (mention only if photo matches):\n${memories
-          .slice(-15)
-          .map((m) => `- "${m.label}": ${m.description}`)
-          .join('\n')}`
-      : '';
 
     let prompt = '';
     const langMandate =
@@ -809,242 +1344,133 @@ export default function VisionCompanionView({ profile, setProfile, onNavigateBac
         ? 'CRITICAL MANDATE: You MUST reply entirely in English. Do NOT use any Arabic characters or Arabic script whatsoever.\n'
         : targetLang === 'fr'
         ? 'DIRECTIVE CRITIQUE : Vous DEVEZ répondre entièrement en français. Ne produisez AUCUN caractère arabe.\n'
-        : 'توجيه حاسم: تحدث باللغة العربية العامية السهلة والمباشرة والودودة.\n';
+        : 'توجيه حاسم: تحدث باللغة العربية الواضحة والسهلة والودودة.\n';
 
-    if (lectureMode) {
-      // University Lecture, Blackboard, Whiteboard, and Slides Scanner
+    if (effectiveTool === 'currency') {
       if (targetLang === 'ar') {
-        prompt = `${langMandate}أنت أستاذ جامعي ومساعد أكاديمي صوتي متقدم جداً لطالب جامعي كفيف يجلس داخل قاعة المحاضرات ويوجه كاميرته نحو السبورة، الشاشة، أو ورقة المحاضرة.
-انظر فوراً إلى السبورة أو الشاشة واستخرج المحتوى الأكاديمي بدقة متناهية بالترتيب التالي:
-1. موضوع المحاضرة والعنوان: قل مباشرة مثلاً: "المحاضرة عن الخوارزميات وهياكل البيانات"، أو "شرح قانون نيوتن الثاني".
-2. القوانين والمعادلات والرموز: اقرأ أي قانون أو معادلة رياضية أو برمجية مكتوبة على السبورة بدقة شديدة وبلفظ واضح.
-3. المخططات والرسومات التوضيحية: إذا كان هناك رسم تخطيطي أو أسهم أو جدول، اشرح معناه والعلاقة بين عناصره بأسلوب وصفي صوتي دقيق.
-4. الخلاصة والزبدة الأكاديمية: اختم في جملتين مباشرتين بأهم فكرة لازم الطالب الكفيف يركز عليها ويكتبها في باله للامتحان.
-تحدث فوراً بصوت طبيعي كأستاذ يشرح لطلابه بدون أي نجوم ماركداون (**) أو عناوين روبوتية لكي يُنطق الشرح صوتياً بسلاسة.${knownContext}`;
+        prompt = `${langMandate}أنت رفيق ذكي ومتخصص في فحص وقراءة العملات النقدية الورقية والقطع المعدنية لمساعدة شخص كفيف عبر الكاميرا.
+افحص الصورة بدقة بالغة واذكر فوراً:
+1. القيمة والعملة: حدد الفئة واسم العملة بدقة فائقة (مثلاً: مئتا جنيه مصري، خمسون جنيهاً مصرياً، عشرون دولاراً أمريكياً، عشرة يورو، مئة ريال سعودي).
+2. التفاصيل والحالة: اذكر ما إذا كانت العملة جديدة أم متهالكة، وأي أرقام بارزة عليها.
+3. إذا لم تكن هناك عملة واضحة: قل باختصار: "لم أتمكن من التعرف على عملة نقدية واضحة، يرجى فرد الورقة وتقريب الكاميرا بإضاءة جيدة".
+تحدث بجملة أو جملتين بلغة عربية سهلة وودودة بدون أي نجوم ماركداون (**) أو عناوين روبوتية.`;
       } else if (targetLang === 'fr') {
-        prompt = `${langMandate}Vous êtes un professeur d'université et assistant académique vocal pour un étudiant malvoyant assistant à un cours magistral et pointant sa caméra vers le tableau, l'écran de projection ou des notes de cours.
-Identifiez immédiatement le contenu pédagogique devant la caméra :
-1. Sujet et titre du cours : annoncez directement le thème (ex. "Cours sur les algorithmes et structures de données", "Mécanique quantique").
-2. Formules, équations et définitions : lisez intégralement et clairement toute équation ou formule inscrite au tableau.
-3. Schémas et graphiques : décrivez tout schéma, organigramme ou courbe avec ses axes et relations clés.
-4. L'essentiel à retenir : concluez par 1 ou 2 phrases nettes résumant le point capital pour l'examen.
-Parlez de façon naturelle et fluide sans astérisques markdown ni titres robotiques.${knownContext}`;
+        prompt = `${langMandate}Vous êtes un assistant expert en reconnaissance de devises et billets pour une personne aveugle ou malvoyante via sa caméra.
+1. Dénomination et devise : Indiquez précisément la valeur et la monnaie (ex. : 200 livres égyptiennes, 20 dollars américains, 50 euros).
+2. Clarté : Si aucun billet n'est clairement visible, indiquez : "Aucun billet identifiable, veuillez déplier la coupure sous un bon éclairage."
+Fournissez 1 à 2 phrases directes sans astérisques markdown (**).`;
       } else {
-        prompt = `${langMandate}You are an expert university professor and voice academic companion for a visually impaired student attending a lecture and pointing their camera at the blackboard, whiteboard, projector slides, or lecture notes.
-Analyze the board or slide immediately with academic precision:
-1. Lecture Topic & Objective: State the core topic directly (e.g. "Lecture on Graph Algorithms & Shortest Path", "Newtonian Mechanics").
-2. Equations, Formulas & Code: Read out every mathematical formula, equation, or code snippet with crystal-clear verbal notation.
-3. Diagrams & Visual Schematics: Describe any flowcharts, graphs, or visual models, detailing their flow and key components.
-4. Essential Bottom-Line Takeaway: Conclude in 1-2 sharp, memorable sentences summarizing what the student must remember for the exam.
-Speak naturally and directly in fluent academic prose without markdown asterisks (**) or robotic labels.${knownContext}`;
+        prompt = `${langMandate}You are an expert currency and banknote recognition assistant speaking aloud to a blind or low-vision user through their camera.
+Examine the captured image with extreme precision and state:
+1. Denomination & Currency: Clearly name the denomination and currency (e.g., 200 Egyptian Pounds, 20 US Dollars, 50 Euros, 100 Saudi Riyals).
+2. Orientation & Details: Note condition, visible features, or orientation if discernible.
+3. If no banknote is clear: Say "No clear currency detected in frame. Please unfold the banknote and ensure good lighting."
+Deliver 1-2 conversational sentences without markdown asterisks (**) or robotic headings.`;
       }
-    } else if (currencyMode) {
-      // Instant Currency & Banknote Reader
+    } else if (effectiveTool === 'color') {
       if (targetLang === 'ar') {
-        prompt = `أنت خبير فوري وقارئ نقود ذكي يتحدث بصوته لشخص كفيف يمسك ورقة نقدية أو نقوداً أمام الكاميرا.
-انظر فوراً إلى الورقة النقدية وقل قيمتها مباشرة في أجزاء من الثانية:
-1. القيمة والعملة فوراً وبدون أي مقدمات: مثلاً "عشرين جنيه مصري جديدة بلاستيك"، "مائة جنيه مصري"، "خمسون جنيهاً"، "مائتي جنيه"، "عشرة جنيهات"، "خمسة جنيهات"، أو العملات الأخرى (دولار، يورو، ريال سعودي، درهم).
-2. حالة الورقة: لو الورقة مقطوعة من الطرف أو ملصوقة بسولوتيب أو باهتة جداً، نبهه فوراً: "الورقة مقطوعة من الطرف" أو "الورقة سليمة".
-3. لو الصورة غير واضحة أو العملة مقلوبة، قل باختصار: "اقلب الورقة أو قربها شوية من الكاميرا".
-تحدث فوراً برقم الفئة والعملة مباشرة دون أي عناوين أو نجوم ماركداون.${knownContext}`;
+        prompt = `${langMandate}أنت رفيق ذكي متخصص في فحص الألوان وتنسيق الملابس والمقتنيات لمساعدة شخص كفيف عبر الكاميرا.
+افحص الصورة بدقة واذكر:
+1. الألوان الأساسية: حدد بدقة اللون الأساسي ودرجته (مثلاً: كحلي داكن، أزرق سماوي، زيتي، بيج، رمادي).
+2. النقوش والتفاصيل: بين ما إذا كانت القطعة سادة أو مقلمة أو كاروهات.
+3. تناسق الألوان: قدم نصيحة سريعة ومفيدة عن الألوان المناسبة لتنسيقها مع هذه القطعة.
+تحدث بلغة عربية عامية ودودة في جملتين دون أي نجوم ماركداون (**).`;
       } else if (targetLang === 'fr') {
-        prompt = `Vous êtes un lecteur vocal instantané de billets de banque pour une personne aveugle.
-Identifiez immédiatement le billet devant la caméra :
-1. Dénomination et devise en premier : ex. "Vingt Livres Égyptiennes en polymère", "Cent Livres Égyptiennes", "Cinquante Euros", "Vingt Dollars", "Cent Riyals Saoudiens".
-2. État du billet : précisez s'il est déchiré ou abîmé.
-3. Si c'est flou, dites "Rapprochez le billet ou retournez-le".
-Parlez directement sans astérisques markdown ni préambule.${knownContext}`;
+        prompt = `${langMandate}Vous êtes un assistant expert en détection de couleurs et coordination vestimentaire pour une personne aveugle ou malvoyante.
+1. Nuances précises : Identifiez la couleur dominante et ses nuances (bleu marine, vert olive, beige, etc.).
+2. Motif et texture : Indiquez si le vêtement est uni, rayé ou à carreaux.
+3. Conseils d'association : Donnez un conseil rapide de combinaison vestimentaire harmonieuse sans astérisques markdown (**).`;
       } else {
-        prompt = `You are a fast voice currency reader for a blind person holding banknotes in front of the camera.
-Instantly identify the bill and announce its exact value in fractions of a second:
-1. Denomination & Currency First: e.g. "Twenty Egyptian Pounds (Polymer)", "One Hundred Egyptian Pounds", "Fifty US Dollars", "Twenty Euros", "One Hundred Saudi Riyals".
-2. Physical condition: note if the bill is torn, heavily taped, or damaged.
-3. If blurry or only partially visible, say "Bring the bill closer or flip it over."
-Speak the denomination directly without preamble, headings, or markdown asterisks.${knownContext}`;
+        prompt = `${langMandate}You are an expert color and outfit matching assistant speaking aloud to a blind or low-vision user through their camera.
+1. Primary Color & Shade: Accurately identify dominant colors and nuances (e.g., navy blue, olive green, charcoal grey, beige).
+2. Pattern: Note if solid, striped, checked, or patterned.
+3. Outfit Coordination: Offer practical advice on matching complementary colors.
+Deliver 2 clear, conversational sentences without markdown asterisks (**).`;
       }
-    } else if (faceMode) {
-      // Familiar Face & Person Recognition
+    } else if (effectiveTool === 'object') {
       if (targetLang === 'ar') {
-        prompt = `أنت رفيق بشري يتحدث بصوته لشخص كفيف ليتعرف على الأشخاص والوجوه أمامه.
-انظر إلى الشخص أو الأشخاص أمام الكاميرا:
-1. إذا كان الشخص يطابق أحد الأشخاص المحفوظين مسبقاً في الذاكرة أدناه، اذكر اسمه فوراً بحرارة وبشرى (مثلاً: "أحمد يقف أمامك ويبتسم"، "والدتك مقبلة نحوك").
-2. إذا لم يكن محفوظاً، صفه بسرعة وبشكل ودود ومفيد: ملامحه التقريبية (رجل/سيدة/طفل، في العشرينات/الأربعينات، يرتدي نظارة، يبتسم، ينظر إليك أو بعيداً، ملابسه).
-3. لو مفيش حد قدامك، قول له بلطف "مفيش حد قدام الكاميرا دلوقتي".
-تحدث بشكل طبيعي ومباشر كصديق يهمس في أذنه بدون أي نجوم ماركداون أو عناوين روبوتية.${knownPeopleContext || knownContext}`;
+        prompt = `${langMandate}أنت رفيق ذكي متخصص في الذاكرة المكانية والبحث عن الأشياء والمقتنيات الشخصية لشخص كفيف عبر الكاميرا.
+ابحث في الصورة بدقة عن الأغراض الأساسية (مفاتيح، محفظة، هاتف، كوب، نظارة، حقيبة، قلم، شاحن):
+1. الأشياء المكتشفة وموقعها: سمّ كل غرض ومكانه التوجيهي الدقيق بنظام عقارب الساعة والمسافة التقريبية (مثلاً: المفاتيح عند الساعة 2 على بعد 40 سم على الطاولة).
+2. العوائق: نبه لأي عائق أمام حركة اليد.
+تحدث بلغة عربية عامية واضحة ومباشرة بدون نجوم ماركداون (**).`;
       } else if (targetLang === 'fr') {
-        prompt = `Vous êtes un compagnon vocal bienveillant qui aide une personne aveugle à reconnaître les visages et personnes devant elle.
-Regardez la personne devant la caméra :
-1. Si la personne correspond à un proche mémorisé ci-dessous, annoncez chaleureusement son nom (ex. "Ahmed est devant vous et sourit", "Votre mère s'approche").
-2. Sinon, décrivez-la gentiment : âge approximatif, expression (souriant, neutre), lunettes, vêtements.
-3. S'il n'y a personne, dites poliment "Aucune personne détectée devant la caméra."
-Parlez directement sans astérisques markdown.${knownPeopleContext || knownContext}`;
+        prompt = `${langMandate}Vous êtes un assistant expert en localisation spatiale d'objets pour une personne aveugle ou malvoyante.
+1. Objets et repères : Identifiez les objets personnels clés (clés, portefeuille, téléphone, tasse, lunettes) avec leur position relative en heures d'horloge et distance (ex. : clés à 2 heures, à 40 cm sur la table).
+2. Dégagement : Précisez si l'accès est libre sans astérisques markdown (**).`;
       } else {
-        prompt = `You are a voice companion helping a visually impaired person recognize people and familiar faces.
-Look at the person or people in front of the camera:
-1. If the person matches a previously remembered friend/family member from the context below, announce their name warmly (e.g. "Ahmed is standing right in front of you, smiling", "Your mother is approaching").
-2. If unknown, describe them kindly and helpfully: approximate age, gender, facial expression (smiling, focused), glasses/hair, clothing, and whether they are looking at the camera.
-3. If no one is there, gently say "No one is in front of the camera right now."
-Speak naturally like a friend whispering in their ear, without headings or markdown asterisks.${knownPeopleContext || knownContext}`;
+        prompt = `${langMandate}You are an expert spatial object finder speaking aloud to a blind or low-vision user through their camera.
+Locate personal items (keys, wallet, phone, mug, glasses, bag):
+1. Detected Items & Position: Name each item with clock-face direction and approximate distance (e.g., keys at 2 o'clock, 40 cm away on the desk).
+2. Clearance: Note any obstacles before reaching.
+Deliver 2 crisp sentences without markdown asterisks (**).`;
       }
-    } else if (outfitMode) {
-      // Clothes & Color Matching Assistant
+    } else if (effectiveTool === 'face') {
       if (targetLang === 'ar') {
-        prompt = `أنت مستشار أناقة ومساعد ألوان ذكي يتحدث بصوته لشخص كفيف لفحص ملابسه وألوانها وتناسقها.
-انظر فوراً إلى الملابس أو القطع المعروضة أمام الكاميرا:
-1. اذكر الألوان والأنماط بدقة: مثلاً "قميص أزرق كحلي سادة"، "بنطلون جينز رمادي غامق"، "فستان نبيتي مشجر".
-2. احكم على التناسق والانسجام: هل الألوان متناسقة مع بعضها؟ هل الطقم ملائم لمقابلة عمل، خروج رسمي، أم كاجوال؟ (مثلاً: "الطقم متناسق وشيك جداً"، أو "الكحلي مش راكب قوي مع البني، الأفضل قميص أبيض أو رمادي").
-3. لو فيه أي بقع أو تجاعيد واضحة، نبهه بلطف: "فيه بقعة صغيرة على الجيب اليمين".
-تحدث بأسلوب صوتي مباشر وودود بدون أي نجوم ماركداون أو عناوين روبوتية.${knownContext}`;
+        prompt = `${langMandate}أنت رفيق ذكي متخصص في التعرف على الأشخاص والوجوه لمساعدة شخص كفيف عبر الكاميرا.
+افحص ما إذا كان هناك شخص أمام الكاميرا:
+1. وجود الأشخاص وموقعهم: هل يوجد شخص أمامك مباشرة، على اليمين، أو على اليسار، وعلى بعد كم تقريباً.
+2. المظهر والتعبير: تعبير الوجه (مبتسم، يتحدث)، والملابس البارزة للمساعدة على تمييزه.
+3. تحدث بلغة عربية ودودة وسلسة بدون نجوم ماركداون (**).`;
       } else if (targetLang === 'fr') {
-        prompt = `Vous êtes un conseiller en style et couleurs vocal pour une personne aveugle qui vérifie sa tenue vestimentaire.
-Examinez les vêtements devant la caméra :
-1. Couleurs et motifs précis : ex. "Chemise bleu marine unie", "Pantalon gris anthracite", "Robe bordeaux".
-2. Harmonisation et style : dites si l'ensemble est assorti et pour quelle occasion (formel, travail, détente).
-3. État : signalez gentiment d'éventuelles taches ou plis visibles.
-Parlez directement sans astérisques markdown ni titres.${knownContext}`;
+        prompt = `${langMandate}Vous êtes un assistant expert en reconnaissance faciale et présence humaine pour une personne aveugle ou malvoyante.
+1. Présence et distance : Indiquez la présence de personnes, leur position (en face, à droite, à gauche) et la distance approximative.
+2. Expression et tenue : Notez l'expression (souriant, attentif) et la couleur principale des vêtements sans astérisques markdown (**).`;
       } else {
-        prompt = `You are a fashion and color matching assistant speaking aloud to a blind person checking their clothes.
-Look at the clothing item or outfit in front of the camera:
-1. Exact colors and patterns: e.g. "Solid navy blue button-down shirt", "Charcoal gray trousers", "Patterned scarf".
-2. Outfit harmony & style: evaluate whether the pieces match well and what setting they suit (e.g. "These colors match wonderfully for work or formal occasions", or "A white shirt would pair better with these trousers").
-3. Condition check: gently mention if any visible stains, wrinkles, or lint are noticed.
-Speak warmly and directly without any markdown asterisks or headings.${knownContext}`;
+        prompt = `${langMandate}You are an expert person and face recognition assistant speaking aloud to a blind or low-vision user through their camera.
+1. Person Presence & Distance: Note if someone is standing directly ahead, left, or right, and approximate distance.
+2. Expression & Appearance: Note facial expression (smiling, speaking) and clothing color cues.
+Deliver 2 warm, natural sentences without markdown asterisks (**).`;
       }
-    } else if (navGuideMode) {
-      // Virtual White Cane & Indoor Navigation Assistant
+    } else if (effectiveTool === 'read' || activeReadAction === 'read') {
       if (targetLang === 'ar') {
-        prompt = `أنت عصا ذكية ومساعد ملاحة داخلي صوتي لشخص كفيف يتحرك في المكان.
-انظر فوراً إلى المسار المباشر والأرضية والممر أمامه:
-1. هل المسار مفتوح وآمن؟ ابدأ بـ "المسار مفتوح قدامك تقدر تمشي خطوتين تلاتة" أو اذكر المسافة التقريبية.
-2. العوائق والسلالم والأسلاك: اذكر فوراً أي عائق وموقعه الدقيق بالساعة أو الاتجاه (مثلاً: "خد بالك، فيه كرسي على شمالك"، "احذر سلك ممدود على الأرض قدامك"، "قدامك درجتين سلم نازل على بعد متر"، "الباب مفتوح على يمينك").
-3. توجيه واضح وبسيط ومباشر بدون أي نجوم ماركداون أو كلام إنشائي، لأن سلامة حركته تعتمد على وضوح كلامك.${knownContext}`;
-      } else if (targetLang === 'fr') {
-        prompt = `Vous êtes une canne blanche virtuelle et guide de navigation intérieure pour une personne aveugle.
-Examinez immédiatement le chemin, le sol et la zone devant la caméra :
-1. État du passage : dites si le chemin est dégagé (ex. "Chemin dégagé pour avancer de 3 pas").
-2. Obstacles, marches et dangers : signalez immédiatement tout objet avec sa position (ex. "Attention, chaise sur votre gauche", "Attention câble au sol devant vous", "Deux marches qui descendent à 1 mètre", "Porte ouverte à 2 heures").
-3. Instructions directes et claires sans astérisques markdown.${knownContext}`;
+        prompt = `${langMandate}أنت تساعد شخصاً كفيفاً بقراءة النص المكتوب أو المطبوع في الصورة أمامه (كتاب، ورقة، شاشة، لافتة، منتج، أو مستند).
+اقرأ كل النص الظاهر بوضوح وبالترتيب الصحيح كلمة بكلمة. لو في الصورة أرقام أو تواريخ أو مبالغ، انطقها بدقة.
+لو لا يوجد نص واضح، قل باختصار: "لا يوجد نص واضح في الصورة، حاول تقريب الكاميرا". لا تستخدم أي نجوم ماركداون (**) أو عناوين روبوتية.`;
       } else {
-        prompt = `You are an indoor navigation assistant and virtual white cane for a blind person walking forward.
-Instantly look at the pathway, floor, and immediate area in front of the camera:
-1. Pathway status: state if the path is clear to step forward (e.g. "Clear pathway ahead for about 3 steps").
-2. Obstacles, steps, and hazards: identify objects and their precise clock direction or distance (e.g. "Caution, chair on your left", "Watch out for a cable on the floor right ahead", "Two steps going down 1 meter ahead", "Doorway is open at 2 o'clock").
-3. Deliver crisp, clear, immediate spatial instructions without any fluff or markdown asterisks.${knownContext}`;
+        prompt = `${langMandate}You are helping a visually impaired person read text visible through their camera (a book, sign, screen, product label, or document).
+Read out all visible text clearly in order, word for word. Pronounce numbers, dates, or prices accurately.
+If no clear text is visible, say "No clear text detected, try moving closer". Do not use markdown asterisks or robotic headings.`;
       }
-    } else if (shoppingMode) {
-      // Shopping Assistant Mode: identifies product name, brand, price tags, currency, weight/size/flavor, expiry date
-      if (targetLang === 'ar') {
-        prompt = `أنت مساعد تسوق ذكي يتحدث بصوته لشخص كفيف في سوبر ماركت أو محل تسوق. انظر فوراً إلى ما هو أمام الكاميرا وتعرف على:
-1. اسم المنتج وماركته ونوعه بالتحديد (مثلاً: لبن جهينة كامل الدسم، مكرونة روجينا قلم، شيبسي بطعم الجبنة المتبلة، مسحوق غسيل، عصير، علبة بنادول، أو ورقة نقدية فئة خمسين جنيه).
-2. السعر إذا كان هناك ملصق سعر أو باركود واضح، واذكر العملة بوضوح (جنيه، ريال، دولار، إلخ).
-3. الحجم أو الوزن أو الطعم، وتاريخ الصلاحية أو الإنتاج إذا كان ظاهراً ومقروءاً على العبوة.
-تحدث فوراً باختصار شديد وبطريقة مباشرة ومفيدة كأنك صديق بجانبه بدون أي مقدمات أو عناوين أو ماركداون. لو الشيء غير واضح أو الكاميرا بعيدة، قول له باختصار "قرب الكاميرا شوية من المنتج عشان أقرالك تفاصيله". لا تستخدم أي نجوم ماركداون نهائياً.${knownContext}`;
-      } else if (targetLang === 'fr') {
-        prompt = `Vous êtes un assistant d'achat vocal intelligent pour une personne malvoyante dans un magasin ou supermarché. Identifiez immédiatement le produit devant la caméra :
-1. Le nom exact du produit, la marque et sa variété (ex. Lait entier Candia, paquet de biscuits, bouteille de jus, billet de 20 euros, etc.).
-2. Le prix ou l'étiquette de prix si visible, en précisant la devise.
-3. Le poids, volume, saveur et la date de péremption si lisible sur l'emballage.
-Parlez de façon directe, concise et naturelle sans titres de section ni astérisques markdown. Si le produit est flou ou trop loin, dites gentiment d'approcher la caméra.${knownContext}`;
-      } else {
-        prompt = `You are a smart voice shopping assistant for a visually impaired person in a store or supermarket. Instantly identify the item or product in front of the camera:
-1. Exact product name, brand, and variety (e.g. Tropicana Orange Juice No Pulp, Heinz Tomato Ketchup 500g, a $20 banknote, cereal box, etc.).
-2. Price tag or cost if visible, stating the currency clearly.
-3. Weight, volume, flavor, and expiration/best-by date if legible on the packaging.
-Speak directly, concisely, and naturally without any headings, robotic labels, or markdown asterisks. If the item is blurry or far, advise them to bring the camera closer.${knownContext}`;
-      }
-    } else if (readMode) {
-      if (activeReadAction === 'summarize') {
-        // Summarize Mode: focus 100% on the core takeaway, bottom line, and vital substance (المفيد والزبدة الصافية)
-        if (targetLang === 'ar') {
-          prompt = `أنت مساعد ومعلم ذكي يتحدث بصوته لشخص كفيف ليعطيه "المفيد والزبدة الصافية" من أي نص أو محاضرة أو شريحة أو ورقة أمامه بالكاميرا.
-قاعدتك الذهبية: ادخل في المفيد فوراً بدون مقدمات ولا لف ودوران:
-1. المفيد أولاً: استخرج الفكرة الجوهرية والزبدة الصافية في جملة أو جملتين مباشرتين ومركزتين (إيه أهم حاجة لازم يعرفها من هذا الكلام؟).
-2. التفاصيل والنتائج المهمة فقط: لو فيه قانون، تعريف أساسي، نتيجة حاسمة، تاريخ أو مبلغ مهم، أو خطوات عملية مطلوبة، قلها بوضوح واختصار.
-3. ممنوع الحشو أو الكلام الإنشائي: لا تضيع وقته في جمل مثل "هذا النص يتحدث عن..." أو قراءة التفاصيل الثانوية، بل ابدأ بالمعلومة المفيدة نفسها فوراً.
-4. تحدث بأسلوب صوتي ودود ومريح ومباشر بدون أي نجوم ماركداون (**) أو شرطات أو عناوين روبوتية لكي يُنطق الصوت بسلاسة وسرعة. لو مفيش نص واضح، قول له باختصار "قرب الكاميرا شوية من الورقة أو الشاشة".${knownContext}`;
-        } else if (targetLang === 'fr') {
-          prompt = `Vous êtes un compagnon vocal intelligent qui donne à une personne malvoyante "l'essentiel et la conclusion utile" de tout cours, diapositive ou document devant sa caméra.
-Règle d'or : Allez directement à l'essentiel sans préambule ni verbiage :
-1. L'essentiel d'abord : Donnez l'idée maîtresse et la conclusion clé en 1 ou 2 phrases percutantes et claires.
-2. Résultats et points cruciaux uniquement : S'il y a une formule, une définition importante, une décision ou une action concrète, énoncez-la directement.
-3. Zéro superflu : Ne commencez jamais par "Ce document parle de...", commencez immédiatement par l'information utile.
-4. Parlez de façon fluide et naturelle sans astérisques markdown ni titres pour une lecture vocale optimale. Si c'est flou, dites simplement d'approcher la caméra.${knownContext}`;
-        } else {
-          prompt = `You are a smart voice tutor giving a visually impaired user the distilled bottom line and core takeaways of any lecture, slide, book, or document in front of the camera.
-Golden rule: Cut straight to the bottom line and essential takeaways with zero filler:
-1. The Core Takeaway First: Deliver the distilled essence and primary message in 1-2 sharp, clear, conversational sentences (what is the single most important thing they need to know?).
-2. Vital Results and Key Facts: If there is a crucial formula, definition, bottom-line total, decision, or actionable step, state it directly and concisely.
-3. Zero Fluff: Never waste words on preamble like "This slide is about..." or minor background details. Start right with the useful takeaway itself.
-4. Speak in natural conversational prose without any markdown asterisks (**), bullet dashes, or robotic headings so speech is smooth and human. If unreadable, say "Bring the camera a bit closer to the text or screen."${knownContext}`;
-        }
-      } else {
-        // Read Mode (Verbatim): read out all visible text word for word
-        if (targetLang === 'ar') {
-          prompt = `أنت تساعد شخص كفيف بقراءة نص مكتوب أمامه بالكاميرا (ممكن يكون روشتة، فاتورة كهربا أو غاز، ملصق منتج، سعر، إيصال، أو أي ورقة). اقرأ كل النص المكتوب في الصورة بالترتيب وبوضوح، كلمة بكلمة كما هو، من غير أي وصف للمشهد أو الأشياء حواليه. لو النص فيه أرقام أو تواريخ أو مبالغ، اقرأها بوضوح وبالترتيب الصحيح. لو مفيش نص واضح في الصورة، قول له بلطف "مفيش نص واضح قدامك دلوقتي، حاول تقرب الكاميرا أكتر." لا تستخدم أي عناوين أو ماركداون أو كلمة "النص المكتوب:" كعنوان.${knownContext}`;
-        } else if (targetLang === 'fr') {
-          prompt = `Vous aidez une personne aveugle à lire un texte visible par sa caméra (ordonnance, facture, étiquette, prix, reçu, ou tout document). Lisez tout le texte visible dans l'image, dans l'ordre, mot pour mot, sans décrire la scène ni les objets environnants. Lisez clairement les chiffres, dates et montants dans leur ordre exact. S'il n'y a pas de texte clair, dites poliment "Aucun texte clair détecté, essayez de rapprocher la caméra." N'utilisez aucun titre, markdown, ou libellé robotique.${knownContext}`;
-        } else {
-          prompt = `You are helping a blind person read text visible through their camera (a prescription, a utility bill, a product label, a price tag, a receipt, or any document). Read out ALL the visible text in the image, in order, word for word, without describing the scene or surrounding objects. Read any numbers, dates, or amounts clearly and in their correct order. If there is no clear text visible, gently say "No clear text detected right now, try moving the camera closer." Do NOT use any headings, markdown, or robotic labels like "Text:".${knownContext}`;
-        }
-      }
-    } else if (targetLang === 'ar') {
-      prompt = `أنت رفيق بصري ومساعد ذكي يتحدث بصوته لشخص كفيف أو ضعيف البصر عبر الكاميرا.
-انظر بدقة متناهية إلى ما يظهر أمام الكاميرا الآن، وقدم وصفاً مكانياً دقيقاً ومفيداً عملياً بالترتيب التالي:
-1. الأمان أولاً (المخاطر والعوائق): ابدأ فوراً بذكر أي خطر أو عائق مباشر في مسار الحركة (سلالم، أسلاك، حواف، زجاج، كراسي، سوائل مسكوبة). ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر ("مفيش أخطار حواليك، المسار مفتوح أمامك").
-2. العناصر الأساسية ومواقعها بالساعة أو الاتجاه: ثم صف الأشخاص والأشياء البارزة ومواقعهم النسبية (مثلاً: "عند الساعة 12 قدامك مكتب"، "عند الساعة 2 على يمينك كرسي"، "على شمالك باب مفتوح").
-3. قراءة النصوص واللافتات والأسماء (OCR): اقرأ أي نصوص أو لافتات أو أسماء ماركات أو تواريخ أو أسعار ظاهرة كلمة بكلمة بدقة دون اختصار.
-4. الألوان والتفاصيل المكانية: صف ألوان العناصر الرئيسية وأبعادها التقريبية إذا كانت واضحة وموثوقة.
-5. الإقرار بعدم التأكد: إذا كانت الصورة مهتزة، مظلمة، الإضاءة ضعيفة، أو الجسم محجوباً جزئياً، قل بصراحة ووضوح: "الصورة غير واضحة تماماً" أو "الإضاءة خافتة، حاول تحريك الكاميرا ببطء أو تشغيل الإضاءة".
-تحدث بلغة عربية عامية سهلة وطبيعية وودودة ("بالبلدي")، بدون أي نجوم ماركداون (**) أو شرطات أو عناوين روبوتية (لا تقل "المخاطر:" أو "الوصف:") لكي يتدفق النطق الصوتي بسلاسة.${knownContext}`;
-    } else if (targetLang === 'fr') {
-      prompt = `Vous êtes un compagnon visuel expert qui s'adresse à voix haute à une personne aveugle ou malvoyante à travers sa caméra.
-Analysez ce qui se trouve devant la caméra avec une grande précision selon cet ordre de priorité :
-1. Sécurité d'abord (Dangers et obstacles) : Signalez immédiatement tout obstacle ou danger (marches, câbles au sol, bordures, liquides). S'il n'y a aucun danger, commencez directement par rassurer la personne ("Aucun danger, le passage est libre").
-2. Objets principaux et positions horaires : Décrivez les personnes, objets clés et surfaces avec leurs positions relatives (ex. "À 12 heures droit devant vous se trouve un bureau", "À 2 heures sur votre droite se trouve une chaise", "Sur votre gauche une porte ouverte").
-3. Textes et panneaux visibles (OCR) : Lisez mot pour mot tout texte, étiquette, prix ou panneau visible.
-4. Couleurs et attributs visuels : Précisez les couleurs et dimensions relatives fiables.
-5. Incertitude explicite : Si l'image est floue, trop sombre ou partiellement masquée, dites-le clairement (ex. "L'image est un peu floue ou sombre, rapprochez légèrement la caméra").
-Parlez d'une voix naturelle, fluide et bienveillante sans astérisques markdown (**) ni titres robotiques.${knownContext}`;
     } else {
-      prompt = `You are an expert visual companion speaking aloud to a blind or low-vision user through their camera.
-Examine what is visible in front of the camera right now with utmost precision, delivering a structured, practical description in this priority order:
-1. Safety First (Hazards & Obstacles): State immediately if any immediate obstacle or hazard is present (steps, cables, drop-offs, sharp objects, spills, traffic). If there are no hazards, start directly with reassuring words ("No hazards in your path, area is clear").
-2. Main Objects & Clock-Face Spatial Positions: Describe people, objects, and their relative positions using clock coordinates or directions (e.g., "At 12 o'clock directly ahead is a desk", "At 2 o'clock to your right is a chair", "To your left is an open doorway").
-3. Verbatim Text & Signs (OCR): Read any visible signs, packaging labels, prices, room numbers, or text accurately word for word.
-4. Colors & Spatial Attributes: Note prominent colors and spatial relationships when reliable.
-5. Explicit Uncertainty: If the image is blurry, poorly lit, obstructed, or out of frame, state that clearly and gently (e.g., "The image is slightly blurry or dim, try moving closer or adjusting lighting").
-Speak directly in natural, warm, concise conversational prose without any markdown asterisks (**), bullet points, or section headings (never say "Hazards:" or "Scene:").${knownContext}`;
+      if (targetLang === 'ar') {
+        prompt = `${langMandate}أنت رفيق ومساعد بصري ذكي يتحدث بصوته لشخص كفيف أو ضعيف البصر عبر الكاميرا.
+انظر بدقة متناهية إلى ما يظهر أمام الكاميرا الآن، وقدم وصفاً مكانياً دقيقاً ومفيداً عملياً بالترتيب التالي:
+1. الأمان والمخاطر: ابدأ مباشرة بجملة تطمينية سلسة إذا لم تكن هناك مخاطر ("المسار مفتوح وآمن أمامك").
+2. العناصر الأساسية: ثم صف الأشخاص والأشياء البارزة ومواقعها النسبية.
+3. قراءة النصوص واللافتات: اقرأ أي نصوص أو عناوين ظاهرة بدقة.
+4. الإيجاز والوضوح: تحدث بلغة عربية عامية سهلة وطبيعية وودودة، بدون أي نجوم ماركداون (**) أو شرطات أو عناوين روبوتية لكي يُنطق الشرح صوتياً بسلاسة.`;
+      } else if (targetLang === 'fr') {
+        prompt = `${langMandate}Vous êtes un assistant visuel expert parlant à voix haute pour une personne aveugle ou malvoyante via sa caméra.
+1. Sécurité et dangers : S'il n'y a aucun danger, commencez directement par rassurer la personne ("Aucun danger devant vous").
+2. Objets et agencement : Décrivez les personnes, objets clés et leurs positions relatives.
+3. Texte visible : Lisez fidèlement les panneaux, étiquettes ou textes visibles.
+4. Concision et ton : Fournissez 2 à 3 phrases claires, naturelles et fluides, sans astérisques markdown (**) ni titres robotiques pour une synthèse vocale limpide.`;
+      } else {
+        prompt = `${langMandate}You are an expert visual companion speaking aloud to a blind or low-vision user through their camera.
+Examine what is visible in front of the camera right now with utmost precision:
+1. Safety & Hazards: If there are no hazards, start directly with reassuring words ("Area in front of you is clear").
+2. Main Objects & Layout: Describe people, objects, and their relative positions.
+3. Visible Text: Read any signs, labels, or visible text word-for-word.
+4. Brevity & Tone: Deliver 2-3 crisp, natural, conversational sentences without markdown asterisks (**) or robotic headings so speech is smooth.`;
+      }
     }
 
-    if (!prompt.includes(langMandate.trim())) {
-      prompt = `${langMandate}\n${prompt}`;
+    if (detailLevel === 'concise') {
+      prompt += targetLang === 'ar'
+        ? '\nمستوى الإيجاز: لخص النتيجة في جملة واحدة فقط واضحة تركز على السلامة وخلو المسار.'
+        : '\nDetail level: Summarize in 1 concise sentence focusing on safety and clear pathway.';
+    } else if (detailLevel === 'detailed') {
+      prompt += targetLang === 'ar'
+        ? '\nمستوى التفصيل: قدم وصفاً دقيقاً في 3 إلى 4 جمل تشمل توزيع المكان والألوان والإضاءة والمواقع النسبية بالساعة.'
+        : '\nDetail level: Provide a thorough 3-4 sentence description detailing space, colors, lighting, and relative clock positions.';
     }
 
-    // Previous observation context comparison when camera has moved or scene changed
-    if (lastDescription && observationType === 'live' && !forcedFrame) {
-      const changePrompt =
-        targetLang === 'ar'
-          ? `\n\n[سياق الملاحظة السابقة - قبل لحظات]:\n"${lastDescription.slice(0, 300)}"\nقاعدة كشف التغيير: إذا كان المستخدم يوجه الكاميرا الآن لشيء جديد تماماً، صف المشهد الجديد فوراً دون تكرار القديم. أما إذا كان نفس المشهد، اذكر التغييرات أو الحركة التي طرأت.`
-          : targetLang === 'fr'
-          ? `\n\n[Contexte de l'observation précédente]:\n"${lastDescription.slice(0, 300)}"\nRègle : Si la caméra pointe vers une nouvelle scène, décrivez directement la nouvelle scène sans répéter l'ancienne.`
-          : `\n\n[Previous observation context - from a moment ago]:\n"${lastDescription.slice(0, 300)}"\nRule: If camera is now pointing at something new, describe the new scene directly without repeating the old one. If the same scene, describe significant changes.`;
-      prompt = `${prompt}\n${changePrompt}`;
+    if (effectiveTool === 'object' && targetItemQuery.trim()) {
+      prompt += targetLang === 'ar'
+        ? `\nالمستخدم يبحث بشكل خاص عن الغرض التالي: "${targetItemQuery.trim()}". هل تراه في الصورة؟ حدد مكانه بدقة بنظام الساعة والمسافة، وإن لم تره قل ذلك واقترح توجيه الكاميرا.`
+        : `\nThe user is specifically searching for: "${targetItemQuery.trim()}". State if visible with clock-face direction and distance. If not visible, explicitly state so.`;
     }
-
-    const verbosityInstruction =
-      verbosity === 'concise'
-        ? targetLang === 'ar'
-          ? '\nمستوى الإيجاز (موجز): اذكر فوراً في جملة واحدة أو جملتين مباشرتين أهم ما أمام المستخدم ومكانه، وأي عائق فوري أو مسار آمن. تجنب تماماً الحشو أو المقدمات.'
-          : targetLang === 'fr'
-          ? '\nNiveau de concision (court) : Donnez 1 à 2 phrases directes sur l\'élément clé et la sécurité.'
-          : '\nBrevity Level (Concise): Deliver 1 to 2 sharp sentences stating primary object, relative position, and immediate safety status. Zero fluff.'
-        : targetLang === 'ar'
-        ? '\nمستوى الإيجاز (مفصل): قدم وصفاً مكانياً دقيقاً، مع تحديد اتجاهات الساعة (مثلاً: عند الساعة 12، عند الساعة 2)، والمسافات التقريبية بالأمتار أو الخطوات، وملمس الأسطح، وقراءة النصوص المكتوبة.'
-        : targetLang === 'fr'
-        ? '\nNiveau de concision (détaillé) : Description spatiale riche avec positions horaires (ex. 12h, 2h) et distances estimées.'
-        : '\nBrevity Level (Detailed): Provide rich spatial layout with clock-face directions (e.g. 12 o\'clock, 2 o\'clock), estimated distances in meters, and visible text.';
-
-    prompt = `${prompt}\n${verbosityInstruction}`;
 
     try {
       const cleanData = frame.replace(/^data:[^;]+;base64,/, '');
@@ -1053,12 +1479,6 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         {
           ...profile,
           language: targetLang === 'ar' ? 'Egyptian Ammiya' : targetLang === 'fr' ? 'French' : 'English',
-          memory: profile.memory
-            ? {
-                ...profile.memory,
-                preferredLanguage: targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English',
-              }
-            : undefined,
         },
         [],
         [{ name: `scene_${captureTimestamp}_${currentReqId}.jpg`, type: 'image/jpeg', data: cleanData }],
@@ -1066,69 +1486,30 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         abortController.signal
       );
 
-      // CRITICAL: Reject stale responses if newer frame/request was already initiated or unmounted or cancelled
       if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current || abortController.signal.aborted) return;
-      const isAuthNotice =
-        result.includes('المعاينة') ||
-        result.includes('تسجيل الدخول') ||
-        result.includes('Preview Mode') ||
-        result.includes('Mode Aperçu') ||
-        result.includes('Authentication') ||
-        result.includes('401') ||
-        result.includes('المصادقة');
 
-      if (isAuthNotice) {
-        setShowGuestAuthCard(true);
+      setShowGuestAuthCard(false);
+
+      if (result.startsWith('⚠️')) {
         setStatus('ready');
-        const cleaned = cleanVisionDescription(result, targetLang);
-        setLastDescription(cleaned);
-
-        const spokenNotice =
-          targetLang === 'ar'
-            ? 'أهلاً بك في المعاينة التجريبية لمنصة كوجنيفاي. ميزات الذكاء الاصطناعي السحابية تتطلب تسجيل الدخول. يمكنك تسجيل حسابك مجاناً لتفعيل الكاميرا الذكية بكامل قدراتها، أو تجربة عينة صوتية حية.'
-            : targetLang === 'fr'
-            ? "Bienvenue sur l'aperçu Cognify. Les fonctionnalités d'IA cloud nécessitent une connexion. Veuillez vous connecter ou créer un compte gratuit pour activer la caméra intelligente, ou écouter un exemple audio."
-            : 'Welcome to Cognify preview mode. Cloud AI vision requires an account. Please sign in or create a free account to activate live camera intelligence, or try a live audio walkthrough.';
-
-        setAnnounce(spokenNotice);
-
-        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.resume();
-        }
-
-        const voiceLang = targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English';
-        setTimeout(() => {
-          speak(spokenNotice, voiceLang, {
-            onStart: () => setIsSpeaking(true),
-            onEnd: () => setIsSpeaking(false),
-          });
-        }, 60);
+        setLastDescription(result);
+        setAnnounce(result);
+        const spoken = cleanVisionDescription(result, targetLang).replace(/[*_`~⚠️]/g, '').trim();
+        speak(spoken, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English', { rate: speechRate });
         return;
       }
 
-      setShowGuestAuthCard(false);
       const cleaned = cleanVisionDescription(result, targetLang);
+      previousDescriptionRef.current = lastDescription;
       setLastDescription(cleaned);
       setStatus('ready');
       setAnnounce(cleaned);
-
-      // Track live vs previous vs uncertain observation with expanded multilingual patterns
-      const isUncertain = /غير واضح|غير متأكد|صورة غير واضحة|إضاءة منخفضة|إضاءة ضعيفة|إضاءة خافتة|العدسة محجوبة|مهتزة|مشوشة|مش واضحة|قرب الكاميرا|حاول تحريك الكاميرا|blurry|unclear|low light|obscured|not sure|hard to tell|bring closer|poorly lit|dimly lit|out of focus|flou|floue|sombre|peu clair|pas certain|rapprochez la caméra|mal éclairé/i.test(result);
-      if (isUncertain) {
-        setObservationType('uncertain');
-        setObservationConfidenceReason(
-          targetLang === 'ar'
-            ? 'الصورة قد تكون مهتزة أو الإضاءة خافتة'
-            : targetLang === 'fr'
-            ? 'Image potentiellement floue ou faible éclairage'
-            : 'Image may be blurry or dimly lit'
-        );
-      } else {
-        setObservationType(isUploadedPhoto ? 'uploaded' : forcedFrame ? 'previous' : 'live');
-        setObservationConfidenceReason('');
-      }
+      setObservationType(isUploadedPhoto ? 'uploaded' : forcedFrame ? 'previous' : 'live');
       setObservationTimestamp(captureTimestamp);
+      if (!forcedFrame) {
+        setComparisonResult(null);
+      }
+
       try {
         sessionStorage.setItem('cognify_vision_last_observation', JSON.stringify({
           description: cleaned,
@@ -1137,7 +1518,6 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         }));
       } catch {}
 
-      // Automatically extract and record spatial physical objects for this user
       if (profile?.uid) {
         const extracted = extractSpatialObjectsFromVision(cleaned, profile.uid, targetLang);
         if (extracted.length > 0) {
@@ -1149,13 +1529,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         }
       }
 
-      // Tactile Haptic Vibration Feedback for Indoor Navigation
-      if (navGuideMode) {
-        const nav = parseNavGuidance(cleaned, targetLang);
-        triggerHapticAlert(nav.hapticPattern);
-      }
-
-      // AUTOMATICALLY REPEAT ALOUD FROM THE VERY FIRST TIME WITHOUT USER HAVING TO ASK!
+      // Read aloud automatically
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         window.speechSynthesis.resume();
@@ -1164,35 +1538,23 @@ Speak directly in natural, warm, concise conversational prose without any markdo
       const voiceLang = targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English';
       setTimeout(() => {
         speak(cleaned, voiceLang, {
+          rate: speechRate,
           onStart: () => setIsSpeaking(true),
           onEnd: () => setIsSpeaking(false),
-          onError: () => {
-            setIsSpeaking(false);
-            // Chrome speech resume recovery
-            if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-              window.speechSynthesis.resume();
-              setTimeout(() => speak(cleaned, voiceLang, {
-                onStart: () => setIsSpeaking(true),
-                onEnd: () => setIsSpeaking(false),
-              }), 120);
-            }
-          },
+          onError: () => setIsSpeaking(false),
         });
       }, 60);
     } catch (err: any) {
       if (!isMountedRef.current || currentReqId !== activeRequestIdRef.current || abortController.signal.aborted || err?.name === 'AbortError') {
-        // Cancelled or superseded in-flight request — safely ignore without resetting UI
         return;
       }
       setStatus('ready');
       const errPrompt =
         targetLang === 'ar'
-          ? 'حصلت مشكلة في تحليل الصورة، من فضلك جرب تاني.'
-          : targetLang === 'fr'
-          ? "Un problème est survenu lors de l'analyse de l'image. Veuillez réessayer."
+          ? 'حصلت مشكلة في تحليل الصورة، من فضلك جرب ثانية أو ارفع صورة أخرى.'
           : 'Something went wrong analyzing the image. Please try again.';
       setLastDescription(errPrompt);
-      speak(errPrompt, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
+      speak(errPrompt, targetLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
     }
   };
 
@@ -1214,87 +1576,6 @@ Speak directly in natural, warm, concise conversational prose without any markdo
     e.target.value = '';
   };
 
-  const handleSearchSpatial = () => {
-    if (!profile?.uid || !spatialQueryInput.trim()) return;
-    const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang);
-    setSpatialQueryResult(res.message);
-    speak(res.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
-  };
-
-  const openSaveDialog = () => {
-    if (!lastDescription) return;
-    cancelSpeech();
-    setLabelInput('');
-    setShowSaveDialog(true);
-  };
-
-  const saveMemory = async () => {
-    if (!labelInput.trim()) { setShowSaveDialog(false); return; }
-    if (!profile?.uid) {
-      // Previously this just closed the dialog with zero feedback — the
-      // person types a label, hits Save, and it silently vanishes with no
-      // indication it was never actually saved (not logged in). For someone
-      // relying entirely on the spoken announcement, that's indistinguishable
-      // from a successful save until they ask for it again and it's gone.
-      setShowSaveDialog(false);
-      const msg = companionLang === 'ar'
-        ? 'مينفعش نحفظ من غير تسجيل دخول.'
-        : "Can't save without being signed in.";
-      setAnnounce(msg);
-      speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
-      return;
-    }
-    const memory: VisionMemory = {
-      id: `vm_${Date.now()}`,
-      label: labelInput.trim(),
-      description: lastDescription,
-      createdAt: new Date().toISOString(),
-      memoryType: isSavingPerson ? 'person' : 'object',
-      imageUrl: lastSnapshot || undefined,
-    };
-    const prevMemories = memories;
-    const updated = [...memories, memory];
-    if (setProfile) setProfile({ ...profile, visionMemories: updated });
-    setShowSaveDialog(false);
-    const msg = companionLang === 'ar' ? `تم الحفظ باسم "${memory.label}".` : `Saved as "${memory.label}".`;
-    setAnnounce(msg);
-    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
-    try {
-      await setDoc(
-        doc(db, `users/${profile.uid}`),
-        { visionMemories: cleanDataForFirestore(updated) },
-        { merge: true }
-      );
-    } catch (err) {
-      console.warn('Failed to sync vision memory:', err);
-      if (!isMountedRef.current) return;
-      if (setProfile) setProfile({ ...profile, visionMemories: prevMemories });
-      const errMsg =
-        companionLang === 'ar'
-          ? 'فشل الحفظ في السحابة. تحقق من اتصالك.'
-          : 'Failed to save to cloud. Check your connection.';
-      setAnnounce(errMsg);
-      speak(errMsg, companionLang === 'ar' ? 'Arabic' : 'English');
-    }
-  };
-
-  const deleteMemory = async (id: string) => {
-    if (!profile?.uid) return;
-    const prevMemories = memories;
-    const updated = memories.filter((m) => m.id !== id);
-    if (setProfile) setProfile({ ...profile, visionMemories: updated });
-    try {
-      await setDoc(
-        doc(db, `users/${profile.uid}`),
-        { visionMemories: cleanDataForFirestore(updated) },
-        { merge: true }
-      );
-    } catch (err) {
-      console.warn('Failed to delete vision memory:', err);
-      if (isMountedRef.current && setProfile) setProfile({ ...profile, visionMemories: prevMemories });
-    }
-  };
-
   const replaySpeech = () => {
     if (!lastDescription) return;
     cancelSpeech();
@@ -1305,6 +1586,7 @@ Speak directly in natural, warm, concise conversational prose without any markdo
     const cleaned = cleanVisionDescription(lastDescription, companionLang);
     setTimeout(() => {
       speak(cleaned, voiceLang, {
+        rate: speechRate,
         onStart: () => setIsSpeaking(true),
         onEnd: () => setIsSpeaking(false),
         onError: () => setIsSpeaking(false),
@@ -1312,7 +1594,6 @@ Speak directly in natural, warm, concise conversational prose without any markdo
     }, 60);
   };
 
-  // Same button toggles play/stop: if currently speaking, stop it; otherwise play it.
   const toggleSpeech = () => {
     if (isSpeaking) {
       cancelSpeech();
@@ -1322,207 +1603,60 @@ Speak directly in natural, warm, concise conversational prose without any markdo
     }
   };
 
-  // Dismisses the current description card (and stops any speech) so the
-  // user can immediately take a fresh description without it lingering.
-  const closeDescription = () => {
-    cancelSpeech();
-    setIsSpeaking(false);
-    setLastDescription('');
-    setShowGuestAuthCard(false);
-    setLastSnapshot(null);
+  const toggleReadMode = () => {
+    setReadMode((prev) => !prev);
   };
 
-  // Comprehensive accessible keyboard shortcuts for blind and visually impaired users
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const isInputFocused =
-        target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable ||
-          target.getAttribute('role') === 'textbox');
+  const openSaveDialog = () => {
+    if (!lastDescription) return;
+    cancelSpeech();
+    setLabelInput('');
+    setIsSavingPerson(false);
+    setShowSaveDialog(true);
+  };
 
-      // If user is actively typing in an input (e.g. Save Memory label, Spatial Search)
-      if (isInputFocused) {
-        if (e.key === 'Escape') {
-          if (showSaveDialog) setShowSaveDialog(false);
-          else target.blur();
-        }
-        return;
-      }
-
-      // Space or Enter: Trigger primary capture/description
-      if (e.code === 'Space' || e.key === 'Enter') {
-        e.preventDefault();
-        if (status === 'ready' || status === 'idle') {
-          describeScene(companionLang);
-        } else if (status === 'camera-denied') {
-          playDemoSample(companionLang);
-        }
-        return;
-      }
-
-      // 'R' or 'r': Replay speech / toggle speech
-      if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        toggleSpeech();
-        return;
-      }
-
-      // 'S' or 's': Stop speech immediately
-      if (e.key === 's' || e.key === 'S') {
-        e.preventDefault();
-        cancelSpeech();
-        setIsSpeaking(false);
-        return;
-      }
-
-      // 'C' or 'c': Toggle Currency Reader
-      if (e.key === 'c' || e.key === 'C') {
-        e.preventDefault();
-        toggleCurrencyMode();
-        return;
-      }
-
-      // 'T' or 't': Toggle Text Reader (OCR)
-      if (e.key === 't' || e.key === 'T') {
-        e.preventDefault();
-        toggleReadMode();
-        return;
-      }
-
-      // 'L' or 'l': Toggle Lecture Scanner
-      if (e.key === 'l' || e.key === 'L') {
-        e.preventDefault();
-        toggleLectureMode();
-        return;
-      }
-
-      // 'N' or 'n': Toggle White Cane & Nav Guide
-      if (e.key === 'n' || e.key === 'N') {
-        e.preventDefault();
-        toggleNavGuideMode();
-        return;
-      }
-
-      // 'F' or 'f': Toggle Face Recognition
-      if (e.key === 'f' || e.key === 'F') {
-        e.preventDefault();
-        toggleFaceMode();
-        return;
-      }
-
-      // 'O' or 'o': Toggle Outfit / Clothes matching
-      if (e.key === 'o' || e.key === 'O') {
-        e.preventDefault();
-        toggleOutfitMode();
-        return;
-      }
-
-      // 'U' or 'u': Upload image from device
-      if (e.key === 'u' || e.key === 'U') {
-        e.preventDefault();
-        fileInputRef.current?.click();
-        return;
-      }
-
-      // 'D' or 'd': Open Document & PDF Studio
-      if (e.key === 'd' || e.key === 'D') {
-        e.preventDefault();
-        setShowDocStudio(true);
-        announceFeature(
-          'استوديو المستندات وتلخيص المحاضرات والـ PDF',
-          'Document and Lecture Studio',
-          'Studio de Documents et Cours',
-          true
-        );
-        return;
-      }
-
-      // 'T' or 't': Open Integrated Accessibility Toolkit (Scanner, Stickers, PDF Evidence)
-      if (e.key === 't' || e.key === 'T') {
-        e.preventDefault();
-        window.location.hash = '#toolkit';
-        return;
-      }
-
-      // 'A' or 'a': Toggle low-vision font size
-      if (e.key === 'a' || e.key === 'A') {
-        e.preventDefault();
-        toggleTextSize();
-        return;
-      }
-
-      // 'V' or 'v': Toggle verbosity (concise vs detailed)
-      if (e.key === 'v' || e.key === 'V') {
-        e.preventDefault();
-        setVerbosity((prev) => {
-          const next = prev === 'concise' ? 'detailed' : 'concise';
-          const msg = next === 'concise'
-            ? (companionLang === 'ar' ? 'تم تفعيل الوصف الموجز' : companionLang === 'fr' ? 'Mode concis activé' : 'Concise mode active')
-            : (companionLang === 'ar' ? 'تم تفعيل الوصف المفصل' : companionLang === 'fr' ? 'Mode détaillé activé' : 'Detailed mode active');
-          speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
-          return next;
-        });
-        return;
-      }
-
-      // '?' or 'H' or 'h': Spoken announcement of keyboard shortcuts
-      if (e.key === '?' || e.key === 'h' || e.key === 'H') {
-        e.preventDefault();
-        const helpMsg = companionLang === 'ar'
-          ? 'اختصارات لوحة المفاتيح للمكفوفين: مسافة أو إنتر للوصف الفوري، حرف آر لتكرار الصوت، حرف إس لإيقاف الصوت، حرف سي لقارئ النقود، حرف تي لقراءة النصوص، حرف إل للمحاضرات، حرف إن للعصا الذكية، حرف يو لرفع صورة، وحرف إيه لتكبير الخط، إسكيب لإغلاق الوصف.'
-          : companionLang === 'fr'
-          ? 'Raccourcis clavier : Espace ou Entrée pour décrire, R pour répéter la voix, S pour arrêter, C pour la monnaie, T pour lire le texte, L pour le cours, N pour la canne, U pour importer une image, A pour la taille du texte, Échap pour fermer.'
-          : 'Keyboard shortcuts for blind and visually impaired users: Press Space or Enter to describe the scene, R to repeat audio, S to stop speech, C for currency reader, T for text OCR, L for lecture scanner, N for white cane, U to upload image, A to enlarge text size, Escape to close.';
-        speak(helpMsg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
-        return;
-      }
-
-      // Escape: Dismiss active description, save dialog, or modals
-      if (e.key === 'Escape') {
-        if (showSaveDialog) {
-          setShowSaveDialog(false);
-        } else if (lastDescription) {
-          closeDescription();
-        } else if (showSpatialMemory) {
-          setShowSpatialMemory(false);
-        } else if (showDocStudio) {
-          setShowDocStudio(false);
-        }
-        return;
-      }
+  const saveMemory = async () => {
+    if (!labelInput.trim()) { setShowSaveDialog(false); return; }
+    if (!profile?.uid) {
+      setShowSaveDialog(false);
+      const msg = companionLang === 'ar' ? 'يرجى تسجيل الدخول لحفظ الذاكرة.' : "Please sign in to save memories.";
+      setAnnounce(msg);
+      speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
+      return;
+    }
+    const memory: VisionMemory = {
+      id: `vm_${Date.now()}`,
+      label: labelInput.trim(),
+      description: lastDescription,
+      createdAt: new Date().toISOString(),
+      memoryType: isSavingPerson || activeTool === 'face' ? 'person' : 'object',
+      imageUrl: lastSnapshot || undefined,
     };
-
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [
-    companionLang,
-    status,
-    showSaveDialog,
-    lastDescription,
-    showSpatialMemory,
-    showDocStudio,
-    toggleSpeech,
-    toggleCurrencyMode,
-    toggleReadMode,
-    toggleLectureMode,
-    toggleNavGuideMode,
-    toggleFaceMode,
-    toggleOutfitMode,
-    toggleTextSize,
-    announceFeature,
-    playDemoSample,
-  ]);
+    const prevMemories = memories;
+    const updated = [...memories, memory];
+    if (setProfile) setProfile({ ...profile, visionMemories: updated });
+    setShowSaveDialog(false);
+    const msg = companionLang === 'ar' ? `تم حفظ "${memory.label}".` : `Saved as "${memory.label}".`;
+    setAnnounce(msg);
+    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
+    try {
+      await setDoc(
+        doc(db, `users/${profile.uid}`),
+        { visionMemories: cleanDataForFirestore(updated) },
+        { merge: true }
+      );
+    } catch (err) {
+      if (setProfile) setProfile({ ...profile, visionMemories: prevMemories });
+    }
+  };
 
   return (
     <div
       ref={containerRef}
-      className={`flex-1 flex flex-col h-full min-h-0 bg-black overflow-hidden relative select-none ${
-        isFullscreen ? 'fixed inset-0 z-[99999]' : ''
+      className={`flex-1 flex flex-col h-full w-full bg-[#061A33] text-[#F5F8FF] overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 select-none transition-colors ${
+        isFullscreen ? 'fixed inset-0 z-[99999] p-4 bg-[#061A33]' : ''
       }`}
-      dir={companionLang === 'ar' ? 'rtl' : 'ltr'}
+      dir={isAr ? 'rtl' : 'ltr'}
     >
       {/* Screen-reader live region */}
       <div className="sr-only" role="status" aria-live="assertive" aria-atomic="true">
@@ -1535,1476 +1669,1626 @@ Speak directly in natural, warm, concise conversational prose without any markdo
         ref={fileInputRef}
         onChange={handleImageUpload}
         accept="image/*"
-        aria-label={companionLang === 'ar' ? 'رفع صورة للتحليل البصري' : 'Upload photo for visual analysis'}
+        aria-label={t('Upload photo for visual analysis', 'رفع صورة للتحليل البصري')}
         className="hidden"
         aria-hidden="true"
       />
 
-      {/* ── 1. FULL-SCREEN LIVE CAMERA VIEWPORT ── */}
-      <div className="absolute inset-0 w-full h-full bg-black overflow-hidden flex items-center justify-center">
-        {status === 'camera-denied' ? (
-          <div className="text-center p-6 sm:p-8 max-w-md z-20 bg-stone-900/90 border border-stone-800 rounded-3xl backdrop-blur-xl shadow-2xl mx-4">
-            <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-            <p className="text-white font-bold mb-2 text-sm sm:text-base">
-              {isMinorStudent && !profile.parentalConsent?.verified
-                ? t(
-                    'Parental or guardian consent is legally required before camera activation for minor students.',
-                    'مطلوب قانونيًا موافقة ولي الأمر قبل تفعيل الكاميرا للطلاب القاصرين.'
-                  )
-                : t(
-                    'Camera access is needed for the Visual Companion live video.',
-                    'محتاجين إذن الكاميرا عشان البث المباشر للرفيق البصري يشتغل.'
-                  )}
-            </p>
-            <p className="text-stone-300 text-xs mb-4 leading-relaxed font-medium">
-              {t(
-                'If your browser blocked camera access: click the camera or lock icon in the address bar, set Camera to "Allow", and refresh.',
-                'إذا حظر المتصفح الكاميرا: اضغط على أيقونة الكاميرا أو القفل في شريط المتصفح، واضبط الكاميرا على "السماح / Allow" ثم أعد تحميل الصفحة.'
-              )}
-            </p>
-            <div className="flex flex-col gap-2.5">
-              {isMinorStudent && !profile.parentalConsent?.verified ? (
-                <button
-                  onClick={() => setShowConsentModal(true)}
-                  className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-xl transition-all cursor-pointer"
-                >
-                  {t('Open Parental Consent Portal', 'فتح بوابة موافقة ولي الأمر')}
-                </button>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => startCamera()}
-                    className="py-3 px-4 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                    <span>{t('Try camera again', 'إعادة محاولة الكاميرا')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="py-3 px-4 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm shadow-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
-                  >
-                    <Upload className="w-4 h-4" />
-                    <span>{t('Upload Image', 'رفع صورة من جهازك')}</span>
-                  </button>
-                </div>
-              )}
+      <div className="max-w-6xl mx-auto w-full space-y-6 sm:space-y-8 pb-16">
+        {/* ── TOP ACCESSIBILITY & PREFERENCES TOOLBAR ── */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#082344]/80 p-3 sm:p-4 rounded-2xl border border-[#07558A]/80 backdrop-blur-md">
+          {onNavigateBack ? (
+            <button
+              type="button"
+              onClick={onNavigateBack}
+              data-testid="vision-navigate-back-btn"
+              aria-label={t('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
+              title={t('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
+              className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#082344] hover:bg-[#0D2542] border border-[#07558A] hover:border-[#00AEB8]/60 text-[#B9CDE3] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+            >
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#00AEB8]" />
+              <span className="text-xs font-bold">{t('Back', 'رجوع', 'Retour')}</span>
+            </button>
+          ) : (
+            <div />
+          )}
 
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {/* Beginner / Advanced Mode Toggle */}
+            <button
+              type="button"
+              onClick={toggleUserMode}
+              data-testid="user-mode-toggle"
+              aria-label={
+                userMode === 'beginner'
+                  ? t('Switch to Advanced Mode', 'التبديل إلى الوضع المتقدم')
+                  : t('Switch to Beginner Mode', 'التبديل إلى الوضع المبسط')
+              }
+              className={`px-3 py-1.5 min-h-[38px] rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                userMode === 'beginner'
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                  : 'bg-[#00AEB8]/15 border-[#00AEB8]/40 text-[#00AEB8]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>{userMode === 'beginner' ? t('Mode: Simple', 'الوضع: مبسط') : t('Mode: Advanced', 'الوضع: متقدم')}</span>
+            </button>
+
+            {/* Voice Command Recognition Mic Toggle */}
+            <button
+              type="button"
+              onClick={toggleVoiceCommands}
+              data-testid="voice-commands-toggle"
+              aria-label={
+                isVoiceCommandsActive
+                  ? t('Stop voice commands', 'إيقاف الأوامر الصوتية')
+                  : t('Start voice commands', 'تشغيل الأوامر الصوتية')
+              }
+              title={
+                isVoiceCommandsActive
+                  ? t('Listening for commands...', 'جاري الاستماع للأوامر الصوتية...')
+                  : t('Voice commands', 'أوامر صوتية')
+              }
+              className={`px-3 py-1.5 min-h-[38px] rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                isVoiceCommandsActive
+                  ? 'bg-red-500/20 border-red-500 text-red-400 animate-pulse'
+                  : 'bg-[#092747] border-[#07558A] text-[#B9CDE3] hover:text-white'
+              }`}
+            >
+              {isVoiceCommandsActive ? (
+                <Mic className="w-3.5 h-3.5 text-red-400 animate-bounce" />
+              ) : (
+                <MicOff className="w-3.5 h-3.5 text-[#B9CDE3]" />
+              )}
+              <span className="hidden sm:inline">
+                {isVoiceCommandsActive ? t('Listening...', 'استماع...') : t('Voice Commands', 'أوامر صوتية')}
+              </span>
+            </button>
+
+            {/* Detail Level Selector */}
+            <div
+              data-testid="detail-level-selector"
+              role="group"
+              aria-label={t('Speech detail level', 'مستوى تفصيل الوصف')}
+              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-[11px]"
+            >
               <button
                 type="button"
-                onClick={() => playDemoSample(companionLang)}
-                className="w-full py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-emerald-300 font-bold text-xs shadow-md cursor-pointer transition-all border border-stone-700 active:scale-95 flex items-center justify-center gap-2"
+                onClick={() => handleDetailLevelChange('concise')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  detailLevel === 'concise' ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                }`}
+                title={t('Concise descriptions', 'أوصاف موجزة')}
               >
-                <Volume2 className="w-4 h-4 text-emerald-400" />
-                <span>{t('Play Live Demo Audio Walkthrough', 'تشغيل عينة صوتية حية فوراً (بدون كاميرا)')}</span>
+                {t('Concise', 'موجز')}
               </button>
-
               <button
-                onClick={() => {
-                  setShowDocStudio(true);
-                  announceFeature(
-                    'استوديو المستندات وتلخيص المحاضرات والـ PDF',
-                    'Document and Lecture Studio',
-                    'Studio de Documents et Cours',
-                    true
-                  );
-                }}
-                className="w-full py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-teal-300 font-bold text-xs shadow-md cursor-pointer transition-all border border-stone-700 active:scale-95 flex items-center justify-center gap-2"
+                type="button"
+                onClick={() => handleDetailLevelChange('standard')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  detailLevel === 'standard' ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                }`}
+                title={t('Standard descriptions', 'أوصاف متوسطة')}
               >
-                <FileText className="w-4 h-4" />
-                <span>{t('Open Document & PDF Studio (No Camera Needed)', 'استوديو المستندات والـ PDF (بدون كاميرا)')}</span>
+                {t('Standard', 'متوسط')}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDetailLevelChange('detailed')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  detailLevel === 'detailed' ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                }`}
+                title={t('Detailed comprehensive descriptions', 'أوصاف تفصيلية شاملة')}
+              >
+                {t('Detailed', 'مفصل')}
               </button>
             </div>
+
+            {/* Speech Rate Selector */}
+            <div
+              data-testid="speech-rate-selector"
+              role="group"
+              aria-label={t('Speech playback speed', 'سرعة نطق الصوت')}
+              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-[11px]"
+            >
+              {[0.75, 1.0, 1.25, 1.5].map((rate) => (
+                <button
+                  key={rate}
+                  type="button"
+                  onClick={() => handleSpeechRateChange(rate)}
+                  className={`px-1.5 py-1 rounded-lg font-bold transition-all ${
+                    speechRate === rate ? 'bg-[#0878BD] text-white' : 'text-[#B9CDE3] hover:text-white'
+                  }`}
+                  title={`${rate}x`}
+                >
+                  {rate}x
+                </button>
+              ))}
+            </div>
+
+            {/* Language Selector */}
+            <div
+              role="group"
+              aria-label={t('Assistant language', 'لغة المساعد')}
+              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-[11px]"
+            >
+              {(['ar', 'en', 'fr'] as const).map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => handleSelectLang(lang)}
+                  className={`px-2 py-1 rounded-lg font-bold uppercase transition-all ${
+                    companionLang === lang ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+
+            {/* Keyboard Shortcuts Help Dialog Trigger */}
+            <button
+              type="button"
+              onClick={() => setShowShortcutsModal(true)}
+              data-testid="shortcuts-help-btn"
+              aria-label={t('Keyboard Shortcuts Help (?)', 'مساعدة اختصارات لوحة المفاتيح (?)')}
+              title={t('Keyboard Shortcuts (?)', 'اختصارات لوحة المفاتيح (?)')}
+              className="p-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#00AEB8] hover:text-white hover:border-[#00AEB8] transition-all cursor-pointer"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
           </div>
-        ) : status === 'unsupported' ? (
-          <div className="text-center p-8 max-w-sm text-white z-20">
-            <p className="text-sm font-semibold">
-              {t('This device/browser does not support camera access.', 'الجهاز أو المتصفح ده مش بيدعم الوصول للكاميرا.')}
+        </div>
+
+        {/* ── 1. INTRODUCTION HERO SECTION (NO HUMAN ILLUSTRATION) ── */}
+        <section
+          aria-label={t('Visual Assistant Introduction', 'مقدمة المساعد البصري')}
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#082344] via-[#092747] to-[#082344] border border-[#07558A] p-6 sm:p-8 shadow-xl"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative z-10">
+            {/* Left Column: Heading, Subtitle, and Tag */}
+            <div className="md:col-span-8 lg:col-span-8 space-y-3 text-start">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-[#00AEB8]/15 text-[#00AEB8] border border-[#00AEB8]/30 shadow-xs">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{t('Welcome to Visual Assistant', 'مرحبًا بك في المساعد البصري')}</span>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#F5F8FF] tracking-tight leading-tight">
+                {t('Discover the world around you', 'اكتشف العالم من حولك')}
+              </h1>
+
+              <p className="text-xs sm:text-sm md:text-base text-[#B9CDE3] leading-relaxed max-w-2xl font-normal">
+                {t(
+                  'Use the camera or upload an image to analyze scenes, read text, and deliver clear, accurate voice descriptions.',
+                  'استخدم الكاميرا أو ارفع صورة لتحليل المشاهد، قراءة النصوص، وتقديم أوصاف صوتية دقيقة وواضحة.'
+                )}
+              </p>
+            </div>
+
+            {/* Right Column: Abstract Glowing Eye Emblem (Completely Non-Human) */}
+            <div className="md:col-span-4 lg:col-span-4 flex items-center justify-center md:justify-end relative">
+              <div className="absolute inset-0 bg-radial from-[#00AEB8]/25 via-[#0878BD]/15 to-transparent blur-2xl -z-10 rounded-full scale-125 pointer-events-none" />
+
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
+                {/* Concentric rings */}
+                <div className="absolute inset-0 rounded-full border border-dashed border-[#07558A]/80 animate-spin-slow pointer-events-none" />
+                <div className="absolute inset-2 rounded-full border border-[#00AEB8]/25 pointer-events-none" />
+                
+                {/* Inner circular emblem with glowing eye */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-[#082344] via-[#092747] to-[#0878BD]/40 border-2 border-[#00AEB8] flex items-center justify-center shadow-lg shadow-[#00AEB8]/30 transition-transform duration-300 hover:scale-105">
+                  <Eye className="w-9 h-9 sm:w-11 sm:h-11 text-[#00AEB8] drop-shadow-[0_0_12px_rgba(0,174,184,0.6)]" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── BEGINNER MODE 3-STEP GUIDE BANNER ── */}
+        {userMode === 'beginner' && (
+          <div
+            role="region"
+            aria-label={t('Simple Usage Guide', 'دليل الاستخدام السريع')}
+            className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-[#07558A]/30 via-[#082344] to-[#07558A]/30 border-2 border-[#00AEB8]/60 shadow-xl space-y-3.5 text-start"
+          >
+            <div className="flex items-center gap-2 text-sm sm:text-base font-black text-[#00AEB8]">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>{t('Simple 3-Step Assistive Guide', 'دليل الخطوات الثلاث السريع للرؤية')}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
+                <span className="w-7 h-7 rounded-xl bg-[#00AEB8] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+                  1
+                </span>
+                <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
+                  {t('Point your camera toward what you want to identify or read.', 'وجّه كاميرا جهازك نحو ما تريد معرفته أو قراءته.')}
+                </p>
+              </div>
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
+                <span className="w-7 h-7 rounded-xl bg-[#00AEB8] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+                  2
+                </span>
+                <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
+                  {t('Press the large button below (or press V on your keyboard).', 'اضغط على الزر الكبير في المنتصف (أو اضغط حرف V بلوحة المفاتيح).')}
+                </p>
+              </div>
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
+                <span className="w-7 h-7 rounded-xl bg-[#00AEB8] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+                  3
+                </span>
+                <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
+                  {t('Listen immediately to the clear spoken voice description.', 'استمع فوراً للوصف الصوتي التلقائي بوضوح تام.')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── 1.5 VISUAL ASSISTANT TOOL SELECTOR BAR ── */}
+        <section
+          aria-label={t('Visual Assistant Tools Selector', 'شريط أدوات المساعد البصري المتخصصة', 'Sélecteur d\'outils visuels')}
+          className="space-y-2.5"
+        >
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#00AEB8]">
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>{t('Select Visual Tool', 'اختر أداة الرؤية المتخصصة', 'Choisir l\'outil visuel')}</span>
+            </div>
+            <span className="text-[11px] text-[#B9CDE3]/70 hidden sm:inline">
+              {t('Shortcuts: C = Cash, T = OCR, S = Stop voice, V = Scene, O = Item Finder, P = Face', 'اختصارات لوحة المفاتيح: C = نقود، T = نص، S = إيقاف الصوت، V = مشهد، O = أشياء، P = وجوه')}
+            </span>
+          </div>
+
+          <div
+            role="tablist"
+            aria-label={t('Visual Tools', 'أدوات الرؤية')}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5"
+          >
+            {VISUAL_TOOLS.map((tool) => {
+              const isSelected = activeTool === tool.id;
+              const ToolIcon = tool.Icon;
+              const title = companionLang === 'ar' ? tool.titleAr : companionLang === 'fr' ? tool.titleFr : tool.titleEn;
+              const badge = companionLang === 'ar' ? tool.badgeAr : companionLang === 'fr' ? tool.badgeFr : tool.badgeEn;
+
+              return (
+                <button
+                  key={tool.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => handleSwitchTool(tool.id)}
+                  className={`min-h-[64px] p-2.5 sm:p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8] ${
+                    isSelected
+                      ? 'bg-[#00AEB8]/15 border-[#00AEB8] text-[#F5F8FF] shadow-lg shadow-[#00AEB8]/20 ring-1 ring-[#00AEB8]'
+                      : 'bg-[#082344] border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#00AEB8]/60 hover:bg-[#092747]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div
+                      className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                        isSelected ? 'bg-[#00AEB8] text-[#061A33]' : 'bg-[#092747] text-[#00AEB8]'
+                      }`}
+                    >
+                      <ToolIcon className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#00AEB8] border border-[#07558A]/80">
+                      {tool.keyboardShortcut}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold leading-tight truncate">{title}</h3>
+                    <p className="text-[10px] text-[#B9CDE3]/70 truncate">{badge}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── 1.75 TARGET OBJECT FINDER QUERY BAR (When Object Finder tool is active) ── */}
+        {activeTool === 'object' && (
+          <section
+            aria-label={t('Item Finder Search', 'البحث عن غرض محدد')}
+            className="p-4 sm:p-5 rounded-3xl bg-[#082344] border border-[#07558A] shadow-lg space-y-2 text-start"
+          >
+            <label htmlFor="target-item-input" className="block text-xs sm:text-sm font-bold text-[#00AEB8]">
+              {t('What item are you looking for?', 'ما هو الغرض أو الشيء الذي تبحث عنه الآن؟')}
+            </label>
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="w-4 h-4 text-[#00AEB8] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="target-item-input"
+                  type="text"
+                  value={targetItemQuery}
+                  onChange={(e) => setTargetItemQuery(e.target.value)}
+                  placeholder={t(
+                    'e.g. Keys, wallet, glasses, phone, medication bottle...',
+                    'مثال: المفاتيح، المحفظة، النظارة، الهاتف، علبة الدواء...'
+                  )}
+                  className="w-full ps-9 pe-4 py-2.5 rounded-2xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#00AEB8] placeholder:text-[#B9CDE3]/50"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      describeScene(companionLang);
+                    }
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => describeScene(companionLang)}
+                disabled={status === 'analyzing'}
+                className="px-5 py-2.5 rounded-2xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                {t('Search Scene', 'ابحث في المشهد')}
+              </button>
+            </div>
+            <p className="text-[11px] text-[#B9CDE3]/70">
+              {t(
+                'Point the camera slowly around the room. The assistant will guide you using clock positions (e.g. at 2 o\'clock).',
+                'حرّك الكاميرا ببطء في الغرفة. سيخبرك المساعد بموقع الغرض بساعة الحائط (مثال: عند الساعة الثانية).'
+              )}
             </p>
-          </div>
-        ) : (
+          </section>
+        )}
+
+        {/* ── 2. CAMERA PREVIEW VIEW FINDER ── */}
+        <section
+          aria-label={t('Camera Viewfinder', 'شاشة الكاميرا')}
+          className="relative rounded-3xl bg-[#082344] border border-[#07558A] overflow-hidden shadow-2xl min-h-[340px] sm:min-h-[420px] md:min-h-[480px] flex items-center justify-center group"
+        >
+          {/* Active Tool Badge at Viewfinder Corner */}
+          {(() => {
+            const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeTool) || VISUAL_TOOLS[0];
+            const ToolIcon = activeToolConfig.Icon;
+            return (
+              <div className="absolute top-6 start-6 z-20 pointer-events-none">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/85 border border-[#00AEB8] text-[#F5F8FF] backdrop-blur-md shadow-md">
+                  <ToolIcon className="w-3.5 h-3.5 text-[#00AEB8]" />
+                  <span>
+                    {companionLang === 'ar'
+                      ? activeToolConfig.titleAr
+                      : companionLang === 'fr'
+                      ? activeToolConfig.titleFr
+                      : activeToolConfig.titleEn}
+                  </span>
+                </span>
+              </div>
+            );
+          })()}
+          {/* Cyan/Teal Corner Viewfinder Brackets */}
+          <div className="absolute top-5 start-5 w-8 h-8 sm:w-10 sm:h-10 border-s-2 border-t-2 border-[#00AEB8] rounded-tl-xl pointer-events-none z-10" />
+          <div className="absolute top-5 end-5 w-8 h-8 sm:w-10 sm:h-10 border-e-2 border-t-2 border-[#00AEB8] rounded-tr-xl pointer-events-none z-10" />
+          <div className="absolute bottom-5 start-5 w-8 h-8 sm:w-10 sm:h-10 border-s-2 border-b-2 border-[#00AEB8] rounded-bl-xl pointer-events-none z-10" />
+          <div className="absolute bottom-5 end-5 w-8 h-8 sm:w-10 sm:h-10 border-e-2 border-b-2 border-[#00AEB8] rounded-br-xl pointer-events-none z-10" />
+
+          {/* Real Video Feed when active */}
           <video
             ref={videoRef}
             playsInline
             muted
-            className="w-full h-full object-cover"
+            autoPlay
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              status === 'ready' && streamRef.current ? 'opacity-100' : 'opacity-0 absolute inset-0'
+            }`}
           />
-        )}
 
-        {status === 'starting-camera' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md z-20 p-6 text-center">
-            <div className="p-6 rounded-3xl bg-stone-900/95 border border-stone-800 max-w-md w-full shadow-2xl flex flex-col items-center">
-              <Loader2 className="w-12 h-12 text-[#E5A93C] animate-spin mb-4" />
-              <p className="text-white font-black text-base sm:text-lg mb-2">
-                {companionLang === 'ar'
-                  ? 'جاري تشغيل الكاميرا والاتصال...'
-                  : companionLang === 'fr'
-                  ? 'Activation de la caméra...'
-                  : 'Starting camera stream...'}
-              </p>
-              <p className="text-stone-300 text-xs sm:text-sm mb-5 leading-relaxed font-medium">
-                {companionLang === 'ar'
-                  ? 'إذا ظهر إشعار في المتصفح بالأعلى يطلب إذن الكاميرا، اضغط "سماح" (Allow). يمكنك أيضاً رفع صورة للفحص مباشرة أو تجربة عينة صوتية.'
-                  : companionLang === 'fr'
-                  ? "Veuillez autoriser l'accès à la caméra dans le navigateur, ou importer une image."
-                  : 'Please allow camera access in the browser prompt, or upload a photo directly.'}
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full">
+          {/* Top Overlays when stream is active */}
+          {status === 'ready' && streamRef.current && (
+            <div className="absolute top-6 end-6 z-20 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/80 border border-[#07558A] text-[#00AEB8] backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-[#00AEB8] animate-pulse" />
+                <span>{t('Live Camera', 'بث مباشر')}</span>
+              </span>
+              <button
+                type="button"
+                onClick={stopCamera}
+                aria-label={t('Stop Camera', 'إيقاف الكاميرا')}
+                title={t('Stop Camera', 'إيقاف الكاميرا')}
+                className="p-2 rounded-xl bg-[#061A33]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={flipCamera}
+                aria-label={t('Flip camera facing mode', 'تبديل الكاميرا')}
+                className="p-2 rounded-xl bg-[#061A33]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                aria-label={t('Toggle fullscreen', 'ملء الشاشة')}
+                className="p-2 rounded-xl bg-[#061A33]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
+              >
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </button>
+            </div>
+          )}
+
+          {/* In-Viewfinder Floating Capture Shutter Control Bar (Anchored at Bottom Center) */}
+          {status === 'ready' && streamRef.current && (() => {
+            const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeTool) || VISUAL_TOOLS[0];
+            const ToolIcon = activeToolConfig.Icon;
+            const primaryBtnLabel =
+              companionLang === 'ar'
+                ? activeToolConfig.captureBtnAr
+                : companionLang === 'fr'
+                ? activeToolConfig.captureBtnFr
+                : activeToolConfig.captureBtnEn;
+            const uploadBtnLabel =
+              companionLang === 'ar'
+                ? activeToolConfig.uploadBtnAr
+                : companionLang === 'fr'
+                ? activeToolConfig.uploadBtnFr
+                : activeToolConfig.uploadBtnEn;
+
+            return (
+              <div data-testid="viewfinder-floating-shutter" className="absolute bottom-6 inset-x-0 z-20 flex flex-wrap items-center justify-center gap-3 px-4 pointer-events-none">
+                <button
+                  type="button"
+                  onClick={() => describeScene(companionLang)}
+                  disabled={(status as string) === 'analyzing'}
+                  data-testid="floating-capture-shutter-btn"
+                  aria-label={primaryBtnLabel}
+                  className="pointer-events-auto px-7 sm:px-9 py-3.5 min-h-[58px] rounded-full bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-2xl shadow-[#00AEB8]/50 flex items-center justify-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md outline-none focus-visible:ring-4 focus-visible:ring-white disabled:opacity-50"
+                >
+                  <ToolIcon className="w-5 h-5 fill-current" />
+                  <span>{primaryBtnLabel}</span>
+                  <ArrowLeft className={`w-4 h-4 ${isAr ? '' : 'rotate-180'}`} />
+                </button>
+
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-[#E5A93C] hover:bg-[#d6982b] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+                  data-testid="floating-upload-btn"
+                  aria-label={uploadBtnLabel}
+                  title={uploadBtnLabel}
+                  className="pointer-events-auto p-3.5 min-h-[50px] min-w-[50px] rounded-full bg-[#061A33]/85 hover:bg-[#082344] text-[#00AEB8] hover:text-white border border-[#07558A] hover:border-[#00AEB8] shadow-xl flex items-center justify-center transition-all cursor-pointer backdrop-blur-md outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
                 >
-                  <Upload className="w-4 h-4" />
-                  <span>{companionLang === 'ar' ? 'رفع صورة من جهازك' : 'Upload photo'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => playDemoSample(companionLang)}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-stone-800 hover:bg-stone-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer border border-white/20"
-                >
-                  <Volume2 className="w-4 h-4 text-emerald-400" />
-                  <span>{companionLang === 'ar' ? 'عينة صوتية حية 🔊' : 'Live sample 🔊'}</span>
+                  <Upload className="w-5 h-5" />
                 </button>
               </div>
+            );
+          })()}
 
-              <button
-                type="button"
-                onClick={() => {
-                  cancelSpeech();
-                  try {
-                    streamRef.current?.getTracks().forEach((tr) => tr.stop());
-                    streamRef.current = null;
-                  } catch {}
-                  if (onNavigateBack) onNavigateBack();
-                  else if (typeof window !== 'undefined') window.location.hash = '#disability/hub';
-                }}
-                className="mt-3 w-full py-2.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-white text-xs font-bold transition-all border border-stone-700 flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
-                <span>{companionLang === 'ar' ? 'العودة لقائمة الميزات' : 'Back to Features Hub'}</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+          {/* Empty State when camera is not yet active */}
+          {(!streamRef.current || status !== 'ready') && (() => {
+            const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeTool) || VISUAL_TOOLS[0];
+            const ToolIcon = activeToolConfig.Icon;
+            const openCamBtnLabel =
+              companionLang === 'ar'
+                ? activeToolConfig.openCamBtnAr
+                : companionLang === 'fr'
+                ? activeToolConfig.openCamBtnFr
+                : activeToolConfig.openCamBtnEn;
+            const uploadBtnLabel =
+              companionLang === 'ar'
+                ? activeToolConfig.uploadBtnAr
+                : companionLang === 'fr'
+                ? activeToolConfig.uploadBtnFr
+                : activeToolConfig.uploadBtnEn;
+            const toolTitle =
+              companionLang === 'ar'
+                ? activeToolConfig.titleAr
+                : companionLang === 'fr'
+                ? activeToolConfig.titleFr
+                : activeToolConfig.titleEn;
 
-      {/* ── 2. ACCESSIBLE FLOATING HUD OVERLAY ── */}
-      <div className="relative z-20 flex flex-col justify-between h-full p-3 sm:p-5 md:p-6 pointer-events-none">
-        {/* Floating Top Command Bar */}
-        <div className="pointer-events-auto flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap w-full">
-          {/* Left group: Back button + Language Choices + Mode Toggle */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-                type="button"
-                onClick={() => {
-                  cancelSpeech();
-                  try {
-                    streamRef.current?.getTracks().forEach((tr) => tr.stop());
-                    streamRef.current = null;
-                  } catch {}
-                  if (onNavigateBack) {
-                    onNavigateBack();
-                  } else if (typeof window !== 'undefined') {
-                    window.location.hash = '#disability/hub';
-                  }
-                }}
-                aria-label={t('Back to Dashboard Hub', 'العودة للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
-                className="min-h-[44px] min-w-[44px] p-2 sm:px-3 sm:py-2 rounded-2xl bg-black/75 hover:bg-black/90 text-white backdrop-blur-xl border border-white/20 shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
-                title={t('Back to Dashboard Hub', 'العودة للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
-              >
-                <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-                <span className="hidden sm:inline">{t('Dashboard', 'لوحة الميزات', 'Tableau de bord')}</span>
-              </button>
-
-            {/* Three Language Choices: Arabic, English, French */}
-            <div className="flex items-center bg-black/75 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-2xl">
-              <button
-                type="button"
-                onClick={() => {
-                  chooseLang('ar');
-                  toast.success('تم اختيار اللغة العربية 🇪🇬');
-                }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                  companionLang === 'ar'
-                    ? 'bg-emerald-600 text-white shadow-lg'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <span>🇪🇬</span>
-                <span>عربي</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  chooseLang('en');
-                  toast.success('English language selected 🇬🇧');
-                }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                  companionLang === 'en'
-                    ? 'bg-primary text-white shadow-lg'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <span>🇬🇧</span>
-                <span>English</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  chooseLang('fr');
-                  toast.success('Langue française sélectionnée 🇫🇷');
-                }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-1 transition-all ${
-                  companionLang === 'fr'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <span>🇫🇷</span>
-                <span>Français</span>
-              </button>
-            </div>
-
-            
-          </div>
-
-            {/* Direct Image File Upload Button */}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              aria-label={t('Upload photo from device', 'رفع صورة من الجهاز', 'Importer une image')}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border border-white/20 bg-black/75 hover:bg-black/90 text-white shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer"
-              title={t('Upload photo from device for AI analysis', 'رفع صورة من جهازك للتحليل الصوتي الفوري', 'Importer une photo pour analyse')}
-            >
-              <Upload className="w-4 h-4 text-[#E5A93C]" />
-              <span className="hidden xl:inline">{t('Upload Photo', 'رفع صورة', 'Image')}</span>
-            </button>
-
-          {/* Right Utilities: Modes + Spatial Memory + Flip Camera + Fullscreen */}
-          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-end">
-            <>
-              <>
-                <button
-                  type="button"
-                  onClick={toggleCurrencyMode}
-                  aria-pressed={currencyMode}
-                  aria-label={t('Currency Reader', 'قارئ العملات', 'Lecteur de monnaie')}
-                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                    currencyMode
-                      ? 'bg-emerald-500/90 border-emerald-300 text-black shadow-emerald-950/50'
-                      : 'bg-black/75 border-emerald-500/40 text-white hover:bg-black/90'
-                  }`}
-                  title={t(
-                    'Currency Reader: detect banknotes and cash instantly',
-                    'قارئ العملات: قراءة الفلوس والنقود فوراً بالصوت',
-                    'Lecteur de monnaie : reconnaître les billets'
-                  )}
-                >
-                  <Banknote className={`w-4 h-4 shrink-0 ${currencyMode ? 'text-black' : 'text-emerald-400'}`} />
-                  <span className="hidden xl:inline">{t('Cash', 'فلوس', 'Monnaie')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={toggleFaceMode}
-                  aria-pressed={faceMode}
-                  aria-label={t('Face Recognition', 'من أمامي؟', 'Qui est là ?')}
-                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                    faceMode
-                      ? 'bg-blue-600/90 border-blue-300 text-white shadow-blue-950/50'
-                      : 'bg-black/75 border-blue-500/40 text-white hover:bg-black/90'
-                  }`}
-                  title={t(
-                    'Face Recognition: identify familiar people and faces',
-                    'من أمامي: التعرف على الوجوه والمقربين والأشخاص',
-                    'Reconnaissance faciale : identifier les proches'
-                  )}
-                >
-                  <Users className={`w-4 h-4 shrink-0 ${faceMode ? 'text-white' : 'text-blue-400'}`} />
-                  <span className="hidden xl:inline">{t('People', 'وجوه', 'Visages')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={toggleOutfitMode}
-                  aria-pressed={outfitMode}
-                  aria-label={t('Color & Outfit Matcher', 'تنسيق الملابس والألوان', 'Style & Couleurs')}
-                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                    outfitMode
-                      ? 'bg-pink-600/90 border-pink-300 text-white shadow-pink-950/50'
-                      : 'bg-black/75 border-pink-500/40 text-white hover:bg-black/90'
-                  }`}
-                  title={t(
-                    'Color & Outfit Matcher: match clothing colors and check style',
-                    'تنسيق الملابس: فحص ألوان الملابس وتناسق الطقم',
-                    'Harmonie des vêtements : vérifier les couleurs et le style'
-                  )}
-                >
-                  <Palette className={`w-4 h-4 shrink-0 ${outfitMode ? 'text-white' : 'text-pink-400'}`} />
-                  <span className="hidden xl:inline">{t('Outfit', 'ملابس', 'Tenue')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={toggleNavGuideMode}
-                  aria-pressed={navGuideMode}
-                  aria-label={t('Indoor Cane & Nav', 'عصا الملاحة', 'Canne virtuelle')}
-                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                    navGuideMode
-                      ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600/90 border-[#E5A93C]/40 text-black shadow-[#E5A93C]/20 animate-pulse'
-                      : 'bg-black/75 border-[#E5A93C]/40 text-white hover:bg-black/90'
-                  }`}
-                  title={t(
-                    'Indoor Cane: detect pathway, obstacles, and steps with haptic vibration',
-                    'العصا الذكية: كشف العوائق والممرات مع تنبيهات اهتزازية',
-                    'Canne virtuelle : obstacles et marches avec vibrations haptiques'
-                  )}
-                >
-                  <Compass className={`w-4 h-4 shrink-0 ${navGuideMode ? 'text-black' : 'text-[#E5A93C]'}`} />
-                  <span className="hidden xl:inline">{t('Cane', 'عصا', 'Canne')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={toggleLectureMode}
-                  aria-pressed={lectureMode}
-                  aria-label={t('Lecture & Board Scanner', 'سكانر المحاضرات والسبورة', 'Scanner de cours et tableau')}
-                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                    lectureMode
-                      ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50 ring-2 ring-purple-400'
-                      : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
-                  }`}
-                  title={t(
-                    'Lecture & Board Scanner: extract blackboard text, formulas, and academic slides',
-                    'سكانر المحاضرات والسبورة: قراءة السبورة والمعادلات وشرح السلايد بالصوت',
-                    'Scanner de cours : lire le tableau, équations et diapositives'
-                  )}
-                >
-                  <GraduationCap className={`w-4 h-4 shrink-0 ${lectureMode ? 'text-white' : 'text-purple-400'}`} />
-                  <span className="hidden xl:inline">{t('Lecture', 'محاضرات', 'Cours')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={toggleShoppingMode}
-                  aria-pressed={shoppingMode}
-                  aria-label={t('Shopping Assistant', 'مساعد التسوق', 'Assistant Achat')}
-                  className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                    shoppingMode
-                      ? 'bg-purple-600/90 border-purple-300 text-white shadow-purple-950/50'
-                      : 'bg-black/75 border-purple-500/40 text-white hover:bg-black/90'
-                  }`}
-                  title={t(
-                    'Shopping Assistant: identify products, prices, and expiry dates',
-                    'مساعد التسوق: فحص المنتجات والأسعار وتواريخ الصلاحية',
-                    'Assistant achat : identifier produits, prix et dates de péremption'
-                  )}
-                >
-                  <ShoppingBag className={`w-4 h-4 shrink-0 ${shoppingMode ? 'text-white' : 'text-purple-400'}`} />
-                  <span className="hidden xl:inline">{t('Shopping', 'تسوق', 'Achats')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDocStudio(true);
-                    announceFeature(
-                      'استوديو المستندات وتلخيص المحاضرات والـ PDF',
-                      'Document and Lecture Studio',
-                      'Studio de Documents et Cours',
-                      true
-                    );
-                  }}
-                  aria-label={t('Document & Lecture Studio', 'المستندات والمحاضرات', 'Documents & Cours')}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-indigo-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-                  title={t(
-                    'Document & Lecture Studio: read PDF, convert to Word, lecture audio recording, translation, speech-to-text',
-                    'المستندات والمحاضرات: قراءة PDF، تحويل لـ Word، تسجيل وتلخيص المحاضرات، ترجمة، تحويل الصوت لكتابة',
-                    'Studio documents : PDF, Word, enregistrement audio, traduction, dictée'
-                  )}
-                >
-                  <FileText className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                  <span className="hidden xl:inline">{t('Docs & PDF', 'مستندات', 'Documents')}</span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-xs text-indigo-300 font-mono">PDF</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.hash = '#toolkit';
-                  }}
-                  aria-label={t('Integrated Accessibility Toolkit: Scanner, Stickers, PDF', 'منظومة الوصول: سكانر وملصقات وPDF', "Boîte d'accessibilité")}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-teal-500/50 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-                  title={t('Open Accessibility Toolkit (Key: T)', 'فتح منظومة الوصول المتكاملة (اختصار: T)', 'Ouvrir la boîte à outils')}
-                >
-                  <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
-                  <span className="hidden xl:inline">{t('Toolkit', 'المنظومة', 'Outils')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSpatialMemory(true);
-                    if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
-                    announceFeature('الذاكرة المكانية وحاجتي فين', 'Spatial Memory Object Locator', 'Localisation des Objets', true);
-                  }}
-                  aria-label={t('Spatial Memory', 'الذاكرة المكانية', 'Mémoire spatiale')}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/75 text-white backdrop-blur-xl border border-emerald-500/40 hover:bg-black/90 shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold"
-                  title={t('Spatial Memory: Where are my things?', 'الذاكرة المكانية: حاجتي فين؟', 'Mémoire spatiale : Où sont mes affaires ?')}
-                >
-                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="hidden xl:inline">{t('Where is my stuff?', 'حاجتي فين؟', 'Où est mon objet ?')}</span>
-                  {spatialRecords.length > 0 && (
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  )}
-                </button>
-              </>
-            </>
-
-            {/* Read Mode (Text OCR) Toggle */}
-            <button
-              type="button"
-              onClick={toggleReadMode}
-              aria-pressed={readMode}
-              aria-label={t('Read Mode', 'وضع القراءة والنصوص', 'Mode lecture')}
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl backdrop-blur-xl border shadow-lg active:scale-95 transition-all flex items-center gap-1.5 text-xs font-bold ${
-                readMode
-                  ? 'bg-amber-500/90 border-amber-300 text-black'
-                  : 'bg-black/75 border-amber-500/40 text-white hover:bg-black/90'
-              }`}
-              title={t(
-                'Read Mode: read prescriptions, bills, labels aloud',
-                'وضع القراءة: اقرأ الروشتة، الفاتورة، الملصقات بصوت عالي',
-                'Mode lecture : lire les ordonnances, factures, étiquettes'
-              )}
-            >
-              <BookOpen className={`w-4 h-4 shrink-0 ${readMode ? 'text-black' : 'text-amber-400'}`} />
-              <span className="hidden xl:inline">{t('Read Text', 'اقرأ لي', 'Lire texte')}</span>
-            </button>
-
-            {(status === 'ready' || status === 'analyzing') && (
-              <button
-                onClick={flipCamera}
-                aria-label={t('Switch camera', 'بدّل الكاميرا', 'Changer de caméra')}
-                className="p-2 sm:p-2.5 rounded-2xl bg-black/65 text-white backdrop-blur-xl border border-white/20 hover:bg-black/85 shadow-lg active:scale-95 transition-all"
-                title={t('Switch Camera', 'تبديل الكاميرا أمامي/خلفي', 'Changer de caméra')}
-              >
-                <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            )}
-
-            <button
-              onClick={toggleFullscreen}
-              aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-              className="p-2 sm:p-2.5 rounded-2xl bg-black/65 text-white backdrop-blur-xl border border-white/20 hover:bg-black/85 shadow-lg active:scale-95 transition-all"
-              title={isFullscreen ? 'خروج من ملء الشاشة' : 'تكبير ملء الشاشة'}
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Sub-selector for Read Mode: Lecture/Text Summary vs Full Reading */}
-        <AnimatePresence>
-          {readMode && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.95 }}
-              className="pointer-events-auto flex items-center justify-center gap-1.5 mt-2 bg-black/85 backdrop-blur-2xl border border-amber-500/50 p-1 rounded-2xl w-fit mx-auto shadow-2xl z-30"
-            >
-              <button
-                onClick={() => setReadAction('summarize')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  readAction === 'summarize'
-                    ? 'bg-amber-500 text-black shadow-md'
-                    : 'text-amber-200/80 hover:text-white'
-                }`}
-                title={t(
-                  'Summarize the core takeaways and bottom line',
-                  'المفيد وخلاصة الكلام من المحاضرة أو النص',
-                  'L\'essentiel et conclusion clé'
-                )}
-              >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>{t('Core Takeaway', 'المفيد والخلاصة', 'L\'essentiel')}</span>
-              </button>
-              <button
-                onClick={() => setReadAction('read')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  readAction === 'read'
-                    ? 'bg-amber-500 text-black shadow-md'
-                    : 'text-amber-200/80 hover:text-white'
-                }`}
-                title={t(
-                  'Read full text word for word',
-                  'قراءة النص كاملاً كلمة بكلمة',
-                  'Lire le texte intégral mot à mot'
-                )}
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>{t('Full Reading', 'قراءة كاملة', 'Lecture intégrale')}</span>
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Center Region: Analysis Indicator or Live Description Card */}
-        <div className="my-auto flex flex-col items-center justify-center px-2 py-3 w-full">
-          {status === 'analyzing' && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="bg-black/85 backdrop-blur-2xl border border-primary/50 text-white px-6 py-4 rounded-3xl flex items-center gap-3.5 shadow-2xl pointer-events-auto"
-            >
-              <Loader2 className="w-6 h-6 text-primary animate-spin" />
-              <span className="text-sm sm:text-base font-bold">
-                {companionLang === 'ar' ? 'بحلل اللي قدامك في الكاميرا...' : "Analyzing what's in front of you..."}
-              </span>
-            </motion.div>
-          )}
-
-          {lastDescription && status !== 'analyzing' && (
-            showGuestAuthCard ? (
-              <motion.div
-                initial={{ y: 20, opacity: 0, scale: 0.95 }}
-                animate={{ y: 0, opacity: 1, scale: 1 }}
-                className="relative w-full max-w-xl pointer-events-auto"
-              >
-                <button
-                  onClick={closeDescription}
-                  aria-label={t('Close', 'إغلاق', 'Fermer')}
-                  title={companionLang === 'ar' ? 'إغلاق' : companionLang === 'fr' ? 'Fermer' : 'Close'}
-                  className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-500 hover:bg-red-400 border-2 border-white text-white flex items-center justify-center shadow-xl transition-colors z-20"
-                >
-                  <X className="w-5 h-5" strokeWidth={3} />
-                </button>
-
-                <div className="bg-[#120816]/95 backdrop-blur-2xl border-2 border-[#E5A93C]/60 text-white rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 ring-1 ring-[#E5A93C]/30">
-                  <div className="flex items-center justify-between gap-2 border-b border-[#4A1224]/80 pb-3">
-                    <div className="flex items-center gap-2 text-[#E5A93C]">
-                      <Sparkles className="w-5 h-5 text-[#E5A93C]" />
-                      <span className="font-black text-sm sm:text-base">
-                        {companionLang === 'ar'
-                          ? 'المعاينة التجريبية — الرفيق البصري'
-                          : companionLang === 'fr'
-                          ? 'Aperçu Démo — Compagnon Visuel'
-                          : 'Guest Preview — Vision Companion'}
-                      </span>
+            return (
+              <div className="relative z-10 flex flex-col items-center justify-center p-6 text-center space-y-4 max-w-lg">
+                {status === 'starting-camera' ? (
+                  <>
+                    <Loader2 className="w-12 h-12 text-[#00AEB8] animate-spin" />
+                    <p className="text-[#F5F8FF] font-bold text-sm sm:text-base">
+                      {t('Starting camera stream...', 'جاري تشغيل الكاميرا...')}
+                    </p>
+                    <p className="text-xs text-[#B9CDE3]/80">
+                      {t('Please allow camera access when prompted.', 'يرجى السماح بالوصول للكاميرا إذا طُلب منك ذلك.')}
+                    </p>
+                    <div className="flex items-center gap-2.5 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => startCamera()}
+                        className="px-4 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                      >
+                        {t('Retry Camera', 'إعادة محاولة الكاميرا')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer"
+                      >
+                        {uploadBtnLabel}
+                      </button>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-xs font-semibold">
-                      {companionLang === 'ar' ? 'تسجيل الدخول مطلوب' : companionLang === 'fr' ? 'Connexion requise' : 'Sign In Required'}
-                    </span>
-                  </div>
+                  </>
+                ) : status === 'no-camera' ? (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                      <CameraOff className="w-7 h-7" />
+                    </div>
+                    <p className="text-[#F5F8FF] font-bold text-sm sm:text-base">
+                      {t('No camera detected on this device', 'لم يتم العثور على كاميرا في هذا الجهاز')}
+                    </p>
+                    <p className="text-xs text-[#B9CDE3] leading-relaxed max-w-xs">
+                      {t(
+                        'Connect a webcam or use the image upload option below to analyze photos from your files.',
+                        'يرجى توصيل كاميرا خارجية أو استخدام خيار رفع صورة من ملفات جهازك.'
+                      )}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => startCamera()}
+                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>{openCamBtnLabel}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <span>{uploadBtnLabel}</span>
+                      </button>
+                    </div>
+                  </>
+                ) : status === 'camera-in-use' ? (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                      <AlertTriangle className="w-7 h-7" />
+                    </div>
+                    <p className="text-[#F5F8FF] font-bold text-sm sm:text-base">
+                      {t('Camera is currently in use', 'الكاميرا قيد الاستخدام حالياً')}
+                    </p>
+                    <p className="text-xs text-[#B9CDE3] leading-relaxed max-w-xs">
+                      {t(
+                        'Another application is using your webcam. Please close other camera apps and click retry.',
+                        'هناك تطبيق آخر يستخدم الكاميرا الآن. يرجى إغلاق التطبيقات الأخرى ثم الضغط على إعادة المحاولة.'
+                      )}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => startCamera()}
+                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>{openCamBtnLabel}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <span>{uploadBtnLabel}</span>
+                      </button>
+                    </div>
+                  </>
+                ) : status === 'unsupported' ? (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                      <AlertTriangle className="w-7 h-7" />
+                    </div>
+                    <p className="text-[#F5F8FF] font-bold text-sm sm:text-base">
+                      {t('Camera requires HTTPS or supported browser', 'الكاميرا تتطلب اتصالاً آمناً أو متصفحاً مدعوماً')}
+                    </p>
+                    <p className="text-xs text-[#B9CDE3] leading-relaxed max-w-xs">
+                      {t(
+                        'Please access Cognify over HTTPS, or use the image upload option below.',
+                        'يرجى فتح التطبيق عبر اتصال آمن (HTTPS) أو استخدام رفع صورة من جهازك.'
+                      )}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4 text-[#061A33]" />
+                        <span>{uploadBtnLabel}</span>
+                      </button>
+                    </div>
+                  </>
+                ) : status === 'camera-denied' ? (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                      <AlertTriangle className="w-7 h-7" />
+                    </div>
+                    <p className="text-[#F5F8FF] font-bold text-sm sm:text-base">
+                      {t('Camera access needed or denied', 'تم حظر الكاميرا أو تحتاج إذن')}
+                    </p>
+                    <p className="text-xs text-[#B9CDE3] leading-relaxed max-w-xs">
+                      {t(
+                        'Click the lock or camera icon in your browser address bar to allow camera access, or use image upload below.',
+                        'اضغط على رمز القفل أو الكاميرا في شريط المتصفح للسماح بالكاميرا، أو استخدم خيار رفع صورة من جهازك.'
+                      )}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => startCamera()}
+                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>{openCamBtnLabel}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <span>{uploadBtnLabel}</span>
+                      </button>
+                    </div>
+                  </>
+                ) : status === 'timeout' ? (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                      <Clock className="w-7 h-7" />
+                    </div>
+                    <p className="text-[#F5F8FF] font-bold text-sm sm:text-base">
+                      {t('Camera request timed out', 'استغرقت الكاميرا وقتاً طويلاً للاستجابة')}
+                    </p>
+                    <p className="text-xs text-[#B9CDE3] leading-relaxed max-w-xs">
+                      {t(
+                        'The camera did not respond in time or permission took too long to grant. Please allow camera permissions and click Retry.',
+                        'لم تستجب الكاميرا في الوقت المحدد أو استغرق منح الإذن وقتاً طويلاً. يرجى التأكد من السماح بالكاميرا ثم الضغط على إعادة المحاولة.'
+                      )}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => startCamera()}
+                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>{t('Retry Camera', 'إعادة محاولة الكاميرا')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <span>{uploadBtnLabel}</span>
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 rounded-2xl bg-[#0878BD]/25 border-2 border-[#00AEB8] flex items-center justify-center text-[#00AEB8] shadow-lg shadow-[#00AEB8]/20">
+                      <ToolIcon className="w-8 h-8" />
+                    </div>
 
-                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                    <div className="space-y-1">
+                      <h3 className="text-base sm:text-lg font-bold text-[#F5F8FF]">
+                        {toolTitle}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#B9CDE3] max-w-sm">
+                        {companionLang === 'ar' ? activeToolConfig.shortDescAr : companionLang === 'fr' ? activeToolConfig.shortDescFr : activeToolConfig.shortDescEn}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => startCamera()}
+                        aria-label={openCamBtnLabel}
+                        className="px-6 py-3 min-h-[48px] rounded-2xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-sm flex items-center gap-2.5 shadow-xl shadow-[#00AEB8]/30 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-white"
+                      >
+                        <Camera className="w-5 h-5" />
+                        <span>{openCamBtnLabel}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        aria-label={uploadBtnLabel}
+                        className="px-5 py-3 min-h-[48px] rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                      >
+                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <span>{uploadBtnLabel}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => playDemoSample(companionLang, activeTool)}
+                        aria-label={t('Test Audio', 'تجربة الصوت')}
+                        className="px-4 py-3 min-h-[48px] rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] font-bold text-xs flex items-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                      >
+                        <Volume2 className="w-4 h-4 text-[#00AEB8]" />
+                        <span>{t('Test Audio', 'تجربة الصوت')}</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Analyzing Overlay Spinner */}
+          {status === 'analyzing' && (
+            <div className="absolute inset-0 bg-[#061A33]/85 backdrop-blur-xs flex flex-col items-center justify-center z-30 space-y-3 p-4">
+              <Loader2 className="w-12 h-12 text-[#00AEB8] animate-spin" />
+              <p className="text-[#F5F8FF] font-bold text-sm sm:text-base animate-pulse">
+                {announce || t('Analyzing scene in front of you...', 'بحلل اللي قدامك في الكاميرا...')}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* ── 3. PRIMARY & SECONDARY ACTION CONTROLS ROW ── */}
+        {(() => {
+          const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeTool) || VISUAL_TOOLS[0];
+          const PrimaryToolIcon = activeToolConfig.Icon;
+          const primaryBtnLabel =
+            companionLang === 'ar'
+              ? activeToolConfig.captureBtnAr
+              : companionLang === 'fr'
+              ? activeToolConfig.captureBtnFr
+              : activeToolConfig.captureBtnEn;
+          const openCamBtnLabel =
+            companionLang === 'ar'
+              ? activeToolConfig.openCamBtnAr
+              : companionLang === 'fr'
+              ? activeToolConfig.openCamBtnFr
+              : activeToolConfig.openCamBtnEn;
+          const uploadBtnLabel =
+            companionLang === 'ar'
+              ? activeToolConfig.uploadBtnAr
+              : companionLang === 'fr'
+              ? activeToolConfig.uploadBtnFr
+              : activeToolConfig.uploadBtnEn;
+
+          const isCamStreaming = status === 'ready' && !!streamRef.current;
+
+          return (
+            <section
+              aria-label={t('Visual Assistant Actions', 'إجراءات المساعد البصري')}
+              className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-1"
+            >
+              {/* Camera Activation / Stop Toggle Button */}
+              <button
+                type="button"
+                onClick={isCamStreaming ? stopCamera : () => startCamera()}
+                aria-label={isCamStreaming ? t('Stop Camera', 'إيقاف الكاميرا') : openCamBtnLabel}
+                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+              >
+                <Camera className={`w-4 h-4 ${isCamStreaming ? 'text-emerald-400' : 'text-[#00AEB8]'}`} />
+                <span>{isCamStreaming ? t('Stop Camera', 'إيقاف الكاميرا') : openCamBtnLabel}</span>
+              </button>
+
+              {/* Primary Action: Dedicated Capture Button for the Active Visual Tool */}
+              <button
+                type="button"
+                onClick={() => describeScene(companionLang)}
+                disabled={status === 'analyzing'}
+                aria-label={primaryBtnLabel}
+                className="px-8 sm:px-10 py-3.5 min-h-[58px] rounded-full bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-xl shadow-[#00AEB8]/30 flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50 disabled:pointer-events-none"
+              >
+                <PrimaryToolIcon className="w-5 h-5 fill-current" />
+                <span>{primaryBtnLabel}</span>
+                <ArrowLeft className={`w-4 h-4 ${isAr ? '' : 'rotate-180'}`} />
+              </button>
+
+              {/* Secondary Action: Upload Image */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label={uploadBtnLabel}
+                className="px-6 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+              >
+                <Upload className="w-4 h-4 text-[#00AEB8]" />
+                <span>{uploadBtnLabel}</span>
+              </button>
+
+              {/* Quick Action: If not on Cash, offer Cash; if on Cash, offer Scene */}
+              {activeTool !== 'currency' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSwitchTool('currency');
+                    describeScene(companionLang, undefined, undefined, false, 'currency');
+                  }}
+                  aria-label={t('Identify Banknote / Cash', 'فحص وقراءة العملة')}
+                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                >
+                  <Banknote className="w-4 h-4 text-[#00AEB8]" />
+                  <span>{t('Cash Reader', 'قارئ العملات')}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSwitchTool('scene');
+                    describeScene(companionLang, undefined, undefined, false, 'scene');
+                  }}
+                  aria-label={t('What is in front of me now? Analyze camera scene', 'ماذا أمامي الآن؟ فحص المشهد')}
+                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                >
+                  <Eye className="w-4 h-4 text-[#00AEB8]" />
+                  <span>{t('Scene Assistant', 'المساعد البصري')}</span>
+                </button>
+              )}
+
+              {/* Secondary Action: Read Text / OCR */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleSwitchTool('read');
+                  describeScene(companionLang, undefined, 'read', false, 'read');
+                }}
+                aria-label={t('Read printed text or signs aloud', 'قراءة النص واللافتات بصوت مسموع')}
+                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+              >
+                <FileText className="w-4 h-4 text-[#00AEB8]" />
+                <span>{t('Read Text', 'قراءة النص')}</span>
+              </button>
+
+              {/* Secondary Action: Test Audio / Demo Sample */}
+              <button
+                type="button"
+                onClick={() => playDemoSample(companionLang, activeTool)}
+                aria-label={t('Test spoken voice audio sample', 'تجربة الصوت وعينة وصف حية')}
+                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+              >
+                <Volume2 className="w-4 h-4 text-[#00AEB8]" />
+                <span>{t('Test Audio', 'تجربة الصوت')}</span>
+              </button>
+            </section>
+          );
+        })()}
+
+        {/* ── 4. LATEST RESULT SECTION ("آخر نتيجة") ── */}
+        <section
+          aria-label={t('Latest Analysis Result', 'آخر نتيجة')}
+          className="p-5 sm:p-6 md:p-7 rounded-3xl bg-[#092747] border border-[#07558A] shadow-xl space-y-5 text-start"
+        >
+          {/* Header */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[#07558A]/50">
+            <div className="flex items-center gap-2.5 text-[#00AEB8]">
+              <Sparkles className="w-4 h-4" />
+              <h2 className="text-base sm:text-lg font-bold text-[#F5F8FF]">
+                {t('Latest Result', 'آخر نتيجة')}
+              </h2>
+              {/* Observation Source Badge */}
+              {lastDescription && (
+                <span
+                  data-testid="observation-source-badge"
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                    observationType === 'live'
+                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                      : observationType === 'uploaded'
+                      ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
+                      : observationType === 'uncertain'
+                      ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                      : 'bg-[#00AEB8]/15 border-[#00AEB8]/40 text-[#00AEB8]'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                  <span>
+                    {observationType === 'live'
+                      ? t('Live Camera', 'بث مباشر')
+                      : observationType === 'uploaded'
+                      ? t('Uploaded Photo', 'صورة مرفوعة')
+                      : observationType === 'uncertain'
+                      ? t('Uncertain Result', 'نتيجة غير مؤكدة')
+                      : t('Previous Observation', 'ملاحظة سابقة')}
+                  </span>
+                </span>
+              )}
+            </div>
+
+            {observationTimestamp && (
+              <span className="text-[11px] text-[#B9CDE3]/70 font-medium">
+                {new Date(observationTimestamp).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
+            )}
+          </div>
+
+          {/* Content */}
+          {lastDescription ? (
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                {/* Thumbnail */}
+                <div className="w-full sm:w-44 h-28 sm:h-32 rounded-2xl overflow-hidden border border-[#07558A] bg-[#082344] shrink-0 relative flex items-center justify-center">
+                  {lastSnapshot ? (
+                    <img
+                      src={lastSnapshot}
+                      alt={t('Analyzed camera snapshot', 'لقطة المشهد')}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Camera className="w-10 h-10 text-[#00AEB8]/60" />
+                  )}
+                </div>
+
+                {/* Description text */}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <h3 className="text-base sm:text-lg font-bold text-[#F5F8FF]">
+                    {(() => {
+                      const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeTool) || VISUAL_TOOLS[0];
+                      return companionLang === 'ar'
+                        ? activeToolConfig.titleAr
+                        : companionLang === 'fr'
+                        ? activeToolConfig.titleFr
+                        : activeToolConfig.titleEn;
+                    })()}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#B9CDE3] leading-relaxed font-normal select-text">
                     {lastDescription}
                   </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                    <button
-                      onClick={() => {
-                        try {
-                          sessionStorage.removeItem('cognify_guest_preview');
-                          localStorage.removeItem('cognify_guest_preview');
-                          window.location.hash = '';
-                        } catch {}
-                        window.location.reload();
-                      }}
-                      className="px-4 py-3 rounded-2xl bg-gradient-to-r from-[#E5A93C] to-[#d6982b] text-slate-950 font-black text-xs sm:text-sm hover:brightness-110 transition-all shadow-lg shadow-[#E5A93C]/20 flex items-center justify-center gap-2 active:scale-95 text-center"
-                    >
-                      <span>{companionLang === 'ar' ? 'تسجيل الدخول / إنشاء حساب مجاني' : companionLang === 'fr' ? 'Se connecter / Compte gratuit' : 'Sign In / Create Free Account'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => playDemoSample(companionLang)}
-                      className="px-4 py-3 rounded-2xl bg-[#4A1224]/80 hover:bg-[#4A1224] border border-[#E5A93C]/40 text-[#E5A93C] font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95 text-center"
-                    >
-                      <Volume2 className="w-4 h-4 text-[#E5A93C] shrink-0" />
-                      <span>{companionLang === 'ar' ? 'اسمع عينة صوتية حية' : companionLang === 'fr' ? 'Écouter une démo vocale' : 'Hear Audio Demo Sample'}</span>
-                    </button>
-                  </div>
                 </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="relative w-full max-w-2xl pointer-events-auto"
-              >
-              <button
-                onClick={closeDescription}
-                aria-label={t('Close', 'إغلاق', 'Fermer')}
-                title={companionLang === 'ar' ? 'إغلاق ووصف جديد' : companionLang === 'fr' ? 'Fermer et faire une nouvelle description' : 'Close and take a new description'}
-                className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-500 hover:bg-red-400 border-2 border-white text-white flex items-center justify-center shadow-xl transition-colors z-20"
-              >
-                <X className="w-5 h-5" strokeWidth={3} />
-              </button>
 
-              <div
-                role="region"
-                aria-label={t('Visual observation description', 'وصف الملاحظة البصرية', 'Description de l\'observation visuelle')}
-                aria-live="polite"
-                aria-busy={false}
-                className="bg-black/85 backdrop-blur-2xl border border-white/20 text-white rounded-3xl p-4 sm:p-5 shadow-2xl pointer-events-auto space-y-3 max-h-64 sm:max-h-72 overflow-y-auto custom-scrollbar"
-              >
-                <div className="flex items-center justify-between text-xs text-slate-300 border-b border-white/10 pb-2.5 pr-2 gap-2 flex-wrap">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold flex items-center gap-1.5 text-primary">
-                      <Sparkles className="w-4 h-4" />
-                      {lectureMode
-                        ? (companionLang === 'ar' ? 'شرح السبورة والمحاضرة' : companionLang === 'fr' ? 'Analyse du Cours et Tableau' : 'Lecture Board & Slide Digest')
-                        : readMode && readAction === 'summarize'
-                        ? (companionLang === 'ar' ? 'المفيد وخلاصة الكلام' : companionLang === 'fr' ? 'L\'essentiel et conclusion' : 'Core Takeaways & Bottom Line')
-                        : (companionLang === 'ar' ? 'الوصف الصوتي التلقائي' : 'Spoken Audio Description')}
-                    </span>
-
-                    {/* Status Badge: Live vs Previous vs Uncertain */}
-                    {observationType === 'live' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>{companionLang === 'ar' ? 'ملاحظة حية' : companionLang === 'fr' ? 'Direct' : 'Live'}</span>
-                        {observationTimestamp && (
-                          <span className="opacity-75 font-mono text-xs">
-                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                          </span>
-                        )}
-                      </span>
-                    )}
-                    {observationType === 'uploaded' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs font-semibold">
-                        <Upload className="w-3 h-3 text-blue-400" />
-                        <span>{companionLang === 'ar' ? 'صورة مرفوعة' : companionLang === 'fr' ? 'Photo importée' : 'Uploaded Photo'}</span>
-                        {observationTimestamp && (
-                          <span className="opacity-75 font-mono text-xs">
-                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                          </span>
-                        )}
-                      </span>
-                    )}
-                    {observationType === 'previous' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold">
-                        <Clock className="w-3 h-3 text-amber-400" />
-                        <span>{companionLang === 'ar' ? 'لقطة سابقة' : companionLang === 'fr' ? 'Précédente' : 'Previous Frame'}</span>
-                        {observationTimestamp && (
-                          <span className="opacity-75 font-mono text-xs">
-                            {new Date(observationTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                          </span>
-                        )}
-                      </span>
-                    )}
-                    {observationType === 'uncertain' && (
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-semibold"
-                        title={observationConfidenceReason}
-                      >
-                        <AlertTriangle className="w-3 h-3 text-rose-400" />
-                        <span>{companionLang === 'ar' ? 'غير مؤكد' : companionLang === 'fr' ? 'Incertain' : 'Uncertain'}</span>
-                        {observationConfidenceReason && (
-                          <span className="hidden md:inline opacity-80 text-xs">({observationConfidenceReason})</span>
-                        )}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Header actions: Refresh + Verbosity + Speech + Doc Studio + Read Text Only */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {/* Explicit Refresh / Re-analyze button */}
+                {/* Primary result action controls */}
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0 w-full md:w-auto justify-end pt-2 md:pt-0">
+                  {lastSnapshot && (
                     <button
                       type="button"
-                      onClick={() => describeScene(companionLang)}
-                      disabled={status === 'starting-camera'}
-                      aria-label={t('Refresh and re-analyze scene', 'إعادة الفحص والتقاط المشهد من جديد', 'Réanalyser la scène')}
-                      title={t('Refresh and re-analyze scene (Space / Enter)', 'إعادة الفحص والتقاط المشهد من جديد (مسافة / Enter)', 'Réanalyser la scène (Espace / Entrée)')}
-                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-50"
+                      onClick={() => describeScene(companionLang, lastSnapshot)}
+                      disabled={status === 'analyzing'}
+                      aria-label={t('Retry analysis on this image', 'إعادة فحص هذه اللقطة')}
+                      className="px-4 py-2.5 rounded-full bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-[#00AEB8] hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
                     >
-                      <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
-                      <span className="hidden sm:inline">{companionLang === 'ar' ? 'إعادة فحص' : companionLang === 'fr' ? 'Actualiser' : 'Refresh'}</span>
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>{t('Retry Analysis', 'إعادة الفحص')}</span>
                     </button>
+                  )}
 
-                    {/* Verbosity Toggle Button (Concise vs Detailed) */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const next = verbosity === 'concise' ? 'detailed' : 'concise';
-                        setVerbosity(next);
-                        const notice = next === 'concise'
-                          ? (companionLang === 'ar' ? 'تم ضبط الوصف على موجز' : companionLang === 'fr' ? 'Mode concis activé' : 'Concise mode active')
-                          : (companionLang === 'ar' ? 'تم ضبط الوصف على مفصل وموسع' : companionLang === 'fr' ? 'Mode détaillé activé' : 'Detailed mode active');
-                        speak(notice, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
-                      }}
-                      aria-label={verbosity === 'concise' ? 'Switch to detailed description' : 'Switch to concise description'}
-                      title={verbosity === 'concise' ? (companionLang === 'ar' ? 'النمط موجز — اضغط للتفصيل' : 'Concise — Click for Detailed') : (companionLang === 'ar' ? 'النمط مفصل — اضغط للإيجاز' : 'Detailed — Click for Concise')}
-                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-                    >
-                      <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{verbosity === 'concise' ? (companionLang === 'ar' ? 'موجز ⚡' : 'Concise ⚡') : (companionLang === 'ar' ? 'مفصل 🔍' : 'Detailed 🔍')}</span>
-                    </button>
-
-                    {/* Lecture Mode: Open Doc Studio */}
-                    {lectureMode && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowDocStudio(true);
-                        }}
-                        aria-label={t('Open in Document Studio', 'فتح في استوديو المحاضرات والمستندات', 'Ouvrir dans le Studio')}
-                        className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 transition-colors"
-                        title={t('Open in Document Studio', 'فتح في استوديو المحاضرات والمستندات', 'Ouvrir dans le Studio')}
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>{t('Doc Studio', 'استوديو المحاضرة', 'Studio')}</span>
-                      </button>
-                    )}
-
-                    {/* Read Mode: Toggle between Core Takeaway and Full Reading */}
-                    {readMode && lastSnapshot && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextAction = readAction === 'read' ? 'summarize' : 'read';
-                          describeScene(companionLang, lastSnapshot, nextAction);
-                        }}
-                        aria-label={readAction === 'read' ? 'Summarize core takeaways' : 'Read full text'}
-                        className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition-colors"
-                        title={
-                          readAction === 'read'
-                            ? t('Get core takeaways and bottom line', 'المفيد وخلاصة هذا الكلام', 'L\'essentiel de ce texte')
-                            : t('Read full text word for word', 'قراءة النص كاملاً كلمة بكلمة', 'Lire le texte intégral')
-                        }
-                      >
-                        {readAction === 'read' ? (
-                          <>
-                            <GraduationCap className="w-3.5 h-3.5" />
-                            <span>{t('Core Takeaways', 'هات المفيد', 'L\'essentiel')}</span>
-                          </>
-                        ) : (
-                          <>
-                            <BookOpen className="w-3.5 h-3.5" />
-                            <span>{t('Full Text', 'قراءة كاملة', 'Texte complet')}</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-
-                    {/* Read Text Only (OCR) direct action button when not in readMode */}
-                    {!readMode && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReadMode(true);
-                          setReadAction('read');
-                          setLectureMode(false);
-                          setCurrencyMode(false);
-                          setFaceMode(false);
-                          setOutfitMode(false);
-                          setNavGuideMode(false);
-                          setShoppingMode(false);
-                          describeScene(companionLang, undefined, 'read');
-                        }}
-                        aria-label={t('Read Text Only', 'اقرأ النصوص فقط', 'Lire le texte')}
-                        title={t('Read any text or writing visible in the scene', 'قراءة أي كتابة أو نصوص في المشهد بدقة', 'Lire les textes visibles')}
-                        className="flex items-center gap-1.5 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 transition-colors"
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{companionLang === 'ar' ? 'اقرأ النصوص' : companionLang === 'fr' ? 'Lire texte' : 'Read Text Only'}</span>
-                      </button>
-                    )}
-
-                    {/* Font Size Toggle for Low-Vision */}
-                    <button
-                      type="button"
-                      onClick={toggleTextSize}
-                      aria-label={t('Toggle font size for low vision', 'تغيير حجم الخط لضعاف البصر', 'Changer la taille du texte')}
-                      title={t('Toggle font size: Normal, Large, Extra Large (Press A)', 'تغيير حجم الخط: عادي، كبير، كبير جداً (اضغط حرف A)', 'Taille du texte (Touche A)')}
-                      className="flex items-center gap-1 font-bold text-xs px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-[#E5A93C]"
-                    >
-                      <span className="font-mono font-black text-xs text-emerald-300">
-                        {textSize === 'extralarge' ? 'A++' : textSize === 'large' ? 'A+' : 'A'}
-                      </span>
-                      <span className="hidden sm:inline">
-                        {textSize === 'extralarge'
-                          ? (companionLang === 'ar' ? 'كبير جداً' : companionLang === 'fr' ? 'Très grand' : 'XL')
-                          : textSize === 'large'
-                          ? (companionLang === 'ar' ? 'كبير' : companionLang === 'fr' ? 'Grand' : 'Large')
-                          : (companionLang === 'ar' ? 'عادي' : companionLang === 'fr' ? 'Normal' : 'Normal')}
-                      </span>
-                    </button>
-
-                    {/* Speech Voice Play/Stop */}
-                    <button
-                      type="button"
-                      onClick={toggleSpeech}
-                      aria-label={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'إعادة النطق الصوتي' : 'Repeat description aloud')}
-                      className={`flex items-center gap-1.5 font-bold text-xs px-3 py-1.5 rounded-xl transition-colors ${
-                        isSpeaking
-                          ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300'
-                          : 'bg-white/10 hover:bg-white/20 text-white hover:text-emerald-400'
-                      }`}
-                    >
+                  <button
+                    type="button"
+                    onClick={toggleSpeech}
+                    aria-label={
+                      isSpeaking
+                        ? t('Stop speech readout', 'إيقاف الصوت')
+                        : t('Listen to description aloud', 'استمع للوصف')
+                    }
+                    className="px-5 py-2.5 rounded-full bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] hover:text-[#00AEB8] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-[#00AEB8] text-[#061A33] flex items-center justify-center font-bold">
                       {isSpeaking ? (
-                        <VolumeX className="w-4 h-4 text-red-400" />
+                        <span className="w-2.5 h-2.5 bg-[#061A33] rounded-xs" />
                       ) : (
-                        <Volume2 className="w-4 h-4 text-emerald-400" />
+                        <Play className="w-3.5 h-3.5 fill-current" />
                       )}
-                      {isSpeaking
-                        ? (companionLang === 'ar' ? 'وقف الصوت' : companionLang === 'fr' ? 'Muet' : 'Stop')
-                        : (companionLang === 'ar' ? 'إعادة النطق' : companionLang === 'fr' ? 'Répéter' : 'Repeat Aloud')}
+                    </div>
+                    <span>{isSpeaking ? t('Stop Voice', 'إيقاف الصوت') : t('Listen to Description', 'استمع للوصف')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={openSaveDialog}
+                    aria-label={t('Remember this scene as a memory', 'حفظ هذا المشهد في الذاكرة')}
+                    title={t('Save to Memory', 'حفظ')}
+                    className="p-2.5 rounded-full bg-[#082344] border border-[#07558A] text-[#B9CDE3] hover:text-[#00AEB8] hover:border-[#00AEB8] transition-all cursor-pointer"
+                  >
+                    <BookmarkPlus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Extended Assistive Action Bar: Scene Comparison & Follow-up Q&A */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#07558A]/40">
+                <button
+                  type="button"
+                  onClick={compareWithPreviousScene}
+                  disabled={isComparingScene || !lastSnapshot}
+                  className="px-4 py-2 rounded-xl bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] hover:text-[#00AEB8] text-xs font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {isComparingScene ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00AEB8]" />
+                  ) : (
+                    <RefreshCw className="w-3.5 h-3.5 text-[#00AEB8]" />
+                  )}
+                  <span>{t('Compare with Previous Scene', 'مقارنة مع المشهد السابق')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowFollowUp((prev) => !prev)}
+                  className={`px-4 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                    showFollowUp
+                      ? 'bg-[#00AEB8] text-[#061A33] border-[#00AEB8]'
+                      : 'bg-[#082344] border-[#07558A] text-[#F5F8FF] hover:border-[#00AEB8]'
+                  }`}
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>{t('Ask about this photo', 'اسأل عن الصورة')}</span>
+                </button>
+              </div>
+
+              {/* Raw OCR Text Review Box (For OCR Tool) */}
+              {activeTool === 'read' && lastDescription && (
+                <div className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#00AEB8]">
+                      <FileText className="w-4 h-4" />
+                      <span>{t('Extracted Text Content', 'النص المستخرج من الصورة')}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(lastDescription);
+                        setCopiedText(true);
+                        setTimeout(() => setCopiedText(false), 2000);
+                        const msg = companionLang === 'ar' ? 'تم نسخ النص إلى الحافظة.' : 'Text copied to clipboard.';
+                        setAnnounce(msg);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-xs font-bold text-[#F5F8FF] flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      {copiedText ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">{t('Copied!', 'تم النسخ!')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-[#00AEB8]" />
+                          <span>{t('Copy Text', 'نسخ النص')}</span>
+                        </>
+                      )}
                     </button>
                   </div>
+                  <div className="p-3 rounded-xl bg-[#082344]/80 border border-[#07558A]/50 text-xs sm:text-sm text-[#F5F8FF] font-mono leading-relaxed select-text whitespace-pre-wrap">
+                    {lastDescription}
+                  </div>
                 </div>
-                <p
-                  className={`text-slate-100 leading-relaxed font-medium transition-all ${
-                    textSize === 'extralarge'
-                      ? 'text-xl sm:text-2xl font-bold tracking-wide'
-                      : textSize === 'large'
-                      ? 'text-base sm:text-lg font-semibold'
-                      : 'text-sm sm:text-base'
-                  }`}
-                >
-                  {lastDescription}
-                </p>
-
-                {/* Safety Guidance Notice: Assistive tool only, not replacement for physical mobility aids */}
-                <div className="pt-2.5 mt-2 border-t border-white/10 flex items-start gap-2 text-[11px] text-amber-200/90 bg-amber-950/40 p-2.5 rounded-xl border border-amber-500/30">
-                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <p className="leading-relaxed">
-                    {companionLang === 'ar'
-                      ? 'تنبيه السلامة: المساعد البصري أداة رقمية مساعدة للوصف والإرشاد، ولا يُغني إطلاقاً عن العصا البيضاء أو كلب الإرشاد أو اتخاذ الحيطة والحذر الشخصي أثناء الحركة.'
-                      : companionLang === 'fr'
-                      ? "Consigne de sécurité : L'assistant visuel est une aide d'appoint au guidage et ne remplace en aucun cas la canne blanche ou la vigilance personnelle."
-                      : 'Safety Notice: The visual assistant is an assistive aid and must never replace a white cane, guide dog, or personal mobility vigilance.'}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-
-        </div>
-
-
-        {/* Floating Bottom Action Dock — only active when camera stream is operating */}
-        {status !== 'camera-denied' && status !== 'unsupported' && (
-          <div className="pointer-events-auto space-y-2.5 max-w-2xl mx-auto w-full">
-          {/* Primary Action: only the button matching the currently selected language shows */}
-          <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
-            {companionLang === 'ar' && (() => {
-              const getCfg = () => {
-                if (lectureMode) return {
-                  icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'مسح السبورة والمحاضرة',
-                  subtitle: 'استخراج القوانين والشرح الأكاديمي بالصوت',
-                };
-                if (currencyMode) return {
-                  icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'فحص وقراءة النقود',
-                  subtitle: 'كشف فئات الجنيه والعملات بالصوت',
-                };
-                if (faceMode) return {
-                  icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'من يقف أمامي؟',
-                  subtitle: 'التعرف على الأشخاص والوجوه بالصوت',
-                };
-                if (outfitMode) return {
-                  icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'فحص ألوان الملابس',
-                  subtitle: 'تناسق الألوان والمظهر بالصوت',
-                };
-                if (navGuideMode) return {
-                  icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'فحص المسار والعوائق',
-                  subtitle: 'توجيه لمسي ومسار تجنب العوائق',
-                };
-                if (shoppingMode) return {
-                  icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'فحص المنتج والتسوق',
-                  subtitle: 'مساعد قراءة المنتجات والأسعار',
-                };
-                if (readMode) return {
-                  icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: readAction === 'summarize' ? 'المفيد وخلاصة الكلام' : 'قراءة النص أمام الكاميرا',
-                  subtitle: readAction === 'summarize' ? 'النقاط الجوهرية والملخص بالصوت' : 'قراءة صوتية دقيقة للنصوص',
-                };
-                return {
-                  icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
-                  title: 'ماذا أمامي الآن؟',
-                  subtitle: 'وصف فوري مباشر بالصوت',
-                };
-              };
-              const cfg = getCfg();
-              return (
-                <button
-                  type="button"
-                  onClick={() => describeScene('ar')}
-                  disabled={status === 'analyzing'}
-                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
-                  aria-keyshortcuts="Space Enter"
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
-                >
-                  {cfg.icon}
-                  <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                    <span>{cfg.title}</span>
-                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
-                  </div>
-                </button>
-              );
-            })()}
-
-            {companionLang === 'en' && (() => {
-              const getCfg = () => {
-                if (lectureMode) return {
-                  icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scan Lecture Board & Slides',
-                  subtitle: 'Extract formulas, diagrams & academic digest',
-                };
-                if (currencyMode) return {
-                  icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scan Cash & Currency',
-                  subtitle: 'Instant denomination audio reader',
-                };
-                if (faceMode) return {
-                  icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Who is in front of me?',
-                  subtitle: 'Face & familiar person recognition',
-                };
-                if (outfitMode) return {
-                  icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Check Outfit & Colors',
-                  subtitle: 'Color matching & style harmony',
-                };
-                if (navGuideMode) return {
-                  icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scan Pathway & Obstacles',
-                  subtitle: 'Haptic directional guidance and obstacle alerts',
-                };
-                if (shoppingMode) return {
-                  icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scan Product & Price',
-                  subtitle: 'Shopping and label assistant',
-                };
-                if (readMode) return {
-                  icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: readAction === 'summarize' ? 'Core Takeaways & Bottom Line' : 'Read This Text',
-                  subtitle: readAction === 'summarize' ? 'Distilled essence & spoken facts' : 'Accurate spoken reading',
-                };
-                return {
-                  icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
-                  title: 'What is in front of me?',
-                  subtitle: 'Instant spoken description',
-                };
-              };
-              const cfg = getCfg();
-              return (
-                <button
-                  type="button"
-                  onClick={() => describeScene('en')}
-                  disabled={status === 'analyzing'}
-                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
-                  aria-keyshortcuts="Space Enter"
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
-                >
-                  {cfg.icon}
-                  <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                    <span>{cfg.title}</span>
-                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
-                  </div>
-                </button>
-              );
-            })()}
-
-            {companionLang === 'fr' && (() => {
-              const getCfg = () => {
-                if (lectureMode) return {
-                  icon: <GraduationCap className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scanner Tableau & Cours',
-                  subtitle: 'Formules, schémas et synthèse académique',
-                };
-                if (currencyMode) return {
-                  icon: <Banknote className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scanner Billets & Devises',
-                  subtitle: 'Lecture audio de la monnaie',
-                };
-                if (faceMode) return {
-                  icon: <Users className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Qui est devant moi ?',
-                  subtitle: 'Reconnaissance faciale et proches',
-                };
-                if (outfitMode) return {
-                  icon: <Palette className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Harmonie des Vêtements',
-                  subtitle: 'Accord des couleurs et tenue',
-                };
-                if (navGuideMode) return {
-                  icon: <Compass className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scanner Chemin & Obstacles',
-                  subtitle: 'Guidage haptique et alertes',
-                };
-                if (shoppingMode) return {
-                  icon: <ShoppingBag className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: 'Scanner Produit & Prix',
-                  subtitle: 'Assistant achat et étiquettes',
-                };
-                if (readMode) return {
-                  icon: readAction === 'summarize' ? <GraduationCap className="w-5 h-5 shrink-0" /> : <BookOpen className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-800 hover:bg-teal-700 border border-teal-600/40 shadow-sm',
-                  title: readAction === 'summarize' ? "L'Essentiel & Conclusion" : 'Lire ce Texte',
-                  subtitle: readAction === 'summarize' ? 'Synthèse utile & conclusion vocale' : 'Lecture audio fidèle',
-                };
-                return {
-                  icon: <Camera className="w-5 h-5 shrink-0" />,
-                  gradient: 'bg-teal-700 hover:bg-teal-800 border border-teal-600/50 shadow-sm',
-                  title: 'Que vois-je devant moi ?',
-                  subtitle: 'Description vocale instantanée',
-                };
-              };
-              const cfg = getCfg();
-              return (
-                <button
-                  type="button"
-                  onClick={() => describeScene('fr')}
-                  disabled={status === 'analyzing'}
-                  aria-label={`${cfg.title} - ${cfg.subtitle}`}
-                  aria-keyshortcuts="Space Enter"
-                  className={`w-full min-h-[58px] sm:min-h-[66px] rounded-2xl text-white font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 focus-visible:ring-4 focus-visible:ring-[#E5A93C] focus:outline-none ${cfg.gradient}`}
-                >
-                  {cfg.icon}
-                  <div className="flex flex-col items-start sm:items-center text-start sm:text-center leading-tight">
-                    <span>{cfg.title}</span>
-                    <span className="text-xs font-normal opacity-90">{cfg.subtitle}</span>
-                  </div>
-                </button>
-              );
-            })()}
-          </div>
-
-          {/* Secondary Controls Bar */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={toggleSpeech}
-              disabled={!lastDescription}
-              aria-label={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'كرر الوصف بالصوت' : 'Repeat description aloud')}
-              title={isSpeaking ? (companionLang === 'ar' ? 'إيقاف نطق الصوت' : 'Stop voice readout') : (companionLang === 'ar' ? 'كرر الوصف بالصوت' : 'Repeat description aloud')}
-              className={`flex-1 min-h-[46px] rounded-xl backdrop-blur-xl border text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none ${
-                isSpeaking
-                  ? 'bg-red-500/30 hover:bg-red-500/40 border-red-400/40'
-                  : 'bg-black/70 hover:bg-black/90 border-white/20'
-              }`}
-            >
-              {isSpeaking ? (
-                <VolumeX className="w-4 h-4 text-red-300" />
-              ) : (
-                <Volume2 className="w-4 h-4 text-emerald-400" />
               )}
-              <span>
-                {isSpeaking
-                  ? (companionLang === 'ar' ? 'وقف الصوت' : companionLang === 'fr' ? 'Muet' : 'Stop voice')
-                  : (companionLang === 'ar' ? 'كرر بالصوت' : companionLang === 'fr' ? 'Répéter' : 'Repeat aloud')}
-              </span>
-            </button>
 
-            <button
-              type="button"
-              onClick={openSaveDialog}
-              disabled={!lastDescription}
-              aria-label={companionLang === 'ar' ? 'حفظ هذا المشهد في الذاكرة' : companionLang === 'fr' ? 'Mémoriser ce lieu ou objet' : 'Remember this scene or person'}
-              title={companionLang === 'ar' ? 'احفظ ده في الذاكرة' : 'Save to memory'}
-              className="flex-1 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
-            >
-              <BookmarkPlus className="w-4 h-4 text-amber-400" />
-              <span>{companionLang === 'ar' ? 'احفظ ده' : companionLang === 'fr' ? 'Mémoriser' : 'Remember this'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowSpatialMemory(true);
-                if (profile?.uid) setSpatialRecords(getSpatialObjects(profile.uid));
-              }}
-              aria-label={companionLang === 'ar' ? 'فتح الذاكرة المكانية ومواقع الأشياء' : companionLang === 'fr' ? 'Ouvrir la mémoire spatiale' : 'Open spatial memory and object locations'}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-emerald-500/40 text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
-              title={companionLang === 'ar' ? 'الذاكرة المكانية' : companionLang === 'fr' ? 'Mémoire spatiale' : 'Spatial Memory'}
-            >
-              <MapPin className="w-4 h-4" />
-              <span>📍 {spatialRecords.length}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowDocStudio(true);
-                announceFeature(
-                  'استوديو المستندات وتلخيص المحاضرات والـ PDF',
-                  'Document and Lecture Studio',
-                  'Studio de Documents et Cours',
-                  true
-                );
-              }}
-              aria-label={companionLang === 'ar' ? 'فتح استوديو المستندات وتلخيص المحاضرات والـ PDF' : companionLang === 'fr' ? 'Ouvrir le studio de documents et cours' : 'Open Document and Lecture Studio'}
-              className="px-3 min-h-[46px] rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-xl border border-[#E5A93C]/30 text-[#E5A93C] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 focus-visible:ring-2 focus-visible:ring-[#E5A93C] focus:outline-none"
-              title={companionLang === 'ar' ? 'المستندات وتلخيص المحاضرات' : 'Docs & Lectures'}
-            >
-              <FileText className="w-4 h-4" />
-              <span>{companionLang === 'ar' ? 'مستندات وPDF' : 'Docs & PDF'}</span>
-            </button>
-          </div>
-        </div>
-        )}
-      </div>
-
-      {/* First-Launch Language Picker — shown once until a language is chosen */}
-      <AnimatePresence>
-        {!langChosen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
-          >
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="lang-picker-title"
-              initial={{ y: 30, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 30, opacity: 0 }}
-              className="w-full max-w-sm bg-[#150917] rounded-3xl p-6 space-y-5 border border-[#4A1224]/60 shadow-2xl text-white text-center"
-            >
-              <div className="space-y-1.5">
-                <h3 id="lang-picker-title" className="font-black text-lg">
-                  اختر لغتك / Choose your language / Choisissez votre langue
-                </h3>
-                <p className="text-xs text-slate-400">
-                  هتقدر تغيرها في أي وقت من فوق · You can change it anytime · Vous pouvez la changer à tout moment
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-2.5">
-                <button
-                  onClick={() => {
-                    chooseLang('ar');
-                    toast.success('تم اختيار اللغة العربية 🇪🇬');
-                  }}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-base flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all"
+              {/* Scene Comparison Result Card */}
+              {comparisonResult && (
+                <div
+                  role="region"
+                  aria-label={t('Scene Comparison Result', 'نتيجة مقارنة المشهدين')}
+                  className="p-4 rounded-2xl bg-[#082344] border-2 border-[#00AEB8]/80 space-y-2.5 text-start"
                 >
-                  <span>🇪🇬</span>
-                  <span>العربية</span>
-                </button>
-                <button
-                  onClick={() => {
-                    chooseLang('en');
-                    toast.success('English language selected 🇬🇧');
-                  }}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 text-white font-black text-base flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all"
-                >
-                  <span>🇬🇧</span>
-                  <span>English</span>
-                </button>
-                <button
-                  onClick={() => {
-                    chooseLang('fr');
-                    toast.success('Langue française sélectionnée 🇫🇷');
-                  }}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-600 text-white font-black text-base flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all"
-                >
-                  <span>🇫🇷</span>
-                  <span>Français</span>
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* "Remember this as..." Dialog Modal */}
-      <AnimatePresence>
-        {showSaveDialog && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-4"
-            onClick={() => setShowSaveDialog(false)}
-          >
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="save-dialog-title"
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-md bg-[#150917] rounded-3xl p-5 sm:p-6 space-y-4 border border-[#4A1224]/60 shadow-2xl text-white"
-            >
-              <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
-                <h3 id="save-dialog-title" className="font-bold text-base text-white flex items-center gap-2">
-                  <BookmarkPlus className="w-5 h-5 text-amber-400" />
-                  {companionLang === 'ar' ? 'احفظ العنصر أو الشخص باسم...' : companionLang === 'fr' ? 'Enregistrer cet élément comme...' : 'Remember this as...'}
-                </h3>
-                <button
-                  onClick={() => setShowSaveDialog(false)}
-                  aria-label={t('Close', 'إغلاق', 'Fermer')}
-                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Type Switcher: Object vs Person */}
-              <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#080409] rounded-xl border border-[#4A1224]/60">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={!isSavingPerson}
-                  onClick={() => setIsSavingPerson(false)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
-                    !isSavingPerson ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {companionLang === 'ar' ? '📦 شيء أو غرض' : companionLang === 'fr' ? '📦 Objet' : '📦 Object / Item'}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={isSavingPerson}
-                  onClick={() => setIsSavingPerson(true)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
-                    isSavingPerson ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {companionLang === 'ar' ? '👤 شخص أو صديق' : companionLang === 'fr' ? '👤 Personne' : '👤 Person / Friend'}
-                </button>
-              </div>
-
-              <input
-                autoFocus
-                type="text"
-                aria-label={t('Memory label', 'اسم العنصر', "Nom de l'élément")}
-                value={labelInput}
-                onChange={(e) => setLabelInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') saveMemory();
-                }}
-                placeholder={
-                  isSavingPerson
-                    ? (companionLang === 'ar' ? 'اسم الشخص (مثلاً: "ماما"، "أحمد"، "دكتور طارق")' : companionLang === 'fr' ? 'Nom de la personne (ex. "Maman", "Ahmed")' : 'Person name (e.g. "Mom", "Ahmed")')
-                    : (companionLang === 'ar' ? 'مثلاً: "دوا الضغط" أو "مفاتيحي"' : companionLang === 'fr' ? 'ex. "Mes clés", "Médicament"' : 'e.g. "My Keys", "Coffee Mug"')
-                }
-                className="w-full px-4 py-3 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 focus:ring-2 focus:ring-primary outline-none text-sm"
-              />
-
-              <div className="flex gap-2.5">
-                <button
-                  onClick={() => setShowSaveDialog(false)}
-                  className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs"
-                >
-                  {companionLang === 'ar' ? 'إلغاء' : companionLang === 'fr' ? 'Annuler' : 'Cancel'}
-                </button>
-                <button
-                  onClick={saveMemory}
-                  disabled={!labelInput.trim()}
-                  className="flex-1 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs disabled:opacity-50"
-                >
-                  {companionLang === 'ar' ? 'حفظ وتثبيت' : companionLang === 'fr' ? 'Enregistrer' : 'Save Memory'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Spatial Memory Query & List Modal */}
-      <AnimatePresence>
-        {showSpatialMemory && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-3 sm:p-4"
-            onClick={() => setShowSpatialMemory(false)}
-          >
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="spatial-dialog-title"
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-lg bg-[#150917] rounded-3xl p-5 sm:p-6 space-y-4 border border-[#4A1224]/60 shadow-2xl text-white max-h-[85vh] flex flex-col"
-            >
-              <div className="flex items-center justify-between border-b border-[#4A1224]/60 pb-3">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-emerald-400" />
-                  <h3 id="spatial-dialog-title" className="font-bold text-base text-white">
-                    {companionLang === 'ar' ? 'الذاكرة المكانية للأشياء' : companionLang === 'fr' ? 'Mémoire Spatiale des Objets' : 'Spatial Memory of Objects'}
-                  </h3>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowTrajectoryV2((v) => !v)}
-                    className="text-xs px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all font-semibold"
-                  >
-                    {showTrajectoryV2
-                      ? (companionLang === 'ar' ? 'البحث السريع' : companionLang === 'fr' ? 'Recherche rapide' : 'Quick Search')
-                      : (companionLang === 'ar' ? 'مسار الحركة (V2)' : companionLang === 'fr' ? 'Trajectoire V2' : 'Trajectory V2')}
-                  </button>
-                  <button
-                    onClick={() => setShowSpatialMemory(false)}
-                    aria-label={t('Close', 'إغلاق', 'Fermer')}
-                    className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              {showTrajectoryV2 ? (
-                <div className="flex-1 overflow-y-auto custom-scrollbar min-h-[300px]">
-                  <SpatialMemoryTrajectoryView
-                    uid={profile?.uid || 'guest'}
-                    lang={companionLang === 'ar' ? 'ar' : companionLang === 'fr' ? 'fr' : 'en'}
-                  />
-                </div>
-              ) : (
-                <>
-                  {/* Query Input */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="spatial-query-input" className="text-xs text-slate-400 font-semibold block">
-                      {companionLang === 'ar'
-                        ? 'اسأل عن مكان أي شيء (مثلاً: "فين الريموت؟" أو "فين المفاتيح؟"):'
-                        : companionLang === 'fr'
-                        ? "Demandez où se trouve un objet (ex. 'Où est la télécommande ?') :"
-                        : "Ask where an item is located (e.g. 'Where is the remote?'):"}
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        id="spatial-query-input"
-                        type="text"
-                        value={spatialQueryInput}
-                        onChange={(e) => setSpatialQueryInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleSearchSpatial();
-                        }}
-                        placeholder={
-                          companionLang === 'ar'
-                            ? 'فين ريموت التلفزيون؟'
-                            : companionLang === 'fr'
-                            ? 'Où est la télécommande ?'
-                            : 'Where is the TV remote?'
-                        }
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-[#4A1224]/50 bg-[#080409] text-white placeholder-slate-500 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleSearchSpatial}
-                        aria-label={companionLang === 'ar' ? 'بحث في الذاكرة المكانية' : companionLang === 'fr' ? 'Rechercher' : 'Search spatial memory'}
-                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none"
-                      >
-                        <Search className="w-4 h-4" aria-hidden="true" />
-                        <span>{companionLang === 'ar' ? 'بحث' : companionLang === 'fr' ? 'Chercher' : 'Search'}</span>
-                      </button>
+                  <div className="flex items-center justify-between pb-1 border-b border-[#07558A]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#00AEB8]">
+                      <RefreshCw className="w-4 h-4" />
+                      <span>{t('Scene Differences Detected', 'الفروق والتغيرات المكتشفة في المشهد')}</span>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setComparisonResult(null)}
+                      aria-label={t('Dismiss comparison', 'إغلاق المقارنة')}
+                      className="text-[#B9CDE3] hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed select-text">
+                    {comparisonResult}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      speak(comparisonResult, companionLang === 'ar' ? 'Arabic' : 'English', {
+                        rate: speechRate,
+                      })
+                    }
+                    className="px-3.5 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#00AEB8] hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                    <span>{t('Listen to Comparison', 'استمع للمقارنة')}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Interactive Follow-Up Q&A Panel */}
+              {showFollowUp && (
+                <div
+                  role="region"
+                  aria-label={t('Follow-up Q&A', 'الأسئلة الاستفسارية')}
+                  className="p-4 sm:p-5 rounded-2xl bg-[#082344] border border-[#07558A] space-y-3.5 text-start"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#00AEB8]">
+                      <MessageSquare className="w-4 h-4" />
+                      <span>{t('Ask about this scene', 'محادثة واستفسار عن هذه اللقطة')}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowFollowUp(false)}
+                      className="text-[#B9CDE3] hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
 
-                  {spatialQueryResult && (
-                    <div className="p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-200 text-sm leading-relaxed flex items-start gap-2.5">
-                      <Volume2 className="w-5 h-5 shrink-0 text-emerald-400 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="font-semibold">{spatialQueryResult}</p>
-                        <button
-                          onClick={() => speak(spatialQueryResult, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English')}
-                          className="mt-2 text-xs font-bold text-emerald-300 hover:text-emerald-100 underline flex items-center gap-1"
+                  {/* Preset quick questions */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      companionLang === 'ar' ? 'أين المفاتيح في هذه الصورة؟' : 'Where are keys in this photo?',
+                      companionLang === 'ar' ? 'ما هو النص المكتوب بالضبط؟' : 'What is the exact text written?',
+                      companionLang === 'ar' ? 'هل هناك أي عوائق في طريقي؟' : 'Are there obstacles in my path?',
+                      companionLang === 'ar' ? 'صف ألوان الملابس بالتفصيل' : 'Describe garment colors in detail',
+                    ].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => handleAskFollowUp(preset)}
+                        disabled={isAnsweringFollowUp}
+                        className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] hover:border-[#00AEB8] text-[11px] text-[#B9CDE3] hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Q&A Thread History */}
+                  {followUpHistory.length > 0 && (
+                    <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-2 p-2 rounded-xl bg-[#061A33]">
+                      {followUpHistory.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className={`p-2.5 rounded-xl text-xs leading-relaxed ${
+                            item.role === 'user'
+                              ? 'bg-[#0878BD]/30 border border-[#0878BD] text-white ms-6'
+                              : 'bg-[#092747] border border-[#07558A] text-[#B9CDE3] me-6'
+                          }`}
                         >
-                          <span>{companionLang === 'ar' ? 'استمع مرة أخرى' : companionLang === 'fr' ? 'Réécouter' : 'Listen again'}</span>
-                        </button>
-                      </div>
+                          <span className="font-bold text-[10px] block opacity-75 mb-1">
+                            {item.role === 'user' ? t('You:', 'أنت:') : t('Assistant:', 'المساعد:')}
+                          </span>
+                          {item.text}
+                        </div>
+                      ))}
                     </div>
                   )}
 
-                  {/* List of remembered items */}
-                  <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[140px]">
-                    <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
-                      <span>{companionLang === 'ar' ? 'الأشياء المرصودة مؤخراً' : companionLang === 'fr' ? 'Objets récemment observés' : 'Recently Observed Items'}</span>
-                      <span className="text-xs font-mono text-emerald-400">{spatialRecords.length} items</span>
-                    </div>
-
-                    {spatialRecords.length === 0 ? (
-                      <div className="text-center py-6 text-slate-500 text-xs">
-                        {companionLang === 'ar'
-                          ? 'لم يتم رصد أي أشياء بعد. وجّه الكاميرا إلى الغرفة واضغط على زر الفحص لتسجيل الأماكن تلقائياً.'
-                          : companionLang === 'fr'
-                          ? 'Aucun objet observé pour le moment. Pointez la caméra et appuyez sur "Que vois-je ?" pour mémoriser les emplacements.'
-                          : 'No objects observed yet. Point the camera and tap any scan button to record locations automatically.'}
-                      </div>
-                    ) : (
-                      spatialRecords.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            const query = querySpatialMemory(profile?.uid || '', item.objectName, companionLang);
-                            setSpatialQueryResult(query.message);
-                            speak(query.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
-                          }}
-                          className="w-full text-start p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-800 border border-teal-900/40 flex items-center justify-between gap-3 group transition-all"
-                        >
-                          <div className="space-y-0.5">
-                            <div className="font-bold text-sm text-white group-hover:text-emerald-400 flex items-center gap-2">
-                              <span>{item.objectName}</span>
-                              {item.relativePosition?.direction && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-normal">
-                                  {item.relativePosition.direction}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-slate-400">
-                              <span>{item.surface || 'Table'}</span>
-                              {item.room && <span> • {item.room}</span>}
-                            </div>
-                          </div>
-                          <div className="text-end shrink-0">
-                            <span className="text-xs text-slate-400 block font-mono">
-                              {new Date(item.lastSeenTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                            <span className="text-xs text-emerald-400 font-semibold group-hover:underline flex items-center justify-end gap-1">
-                              <Volume2 className="w-3.5 h-3.5" />
-                              {companionLang === 'ar' ? 'اسمع المكان' : companionLang === 'fr' ? 'Écouter' : 'Hear'}
-                            </span>
-                          </div>
-                        </button>
-                      ))
-                    )}
+                  {/* Follow-up input form */}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={followUpQuestion}
+                      onChange={(e) => setFollowUpQuestion(e.target.value)}
+                      placeholder={t('Type your question about this image...', 'اكتب سؤالك عن هذه الصورة...')}
+                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#00AEB8]"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAskFollowUp();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAskFollowUp()}
+                      disabled={isAnsweringFollowUp || !followUpQuestion.trim()}
+                      className="px-4 py-2.5 rounded-xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                      {isAnsweringFollowUp ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4 rtl:rotate-180" />
+                      )}
+                      <span>{t('Send', 'إرسال')}</span>
+                    </button>
                   </div>
-                </>
+                </div>
               )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          ) : (
+            <div className="p-8 sm:p-12 text-center rounded-2xl bg-[#082344]/50 border border-dashed border-[#07558A] space-y-2">
+              <Eye className="w-8 h-8 text-[#00AEB8] mx-auto opacity-75" />
+              <h3 className="text-sm sm:text-base font-bold text-[#F5F8FF]">
+                {t('No scene analyzed yet', 'لم يتم إجراء أي تحليل بعد')}
+              </h3>
+              <p className="text-xs text-[#B9CDE3] max-w-md mx-auto leading-relaxed">
+                {t(
+                  'Point your camera and click "What is in front of me now?" or upload a photo to receive an instant voice description.',
+                  'وجّه الكاميرا واضغط على زر «ماذا أمامي الآن؟» أو ارفع صورة لتحليل المشهد وسماع الوصف الصوتي الفوري.'
+                )}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* ── 5. SAVED MEMORIES & SPATIAL ASSISTANCE HUB ── */}
+        <section
+          aria-label={t('Saved Memories and Locations', 'ذاكرة الأماكن والمقتنيات المحفوظة')}
+          className="p-5 sm:p-6 md:p-7 rounded-3xl bg-[#082344] border border-[#07558A] shadow-xl space-y-4 text-start"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#07558A]/50">
+            <div className="flex items-center gap-2 text-[#00AEB8]">
+              <BookmarkPlus className="w-5 h-5" />
+              <h2 className="text-base sm:text-lg font-bold text-[#F5F8FF]">
+                {t('Saved Memories & Places', 'ذاكرة الأماكن والمقتنيات المحفوظة')}
+              </h2>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#061A33] text-[#00AEB8] border border-[#07558A]">
+                {filteredMemories.length}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowSpatialMemory(true)}
+                data-testid="open-spatial-memory-btn"
+                className="px-3.5 py-1.5 rounded-xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <Compass className="w-3.5 h-3.5 text-[#00AEB8]" />
+                <span>{t('Spatial Map', 'المسار المكاني')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDocStudio(true)}
+                data-testid="open-doc-studio-btn"
+                className="px-3.5 py-1.5 rounded-xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5 text-[#00AEB8]" />
+                <span>{t('Doc Studio', 'استوديو المستندات')}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Search & Category Filter Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 p-1 bg-[#061A33] rounded-xl border border-[#07558A]/60 text-xs font-bold">
+              {(
+                [
+                  { id: 'all', labelEn: 'All', labelAr: 'الكل' },
+                  { id: 'person', labelEn: 'People', labelAr: 'أشخاص' },
+                  { id: 'object', labelEn: 'Objects', labelAr: 'أشياء' },
+                  { id: 'document', labelEn: 'Docs', labelAr: 'وثائق' },
+                ] as const
+              ).map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedMemoryCategory(cat.id)}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    selectedMemoryCategory === cat.id
+                      ? 'bg-[#00AEB8] text-[#061A33]'
+                      : 'text-[#B9CDE3] hover:text-white'
+                  }`}
+                >
+                  {companionLang === 'ar' ? cat.labelAr : cat.labelEn}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
+              <Search className="w-3.5 h-3.5 text-[#00AEB8] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={memorySearchQuery}
+                onChange={(e) => setMemorySearchQuery(e.target.value)}
+                placeholder={t('Search saved memories...', 'البحث في الذاكرة...')}
+                aria-label={t('Search saved memories', 'البحث في الذاكرة المحفوظة')}
+                className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#00AEB8]"
+              />
+            </div>
+          </div>
+
+          {/* Memory Cards Grid */}
+          {filteredMemories.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+              {filteredMemories.map((mem) => (
+                <div
+                  key={mem.id}
+                  className="p-3.5 rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8]/60 transition-all space-y-2.5 flex flex-col justify-between"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="w-6 h-6 rounded-lg bg-[#00AEB8]/15 text-[#00AEB8] flex items-center justify-center shrink-0">
+                          {mem.memoryType === 'person' ? (
+                            <Users className="w-3.5 h-3.5" />
+                          ) : (
+                            <BookmarkPlus className="w-3.5 h-3.5" />
+                          )}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-bold text-[#F5F8FF] truncate">{mem.label}</h4>
+                      </div>
+                      <span className="text-[10px] text-[#B9CDE3]/60 shrink-0">
+                        {new Date(mem.createdAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#B9CDE3] line-clamp-2 leading-relaxed">
+                      {mem.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#07558A]/40">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        speak(mem.description, companionLang === 'ar' ? 'Arabic' : 'English', {
+                          rate: speechRate,
+                        })
+                      }
+                      aria-label={`${t('Listen to', 'استمع إلى')} ${mem.label}`}
+                      className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] text-[#00AEB8] hover:text-white hover:border-[#00AEB8] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Volume2 className="w-3 h-3" />
+                      <span>{t('Listen', 'استمع')}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => deleteMemory(mem.id)}
+                      aria-label={`${t('Delete memory', 'حذف ذاكرة')} ${mem.label}`}
+                      className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 text-center rounded-2xl bg-[#061A33]/50 border border-dashed border-[#07558A] space-y-1">
+              <p className="text-xs text-[#B9CDE3]">
+                {memorySearchQuery
+                  ? t('No memories match your search filter.', 'لا توجد عناصر مطابقة لبحثك.')
+                  : t(
+                      'No saved memories yet. Click the bookmark icon on any result to save it.',
+                      'لم يتم حفظ أي عناصر بعد. اضغط على رمز الحفظ فوق أي نتيجة لإضافتها.'
+                    )}
+              </p>
+            </div>
+          )}
+        </section>
+
+      </div>
+
+      {/* Keyboard Shortcuts Cheatsheet Modal */}
+      {showShortcutsModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="shortcuts-modal-title"
+          className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center z-50 p-4"
+        >
+          <div className="w-full max-w-lg bg-[#082344] border border-[#07558A] rounded-3xl p-6 space-y-4 shadow-2xl text-start">
+            <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/50">
+              <div className="flex items-center gap-2 text-[#00AEB8]">
+                <HelpCircle className="w-5 h-5" />
+                <h3 id="shortcuts-modal-title" className="text-base sm:text-lg font-bold text-[#F5F8FF]">
+                  {t('Keyboard Shortcuts Cheatsheet', 'دليل اختصارات لوحة المفاتيح')}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowShortcutsModal(false)}
+                aria-label={t('Close shortcuts modal', 'إغلاق نافذة الاختصارات')}
+                className="p-1.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#B9CDE3] hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto custom-scrollbar p-1">
+              {[
+                { key: 'V', titleEn: 'Scene Vision & Safety', titleAr: 'وصف المشهد العام والأمان' },
+                { key: 'C', titleEn: 'Cash & Currency Reader', titleAr: 'قارئ العملات والنقود' },
+                { key: 'T', titleEn: 'Text & Signs OCR', titleAr: 'قراءة النصوص واللافتات' },
+                { key: 'K', titleEn: 'Color & Outfit Matcher', titleAr: 'فحص وتنسيق الألوان' },
+                { key: 'O', titleEn: 'Target Item Finder', titleAr: 'البحث عن غرض محدد' },
+                { key: 'P / F', titleEn: 'People & Face Recognition', titleAr: 'التعرف على الأشخاص والوجوه' },
+                { key: 'S', titleEn: 'Stop Voice / Silence', titleAr: 'إيقاف نطق الصوت فوراً' },
+                { key: '?', titleEn: 'Show / Hide Shortcuts', titleAr: 'فتح / إغلاق دليل الاختصارات' },
+                { key: 'Esc', titleEn: 'Close Dialogs & Modals', titleAr: 'إغلاق النوافذ المنبثقة' },
+              ].map((shortcut) => (
+                <div
+                  key={shortcut.key}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#061A33] border border-[#07558A]"
+                >
+                  <span className="text-xs text-[#F5F8FF] font-medium">
+                    {companionLang === 'ar' ? shortcut.titleAr : shortcut.titleEn}
+                  </span>
+                  <kbd className="px-2 py-1 rounded bg-[#092747] border border-[#00AEB8]/40 text-[#00AEB8] font-mono text-xs font-bold">
+                    {shortcut.key}
+                  </kbd>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowShortcutsModal(false)}
+                className="px-5 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+              >
+                {t('Close', 'إغلاق')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Spatial Trajectory & Breadcrumbs Modal */}
+      {showSpatialMemory && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="spatial-modal-title"
+          className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center z-50 p-4"
+        >
+          <div className="w-full max-w-xl bg-[#082344] border border-[#07558A] rounded-3xl p-6 space-y-4 shadow-2xl text-start">
+            <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/50">
+              <div className="flex items-center gap-2 text-[#00AEB8]">
+                <Compass className="w-5 h-5" />
+                <h3 id="spatial-modal-title" className="text-base sm:text-lg font-bold text-[#F5F8FF]">
+                  {t('Spatial Memory & Trajectory Navigator', 'خريطة المسار المكاني والذاكرة المكانية')}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSpatialMemory(false)}
+                aria-label={t('Close spatial memory modal', 'إغلاق خريطة المسار')}
+                className="p-1.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#B9CDE3] hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs text-[#B9CDE3]">
+                {t(
+                  'Search previously recorded spatial objects or trace room landmarks saved in your private encrypted vault.',
+                  'ابحث في الأغراض والمواقع المكانية المسجلة مسبقاً أو تتبع معالم الغرفة المشفرة بأمان.'
+                )}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={spatialQueryInput}
+                  onChange={(e) => setSpatialQueryInput(e.target.value)}
+                  placeholder={t('e.g. Where did I leave my keys?', 'مثال: أين تركت مفاتيحي أو نظارتي؟')}
+                  className="flex-1 px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#00AEB8]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && profile?.uid) {
+                      const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang === 'ar' ? 'ar' : 'en');
+                      setSpatialQueryResult(res.message);
+                      if (res.message)
+                        speak(res.message, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (profile?.uid) {
+                      const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang === 'ar' ? 'ar' : 'en');
+                      setSpatialQueryResult(res.message);
+                      if (res.message)
+                        speak(res.message, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                >
+                  {t('Query', 'استعلام')}
+                </button>
+              </div>
+
+              {spatialQueryResult && (
+                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#00AEB8]/40 space-y-1.5">
+                  <span className="text-[11px] font-bold text-[#00AEB8]">
+                    {t('Spatial Engine Answer:', 'إجابة محرك الذاكرة المكانية:')}
+                  </span>
+                  <p className="text-xs text-[#F5F8FF] leading-relaxed">{spatialQueryResult}</p>
+                </div>
+              )}
+
+              <div className="space-y-2 pt-2">
+                <h4 className="text-xs font-bold text-[#B9CDE3]">
+                  {t('Recent Spatial Landmarks:', 'معالم مكانية حديثة:')}
+                </h4>
+                <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-1.5">
+                  {spatialRecords.length > 0 ? (
+                    spatialRecords.slice(0, 5).map((rec) => (
+                      <div
+                        key={rec.id}
+                        className="p-2 rounded-lg bg-[#061A33] border border-[#07558A]/60 flex items-center justify-between text-xs"
+                      >
+                        <span className="text-[#F5F8FF] font-medium">{rec.objectName}</span>
+                        <span className="text-[10px] text-[#B9CDE3]/60">
+                          {rec.relativePosition?.distance ? `${rec.relativePosition.distance}` : (rec.room || 'Detected')}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-[11px] text-[#B9CDE3]/50 italic">
+                      {t('No spatial landmarks recorded yet.', 'لم يتم تسجيل معالم مكانية بعد.')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowSpatialMemory(false)}
+                className="px-5 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+              >
+                {t('Close', 'إغلاق')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Memory Dialog Modal */}
+      {showSaveDialog && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-md bg-[#082344] border border-[#07558A] rounded-3xl p-6 space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-[#F5F8FF]">
+              {t('Save Scene to Memory', 'حفظ المشهد في الذاكرة')}
+            </h3>
+            <p className="text-xs text-[#B9CDE3]">
+              {t('Enter a name for this item or place to recognize it next time:', 'أدخل اسماً لهذا الشيء أو المكان ليتعرف عليه المساعد في المرات القادمة:')}
+            </p>
+            {/* Type Switcher: Object vs Person */}
+            <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#061A33] rounded-xl border border-[#07558A]/60">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={!isSavingPerson}
+                onClick={() => setIsSavingPerson(false)}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#00AEB8] focus:outline-none ${
+                  !isSavingPerson ? 'bg-[#0878BD] text-white shadow' : 'text-[#B9CDE3] hover:text-white'
+                }`}
+              >
+                {companionLang === 'ar' ? '📦 شيء أو غرض' : '📦 Object / Item'}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={isSavingPerson}
+                onClick={() => setIsSavingPerson(true)}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#00AEB8] focus:outline-none ${
+                  isSavingPerson ? 'bg-[#0878BD] text-white shadow' : 'text-[#B9CDE3] hover:text-white'
+                }`}
+              >
+                {companionLang === 'ar' ? '👤 شخص أو صديق' : '👤 Person / Friend'}
+              </button>
+            </div>
+
+            <input
+              type="text"
+              value={labelInput}
+              onChange={(e) => setLabelInput(e.target.value)}
+              placeholder={t('e.g. My study desk, Front door key...', 'مثال: مكتبي، مفاتيح الشقة...')}
+              aria-label={companionLang === 'ar' ? (isSavingPerson ? 'اسم الشخص أو الصديق' : 'اسم المكان أو الشيء') : (isSavingPerson ? 'Person or friend name' : 'Object or location label')}
+              className="w-full px-4 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] text-sm outline-none focus:border-[#00AEB8]"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowSaveDialog(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#B9CDE3] hover:text-white"
+              >
+                {t('Cancel', 'إلغاء')}
+              </button>
+              <button
+                type="button"
+                onClick={saveMemory}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#00AEB8] text-[#061A33] hover:bg-[#0878BD] hover:text-white transition-colors"
+              >
+                {t('Save', 'حفظ')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Document & Lecture Studio Modal */}
       <DocumentStudioModal

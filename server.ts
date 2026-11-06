@@ -4,6 +4,7 @@ import path from "path";
 import dotenv from "dotenv";
 
 dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";

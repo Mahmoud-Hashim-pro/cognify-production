@@ -17,8 +17,8 @@ import {
   Timestamp,
   Unsubscribe,
 } from 'firebase/firestore';
-import { db } from './firebase';
-import { eventBus } from './learningEvents';
+import { db, cleanDataForFirestore } from './firebase';
+import { eventBus, isGuestUser } from './learningEvents';
 import {
   LearningProfile,
   SubjectType,
@@ -92,39 +92,150 @@ export async function getOrCreateLearningProfile(uid: string): Promise<LearningP
   }
 }
 
+const localSubscribers = new Map<string, Set<(profile: LearningProfile) => void>>();
+
+export function notifyLocalSubscribers(uid: string, profile: LearningProfile): void {
+  const subs = localSubscribers.get(uid);
+  if (subs) {
+    subs.forEach((cb) => {
+      try {
+        cb(profile);
+      } catch (err) {
+        console.error('[LearningProfile] Subscriber callback error:', err);
+      }
+    });
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(
+        new CustomEvent('cognify_learning_profile_change', {
+          detail: { uid, profile },
+        })
+      );
+    } catch {}
+  }
+}
+
 /**
- * Real-time subscription to child's learning profile
+ * Real-time subscription to child's learning profile with instantaneous local hydration
  */
 export function subscribeLearningProfile(
   uid: string,
   onUpdate: (profile: LearningProfile) => void
 ): Unsubscribe {
+  if (!uid || typeof uid !== 'string' || uid.trim() === '') {
+    return () => {};
+  }
   const localKey = `${LOCAL_STORAGE_KEY_PREFIX}${uid}`;
-  const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
 
-  return onSnapshot(
-    profileRef,
-    (snap) => {
-      if (snap.exists()) {
-        const data = snap.data() as LearningProfile;
-        localStorage.setItem(localKey, JSON.stringify(data));
-        onUpdate(data);
-      } else {
-        const initial = createDefaultLearningProfile();
-        setDoc(profileRef, initial, { merge: true }).catch(console.error);
-        onUpdate(initial);
-      }
-    },
-    (err) => {
-      console.warn('[LearningProfile] Realtime sync error, using local fallback:', err);
-      const cached = localStorage.getItem(localKey);
-      if (cached) {
-        try {
-          onUpdate(JSON.parse(cached));
-        } catch { /* ignore */ }
-      }
+  // 1. Immediately hydrate synchronously from local storage or default profile
+  // This guarantees zero waiting time and no null/flicker state in any component!
+  const cachedRaw = safeStorageGet(localKey);
+  let currentInMemoryProfile: LearningProfile;
+  if (cachedRaw) {
+    try {
+      const parsed = JSON.parse(cachedRaw);
+      currentInMemoryProfile = {
+        ...createDefaultLearningProfile(),
+        ...parsed,
+        subjects: {
+          ...createDefaultLearningProfile().subjects,
+          ...(parsed.subjects || {}),
+        },
+      };
+    } catch {
+      currentInMemoryProfile = createDefaultLearningProfile();
     }
-  );
+  } else {
+    currentInMemoryProfile = createDefaultLearningProfile();
+    safeStorageSet(localKey, JSON.stringify(currentInMemoryProfile));
+  }
+
+  // Invoke immediately with current data
+  try {
+    onUpdate(currentInMemoryProfile);
+  } catch (err) {
+    console.error('[LearningProfile] Initial onUpdate error:', err);
+  }
+
+  // 2. Register with in-memory subscriber map
+  if (!localSubscribers.has(uid)) {
+    localSubscribers.set(uid, new Set());
+  }
+  localSubscribers.get(uid)!.add(onUpdate);
+
+  // 3. Listen to window broadcast event
+  const windowListener = (e: Event) => {
+    const customEvt = e as CustomEvent<{ uid: string; profile: LearningProfile }>;
+    if (customEvt.detail && customEvt.detail.uid === uid && customEvt.detail.profile) {
+      try {
+        onUpdate(customEvt.detail.profile);
+      } catch {}
+    }
+  };
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('cognify_learning_profile_change', windowListener);
+  }
+
+  // 4. If guest or test user, skip Firestore onSnapshot to avoid PERMISSION_DENIED
+  if (isGuestUser(uid)) {
+    return () => {
+      localSubscribers.get(uid)?.delete(onUpdate);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('cognify_learning_profile_change', windowListener);
+      }
+    };
+  }
+
+  // 5. Authenticated user: attach Firestore realtime onSnapshot
+  let firestoreUnsub: Unsubscribe = () => {};
+  try {
+    const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
+    firestoreUnsub = onSnapshot(
+      profileRef,
+      (snap) => {
+        if (snap.exists()) {
+          const remoteData = snap.data() as LearningProfile;
+          const merged: LearningProfile = {
+            ...createDefaultLearningProfile(),
+            ...remoteData,
+            subjects: {
+              ...createDefaultLearningProfile().subjects,
+              ...(remoteData.subjects || {}),
+            },
+          };
+          safeStorageSet(localKey, JSON.stringify(merged));
+          onUpdate(merged);
+        } else {
+          // Initialize if remote doc does not exist yet
+          const initial = currentInMemoryProfile || createDefaultLearningProfile();
+          setDoc(profileRef, cleanDataForFirestore(initial), { merge: true }).catch(() => {});
+        }
+      },
+      (err) => {
+        console.warn('[LearningProfile] Realtime sync restricted, operating in resilient local mode:', err.message);
+        const localCached = safeStorageGet(localKey);
+        if (localCached) {
+          try {
+            onUpdate(JSON.parse(localCached));
+          } catch {}
+        }
+      }
+    );
+  } catch (err) {
+    console.warn('[LearningProfile] Failed to establish Firestore onSnapshot:', err);
+  }
+
+  return () => {
+    localSubscribers.get(uid)?.delete(onUpdate);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('cognify_learning_profile_change', windowListener);
+    }
+    try {
+      firestoreUnsub();
+    } catch {}
+  };
 }
 
 /**
@@ -139,8 +250,19 @@ export async function recordExerciseResult(
   const now = Date.now();
   const today = new Date().toISOString().split('T')[0];
 
+  // Rapid double-click / duplicate submission guard:
+  if (
+    currentProfile.lastExerciseId === result.exerciseId &&
+    currentProfile.lastExerciseTimestamp &&
+    Math.abs(now - currentProfile.lastExerciseTimestamp) < 500
+  ) {
+    return currentProfile;
+  }
+
   // 1. Clone profile
   const updated: LearningProfile = JSON.parse(JSON.stringify(currentProfile));
+  updated.lastExerciseId = result.exerciseId;
+  updated.lastExerciseTimestamp = now;
   const subProfile = updated.subjects[result.subject];
 
   // 2. Update subject metrics
@@ -233,6 +355,9 @@ export async function recordExerciseResult(
   // Save to localStorage immediately
   safeStorageSet(localKey, JSON.stringify(updated));
 
+  // Notify all local subscribers immediately
+  notifyLocalSubscribers(uid, updated);
+
   // 4. Async Firestore updates & Learning Event Bus emission
   try {
     const diffMap: Record<number, 'easy' | 'medium' | 'hard'> = { 1: 'easy', 2: 'medium', 3: 'hard' };
@@ -249,17 +374,19 @@ export async function recordExerciseResult(
     console.warn('[LearningProfile] EventBus emission error:', eventErr);
   }
 
-  try {
-    const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
-    setDoc(profileRef, updated, { merge: true }).catch(console.error);
+  if (!isGuestUser(uid)) {
+    try {
+      const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
+      setDoc(profileRef, cleanDataForFirestore(updated), { merge: true }).catch(() => {});
 
-    const historyRef = collection(db, 'users', uid, 'exerciseHistory');
-    addDoc(historyRef, {
-      ...result,
-      timestamp: Timestamp.fromMillis(result.timestamp || now),
-    }).catch(console.error);
-  } catch (err) {
-    console.warn('[LearningProfile] Firestore save failed (offline mode):', err);
+      const historyRef = collection(db, 'users', uid, 'exerciseHistory');
+      addDoc(historyRef, {
+        ...result,
+        timestamp: Timestamp.fromMillis(result.timestamp || now),
+      }).catch(() => {});
+    } catch (err) {
+      console.warn('[LearningProfile] Firestore save failed (offline mode):', err);
+    }
   }
 
   return updated;
@@ -290,13 +417,16 @@ export async function finishLearningSession(
   }
 
   const localKey = `${LOCAL_STORAGE_KEY_PREFIX}${uid}`;
-  localStorage.setItem(localKey, JSON.stringify(updated));
+  safeStorageSet(localKey, JSON.stringify(updated));
+  notifyLocalSubscribers(uid, updated);
 
-  try {
-    const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
-    await setDoc(profileRef, updated, { merge: true });
-  } catch (err) {
-    console.warn('[LearningProfile] Error updating session stats:', err);
+  if (!isGuestUser(uid)) {
+    try {
+      const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
+      await setDoc(profileRef, updated, { merge: true });
+    } catch (err) {
+      console.warn('[LearningProfile] Error updating session stats:', err);
+    }
   }
 
   return updated;
@@ -430,16 +560,19 @@ export async function resolveMistakeReview(
   updated.totalStarsEarned = (updated.totalStarsEarned || 0) + 5;
   const localKey = `${LOCAL_STORAGE_KEY_PREFIX}${uid}`;
   safeStorageSet(localKey, JSON.stringify(updated));
+  notifyLocalSubscribers(uid, updated);
 
-  try {
-    const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
-    await setDoc(
-      profileRef,
-      { mistakeQueue: updated.mistakeQueue || [], totalStarsEarned: updated.totalStarsEarned },
-      { merge: true }
-    );
-  } catch (err) {
-    console.warn('[LearningProfile] Error resolving mistake review in Firestore:', err);
+  if (!isGuestUser(uid)) {
+    try {
+      const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
+      await setDoc(
+        profileRef,
+        { mistakeQueue: updated.mistakeQueue || [], totalStarsEarned: updated.totalStarsEarned },
+        { merge: true }
+      );
+    } catch (err) {
+      console.warn('[LearningProfile] Error resolving mistake review in Firestore:', err);
+    }
   }
 
   return updated;
@@ -459,12 +592,15 @@ export async function updateLearningSettings(
   };
   const localKey = `${LOCAL_STORAGE_KEY_PREFIX}${uid}`;
   safeStorageSet(localKey, JSON.stringify(updated));
+  notifyLocalSubscribers(uid, updated);
 
-  try {
-    const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
-    await setDoc(profileRef, settings, { merge: true });
-  } catch (err) {
-    console.warn('[LearningProfile] Error saving learning settings to Firestore:', err);
+  if (!isGuestUser(uid)) {
+    try {
+      const profileRef = doc(db, 'users', uid, 'learningProfile', 'current');
+      await setDoc(profileRef, settings, { merge: true });
+    } catch (err) {
+      console.warn('[LearningProfile] Error saving learning settings to Firestore:', err);
+    }
   }
 
   return updated;

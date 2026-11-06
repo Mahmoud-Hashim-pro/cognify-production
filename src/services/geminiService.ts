@@ -60,9 +60,9 @@ async function callGemini(parts: any[]): Promise<string> {
   const geminiKey = userKey || envKey;
   if (geminiKey) {
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
         body: JSON.stringify({ contents: [{ role: "user", parts }] }),
       });
       if (res.ok) {

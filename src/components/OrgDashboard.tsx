@@ -3,7 +3,7 @@ import { UserProfile } from "../types";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, onSnapshot, query, where, limit } from "firebase/firestore";
 import { localize } from "../lib/translations";
-import { Users, Activity, Mail, Loader2, Eye, Ear, Mic, Brain, Accessibility, User as UserIcon, AlertTriangle, Building2 } from "lucide-react";
+import { Users, Activity, Mail, Loader2, Eye, Ear, Mic, Brain, Accessibility, User as UserIcon, AlertTriangle, Building2, ArrowLeft } from "lucide-react";
 
 /**
  * OrgDashboard — the organization (charity) staff view INSIDE the disability hub.
@@ -14,6 +14,7 @@ import { Users, Activity, Mail, Loader2, Eye, Ear, Mic, Brain, Accessibility, Us
  */
 interface OrgDashboardProps {
   profile: UserProfile;
+  onNavigateBack?: () => void;
 }
 
 const DIS_ICON: Record<string, typeof Eye> = {
@@ -42,7 +43,7 @@ function daysSinceActive(u: UserProfile): number {
   return (Date.now() - t) / 86400000;
 }
 
-export default function OrgDashboard({ profile }: OrgDashboardProps) {
+export default function OrgDashboard({ profile, onNavigateBack }: OrgDashboardProps) {
   const [members, setMembers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const org = (profile.organization || '').trim();
@@ -90,6 +91,18 @@ export default function OrgDashboard({ profile }: OrgDashboardProps) {
       <div className="max-w-5xl mx-auto space-y-5 pb-24">
         {/* Header */}
         <div className="flex items-center gap-3">
+          {onNavigateBack && (
+            <button
+              type="button"
+              onClick={onNavigateBack}
+              aria-label={L("Back to Dashboard Hub", "الرجوع للوحة الميزات الرئيسية")}
+              title={L("Back to Dashboard Hub", "الرجوع للوحة الميزات الرئيسية")}
+              className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#0E0610] hover:bg-slate-800 border border-[#4A1224]/60 text-slate-300 hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+              <span className="text-xs font-bold">{L("Back", "رجوع")}</span>
+            </button>
+          )}
           <div className="p-3 bg-primary-soft rounded-xl">
             <Building2 className="w-6 h-6 text-primary" />
           </div>

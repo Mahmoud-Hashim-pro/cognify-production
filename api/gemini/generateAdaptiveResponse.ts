@@ -85,13 +85,16 @@ export default async function handler(req: any, res: any) {
       // fall through to Gemini below if NVIDIA/Groq/xAI all failed
     }
 
+    let gstatus = 0;
     if (!rawOutput) {
       const body = JSON.stringify({
         contents: buildContents(message, safeHistory, safeAttachments),
         systemInstruction: { parts: [{ text: system }] },
         generationConfig: { temperature: 0.7, topP: 0.95 },
       });
-      const { res: gres } = await geminiFetch('generateContent', body, { category });
+      const gResult = await geminiFetch('generateContent', body, { category, byokKey: req.byokKey });
+      const gres = gResult.res;
+      gstatus = gResult.status;
       if (gres) {
         const j: any = await gres.json().catch(() => null);
         const txt = j?.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -104,6 +107,15 @@ export default async function handler(req: any, res: any) {
     }
 
     const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';
+
+    if (!rawOutput && gstatus === 503) {
+      res.status(503).json({
+        error: isAr ? 'مزود خدمة الذكاء الاصطناعي مجهد حالياً بسبب كثرة الطلبات (503). يرجى المحاولة بعد لحظات.' : 'AI provider is temporarily overloaded (503). Please retry in a few moments.',
+        code: 'PROVIDER_OVERLOADED',
+      });
+      return;
+    }
+
     const fallbackMessage = isAr ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني 🙏' : '⚠️ The AI is busy right now. Please try again 🙏';
     const validated = validateAndSanitizeResponse(rawOutput || fallbackMessage, {
       accessibilityMode: profile?.accessibilityMode,
