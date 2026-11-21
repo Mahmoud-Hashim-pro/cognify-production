@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://rafiqi.vercel.app/sitemap.xml
+Sitemap: https://rafiqi-ai.vercel.app/sitemap.xml

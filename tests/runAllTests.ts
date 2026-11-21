@@ -2384,7 +2384,7 @@ Keep practicing closures with higher-order functions!
     );
     assert(capturedTitle.includes('Rafiqi Academic Cockpit'), 'applySeoMetadata updates document title via injected adapter');
     assert(capturedMetas['og:title'] === capturedTitle, 'applySeoMetadata synchronizes Open Graph title');
-    assert(capturedCanonical.startsWith('https://rafiqi.vercel.app'), 'applySeoMetadata sets canonical URL');
+    assert(capturedCanonical.startsWith('https://rafiqi-ai.vercel.app'), 'applySeoMetadata sets canonical URL');
 
     // Verify index.html SEO tags, Open Graph, Twitter Card & Schema.org JSON-LD
     const htmlContent = fs.readFileSync(path.resolve('index.html'), 'utf8');

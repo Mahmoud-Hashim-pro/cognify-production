@@ -41,7 +41,7 @@ export const BRAND_CONFIG: BrandConfig = Object.freeze({
     'رفيقي (Rafiqi) هو مساعدك الشخصي الذكي ومنصة التعلم الشامل والتكيفي المصممة لدعم الطلاب وذوي الهمم بأعلى معايير الإتاحة العالمية.',
   teamNameEn: 'The Rafiqi Team / Graduation Project Team',
   teamNameAr: 'فريق تطوير منصة رفيقي',
-  canonicalUrl: 'https://rafiqi.vercel.app',
+  canonicalUrl: 'https://rafiqi-ai.vercel.app',
   themeColor: '#0F172A',
   backgroundColor: '#071426',
 });
