@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * 
- * Cognify Accessible Educational Book & Document Studio Engine
+ * Rafiqi Accessible Educational Book & Document Studio Engine
  * (Phase 6: Professional Word Formatting, Semantic Outline, and Question Recognition)
  */
 
@@ -630,7 +630,7 @@ export async function buildAccessibleBookDocx(
         spacing: { before: 240, after: 200 },
         children: [
           new TextRun({
-            text: metadata.title || (isAr ? 'المستند التعليمي الشامل' : 'Cognify Educational Document'),
+            text: metadata.title || (isAr ? 'المستند التعليمي الشامل' : 'Rafiqi Educational Document'),
             font: fontName,
             size: sizes.title,
             bold: true,
@@ -1545,7 +1545,7 @@ export function buildPrintableHtmlDocument(
     <html dir="${dir}" lang="${isAr ? 'ar' : 'en'}">
     <head>
       <meta charset="utf-8"/>
-      <title>${metadata.title || 'Cognify Educational Document'}</title>
+      <title>${metadata.title || 'Rafiqi Educational Document'}</title>
       <style>
         @page {
           size: A4;

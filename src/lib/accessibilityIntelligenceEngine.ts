@@ -24,7 +24,7 @@ import type {
 
 /**
  * Forbidden clinical, medical, deficit, or psychological diagnostic terms.
- * Cognify strictly adapts to observable functional interaction habits (dwell time,
+ * Rafiqi strictly adapts to observable functional interaction habits (dwell time,
  * prompt brevity, TTS audio consumption) and NEVER infers or stores medical labels.
  */
 export const FORBIDDEN_CLINICAL_KEYWORDS: readonly string[] = Object.freeze([
@@ -186,7 +186,7 @@ export function enforceNonDiagnosticInvariant<T>(data: T, action: 'throw' | 'str
 
   if (action === 'throw') {
     throw new Error(
-      `[Ethical Non-Diagnosis Invariant Violation]: Cognify strictly forbids medical or deficit labels. Violations detected: ${check.violations.join('; ')}`
+      `[Ethical Non-Diagnosis Invariant Violation]: Rafiqi strictly forbids medical or deficit labels. Violations detected: ${check.violations.join('; ')}`
     );
   }
 

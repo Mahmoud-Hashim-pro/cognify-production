@@ -194,7 +194,7 @@ export default function AdminUserDetailModal({
                     </span>
                     <span className="text-[11px] text-slate-300 font-normal">
                       {modalPresence.status === 'online'
-                        ? 'User is actively on Cognify right now.'
+                        ? 'User is actively on Rafiqi right now.'
                         : modalPresence.status === 'away'
                         ? `Last recorded interaction was ~${modalPresence.minutesAgo} minutes ago.`
                         : 'User is currently offline.'}
@@ -381,7 +381,7 @@ export default function AdminUserDetailModal({
                     ))}
                   </select>
                   <a
-                    href={`mailto:${user.email}?subject=Message from Cognify Admin`}
+                    href={`mailto:${user.email}?subject=Message from Rafiqi Admin`}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-700 transition-colors border border-[#16395E]/50"
                   >
                     <Mail className="w-3.5 h-3.5" /> Send Email

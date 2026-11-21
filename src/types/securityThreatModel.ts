@@ -1,5 +1,5 @@
 /**
- * Milestone 22: Cognify Security & Threat Model Types
+ * Milestone 22: Rafiqi Security & Threat Model Types
  * Defines comprehensive data contracts for:
  * - OWASP Top 10: 2025 Web Application Security
  * - OWASP API Security Top 10: 2023

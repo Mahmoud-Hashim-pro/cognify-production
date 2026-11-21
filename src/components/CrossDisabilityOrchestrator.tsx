@@ -929,7 +929,7 @@ export default function CrossDisabilityOrchestrator({
 
                   <a
                     href={`https://wa.me/?text=${encodeURIComponent(
-                      (isAr ? 'نداء استغاثة عاجل من تطبيق كوجنيفاي! إحداثياتي: ' : 'Emergency SOS Alert from Cognify! Coordinates: ') + userLocationStr
+                      (isAr ? 'نداء استغاثة عاجل من تطبيق رفيقي! إحداثياتي: ' : 'Emergency SOS Alert from Rafiqi! Coordinates: ') + userLocationStr
                     )}`}
                     target="_blank"
                     rel="noreferrer"

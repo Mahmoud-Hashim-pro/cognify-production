@@ -316,7 +316,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
       {/* Top Navbar */}
       <header className="max-w-7xl mx-auto w-full flex items-center justify-between z-10 py-1 sm:py-2 mb-2 sm:mb-4">
-        {/* Cognify Brand & Subtitle */}
+        {/* Rafiqi Brand & Subtitle */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#087F8C] to-[#10B8B0] flex items-center justify-center shadow-lg shadow-[#087F8C]/30 text-white shrink-0">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -328,7 +328,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
           </div>
           <div className="flex flex-col">
             <span className="text-xl sm:text-2xl font-black tracking-tight text-white leading-none">
-              Cognify
+              {t('Rafiqi', 'رفيقي · Rafiqi')}
             </span>
             <span className="text-[11px] sm:text-xs text-[#C1CCDA] font-semibold mt-1">
               {t('Inclusive Learning Platform', 'منصة التعلّم الشامل')}
@@ -398,8 +398,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
               <p className="text-sm sm:text-base text-[#C1CCDA] font-medium leading-relaxed max-w-xl">
                 {t(
-                  'Cognify empowers learners of all abilities with personalized, accessible, and flexible learning experiences.',
-                  'تمكّن كوجنيفاي المتعلمين بمختلف قدراتهم من خلال تجارب تعلّم مخصصة، ميسرة، ومرنة تواكب وتيرتك واحتياجاتك.'
+                  'Rafiqi empowers learners of all abilities with personalized, accessible, and flexible learning experiences.',
+                  'تمكّن منصة رفيقي المتعلمين بمختلف قدراتهم من خلال تجارب تعلّم مخصصة، ميسرة، ومرنة تواكب وتيرتك واحتياجاتك.'
                 )}
               </p>
             </div>
@@ -773,8 +773,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
           </div>
           <span className="font-medium">
             {t(
-              'Cognify supports assistive technologies and is built with accessibility in mind.',
-              'كوجنيفاي تدعم التقنيات المساندة ومصممة بأعلى معايير الإتاحة العالمية.'
+              'Rafiqi supports assistive technologies and is built with accessibility in mind.',
+              'رفيقي تدعم التقنيات المساندة ومصممة بأعلى معايير الإتاحة العالمية.'
             )}
           </span>
         </div>

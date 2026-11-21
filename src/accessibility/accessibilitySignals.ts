@@ -1,5 +1,5 @@
 /**
- * Cognify Accessibility 2.0 - Signal Extraction & Buffer Engine
+ * Rafiqi Accessibility 2.0 - Signal Extraction & Buffer Engine
  * src/accessibility/accessibilitySignals.ts
  *
  * Extracts and temporal-buffers interaction signals across all modalities:

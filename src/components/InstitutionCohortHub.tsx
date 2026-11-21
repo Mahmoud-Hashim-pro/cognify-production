@@ -136,7 +136,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
       link.href = url;
       const cleanOrg = (stats.orgCode || 'cohort').replace(/[^a-zA-Z0-9_-]/g, '_');
       const dateStr = new Date().toISOString().split('T')[0];
-      link.setAttribute('download', `Cognify_Cohort_Report_${cleanOrg}_${dateStr}.csv`);
+      link.setAttribute('download', `Rafiqi_Cohort_Report_${cleanOrg}_${dateStr}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

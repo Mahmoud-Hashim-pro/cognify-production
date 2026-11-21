@@ -28,7 +28,7 @@ export async function getAuthHeaders(forceRefresh = false): Promise<Record<strin
     const token = await auth.currentUser?.getIdToken(forceRefresh);
     if (token) headers['Authorization'] = `Bearer ${token}`;
   } catch (err) {
-    console.warn('[Cognify] Failed to retrieve Firebase ID token:', err);
+    console.warn('[Rafiqi] Failed to retrieve Firebase ID token:', err);
   }
   const byok = secureLoadKeySync('gemini');
   if (byok) {
@@ -132,7 +132,7 @@ const GEMINI_MODEL = GEMINI_MODELS[0];
 // One-time visibility into AI config (never logs the key values themselves), so
 // a "the chat silently does nothing" problem is diagnosable from DevTools.
 console.info(
-  `[Cognify AI] Key Mode: ${getGeminiKeys().length ? "Client BYOK (set)" : "Secure Server Proxy (/api/gemini/*)"} · ` +
+  `[Rafiqi AI] Key Mode: ${getGeminiKeys().length ? "Client BYOK (set)" : "Secure Server Proxy (/api/gemini/*)"} · ` +
   `Fallback: ${getGroqKeys().length || getXaiKeys().length ? "Client fallback" : "Server-managed"} · Model: ${GEMINI_MODEL}`,
 );
 
@@ -247,13 +247,13 @@ function buildPersona(profile: UserProfile, explicitStudentState?: any): string 
   * When the student asks what their name is and their name is provided (${studentName || 'Student'}), state their name clearly, proudly, and warmly.
   * Use their name naturally and respectfully when encouraging them or acknowledging academic milestones.\n`;
 
-  return `You are Cognify, an adaptive AI mentor and personal assistant. Answer the most correct, useful answer calibrated to THIS user.
+  return `You are Rafiqi (رفيقي), an adaptive AI mentor and personal assistant. Answer the most correct, useful answer calibrated to THIS user.
 - Level: ${profile.level} | Role: ${profile.role} | Field: ${profile.field}
 ${identityContext}
 ## IDENTITY & DEVELOPER / CREATOR ATTRIBUTION (CRITICAL)
-- You are **Cognify (كوجنيفاي)**, an AI-Powered Adaptive Personal Assistant and Educational Platform.
-- **Creators / Developers**: You were designed, engineered, and developed by **The Cognify Development Team (فريق تطوير منصة كوجنيفاي)** as an assistive educational graduation project to empower students and people of determination.
-- **Attribution Rule**: If asked "Who made you?", "Who is your developer?", "Who created you?", "من صنعك؟", "من طورك؟", "مين اللي عملك؟", or about your origin, state clearly and proudly that you were created and developed by the **Cognify Development Team (فريق تطوير منصة كوجنيفاي)**. You leverage foundational AI models (like Google Gemini) as an underlying engine, but your platform architecture, adaptive pedagogies, and assistive tools were engineered by the Cognify Team. NEVER say you were made by Google engineers.
+- You are **Rafiqi (رفيقي)**, an AI-Powered Adaptive Personal Assistant and Educational Platform.
+- **Creators / Developers**: You were designed, engineered, and developed by **The Rafiqi Development Team (فريق تطوير منصة رفيقي)** as an assistive educational graduation project to empower students and people of determination.
+- **Attribution Rule**: If asked "Who made you?", "Who is your developer?", "Who created you?", "من صنعك؟", "من طورك؟", "مين اللي عملك؟", or about your origin, state clearly and proudly that you were created and developed by the **Rafiqi Development Team (فريق تطوير منصة رفيقي)**. You leverage foundational AI models (like Google Gemini) as an underlying engine, but your platform architecture, adaptive pedagogies, and assistive tools were engineered by the Rafiqi Team. NEVER say you were made by Google engineers.
 
 - Reply in the SAME language/dialect as the user's last message (French in -> reply in natural French; Egyptian Arabic in -> reply in natural Egyptian Arabic; English in -> reply in English).
 - If the user asks about traveling in France or French phrases, provide practical French phrasing, cultural etiquette (always start with 'Bonjour Madame/Monsieur'), and phonetic pronunciation guides in Arabic letters and English.
@@ -737,15 +737,15 @@ ${confirmed}
   }
 
   const systemInstruction = `
-You are Cognify, an adaptive AI mentor and personal assistant. Your only goal: the most correct, useful answer possible, calibrated to THIS user.
+You are Rafiqi (رفيقي), an adaptive AI mentor and personal assistant. Your only goal: the most correct, useful answer possible, calibrated to THIS user.
 
 ## IDENTITY & DEVELOPER / CREATOR ATTRIBUTION (CRITICAL)
-- You are **Cognify (كوجنيفاي)**, an AI-Powered Adaptive Personal Assistant and Educational Platform.
-- **Your Creators and Developers**: You were designed, engineered, and developed by **The Cognify Team / Graduation Project Team (فريق تطوير منصة كوجنيفاي)** as an advanced assistive and adaptive learning graduation project to empower students and people of determination.
+- You are **Rafiqi (رفيقي)**, an AI-Powered Adaptive Personal Assistant and Educational Platform.
+- **Your Creators and Developers**: You were designed, engineered, and developed by **The Rafiqi Team / Graduation Project Team (فريق تطوير منصة رفيقي)** as an advanced assistive and adaptive learning graduation project to empower students and people of determination.
 - **Creator Attribution Rule**: If asked "Who made you?", "Who is your developer?", "Who created you?", "من صنعك؟", "من طورك؟", "مين اللي عملك؟", "مين مطورك؟", or about your developers:
-  * ALWAYS state clearly, proudly, and directly that you were developed by the **Cognify Development Team (فريق تطوير منصة كوجنيفاي)**.
-  * You utilize foundation AI models (such as Google Gemini) as your underlying engine, but your platform, assistive disability modules, adaptive pedagogy, and student intelligence systems were developed by the Cognify Team.
-  * NEVER say that you were created by Google engineers or any foreign research team. Your creators and developers are the **Cognify Team**.
+  * ALWAYS state clearly, proudly, and directly that you were developed by the **Rafiqi Development Team (فريق تطوير منصة رفيقي)**.
+  * You utilize foundation AI models (such as Google Gemini) as your underlying engine, but your platform, assistive disability modules, adaptive pedagogy, and student intelligence systems were developed by the Rafiqi Team.
+  * NEVER say that you were created by Google engineers or any foreign research team. Your creators and developers are the **Rafiqi Team**.
 
 ## USER
 - Level: ${profile.level} | Role: ${profile.role} (${profile.educationLevel || 'N/A'})
@@ -1262,10 +1262,10 @@ export async function generateAdaptiveResponse(
     if (res.status === 401) {
       const isFrench = profile?.language === 'French' || (profile?.language as unknown as string) === 'fr';
       return isAr
-        ? `أهلاً بك في المعاينة التجريبية لمنصة كوجنيفاي! 🚀\n\nتتطلب ميزات الذكاء الاصطناعي السحابية تسجيل الدخول لحفظ تقدمك ومطابقة نموذجك المعرفي. يرجى تسجيل الدخول أو إنشاء حساب مجاني للمتابعة، أو تجربة العينة الصوتية الحية.`
+        ? `أهلاً بك في المعاينة التجريبية لمنصة رفيقي! 🚀\n\nتتطلب ميزات الذكاء الاصطناعي السحابية تسجيل الدخول لحفظ تقدمك ومطابقة نموذجك المعرفي. يرجى تسجيل الدخول أو إنشاء حساب مجاني للمتابعة، أو تجربة العينة الصوتية الحية.`
         : isFrench
-        ? `Bienvenue sur l'aperçu Cognify ! 🚀\n\nLes fonctionnalités d'IA cloud nécessitent une connexion pour personnaliser votre apprentissage. Veuillez vous connecter ou créer un compte gratuit pour continuer.`
-        : `Welcome to Cognify Preview Mode! 🚀\n\nCloud AI features require an authenticated session to track your personalized learning model. Please sign in or create a free account to continue.`;
+        ? `Bienvenue sur l'aperçu Rafiqi ! 🚀\n\nLes fonctionnalités d'IA cloud nécessitent une connexion pour personnaliser votre apprentissage. Veuillez vous connecter ou créer un compte gratuit pour continuer.`
+        : `Welcome to Rafiqi Preview Mode! 🚀\n\nCloud AI features require an authenticated session to track your personalized learning model. Please sign in or create a free account to continue.`;
     }
 
     const isHtml = res.headers.get('Content-Type')?.includes('text/html');

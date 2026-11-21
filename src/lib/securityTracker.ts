@@ -1,5 +1,5 @@
 /**
- * Cognify DevTools & Element Inspect Security Tracker
+ * Rafiqi DevTools & Element Inspect Security Tracker
  * 
  * Provides real-time detection and telemetry for:
  * 1. DevTools keyboard shortcuts (F12, Ctrl+Shift+I/J/C, Cmd+Option+I/J/C, Ctrl+U)
@@ -306,7 +306,7 @@ export function initSecurityTracker(
   // Console warning banner to deter theft and reverse engineering
   try {
     console.log(
-      '%c🛑 STOP! 🛡️ Cognify Anti-Tamper & Security Shield Active',
+      '%c🛑 STOP! 🛡️ Rafiqi Anti-Tamper & Security Shield Active',
       'color: #ef4444; font-size: 18px; font-weight: 900; background: #0b0f19; padding: 6px 10px; border-radius: 6px; border: 1px solid #ef4444;'
     );
     console.log(

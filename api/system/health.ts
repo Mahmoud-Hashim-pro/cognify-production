@@ -1,6 +1,6 @@
 /**
  * Phase C - Requirement 25: Production Health & Uptime Check Endpoint
- * Cognify 2.0 Production Observability & Tracing Engine
+ * Rafiqi 2.0 Production Observability & Tracing Engine
  *
  * Route: GET /api/system/health
  * Returns HTTP 200 with structured JSON payload:

@@ -119,7 +119,7 @@ export async function runDeveloperApiVerification(): Promise<{ passed: number; f
   console.log('Group 4: OpenAPI 3.1 Specification');
   const spec = generateOpenApiSpec();
   assert(spec.openapi === '3.1.0', 'Spec specifies OpenAPI version 3.1.0');
-  assert(spec.info.title.includes('Cognify'), 'Spec title references Cognify');
+  assert(spec.info.title.includes('Rafiqi'), 'Spec title references Rafiqi');
   assert(spec.paths['/student/state'] !== undefined, 'Spec defines /student/state endpoint');
   assert(spec.paths['/events/emit'] !== undefined, 'Spec defines /events/emit endpoint');
   assert(spec.paths['/ai/guard'] !== undefined, 'Spec defines /ai/guard endpoint');

@@ -910,7 +910,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Cognify Brand Logo Anchor */}
+          {/* Rafiqi Brand Logo Anchor */}
           <div 
             onClick={() => {
               if (activeTab !== 'hub') handleSelectTab('hub');
@@ -922,7 +922,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-black tracking-tight text-[#F5F8FF] leading-none group-hover:text-[#10B8B0] transition-colors">
-                Cognify
+                Rafiqi
               </span>
               <span className="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-[#087F8C]/30 text-[#10B8B0] border border-[#087F8C]/50 uppercase tracking-wider">
                 A11y
@@ -1132,7 +1132,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             <p className="text-[11px] text-[#C4D3E5] leading-relaxed">
               {localize(
                 profile.language,
-                'Cognify supports comprehensive assistive technologies with full accessibility for all.',
+                'Rafiqi supports comprehensive assistive technologies with full accessibility for all.',
                 'تدعم تقنيات المساعدة والوصول الشامل مع مراعاة إمكانية الوصول للجميع.'
               )}
             </p>
@@ -1189,7 +1189,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       <div className="w-8 h-8 rounded-lg bg-[#087F8C] flex items-center justify-center text-white">
                         <Brain className="w-4 h-4" />
                       </div>
-                      <span className="font-bold text-[#F5F8FF] text-base">Cognify</span>
+                      <span className="font-bold text-[#F5F8FF] text-base">Rafiqi</span>
                     </div>
                     <button
                       type="button"
@@ -1350,7 +1350,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                   {/* ── 1. WELCOME HERO SECTION (Exact Reference Match) ── */}
                   <section
-                    aria-label={localize(profile.language, 'Welcome to Cognify', 'مرحباً بك في كوجنيفاي')}
+                    aria-label={localize(profile.language, 'Welcome to Rafiqi', 'مرحباً بك في رفيقي')}
                     className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#082344] via-[#071F3C] to-[#082344] border border-[#16395E] p-6 sm:p-8 lg:p-10 shadow-xl"
                   >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
@@ -1358,7 +1358,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       <div className="lg:col-span-7 space-y-4 text-start">
                         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-[#10B8B0]/15 text-[#10B8B0] border border-[#10B8B0]/30 shadow-xs">
                           <Sparkles className="w-3.5 h-3.5" />
-                          <span>{localize(profile.language, 'Welcome to Cognify', 'مرحباً بك في كوجنيفاي')}</span>
+                          <span>{localize(profile.language, 'Welcome to Rafiqi', 'مرحباً بك في رفيقي')}</span>
                         </div>
 
                         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#F5F8FF] tracking-tight leading-tight">
@@ -1896,8 +1896,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         <p className="text-xs text-[#C4D3E5] leading-relaxed max-w-2xl">
                           {localize(
                             profile.language,
-                            'Cognify is committed to providing equal learning opportunities through adaptive technologies.',
-                            'تلتزم كوجنيفاي بتقديم فرص تعليمية متكافئة للجميع عبر أحدث التقنيات التكيفية الميسرة.'
+                            'Rafiqi is committed to providing equal learning opportunities through adaptive technologies.',
+                            'تلتزم رفيقي بتقديم فرص تعليمية متكافئة للجميع عبر أحدث التقنيات التكيفية الميسرة.'
                           )}
                         </p>
                       </div>

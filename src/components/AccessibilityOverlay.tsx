@@ -619,7 +619,7 @@ export default function AccessibilityOverlay({
         transition: { duration: 0.8, ease: "circInOut" },
       };
     }
-    // Deep Cognition: Think, Know, Mind, Cognify
+    // Deep Cognition: Think, Know, Mind, Rafiqi
     if (
       [
         "think",

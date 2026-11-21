@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 
 /**
- * Self-contained "Welcome to Cognify" splash screen.
+ * Self-contained "Welcome to Rafiqi" splash screen.
  * Matches the new modern dark UI aesthetic with ambient glow and vibrant brand gradient.
  */
 export default function SplashScreen() {
@@ -51,10 +51,10 @@ export default function SplashScreen() {
             {isAr ? 'أهلاً بك في' : 'Welcome to'}
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-none">
-            Cognify
+            {isAr ? 'رفيقي · Rafiqi' : 'Rafiqi'}
           </h1>
           <p className="text-xs sm:text-sm font-medium text-stone-400 pt-1">
-            {isAr ? 'مساعدك الذكي المتكيف' : 'Your adaptive AI study mentor'}
+            {isAr ? 'رفيقك الذكي المتكيف' : 'Your adaptive AI study mentor'}
           </p>
         </div>
       </div>

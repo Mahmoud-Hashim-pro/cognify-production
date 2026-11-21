@@ -1,5 +1,5 @@
 /**
- * Cognify Accessibility 2.0 - State Engine
+ * Rafiqi Accessibility 2.0 - State Engine
  * src/accessibility/accessibilityStateEngine.ts
  *
  * Implements:

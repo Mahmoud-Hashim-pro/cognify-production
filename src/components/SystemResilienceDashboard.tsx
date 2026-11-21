@@ -357,7 +357,7 @@ export const SystemResilienceDashboard: React.FC<SystemResilienceDashboardProps>
                 Graceful Degradation Matrix (Zero-Downtime Offline Fallbacks)
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                When upstream AI networks disconnect or trip circuit breakers, Cognify serves vetted pedagogical explanations directly from local encrypted cache.
+                When upstream AI networks disconnect or trip circuit breakers, Rafiqi serves vetted pedagogical explanations directly from local encrypted cache.
               </p>
             </div>
 

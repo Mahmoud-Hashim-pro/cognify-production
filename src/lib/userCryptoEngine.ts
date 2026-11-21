@@ -1,5 +1,5 @@
 /**
- * Client-Side AES-256-GCM Encryption at Rest with Device-Bound Key Storage for Cognify 2.0
+ * Client-Side AES-256-GCM Encryption at Rest with Device-Bound Key Storage for Rafiqi 2.0
  * 
  * Provides robust client-side confidentiality for sensitive student data:
  *  - Chat Threads (/users/{uid}/threads/{threadId})
@@ -551,7 +551,7 @@ export async function decryptData<T>(
 }
 
 /**
- * Checks whether an incoming payload is encrypted with Cognify AES-256-GCM.
+ * Checks whether an incoming payload is encrypted with Rafiqi AES-256-GCM.
  */
 export function isEncryptedPayload(obj: any): boolean {
   return (

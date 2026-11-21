@@ -1,5 +1,5 @@
 /**
- * Cognify 2.0 - Milestone Benchmark Engine (Phase B: Requirements 14, 18, 19)
+ * Rafiqi 2.0 - Milestone Benchmark Engine (Phase B: Requirements 14, 18, 19)
  * 
  * Comprehensive AI Provider Performance, Economic Models, Fallback Cascade,
  * Quota Tracking, and Formatting Preservation across Google Gemini, Groq, NVIDIA NIM, and xAI.
@@ -31,7 +31,7 @@ export interface ModelPricingProfile {
 }
 
 /**
- * Verified pricing and latency performance models for all 4 Cognify AI providers:
+ * Verified pricing and latency performance models for all 4 Rafiqi AI providers:
  * 1. Google Gemini (1.5 Flash & 1.5 Pro)
  * 2. Groq (Llama-3.3-70b)
  * 3. NVIDIA NIM (Nemotron-70b)
@@ -109,7 +109,7 @@ export const PROVIDER_PRICING_MODELS: Record<string, ModelPricingProfile> = {
 };
 
 /**
- * Standard provider fallback cascade order mandated by Cognify architecture:
+ * Standard provider fallback cascade order mandated by Rafiqi architecture:
  * Gemini (primary) -> Groq (first fallback) -> NVIDIA (second fallback) -> xAI (frontier fallback)
  */
 export const PROVIDER_FALLBACK_CASCADE: CognifyProviderId[] = [
@@ -237,10 +237,10 @@ export interface DeterministicRoutingResult {
 }
 
 const DETERMINISTIC_PATTERNS: Array<{ regex: RegExp; intent: string; response: string }> = [
-  { regex: /^(hello|hi|hey|good\s*(morning|afternoon|evening))\b/i, intent: 'greeting', response: 'Hello! I am Cognify, your adaptive personal learning assistant. What would you like to explore today?' },
+  { regex: /^(hello|hi|hey|good\s*(morning|afternoon|evening))\b/i, intent: 'greeting', response: 'Hello! I am Rafiqi, your adaptive personal learning assistant. What would you like to explore today?' },
   { regex: /^(help|what\s+can\s+you\s+do|commands)\b/i, intent: 'help', response: 'You can ask academic questions, practice quizzes, explore concept graphs, or enable accessibility features like gaze tracking and speech assist.' },
   { regex: /^(\d+)\s*([\+\-\*\/])\s*(\d+)$/, intent: 'simple_math', response: 'CALCULATED_ARITHMETIC' },
-  { regex: /^(who\s+are\s+you|what\s+is\s+cognify)\b/i, intent: 'identity', response: 'Cognify is an AI-powered adaptive learning assistant designed for personalized, accessible education.' },
+  { regex: /^(who\s+are\s+you|what\s+is\s+(rafiqi|cognify))\b/i, intent: 'identity', response: 'Rafiqi is an AI-powered adaptive learning assistant designed for personalized, accessible education.' },
   { regex: /^(accessibility\s+status|toggle\s+captions)\b/i, intent: 'a11y_command', response: 'Accessibility overlay toggled.' },
 ];
 

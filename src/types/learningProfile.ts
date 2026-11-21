@@ -1,7 +1,7 @@
 /**
  * Phase 2C - Sprint 1: Learning Profile Contract
  *
- * Defines the canonical data contract between the Cognify Intelligence/PLM layer
+ * Defines the canonical data contract between the Rafiqi Intelligence/PLM layer
  * and consumer presentations (Student Intelligence Profile, Teacher Dashboards, etc.).
  *
  * The frontend NEVER queries raw event tables or computes intelligence statistics;

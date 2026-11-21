@@ -1,5 +1,5 @@
 /**
- * Cognify Accessibility 2.0 - Core Accessibility Types & Contracts
+ * Rafiqi Accessibility 2.0 - Core Accessibility Types & Contracts
  * src/accessibility/accessibilityTypes.ts
  *
  * Models operational capabilities across all modalities (Vision, Hearing, Motor, Speech, Communication).

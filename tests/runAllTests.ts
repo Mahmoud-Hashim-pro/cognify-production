@@ -100,6 +100,8 @@ import { runAccessibilityToolkitVerification } from './accessibilityToolkitVerif
 import { runUsageLimitsReliabilityVerification } from './usageLimitsReliabilityVerification.js';
 import { runSecurityPrivacyReviewVerification } from './securityPrivacyReviewVerification.js';
 import { runEndToEndAndRegressionVerification } from './endToEndAndRegressionVerification.js';
+import { BRAND_CONFIG, getBrandName, getBrandTagline } from '../src/config/brand.js';
+import { resolveSeoMetadata, applySeoMetadata } from '../src/lib/seoEngine.js';
 
 let totalPassed = 0;
 let totalFailed = 0;
@@ -640,9 +642,9 @@ async function run() {
     assert(persona.includes('ACTIVE INTERVENTION DIRECTIVE:'), 'Persona includes ACTIVE INTERVENTION DIRECTIVE');
     assert(persona.includes('Strategy: worked_example'), 'Persona specifies worked_example strategy');
     assert(persona.includes('IDENTITY & DEVELOPER / CREATOR ATTRIBUTION'), 'Persona includes developer attribution section');
-    assert(persona.includes('فريق تطوير منصة كوجنيفاي'), 'Persona attributes development to Cognify team in Arabic');
-    assert(persona.includes('The Cognify Team / Graduation Project Team'), 'Persona attributes development to Cognify team in English');
-    assert(persona.includes('NEVER say or imply that you were made, developed, or built by Google engineers'), 'Persona prohibits claiming Google made Cognify');
+    assert(persona.includes('فريق تطوير منصة رفيقي'), 'Persona attributes development to Rafiqi team in Arabic');
+    assert(persona.includes('The Rafiqi Team / Graduation Project Team'), 'Persona attributes development to Rafiqi team in English');
+    assert(persona.includes('NEVER say or imply that you were made, developed, or built by Google engineers'), 'Persona prohibits claiming Google made Rafiqi');
     assert(persona.includes('USER IS BLIND'), 'Preserves accessibility instructions for Visual mode');
 
     // Student Identity and Recognition Verification
@@ -910,7 +912,7 @@ async function run() {
     const mockUsers: any[] = [{ uid: 'test-1', email: 'test@cognify.app', points: 150 }];
     const backup = generateFullSystemBackupJson(mockUsers as any, []);
     assert(backup.filename.includes('backup-') && backup.filename.endsWith('.json'), 'Backup generates timestamped filename');
-    assert((backup.jsonString || '').includes('Cognify'), 'Backup contains system metadata header');
+    assert((backup.jsonString || '').includes('Rafiqi'), 'Backup contains system metadata header');
     assert((backup.jsonString || '').includes('test@cognify.app'), 'Backup contains user records');
 
     // Stale session & cache cleaner
@@ -2352,6 +2354,47 @@ Keep practicing closures with higher-order functions!
     const m36Res = await runEndToEndAndRegressionVerification();
     totalPassed += m36Res.passed;
     totalFailed += m36Res.failed;
+  }
+
+  // 68. Rafiqi (رفيقي) Brand Identity, SOLID Architecture & Technical SEO Verification
+  console.log('\n[68] Rafiqi (رفيقي) Brand Identity, SOLID Architecture & Technical SEO');
+  {
+    assert(BRAND_CONFIG.nameEn === 'Rafiqi', 'BRAND_CONFIG defines English brand name as Rafiqi');
+    assert(BRAND_CONFIG.nameAr === 'رفيقي', 'BRAND_CONFIG defines Arabic brand name as رفيقي');
+    assert(getBrandName('English') === 'Rafiqi', 'getBrandName resolves English to Rafiqi');
+    assert(getBrandName('Arabic') === 'رفيقي', 'getBrandName resolves Arabic to رفيقي');
+    assert(getBrandName('Egyptian Ammiya') === 'رفيقي', 'getBrandName resolves Egyptian Ammiya to رفيقي');
+    assert(getBrandTagline('Arabic').includes('رفيقك'), 'getBrandTagline returns Arabic tagline');
+
+    // Verify SEO Engine (SOLID Dependency Inversion via mock DocumentAdapter)
+    const arMeta = resolveSeoMetadata({ view: 'disability', subTab: 'vision', language: 'Arabic' });
+    assert(arMeta.title.includes('رفيقي') && arMeta.title.includes('Rafiqi'), 'Arabic Vision SEO title includes رفيقي and Rafiqi');
+    assert(arMeta.dir === 'rtl' && arMeta.lang === 'ar', 'Arabic SEO metadata resolves RTL and lang=ar');
+
+    let capturedTitle = '';
+    let capturedCanonical = '';
+    const capturedMetas: Record<string, string> = {};
+    applySeoMetadata(
+      { view: 'academics', language: 'English' },
+      {
+        setTitle: (t) => { capturedTitle = t; },
+        setMetaContent: (_sel, _attr, key, content) => { capturedMetas[key] = content; },
+        setCanonical: (href) => { capturedCanonical = href; },
+      }
+    );
+    assert(capturedTitle.includes('Rafiqi Academic Cockpit'), 'applySeoMetadata updates document title via injected adapter');
+    assert(capturedMetas['og:title'] === capturedTitle, 'applySeoMetadata synchronizes Open Graph title');
+    assert(capturedCanonical.startsWith('https://rafiqi.vercel.app'), 'applySeoMetadata sets canonical URL');
+
+    // Verify index.html SEO tags, Open Graph, Twitter Card & Schema.org JSON-LD
+    const htmlContent = fs.readFileSync(path.resolve('index.html'), 'utf8');
+    assert(htmlContent.includes('<title>Rafiqi (رفيقي)'), 'index.html title is branded as Rafiqi (رفيقي)');
+    assert(htmlContent.includes('property="og:title"'), 'index.html includes Open Graph title tag');
+    assert(htmlContent.includes('name="twitter:card"'), 'index.html includes Twitter Card meta tag');
+    assert(htmlContent.includes('rel="canonical"'), 'index.html includes canonical link tag');
+    assert(htmlContent.includes('application/ld+json') && htmlContent.includes('"@type": "WebApplication"'), 'index.html embeds Schema.org WebApplication JSON-LD structured data');
+    assert(fs.existsSync(path.resolve('public/robots.txt')), 'public/robots.txt exists for search engine crawlers');
+    assert(fs.existsSync(path.resolve('public/sitemap.xml')), 'public/sitemap.xml exists for search engine indexing');
   }
 
   console.log(`\n========================================`);

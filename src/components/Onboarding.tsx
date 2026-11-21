@@ -428,7 +428,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         </div>
         <div className="space-y-2">
           <h2 className="text-3xl font-extrabold tracking-tight text-text-main leading-tight">{localize(formData.language, "Sustainability & Life Goals", "الاستدامة وأهداف الحياة")}</h2>
-          <p className="text-text-muted">{localize(formData.language, "Cognify is built for long-term human growth. Which UN Sustainable Development Goal do you care about most?", "كوجنيفاي مبني للنمو الإنساني طويل المدى. أنهي هدف من أهداف التنمية المستدامة يهمّك أكتر؟")}</p>
+          <p className="text-text-muted">{localize(formData.language, "Rafiqi is built for long-term human growth. Which UN Sustainable Development Goal do you care about most?", "رفيقي مبني للنمو الإنساني طويل المدى. أنهي هدف من أهداف التنمية المستدامة يهمّك أكتر؟")}</p>
         </div>
       </div>
 
@@ -490,8 +490,8 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               <p className="text-xs md:text-sm text-text-muted leading-relaxed">
                 {localize(
                   formData.language,
-                  "Cognify personalizes its explanation depth and scaffolding to your unique reasoning preferences. Complete this quick 10-question visual puzzle preview, or start with our balanced baseline.",
-                  "يتكيّف كوجنيفاي تلقائياً مع طريقتك في التفكير وأسلوب الشرح المفضل لديك عبر 10 ألغاز بصرية استكشافية سريعة، أو يمكنك البدء بالمستوى المتوازن وممارسة التمارين لاحقاً."
+                  "Rafiqi personalizes its explanation depth and scaffolding to your unique reasoning preferences. Complete this quick 10-question visual puzzle preview, or start with our balanced baseline.",
+                  "يتكيّف رفيقي تلقائياً مع طريقتك في التفكير وأسلوب الشرح المفضل لديك عبر 10 ألغاز بصرية استكشافية سريعة، أو يمكنك البدء بالمستوى المتوازن وممارسة التمارين لاحقاً."
                 )}
               </p>
             </div>
@@ -964,7 +964,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
 
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-text-main tracking-tight uppercase">{isRtl ? 'ملفك جاهز' : 'Profile Ready'}</h2>
-          <p className="text-xs text-text-muted font-medium">{isRtl ? 'تم إعداد وضبط تجربتك الشخصية في كوجنيفاي بنجاح.' : 'Your personalized Cognify experience is ready to go.'}</p>
+          <p className="text-xs text-text-muted font-medium">{isRtl ? 'تم إعداد وضبط تجربتك الشخصية في رفيقي بنجاح.' : 'Your personalized Rafiqi experience is ready to go.'}</p>
         </div>
 
         {/* Profile Card Summary */}
@@ -1079,7 +1079,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
       </div>
 
       <div className="mt-8 text-[10px] text-faint font-mono tracking-[0.3em] uppercase pb-6">
-        Cognify Initialization
+        Rafiqi Initialization
       </div>
     </div>
   );

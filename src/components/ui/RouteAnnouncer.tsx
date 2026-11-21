@@ -24,7 +24,7 @@ export const RouteAnnouncer: React.FC<RouteAnnouncerProps> = ({ route, language 
 
     // 1. Update browser tab title
     if (typeof document !== 'undefined') {
-      document.title = `Cognify — ${pageTitle}`;
+      document.title = `Rafiqi — ${pageTitle}`;
     }
 
     // 2. Deliver polite live announcement

@@ -121,7 +121,7 @@ export default function UnifiedHearingCenter({
     setIsAiLoading(true);
     triggerHapticAlert('single-pulse');
 
-    const prompt = `You are Cognify's specialized Deaf & Hard of Hearing AI Sign Companion.
+    const prompt = `You are Rafiqi's specialized Deaf & Hard of Hearing AI Sign Companion.
 Explain this concept or answer this question clearly, visually, and concisely in 1 to 2 short sentences in the requested language/dialect: "${dialect}".
 CRITICAL: Do NOT use any English placeholders or system terms like "Other", "N/A", or "esraahosni". If the dialect is Arabic or Egyptian Ammiya, answer purely in Arabic.
 Keep it simple, clear, and direct so it can be signed by a 3D Sign Avatar and read easily by a deaf student:

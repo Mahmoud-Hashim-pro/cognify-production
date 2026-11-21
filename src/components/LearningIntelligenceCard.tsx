@@ -232,7 +232,7 @@ export default function LearningIntelligenceCard({ profile }: LearningIntelligen
             <h3 className="font-black text-white text-base flex items-center gap-2">
               {localize(profile.language, 'Explainable Learning Profile', 'الملف المعرفي الشفاف')}
               <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
-                Cognify 2.0
+                Rafiqi 2.0
               </span>
             </h3>
             <p className="text-xs text-slate-400 font-medium">
@@ -323,10 +323,10 @@ export default function LearningIntelligenceCard({ profile }: LearningIntelligen
         </div>
         <p className="text-xs text-slate-300 leading-relaxed font-medium">
           {isAr
-            ? `بناءً على التفاعل التجريبي المستمر، أظهر الطالب أعلى كفاءة حل للمسائل واستبقاء للمفاهيم عبر "${primaryStrategyMeta.nameAr}". يبدأ كوجنيفاي شروحاته استباقياً بهذه الاستراتيجية.`
+            ? `بناءً على التفاعل التجريبي المستمر، أظهر الطالب أعلى كفاءة حل للمسائل واستبقاء للمفاهيم عبر "${primaryStrategyMeta.nameAr}". يبدأ رفيقي شروحاته استباقياً بهذه الاستراتيجية.`
             : isFr
-            ? `D'après les interactions enregistrées, l'élève démontre la meilleure rétention via "${primaryStrategyMeta.nameFr}". Cognify ouvre ses explications de façon proactive avec ce style.`
-            : `Based on longitudinal practice evidence, the learner demonstrates highest retention and problem-solving velocity when instruction begins with "${primaryStrategyMeta.nameEn}". Cognify proactively opens explanations with this modality.`}
+            ? `D'après les interactions enregistrées, l'élève démontre la meilleure rétention via "${primaryStrategyMeta.nameFr}". Rafiqi ouvre ses explications de façon proactive avec ce style.`
+            : `Based on longitudinal practice evidence, the learner demonstrates highest retention and problem-solving velocity when instruction begins with "${primaryStrategyMeta.nameEn}". Rafiqi proactively opens explanations with this modality.`}
         </p>
       </div>
 

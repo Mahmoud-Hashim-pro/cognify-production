@@ -1,5 +1,5 @@
 /**
- * Multilingual Benchmark Dataset & Evaluation Rubrics (Cognify 2.0 - Requirement 15)
+ * Multilingual Benchmark Dataset & Evaluation Rubrics (Rafiqi 2.0 - Requirement 15)
  *
  * Trilingual dataset and evaluation rubrics for French, Arabic (Egyptian + MSA), and English.
  * Contains linguistic fixtures for:

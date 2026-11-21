@@ -44,8 +44,8 @@ test('isArabicLocale identifies Arabic variants correctly', () => {
 
 // 2. Localization Functions (getTranslation & localize)
 test('getTranslation returns correct localized strings for core keys', () => {
-  assert.strictEqual(getTranslation('English', 'appName'), 'Cognify AI');
-  assert.strictEqual(getTranslation('Arabic', 'appName'), 'كوجنيفي AI');
+  assert.strictEqual(getTranslation('English', 'appName'), 'Rafiqi AI');
+  assert.strictEqual(getTranslation('Arabic', 'appName'), 'رفيقي AI');
   assert.strictEqual(getTranslation('English', 'continue'), 'Continue');
   assert.strictEqual(getTranslation('Arabic', 'continue'), 'استمرار');
   assert.strictEqual(getTranslation('Egyptian Ammiya', 'continue'), 'كمل');

@@ -1,5 +1,5 @@
 /**
- * React hook for Cognify 2.0 Student State (Point 1 Integration)
+ * React hook for Rafiqi 2.0 Student State (Point 1 Integration)
  * Provides reactive access to the Unified Student State Engine.
  */
 import { useState, useEffect, useCallback } from 'react';

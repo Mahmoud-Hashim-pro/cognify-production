@@ -1,5 +1,5 @@
 /**
- * Conversational Strain & Pedagogical Adaptation Engine (Cognify 2.0 - Pillar 1)
+ * Conversational Strain & Pedagogical Adaptation Engine (Rafiqi 2.0 - Pillar 1)
  * 
  * Detects implicit signals of student confusion, misunderstanding, or hesitation
  * in real-time chat messages across Arabic, English, and French.

@@ -1,5 +1,5 @@
 /**
- * Comprehensive Benchmark Evaluation Dataset for Cognify 2.0 (Phase B - Requirements 11 & 12)
+ * Comprehensive Benchmark Evaluation Dataset for Rafiqi 2.0 (Phase B - Requirements 11 & 12)
  *
  * Implements:
  * 1. Benchmark items across 4 academic domains:

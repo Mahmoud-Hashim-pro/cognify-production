@@ -1,5 +1,5 @@
 /**
- * Cognify Client-Side HTTPS & API Request Telemetry Tracker
+ * Rafiqi Client-Side HTTPS & API Request Telemetry Tracker
  * 
  * Intercepts and monitors outgoing HTTP/HTTPS fetch calls to provide real-time
  * metrics on backend invocations, Firestore API traffic, Gemini AI calls, and

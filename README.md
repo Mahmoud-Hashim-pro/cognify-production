@@ -1,4 +1,4 @@
-# Cognify 2.0 (كوجنيفاي)
+# Rafiqi 2.0 (رفيقي)
 *An Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform*
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://my-cognify-app.vercel.app)
@@ -6,9 +6,9 @@
 [![TypeScript Validated](https://img.shields.io/badge/TypeScript-Validated%20(Zero%20Errors)-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Security Standard](https://img.shields.io/badge/Security-OWASP%20Top%2010%20Hardened-8B5CF6?logo=googlecloud&logoColor=white)](ARCHITECTURE.md)
 
-Cognify is an **Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform** developed by the **Cognify Development Team** to empower students, self-learners, and people of determination (individuals with visual, hearing, or neurodiverse needs).
+Rafiqi is an **Adaptive AI Mentor, Pedagogical Diagnostic Engine & Assistive Platform** developed by the **Rafiqi Development Team** to empower students, self-learners, and people of determination (individuals with visual, hearing, or neurodiverse needs).
 
-Unlike conventional LLM wrappers that treat every query as a stateless prompt, Cognify maintains a **continuous, evidence-based pedagogical state**. It detects learning strain in real time, diagnoses root-cause prerequisite gaps, optimizes instructional strategies dynamically across 5 modalities, and guards against memory decay using active spaced micro-retrieval.
+Unlike conventional LLM wrappers that treat every query as a stateless prompt, Rafiqi maintains a **continuous, evidence-based pedagogical state**. It detects learning strain in real time, diagnoses root-cause prerequisite gaps, optimizes instructional strategies dynamically across 5 modalities, and guards against memory decay using active spaced micro-retrieval.
 
 ---
 
@@ -21,8 +21,8 @@ Most AI educational tools and chatbots suffer from four fundamental flaws:
 
 ---
 
-## 🚀 The Cognify Solution
-Cognify bridges these gaps with a closed-loop, evidence-based learning cycle:
+## 🚀 The Rafiqi Solution
+Rafiqi bridges these gaps with a closed-loop, evidence-based learning cycle:
 - **Trilingual Core**: Native fluency in **Arabic** (Egyptian & Modern Standard), **English**, and **French**.
 - **Pedagogical Decoupling**: Academic levels and cognitive scaffolding are driven strictly by **observed concept mastery and empirical evidence**, completely decoupled from static IQ metrics.
 - **Server-Side AI Gateway**: Master provider API keys remain strictly on the server (`api/` serverless functions); client browsers **never** touch master AI keys.
@@ -79,7 +79,7 @@ Student Interaction (Chat / Formative Check / Video / Speech)
 - **Normalized Gain Evaluation**: Uses Hake's normalized gain equation ($g = \frac{Post - Pre}{100 - Pre}$) to measure actual knowledge transfer between pre- and post-assessments.
 
 ### 2. Multi-Modal Accessibility Suite
-- **Vision Companion (Blind & Low-Vision)**: Real-time scene, text, and hazard narration. Camera frames are sent to Google Gemini for AI inference, then immediately discarded — **never persisted to disk, database, or any Cognify server (0% Disk / 0% Database Storage)**. Ephemeral cloud inference is required for multimodal AI; see [PRIVACY_SPECIFICATION.md](PRIVACY_SPECIFICATION.md) for the full data-flow audit.
+- **Vision Companion (Blind & Low-Vision)**: Real-time scene, text, and hazard narration. Camera frames are sent to Google Gemini for AI inference, then immediately discarded — **never persisted to disk, database, or any Rafiqi server (0% Disk / 0% Database Storage)**. Ephemeral cloud inference is required for multimodal AI; see [PRIVACY_SPECIFICATION.md](PRIVACY_SPECIFICATION.md) for the full data-flow audit.
 - **Spatial Memory Engine**: Localizes and tracks physical objects (keys, eyeglasses, canes) across rooms with chronological surface history (last 10 surfaces) and epistemic honesty (never hallucinates an unobserved item).
 - **Sign Avatar 3D (Deaf & Hard of Hearing)**: Real-time 3D signing avatar powered by Three.js. **Note:** Current gesture poses are ASL-based approximations pending review by a certified Arabic Sign Language (ArSL) linguist. A disclaimer is displayed in-app. Certified ArSL integration is on the roadmap (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - **Two-Way Hearing Bridge**: Live bilingual speech-to-text transcription with adjustable font sizes and high-contrast styling.
@@ -135,7 +135,7 @@ VITE_SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
 ```
 
 > [!IMPORTANT]
-> **No `VITE_GEMINI_API_KEY` in Production**: In Cognify 2.0, production AI requests are handled exclusively through serverless endpoints (`/api/gemini/chat`, `/api/gemini/generate`). Client-side BYOK keys entered by users are encrypted via Web Crypto API AES-GCM before storage.
+> **No `VITE_GEMINI_API_KEY` in Production**: In Rafiqi 2.0, production AI requests are handled exclusively through serverless endpoints (`/api/gemini/chat`, `/api/gemini/generate`). Client-side BYOK keys entered by users are encrypted via Web Crypto API AES-GCM before storage.
 
 ---
 
@@ -169,7 +169,7 @@ The application will be available at `http://localhost:5173`.
 
 ## 🧪 Automated Testing & Verification Suite
 
-Cognify features a comprehensive test suite covering mathematical formulas, pedagogical state transitions, rate limiters, security guards, CORS policies, state integrity checks, and full end-to-end user lifecycles.
+Rafiqi features a comprehensive test suite covering mathematical formulas, pedagogical state transitions, rate limiters, security guards, CORS policies, state integrity checks, and full end-to-end user lifecycles.
 
 ```bash
 # Run the complete test suite
@@ -207,7 +207,7 @@ npm run build
 
 ## 🚢 Deployment
 
-Cognify can be deployed on **Vercel**, but production API security depends on configuring its server-side environment variables:
+Rafiqi can be deployed on **Vercel**, but production API security depends on configuring its server-side environment variables:
 1. Connect your repository to Vercel.
 2. In **Project Settings → Environment Variables**, set `GEMINI_API_KEY`, `FIREBASE_PROJECT_ID`, and `PRODUCTION_ORIGIN` to the exact production app origin.
 3. Configure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for shared production rate limiting. Production API requests fail closed when Upstash is not configured.
@@ -220,7 +220,7 @@ Do not put server credentials in `VITE_*` variables; Vite includes those values 
 
 ## 🔍 Technical Invariants & Known System Constraints
 
-Cognify is engineered with strict technical honesty. The following requirements and runtime characteristics apply:
+Rafiqi is engineered with strict technical honesty. The following requirements and runtime characteristics apply:
 
 1. **Emergency SOS Notification Pipeline**:
    - Dispatches via server-side endpoints (`/api/emergency/dispatch`) to Webhook, Telegram Bot API, or Twilio SMS when environment variables (`TELEGRAM_BOT_TOKEN`, `TWILIO_ACCOUNT_SID`, etc.) are configured.
@@ -244,4 +244,4 @@ Cognify is engineered with strict technical honesty. The following requirements 
 ---
 
 ## 📄 License & Attribution
-Engineered and maintained by the **Cognify Development Team** as an assistive educational innovation for students and people of determination.
+Engineered and maintained by the **Rafiqi Development Team** as an assistive educational innovation for students and people of determination.

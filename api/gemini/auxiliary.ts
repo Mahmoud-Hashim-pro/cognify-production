@@ -36,7 +36,7 @@ export async function benchmarkComparisonHandler(req: any, res: any) {
 
     const prompt = `You are a strict reviewer performing a SECOND-PASS review of an AI tutor's answer.
 The user asked: "${userMessage}"
-The assistant (Cognify) replied: "${originalMessage}"
+The assistant (Rafiqi) replied: "${originalMessage}"
 
 Write an independent, higher-quality answer for this learner (Level: ${profile.level || 'Basic'}, Field: ${profile.field || 'General'}).
 

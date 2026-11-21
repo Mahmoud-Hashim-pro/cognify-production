@@ -1,5 +1,5 @@
 /**
- * Spatial Memory Engine for Cognify 2.0
+ * Spatial Memory Engine for Rafiqi 2.0
  * Provides persistent, multi-user isolated physical object tracking,
  * spatial extraction from vision descriptions, location history,
  * and epistemically honest spatial queries across English, Arabic, and French.

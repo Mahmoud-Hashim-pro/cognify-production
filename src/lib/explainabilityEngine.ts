@@ -216,8 +216,8 @@ export function explainPedagogyChoice(
         confidenceLevel,
         pedagogicalGoalEn: 'Relieve extraneous cognitive load through concrete step-by-step demonstration before asking for independent synthesis.',
         pedagogicalGoalAr: 'تخفيف العبء الإدراكي عبر تقديم حلول نموذجية مشروحة خطوة بخطوة قبل الانتقال للتطبيق المستقل.',
-        rationaleEn: `Cognify switched to step-by-step Worked Examples for "${conceptName}". Breaking down the mechanics sequentially relieves working memory overload, allowing you to absorb the execution blueprint before tackling code independently.`,
-        rationaleAr: `اختار كوجنيفاي أسلوب "المسائل النموذجية المحلولة خطوة بخطوة" في "${conceptNameAr}". استعراض خطوات الحل تفصيلياً يُخفف العبء الذهني ويتيح استيعاب النمط الأساسي قبل الانتقال للتطبيق العملي بمفردك.`,
+        rationaleEn: `Rafiqi switched to step-by-step Worked Examples for "${conceptName}". Breaking down the mechanics sequentially relieves working memory overload, allowing you to absorb the execution blueprint before tackling code independently.`,
+        rationaleAr: `اختار رفيقي أسلوب "المسائل النموذجية المحلولة خطوة بخطوة" في "${conceptNameAr}". استعراض خطوات الحل تفصيلياً يُخفف العبء الذهني ويتيح استيعاب النمط الأساسي قبل الانتقال للتطبيق العملي بمفردك.`,
       };
     }
 
@@ -235,8 +235,8 @@ export function explainPedagogyChoice(
         confidenceLevel,
         pedagogicalGoalEn: 'Bridge unfamiliar computational concepts to intuitive everyday mental models before formal notation.',
         pedagogicalGoalAr: 'تقريب المفاهيم الحاسوبية المجردة بنماذج ذهنية واقعية مألوفة قبل الدخول في الصيغ التقنية.',
-        rationaleEn: `Cognify engaged Conceptual Analogies for "${conceptName}". Grounding abstract computing logic into familiar physical systems anchors intuitive mental models, making low-level mechanics feel concrete and accessible.`,
-        rationaleAr: `اعتمد كوجنيفاي أسلوب "التشبيهات والنماذج الذهنية" في "${conceptNameAr}". ربط الأفكار البرمجية المجردة بتجارب واقعية مألوفة يُرسخ الفهم البديهي ويسهل استيعاب الآليات الدقيقة.`,
+        rationaleEn: `Rafiqi engaged Conceptual Analogies for "${conceptName}". Grounding abstract computing logic into familiar physical systems anchors intuitive mental models, making low-level mechanics feel concrete and accessible.`,
+        rationaleAr: `اعتمد رفيقي أسلوب "التشبيهات والنماذج الذهنية" في "${conceptNameAr}". ربط الأفكار البرمجية المجردة بتجارب واقعية مألوفة يُرسخ الفهم البديهي ويسهل استيعاب الآليات الدقيقة.`,
       };
     }
 
@@ -254,8 +254,8 @@ export function explainPedagogyChoice(
         confidenceLevel,
         pedagogicalGoalEn: 'Deconstruct complex problem spaces into sequenced, bite-sized checkpoints to maintain momentum without overwhelming working memory.',
         pedagogicalGoalAr: 'تفكيك المسائل المعقدة إلى خطوات تدريجية منظمة للحفاظ على استمرارية الإنجاز دون إرهاق الذاكرة النشطة.',
-        rationaleEn: `Cognify deployed Scaffolded Guidance for "${conceptName}". Breaking down the solution into incremental milestones supports autonomous problem-solving while ensuring you never get stuck on intermediate steps.`,
-        rationaleAr: `استخدم كوجنيفاي أسلوب "التفكيك المتدرج (Scaffolding)" في "${conceptNameAr}". تقسيم التحدي إلى مراحل متسلسلة يُمكنك من الوصول للحل بشكل ذاتي دون التعثر في الخطوات البينية.`,
+        rationaleEn: `Rafiqi deployed Scaffolded Guidance for "${conceptName}". Breaking down the solution into incremental milestones supports autonomous problem-solving while ensuring you never get stuck on intermediate steps.`,
+        rationaleAr: `استخدم رفيقي أسلوب "التفكيك المتدرج (Scaffolding)" في "${conceptNameAr}". تقسيم التحدي إلى مراحل متسلسلة يُمكنك من الوصول للحل بشكل ذاتي دون التعثر في الخطوات البينية.`,
       };
     }
 
@@ -274,7 +274,7 @@ export function explainPedagogyChoice(
         confidenceLevel,
         pedagogicalGoalEn: 'Promote autonomous discovery and meta-cognitive evaluation through targeted, thought-provoking micro-prompts.',
         pedagogicalGoalAr: 'تحفيز الاكتشاف الذاتي والتفكير النقدي العميق عبر أسئلة استنتاجية توجيهية ذكية.',
-        rationaleEn: `Cognify promoted this interaction to Socratic Inquiry for "${conceptName}". You have demonstrated solid foundational fluency; guiding you with deductive questions challenges you to evaluate edge cases and architectural trade-offs independently.`,
+        rationaleEn: `Rafiqi promoted this interaction to Socratic Inquiry for "${conceptName}". You have demonstrated solid foundational fluency; guiding you with deductive questions challenges you to evaluate edge cases and architectural trade-offs independently.`,
         rationaleAr: `تمت الترقية إلى "الحوار السقراطي الاستنتاجي" في "${conceptNameAr}". نظراً لتمكنك الواضح من الأساسيات؛ فإن توجيهك بأسئلة ذكية يُحفزك على اكتشاف حالات الحافة والبدائل الهندسية ذاتياً.`,
       };
     }
@@ -292,8 +292,8 @@ export function explainPedagogyChoice(
         confidenceLevel,
         pedagogicalGoalEn: 'Explore mathematical formalisms, low-level execution boundaries, and production-grade algorithmic trade-offs.',
         pedagogicalGoalAr: 'التعمق في الدقة الرياضية، وتفاصيل الذاكرة منخفضة المستوى، والتعقيد الخوارزمي في بيئات الإنتاج.',
-        rationaleEn: `Cognify selected Formal Rigor for "${conceptName}". Your demonstrated proficiency enables deep analysis of memory layout boundaries, algorithmic complexity guarantees, and enterprise-grade design constraints.`,
-        rationaleAr: `اختار كوجنيفاي أسلوب "العمق الأكاديمي والدقة الخوارزمية" في "${conceptNameAr}". مستواك المتقدم يتيح الخوض في تفاصيل الذاكرة منخفضة المستوى والتعقيد الحسابي ومعايير النظم الكبرى.`,
+        rationaleEn: `Rafiqi selected Formal Rigor for "${conceptName}". Your demonstrated proficiency enables deep analysis of memory layout boundaries, algorithmic complexity guarantees, and enterprise-grade design constraints.`,
+        rationaleAr: `اختار رفيقي أسلوب "العمق الأكاديمي والدقة الخوارزمية" في "${conceptNameAr}". مستواك المتقدم يتيح الخوض في تفاصيل الذاكرة منخفضة المستوى والتعقيد الحسابي ومعايير النظم الكبرى.`,
       };
     }
 
@@ -305,8 +305,8 @@ export function explainPedagogyChoice(
         confidenceLevel: 'provisional',
         pedagogicalGoalEn: 'Provide balanced scaffolding tailored to the active curriculum.',
         pedagogicalGoalAr: 'تقديم دعم تدريجي متوازن ومناسب للمرحلة التعليمية الحالية.',
-        rationaleEn: `Cognify is using structured guidance to support your steady progression through "${conceptName}".`,
-        rationaleAr: `يستخدم كوجنيفاي التوجيه المتدرج لدعم تقدمك المستمر في "${conceptNameAr}".`,
+        rationaleEn: `Rafiqi is using structured guidance to support your steady progression through "${conceptName}".`,
+        rationaleAr: `يستخدم رفيقي التوجيه المتدرج لدعم تقدمك المستمر في "${conceptNameAr}".`,
       };
     }
   }

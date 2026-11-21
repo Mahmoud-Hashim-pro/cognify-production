@@ -167,7 +167,7 @@ export default function StudentCockpitHub({
 
     const greeting = profile.name
       ? `${t('Hello', 'أهلاً بك يا', 'Bonjour')} ${profile.name}.`
-      : t('Welcome back.', 'أهلاً بك في كوجنيفاي.', 'Bienvenue sur Cognify.');
+      : t('Welcome back.', 'أهلاً بك في رفيقي.', 'Bienvenue sur Rafiqi.');
     
     const summary = isAr
       ? `${greeting} مساحتك التعليمية الهادئة جاهزة. طريقتك المفضلة الحالية في الشرح هي ${getPedagogyLabel(activePedagogy)}. يمكنك بدء الدرس في أي وقت، ومراجعة مفاهيمك المستحقة براحة تامة وبدون أي ضغط.`
@@ -534,7 +534,7 @@ export default function StudentCockpitHub({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60">
-                Cognify · {t('Personal Learning Space', 'مساحتك التعليمية الشخصية', 'Espace d\'apprentissage personnel')}
+                Rafiqi · {t('Personal Learning Space', 'مساحتك التعليمية الشخصية', 'Espace d\'apprentissage personnel')}
               </span>
               <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
                 {profile.field || 'General Studies'}

@@ -1,6 +1,6 @@
 /**
  * Phase C - Requirement 20: Distributed Correlation Tracing
- * Cognify 2.0 Production Observability & Tracing Engine
+ * Rafiqi 2.0 Production Observability & Tracing Engine
  *
  * Implements x-cognify-trace-id correlation tracking with UUIDv4 + nano-timestamp,
  * hierarchical span lifecycle management with high-resolution duration calculation,
@@ -52,7 +52,7 @@ export function generateTraceId(): string {
 }
 
 /**
- * Validates that a string is a properly formatted Cognify trace ID
+ * Validates that a string is a properly formatted Rafiqi trace ID
  * containing a UUIDv4 segment and a numeric timestamp segment.
  */
 export function isValidTraceId(traceId?: string | null): boolean {

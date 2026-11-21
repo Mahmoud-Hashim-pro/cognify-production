@@ -748,8 +748,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!profile.uid || !profile.activeThreadId) {
       const isArabic = isArabicLocale(profile.language);
       const welcomeMsg = isArabic 
-        ? `كوجنيفي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
-        : `Cognify Ready. How can I assist your ${profile.field} studies today?`;
+        ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
+        : `Rafiqi Ready. How can I assist your ${profile.field} studies today?`;
         
       setMessages([
         {
@@ -795,8 +795,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             // If thread exists in metadata but no messages
             const isArabic = isArabicLocale(profile.language);
             const welcomeMsg = isArabic 
-              ? `كوجنيفي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
-              : `Cognify Ready. How can I assist your ${profile.field} studies today?`;
+              ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
+              : `Rafiqi Ready. How can I assist your ${profile.field} studies today?`;
             setMessages([
               {
                 id: 'welcome',
@@ -826,8 +826,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         // If thread document does not exist yet
         const isArabic = isArabicLocale(profile.language);
         const welcomeMsg = isArabic 
-          ? `كوجنيفي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
-          : `Cognify Ready. How can I assist your ${profile.field} studies today?`;
+          ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
+          : `Rafiqi Ready. How can I assist your ${profile.field} studies today?`;
         setMessages([
           {
             id: 'welcome',
@@ -1590,7 +1590,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 {localize(profile.language, 'AI Tutor', 'المعلم الذكي')}
               </h1>
               <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#087F8C]/20 text-[#0A96A5] border border-[#087F8C]/40 shrink-0">
-                Cognify
+                Rafiqi
               </span>
             </div>
             <p className="text-[11px] text-[#8FA7BE] hidden sm:block truncate mt-0.5">
@@ -2244,7 +2244,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           name="chat-composer"
                           rows={1}
                           aria-label={getTranslation(profile.language, 'typeMessage')}
-                          placeholder={isListening ? (localize(profile.language, "Listening...", 'جاري الاستماع...')) : (localize(profile.language, "Ask Cognify or type a message...", "اسأل كوجنيفاي أو اكتب رسالتك..."))}
+                          placeholder={isListening ? (localize(profile.language, "Listening...", 'جاري الاستماع...')) : (localize(profile.language, "Ask Rafiqi or type a message...", "اسأل رفيقي أو اكتب رسالتك..."))}
                           value={input + (interimTranscript ? (input ? " " : "") + interimTranscript : "")}
                           onChange={(e) => setInput(e.target.value)}
                           onInput={(e) => {
@@ -2498,7 +2498,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
                   {/* Disclaimer */}
                   <p className="text-center text-[10px] text-[#8FA7BE] tracking-wide">
-                    {localize(profile.language, 'Cognify can make mistakes. Check important information.', 'كوجنيفاي ممكن يخطئ. راجِع المعلومات المهمة.')}
+                    {localize(profile.language, 'Rafiqi can make mistakes. Check important information.', 'رفيقي ممكن يخطئ. راجِع المعلومات المهمة.')}
                   </p>
                 </div>
               </div>

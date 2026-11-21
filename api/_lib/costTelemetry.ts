@@ -1,6 +1,6 @@
 /**
  * Phase C - Requirement 22: Cost Telemetry & Multi-Tenant Budget Enforcement
- * Cognify 2.0 Production Observability & Tracing Engine
+ * Rafiqi 2.0 Production Observability & Tracing Engine
  *
  * Calculates per-call estimated USD costs based on granular provider/model pricing,
  * and tracks aggregated tenant organization usage against monthly budget caps

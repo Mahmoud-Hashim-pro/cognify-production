@@ -9,7 +9,7 @@
  *    - Processing Speed (Timed perceptual discrimination)
  * 2. Domain Strengths & Preferences (0-100% per domain)
  * 3. Exponential Cooldown Calculation (7 * 2^(n-1) days)
- * 4. Daily Cognitive Gym workout generators with Cognify points
+ * 4. Daily Cognitive Gym workout generators with Rafiqi points
  * 
  * NOTE: Strictly an exploratory educational preview to personalize AI pedagogy.
  * Not a clinical IQ test, standardized psychometric examination, or static measure of intelligence.

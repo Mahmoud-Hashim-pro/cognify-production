@@ -1,12 +1,12 @@
 /**
- * Cognify Client Storage Protection (V1)
+ * Rafiqi Client Storage Protection (V1)
  * 
  * Provides client-side storage obfuscation, integrity verification, and optional
  * Web Crypto AES-GCM protection for user-provided BYOK (Bring-Your-Own-Key) tokens
  * stored in browser localStorage.
  * 
  * ARCHITECTURAL BOUNDARY:
- * 1. Primary AI inference in production Cognify is executed server-side via `/api/gemini/chat`,
+ * 1. Primary AI inference in production Rafiqi is executed server-side via `/api/gemini/chat`,
  *    where API keys reside exclusively in server environment variables and are NEVER sent to the client.
  * 2. This client shield protects optional developer keys entered in Settings (BYOK) against
  *    plain-text shoulder-surfing and automated scraper memory inspection.

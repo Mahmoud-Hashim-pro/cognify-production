@@ -195,7 +195,7 @@ export function generateOpenApiSpec(): Record<string, any> {
   return {
     openapi: '3.1.0',
     info: {
-      title: 'Cognify 2.0 Adaptive Learning Platform API',
+      title: 'Rafiqi 2.0 Adaptive Learning Platform API',
       version: '2.0.0',
       description: 'Programmatic REST API for LMS integration, pedagogical evaluations, differential privacy analytics, and real-time webhook subscriptions.'
     },
@@ -208,7 +208,7 @@ export function generateOpenApiSpec(): Record<string, any> {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'API Key (cog_live_*)',
-          description: 'Provide your Cognify API Key with the Bearer prefix.'
+          description: 'Provide your Rafiqi API Key with the Bearer prefix.'
         }
       }
     },

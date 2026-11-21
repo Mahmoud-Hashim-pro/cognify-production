@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * 
- * Cognify Accessible Educational Book & Document Studio View
+ * Rafiqi Accessible Educational Book & Document Studio View
  * (Phase 6: Dedicated Accessible Studio for Transforming Rough Content into Professional DOCX/PDF)
  */
 
@@ -116,7 +116,7 @@ export default function AccessibleBookStudioView({
       author: profile?.name || 'الأستاذ الدكتور / المشرف الأكاديمي',
       subject: profile?.field || (isArLocale ? 'العلوم الطبيعية والفيزياء' : 'Physics & Natural Science'),
       gradeLevel: profile?.educationLevel || (isArLocale ? 'المرحلة الثانوية / الجامعية' : 'High School / University'),
-      institution: profile?.organization || (isArLocale ? 'منصة كوجنيفاي للتعليم الميسر' : 'Cognify Inclusive Learning Platform'),
+      institution: profile?.organization || (isArLocale ? 'منصة رفيقي للتعليم الميسر' : 'Rafiqi Inclusive Learning Platform'),
       date: new Date().toLocaleDateString(isArLocale ? 'ar-EG' : 'en-US'),
       language: isArLocale ? 'ar' : 'en',
       template: 'textbook',
@@ -255,7 +255,7 @@ export default function AccessibleBookStudioView({
     }
   };
 
-  // Load extracted text from Cognify File Reader session
+  // Load extracted text from Rafiqi File Reader session
   const handleImportFromFileReader = () => {
     if (typeof window === 'undefined') return;
     try {
@@ -276,7 +276,7 @@ export default function AccessibleBookStudioView({
         if (rawContent) setRawSourceHistory((prev) => [...prev, rawContent]);
         setRawContent(imported);
         toast.success(
-          isArLocale ? 'تم استيراد المحتوى المستخرج من قارئ المستندات!' : 'Imported text from Cognify Document Reader!',
+          isArLocale ? 'تم استيراد المحتوى المستخرج من قارئ المستندات!' : 'Imported text from Rafiqi Document Reader!',
           isArLocale ? 'استيراد' : 'Import'
         );
       } else {
@@ -306,7 +306,7 @@ export default function AccessibleBookStudioView({
       const blob = await buildAccessibleBookDocx(activeSections, metadata);
 
       // Trigger native download
-      const cleanFileName = (metadata.title || 'Cognify_Educational_Document')
+      const cleanFileName = (metadata.title || 'Rafiqi_Educational_Document')
         .replace(/[\/\\:*?"<>|]/g, '_')
         .substring(0, 60);
       const url = URL.createObjectURL(blob);

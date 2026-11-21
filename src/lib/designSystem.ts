@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * 
- * Cognify Design System Tokens & Accessibility Standards (Phase 2)
+ * Rafiqi Design System Tokens & Accessibility Standards (Phase 2)
  *
  * Provides typed constants for brand colors, contrast-verified semantic palettes,
  * typography scales, spacing tokens, and WCAG 2.2 accessibility helpers.
@@ -18,7 +18,7 @@ export interface ColorToken {
 }
 
 /**
- * Verified Brand Palette (Cognify Core)
+ * Verified Brand Palette (Rafiqi Core)
  */
 export const BRAND_COLORS = {
   // Primary: Deep Indigo (Trust, Calm, Authority)

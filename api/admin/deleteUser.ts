@@ -1,5 +1,5 @@
 /**
- * Cognify Server-Side Admin User Deletion Endpoint
+ * Rafiqi Server-Side Admin User Deletion Endpoint
  * 
  * Complies with GDPR Art. 17 (Right to Erasure) and Enterprise Admin Access Control.
  * Allows verified Super Admins to permanently purge a user account:

@@ -1,5 +1,5 @@
 /**
- * Cognitive & Executive Function Engine 2.0 (Cognify)
+ * Cognitive & Executive Function Engine 2.0 (Rafiqi)
  * 
  * Evidence-Based Neuropsychological Training & Assistive Scaffolds:
  * 1. Executive Function Paradigms:

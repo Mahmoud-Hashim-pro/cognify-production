@@ -1,5 +1,5 @@
 /**
- * Central Model & Provider Registry for Cognify.
+ * Central Model & Provider Registry for Rafiqi.
  * 
  * To add ANY new model or API provider in the future:
  * Simply add an entry to the `AVAILABLE_MODELS` array or `PROVIDERS` object below!

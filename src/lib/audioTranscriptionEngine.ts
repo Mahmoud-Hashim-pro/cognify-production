@@ -1,5 +1,5 @@
 /**
- * Cognify Audio Lecture Transcription Engine
+ * Rafiqi Audio Lecture Transcription Engine
  * Features:
  * 1. Audio validation, metadata inspection, and format checks (.mp3, .wav, .m4a, .webm, .ogg, .aac, .flac)
  * 2. Long recording chunking, progress tracking, and resumable timeout handling

@@ -185,7 +185,7 @@ export const WHATSAPP_QUICK_MESSAGES = [
   {
     id: 'wa-fine',
     textEn: 'I am doing fine and currently studying.',
-    textAr: 'أنا بخير والحمد لله وبدرس حالياً على كوجنيفاي.',
+    textAr: 'أنا بخير والحمد لله وبدرس حالياً على رفيقي.',
   },
   {
     id: 'wa-water',

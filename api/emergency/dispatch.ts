@@ -1,5 +1,5 @@
 /**
- * Cognify Server-Side Emergency SOS Dispatch Endpoint
+ * Rafiqi Server-Side Emergency SOS Dispatch Endpoint
  *
  * Replaces client-side window.open with a guaranteed, non-interactive server-side
  * notification pipeline. Essential for ALS/quadriplegic patients who cannot click buttons.
@@ -155,7 +155,7 @@ export default async function handler(req: any, res: any) {
 
     const student = typeof payload.studentName === 'string' && payload.studentName.trim()
       ? payload.studentName.trim().slice(0, 100)
-      : 'Cognify Student';
+      : 'Rafiqi Student';
     const caregiverName = typeof payload.caregiverName === 'string' && payload.caregiverName.trim()
       ? payload.caregiverName.trim().slice(0, 100)
       : 'Primary Caregiver';
@@ -266,7 +266,7 @@ Time: ${timestamp}`;
         smsParams.append('To', validCaregiverPhone);
         smsParams.append('From', twilioFrom);
         // Fixed immutable safety template prevents arbitrary SMS text injection / open-relay abuse
-        const fixedSmsBody = `[Cognify SOS Alert] Student "${student}" (UID: ${authenticatedUid}) triggered an emergency alert. Incident ID: ${incidentId}. Location: ${locationStr}. Time: ${timestamp}. Immediate caregiver assistance requested.`;
+        const fixedSmsBody = `[Rafiqi SOS Alert] Student "${student}" (UID: ${authenticatedUid}) triggered an emergency alert. Incident ID: ${incidentId}. Location: ${locationStr}. Time: ${timestamp}. Immediate caregiver assistance requested.`;
         smsParams.append('Body', fixedSmsBody);
 
         const smsRes = await fetch(

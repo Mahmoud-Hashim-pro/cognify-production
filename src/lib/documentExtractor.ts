@@ -1,5 +1,5 @@
 /**
- * Cognify Document Extractor & Validator
+ * Rafiqi Document Extractor & Validator
  * Pure, resilient, zero-dependency document parsing for:
  * - PDF (selectable text extraction, page order preservation, scanned-page OCR detection, malformed PDF handling)
  * - DOCX (PKZip extraction of word/document.xml, paragraphs, tables, headings)

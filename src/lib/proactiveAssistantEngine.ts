@@ -1,5 +1,5 @@
 /**
- * Cognify 2.0 - Milestone 6: Proactive Learning Assistant Engine
+ * Rafiqi 2.0 - Milestone 6: Proactive Learning Assistant Engine
  *
  * Detects timely pedagogical intervention and growth opportunities from
  * StudentState, concept mastery records, spaced retention schedules, and the PLM.

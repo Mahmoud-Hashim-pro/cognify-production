@@ -2280,7 +2280,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     </p>
                     <p className="text-xs text-[#B9CDE3] leading-relaxed max-w-xs">
                       {t(
-                        'Please access Cognify over HTTPS, or use the image upload option below.',
+                        'Please access Rafiqi over HTTPS, or use the image upload option below.',
                         'يرجى فتح التطبيق عبر اتصال آمن (HTTPS) أو استخدام رفع صورة من جهازك.'
                       )}
                     </p>

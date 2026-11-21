@@ -1,6 +1,6 @@
 /**
  * Serverless API endpoint to extract and return client public IP.
- * Used by Cognify's Security Tracker for DevTools / Element Inspect tracking.
+ * Used by Rafiqi's Security Tracker for DevTools / Element Inspect tracking.
  */
 import { applyCorsHeaders } from '../_lib/cors.js';
 import { checkDistributedRateLimit } from '../_lib/rateLimiter.js';

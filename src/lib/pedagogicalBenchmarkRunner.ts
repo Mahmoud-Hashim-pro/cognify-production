@@ -1,5 +1,5 @@
 /**
- * Cognify 2.0 - Milestone 17 (Phase B - Requirement 13)
+ * Rafiqi 2.0 - Milestone 17 (Phase B - Requirement 13)
  * Pedagogical & Strategy Effectiveness Benchmark Runner
  *
  * Implements:

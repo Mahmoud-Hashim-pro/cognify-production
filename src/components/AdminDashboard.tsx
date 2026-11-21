@@ -713,7 +713,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">
-                  Cognify Admin Hub
+                  Rafiqi Admin Hub
                 </h2>
                 {isSuperAdmin && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-400 border border-amber-500/30">
@@ -1047,7 +1047,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                           ? 'bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/20'
                           : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                       }`}
-                      title="Filter users who are active on Cognify right now"
+                      title="Filter users who are active on Rafiqi right now"
                     >
                       <span className="relative flex h-2 w-2">
                         <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 ${onlyOnlineFilter ? 'inline-flex' : 'hidden'}`} />

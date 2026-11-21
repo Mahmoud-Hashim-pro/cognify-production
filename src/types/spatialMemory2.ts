@@ -1,5 +1,5 @@
 /**
- * Spatial Memory 2.0 Type Definitions for Cognify
+ * Spatial Memory 2.0 Type Definitions for Rafiqi
  * Object Identity, Disambiguation, Movement Trajectory, and User Correction
  */
 

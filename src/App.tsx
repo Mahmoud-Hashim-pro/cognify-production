@@ -17,6 +17,7 @@ import { toast, ToastContainer } from "./components/Toast";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
 import { isRTL, isArabicLocale, getTranslation, localize } from "./lib/translations";
+import { applySeoMetadata } from "./lib/seoEngine";
 import { canAccessSection } from "./lib/academics";
 import { canAccessView, homeViewFor, isAccessibilityUser, AppView } from "./lib/access";
 import {
@@ -226,7 +227,7 @@ export default function App() {
     return 'hub';
   });
 
-  // Cognify Memory (Phase 2) state
+  // Rafiqi Memory (Phase 2) state
   const [memoryState, setMemoryState] = useState<StudentMemory | null>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -252,7 +253,7 @@ export default function App() {
     return initSecurityTracker(() => profileRef.current);
   }, []);
 
-  // Subscribe to Cognify Memory snapshot from Firestore (Single Source of Truth)
+  // Subscribe to Rafiqi Memory snapshot from Firestore (Single Source of Truth)
   useEffect(() => {
     const activeUid = user?.uid || (profile?.uid === 'guest-explorer' ? 'guest-explorer' : profile?.uid);
     if (!activeUid) {
@@ -295,9 +296,9 @@ export default function App() {
       (err) => {
         const errMsg = (err as any)?.message || String(err);
         if (errMsg.includes('permission') || errMsg.includes('PERMISSION_DENIED')) {
-          console.warn('[Cognify Memory] Cloud sync restricted; operating in resilient local cache mode.');
+          console.warn('[Rafiqi Memory] Cloud sync restricted; operating in resilient local cache mode.');
         } else {
-          console.warn('[Cognify Memory] Memory subscription notice:', errMsg);
+          console.warn('[Rafiqi Memory] Memory subscription notice:', errMsg);
         }
         // Fall back gracefully to cache or default so the user is never stuck
         setMemoryState((prev) => prev || cached || DEFAULT_STUDENT_MEMORY);
@@ -334,7 +335,12 @@ export default function App() {
       'English': 'en',
     };
     document.documentElement.lang = (profile?.language && langMap[profile.language]) || (direction === 'rtl' ? 'ar' : 'en');
-  }, [direction, profile?.language]);
+    applySeoMetadata({
+      view: !user && !isGuestPreview ? 'login' : currentView,
+      subTab: currentView === 'disability' ? disabilityTab : undefined,
+      language: profile?.language,
+    });
+  }, [direction, profile?.language, currentView, disabilityTab, user, isGuestPreview]);
 
   // Theme management: Default to system, but respect manual override if present
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -585,7 +591,7 @@ export default function App() {
     // fire NEITHER the success nor the error callback, leaving the gate stuck
     // forever. Release it after 10s so the user reaches a usable screen.
     const watchdog = setTimeout(() => {
-      console.warn('[Cognify] Profile sync timed out — releasing the loading gate.');
+      console.warn('[Rafiqi] Profile sync timed out — releasing the loading gate.');
       // Mark it as a FAILURE, not "no profile". Releasing the gate with
       // profile===null would otherwise render Onboarding, whose Special-Needs
       // branch auto-submits and would overwrite the real profile (points/level/
@@ -1313,7 +1319,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <Accessibility className="w-4 h-4 text-emerald-400" />
             <span className="font-bold text-white text-[11px] sm:text-xs">
-              {direction === 'rtl' ? 'معاينة حية: منصة كوجنيفاي التعليمية الشاملة' : 'Live Preview: Cognify Inclusive Learning Platform'}
+              {direction === 'rtl' ? 'معاينة حية: منصة رفيقي التعليمية الشاملة' : 'Live Preview: Rafiqi Inclusive Learning Platform'}
             </span>
           </div>
           <button

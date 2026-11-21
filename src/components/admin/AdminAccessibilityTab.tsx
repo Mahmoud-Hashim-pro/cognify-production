@@ -161,7 +161,7 @@ export default function AdminAccessibilityTab({
       const d = daysSinceActive(u);
       return `<tr><td>${esc(u.name || 'Unnamed')}</td><td>${esc(u.disabilityType || 'Other')}</td><td>${esc(u.accessibilityMode || 'None')}</td><td class="c">${d <= 7 ? 'نشط' : d === Infinity ? 'لم يبدأ' : Math.floor(d) + ' يوم خمول'}</td></tr>`;
     }).join('');
-    win.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تقرير كوجنيفاي الشهري — قسم ذوي الهمم</title><style>
+    win.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تقرير رفيقي الشهري — قسم ذوي الهمم</title><style>
       body{font-family:'Segoe UI',Tahoma,sans-serif;color:#141E38;margin:32px;line-height:1.6}
       h1{font-size:24px;margin:0 0 2px} .sub{color:#54617C;font-size:13px;margin:0 0 24px}
       h2{font-size:15px;margin:26px 0 8px;border-bottom:2px solid #2E42C9;padding-bottom:4px;color:#2E42C9}
@@ -175,8 +175,8 @@ export default function AdminAccessibilityTab({
       @media print{ .noprint{display:none} }
     </style></head><body>
       <button class="noprint" onclick="window.print()" style="padding:8px 18px;font-weight:700;margin-bottom:16px">🖨️ طباعة / حفظ PDF</button>
-      <h1>تقرير كوجنيفاي الشهري — قسم ذوي الهمم</h1>
-      <p class="sub">${monthName} · أُنشئ في ${new Date().toLocaleDateString('ar-EG')} · إعداد فريق كوجنيفاي</p>
+      <h1>تقرير رفيقي الشهري — قسم ذوي الهمم</h1>
+      <p class="sub">${monthName} · أُنشئ في ${new Date().toLocaleDateString('ar-EG')} · إعداد فريق رفيقي</p>
       <div class="kpis">
         ${kpi('إجمالي المستخدمين', a11yAll.length)}
         ${kpi('نشطون آخر 7 أيام', a11yActive7)}
@@ -189,7 +189,7 @@ export default function AdminAccessibilityTab({
       <h2>التوزيع حسب الوضع المفعّل</h2><table><tr><th>الوضع</th><th class="c">العدد</th></tr>${modeRows}</table>
       <h2>مستخدمون يحتاجون متابعة (خمول +14 يوم)</h2><table><tr><th>الاسم</th><th>البريد</th><th class="c">مدة الخمول</th></tr>${idleRows}</table>
       <h2>كل المستخدمين</h2><table><tr><th>الاسم</th><th>نوع الإعاقة</th><th>الوضع</th><th class="c">الحالة</th></tr>${userRows}</table>
-      <p class="foot">كوجنيفاي — نسخة إمكانية الوصول · تقرير آلي من لوحة الإدارة</p>
+      <p class="foot">رفيقي — نسخة إمكانية الوصول · تقرير آلي من لوحة الإدارة</p>
     </body></html>`);
     win.document.close();
   };
@@ -232,7 +232,7 @@ export default function AdminAccessibilityTab({
             {idleUsers.slice(0, 8).map((u) => (
               <a
                 key={u.uid}
-                href={`mailto:${u.email}?subject=Cognify Accessibility Check-in`}
+                href={`mailto:${u.email}?subject=Rafiqi Accessibility Check-in`}
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#082344]/95 border border-amber-500/40 rounded-xl text-xs font-bold text-slate-200 hover:border-amber-400 transition-colors"
               >
                 <Mail className="w-3.5 h-3.5 text-amber-400" />
@@ -281,7 +281,7 @@ export default function AdminAccessibilityTab({
             ))}
           </div>
           <p className="text-xs text-slate-400 font-medium mt-5 leading-relaxed">
-            The active operational mode represents how the learner interacts with Cognify in real-time (e.g., Eye Gaze, Euphonia vocal triggers, or Sign avatar).
+            The active operational mode represents how the learner interacts with Rafiqi in real-time (e.g., Eye Gaze, Euphonia vocal triggers, or Sign avatar).
           </p>
         </section>
       </div>

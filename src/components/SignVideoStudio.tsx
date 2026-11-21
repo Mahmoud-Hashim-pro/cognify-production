@@ -132,7 +132,7 @@ export default function SignVideoStudio({ profile, onMenuClick, isEmbedded, onNa
     modeSign: localize(voiceLang, "Sign", "إشارة"),
     modeText: localize(voiceLang, "Type", "كتابة"),
     modeVoice: localize(voiceLang, "Speak", "صوت"),
-    howToInput: localize(voiceLang, "How do you want to talk to Cognify?", "عايز تكلّم كوجنيفاي إزاي؟"),
+    howToInput: localize(voiceLang, "How do you want to talk to Rafiqi?", "عايز تكلّم رفيقي إزاي؟"),
     startCamera: localize(voiceLang, "Start Camera", "تشغيل الكاميرا"),
     stopCamera: localize(voiceLang, "Stop Camera", "إيقاف الكاميرا"),
     signHint: localize(voiceLang, "Camera reads English ASL letters only (A–Y) — Arabic hand shapes aren't recognized yet. Use Type or Speak for Arabic.", "الكاميرا بتقرا حروف لغة الإشارة الأمريكية (ASL) الإنجليزي بس (A–Y) — لسه مش بتتعرف على إشارات عربي. استخدمي وضع الكتابة أو الصوت للعربي."),

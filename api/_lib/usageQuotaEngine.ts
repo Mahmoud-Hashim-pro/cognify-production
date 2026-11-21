@@ -1,5 +1,5 @@
 /**
- * Cognify 2.0 - Usage Limits, Quota Accounting & Reliability Engine
+ * Rafiqi 2.0 - Usage Limits, Quota Accounting & Reliability Engine
  * Phase 8: Senior Backend Engineering Implementation
  *
  * Implements:

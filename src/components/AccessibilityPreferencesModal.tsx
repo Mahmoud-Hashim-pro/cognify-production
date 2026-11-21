@@ -132,8 +132,8 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
             </div>
             <p className="text-[11px] text-emerald-200/80 leading-relaxed">
               {isAr
-                ? 'يتعلم كوجنيفاي أسلوب التواصل والتفاعل الوظيفي فقط (مثل طول الرد وسرعة التصفح)، ولا يقوم أبدًا بتشخيص أو تصنيف أو تخزين أي حالات أو مسميات طبية.'
-                : 'Cognify adapts strictly to observable communication habits (response length, listening preferences) and never infers, assigns, or stores medical diagnostic labels.'}
+                ? 'يتعلم رفيقي أسلوب التواصل والتفاعل الوظيفي فقط (مثل طول الرد وسرعة التصفح)، ولا يقوم أبدًا بتشخيص أو تصنيف أو تخزين أي حالات أو مسميات طبية.'
+                : 'Rafiqi adapts strictly to observable communication habits (response length, listening preferences) and never infers, assigns, or stores medical diagnostic labels.'}
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
             <p className="text-[11px] text-slate-400 mt-0.5">
               {isAr
                 ? 'السماح للنظام بضبط أسلوب التواصل تلقائياً بناءً على سرعة القراءة والاستماع.'
-                : 'Allow Cognify to adjust communication style based on your pace and reading habits.'}
+                : 'Allow Rafiqi to adjust communication style based on your pace and reading habits.'}
             </p>
           </div>
 

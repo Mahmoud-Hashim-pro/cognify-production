@@ -1,5 +1,5 @@
 /**
- * Active Spaced Micro-Retrieval Warm-Up Banner (Cognify 2.0 - Pillar 3)
+ * Active Spaced Micro-Retrieval Warm-Up Banner (Rafiqi 2.0 - Pillar 3)
  * 
  * Inspects the student's SuperMemo SM-2 retention schedules and detects
  * concepts at risk of memory decay (due for review). Surfaces a 30-second

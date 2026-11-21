@@ -1,5 +1,5 @@
 /**
- * Cognify 2.0 - Milestone 7: Learning Strategy Intelligence
+ * Rafiqi 2.0 - Milestone 7: Learning Strategy Intelligence
  *
  * Provides empirical tracking, statistical calibration, and actionable ranking
  * of pedagogical strategies per learner, concept, and instructional context.
@@ -58,14 +58,14 @@ export interface StrategyRecommendation {
 
 /**
  * Anti-Overclaiming Principle Disclaimers:
- * Cognify adheres strictly to cognitive psychology evidence:
+ * Rafiqi adheres strictly to cognitive psychology evidence:
  * instructional modalities are task-situated strategies, NOT immutable student traits.
  */
 export const ANTI_OVERCLAIMING_DISCLAIMER_EN =
-  'Instructional strategy efficacy is empirical and situational, reflecting observed success on specific problem types and concepts. Cognify rejects static "learning style" labels (e.g., visual vs auditory learner myth): optimal pedagogical scaffolding is dynamic and evolves as student mastery deepens.';
+  'Instructional strategy efficacy is empirical and situational, reflecting observed success on specific problem types and concepts. Rafiqi rejects static "learning style" labels (e.g., visual vs auditory learner myth): optimal pedagogical scaffolding is dynamic and evolves as student mastery deepens.';
 
 export const ANTI_OVERCLAIMING_DISCLAIMER_AR =
-  'فاعلية الاستراتيجيات التعليمية هي نتائج تجريبية وسياقية مرتبطة بطبيعة المفهوم والمسألة المطروحة، وتعكس الأداء الملاحظ في مهام محددة. يرفض كوجنيفاي تصنيفات "أنماط التعلم الثابتة": الاستراتيجية التعليمية المثلى متغيرة وتتكيف باستمرار مع تطور استيعاب الطالب.';
+  'فاعلية الاستراتيجيات التعليمية هي نتائج تجريبية وسياقية مرتبطة بطبيعة المفهوم والمسألة المطروحة، وتعكس الأداء الملاحظ في مهام محددة. يرفض رفيقي تصنيفات "أنماط التعلم الثابتة": الاستراتيجية التعليمية المثلى متغيرة وتتكيف باستمرار مع تطور استيعاب الطالب.';
 
 export const STRATEGY_DISPLAY_NAMES: Record<
   PedagogyStrategy,

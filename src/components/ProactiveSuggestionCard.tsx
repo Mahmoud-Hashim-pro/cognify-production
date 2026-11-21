@@ -1,5 +1,5 @@
 /**
- * Proactive Suggestion & Grounded Insight Card (Cognify 2.0)
+ * Proactive Suggestion & Grounded Insight Card (Rafiqi 2.0)
  * Milestones 6, 7 & 8: Obsidian glassmorphic banner for proactive opportunities and insights.
  *
  * Adheres to:

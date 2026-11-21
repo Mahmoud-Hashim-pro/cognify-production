@@ -180,7 +180,7 @@ export interface UserProfile {
   lastLoginDevice?: string;
   lastIp?: string | null;
   /**
-   * Phase 2: Cognify Memory (Transparent Student Memory).
+   * Phase 2: Rafiqi Memory (Transparent Student Memory).
    * Stored under users/{userId}/memory/config in Firestore.
    */
   memory?: StudentMemory;

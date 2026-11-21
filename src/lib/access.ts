@@ -1,6 +1,6 @@
 import { UserProfile, AccountPath } from '../types';
 
-// The views supported in the Cognify Assistive Platform.
+// The views supported in the Rafiqi Assistive Platform.
 export type AppView =
   | 'chat' | 'profile' | 'settings' | 'video' | 'disability' | 'book_studio' | 'toolkit'
   | 'admin' | 'support' | 'privacy_security'

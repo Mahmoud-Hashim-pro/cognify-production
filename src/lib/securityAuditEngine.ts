@@ -1,5 +1,5 @@
 /**
- * Milestone 22: Cognify Security & Threat Model Audit Engine
+ * Milestone 22: Rafiqi Security & Threat Model Audit Engine
  * 
  * Provides automated verification and runtime enforcement for:
  * 1. OWASP Top 10 (2025) Web Application Security Matrix

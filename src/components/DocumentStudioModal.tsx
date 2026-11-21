@@ -163,7 +163,7 @@ export function printAccessibleDocument(
     <html lang="${isAr ? 'ar' : 'en'}" dir="${isAr ? 'rtl' : 'ltr'}">
     <head>
       <meta charset="utf-8">
-      <title>${title || (isAr ? 'مستند كوجنيفاي التعليمي' : 'Cognify Educational Document')}</title>
+      <title>${title || (isAr ? 'مستند رفيقي التعليمي' : 'Rafiqi Educational Document')}</title>
       <style>
         @page { margin: 20mm; size: A4; }
         body {
@@ -187,8 +187,8 @@ export function printAccessibleDocument(
       </style>
     </head>
     <body>
-      <h1>${title || (isAr ? 'مستند كوجنيفاي التعليمي' : 'Cognify Educational Document')}</h1>
-      <div class="meta">${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')} • ${isAr ? 'منصة كوجنيفاي التعليمية الميسرة' : 'Cognify Inclusive Learning Platform'}</div>
+      <h1>${title || (isAr ? 'مستند رفيقي التعليمي' : 'Rafiqi Educational Document')}</h1>
+      <div class="meta">${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')} • ${isAr ? 'منصة رفيقي التعليمية الميسرة' : 'Rafiqi Inclusive Learning Platform'}</div>
       <h2>${isAr ? '📌 الزبدة وخلاصة المحتوى' : '📌 Core Takeaways'}</h2>
       <div class="box">${cleanSummary.replace(/\n/g, '<br/>')}</div>
       ${quiz && quiz.length > 0 ? `
@@ -2153,7 +2153,7 @@ ${currentDoc.summary}
                               <span className="font-bold text-[10px] text-slate-400 block mb-0.5">
                                 {msg.role === 'user'
                                   ? (companionLang === 'ar' ? 'أنت' : 'You')
-                                  : (companionLang === 'ar' ? 'المعلم الذكي' : 'Cognify Tutor')}
+                                  : (companionLang === 'ar' ? 'المعلم الذكي' : 'Rafiqi Tutor')}
                               </span>
                               <p>{msg.content}</p>
                             </div>

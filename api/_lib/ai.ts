@@ -543,16 +543,16 @@ export function buildPersona(
   * When the student asks what their name is and their name is provided (${studentName || 'Student'}), state their name clearly, proudly, and warmly.
   * Use their name naturally and respectfully when encouraging them or acknowledging academic milestones.\n`;
 
-  return `You are Cognify, an adaptive AI mentor and personal assistant. Give the most correct, useful answer calibrated to THIS user.
+  return `You are Rafiqi (رفيقي), an adaptive AI mentor and personal assistant. Give the most correct, useful answer calibrated to THIS user.
 - Level: ${profile.level || 'Basic'} | Role: ${profile.role || 'Student'} | Field: ${profile.field || 'General'} | Configured Language: ${profile.language || 'English'}
 ${identityContext}
 ## IDENTITY & DEVELOPER / CREATOR ATTRIBUTION (CRITICAL)
-- You are **Cognify (كوجنيفاي)**, an AI-Powered Adaptive Personal Assistant and Educational Platform.
-- **Your Creators and Developers**: You were designed, engineered, and developed by **The Cognify Team / Graduation Project Team (فريق تطوير منصة كوجنيفاي)** as an advanced assistive and adaptive learning platform to empower students and people of determination (individuals with visual, hearing, or motor disabilities).
+- You are **Rafiqi (رفيقي)**, an AI-Powered Adaptive Personal Assistant and Educational Platform.
+- **Your Creators and Developers**: You were designed, engineered, and developed by **The Rafiqi Team / Graduation Project Team (فريق تطوير منصة رفيقي)** as an advanced assistive and adaptive learning platform to empower students and people of determination (individuals with visual, hearing, or motor disabilities).
 - **Creator Attribution Rule**: If the user asks "Who made you?", "Who is your developer?", "Who created you?", "من صنعك؟", "من طورك؟", "مين اللي عملك؟", "مين مطورك؟", or asks about your origin, developers, or creators:
-  * ALWAYS state clearly, proudly, and directly that you were created and developed by the **Cognify Development Team (فريق تطوير منصة كوجنيفاي)** as their graduation project / assistive AI innovation.
-  * You may mention that you leverage state-of-the-art foundation AI models (such as Google Gemini) as your underlying core language engine, BUT emphasize that the platform, intelligent architecture, accessibility companions, adaptive learning pedagogies, and assistive systems were created and built by the **Cognify Team**.
-  * NEVER say or imply that you were made, developed, or built by Google engineers or any third party. Your developers are the **Cognify Team**.
+  * ALWAYS state clearly, proudly, and directly that you were created and developed by the **Rafiqi Development Team (فريق تطوير منصة رفيقي)** as their graduation project / assistive AI innovation.
+  * You may mention that you leverage state-of-the-art foundation AI models (such as Google Gemini) as your underlying core language engine, BUT emphasize that the platform, intelligent architecture, accessibility companions, adaptive learning pedagogies, and assistive systems were created and built by the **Rafiqi Team**.
+  * NEVER say or imply that you were made, developed, or built by Google engineers or any third party. Your developers are the **Rafiqi Team**.
 
 ## LANGUAGE
 - Configured Interface Language: ${profile.language || 'English'}.
@@ -692,7 +692,7 @@ export async function geminiFetch(
 
   const envPresent = Boolean(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GEMINI_API_KEY);
   const authPath = opts.byokKey ? 'BYOK' : (keys.length > 0 ? 'server key' : 'none');
-  console.log(`[Cognify AI Diagnostic: Fetch] Expected env present: ${envPresent} (GEMINI_API_KEY: ${Boolean(process.env.GEMINI_API_KEY)}, VITE_GEMINI_API_KEY: ${Boolean(process.env.VITE_GEMINI_API_KEY)}, GOOGLE_API_KEY: ${Boolean(process.env.GOOGLE_API_KEY)}), Auth path selected: ${authPath}`);
+  console.log(`[Rafiqi AI Diagnostic: Fetch] Expected env present: ${envPresent} (GEMINI_API_KEY: ${Boolean(process.env.GEMINI_API_KEY)}, VITE_GEMINI_API_KEY: ${Boolean(process.env.VITE_GEMINI_API_KEY)}, GOOGLE_API_KEY: ${Boolean(process.env.GOOGLE_API_KEY)}), Auth path selected: ${authPath}`);
 
   for (const model of GEMINI_MODELS) {
     for (const key of keys.length ? keys : ['']) {
@@ -718,7 +718,7 @@ export async function geminiFetch(
           });
         } catch (err) {
           lastStatus = 0;
-          console.log(`[Cognify AI Diagnostic: Response] Network error during Gemini fetch: ${err instanceof Error ? err.name : 'UnknownError'}`);
+          console.log(`[Rafiqi AI Diagnostic: Response] Network error during Gemini fetch: ${err instanceof Error ? err.name : 'UnknownError'}`);
           logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: false, error: String(err) });
           break;
         }
@@ -732,9 +732,9 @@ export async function geminiFetch(
           } catch {
             sanitizedError = `HTTP_${googleStatus}`;
           }
-          console.log(`[Cognify AI Diagnostic: Response] Google HTTP status: ${googleStatus}, Sanitized provider status: ${sanitizedError}`);
+          console.log(`[Rafiqi AI Diagnostic: Response] Google HTTP status: ${googleStatus}, Sanitized provider status: ${sanitizedError}`);
         } else {
-          console.log(`[Cognify AI Diagnostic: Response] Google HTTP status: ${googleStatus} (OK)`);
+          console.log(`[Rafiqi AI Diagnostic: Response] Google HTTP status: ${googleStatus} (OK)`);
         }
         logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: r.ok, status: r.status });
         if (r.ok && (!opts.stream || r.body)) return { res: r, status: r.status };
@@ -894,7 +894,7 @@ export async function guard(
   // 1. Authentication Verification (Strict Firebase ID Token Check)
   const auth = await verifyRequestAuth(req);
   if (!auth.authenticated || !auth.uid) {
-    res.status(401).json({ error: auth.error || 'Authentication required. Please sign in to access Cognify AI.' });
+    res.status(401).json({ error: auth.error || 'Authentication required. Please sign in to access Rafiqi AI.' });
     return false;
   }
   req.authenticatedUid = auth.uid;
@@ -905,7 +905,7 @@ export async function guard(
   const hasValidClientByok = Boolean(clientByok && clientByok.length >= 10);
   const authPath = hasValidClientByok ? 'BYOK' : (hasServerKeys ? 'server key' : 'none');
   const envPresent = Boolean(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GEMINI_API_KEY);
-  console.log(`[Cognify AI Diagnostic: Guard] Expected env present: ${envPresent}, Selected auth path: ${authPath}`);
+  console.log(`[Rafiqi AI Diagnostic: Guard] Expected env present: ${envPresent}, Selected auth path: ${authPath}`);
 
   if (!hasServerKeys && !hasValidClientByok) {
     res.status(503).json({

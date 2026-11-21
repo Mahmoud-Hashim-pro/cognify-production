@@ -602,8 +602,8 @@ export default function StudentIntelligenceProfileView({
               <p className="text-[11px] text-slate-400 max-w-md mx-auto">
                 {localize(
                   profile.language,
-                  'No recurring mistake patterns (like null dereferencing or boundary errors) have been recorded yet. As you solve exercises, Cognify will automatically synthesize patterns here.',
-                  'لم يتم رصد أي أنماط أخطاء متكررة (مثل فك إشارة مؤشر فارغ أو أخطاء حدود التكرار) حتى الآن. مع حل التمارين سيقوم كوجنيفاي بتحليل الأخطاء تلقائيًا.'
+                  'No recurring mistake patterns (like null dereferencing or boundary errors) have been recorded yet. As you solve exercises, Rafiqi will automatically synthesize patterns here.',
+                  'لم يتم رصد أي أنماط أخطاء متكررة (مثل فك إشارة مؤشر فارغ أو أخطاء حدود التكرار) حتى الآن. مع حل التمارين سيقوم رفيقي بتحليل الأخطاء تلقائيًا.'
                 )}
               </p>
             </div>
@@ -691,8 +691,8 @@ export default function StudentIntelligenceProfileView({
               <p className="text-xs text-slate-400 max-w-md mx-auto">
                 {localize(
                   profile.language,
-                  'Start solving interactive questions in the Chat or Learning Hub. Cognify will track your mastery and confidence automatically.',
-                  'ابدأ بحل تمارين تفاعلية في المحادثة أو مركز التعلم. سيرصد كوجنيفاي مستوى إتقانك وثقتك تلقائيًا.'
+                  'Start solving interactive questions in the Chat or Learning Hub. Rafiqi will track your mastery and confidence automatically.',
+                  'ابدأ بحل تمارين تفاعلية في المحادثة أو مركز التعلم. سيرصد رفيقي مستوى إتقانك وثقتك تلقائيًا.'
                 )}
               </p>
             </div>
@@ -870,8 +870,8 @@ export default function StudentIntelligenceProfileView({
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
                 {isAr
-                  ? 'يتكيف كوجنيفاي تلقائيًا مع أسلوب التعلم الذي يناسبك في كل موضوع لضمان فهم المفاهيم بأسرع وقت وأعلى دقة.'
-                  : 'Cognify automatically adapts its explanation style to whatever helps you understand each subject best.'}
+                  ? 'يتكيف رفيقي تلقائيًا مع أسلوب التعلم الذي يناسبك في كل موضوع لضمان فهم المفاهيم بأسرع وقت وأعلى دقة.'
+                  : 'Rafiqi automatically adapts its explanation style to whatever helps you understand each subject best.'}
               </p>
             </div>
           </div>
@@ -1009,9 +1009,9 @@ export default function StudentIntelligenceProfileView({
             <p>
               {isAr
                 ? learningProfile.ethicalDisclaimerAr ||
-                  'يرصد نظام كوجنيفاي نمط استيعابك للمفاهيم وتفضيلك لطرق الشرح بهدف التكيّف معك وتخصيص تجربتك، ولا يمثل مقياسًا لنسبة الذكاء IQ أو حكمًا ثابتًا على قدراتك الإدراكية.'
+                  'يرصد نظام رفيقي نمط استيعابك للمفاهيم وتفضيلك لطرق الشرح بهدف التكيّف معك وتخصيص تجربتك، ولا يمثل مقياسًا لنسبة الذكاء IQ أو حكمًا ثابتًا على قدراتك الإدراكية.'
                 : learningProfile.ethicalDisclaimerEn ||
-                  'Cognify models dynamic learning behavior, strategy affinity, and conceptual retention to optimize your daily explanations. This is not an IQ score, clinical test, or static measurement of intelligence.'}
+                  'Rafiqi models dynamic learning behavior, strategy affinity, and conceptual retention to optimize your daily explanations. This is not an IQ score, clinical test, or static measurement of intelligence.'}
             </p>
           </div>
         </section>

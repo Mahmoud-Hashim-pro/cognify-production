@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * 
- * Cognify Unified Accessibility Toolkit Engine
+ * Rafiqi Unified Accessibility Toolkit Engine
  * (Phase 7: Integrated Vision, Document Scanner, PDF Evidence Assistant, and Sticker Explainer)
  */
 
@@ -373,7 +373,7 @@ export function applyScanFilter(
  */
 export async function combinePagesIntoPdf(
   pages: { dataUrl: string; width: number; height: number; pageNumber?: number }[],
-  docTitle = 'Cognify Scanned Document'
+  docTitle = 'Rafiqi Scanned Document'
 ): Promise<Blob> {
   if (!pages || pages.length === 0) {
     throw new Error('No pages provided for PDF compilation');
@@ -508,7 +508,7 @@ export async function combinePagesIntoPdf(
     xrefStr += `${off} 00000 n \n`;
   }
 
-  const trailerStr = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R /Info << /Title (${escapePdfString(docTitle)}) /Producer (Cognify Accessibility Toolkit) >> >>\nstartxref\n${xrefStartOffset}\n%%EOF\n`;
+  const trailerStr = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R /Info << /Title (${escapePdfString(docTitle)}) /Producer (Rafiqi Accessibility Toolkit) >> >>\nstartxref\n${xrefStartOffset}\n%%EOF\n`;
 
   const xrefBytes = new TextEncoder().encode(xrefStr);
   const trailerBytes = new TextEncoder().encode(trailerStr);

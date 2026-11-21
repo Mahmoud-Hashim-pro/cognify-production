@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * 
- * Cognify Inclusive Platform — Central Navigation, Routing & History Orchestrator
+ * Rafiqi Inclusive Platform — Central Navigation, Routing & History Orchestrator
  * (Phase 5: Seamless Navigation, Android/Browser Back Sync, Session Restoration)
  */
 
@@ -173,7 +173,7 @@ export function saveReturnDestination(route: RouteState, explicitHash?: string):
     };
     sessionStorage.setItem(STORAGE_KEYS.RETURN_DESTINATION, JSON.stringify(payload));
   } catch (err) {
-    console.warn('[Cognify Nav] Failed to save return destination:', err);
+    console.warn('[Rafiqi Nav] Failed to save return destination:', err);
   }
 }
 

@@ -1585,7 +1585,7 @@ export default function AdminDatabaseHub({
                                               }`}
                                             >
                                               <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1 font-mono">
-                                                <span>{isUserMsg ? 'Student User' : 'Cognify AI Mentor'}</span>
+                                                <span>{isUserMsg ? 'Student User' : 'Rafiqi AI Mentor'}</span>
                                                 {msg.timestamp && (
                                                   <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
                                                 )}
@@ -1628,7 +1628,7 @@ export default function AdminDatabaseHub({
                                 }`}
                               >
                                 <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1 font-mono">
-                                  <span>{isUserMsg ? 'Student User' : 'Cognify AI Mentor'}</span>
+                                  <span>{isUserMsg ? 'Student User' : 'Rafiqi AI Mentor'}</span>
                                   {msg.timestamp && (
                                     <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
                                   )}

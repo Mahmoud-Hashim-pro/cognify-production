@@ -1,6 +1,6 @@
 /**
  * Phase C - Requirement 21: Structured AI Telemetry Capture
- * Cognify 2.0 Production Observability & Tracing Engine
+ * Rafiqi 2.0 Production Observability & Tracing Engine
  *
  * Captures granular runtime metrics for every LLM inference call:
  * prompt tokens, completion tokens, total tokens, model name, provider,

@@ -1,5 +1,5 @@
 /**
- * Cognify 2.0 - Client Usage Limits & Accessibility Quota Engine
+ * Rafiqi 2.0 - Client Usage Limits & Accessibility Quota Engine
  * Phase 8: Accessible Transparent Quota UI, Local Deduplication, and Client-Side Estimation
  */
 

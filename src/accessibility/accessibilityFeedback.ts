@@ -1,5 +1,5 @@
 /**
- * Cognify Accessibility 2.0 - Feedback & Efficacy Metrics Engine
+ * Rafiqi Accessibility 2.0 - Feedback & Efficacy Metrics Engine
  * src/accessibility/accessibilityFeedback.ts
  *
  * Implements:

@@ -319,8 +319,8 @@ export default function StudentSettingsView({
     if (isPlayingPreview) return;
     setIsPlayingPreview(true);
     const phrase = isAr
-      ? 'مرحباً بك في كوجنيفاي، تم ضبط إعدادات الصوت والقراءة بنجاح.'
-      : 'Welcome to Cognify. Your audio and reading settings are configured successfully.';
+      ? 'مرحباً بك في رفيقي، تم ضبط إعدادات الصوت والقراءة بنجاح.'
+      : 'Welcome to Rafiqi. Your audio and reading settings are configured successfully.';
 
     speak(phrase, interfaceLanguage === 'English' ? 'English' : 'Arabic', {
       rate: audioSpeed,

@@ -1,5 +1,5 @@
 /**
- * Cognify 2.0 - Milestone 8: Learning Insights Engine
+ * Rafiqi 2.0 - Milestone 8: Learning Insights Engine
  *
  * Grounded rule-based insight generator strictly adhering to the triad:
  * Insight = Evidence (raw delta / empirical metrics)

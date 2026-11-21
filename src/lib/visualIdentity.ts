@@ -2,10 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * 
- * Cognify Visual Identity Guidelines & Rules (Phase 3)
+ * Rafiqi Visual Identity Guidelines & Rules (Phase 3)
  *
  * Core Product Philosophy:
- * Cognify is designed around independence, dignity, intelligence, and agency,
+ * Rafiqi is designed around independence, dignity, intelligence, and agency,
  * strictly rejecting stereotypical disability imagery, medicalized symbols, or infantilizing metaphors.
  */
 

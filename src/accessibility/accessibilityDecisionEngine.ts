@@ -1,5 +1,5 @@
 /**
- * Cognify Accessibility 2.0 - Decision Engine
+ * Rafiqi Accessibility 2.0 - Decision Engine
  * src/accessibility/accessibilityDecisionEngine.ts
  *
  * Implements:

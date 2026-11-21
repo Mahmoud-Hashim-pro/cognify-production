@@ -1,6 +1,6 @@
 /**
  * Phase C - Requirement 23: Privacy-Safe Production Logging Engine
- * Cognify 2.0 Production Observability & Tracing Engine
+ * Rafiqi 2.0 Production Observability & Tracing Engine
  *
  * Privacy-first logging utility that redacts sensitive PII before console
  * or persistent sink logging: emails, full student names, passwords/credentials,

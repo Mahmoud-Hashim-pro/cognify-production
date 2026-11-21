@@ -27,7 +27,7 @@ const textSizeMap: Record<BrandLogoSize, { title: string; badge: string; subtitl
 };
 
 /**
- * Cognify Constellation Logomark:
+ * Rafiqi Constellation Logomark:
  * Represents 3 interconnected cognitive nodes: Intelligence, Accessibility, and Human Empowerment.
  * Dignified, modern, and completely avoids stereotypical disability symbols.
  */
@@ -74,7 +74,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           'inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-[#243B73] to-[#087F8C] text-white p-1.5 shadow-sm select-none',
           className
         )}
-        aria-label="Cognify"
+        aria-label="Rafiqi"
         role="img"
         {...props}
       >
@@ -113,7 +113,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
               textStyles.title
             )}
           >
-            Cognify
+            Rafiqi
           </TitleTag>
 
           {badgeText && (

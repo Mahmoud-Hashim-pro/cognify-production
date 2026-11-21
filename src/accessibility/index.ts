@@ -1,5 +1,5 @@
 /**
- * Cognify Accessibility 2.0 - Unified Accessibility Intelligence Module
+ * Rafiqi Accessibility 2.0 - Unified Accessibility Intelligence Module
  * src/accessibility/index.ts
  */
 

@@ -1,6 +1,6 @@
 /**
  * Phase C - Requirement 24: Security Telemetry Anomaly Detector & Alerts Engine
- * Cognify 2.0 Production Observability & Tracing Engine
+ * Rafiqi 2.0 Production Observability & Tracing Engine
  *
  * Anomaly detector for security telemetry:
  * - Flags rapid rate-limit violations (> 5 in 1 min)

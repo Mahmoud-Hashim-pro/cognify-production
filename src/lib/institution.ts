@@ -268,7 +268,7 @@ export function exportCohortCsv(stats: InstitutionCohortStats): string {
   const lines: string[] = [];
 
   // Report Header
-  lines.push('Cognify Institution & B2B Cohort Report');
+  lines.push('Rafiqi Institution & B2B Cohort Report');
   lines.push(`Generated At,${escapeCsv(new Date().toISOString())}`);
   lines.push(`Institution / Org Code,${escapeCsv(stats.orgCode)}`);
   lines.push(`k-Anonymity Threshold,${stats.kThreshold}`);

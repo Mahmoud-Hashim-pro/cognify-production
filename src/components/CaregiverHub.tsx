@@ -159,7 +159,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       contacts: loadContacts(),
       sensoryLogs: sensoryLogs,
       exportedAt: new Date().toISOString(),
-      version: 'Cognify-Access-2.0',
+      version: 'Rafiqi-Access-2.0',
     };
 
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -178,8 +178,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     const primary = contacts.find((c) => c.isPrimaryEmergency) || contacts[0];
     if (primary && isValidContactPhone(primary.phone)) {
       const testMsg = isAr
-        ? '🔔 تجربة نظام الطوارئ من Cognify: نداء الاستغاثة يعمل بنجاح!'
-        : '🔔 Cognify Emergency SOS Test: Alert system is functioning correctly!';
+        ? '🔔 تجربة نظام الطوارئ من Rafiqi: نداء الاستغاثة يعمل بنجاح!'
+        : '🔔 Rafiqi Emergency SOS Test: Alert system is functioning correctly!';
       sendWhatsAppMessage(primary.phone, testMsg);
       setTestSent(true);
       toast.success(t('Test message opened for primary contact', 'تم تجهيز رسالة التجربة للمرافق'));
@@ -228,7 +228,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       <html dir="${isAr ? 'rtl' : 'ltr'}" lang="${isAr ? 'ar' : 'en'}">
       <head>
         <meta charset="utf-8" />
-        <title>Cognify Clinical ABA & Sensory Report - ${studentName}</title>
+        <title>Rafiqi Clinical ABA & Sensory Report - ${studentName}</title>
         <style>
           body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -325,13 +325,13 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       <body>
         <div class="header">
           <div>
-            <h1 style="margin: 0; font-size: 20px; color: #1e1b4b;">Cognify Assistive Platform • Clinical ABA & Sensory Progress Report</h1>
+            <h1 style="margin: 0; font-size: 20px; color: #1e1b4b;">Rafiqi Assistive Platform • Clinical ABA & Sensory Progress Report</h1>
             <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12px;">
               ${isAr ? 'تقرير تحليلي سريري لجلسات التكامل الحسي والتواصل البديل والمعزز (AAC)' : 'Clinical ABA, SLP & Occupational Therapy Progress Summary'}
             </p>
           </div>
           <div style="text-align: ${isAr ? 'left' : 'right'};">
-            <span class="badge">Cognify Protocol v2.4</span>
+            <span class="badge">Rafiqi Protocol v2.4</span>
             <div style="font-size: 11px; color: #64748b; margin-top: 4px;">${reportDate}</div>
           </div>
         </div>
@@ -761,7 +761,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 </div>
                 {c.phone && (
                   <button
-                    onClick={() => sendWhatsAppMessage(c.phone, t('Test message from Cognify Caregiver Hub', 'رسالة تجربة من لوحة مرافق Cognify'))}
+                    onClick={() => sendWhatsAppMessage(c.phone, t('Test message from Rafiqi Caregiver Hub', 'رسالة تجربة من لوحة مرافق Rafiqi'))}
                     className="min-w-[40px] min-h-[40px] p-2.5 rounded-xl bg-emerald-600/30 text-emerald-300 hover:bg-emerald-600/50 transition-all flex items-center justify-center cursor-pointer"
                     title="WhatsApp"
                     aria-label="WhatsApp"

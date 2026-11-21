@@ -11,7 +11,7 @@ import {
 } from "../lib/aslAvatarDictionary";
 
 /**
- * SignAvatar3D — procedural 3D signing avatar for Cognify.
+ * SignAvatar3D — procedural 3D signing avatar for Rafiqi.
  *
  * - Builds a stylized avatar bust + a fully articulated right hand
  *   (15 finger joints + thumb, wrist, dynamic forearm) in pure Three.js.
@@ -194,7 +194,7 @@ const WORD_ALIASES: Record<string, string> = {
 /* Rig                                                                 */
 /* ------------------------------------------------------------------ */
 
-const ACCENT = 0x12cfe0; // Cognify bright cyan accent (#12CFE0)
+const ACCENT = 0x12cfe0; // Rafiqi bright cyan accent (#12CFE0)
 const ACCENT_SOFT = 0x67e8f9; // Soft cyan glow
 
 interface FingerRig {

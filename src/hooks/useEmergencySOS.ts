@@ -87,12 +87,12 @@ export function useEmergencySOS({
       const caregiverName = isArabic ? (primary?.nameAr || primary?.nameEn) : (primary?.nameEn || primary?.nameAr);
 
       const sosText = isArabic
-        ? `🚨 نداء استغاثة عاجل (Emergency SOS) من مستخدم Cognify: أحتاج إلى مساعدة طبية فورية! ${mapUrl ? `موقعي الحالي على الخريطة: ${mapUrl}` : ''}`
-        : `🚨 Emergency SOS from Cognify user: I need immediate medical assistance! ${mapUrl ? `Location: ${mapUrl}` : ''}`;
+        ? `🚨 نداء استغاثة عاجل (Emergency SOS) من مستخدم Rafiqi: أحتاج إلى مساعدة طبية فورية! ${mapUrl ? `موقعي الحالي على الخريطة: ${mapUrl}` : ''}`
+        : `🚨 Emergency SOS from Rafiqi user: I need immediate medical assistance! ${mapUrl ? `Location: ${mapUrl}` : ''}`;
 
       dispatchServerEmergencySOS({
         uid: profile?.uid,
-        studentName: profile?.name || (isArabic ? 'طالب كوجنيفاي' : 'Cognify Student'),
+        studentName: profile?.name || (isArabic ? 'طالب رفيقي' : 'Rafiqi Student'),
         caregiverPhone,
         caregiverName,
         location: emergencyGeoCoords || undefined,

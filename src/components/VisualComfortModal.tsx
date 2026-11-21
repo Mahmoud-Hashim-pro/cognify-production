@@ -191,8 +191,8 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
             }`}
           >
             {isAr
-              ? 'كل قارئ في كوجنيفاي يستحق تجربة مريحة تماماً. المسطرة المضيئة تمنع القفز بين السطور، والخط الواسع يمنح العقل تركيزاً سلساً.'
-              : 'Every reader in Cognify deserves total visual ease. Guided rulers eliminate line-skipping, and spacious typography unlocks smooth focus.'}
+              ? 'كل قارئ في رفيقي يستحق تجربة مريحة تماماً. المسطرة المضيئة تمنع القفز بين السطور، والخط الواسع يمنح العقل تركيزاً سلساً.'
+              : 'Every reader in Rafiqi deserves total visual ease. Guided rulers eliminate line-skipping, and spacious typography unlocks smooth focus.'}
           </p>
         </div>
 

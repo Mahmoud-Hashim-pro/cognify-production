@@ -1,5 +1,5 @@
 /**
- * Firebase CRUD helpers for Cognify Memory (Phase 2).
+ * Firebase CRUD helpers for Rafiqi Memory (Phase 2).
  * Stored at: users/{uid}/memory/config
  *
  * Single Source of Truth: Firestore only (no localStorage cache/fallback).
@@ -78,7 +78,7 @@ export async function getStudentMemory(uid?: string | null): Promise<StudentMemo
   } catch (err) {
     const cached = getCachedStudentMemory(uid);
     if (cached) return cached;
-    console.warn(`[Cognify Memory] Soft fallback to default memory for ${path}:`, (err as any)?.message || err);
+    console.warn(`[Rafiqi Memory] Soft fallback to default memory for ${path}:`, (err as any)?.message || err);
     return DEFAULT_STUDENT_MEMORY;
   }
 }
@@ -108,7 +108,7 @@ export function subscribeToStudentMemory(
   const safetyTimer = setTimeout(() => {
     if (!hasEmitted) {
       hasEmitted = true;
-      console.warn(`[Cognify Memory] Firestore subscription timed out for ${path}. Emitting fallback memory.`);
+      console.warn(`[Rafiqi Memory] Firestore subscription timed out for ${path}. Emitting fallback memory.`);
       onUpdate?.(cached || DEFAULT_STUDENT_MEMORY);
     }
   }, 4500);
@@ -179,7 +179,7 @@ export async function updateStudentMemory(
 }
 
 /**
- * Toggles whether Cognify Memory is enabled for AI context injection.
+ * Toggles whether Rafiqi Memory is enabled for AI context injection.
  */
 export async function toggleMemoryEnabled(
   uid?: string | null,

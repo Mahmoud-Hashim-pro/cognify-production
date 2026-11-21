@@ -1,5 +1,5 @@
 /**
- * Cognify Accessibility 2.0 - State Engine (Backward-Compatible Facade)
+ * Rafiqi Accessibility 2.0 - State Engine (Backward-Compatible Facade)
  * src/lib/accessibilityStateEngine.ts
  *
  * Re-exports the modular Accessibility Intelligence 2.0 implementation

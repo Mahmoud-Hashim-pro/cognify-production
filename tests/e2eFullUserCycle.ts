@@ -206,7 +206,7 @@ async function runE2ETest() {
 
   const manifestContent = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   expect(manifestContent.display === 'standalone', 'PWA manifest configured for standalone full-screen mobile display');
-  expect(manifestContent.name.includes('Cognify'), 'PWA manifest contains valid app title');
+  expect(manifestContent.name.includes('Rafiqi'), 'PWA manifest contains valid app title');
 
   const indexContent = fs.readFileSync(indexPath, 'utf8');
   expect(indexContent.includes('rel="manifest"'), 'index.html contains manifest link');

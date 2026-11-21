@@ -131,7 +131,7 @@ export default function StudentMemoryPage({
             </div>
             <div>
               <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
-                {localize(profile.language, 'Cognify Memory', 'ذاكرة كوجنيفي')}
+                {localize(profile.language, 'Rafiqi Memory', 'ذاكرة رفيقي')}
                 <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
                   Phase 2
                 </span>
@@ -222,7 +222,7 @@ export default function StudentMemoryPage({
             </div>
             <div>
               <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
-                {localize(profile.language, 'Cognify Memory', 'ذاكرة كوجنيفي')}
+                {localize(profile.language, 'Rafiqi Memory', 'ذاكرة رفيقي')}
                 <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
                   Phase 2
                 </span>
@@ -244,7 +244,7 @@ export default function StudentMemoryPage({
             <ShieldAlert className="w-7 h-7" />
           </div>
           <h3 className="text-lg font-bold text-white">
-            {localize(profile.language, 'Unable to Load Cognify Memory', 'تعذر تحميل ذاكرة كوجنيفي')}
+            {localize(profile.language, 'Unable to Load Rafiqi Memory', 'تعذر تحميل ذاكرة رفيقي')}
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
             {error || localize(profile.language, 'Firestore connection is offline or unavailable. You can retry connection or use local memory.', 'الاتصال بفايراستور غير متاح حالياً. يمكنك إعادة المحاولة أو استخدام الذاكرة المحلية.')}
@@ -297,8 +297,8 @@ export default function StudentMemoryPage({
       await toggleMemoryEnabled(profile.uid, !safeMemory.enabled);
       toast.success(
         !safeMemory.enabled
-          ? localize(profile.language, 'Cognify Memory enabled.', 'تم تفعيل ذاكرة كوجنيفي.')
-          : localize(profile.language, 'Cognify Memory disabled.', 'تم تعطيل ذاكرة كوجنيفي.'),
+          ? localize(profile.language, 'Rafiqi Memory enabled.', 'تم تفعيل ذاكرة رفيقي.')
+          : localize(profile.language, 'Rafiqi Memory disabled.', 'تم تعطيل ذاكرة رفيقي.'),
         localize(profile.language, 'Memory Updated', 'تم تحديث الذاكرة')
       );
     } catch (err) {
@@ -428,7 +428,7 @@ export default function StudentMemoryPage({
           </div>
           <div>
             <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
-              {localize(profile.language, 'Cognify Memory', 'ذاكرة كوجنيفي')}
+              {localize(profile.language, 'Rafiqi Memory', 'ذاكرة رفيقي')}
               <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
                 Phase 2
               </span>
@@ -483,8 +483,8 @@ export default function StudentMemoryPage({
               <p className="text-xs text-slate-400 mt-1.5 leading-relaxed max-w-2xl font-medium">
                 {localize(
                   profile.language,
-                  'When enabled, Cognify passes your stored preferences and goals to the AI during study sessions. When disabled, AI operates without any memory context. Default is privacy-first (Disabled).',
-                  'عند التفعيل، يرسل كوجنيفي تفضيلاتك وأهدافك المخزنة للمساعد الذكي أثناء الجلسة. عند التعطيل، يعمل المساعد بدون ذاكرة.'
+                  'When enabled, Rafiqi passes your stored preferences and goals to the AI during study sessions. When disabled, AI operates without any memory context. Default is privacy-first (Disabled).',
+                  'عند التفعيل، يرسل رفيقي تفضيلاتك وأهدافك المخزنة للمساعد الذكي أثناء الجلسة. عند التعطيل، يعمل المساعد بدون ذاكرة.'
                 )}
               </p>
             </div>

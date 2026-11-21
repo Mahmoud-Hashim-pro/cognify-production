@@ -1,5 +1,5 @@
 /**
- * CORS Security Guard for Cognify 2.0 (Point 1 Hardening)
+ * CORS Security Guard for Rafiqi 2.0 (Point 1 Hardening)
  * Strictly restricts allowed origins, supports dynamic Vercel / environment origins,
  * and handles preflight OPTIONS requests cleanly.
  */

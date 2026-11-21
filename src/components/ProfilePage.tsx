@@ -587,8 +587,8 @@ export default function ProfilePage({
                   onChange={(e) => handleChange('language', e.target.value as LanguagePreference)}
                   className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#18C6C3] cursor-pointer"
                 >
-                  {LANGUAGE_OPTIONS.map(l => (
-                    <option key={l.id} value={l.id}>{l.flag} {isAr ? l.nameAr : l.nameEn}</option>
+                  {LANGUAGE_OPTIONS.map(opt => (
+                    <option key={opt.id} value={opt.id}>{opt.flag} {isAr ? opt.nameAr : opt.nameEn}</option>
                   ))}
                 </select>
               </div>

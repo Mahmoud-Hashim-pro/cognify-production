@@ -1,5 +1,5 @@
 /**
- * Event-Driven Architecture & Persistent Event Store for Cognify 2.0 (Point 24)
+ * Event-Driven Architecture & Persistent Event Store for Rafiqi 2.0 (Point 24)
  * Decouples learning modules, analytics, and adaptation engines through strongly typed events.
  * Persists all events to Cloud Firestore under users/{uid}/learningEvents/{eventId} with a 5-second
  * debounce window to protect Firebase Spark tier quotas.

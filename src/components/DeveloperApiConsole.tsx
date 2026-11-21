@@ -314,7 +314,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold">HTTP Header: X-Cognify-Signature</span>
+                <span className="text-[10px] text-slate-500 uppercase font-bold">HTTP Header: X-Rafiqi-Signature</span>
                 <pre className="p-2.5 bg-[#0E0610] rounded-xl border border-[#4A1224]/60 text-[11px] font-mono text-[#E5A93C] overflow-x-auto">
                   {lastWebhookDelivery.signature}
                 </pre>

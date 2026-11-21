@@ -1,5 +1,5 @@
 /**
- * Interactive Formative Micro-Check Widget (Cognify 2.0 - Pillar 2)
+ * Interactive Formative Micro-Check Widget (Rafiqi 2.0 - Pillar 2)
  * 
  * Embedded directly in chat when the AI explains a substantive concept.
  * Allows 1-click comprehension verification, calculates latency, updates

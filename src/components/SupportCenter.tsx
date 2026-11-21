@@ -44,8 +44,8 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
     {
       icon: MessageSquare,
       q: t('The AI said it is busy or overloaded — what do I do?', 'الـ AI قال إنه مشغول/زحمة — أعمل إيه؟'),
-      a: t('Just try again in a moment. Cognify automatically falls back across multiple AI providers, so it keeps working even when one is rate-limited.',
-           'جرّب تاني بعد لحظات. كوجنيفاي بيبدّل تلقائيًا بين أكتر من مزوّد ذكاء اصطناعي، فبيفضل شغّال حتى لو واحد زحمة.'),
+      a: t('Just try again in a moment. Rafiqi automatically falls back across multiple AI providers, so it keeps working even when one is rate-limited.',
+           'جرّب تاني بعد لحظات. رفيقي بيبدّل تلقائيًا بين أكتر من مزوّد ذكاء اصطناعي، فبيفضل شغّال حتى لو واحد زحمة.'),
     },
     {
       icon: ShieldCheck,

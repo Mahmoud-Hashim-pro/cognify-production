@@ -1,6 +1,6 @@
 /**
  * Unified Student State Engine (Point 1)
- * The Single Source of Truth for student state in Cognify 2.0.
+ * The Single Source of Truth for student state in Rafiqi 2.0.
  * Coordinates cognitive stage, concept mastery, prerequisite diagnosis,
  * active interventions, and spaced retention schedules.
  */

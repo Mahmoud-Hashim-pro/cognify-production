@@ -67,7 +67,7 @@ export default function StudentPrivacyCenter({
       const exportBundle = {
         exportVersion: '2.0.0',
         exportDate: new Date().toISOString(),
-        specification: 'Cognify 2.0 Complete Machine-Readable Learning & Account Archive',
+        specification: 'Rafiqi 2.0 Complete Machine-Readable Learning & Account Archive',
         complianceStandard: 'GDPR Article 20 (Data Portability), FERPA, Egyptian Data Protection Law No. 151 of 2020',
         studentProfile: {
           uid: profile.uid,

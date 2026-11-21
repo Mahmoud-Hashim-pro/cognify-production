@@ -128,7 +128,7 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
     <aside
       role="alert"
       aria-live="polite"
-      aria-label={L('Install Cognify Application', 'تثبيت تطبيق كوجنيفاي')}
+      aria-label={L('Install Rafiqi Application', 'تثبيت تطبيق رفيقي')}
       className="fixed bottom-5 start-4 end-4 sm:start-auto sm:end-6 max-w-md z-50 bg-[#0E0610]/90 border border-[#4A1224]/50 shadow-2xl rounded-3xl p-5 backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="flex items-start gap-3.5">
@@ -139,7 +139,7 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
         <div className="flex-1 text-start">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-black text-white flex items-center gap-1.5">
-              <span>{L('Install Cognify on Phone', 'تثبيت كوجنيفاي على هاتفك')}</span>
+              <span>{L('Install Rafiqi on Phone', 'تثبيت رفيقي على هاتفك')}</span>
               <Sparkles className="w-3.5 h-3.5 text-rose-400" />
             </h3>
             <button
@@ -153,8 +153,8 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
 
           <p className="text-xs text-slate-300 mt-1 leading-relaxed">
             {L(
-              'Add Cognify to your home screen for quick offline access, full-screen study mode, and seamless assistive tools.',
-              'أضف كوجنيفاي لشاشتك الرئيسية لتجربة أسرع، استخدام مريح بدون إنترنت، ووصول فوري لأدوات الإتاحة.'
+              'Add Rafiqi to your home screen for quick offline access, full-screen study mode, and seamless assistive tools.',
+              'أضف رفيقي لشاشتك الرئيسية لتجربة أسرع، استخدام مريح بدون إنترنت، ووصول فوري لأدوات الإتاحة.'
             )}
           </p>
 
@@ -189,7 +189,7 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-rose-500/20 hover:opacity-95 active:scale-95 transition-all"
               >
                 <Download className="w-4 h-4" />
-                <span>{L('Install Cognify App', 'تثبيت تطبيق كوجنيفاي')}</span>
+                <span>{L('Install Rafiqi App', 'تثبيت تطبيق رفيقي')}</span>
               </button>
 
               <button

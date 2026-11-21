@@ -132,7 +132,7 @@ export default function BurgundyConstellationHero({
 
       {/* ── CARD HEADER: Brand Logo + Tagline + Theme Toggle ── */}
       <div className={`relative z-10 flex items-center justify-between pb-6 border-b ${isDarkMode ? 'border-rose-950/60' : 'border-rose-100'} gap-3 flex-wrap`}>
-        {/* Right side: Cognify with gold monogram + Arabic tagline */}
+        {/* Right side: Rafiqi with gold monogram + Arabic tagline */}
         <div className="flex items-center gap-3">
           {/* Brand Icon Badge */}
           <div className={`w-10 h-10 rounded-2xl ${isDarkMode ? 'bg-amber-500/10 border-2 border-[#E5A93C] text-[#E5A93C] shadow-md shadow-amber-950/50' : 'bg-amber-100 border-2 border-amber-500 text-amber-700 shadow-sm'} flex items-center justify-center`}>
@@ -140,7 +140,7 @@ export default function BurgundyConstellationHero({
           </div>
           <div>
             <div className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tight flex items-center gap-2`}>
-              <span>Cognify</span>
+              <span>{isAr ? 'رفيقي · Rafiqi' : 'Rafiqi'}</span>
             </div>
             <div className={`text-xs font-semibold ${isDarkMode ? 'text-rose-300/80' : 'text-rose-700'}`}>
               {localize(profile.language, 'Adaptive Learning Companion', 'رفيقك التعليمي المتكيّف')}

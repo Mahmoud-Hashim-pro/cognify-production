@@ -395,7 +395,7 @@ export default function HumanCommunicationBridge({ profile }: HumanCommunication
     setIsAiAnswering(true);
     triggerHapticAlert('single-pulse');
 
-    const prompt = `You are Cognify's specialized Deaf & Hard of Hearing Adaptive Tutor.
+    const prompt = `You are Rafiqi's specialized Deaf & Hard of Hearing Adaptive Tutor.
 Answer this student question clearly, visually, and concisely in the requested language: "${voiceDialect}".
 Explain the core concept in 2-3 clear sentences so it can be easily signed by a 3D Sign Language Avatar:
 Question: "${q}"`;
@@ -503,7 +503,7 @@ Question: "${q}"`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Cognify_Deaf_Bridge_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `Rafiqi_Deaf_Bridge_${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(isArabic ? 'تم حفظ سجل المحادثة بنجاح' : isFrench ? 'Historique téléchargé' : 'Transcript saved');

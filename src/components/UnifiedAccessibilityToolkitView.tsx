@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * 
- * Cognify Unified Accessibility Toolkit View
+ * Rafiqi Unified Accessibility Toolkit View
  * (Phase 7: Integrated Visual Assistant, Document Scanner, PDF Evidence Assistant & Sticker Explainer)
  */
 
@@ -266,13 +266,13 @@ export default function UnifiedAccessibilityToolkitView({
           height: p.height,
           pageNumber: p.pageNumber,
         })),
-        isAr ? 'مستند ممسوح ضوئياً - كوجنيفاي' : 'Cognify Scanned Document'
+        isAr ? 'مستند ممسوح ضوئياً - رفيقي' : 'Rafiqi Scanned Document'
       );
 
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Cognify_Scan_${Date.now()}.pdf`;
+      a.download = `Rafiqi_Scan_${Date.now()}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1067,7 +1067,7 @@ export default function UnifiedAccessibilityToolkitView({
                   <p className="text-sm font-bold text-stone-300">
                     {localize(
                       profile.language,
-                      'Integrated with Cognify Audio Transcription Engine (Phase 3). Fully accessible with screen readers.',
+                      'Integrated with Rafiqi Audio Transcription Engine (Phase 3). Fully accessible with screen readers.',
                       'مدمج بالكامل مع محرك تفريغ المحاضرات الصوتي المطور في المرحلة الثالثة.'
                     )}
                   </p>
@@ -1346,8 +1346,8 @@ export default function UnifiedAccessibilityToolkitView({
                 <p className="leading-relaxed">
                   {localize(
                     profile.language,
-                    '💡 Cognify allowances are generous and designed for intensive university lectures, homework, and continuous navigation. If any single quota is reached, other assistive tools continue to work uninterrupted.',
-                    '💡 حصص كوجنيفاي سخية ومصممة لدعم المحاضرات الجامعية اليومية، والمذاكرة، والتنقل المستمر. إذا اكتملت حصة أي ميزة، تظل باقي الأدوات المساعدة تعمل دون توقف.'
+                    '💡 Rafiqi allowances are generous and designed for intensive university lectures, homework, and continuous navigation. If any single quota is reached, other assistive tools continue to work uninterrupted.',
+                    '💡 حصص رفيقي سخية ومصممة لدعم المحاضرات الجامعية اليومية، والمذاكرة، والتنقل المستمر. إذا اكتملت حصة أي ميزة، تظل باقي الأدوات المساعدة تعمل دون توقف.'
                   )}
                 </p>
               </div>
