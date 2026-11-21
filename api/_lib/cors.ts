@@ -70,7 +70,18 @@ export function applyCorsHeaders(req: any, res: any): boolean {
   res.setHeader?.('Access-Control-Max-Age', '86400');
 
   if (origin) {
-    if (!isAllowedOrigin(origin)) {
+    const reqHost = String(req.headers?.['x-forwarded-host'] || req.headers?.host || '')
+      .split(',')[0]
+      .trim()
+      .toLowerCase();
+    const cleanOriginLower = String(origin).trim().replace(/\/$/, '').toLowerCase();
+    const isSameHostOrigin = Boolean(
+      reqHost &&
+        (cleanOriginLower === `https://${reqHost}` ||
+          (process.env.NODE_ENV !== 'production' && cleanOriginLower === `http://${reqHost}`))
+    );
+
+    if (!isAllowedOrigin(origin) && !isSameHostOrigin) {
       if (typeof res.status === 'function') {
         const s = res.status(403);
         if (s && typeof s.json === 'function') {
