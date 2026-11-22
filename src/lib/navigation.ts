@@ -34,7 +34,7 @@ export interface RouteState {
 }
 
 export const VALID_VIEWS: readonly AppView[] = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -78,6 +78,10 @@ export function parseRoute(hashString: string): RouteState {
   if (clean === 'productivity' || clean.startsWith('productivity/')) {
     const subTool = clean.split('/')[1] as any;
     return { view: 'productivity', tab: subTool, params: subTool ? { tool: subTool } : undefined };
+  }
+  if (clean === 'mobility' || clean.startsWith('mobility/')) {
+    const subTool = clean.split('/')[1] as any;
+    return { view: 'mobility', tab: subTool, params: subTool ? { tool: subTool } : undefined };
   }
 
   // ── Six Official Product Sections Routes (Deep Linking & Refresh Support) ──
@@ -182,6 +186,9 @@ export function buildHash(route: RouteState): string {
       return `#disability/${route.tab}`;
     }
     return '#disability/hub';
+  }
+  if (route.view === 'mobility' && route.tab) {
+    return `#mobility/${route.tab}`;
   }
   return `#${route.view}`;
 }
@@ -327,6 +334,8 @@ export function getRouteTitle(route: RouteState, lang?: string): string {
   }
 
   switch (route.view) {
+    case 'mobility':
+      return isAr ? 'مساعد الحركة واستكشاف الأماكن' : 'Mobility & Place Assistant';
     case 'productivity':
       return isAr ? 'مساحة الإنتاجية ومساعد العمل والإبداع' : 'Productivity Workspace & Assistant';
     case 'book_studio':

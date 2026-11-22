@@ -91,10 +91,11 @@ const UnifiedAccessibilityToolkitView = lazyWithRetry(() => import("./components
 const AudioDocumentIntelligenceView = lazyWithRetry(() => import("./components/AudioDocumentIntelligenceView"));
 const HearAndExpressView = lazyWithRetry(() => import("./components/HearAndExpressView"));
 const AccessibleProductivityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleProductivityWorkspaceView"));
+const AccessibleMobilityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleMobilityWorkspaceView"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -1245,6 +1246,22 @@ export default function App() {
               }
               navigateTo('book_studio');
             }}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'mobility':
+        return (
+          <AccessibleMobilityWorkspaceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={() => {
+              if (currentSection === 'move_explore') {
+                handleSelectSection('move_explore');
+              } else {
+                handleBack();
+              }
+            }}
+            initialTool={disabilityTab as any}
             isDarkMode={isDarkMode}
           />
         );
