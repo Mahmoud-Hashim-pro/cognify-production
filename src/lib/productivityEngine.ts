@@ -451,7 +451,7 @@ export function generateEmailDraft(input: EmailAssistantInput): GeneratedEmailDr
   }
 
   // Key points
-  const points = input.keyPoints.filter(Boolean);
+  const points = (input.keyPoints || []).filter(Boolean);
   if (points.length > 0) {
     if (input.length === 'short') {
       const joined = points.join(isAr ? '، مع ' : ', as well as ');

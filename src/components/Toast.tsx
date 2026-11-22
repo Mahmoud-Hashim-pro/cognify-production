@@ -51,7 +51,13 @@ export const toast = {
   },
   info: (message: string, title?: string, duration?: number) => {
     toast.show("info", message, title, duration);
-  }
+  },
+  loading: (message: string, titleOrOpts?: string | { id?: string }, duration?: number) => {
+    const title = typeof titleOrOpts === 'string' ? titleOrOpts : "Loading";
+    toast.show("info", message, title, duration);
+    return typeof titleOrOpts === 'object' && titleOrOpts?.id ? titleOrOpts.id : "toast-loading";
+  },
+  dismiss: (_id?: string) => {}
 };
 
 interface ToastContainerProps {

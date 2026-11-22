@@ -559,6 +559,10 @@ export default function App() {
     }, 50);
   };
 
+  const handleSelectSection = (sectionId: ProductSectionId) => {
+    navigateTo('disability', 'hub', sectionId);
+  };
+
   const handleBack = () => {
     smartNavigateBack(navigateTo, 'disability', 'hub');
   };

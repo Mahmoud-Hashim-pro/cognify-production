@@ -380,7 +380,7 @@ Notes: شرح تفصيلي لأدوات الوصول.
   assert(parsedProd.view === 'productivity', '#productivity parses to view "productivity"');
 
   const parsedProdVoice = parseRoute('#productivity/voice_doc');
-  assert(parsedProdVoice.view === 'productivity' && parsedProdVoice.tab === 'voice_doc', '#productivity/voice_doc parses tool');
+  assert(parsedProdVoice.view === 'productivity' && (parsedProdVoice.tab as any) === 'voice_doc', '#productivity/voice_doc parses tool');
 
   const parsedWorkCreate = parseRoute('#work_create');
   assert(parsedWorkCreate.view === 'disability' && parsedWorkCreate.section === 'work_create', '#work_create parses to section "work_create"');

@@ -316,7 +316,7 @@ export async function runPhase11CommunicateTests() {
 
   const routeTool = parseRoute('#communication/handwriting');
   assert(routeTool.view === 'communication', 'parseRoute("#communication/handwriting") returns view="communication"');
-  assert(routeTool.tab === 'handwriting', 'parseRoute parses tab="handwriting"');
+  assert((routeTool.tab as any) === 'handwriting', 'parseRoute parses tab="handwriting"');
   assert(routeTool.params?.tool === 'handwriting', 'parseRoute parses params.tool="handwriting"');
 
   const hashComm = buildHash({ view: 'communication' });

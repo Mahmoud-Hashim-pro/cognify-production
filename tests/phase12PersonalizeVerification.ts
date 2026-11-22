@@ -21,7 +21,6 @@ import fs from 'fs';
 import path from 'path';
 import {
   getProductSection,
-  SECTION_DEFINITIONS,
 } from '../src/lib/sections';
 import {
   parseRoute,
@@ -221,8 +220,6 @@ export async function runPhase12PersonalizeTests(): Promise<{ passed: number; fa
     lastPosition: 10,
     totalLength: 100,
     progressPercent: 10,
-    timestamp: Date.now(),
-    storageProvenance: 'local_browser_only',
   });
   assert(added.length === 2 && added[0].id === 'item_2', 'Reading History', 'addReadingHistoryItem prepends newest item');
 
@@ -292,13 +289,13 @@ export async function runPhase12PersonalizeTests(): Promise<{ passed: number; fa
   assert(routeSettings.view === 'settings', 'Navigation Routing', 'parseRoute parses #settings to view: settings');
 
   const routeVoice = parseRoute('#settings/voice');
-  assert(routeVoice.view === 'settings' && routeVoice.tab === 'voice', 'Navigation Routing', 'parseRoute parses #settings/voice to tab: voice');
+  assert(routeVoice.view === 'settings' && (routeVoice.tab as any) === 'voice', 'Navigation Routing', 'parseRoute parses #settings/voice to tab: voice');
 
   const routeMemory = parseRoute('#settings/memory');
-  assert(routeMemory.view === 'settings' && routeMemory.tab === 'memory', 'Navigation Routing', 'parseRoute parses #settings/memory to tab: memory');
+  assert(routeMemory.view === 'settings' && (routeMemory.tab as any) === 'memory', 'Navigation Routing', 'parseRoute parses #settings/memory to tab: memory');
 
   const routeOffline = parseRoute('#settings/offline');
-  assert(routeOffline.view === 'settings' && routeOffline.tab === 'offline', 'Navigation Routing', 'parseRoute parses #settings/offline to tab: offline');
+  assert(routeOffline.view === 'settings' && (routeOffline.tab as any) === 'offline', 'Navigation Routing', 'parseRoute parses #settings/offline to tab: offline');
 
   const hashSettings = buildHash({ view: 'settings' });
   assert(hashSettings === '#settings', 'Navigation Routing', 'buildHash formats #settings cleanly');

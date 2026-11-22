@@ -178,8 +178,7 @@ export default function AccessibleMobilityWorkspaceView({
     (text: string) => {
       cancelSpeech();
       setIsSpeaking(true);
-      speak(text, {
-        lang: isAr ? 'ar-SA' : 'en-US',
+      speak(text, isAr ? 'ar-SA' : 'en-US', {
         onEnd: () => setIsSpeaking(false),
         onError: () => setIsSpeaking(false),
       });

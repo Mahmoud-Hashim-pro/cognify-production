@@ -342,7 +342,7 @@ export async function runPhase10MobilityTests() {
 
   const routeTool = parseRoute('#mobility/sign_reader');
   assert(routeTool.view === 'mobility', 'parseRoute("#mobility/sign_reader") returns view="mobility"');
-  assert(routeTool.tab === 'sign_reader', 'parseRoute("#mobility/sign_reader") returns tab="sign_reader"');
+  assert((routeTool.tab as any) === 'sign_reader', 'parseRoute("#mobility/sign_reader") returns tab="sign_reader"');
   assert(routeTool.params?.tool === 'sign_reader', 'parseRoute parses params.tool="sign_reader"');
 
   const hashMobility = buildHash({ view: 'mobility' });
