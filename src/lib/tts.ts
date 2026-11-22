@@ -477,6 +477,9 @@ export function cancelSpeech(): void {
   }
 }
 
+/** Alias for cancelSpeech */
+export const stopSpeaking = cancelSpeech;
+
 /** Pause ongoing speech synthesis if currently active. */
 export function pauseSpeech(): void {
   if (typeof window !== "undefined" && "speechSynthesis" in window) {

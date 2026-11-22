@@ -2,7 +2,7 @@ import { UserProfile, AccountPath } from '../types';
 
 // The views supported in the Rafiqi Assistive Platform.
 export type AppView =
-  | 'chat' | 'profile' | 'settings' | 'video' | 'disability' | 'book_studio' | 'toolkit' | 'audio_document_intelligence' | 'hear_express' | 'productivity' | 'mobility'
+  | 'chat' | 'profile' | 'settings' | 'video' | 'disability' | 'book_studio' | 'toolkit' | 'audio_document_intelligence' | 'hear_express' | 'productivity' | 'mobility' | 'communicate' | 'communication'
   | 'admin' | 'support' | 'privacy_security'
   | 'learning' | 'goals' | 'gpa' | 'analytics' | 'planner' | 'memory'
   | 'gym' | 'iq' | 'institution' | 'france' | 'privacy' | 'intelligence'

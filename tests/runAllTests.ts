@@ -112,6 +112,7 @@ import { runAudioDocumentIntelligencePhase7Verification } from './audioDocumentI
 import { runPhase8Verification } from './phase8UnifiedNavigationVerification.js';
 import { runPhase9ProductivityTests } from './phase9ProductivityAssistantVerification.js';
 import { runPhase10MobilityTests } from './phase10MobilityAssistanceVerification.js';
+import { runPhase11CommunicateTests } from './phase11CommunicateVerification.js';
 import { BRAND_CONFIG, getBrandName, getBrandTagline } from '../src/config/brand.js';
 import { resolveSeoMetadata, applySeoMetadata } from '../src/lib/seoEngine.js';
 
@@ -2503,6 +2504,14 @@ Keep practicing closures with higher-order functions!
     const phase10Res = await runPhase10MobilityTests();
     totalPassed += phase10Res.passed;
     totalFailed += phase10Res.failed;
+  }
+
+  // 81. Rafiqi Communicate — Accessible Communication Assistant (Phase 11)
+  console.log('\n[81] Rafiqi Communicate — Accessible Communication Assistant (Phase 11)');
+  {
+    const phase11Res = await runPhase11CommunicateTests();
+    totalPassed += phase11Res.passed;
+    totalFailed += phase11Res.failed;
   }
 
   console.log(`\n========================================`);

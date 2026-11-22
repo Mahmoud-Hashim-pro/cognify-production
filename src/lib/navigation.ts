@@ -34,7 +34,7 @@ export interface RouteState {
 }
 
 export const VALID_VIEWS: readonly AppView[] = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'communication', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -82,6 +82,14 @@ export function parseRoute(hashString: string): RouteState {
   if (clean === 'mobility' || clean.startsWith('mobility/')) {
     const subTool = clean.split('/')[1] as any;
     return { view: 'mobility', tab: subTool, params: subTool ? { tool: subTool } : undefined };
+  }
+  if (clean.startsWith('communicate/') || clean.startsWith('communication/')) {
+    const subTool = clean.split('/')[1] as any;
+    const tab = (subTool === 'workspace' || subTool === 'main' || subTool === 'hub') ? undefined : subTool;
+    return { view: 'communication', tab, section: 'communicate', params: tab ? { tool: tab } : undefined };
+  }
+  if (['communication', 'communicate_workspace', 'communicate-workspace', 'communicate_assistant'].includes(clean)) {
+    return { view: 'communication', section: 'communicate' };
   }
 
   // ── Six Official Product Sections Routes (Deep Linking & Refresh Support) ──
@@ -189,6 +197,9 @@ export function buildHash(route: RouteState): string {
   }
   if (route.view === 'mobility' && route.tab) {
     return `#mobility/${route.tab}`;
+  }
+  if (route.view === 'communication' || route.view === 'communicate') {
+    return route.tab ? `#communication/${route.tab}` : '#communication';
   }
   return `#${route.view}`;
 }
@@ -334,6 +345,9 @@ export function getRouteTitle(route: RouteState, lang?: string): string {
   }
 
   switch (route.view) {
+    case 'communication':
+    case 'communicate':
+      return isAr ? 'مساعد التواصل الشامل' : 'Communicate — Accessible Communication Assistant';
     case 'mobility':
       return isAr ? 'مساعد الحركة واستكشاف الأماكن' : 'Mobility & Place Assistant';
     case 'productivity':

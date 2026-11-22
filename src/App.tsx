@@ -92,10 +92,11 @@ const AudioDocumentIntelligenceView = lazyWithRetry(() => import("./components/A
 const HearAndExpressView = lazyWithRetry(() => import("./components/HearAndExpressView"));
 const AccessibleProductivityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleProductivityWorkspaceView"));
 const AccessibleMobilityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleMobilityWorkspaceView"));
+const AccessibleCommunicateWorkspaceView = lazyWithRetry(() => import("./components/AccessibleCommunicateWorkspaceView"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'communication', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -488,8 +489,8 @@ export default function App() {
     let targetTab: DisabilityTab | undefined = tab;
     let targetSection: ProductSectionId | null = section !== undefined ? section : null;
 
-    const SECTION_IDS: ProductSectionId[] = ['see_understand', 'read_learn', 'work_create', 'move_explore', 'communicate', 'personalize'];
-    if (SECTION_IDS.includes(view as ProductSectionId)) {
+    const SECTION_IDS: ProductSectionId[] = ['see_understand', 'read_learn', 'work_create', 'move_explore', 'personalize'];
+    if (SECTION_IDS.includes(view as ProductSectionId) || (view === 'communicate' && (tab === 'hub' || section === 'communicate'))) {
       targetView = 'disability';
       targetTab = 'hub';
       targetSection = view as ProductSectionId;
@@ -1261,6 +1262,24 @@ export default function App() {
                 handleBack();
               }
             }}
+            initialTool={disabilityTab as any}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'communication':
+      case 'communicate':
+        return (
+          <AccessibleCommunicateWorkspaceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={() => {
+              if (currentSection === 'communicate') {
+                handleSelectSection('communicate');
+              } else {
+                handleBack();
+              }
+            }}
+            onOpenHearingSuite={() => navigateTo('hear_express')}
             initialTool={disabilityTab as any}
             isDarkMode={isDarkMode}
           />
