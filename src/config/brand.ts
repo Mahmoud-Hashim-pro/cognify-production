@@ -32,13 +32,13 @@ export const BRAND_CONFIG: BrandConfig = Object.freeze({
   nameAr: 'رفيقي',
   appNameEn: 'Rafiqi AI',
   appNameAr: 'رفيقي AI',
-  taglineEn: 'AI-Powered Adaptive Personal & Accessibility Assistant',
-  taglineAr: 'رفيقك الذكي التكيفي للتعلم الشامل وإمكانية الوصول',
-  taglineFr: 'Assistant Personnel et Mentor IA Adaptatif & Accessible',
+  taglineEn: 'Inclusive Learning & Assistive Technology Platform',
+  taglineAr: 'رفيقك للتعلّم الشامل والتقنيات المساندة لذوي الهمم',
+  taglineFr: 'Plateforme d’Apprentissage Inclusif & Technologies d’Assistance',
   descriptionEn:
-    'Rafiqi (رفيقي) is an AI-powered adaptive personal assistant and inclusive learning platform that tailors every interaction to your cognitive level, academic field, and accessibility needs.',
+    'Rafiqi (رفيقي) is an inclusive learning and assistive technology platform empowering people of determination and learners of all abilities with a real-time AI visual companion, 3D sign language interpreter, accessible document studio, and smart tutor.',
   descriptionAr:
-    'رفيقي (Rafiqi) هو مساعدك الشخصي الذكي ومنصة التعلم الشامل والتكيفي المصممة لدعم الطلاب وذوي الهمم بأعلى معايير الإتاحة العالمية.',
+    'رفيقي (Rafiqi) هي منصة التعلّم الشامل والتقنيات المساندة لذوي الهمم، توفر المساعد البصري الذكي للمكفوفين، ومترجم لغة الإشارة ثلاثي الأبعاد للصم، واستوديو المستندات الميسرة، والمعلم الذكي.',
   teamNameEn: 'The Rafiqi Team / Graduation Project Team',
   teamNameAr: 'فريق تطوير منصة رفيقي',
   canonicalUrl: 'https://rafiqi-ai.vercel.app',

@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Rafiqi (رفيقي) — Adaptive AI Study Mentor & Accessibility Companion",
+  "name": "Rafiqi (رفيقي) — Inclusive Learning & Assistive Technology Platform",
   "short_name": "Rafiqi",
-  "description": "Rafiqi (رفيقي) is an adaptive, accessible AI personal assistant and study mentor that tailors learning to your level, field, and accessibility needs.",
+  "description": "Rafiqi (رفيقي) — منصة التعلّم الشامل والتقنيات المساندة لذوي الهمم: المساعد البصري للمكفوفين، ومترجم لغة الإشارة ثلاثي الأبعاد للصم، واستوديو المستندات الميسرة.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -20,16 +20,16 @@
   ],
   "shortcuts": [
     {
-      "name": "Rafiqi AI Chat Mentor",
-      "short_name": "Chat",
-      "description": "Ask questions and receive calibrated adaptive answers",
-      "url": "/#chat"
+      "name": "Rafiqi Accessibility Hub",
+      "short_name": "Assistive",
+      "description": "Visual companion, 3D sign language, live captions, and accessible document studio",
+      "url": "/#disability"
     },
     {
-      "name": "Rafiqi Accessibility Suite",
-      "short_name": "Assistive",
-      "description": "Visual companion, 3D sign language, live captions, and motor voice tools",
-      "url": "/#disability"
+      "name": "Rafiqi Inclusive AI Tutor",
+      "short_name": "AI Tutor",
+      "description": "Ask questions and receive accessible, personalized explanations",
+      "url": "/#chat"
     }
   ]
 }

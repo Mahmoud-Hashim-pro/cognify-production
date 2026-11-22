@@ -1,6 +1,6 @@
 {
-  "name": "Cognify",
-  "description": "Cognitive Optimization & Growth Navigation Intelligence Framework Yield. Your adaptive AI mentor and intellectual companion.",
+  "name": "Rafiqi",
+  "description": "Rafiqi (رفيقي) — Inclusive Learning & Assistive Technology Platform for People of Determination (Visual Companion, 3D Sign Language & Hearing Center, Accessible Document Studio, and Inclusive AI Tutor).",
   "requestFramePermissions": ["microphone", "camera"],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

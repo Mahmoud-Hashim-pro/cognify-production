@@ -54,7 +54,7 @@ export default function SplashScreen() {
             {isAr ? 'رفيقي · Rafiqi' : 'Rafiqi'}
           </h1>
           <p className="text-xs sm:text-sm font-medium text-stone-400 pt-1">
-            {isAr ? 'رفيقك الذكي المتكيف' : 'Your adaptive AI study mentor'}
+            {isAr ? 'منصة التعلّم الشامل والتقنيات المساندة' : 'Inclusive Learning & Assistive Technology Platform'}
           </p>
         </div>
       </div>
