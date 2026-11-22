@@ -50,6 +50,10 @@ import {
   Navigation,
   Video,
   CheckCircle2,
+  Keyboard,
+  History,
+  Wifi,
+  Layers,
 } from 'lucide-react';
 
 export type ProductSectionId =
@@ -909,6 +913,96 @@ export const PRODUCT_SECTIONS: ProductSectionDefinition[] = [
         isPrimaryAction: true,
       },
       {
+        id: 'feat_voice_audio_preferences',
+        titleEn: 'Voice, Pitch & Speech Controls',
+        titleAr: 'تفضيلات الصوت وسرعة القراءة والطبقة',
+        descEn: 'Configure speech synthesis language, native system voice, reading speed, volume, and pitch with browser capability disclosures.',
+        descAr: 'تخصيص لغة النطق والصوت المحلي للنظام وسرعة القراءة والطبقة ومستوى الصوت مع بيان قيود المتصفح.',
+        iconName: 'Volume2',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Voice Select', 'Rate 0.5-2.0x', 'Pitch', 'Tashkeel'],
+        tagsAr: ['اختيار الصوت', 'السرعة', 'طبقة الصوت', 'التشكيل'],
+        targetView: 'settings',
+        targetTab: 'voice',
+      },
+      {
+        id: 'feat_description_reading_preferences',
+        titleEn: 'Visual Descriptions & Reading Defaults',
+        titleAr: 'تفضيلات الوصف البصري والقراءة والعملات',
+        descEn: 'Set concise or detailed scene descriptions, description dialect, default reading mode, preferred currency, and units.',
+        descAr: 'تحديد عمق الوصف البصري (موجز/مفصل)، لغة الشرح، العملة المفضلة، نمط نطق الأرقام، ووحدات القياس.',
+        iconName: 'FileText',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Concise/Detailed', 'Currency', 'Units', 'Reading Mode'],
+        tagsAr: ['موجز ومفصل', 'العملة', 'الوحدات', 'نمط القراءة'],
+        targetView: 'settings',
+        targetTab: 'descriptions',
+      },
+      {
+        id: 'feat_shortcuts_commands',
+        titleEn: 'Personal Commands & Accessible Shortcuts',
+        titleAr: 'الأوامر الصوتية واختصارات لوحة المفاتيح',
+        descEn: 'Discoverable keyboard shortcuts matrix, screen reader conflict prevention, custom voice phrases, and restore defaults.',
+        descAr: 'مصفوفة اختصارات لوحة المفاتيح الميسرة مع منع التعارض مع قارئات الشاشة والأمر الصوتي المخصص.',
+        iconName: 'Keyboard',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Keyboard Matrix', 'No Conflict', 'Voice Phrase', 'Restore'],
+        tagsAr: ['مصفوفة الاختصارات', 'منع التعارض', 'أمر صوتي', 'استعادة'],
+        targetView: 'settings',
+        targetTab: 'shortcuts',
+      },
+      {
+        id: 'feat_reading_history_manager',
+        titleEn: 'Reading History & Learning Bookmark Manager',
+        titleAr: 'سجل القراءة واستئناف الكتب والمحاضرات',
+        descEn: 'Resume documents and audio lectures from exact page/second markers without storing heavy binary content unnecessarily.',
+        descAr: 'استئناف قراءة الكتب والمحاضرات من موضع التوقف مع إمكانية مسح السجلات وحفظ الخصوصية محلياً.',
+        iconName: 'History',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Resume Progress', 'Local Bookmarks', 'Clear History'],
+        tagsAr: ['استئناف القراءة', 'علامات محلية', 'مسح السجل'],
+        targetView: 'settings',
+        targetTab: 'history',
+      },
+      {
+        id: 'feat_assistant_memory_privacy',
+        titleEn: 'Privacy-First Assistant Memory & Opt-in',
+        titleAr: 'ذاكرة المساعد الشخصي بخصوصية تامة',
+        descEn: 'Strict opt-in assistant memory: review, edit, or delete stored entries, pause memory, and block sensitive national IDs/passwords.',
+        descAr: 'ذاكرة مساعد باشتراك اختياري صريح مع إمكانية التعديل والحذف والإيقاف المؤقت ومنع حفظ البيانات السرية.',
+        iconName: 'Brain',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Strict Opt-in', 'Edit/Delete', 'Pause', 'No Sensitive Data'],
+        tagsAr: ['اشتراك اختياري', 'تعديل وحذف', 'إيقاف مؤقت', 'حماية الأرقام القومية'],
+        targetView: 'settings',
+        targetTab: 'memory',
+      },
+      {
+        id: 'feat_offline_connectivity_status',
+        titleEn: 'Offline Capabilities & Connectivity Status',
+        titleAr: 'إمكانيات العمل دون إنترنت وحالة الاتصال',
+        descEn: 'Real-time online/offline network indicator and honest capability matrix distinguishing genuine offline tools from cloud AI.',
+        descAr: 'مؤشر فوري لحالة الاتصال مع مصفوفة صادقة توضح الميزات التي تعمل دون إنترنت وتلك التي تتطلب شبكة.',
+        iconName: 'Wifi',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Real-time Status', 'Offline Tools', 'Zero Fake Offline AI'],
+        tagsAr: ['حالة الشبكة', 'أدوات دون إنترنت', 'بيانات دقيقة'],
+        targetView: 'settings',
+        targetTab: 'offline',
+      },
+      {
         id: 'feat_student_profile',
         titleEn: 'Student Progress & Identity Passport',
         titleAr: 'تقدمي التعليمي وجواز الهوية',
@@ -1002,6 +1096,10 @@ export function getSectionIconComponent(iconName: string): React.ComponentType<{
     case 'Navigation': return Navigation;
     case 'Video': return Video;
     case 'CheckCircle2': return CheckCircle2;
+    case 'Keyboard': return Keyboard;
+    case 'History': return History;
+    case 'Wifi': return Wifi;
+    case 'Layers': return Layers;
     default: return Sparkles;
   }
 }

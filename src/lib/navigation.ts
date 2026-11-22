@@ -91,6 +91,10 @@ export function parseRoute(hashString: string): RouteState {
   if (['communication', 'communicate_workspace', 'communicate-workspace', 'communicate_assistant'].includes(clean)) {
     return { view: 'communication', section: 'communicate' };
   }
+  if (clean === 'settings' || clean.startsWith('settings/')) {
+    const subTool = clean.split('/')[1] as any;
+    return { view: 'settings', tab: subTool, params: subTool ? { tool: subTool, tab: subTool } : undefined };
+  }
 
   // ── Six Official Product Sections Routes (Deep Linking & Refresh Support) ──
   // Matches: #see_understand, #read_learn, #work_create, #move_explore, #communicate, #personalize
@@ -200,6 +204,9 @@ export function buildHash(route: RouteState): string {
   }
   if (route.view === 'communication' || route.view === 'communicate') {
     return route.tab ? `#communication/${route.tab}` : '#communication';
+  }
+  if (route.view === 'settings') {
+    return route.tab ? `#settings/${route.tab}` : '#settings';
   }
   return `#${route.view}`;
 }
