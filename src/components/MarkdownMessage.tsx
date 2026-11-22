@@ -46,8 +46,8 @@ function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [ke
     <div className="my-5 max-w-2xl rounded-3xl overflow-hidden border border-[rgba(72,139,190,0.22)] bg-[#0A203A] shadow-xl group transition-all hover:border-[#1685B5]">
       <div className="relative min-h-[220px] flex items-center justify-center bg-[#071B33] overflow-hidden">
         {!loaded && !error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-[#0A96A5] bg-[#0A203A]/90 backdrop-blur-md">
-            <Sparkles className="w-6 h-6 animate-spin text-[#0A96A5]" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-[#4B9FE1] bg-[#0A203A]/90 backdrop-blur-md">
+            <Sparkles className="w-6 h-6 animate-spin text-[#4B9FE1]" />
             <span className="text-xs font-black uppercase tracking-wider text-slate-300">
               Generating & Rendering Visual…
             </span>
@@ -60,7 +60,7 @@ function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [ke
               <button
                 type="button"
                 onClick={handleManualRetry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#087F8C]/20 hover:bg-[#087F8C]/30 text-[#0A96A5] border border-[#087F8C]/40 rounded-xl font-bold text-xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1769AA]/20 hover:bg-[#0D4778]/30 text-[#4B9FE1] border border-[#1769AA]/40 rounded-xl font-bold text-xs transition-all cursor-pointer"
               >
                 <RefreshCw className="w-3 h-3" />
                 <span>Retry Generation</span>
@@ -69,7 +69,7 @@ function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [ke
                 href={src}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#0A96A5] underline hover:text-[#10B8B0] font-bold text-xs"
+                className="text-[#4B9FE1] underline hover:text-[#4B9FE1] font-bold text-xs"
               >
                 Open direct image link ↗
               </a>
@@ -96,7 +96,7 @@ function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [ke
             href={src}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0A96A5] hover:text-[#10B8B0] hover:underline shrink-0"
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#4B9FE1] hover:text-[#4B9FE1] hover:underline shrink-0"
           >
             <span>Full Size</span>
             <ExternalLink className="w-3 h-3" />
@@ -189,14 +189,14 @@ export default function MarkdownMessage({
               h2: ({ node, ...p }: any) => <h2 className="text-xl font-bold text-[#F4F7FB] border-b border-[rgba(72,139,190,0.22)] pb-2 mb-3 pt-4 tracking-tight" {...p} />,
               h3: ({ node, ...p }: any) => <h3 className="text-lg font-semibold text-[#F4F7FB] mb-2 pt-3" {...p} />,
               p: ({ node, ...p }: any) => <p className="mb-3.5 leading-relaxed text-[#F4F7FB]" {...p} />,
-              ul: ({ node, ...p }: any) => <ul className="list-disc ms-6 mb-4 space-y-1.5 marker:text-[#0A96A5] text-[#F4F7FB]" {...p} />,
-              ol: ({ node, ...p }: any) => <ol className="list-decimal ms-6 mb-4 space-y-1.5 marker:text-[#0A96A5] text-[#F4F7FB]" {...p} />,
+              ul: ({ node, ...p }: any) => <ul className="list-disc ms-6 mb-4 space-y-1.5 marker:text-[#4B9FE1] text-[#F4F7FB]" {...p} />,
+              ol: ({ node, ...p }: any) => <ol className="list-decimal ms-6 mb-4 space-y-1.5 marker:text-[#4B9FE1] text-[#F4F7FB]" {...p} />,
               li: ({ node, ...p }: any) => <li className="leading-relaxed" {...p} />,
               a: ({ node, href, ...p }: any) => {
                 const isSafe = href && !href.trim().toLowerCase().startsWith('javascript:') && !href.trim().toLowerCase().startsWith('data:');
                 return (
                   <a
-                    className="text-[#0A96A5] underline underline-offset-4 decoration-[#0A96A5]/40 hover:text-[#10B8B0] transition-colors font-semibold"
+                    className="text-[#4B9FE1] underline underline-offset-4 decoration-[#4B9FE1]/40 hover:text-[#4B9FE1] transition-colors font-semibold"
                     target="_blank"
                     rel="noopener noreferrer"
                     href={isSafe ? href : '#'}
@@ -207,14 +207,14 @@ export default function MarkdownMessage({
               strong: ({ node, ...p }: any) => <strong className="font-black text-white" {...p} />,
               em: ({ node, ...p }: any) => <em className="italic text-slate-300" {...p} />,
               hr: ({ node, ...p }: any) => <hr className="my-4 border-[rgba(72,139,190,0.22)]" {...p} />,
-              blockquote: ({ node, ...p }: any) => <blockquote className="border-s-4 border-[#087F8C] bg-[#0A203A]/80 px-4 py-3 rounded-e-2xl italic text-[#F4F7FB] my-4 border border-[rgba(72,139,190,0.22)]" {...p} />,
+              blockquote: ({ node, ...p }: any) => <blockquote className="border-s-4 border-[#1769AA] bg-[#0A203A]/80 px-4 py-3 rounded-e-2xl italic text-[#F4F7FB] my-4 border border-[rgba(72,139,190,0.22)]" {...p} />,
               pre: ({ node, ...p }: any) => <pre className="bg-[#071B33] text-[#F4F7FB] border border-[rgba(72,139,190,0.22)] rounded-2xl p-4 overflow-x-auto text-xs my-4 custom-scrollbar" {...p} />,
               code: ({ node, className, children, ...p }: any) => {
                 const isBlock = (className && className.includes('language-')) || String(children).includes('\n');
                 return isBlock ? (
-                  <code className={`font-mono text-[#0A96A5] ${className || ''}`} {...p}>{children}</code>
+                  <code className={`font-mono text-[#4B9FE1] ${className || ''}`} {...p}>{children}</code>
                 ) : (
-                  <code className="px-2 py-0.5 rounded-lg bg-[#071B33] border border-[rgba(72,139,190,0.22)] text-[#0A96A5] text-[0.85em] font-mono" {...p}>{children}</code>
+                  <code className="px-2 py-0.5 rounded-lg bg-[#071B33] border border-[rgba(72,139,190,0.22)] text-[#4B9FE1] text-[0.85em] font-mono" {...p}>{children}</code>
                 );
               },
               table: ({ node, ...p }: any) => <div className="overflow-x-auto my-4 rounded-xl border border-[rgba(72,139,190,0.22)] bg-[#071B33]/80"><table className="w-full text-xs text-[#F4F7FB] border-collapse" {...p} /></div>,

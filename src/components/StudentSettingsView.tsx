@@ -430,9 +430,9 @@ export default function StudentSettingsView({
                   onClick={onNavigateBack}
                   aria-label={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
                   title={localize(profile.language, 'Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
-                  className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#082344] hover:bg-[#0D2542] border border-[#16395E] hover:border-[#10B8B0]/50 text-[#C4D3E5] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
+                  className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#082344] hover:bg-[#0D2542] border border-[#16395E] hover:border-[#1769AA]/50 text-[#C4D3E5] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
-                  <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#10B8B0]" />
+                  <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#4B9FE1]" />
                   <span className="text-xs font-bold">{localize(profile.language, 'Back', 'رجوع')}</span>
                 </button>
               )}
@@ -440,8 +440,8 @@ export default function StudentSettingsView({
                 <h1 className="text-2xl sm:text-3xl font-black text-[#F4F7FB] tracking-tight">
                   {localize(profile.language, 'Settings', 'الإعدادات')}
                 </h1>
-                <div className="w-8 h-8 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center text-[#00AEB8] shrink-0">
-                  <Settings className="w-4 h-4 text-[#00AEB8]" />
+                <div className="w-8 h-8 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1] shrink-0">
+                  <Settings className="w-4 h-4 text-[#4B9FE1]" />
                 </div>
               </div>
             </div>
@@ -465,8 +465,8 @@ export default function StudentSettingsView({
             <div>
               {/* Card Header */}
               <div className="border-b border-[#16395E] pb-4 mb-6">
-                <div className="flex items-center gap-2.5 text-[#00AEB8]">
-                  <UserCheck className="w-5 h-5 text-[#00AEB8]" />
+                <div className="flex items-center gap-2.5 text-[#4B9FE1]">
+                  <UserCheck className="w-5 h-5 text-[#4B9FE1]" />
                   <h2 className="text-lg font-bold text-[#F4F7FB]">
                     {localize(profile.language, 'Accessibility Settings', 'إعدادات الوصول')}
                   </h2>
@@ -508,7 +508,7 @@ export default function StudentSettingsView({
                         setFontSizeScale(val);
                         executeSave(val, contrastMode, screenReader, reduceMotion, interfaceLanguage, explanationLanguage, explanationDetail, experienceLevel, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
                     >
                       <option value="normal">{localize(profile.language, 'Small', 'صغير')}</option>
                       <option value="medium">{localize(profile.language, 'Medium', 'متوسط')}</option>
@@ -546,7 +546,7 @@ export default function StudentSettingsView({
                         if (val === 'light' && isDarkMode && toggleTheme) toggleTheme();
                         executeSave(fontSizeScale, val, screenReader, reduceMotion, interfaceLanguage, explanationLanguage, explanationDetail, experienceLevel, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
                     >
                       <option value="dark">{localize(profile.language, 'Dark Mode', 'الوضع الداكن')}</option>
                       <option value="light">{localize(profile.language, 'Light Mode', 'الوضع الفاتح')}</option>
@@ -588,7 +588,7 @@ export default function StudentSettingsView({
                         executeSave(fontSizeScale, contrastMode, next, reduceMotion, interfaceLanguage, explanationLanguage, explanationDetail, experienceLevel, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
                       className={`w-12 h-6.5 rounded-full transition-colors p-1 cursor-pointer flex items-center ${
-                        screenReader ? 'bg-[#00AEB8]' : 'bg-[#082344] border border-[#16395E]'
+                        screenReader ? 'bg-[#1769AA]' : 'bg-[#082344] border border-[#16395E]'
                       }`}
                     >
                       <div className={`w-4.5 h-4.5 rounded-full bg-white transition-transform shadow-xs ${
@@ -632,7 +632,7 @@ export default function StudentSettingsView({
                         executeSave(fontSizeScale, contrastMode, screenReader, next, interfaceLanguage, explanationLanguage, explanationDetail, experienceLevel, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
                       className={`w-12 h-6.5 rounded-full transition-colors p-1 cursor-pointer flex items-center ${
-                        reduceMotion ? 'bg-[#00AEB8]' : 'bg-[#082344] border border-[#16395E]'
+                        reduceMotion ? 'bg-[#1769AA]' : 'bg-[#082344] border border-[#16395E]'
                       }`}
                     >
                       <div className={`w-4.5 h-4.5 rounded-full bg-white transition-transform shadow-xs ${
@@ -655,8 +655,8 @@ export default function StudentSettingsView({
             <div>
               {/* Card Header */}
               <div className="border-b border-[#16395E] pb-4 mb-6">
-                <div className="flex items-center gap-2.5 text-[#00AEB8]">
-                  <BookOpen className="w-5 h-5 text-[#00AEB8]" />
+                <div className="flex items-center gap-2.5 text-[#4B9FE1]">
+                  <BookOpen className="w-5 h-5 text-[#4B9FE1]" />
                   <h2 className="text-lg font-bold text-[#F4F7FB]">
                     {localize(profile.language, 'Learning Preferences', 'تفضيلات التعلم')}
                   </h2>
@@ -698,7 +698,7 @@ export default function StudentSettingsView({
                         setInterfaceLanguage(val);
                         executeSave(fontSizeScale, contrastMode, screenReader, reduceMotion, val, explanationLanguage, explanationDetail, experienceLevel, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
                     >
                       <option value="Arabic">العربية</option>
                       <option value="English">English</option>
@@ -736,7 +736,7 @@ export default function StudentSettingsView({
                         setExplanationLanguage(val);
                         executeSave(fontSizeScale, contrastMode, screenReader, reduceMotion, interfaceLanguage, val, explanationDetail, experienceLevel, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
                     >
                       <option value="Arabic">العربية</option>
                       <option value="English">English</option>
@@ -772,7 +772,7 @@ export default function StudentSettingsView({
                         setExplanationDetail(val);
                         executeSave(fontSizeScale, contrastMode, screenReader, reduceMotion, interfaceLanguage, explanationLanguage, val, experienceLevel, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
                     >
                       <option value="concise">{localize(profile.language, 'Concise', 'موجز')}</option>
                       <option value="balanced">{localize(profile.language, 'Medium', 'متوسط')}</option>
@@ -807,7 +807,7 @@ export default function StudentSettingsView({
                         setExperienceLevel(val);
                         executeSave(fontSizeScale, contrastMode, screenReader, reduceMotion, interfaceLanguage, explanationLanguage, explanationDetail, val, audioSpeed, voiceSelection, audioQuality, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
                     >
                       <option value="Basic">{localize(profile.language, 'Beginner', 'مبتدئ')}</option>
                       <option value="Intermediate">{localize(profile.language, 'Intermediate', 'متوسط')}</option>
@@ -828,8 +828,8 @@ export default function StudentSettingsView({
             <div>
               {/* Card Header */}
               <div className="border-b border-[#16395E] pb-4 mb-6">
-                <div className="flex items-center gap-2.5 text-[#00AEB8]">
-                  <Volume2 className="w-5 h-5 text-[#00AEB8]" />
+                <div className="flex items-center gap-2.5 text-[#4B9FE1]">
+                  <Volume2 className="w-5 h-5 text-[#4B9FE1]" />
                   <h2 className="text-lg font-bold text-[#F4F7FB]">
                     {localize(profile.language, 'Audio & Reading', 'الصوت والقراءة')}
                   </h2>
@@ -876,7 +876,7 @@ export default function StudentSettingsView({
                         setAudioSpeed(val);
                         executeSave(fontSizeScale, contrastMode, screenReader, reduceMotion, interfaceLanguage, explanationLanguage, explanationDetail, experienceLevel, val, voiceSelection, audioQuality, autoSave);
                       }}
-                      className="w-32 sm:w-36 h-2 bg-[#102C4D] rounded-lg appearance-none cursor-pointer accent-[#00AEB8]"
+                      className="w-32 sm:w-36 h-2 bg-[#102C4D] rounded-lg appearance-none cursor-pointer accent-[#1769AA]"
                     />
                     <span className="text-xs font-bold text-[#F4F7FB] font-mono min-w-[36px] text-center">
                       {audioSpeed.toFixed(1)}x
@@ -909,7 +909,7 @@ export default function StudentSettingsView({
                         setVoiceSelection(val);
                         executeSave(fontSizeScale, contrastMode, screenReader, reduceMotion, interfaceLanguage, explanationLanguage, explanationDetail, experienceLevel, audioSpeed, val, audioQuality, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[130px] sm:min-w-[150px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[130px] sm:min-w-[150px] text-center"
                     >
                       <option value="female_ar">{localize(profile.language, 'Female Voice (Arabic)', 'صوت أنثوي (عربي)')}</option>
                       <option value="male_ar">{localize(profile.language, 'Male Voice (Arabic)', 'صوت ذكوري (عربي)')}</option>
@@ -944,7 +944,7 @@ export default function StudentSettingsView({
                         setAudioQuality(val);
                         executeSave(fontSizeScale, contrastMode, screenReader, reduceMotion, interfaceLanguage, explanationLanguage, explanationDetail, experienceLevel, audioSpeed, voiceSelection, val, autoSave);
                       }}
-                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#00AEB8] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
+                      className="bg-[#082344] border border-[#16395E] rounded-xl px-3.5 py-2.5 text-xs text-[#F4F7FB] font-semibold pe-8 focus:outline-none focus:border-[#1769AA] cursor-pointer appearance-none min-w-[120px] sm:min-w-[140px] text-center"
                     >
                       <option value="high">{localize(profile.language, 'High Quality', 'جودة عالية')}</option>
                       <option value="saver">{localize(profile.language, 'Data Saver', 'وضع توفير البيانات')}</option>
@@ -959,16 +959,16 @@ export default function StudentSettingsView({
                     type="button"
                     onClick={handleVoicePreview}
                     disabled={isPlayingPreview}
-                    className="w-full py-3 px-4 rounded-2xl border border-[#00AEB8]/60 bg-[#082344] hover:bg-[#00AEB8]/15 text-[#00AEB8] hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 px-4 rounded-2xl border border-[#1769AA]/60 bg-[#082344] hover:bg-[#1769AA]/15 text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
                   >
                     {isPlayingPreview ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin text-[#00AEB8]" />
+                        <Loader2 className="w-4 h-4 animate-spin text-[#4B9FE1]" />
                         <span>{localize(profile.language, 'Speaking preview...', 'جاري الاستماع للمعاينة...')}</span>
                       </>
                     ) : (
                       <>
-                        <Play className="w-4 h-4 fill-current text-[#00AEB8]" />
+                        <Play className="w-4 h-4 fill-current text-[#4B9FE1]" />
                         <span>{localize(profile.language, 'Listen to Voice Preview', 'استمع إلى معاينة الصوت')}</span>
                       </>
                     )}
@@ -986,8 +986,8 @@ export default function StudentSettingsView({
             <div>
               {/* Card Header */}
               <div className="border-b border-[#16395E] pb-4 mb-6">
-                <div className="flex items-center gap-2.5 text-[#00AEB8]">
-                  <ShieldCheck className="w-5 h-5 text-[#00AEB8]" />
+                <div className="flex items-center gap-2.5 text-[#4B9FE1]">
+                  <ShieldCheck className="w-5 h-5 text-[#4B9FE1]" />
                   <h2 className="text-lg font-bold text-[#F4F7FB]">
                     {localize(profile.language, 'Account & Preferences', 'الحساب والتفضيلات')}
                   </h2>
@@ -1041,7 +1041,7 @@ export default function StudentSettingsView({
                         }
                       }}
                       className={`w-12 h-6.5 rounded-full transition-colors p-1 cursor-pointer flex items-center ${
-                        autoSave ? 'bg-[#00AEB8]' : 'bg-[#082344] border border-[#16395E]'
+                        autoSave ? 'bg-[#1769AA]' : 'bg-[#082344] border border-[#16395E]'
                       }`}
                     >
                       <div className={`w-4.5 h-4.5 rounded-full bg-white transition-transform shadow-xs ${
@@ -1074,7 +1074,7 @@ export default function StudentSettingsView({
                     <button
                       type="button"
                       onClick={() => setShowResetConfirm(true)}
-                      className="px-5 py-2 rounded-xl bg-[#082344] border border-[#16395E] hover:border-[#00AEB8]/60 text-xs font-bold text-[#F4F7FB] hover:text-[#00AEB8] transition-all cursor-pointer active:scale-95"
+                      className="px-5 py-2 rounded-xl bg-[#082344] border border-[#16395E] hover:border-[#1769AA]/60 text-xs font-bold text-[#F4F7FB] hover:text-[#4B9FE1] transition-all cursor-pointer active:scale-95"
                     >
                       {localize(profile.language, 'Restore', 'استعادة')}
                     </button>
@@ -1123,8 +1123,8 @@ export default function StudentSettingsView({
             {/* Bottom: Save Status Banner (Exact Reference Match) */}
             <div className="pt-4 border-t border-[#16395E]">
               {saveStatus === 'saving' && (
-                <div className="p-4 rounded-2xl bg-[#082344]/80 border border-[#00AEB8]/30 flex items-center gap-3">
-                  <Loader2 className="w-5 h-5 animate-spin text-[#00AEB8] shrink-0" />
+                <div className="p-4 rounded-2xl bg-[#082344]/80 border border-[#1769AA]/30 flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#4B9FE1] shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-[#F4F7FB]">
                       {localize(profile.language, 'Saving changes...', 'جارٍ حفظ التغييرات...')}
@@ -1137,8 +1137,8 @@ export default function StudentSettingsView({
               )}
 
               {saveStatus === 'saved' && (
-                <div className="p-4 rounded-2xl bg-[#082344]/80 border border-[#00AEB8]/30 flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#00AEB8] shrink-0" />
+                <div className="p-4 rounded-2xl bg-[#082344]/80 border border-[#1769AA]/30 flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#4B9FE1] shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-[#F4F7FB]">
                       {localize(profile.language, 'Settings saved successfully', 'تم حفظ الإعدادات بنجاح')}
@@ -1176,8 +1176,8 @@ export default function StudentSettingsView({
               {/* Card Header */}
               <div className="border-b border-[#16395E] pb-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2.5 text-[#00AEB8]">
-                    <Key className="w-5 h-5 text-[#00AEB8]" />
+                  <div className="flex items-center gap-2.5 text-[#4B9FE1]">
+                    <Key className="w-5 h-5 text-[#4B9FE1]" />
                     <h2 className="text-lg font-bold text-[#F4F7FB]">
                       {localize(profile.language, 'AI Service & API Key (BYOK)', 'خدمة الذكاء الاصطناعي ومفتاحك الخاص')}
                     </h2>
@@ -1220,13 +1220,13 @@ export default function StudentSettingsView({
                       placeholder="AIzaSy..."
                       autoComplete="off"
                       spellCheck="false"
-                      className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#F4F7FB] font-mono focus:outline-none focus:border-[#00AEB8] placeholder:text-[#A9C4DD]/40 pe-11"
+                      className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#F4F7FB] font-mono focus:outline-none focus:border-[#1769AA] placeholder:text-[#A9C4DD]/40 pe-11"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey(!showApiKey)}
                       aria-label={showApiKey ? localize(profile.language, 'Hide API key', 'إخفاء المفتاح') : localize(profile.language, 'Show API key', 'إظهار المفتاح')}
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-[#A9C4DD] hover:text-[#00AEB8] transition-colors p-1"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-[#A9C4DD] hover:text-[#4B9FE1] transition-colors p-1"
                     >
                       {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -1246,7 +1246,7 @@ export default function StudentSettingsView({
                     type="button"
                     onClick={handleSaveApiKey}
                     disabled={isSavingKey}
-                    className="px-6 py-2.5 rounded-xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
                   >
                     {isSavingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     <span>{localize(profile.language, 'Save Key', 'حفظ المفتاح')}</span>
@@ -1302,7 +1302,7 @@ export default function StudentSettingsView({
               <button
                 type="button"
                 onClick={handleResetDefaults}
-                className="px-5 py-2.5 rounded-xl bg-[#00AEB8] hover:bg-[#10B8B0] text-xs font-bold text-[#061A33] transition-all cursor-pointer shadow-md"
+                className="px-5 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-xs font-bold text-[#061A33] transition-all cursor-pointer shadow-md"
               >
                 {localize(profile.language, 'Yes, Restore Defaults', 'نعم، استعادة الافتراضي')}
               </button>

@@ -9,7 +9,7 @@
 
 export interface DocumentValidationResult {
   valid: boolean;
-  category: 'pdf' | 'docx' | 'txt' | 'image' | 'audio' | 'unsupported';
+  category: 'pdf' | 'docx' | 'epub' | 'txt' | 'image' | 'audio' | 'unsupported';
   error?: string;
   localizedMessage: {
     ar: string;
@@ -145,6 +145,11 @@ export function validateUploadFile(file: {
     mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ) {
     category = 'docx';
+  } else if (
+    name.endsWith('.epub') ||
+    mime === 'application/epub+zip'
+  ) {
+    category = 'epub';
   } else if (name.endsWith('.txt') || name.endsWith('.md') || mime.startsWith('text/')) {
     category = 'txt';
   } else if (
@@ -707,3 +712,10 @@ export function parseAudioSegments(transcriptText: string): AudioTranscriptSegme
 
   return segments;
 }
+
+
+export {
+  extractTextFromEpub,
+  type ExtractedEpubResult,
+  type ExtractedEpubChapter,
+} from './audioDocumentIntelligenceEngine';

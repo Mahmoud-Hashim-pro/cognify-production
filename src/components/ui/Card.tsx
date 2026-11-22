@@ -17,9 +17,9 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
           variant === 'default' && 'shadow-sm',
           variant === 'elevated' && 'shadow-md border-cognify-border-light dark:border-cognify-border-dark dark:bg-cognify-surface-elevated',
           variant === 'interactive' &&
-            'cursor-pointer hover:border-cognify-teal/60 dark:hover:border-cognify-teal/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
+            'cursor-pointer hover:border-rafiqi-primary/60 dark:hover:border-rafiqi-primary/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
           variant === 'highlighted' &&
-            'border-cognify-indigo/40 dark:border-cognify-indigo/60 bg-cognify-bg-light dark:bg-cognify-surface-elevated shadow-sm',
+            'border-rafiqi-primary/40 dark:border-rafiqi-primary/60 bg-rafiqi-primary-light/40 dark:bg-cognify-surface-elevated shadow-sm',
           className
         )}
         {...props}

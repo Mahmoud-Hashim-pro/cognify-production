@@ -71,7 +71,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <div
         className={cn(
-          'inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-[#243B73] to-[#087F8C] text-white p-1.5 shadow-sm select-none',
+          'inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-[#0D4778] to-[#1769AA] text-white p-1.5 shadow-sm select-none',
           className
         )}
         aria-label="Rafiqi"
@@ -97,7 +97,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       {/* Logomark Container */}
       <div
         className={cn(
-          'inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#243B73] to-[#087F8C] text-white p-2 shadow-sm shrink-0'
+          'inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#0D4778] to-[#1769AA] text-white p-2 shadow-sm shrink-0'
         )}
         aria-hidden="true"
       >
@@ -120,7 +120,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
             <span
               className={cn(
                 'font-bold rounded-lg uppercase tracking-wider border select-none',
-                'bg-[#087F8C]/10 text-[#087F8C] border-[#087F8C]/30 dark:bg-[#087F8C]/20 dark:text-[#5EEAD4] dark:border-[#087F8C]/40',
+                'bg-rafiqi-primary-light text-rafiqi-primary-dark border-rafiqi-primary/30 dark:bg-rafiqi-surface-elevated dark:text-rafiqi-primary-muted dark:border-rafiqi-primary/40',
                 textStyles.badge
               )}
             >

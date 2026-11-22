@@ -109,11 +109,11 @@ export default function BurgundyConstellationHero({
       className="w-full relative overflow-hidden rounded-3xl cognify-burgundy-hero p-5 sm:p-8 md:p-10 select-none transition-all shadow-2xl"
       style={{
         background: isDarkMode
-          ? 'radial-gradient(circle at 50% 18%, rgba(159, 18, 57, 0.42) 0%, rgba(45, 11, 22, 0.95) 50%, rgba(13, 4, 7, 0.99) 100%)'
-          : 'radial-gradient(circle at 50% 18%, rgba(255, 241, 242, 0.9) 0%, rgba(255, 245, 245, 0.96) 50%, rgba(255, 255, 255, 1) 100%)',
+          ? 'radial-gradient(circle at 50% 18%, rgba(23, 105, 170, 0.35) 0%, rgba(13, 71, 120, 0.45) 50%, rgba(11, 19, 30, 0.99) 100%)'
+          : 'radial-gradient(circle at 50% 18%, rgba(234, 244, 252, 0.95) 0%, rgba(245, 249, 253, 0.98) 50%, rgba(255, 255, 255, 1) 100%)',
         border: isDarkMode
-          ? '1px solid rgba(229, 169, 60, 0.28)'
-          : '1px solid rgba(244, 63, 94, 0.25)',
+          ? '1px solid rgba(23, 105, 170, 0.35)'
+          : '1px solid rgba(23, 105, 170, 0.25)',
       }}
     >
       {/* Ambient Lighting Orbs */}
@@ -338,10 +338,10 @@ export default function BurgundyConstellationHero({
 
         {/* ── ACTION BUTTONS ── */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full max-w-md">
-          {/* Primary CTA: Burgundy filled button */}
+          {/* Primary CTA: Rafiqi Blue button */}
           <button
             onClick={onLaunchPrimary}
-            className="w-full sm:w-auto flex-1 min-h-[48px] px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#881337] via-[#9F1239] to-[#831843] hover:from-[#9F1239] hover:to-[#BE123C] text-white font-black text-sm tracking-wide shadow-xl shadow-rose-950/60 border border-rose-400/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto flex-1 min-h-[48px] px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#0D4778] via-[#1769AA] to-[#0D4778] hover:from-[#1769AA] hover:to-[#4B9FE1] text-white font-black text-sm tracking-wide shadow-xl shadow-[#0D4778]/50 border border-[#4B9FE1]/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-amber-300" />
             <span>{primaryCtaText}</span>

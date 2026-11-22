@@ -15,12 +15,12 @@ export interface IconButtonProps extends Omit<ReactAriaButtonProps, 'children'> 
 }
 
 const variantStyles: Record<IconButtonVariant, string> = {
-  default: 'bg-cognify-bg-light hover:bg-cognify-border-light text-cognify-text-primary dark:bg-cognify-surface-elevated dark:hover:bg-cognify-surface-dark dark:text-cognify-text-dark-primary border border-cognify-border-light dark:border-cognify-border-dark',
-  primary: 'bg-cognify-indigo hover:bg-cognify-indigo-dark text-white shadow-sm',
-  teal: 'bg-cognify-teal hover:bg-cognify-teal-dark text-white shadow-sm',
-  ghost: 'bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
-  outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
-  danger: 'bg-cognify-error-light hover:brightness-95 text-cognify-error-text-light dark:bg-cognify-error-dark dark:hover:brightness-125 dark:text-cognify-error-text-dark border border-cognify-error-light dark:border-cognify-error-dark',
+  default: 'bg-rafiqi-bg hover:bg-rafiqi-primary-light text-cognify-text-primary dark:bg-rafiqi-surface-elevated dark:hover:bg-rafiqi-surface-dark dark:text-cognify-text-dark-primary border border-cognify-border-light dark:border-cognify-border-dark',
+  primary: 'bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white shadow-sm',
+  teal: 'bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white shadow-sm',
+  ghost: 'bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
+  outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
+  danger: 'bg-[#FDF1F2] hover:brightness-95 text-rafiqi-error dark:bg-[#2D0D12] dark:hover:brightness-125 dark:text-[#F87171] border border-rafiqi-error/30 dark:border-rafiqi-error/40',
 };
 
 const sizeStyles: Record<IconButtonSize, string> = {

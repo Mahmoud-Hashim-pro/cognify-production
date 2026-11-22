@@ -304,13 +304,13 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
   return (
     <div
-      className="min-h-screen bg-[#071426] text-[#F7FAFF] flex flex-col justify-between p-3 sm:p-5 lg:p-6 font-sans relative overflow-y-auto selection:bg-[#087F8C]/40 selection:text-white"
+      className="min-h-screen bg-[#071426] text-[#F8FAFC] flex flex-col justify-between p-3 sm:p-5 lg:p-6 font-sans relative overflow-y-auto selection:bg-[#1769AA]/40 selection:text-white"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Background ambient lighting — Deep Blue and Academic Teal Identity */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-40 -start-40 w-[600px] h-[600px] bg-[#102F5B]/30 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -end-40 w-[550px] h-[550px] bg-[#087F8C]/15 rounded-full blur-[160px]" />
+        <div className="absolute -top-40 -start-40 w-[600px] h-[600px] bg-[#1A283D]/30 rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -end-40 w-[550px] h-[550px] bg-[#1769AA]/15 rounded-full blur-[160px]" />
         <div className="absolute -bottom-40 start-1/4 w-[650px] h-[650px] bg-[#1E4D8F]/20 rounded-full blur-[180px]" />
       </div>
 
@@ -318,7 +318,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
       <header className="max-w-7xl mx-auto w-full flex items-center justify-between z-10 py-1 sm:py-2 mb-2 sm:mb-4">
         {/* Rafiqi Brand & Subtitle */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#087F8C] to-[#10B8B0] flex items-center justify-center shadow-lg shadow-[#087F8C]/30 text-white shrink-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-[#1769AA] to-[#4B9FE1] flex items-center justify-center shadow-lg shadow-[#1769AA]/30 text-white shrink-0">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="6" cy="12" r="3" fill="currentColor" fillOpacity="0.25" />
               <circle cx="18" cy="6" r="3" fill="currentColor" fillOpacity="0.25" />
@@ -330,7 +330,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             <span className="text-xl sm:text-2xl font-black tracking-tight text-white leading-none">
               {t('Rafiqi', 'رفيقي · Rafiqi')}
             </span>
-            <span className="text-[11px] sm:text-xs text-[#C1CCDA] font-semibold mt-1">
+            <span className="text-[11px] sm:text-xs text-[#94A3B8] font-semibold mt-1">
               {t('Inclusive Learning Platform', 'منصة التعلّم الشامل')}
             </span>
           </div>
@@ -340,16 +340,16 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
         <div
           role="group"
           aria-label={t('Language Selector', 'اختيار اللغة')}
-          className="flex items-center gap-1 p-1 bg-[#071A36] border border-[#29466A] rounded-full shadow-md"
+          className="flex items-center gap-1 p-1 bg-[#131E2E] border border-[#22354E] rounded-full shadow-md"
         >
           <button
             type="button"
             onClick={() => setLang('en')}
             aria-pressed={lang === 'en'}
-            className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] ${
+            className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
               lang === 'en'
-                ? 'bg-[#087F8C] text-white shadow-sm'
-                : 'text-[#C1CCDA] hover:text-white hover:bg-[#102F5B]/60'
+                ? 'bg-[#1769AA] text-white shadow-sm'
+                : 'text-[#94A3B8] hover:text-white hover:bg-[#1A283D]/60'
             }`}
           >
             EN
@@ -358,10 +358,10 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             type="button"
             onClick={() => setLang('ar')}
             aria-pressed={lang === 'ar'}
-            className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] ${
+            className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
               lang === 'ar'
-                ? 'bg-[#087F8C] text-white shadow-sm'
-                : 'text-[#C1CCDA] hover:text-white hover:bg-[#102F5B]/60'
+                ? 'bg-[#1769AA] text-white shadow-sm'
+                : 'text-[#94A3B8] hover:text-white hover:bg-[#1A283D]/60'
             }`}
           >
             AR
@@ -382,21 +382,21 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                 {isRtl ? (
                   <>
                     طاقات حقيقية.<br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B8B0] via-[#5EEAD4] to-[#087F8C]">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4B9FE1] via-[#60A5FA] to-[#1769AA]">
                       تمكين بلا حدود.
                     </span>
                   </>
                 ) : (
                   <>
                     Real People.<br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B8B0] via-[#5EEAD4] to-[#087F8C]">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4B9FE1] via-[#60A5FA] to-[#1769AA]">
                       Real Potential.
                     </span>
                   </>
                 )}
               </h1>
 
-              <p className="text-sm sm:text-base text-[#C1CCDA] font-medium leading-relaxed max-w-xl">
+              <p className="text-sm sm:text-base text-[#94A3B8] font-medium leading-relaxed max-w-xl">
                 {t(
                   'Rafiqi empowers learners of all abilities with personalized, accessible, and flexible learning experiences.',
                   'تمكّن منصة رفيقي المتعلمين بمختلف قدراتهم من خلال تجارب تعلّم مخصصة، ميسرة، ومرنة تواكب وتيرتك واحتياجاتك.'
@@ -407,31 +407,31 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             {/* Three Compact Benefit Items */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-1">
               {/* Item 1: Accessible by Design */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#071A36]/80 border border-[#29466A]/80 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-[#102F5B] border border-[#29466A] flex items-center justify-center text-[#10B8B0] shrink-0">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#131E2E]/80 border border-[#22354E]/80 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#1A283D] border border-[#22354E] flex items-center justify-center text-[#4B9FE1] shrink-0">
                   <Accessibility className="w-5 h-5" aria-hidden="true" />
                 </div>
-                <span className="text-xs sm:text-[13px] font-bold text-[#F7FAFF] leading-snug">
+                <span className="text-xs sm:text-[13px] font-bold text-[#F8FAFC] leading-snug">
                   {t('Accessible by Design', 'تصميم ميسر بالكامل')}
                 </span>
               </div>
 
               {/* Item 2: Personalized Learning */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#071A36]/80 border border-[#29466A]/80 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-[#102F5B] border border-[#29466A] flex items-center justify-center text-[#10B8B0] shrink-0">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#131E2E]/80 border border-[#22354E]/80 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#1A283D] border border-[#22354E] flex items-center justify-center text-[#4B9FE1] shrink-0">
                   <Heart className="w-5 h-5" aria-hidden="true" />
                 </div>
-                <span className="text-xs sm:text-[13px] font-bold text-[#F7FAFF] leading-snug">
+                <span className="text-xs sm:text-[13px] font-bold text-[#F8FAFC] leading-snug">
                   {t('Personalized Learning', 'تعلّم تكيفي مخصص')}
                 </span>
               </div>
 
               {/* Item 3: A More Inclusive Future */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#071A36]/80 border border-[#29466A]/80 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-[#102F5B] border border-[#29466A] flex items-center justify-center text-[#10B8B0] shrink-0">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#131E2E]/80 border border-[#22354E]/80 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#1A283D] border border-[#22354E] flex items-center justify-center text-[#4B9FE1] shrink-0">
                   <Users className="w-5 h-5" aria-hidden="true" />
                 </div>
-                <span className="text-xs sm:text-[13px] font-bold text-[#F7FAFF] leading-snug">
+                <span className="text-xs sm:text-[13px] font-bold text-[#F8FAFC] leading-snug">
                   {t('A More Inclusive Future', 'مستقبل أكثر شمولاً')}
                 </span>
               </div>
@@ -441,11 +441,11 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
             <div className="relative mt-2 sm:mt-3 w-full max-w-xl flex items-center justify-center">
               {/* Subtle atmospheric navy and teal aura gradients behind the illustration (no cards or borders) */}
               <div 
-                className="absolute inset-0 -m-4 sm:-m-8 bg-gradient-to-tr from-[#087F8C]/15 via-[#10B8B0]/10 to-transparent rounded-full blur-3xl -z-10 pointer-events-none" 
+                className="absolute inset-0 -m-4 sm:-m-8 bg-gradient-to-tr from-[#1769AA]/15 via-[#4B9FE1]/10 to-transparent rounded-full blur-3xl -z-10 pointer-events-none" 
                 aria-hidden="true" 
               />
               <div 
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-radial from-[#102F5B]/30 via-[#087F8C]/10 to-transparent rounded-full blur-2xl -z-10 pointer-events-none" 
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-radial from-[#1A283D]/30 via-[#1769AA]/10 to-transparent rounded-full blur-2xl -z-10 pointer-events-none" 
                 aria-hidden="true" 
               />
               
@@ -467,7 +467,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
           {/* ── ZONE C: SIGN-IN CARD ── */}
           <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
-            <div className="w-full max-w-md bg-[#0A1F3D] border border-[#29466A] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl shadow-black/50 relative text-start">
+            <div className="w-full max-w-md bg-[#131E2E] border border-[#22354E] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl shadow-black/50 relative text-start">
               
               {/* Form Card Header */}
               <div className="space-y-0.5 mb-3">
@@ -478,7 +478,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                     ? t('Create Your Profile', 'إنشاء حسابك الجديد')
                     : t('Reset Password', 'استعادة كلمة المرور')}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#C1CCDA] font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#94A3B8] font-medium leading-relaxed">
                   {mode === 'email-login'
                     ? t('Sign in to continue your learning journey', 'سجّل دخولك لمتابعة رحلتك التعليمية')
                     : mode === 'email-register'
@@ -497,7 +497,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   <button
                     type="button"
                     onClick={() => { setMode('email-login'); setResetSuccess(false); setError(null); }}
-                    className="block text-[#10B8B0] hover:text-[#5EEAD4] pt-2 font-black cursor-pointer underline outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
+                    className="block text-[#4B9FE1] hover:text-[#93C5FD] pt-2 font-black cursor-pointer underline outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   >
                     {t('Return to Sign In', 'العودة لتسجيل الدخول')}
                   </button>
@@ -505,7 +505,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
               ) : mode === 'reset-password' ? (
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div className="space-y-1.5">
-                    <label htmlFor="reset-email" className="text-xs font-bold text-[#F7FAFF]">
+                    <label htmlFor="reset-email" className="text-xs font-bold text-[#F8FAFC]">
                       {t('Email Address', 'البريد الإلكتروني')}
                     </label>
                     <div className="relative">
@@ -520,7 +520,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#22354E] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                       />
                     </div>
                   </div>
@@ -535,7 +535,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 px-6 bg-[#087F8C] hover:bg-[#10B8B0] active:bg-[#06626C] text-white font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#087F8C]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
+                    className="w-full py-3.5 px-6 bg-[#1769AA] hover:bg-[#0D4778] active:bg-[#09355B] text-white font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#1769AA]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B]"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : t('Send Reset Link', 'إرسال رابط الاستعادة')}
                   </button>
@@ -543,7 +543,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   <button
                     type="button"
                     onClick={() => { setMode('email-login'); setError(null); }}
-                    className="w-full text-center text-xs text-[#C1CCDA] hover:text-[#10B8B0] font-bold py-1 cursor-pointer outline-none focus-visible:underline"
+                    className="w-full text-center text-xs text-[#94A3B8] hover:text-[#4B9FE1] font-bold py-1 cursor-pointer outline-none focus-visible:underline"
                   >
                     {t('Back to Sign In', 'العودة لتسجيل الدخول')}
                   </button>
@@ -553,7 +553,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                 <form onSubmit={handleManualAuth} className="space-y-3">
                   {/* Email Field */}
                   <div className="space-y-1.5">
-                    <label htmlFor="auth-email" className="text-xs font-bold text-[#F7FAFF]">
+                    <label htmlFor="auth-email" className="text-xs font-bold text-[#F8FAFC]">
                       {t('Email Address', 'البريد الإلكتروني')}
                     </label>
                     <div className="relative">
@@ -568,14 +568,14 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#22354E] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                       />
                     </div>
                   </div>
 
                   {/* Password Field */}
                   <div className="space-y-1.5">
-                    <label htmlFor="auth-password" className="text-xs font-bold text-[#F7FAFF]">
+                    <label htmlFor="auth-password" className="text-xs font-bold text-[#F8FAFC]">
                       {t('Password', 'كلمة المرور')}
                     </label>
                     <div className="relative">
@@ -590,14 +590,14 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         placeholder={t('Enter your password', 'أدخل كلمة المرور')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                        className="w-full bg-[#F8FAFD] border border-[#22354E] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? t('Hide password', 'إخفاء كلمة المرور') : t('Show password', 'إظهار كلمة المرور')}
                         aria-pressed={showPassword}
-                        className="absolute inset-y-0 end-0 pe-3.5 flex items-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer outline-none focus-visible:text-[#087F8C]"
+                        className="absolute inset-y-0 end-0 pe-3.5 flex items-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer outline-none focus-visible:text-[#1769AA]"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -607,7 +607,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   {/* Confirm Password (when registering) */}
                   {mode === 'email-register' && (
                     <div className="space-y-1.5">
-                      <label htmlFor="auth-confirm-password" className="text-xs font-bold text-[#F7FAFF]">
+                      <label htmlFor="auth-confirm-password" className="text-xs font-bold text-[#F8FAFC]">
                         {t('Confirm Password', 'تأكيد كلمة المرور')}
                       </label>
                       <div className="relative">
@@ -622,7 +622,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                           placeholder={t('Confirm your password', 'أعد إدخال كلمة المرور')}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full bg-[#F8FAFD] border border-[#29466A] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#10B8B0] focus:border-[#10B8B0]"
+                          className="w-full bg-[#F8FAFD] border border-[#22354E] text-[#102542] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-2.5 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                         />
                       </div>
                     </div>
@@ -631,13 +631,13 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   {/* Remember me & Forgot Password Options (Login Mode) */}
                   {mode === 'email-login' && (
                     <div className="flex items-center justify-between text-xs pt-0.5">
-                      <label className="flex items-center gap-2 cursor-pointer select-none text-[#C1CCDA] hover:text-white transition-colors">
+                      <label className="flex items-center gap-2 cursor-pointer select-none text-[#94A3B8] hover:text-white transition-colors">
                         <input
                           type="checkbox"
                           checked={rememberMe}
                           aria-label={t('Remember me on this device', 'تذكر تسجيل دخولي على هذا الجهاز')}
                           onChange={(e) => setRememberMe(e.target.checked)}
-                          className="w-4 h-4 rounded text-[#087F8C] focus:ring-[#10B8B0] accent-[#087F8C] cursor-pointer"
+                          className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] accent-[#1769AA] cursor-pointer"
                         />
                         <span>{t('Remember me', 'تذكرني')}</span>
                       </label>
@@ -645,7 +645,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       <button
                         type="button"
                         onClick={() => { setMode('reset-password'); setError(null); }}
-                        className="text-[#10B8B0] hover:text-[#5EEAD4] font-bold transition-colors cursor-pointer outline-none focus-visible:underline"
+                        className="text-[#4B9FE1] hover:text-[#93C5FD] font-bold transition-colors cursor-pointer outline-none focus-visible:underline"
                       >
                         {t('Forgot password?', 'نسيت كلمة المرور؟')}
                       </button>
@@ -663,7 +663,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         <button
                           type="button"
                           onClick={handleDirectPreview}
-                          className="shrink-0 px-2.5 py-1 rounded-lg bg-[#087F8C] hover:bg-[#10B8B0] text-white text-[11px] font-bold transition-all shadow-sm"
+                          className="shrink-0 px-2.5 py-1 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white text-[11px] font-bold transition-all shadow-sm"
                         >
                           {t('Guest Access', 'دخول كزائر')}
                         </button>
@@ -675,7 +675,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 sm:py-3 px-5 bg-[#087F8C] hover:bg-[#10B8B0] active:bg-[#06626C] text-white font-black text-xs sm:text-sm rounded-xl transition-all shadow-md shadow-[#087F8C]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
+                    className="w-full py-2.5 sm:py-3 px-5 bg-[#1769AA] hover:bg-[#0D4778] active:bg-[#09355B] text-white font-black text-xs sm:text-sm rounded-xl transition-all shadow-md shadow-[#1769AA]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   >
                     {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -689,8 +689,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
                   {/* "or" Divider */}
                   <div className="relative flex items-center justify-center my-2">
-                    <div className="border-t border-[#29466A] w-full" />
-                    <span className="bg-[#0A1F3D] px-2.5 text-[10px] sm:text-[11px] font-bold text-[#C1CCDA] uppercase tracking-wider">
+                    <div className="border-t border-[#22354E] w-full" />
+                    <span className="bg-[#131E2E] px-2.5 text-[10px] sm:text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">
                       {t('or', 'أو')}
                     </span>
                   </div>
@@ -701,7 +701,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       type="button"
                       onClick={handleGoogleAuth}
                       disabled={loading}
-                      className="w-full py-2 px-3 rounded-xl border border-[#29466A] bg-[#071A36] hover:bg-[#102F5B]/50 text-[#F7FAFF] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0]"
+                      className="w-full py-2 px-3 rounded-xl border border-[#22354E] bg-[#131E2E] hover:bg-[#1A283D]/50 text-[#F8FAFC] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                     >
                       <Chrome className="w-3.5 h-3.5 text-emerald-400 shrink-0" aria-hidden="true" />
                       <span className="truncate">{t('Google', 'جوجل')}</span>
@@ -711,9 +711,9 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                       <button
                         type="button"
                         onClick={handleDirectPreview}
-                        className="w-full py-2 px-3 rounded-xl border border-teal-500/40 bg-teal-500/15 hover:bg-teal-500/25 text-[#10B8B0] hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#10B8B0] shadow-sm"
+                        className="w-full py-2 px-3 rounded-xl border border-[#1769AA]/40 bg-[#1769AA]/15 hover:bg-[#1769AA]/25 text-[#4B9FE1] hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shadow-sm"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-[#10B8B0] shrink-0" aria-hidden="true" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#4B9FE1] shrink-0" aria-hidden="true" />
                         <span className="truncate">{t('Guest Access', 'دخول كزائر')}</span>
                       </button>
                     )}
@@ -731,14 +731,14 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                   )}
 
                   {/* Account Switcher Footer Link */}
-                  <div className="text-center text-xs text-[#C1CCDA] pt-1 border-t border-[#29466A]/40 mt-2">
+                  <div className="text-center text-xs text-[#94A3B8] pt-1 border-t border-[#22354E]/40 mt-2">
                     {mode === 'email-login' ? (
                       <span>
                         {t("Don't have an account?", 'ليس لديك حساب؟')}{' '}
                         <button
                           type="button"
                           onClick={() => { setMode('email-register'); setError(null); }}
-                          className="text-[#10B8B0] hover:text-[#5EEAD4] font-bold cursor-pointer underline ms-1 outline-none focus-visible:ring-1 focus-visible:ring-[#10B8B0]"
+                          className="text-[#4B9FE1] hover:text-[#93C5FD] font-bold cursor-pointer underline ms-1 outline-none focus-visible:ring-1 focus-visible:ring-[#1769AA]"
                         >
                           {t('Create Account', 'إنشاء حساب جديد')}
                         </button>
@@ -749,7 +749,7 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
                         <button
                           type="button"
                           onClick={() => { setMode('email-login'); setError(null); }}
-                          className="text-[#10B8B0] hover:text-[#5EEAD4] font-bold cursor-pointer underline ms-1 outline-none focus-visible:ring-1 focus-visible:ring-[#10B8B0]"
+                          className="text-[#4B9FE1] hover:text-[#93C5FD] font-bold cursor-pointer underline ms-1 outline-none focus-visible:ring-1 focus-visible:ring-[#1769AA]"
                         >
                           {t('Sign In', 'تسجيل الدخول')}
                         </button>
@@ -767,8 +767,8 @@ export default function Login({ onDirectPreview }: LoginProps = {}) {
 
       {/* ── ZONE 3: ACCESSIBILITY ASSURANCE FOOTER ── */}
       <footer className="max-w-7xl mx-auto w-full z-10 pt-2 pb-1 text-start">
-        <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#071A36]/90 border border-[#29466A] text-xs sm:text-[13px] text-[#F7FAFF] shadow-sm backdrop-blur-xs">
-          <div className="w-6 h-6 rounded-full bg-[#087F8C] flex items-center justify-center text-white shrink-0">
+        <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#131E2E]/90 border border-[#22354E] text-xs sm:text-[13px] text-[#F8FAFC] shadow-sm backdrop-blur-xs">
+          <div className="w-6 h-6 rounded-full bg-[#1769AA] flex items-center justify-center text-white shrink-0">
             <Accessibility className="w-3.5 h-3.5" aria-hidden="true" />
           </div>
           <span className="font-medium">

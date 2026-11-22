@@ -106,15 +106,15 @@ export default function RetentionWarmupBanner({
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className="mx-4 my-2 p-3.5 rounded-2xl bg-gradient-to-r bg-[#0D2542] border border-[rgba(72,139,190,0.22)] shadow-xl flex items-center justify-between gap-3 text-slate-100 backdrop-blur-xl animate-fade-in relative z-20"
+      className="mx-4 my-2 p-3.5 rounded-2xl bg-gradient-to-r bg-[#0D2542] border border-[#22354E] shadow-xl flex items-center justify-between gap-3 text-slate-100 backdrop-blur-xl animate-fade-in relative z-20"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-8 h-8 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center shrink-0 text-[#0A96A5]">
+        <div className="w-8 h-8 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center shrink-0 text-[#4B9FE1]">
           <Clock className="w-4 h-4 animate-spin-slow" />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#0A96A5]">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#4B9FE1]">
               {isAr ? 'إنعاش الذاكرة التباعدية (SM-2)' : isFr ? 'Rappel Espacé Actif (SM-2)' : 'Spaced Retention Due (SM-2)'}
             </span>
             <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${

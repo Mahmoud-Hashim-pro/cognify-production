@@ -22,9 +22,19 @@ import {
   Award,
   Sparkles,
   Check,
+  Eye,
+  Ear,
+  MessageSquare,
+  ShieldCheck,
+  Volume2,
+  Lock,
+  Compass,
+  BookOpen,
 } from "lucide-react";
 import { auth, logout } from "../lib/firebase";
 import { getTranslation, isRTL } from "../lib/translations";
+import { speak } from "../lib/tts";
+import { PRODUCT_SECTIONS, getSectionIconComponent } from "../lib/sections";
 import {
   IQ_QUESTION_BATTERY,
   calculateStandardizedIq,
@@ -268,6 +278,38 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         ))}
       </div>
 
+      {/* Speech Voice & Audio Preview */}
+      <div className="p-4 rounded-2xl bg-white border border-border text-start space-y-3 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Volume2 className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-text-main">
+              {localize(formData.language, 'Speech & Audio Accessibility', 'الصوت والنطق الصوتي')}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              speak(
+                localize(formData.language, 'Welcome to Rafiqi assistive platform.', 'أهلاً بك في منصة رفيقي للمساعدة والتيسير.'),
+                formData.language as any
+              );
+            }}
+            className="px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-press transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+          >
+            <Volume2 className="w-3.5 h-3.5" />
+            <span>{localize(formData.language, 'Test Voice', 'تجربة الصوت')}</span>
+          </button>
+        </div>
+        <p className="text-[11px] text-text-muted leading-relaxed">
+          {localize(
+            formData.language,
+            'Rafiqi will vocalize descriptions, read documents, and announce visual feedback in your preferred language.',
+            'يقوم رفيقي بنطق الأوصاف البصرية وقراءة المستندات والكتب وإعلان التنبيهات بلغتك المختارة.'
+          )}
+        </p>
+      </div>
+
       <button
         onClick={handleNextStep}
         disabled={!formData.language}
@@ -404,6 +446,53 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         </div>
       </div>
 
+      {/* Optional Self-Selected Accessibility Profile */}
+      <div className="space-y-2 text-start pt-2">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-text-main flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+            <span>{localize(formData.language, 'Optional Assistive Profile', 'نمط التيسير المفضل (اختياري)')}</span>
+          </label>
+          <span className="text-[10px] text-text-muted">
+            {localize(formData.language, 'No medical proof required', 'لا يلزم أي إثبات طبي')}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {[
+            { mode: 'Visual' as const, type: 'Visual Impairment', labelEn: 'Visual Assistance', labelAr: 'المساعد البصري', icon: Eye },
+            { mode: 'Vocal-Deaf' as const, type: 'Hearing Impairment', labelEn: 'Captions & Sign', labelAr: 'التفريغ ولغة الإشارة', icon: Ear },
+            { mode: 'Speech' as const, type: 'Speech & Communication', labelEn: 'Speech & Voice', labelAr: 'النطق والتواصل الصوتي', icon: MessageSquare },
+            { mode: 'Sign-Only' as const, type: 'Sign Language', labelEn: 'Sign Language Only', labelAr: 'لغة الإشارة فقط', icon: Brain },
+            { mode: 'None' as const, type: '', labelEn: 'General Learner', labelAr: 'تعلم أكاديمي عام', icon: GraduationCap },
+          ].map((profileOpt) => {
+            const isSelected = formData.accessibilityMode === profileOpt.mode;
+            return (
+              <button
+                key={profileOpt.mode}
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    ...formData,
+                    accountPath: profileOpt.mode === 'None' ? 'Normal' : 'Special Needs',
+                    accessibilityMode: profileOpt.mode,
+                    disabilityType: profileOpt.type,
+                  });
+                }}
+                className={`p-2.5 rounded-xl border text-xs font-bold flex items-center gap-2.5 text-start transition-all cursor-pointer ${
+                  isSelected
+                    ? 'border-primary bg-primary/10 text-primary ring-1 ring-primary'
+                    : 'border-border bg-white text-text-muted hover:border-primary/40'
+                }`}
+              >
+                <profileOpt.icon className="w-4 h-4 shrink-0" />
+                <span className="truncate">{localize(formData.language, profileOpt.labelEn, profileOpt.labelAr)}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <button
         onClick={handleNextStep}
         disabled={formData.role === "Student"
@@ -452,6 +541,47 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             )}
           </button>
         ))}
+      </div>
+
+      {/* The Six Official Product Sections Overview */}
+      <div className="space-y-2 text-start pt-1">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-text-main">
+          <Layers className="w-3.5 h-3.5 text-primary" />
+          <span>{localize(formData.language, 'The Six Official Product Sections', 'أقسام رفيقي الستة الرسمية')}</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {PRODUCT_SECTIONS.map((sec) => {
+            const SecIcon = getSectionIconComponent(sec.iconName);
+            return (
+              <div key={sec.id} className="p-2.5 rounded-xl bg-white border border-border flex items-center gap-2">
+                <SecIcon className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold text-text-main truncate">
+                    {localize(formData.language, sec.titleEn, sec.titleAr)}
+                  </p>
+                  <p className="text-[9px] text-text-muted truncate">
+                    {localize(formData.language, `Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Privacy & Safety Guarantee */}
+      <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-start space-y-1">
+        <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200 text-xs font-bold">
+          <ShieldCheck className="w-4 h-4" />
+          <span>{localize(formData.language, 'Privacy & Safety Protected', 'الخصوصية والأمان مكفولان')}</span>
+        </div>
+        <p className="text-[11px] text-emerald-900/80 dark:text-emerald-200/80 leading-relaxed">
+          {localize(
+            formData.language,
+            'No raw audio recordings are stored. Camera frames stay private. You can clear reading activity anytime.',
+            'لا يتم تخزين تسجيلاتك الصوتية إطلاقاً، وتتم حماية خصوصية الكاميرا بالكامل، ويمكنك مسح أي سجل بنقرة زر.'
+          )}
+        </p>
       </div>
 
       <button
@@ -1017,6 +1147,19 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
 
   return (
     <div dir={direction} className="fixed inset-0 bg-surface-2 z-[100] flex flex-col items-center justify-start py-12 px-6 overflow-y-auto custom-scrollbar relative">
+      {/* Top Header: Skip Directly to Dashboard + Log Out */}
+      <div className="absolute top-6 start-6 md:top-8 md:start-8 z-50 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={finishOnboarding}
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-surface-3 text-primary rounded-xl transition-all text-xs font-bold border border-border shadow-sm cursor-pointer"
+          title={localize(formData.language, 'Skip setup and go directly to Dashboard', 'تخطي الإعداد والدخول للرئيسية فوراً')}
+        >
+          <span>{localize(formData.language, 'Skip to Dashboard', 'تخطي للرئيسية')}</span>
+          <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+        </button>
+      </div>
+
       <button
         onClick={async () => {
           try {

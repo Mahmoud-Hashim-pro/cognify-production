@@ -299,7 +299,7 @@ Question: "${q}"`;
         // Draw skeleton connecting points in sleek cyan
         ctx.strokeStyle = '#12CFE0';
         ctx.lineWidth = 2.5;
-        ctx.fillStyle = '#10B8B0';
+        ctx.fillStyle = '#4B9FE1';
 
         for (let i = 0; i < landmarks.length; i++) {
           const x = landmarks[i].x * canvas.width;
@@ -504,7 +504,7 @@ Question: "${q}"`;
                 aria-pressed={isSelected}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none ${
                   isSelected
-                    ? 'bg-[#087F8C] text-white shadow-md shadow-[#087F8C]/30'
+                    ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30'
                     : 'text-[#A9BDD3] hover:text-[#F4F7FB] hover:bg-[#102D4D]/60'
                 }`}
               >
@@ -685,7 +685,7 @@ Question: "${q}"`;
                 onClick={handleSpeakAccumulatedText}
                 aria-label={loc('Listen to translated voice', 'استمع إلى الترجمة الصوتية')}
                 className={`p-2 rounded-lg text-[#12CFE0] hover:text-white hover:bg-[#102D4D] transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none ${
-                  isSpeakingCameraText ? 'animate-bounce text-[#10B8B0]' : ''
+                  isSpeakingCameraText ? 'animate-bounce text-[#4B9FE1]' : ''
                 }`}
                 title={loc('Speak text aloud', 'نطق النص')}
               >
@@ -717,7 +717,7 @@ Question: "${q}"`;
                   ? loc('Stop Camera', 'إيقاف الكاميرا')
                   : loc('Start Camera', 'تشغيل الكاميرا')
               }
-              className="py-2.5 px-3 rounded-xl bg-[#087F8C] hover:bg-[#076D78] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-[#087F8C]/25 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+              className="py-2.5 px-3 rounded-xl bg-[#1769AA] hover:bg-[#076D78] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-[#1769AA]/25 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
             >
               {isCameraActive ? (
                 <>
@@ -927,7 +927,7 @@ Question: "${q}"`;
               onClick={() => handleDirectSignScript()}
               disabled={!aiQuestion.trim()}
               aria-label={loc('Translate text to 3D sign language', 'ترجمة إلى إشارة')}
-              className="py-2.5 px-4 rounded-xl bg-[#087F8C] hover:bg-[#076D78] disabled:opacity-40 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#087F8C]/20 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+              className="py-2.5 px-4 rounded-xl bg-[#1769AA] hover:bg-[#076D78] disabled:opacity-40 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#1769AA]/20 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
             >
               <Hand className="w-4 h-4 shrink-0" aria-hidden="true" />
               <span className="truncate">{loc('Translate to Sign', 'ترجمة إلى إشارة')}</span>
@@ -996,7 +996,7 @@ Question: "${q}"`;
                   aria-pressed={showSkeleton}
                   aria-label={loc('Toggle Hand Skeleton Overlay', 'تبديل إظهار هيكل اليد')}
                   className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-                    showSkeleton ? 'bg-[#087F8C] justify-end' : 'bg-stone-700 justify-start'
+                    showSkeleton ? 'bg-[#1769AA] justify-end' : 'bg-stone-700 justify-start'
                   }`}
                 >
                   <span className="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform" />
@@ -1022,7 +1022,7 @@ Question: "${q}"`;
                   aria-pressed={autoVoice}
                   aria-label={loc('Toggle Auto Voice Recognized Signs', 'تبديل النطق الفوري التلقائي')}
                   className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-                    autoVoice ? 'bg-[#087F8C] justify-end' : 'bg-stone-700 justify-start'
+                    autoVoice ? 'bg-[#1769AA] justify-end' : 'bg-stone-700 justify-start'
                   }`}
                 >
                   <span className="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform" />
@@ -1034,7 +1034,7 @@ Question: "${q}"`;
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="py-2 px-5 rounded-xl bg-[#087F8C] hover:bg-[#076D78] text-white font-bold text-xs cursor-pointer shadow-md transition-all"
+                className="py-2 px-5 rounded-xl bg-[#1769AA] hover:bg-[#076D78] text-white font-bold text-xs cursor-pointer shadow-md transition-all"
               >
                 {loc('Done', 'تم')}
               </button>

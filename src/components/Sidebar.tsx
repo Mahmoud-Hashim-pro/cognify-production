@@ -3,7 +3,7 @@ import { useState } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
   User, Settings, LifeBuoy, MessageSquare, AlertCircle, Database, 
-  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen, LayoutDashboard
+  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen, LayoutDashboard, Headphones, Compass, Briefcase, Activity, Home
 } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
@@ -11,14 +11,17 @@ import { isAdminUser } from "../lib/roles";
 import { AppView } from "../lib/access";
 import type { DisabilityTab } from "./DisabilityModeView";
 import { BrandLogo } from "./ui/BrandLogo";
+import { PRODUCT_SECTIONS, ProductSectionId, getSectionIconComponent } from "../lib/sections";
 
 interface SidebarProps {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
   currentView: AppView;
-  setCurrentView: (view: AppView) => void;
+  setCurrentView: (view: any) => void;
   activeDisabilityTab?: DisabilityTab;
   onSelectDisabilityTab?: (tab: DisabilityTab) => void;
+  currentSection?: ProductSectionId | null;
+  onSelectSection?: (section: ProductSectionId | null) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
   openLiveCaptions: () => void;
@@ -33,6 +36,8 @@ export default function Sidebar({
   setCurrentView, 
   activeDisabilityTab,
   onSelectDisabilityTab,
+  currentSection,
+  onSelectSection,
   isDarkMode, 
   toggleTheme, 
   openLiveCaptions, 
@@ -87,91 +92,106 @@ export default function Sidebar({
     return currentTab === tab;
   };
 
-  // Dedicated Assistive Suites Navigation List
+  const isAr = isArabicLocale(profile.language);
+
+  // Dedicated Six Official Product Sections Navigation List
   const assistiveItems = [
     {
       id: 'hub',
       label: localize(profile.language, 'Dashboard Hub', 'لوحة الميزات الرئيسية'),
       icon: LayoutDashboard,
-      action: () => navigateToDisabilityTab('hub'),
-      active: currentView === 'disability' && (activeDisabilityTab === 'hub' || !activeDisabilityTab),
-    },
-    {
-      id: 'chat',
-      label: localize(profile.language, 'Accessible AI Tutor', 'المساعد الذكي المهيأ'),
-      icon: MessageSquare,
       action: () => {
         onClose?.();
-        if (currentView === 'disability') {
-          navigateToDisabilityTab('chat');
+        if (onSelectSection) onSelectSection(null);
+        navigateToDisabilityTab('hub');
+      },
+      active: currentView === 'disability' && !currentSection && (activeDisabilityTab === 'hub' || !activeDisabilityTab),
+    },
+    {
+      id: 'vision_shortcut',
+      label: localize(profile.language, 'Visual Assistant', 'المساعد البصري'),
+      icon: Eye,
+      action: () => {
+        onClose?.();
+        if (onSelectSection) onSelectSection(null);
+        navigateToDisabilityTab('vision');
+      },
+      active: currentView === 'disability' && !currentSection && isTabActive('vision'),
+    },
+    ...PRODUCT_SECTIONS.map((sec) => ({
+      id: sec.id,
+      label: isAr ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`,
+      icon: getSectionIconComponent(sec.iconName),
+      action: () => {
+        onClose?.();
+        if (onSelectSection) {
+          onSelectSection(sec.id);
         } else {
-          setCurrentView('chat');
+          setCurrentView('disability');
+          window.location.hash = `#${sec.id}`;
         }
       },
-      active: currentView === 'chat' || (currentView === 'disability' && activeDisabilityTab === 'chat'),
+      active: currentView === 'disability' && currentSection === sec.id,
+    })),
+    {
+      id: 'progress',
+      label: localize(profile.language, 'My Progress', 'تقدمي'),
+      icon: Activity,
+      action: () => {
+        onClose?.();
+        if (onSelectSection) onSelectSection(null);
+        onSelectDisabilityTab?.('progress');
+        setCurrentView('profile');
+      },
+      active: currentView === 'profile' || (currentView === 'disability' && !currentSection && activeDisabilityTab === 'progress'),
     },
     {
-      id: 'vision',
-      label: localize(profile.language, 'Visual Companion', 'الرفيق البصري (كاميرا وصوت)'),
-      icon: Eye,
-      action: () => navigateToDisabilityTab('vision'),
-      active: isTabActive('vision'),
-    },
-    {
-      id: 'hearing',
-      label: localize(profile.language, '3D Sign & Hearing Studio', 'استوديو لغة الإشارة 3D والمحطة السمعية'),
-      icon: Ear,
-      action: () => navigateToDisabilityTab('deaf'),
-      active: isTabActive('deaf') || currentView === 'video',
-    },
-    {
-      id: 'book_studio',
-      label: localize(profile.language, 'Educational Book Studio', 'استوديو الكتب والمستندات التعليمية'),
-      icon: BookOpen,
-      action: () => { onClose?.(); setCurrentView('book_studio'); },
-      active: currentView === 'book_studio',
-    },
-    {
-      id: 'toolkit',
-      label: localize(profile.language, 'Accessibility Toolkit', 'منظومة الوصول والمساعد المتكامل'),
-      icon: Sparkles,
-      action: () => { onClose?.(); setCurrentView('toolkit'); },
-      active: currentView === 'toolkit',
-    },
-    {
-      id: 'profile',
-      label: localize(profile.language, 'My Progress & Passport', 'تقدمي التعليمي وجواز الإتاحة'),
-      icon: User,
-      action: () => { onClose?.(); onSelectDisabilityTab?.('progress'); setCurrentView('profile'); },
-      active: currentView === 'profile' || (currentView === 'disability' && activeDisabilityTab === 'progress'),
+      id: 'settings',
+      label: localize(profile.language, 'Settings', 'الإعدادات'),
+      icon: Settings,
+      action: () => {
+        onClose?.();
+        if (onSelectSection) onSelectSection(null);
+        onSelectDisabilityTab?.('settings');
+        setCurrentView('settings');
+      },
+      active: currentView === 'settings' || (currentView === 'disability' && !currentSection && activeDisabilityTab === 'settings'),
     },
     {
       id: 'privacy_security',
       label: localize(profile.language, 'Privacy & Security', 'الخصوصية وأمان البيانات'),
       icon: ShieldCheck,
-      action: () => { onClose?.(); setCurrentView('privacy_security'); },
+      action: () => {
+        onClose?.();
+        if (onSelectSection) onSelectSection(null);
+        setCurrentView('privacy_security');
+      },
       active: currentView === 'privacy_security',
     },
     {
       id: 'support',
       label: localize(profile.language, 'Accessible Support', 'الدعم والمساعدة'),
       icon: LifeBuoy,
-      action: () => { onClose?.(); setCurrentView('support'); },
+      action: () => {
+        onClose?.();
+        if (onSelectSection) onSelectSection(null);
+        setCurrentView('support');
+      },
       active: currentView === 'support',
     },
   ];
 
   const navBtn = (active: boolean) =>
-    `group flex items-center gap-3 w-full px-3 min-h-[44px] py-2 rounded-xl text-[13px] font-medium text-start transition-all relative select-none focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
+    `group flex items-center gap-3 w-full px-3 min-h-[44px] py-2 rounded-xl text-[13px] font-medium text-start transition-all relative select-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none ${
       active
         ? isDarkMode
-          ? 'bg-teal-950/60 border border-teal-600/50 text-teal-300 font-bold shadow-sm'
-          : 'bg-teal-50 border border-teal-600/40 text-teal-900 font-bold shadow-sm'
+          ? 'bg-rafiqi-surface-elevated border border-rafiqi-primary/50 text-rafiqi-primary-muted font-bold shadow-sm'
+          : 'bg-rafiqi-primary-light border border-rafiqi-primary/30 text-rafiqi-primary-dark font-bold shadow-sm'
         : isDarkMode
-          ? 'text-stone-300 hover:bg-cognify-surface-dark hover:text-white border border-transparent hover:border-teal-700/40 active:scale-[0.98]'
-          : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950 border border-transparent hover:border-stone-200 active:scale-[0.98]'
+          ? 'text-stone-300 hover:bg-rafiqi-surface-dark hover:text-white border border-transparent hover:border-rafiqi-border-dark active:scale-[0.98]'
+          : 'text-stone-700 hover:bg-rafiqi-primary-light/60 hover:text-stone-950 border border-transparent hover:border-rafiqi-primary/20 active:scale-[0.98]'
     }`;
-  const navIcon = (_active: boolean) => `w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-110 group-focus-visible:scale-110 text-teal-700 dark:text-teal-400`;
+  const navIcon = (_active: boolean) => `w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-110 group-focus-visible:scale-110 text-rafiqi-primary dark:text-rafiqi-primary-muted`;
 
   const userInitial = (profile.name || profile.email || 'U').trim().charAt(0).toUpperCase();
 
@@ -193,7 +213,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={onClose}
-            className={`p-1.5 rounded-xl ${isDarkMode ? 'text-stone-400 hover:text-white hover:bg-stone-800' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200'} transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
+            className={`p-1.5 rounded-xl ${isDarkMode ? 'text-stone-400 hover:text-white hover:bg-stone-800' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200'} transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none`}
             aria-label={localize(profile.language, 'Close menu', 'إغلاق القائمة')}
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -206,7 +226,7 @@ export default function Sidebar({
         <button
           type="button"
           onClick={startNewChat}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-teal-700/20 active:scale-[0.98] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-rafiqi-primary hover:bg-rafiqi-primary-dark active:bg-[#09355B] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-rafiqi-primary/20 active:scale-[0.98] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none"
         >
           <Plus className="w-[17px] h-[17px] text-white" aria-hidden="true" /> {getTranslation(profile.language, 'newThread')}
         </button>
@@ -277,13 +297,13 @@ export default function Sidebar({
               return (
                 <div key={t.id} className={`group flex items-center gap-1 rounded-xl transition-all ${
                   active 
-                    ? isDarkMode ? 'bg-cognify-surface-dark border border-teal-800' : 'bg-teal-50 border border-teal-200'
-                    : isDarkMode ? 'hover:bg-stone-800/40 border border-transparent' : 'hover:bg-stone-100 border border-transparent'
+                    ? isDarkMode ? 'bg-rafiqi-surface-elevated border border-rafiqi-primary/50' : 'bg-rafiqi-primary-light border border-rafiqi-primary/30'
+                    : isDarkMode ? 'hover:bg-rafiqi-surface-dark border border-transparent' : 'hover:bg-rafiqi-primary-light/40 border border-transparent'
                 }`}>
                   <button
                     type="button"
                     onClick={() => switchThread(t.id)}
-                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1.5 text-start overflow-hidden min-w-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none rounded-lg"
+                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1.5 text-start overflow-hidden min-w-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none rounded-lg"
                     aria-current={active ? 'true' : undefined}
                   >
                     <span className={`text-[13px] font-semibold truncate w-full max-w-[200px] ${isDarkMode ? 'text-stone-200' : 'text-stone-900'}`}>{t.title}</span>
@@ -324,7 +344,7 @@ export default function Sidebar({
               isDarkMode 
                 ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:text-white hover:bg-stone-800' 
                 : 'border-stone-200 bg-white text-stone-800 hover:text-stone-950 hover:bg-stone-100'
-            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
+            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none`}
           >
             {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" aria-hidden="true" /> : <Moon className="w-4 h-4 text-stone-600" aria-hidden="true" />}
             {isDarkMode ? (localize(profile.language, 'Light', 'فاتح')) : (localize(profile.language, 'Dark', 'داكن'))}
@@ -335,9 +355,9 @@ export default function Sidebar({
               onChange={(e) => handleChange('language', e.target.value)}
               className={`w-full h-full min-h-[44px] appearance-none cursor-pointer text-center py-2.5 px-2 rounded-xl border ${
                 isDarkMode
-                  ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:border-teal-500 focus:border-teal-500 [color-scheme:dark]'
-                  : 'border-stone-200 bg-white text-stone-800 hover:border-teal-500 focus:border-teal-500 [color-scheme:light]'
-              } text-xs font-semibold transition-all outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
+                  ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:border-rafiqi-primary focus:border-rafiqi-primary [color-scheme:dark]'
+                  : 'border-stone-200 bg-white text-stone-800 hover:border-rafiqi-primary focus:border-rafiqi-primary [color-scheme:light]'
+              } text-xs font-semibold transition-all outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary`}
               aria-label={localize(profile.language, 'Select Language', 'اختر اللغة')}
             >
               {['English', 'Arabic', 'Egyptian Ammiya', 'French', 'Spanish'].map((l) => (
@@ -351,8 +371,8 @@ export default function Sidebar({
           isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
         } backdrop-blur-md transition-all ${
           currentView === 'profile' || currentView === 'settings' 
-            ? 'border-teal-600 shadow-sm'
-            : isDarkMode ? 'hover:border-stone-700' : 'hover:border-teal-400'
+            ? 'border-rafiqi-primary shadow-sm'
+            : isDarkMode ? 'hover:border-stone-700' : 'hover:border-rafiqi-primary/40'
         }`}>
           <button 
             type="button"
@@ -360,18 +380,18 @@ export default function Sidebar({
               onClose?.();
               setCurrentView('profile');
             }} 
-            className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none rounded-xl" 
+            className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none rounded-xl" 
             title={localize(profile.language, 'View Profile', 'الملف الشخصي وجواز الإتاحة')}
             aria-label={localize(profile.language, 'View Profile and Accommodation Passport', 'الملف الشخصي وجواز الإتاحة')}
           >
             <div className="relative shrink-0">
-              <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 overflow-hidden shadow-sm bg-gradient-to-br from-teal-600 to-teal-800 group-hover:scale-105 transition-transform ring-1 ring-teal-500/30">
+              <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 overflow-hidden shadow-sm bg-gradient-to-br from-rafiqi-primary-dark to-rafiqi-primary group-hover:scale-105 transition-transform ring-1 ring-rafiqi-primary/30">
                 {profile.photoURL ? <img src={profile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : userInitial}
               </div>
-              <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-teal-500 ring-2 ${isDarkMode ? 'ring-[#0E1416]' : 'ring-white'}`} aria-hidden="true" />
+              <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rafiqi-primary ring-2 ${isDarkMode ? 'ring-[#0B131E]' : 'ring-white'}`} aria-hidden="true" />
             </div>
             <div className="leading-tight overflow-hidden flex-1">
-              <div className={`text-sm font-bold ${isDarkMode ? 'text-stone-100 group-hover:text-teal-400' : 'text-stone-900 group-hover:text-teal-700'} truncate transition-colors`}>{profile.name || profile.email?.split('@')[0] || 'User'}</div>
+              <div className={`text-sm font-bold ${isDarkMode ? 'text-stone-100 group-hover:text-rafiqi-primary-muted' : 'text-stone-900 group-hover:text-rafiqi-primary-dark'} truncate transition-colors`}>{profile.name || profile.email?.split('@')[0] || 'User'}</div>
               <div className={`text-xs ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} truncate`}>{profile.disabilityType || profile.accessibilityMode || 'Assistive Learning'}</div>
             </div>
           </button>
@@ -381,10 +401,10 @@ export default function Sidebar({
               onClose?.();
               setCurrentView('settings');
             }}
-            className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none ${
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none ${
               currentView === 'settings'
-                ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500'
-                : 'text-stone-600 dark:text-stone-400 hover:text-teal-700 hover:bg-stone-100 dark:hover:bg-stone-800'
+                ? 'bg-rafiqi-primary-light dark:bg-rafiqi-surface-elevated text-rafiqi-primary-dark dark:text-rafiqi-primary-muted border border-rafiqi-primary/40'
+                : 'text-stone-600 dark:text-stone-400 hover:text-rafiqi-primary hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
             title={localize(profile.language, 'Settings', 'الإعدادات')}
             aria-label={localize(profile.language, 'Settings', 'الإعدادات')}
@@ -400,11 +420,11 @@ export default function Sidebar({
             aria-label={localize(profile.language, 'Open Live Captions', 'فتح الكابشن المباشر')}
             className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] py-2.5 rounded-xl border ${
               isDarkMode 
-                ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:bg-stone-800 hover:border-teal-700' 
-                : 'border-stone-200 bg-white text-stone-800 hover:bg-stone-100 hover:border-teal-400'
-            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400 focus:outline-none`}
+                ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:bg-stone-800 hover:border-rafiqi-border-dark' 
+                : 'border-stone-200 bg-white text-stone-800 hover:bg-stone-100 hover:border-rafiqi-primary/30'
+            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none`}
           >
-            <Mic className={`w-4 h-4 text-teal-600 dark:text-teal-400`} aria-hidden="true" /> {localize(profile.language, 'Captions', 'الكابشن')}
+            <Mic className={`w-4 h-4 text-rafiqi-primary dark:text-rafiqi-primary-muted`} aria-hidden="true" /> {localize(profile.language, 'Captions', 'الكابشن')}
           </button>
           <button 
             type="button"

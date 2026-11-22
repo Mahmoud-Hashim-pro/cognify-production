@@ -100,6 +100,16 @@ import { runAccessibilityToolkitVerification } from './accessibilityToolkitVerif
 import { runUsageLimitsReliabilityVerification } from './usageLimitsReliabilityVerification.js';
 import { runSecurityPrivacyReviewVerification } from './securityPrivacyReviewVerification.js';
 import { runEndToEndAndRegressionVerification } from './endToEndAndRegressionVerification.js';
+import { runUnifiedBlueThemeVerification } from './unifiedBlueThemeVerification.js';
+import { runVisualCompanionPhase2Verification } from './visualCompanionPhase2Verification.js';
+import { runVisualCompanionPhase3Verification } from './visualCompanionPhase3Verification.js';
+import { runVisualCompanionPhase4Verification } from './visualCompanionPhase4Verification.js';
+import { runVisualCompanionPhase5RealWorldValidation } from './visualCompanionPhase5RealWorldValidation.js';
+import { runAudioDocumentIntelligencePhase6Verification } from './audioDocumentIntelligencePhase6Verification.js';
+import { runGlobalExperiencePhase6Verification } from './globalExperiencePhase6Verification.js';
+import { runVisualCompanionPhase6Verification } from './visualCompanionPhase6Verification.js';
+import { runAudioDocumentIntelligencePhase7Verification } from './audioDocumentIntelligencePhase7Verification.js';
+import { runPhase8Verification } from './phase8UnifiedNavigationVerification.js';
 import { BRAND_CONFIG, getBrandName, getBrandTagline } from '../src/config/brand.js';
 import { resolveSeoMetadata, applySeoMetadata } from '../src/lib/seoEngine.js';
 
@@ -2395,6 +2405,86 @@ Keep practicing closures with higher-order functions!
     assert(htmlContent.includes('application/ld+json') && htmlContent.includes('"@type": "WebApplication"'), 'index.html embeds Schema.org WebApplication JSON-LD structured data');
     assert(fs.existsSync(path.resolve('public/robots.txt')), 'public/robots.txt exists for search engine crawlers');
     assert(fs.existsSync(path.resolve('public/sitemap.xml')), 'public/sitemap.xml exists for search engine indexing');
+  }
+
+  // 69. Rafiqi Unified Blue Design System & WCAG 2.2 AA Contrast Compliance (Phase 1)
+  console.log('\n[69] Rafiqi Unified Blue Design System & WCAG 2.2 AA Contrast Compliance');
+  {
+    const blueThemeRes = await runUnifiedBlueThemeVerification();
+    totalPassed += blueThemeRes.passed;
+    totalFailed += blueThemeRes.failed;
+  }
+
+  // 70. Rafiqi Visual Companion Intelligence Core (Phase 2)
+  console.log('\n[70] Rafiqi Visual Companion Intelligence Core (Phase 2)');
+  {
+    const phase2Res = await runVisualCompanionPhase2Verification();
+    totalPassed += phase2Res.passed;
+    totalFailed += phase2Res.failed;
+  }
+
+  // 71. Rafiqi Real-World Visual Assistance (Phase 3)
+  console.log('\n[71] Rafiqi Real-World Visual Assistance (Phase 3)');
+  {
+    const phase3Res = await runVisualCompanionPhase3Verification();
+    totalPassed += phase3Res.passed;
+    totalFailed += phase3Res.failed;
+  }
+
+  // 72. Rafiqi Visual Companion Production Readiness (Phase 4)
+  console.log('\n[72] Rafiqi Visual Companion Production Readiness (Phase 4)');
+  {
+    const phase4Res = await runVisualCompanionPhase4Verification();
+    totalPassed += phase4Res.passed;
+    totalFailed += phase4Res.failed;
+  }
+
+  // 73. Rafiqi Real-World Validation & Launch Readiness (Phase 5)
+  console.log('\n[73] Rafiqi Real-World Validation & Launch Readiness (Phase 5)');
+  {
+    const phase5Res = await runVisualCompanionPhase5RealWorldValidation();
+    totalPassed += phase5Res.passed;
+    totalFailed += phase5Res.failed;
+  }
+
+  // 74. Rafiqi Audio & Document Intelligence (Phase 6)
+  console.log('\n[74] Rafiqi Audio & Document Intelligence (Phase 6)');
+  {
+    const phase6Res = await runAudioDocumentIntelligencePhase6Verification();
+    totalPassed += phase6Res.passed;
+    totalFailed += phase6Res.failed;
+  }
+
+  // 75. Rafiqi Global Application Experience & UI/UX Architecture (Phase 6)
+  console.log('\n[75] Rafiqi Global Application Experience & UI/UX Architecture (Phase 6)');
+  {
+    const globalExpRes = runGlobalExperiencePhase6Verification();
+    totalPassed += globalExpRes.passed;
+    totalFailed += globalExpRes.failed;
+  }
+
+  // 76. Rafiqi See & Understand — Advanced Visual Intelligence (Phase 6)
+  console.log('\n[76] Rafiqi See & Understand — Advanced Visual Intelligence (Phase 6)');
+  {
+    const phase6VisualRes = runVisualCompanionPhase6Verification();
+    totalPassed += phase6VisualRes.passed;
+    totalFailed += phase6VisualRes.failed;
+  }
+
+  // 77. Rafiqi Read & Learn — Audio & Document Intelligence (Phase 7)
+  console.log('\n[77] Rafiqi Read & Learn — Audio & Document Intelligence (Phase 7)');
+  {
+    const phase7Res = await runAudioDocumentIntelligencePhase7Verification();
+    totalPassed += phase7Res.passed;
+    totalFailed += phase7Res.failed;
+  }
+
+  // 78. Rafiqi Unified Navigation & Safe Architecture (Phase 8)
+  console.log('\n[78] Rafiqi Unified Navigation & Safe Architecture (Phase 8)');
+  {
+    const phase8Res = runPhase8Verification();
+    totalPassed += phase8Res.passed;
+    totalFailed += phase8Res.failed;
   }
 
   console.log(`\n========================================`);

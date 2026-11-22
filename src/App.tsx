@@ -37,6 +37,7 @@ import { RouteAnnouncer } from "./components/ui/RouteAnnouncer";
 import { isAdminUser } from "./lib/roles";
 import { subscribeToStudentMemory, clearStudentMemory, getCachedStudentMemory, DEFAULT_STUDENT_MEMORY } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
+import { ProductSectionId } from "./lib/sections";
 import { initSecurityTracker } from "./lib/securityTracker";
 import { getVisitorCountryCode } from "./lib/geo";
 import { recordUserLoginSession } from "./lib/loginHistory";
@@ -87,10 +88,12 @@ const AccessibilityOverlay = lazyWithRetry(() => import("./components/Accessibil
 const LiveCaptions = lazyWithRetry(() => import("./components/LiveCaptions"));
 const AccessibleBookStudioView = lazyWithRetry(() => import("./components/AccessibleBookStudioView"));
 const UnifiedAccessibilityToolkitView = lazyWithRetry(() => import("./components/UnifiedAccessibilityToolkitView"));
+const AudioDocumentIntelligenceView = lazyWithRetry(() => import("./components/AudioDocumentIntelligenceView"));
+const HearAndExpressView = lazyWithRetry(() => import("./components/HearAndExpressView"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -226,6 +229,10 @@ export default function App() {
     }
     return 'hub';
   });
+
+  const [currentSection, setCurrentSection] = useState<ProductSectionId | null>(
+    initialRouteRef.current.section || (initialRouteRef.current.params?.section as ProductSectionId) || null
+  );
 
   // Rafiqi Memory (Phase 2) state
   const [memoryState, setMemoryState] = useState<StudentMemory | null>(() => {
@@ -456,6 +463,7 @@ export default function App() {
         if (event.state.tab) {
           setDisabilityTab(event.state.tab);
         }
+        setCurrentSection(event.state.section || null);
         return;
       }
 
@@ -465,6 +473,7 @@ export default function App() {
       if (parsed.tab) {
         setDisabilityTab(parsed.tab);
       }
+      setCurrentSection(parsed.section || (parsed.params?.section as ProductSectionId) || null);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -472,14 +481,29 @@ export default function App() {
   }, []);
 
   // Custom navigation function that updates URL and history state without duplicates
-  const navigateTo = (view: AppView, tab?: DisabilityTab) => {
+  const navigateTo = (view: AppView | ProductSectionId, tab?: DisabilityTab, section?: ProductSectionId | null) => {
+    let targetView: AppView = view as AppView;
+    let targetTab: DisabilityTab | undefined = tab;
+    let targetSection: ProductSectionId | null = section !== undefined ? section : null;
+
+    const SECTION_IDS: ProductSectionId[] = ['see_understand', 'read_learn', 'work_create', 'move_explore', 'communicate', 'personalize'];
+    if (SECTION_IDS.includes(view as ProductSectionId)) {
+      targetView = 'disability';
+      targetTab = 'hub';
+      targetSection = view as ProductSectionId;
+    }
+
     const targetRoute: RouteState = {
-      view,
-      tab: tab || (view === 'disability' ? (disabilityTab || 'hub') : undefined),
+      view: targetView,
+      tab: targetTab || (targetView === 'disability' ? (disabilityTab || 'hub') : undefined),
+      section: targetSection || undefined,
+      params: targetSection ? { section: targetSection } : undefined,
     };
     const currentRoute: RouteState = {
       view: currentView,
       tab: currentView === 'disability' ? (disabilityTab || 'hub') : undefined,
+      section: currentSection || undefined,
+      params: currentSection ? { section: currentSection } : undefined,
     };
 
     // Avoid duplicate history entries
@@ -489,12 +513,13 @@ export default function App() {
     }
 
     const newHash = buildHash(targetRoute);
-    window.history.pushState({ view: targetRoute.view, tab: targetRoute.tab }, '', newHash);
+    window.history.pushState({ view: targetRoute.view, tab: targetRoute.tab, section: targetSection }, '', newHash);
     recordInAppNavigation();
     setCurrentView(targetRoute.view);
     if (targetRoute.tab) {
       setDisabilityTab(targetRoute.tab);
     }
+    setCurrentSection(targetSection);
     setIsMobileMenuOpen(false);
   };
 
@@ -1148,6 +1173,8 @@ export default function App() {
               window.history.pushState({ view: 'disability', tab: newTab }, '', newHash);
             }
           }}
+          initialSection={currentSection}
+          onSectionChange={setCurrentSection}
           setProfile={setProfile}
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
@@ -1175,6 +1202,24 @@ export default function App() {
               }
               navigateTo('book_studio');
             }}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'audio_document_intelligence':
+        return (
+          <AudioDocumentIntelligenceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={handleBack}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'hear_express':
+        return (
+          <HearAndExpressView
+            profile={activeProfile}
+            onNavigateBack={handleBack}
+            onOpenSignStudio={() => navigateTo('disability', 'deaf')}
             isDarkMode={isDarkMode}
           />
         );
@@ -1332,13 +1377,13 @@ export default function App() {
       )}
 
       <div
-        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} font-sans overflow-hidden selection:bg-teal-500/30 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
+        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0B131E] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} font-sans overflow-hidden selection:bg-[#1769AA]/25 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
           profile?.accessibilityMode === 'Visual' ? 'text-lg contrast-125' : ''
         }`}
         dir={direction}
       >
         <ToastContainer rtl={direction === 'rtl'} />
-        <RouteAnnouncer route={{ view: currentView, tab: disabilityTab }} language={profile?.language} />
+        <RouteAnnouncer route={{ view: currentView, tab: disabilityTab, section: currentSection || undefined }} language={profile?.language} />
 
         {/* WCAG 2.4.1 Skip to main content link */}
         <a
@@ -1409,7 +1454,17 @@ export default function App() {
               setCurrentView={navigateTo}
               activeDisabilityTab={disabilityTab}
               onSelectDisabilityTab={(tab) => {
+                setCurrentSection(null);
                 setDisabilityTab(tab);
+                setIsMobileMenuOpen(false);
+              }}
+              currentSection={currentSection}
+              onSelectSection={(sec) => {
+                if (sec) {
+                  navigateTo(sec);
+                } else {
+                  navigateTo('disability', 'hub');
+                }
                 setIsMobileMenuOpen(false);
               }}
               isDarkMode={isDarkMode}

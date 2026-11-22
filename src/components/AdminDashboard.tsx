@@ -707,7 +707,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               ) : adminView === 'resilience' ? (
                 <Activity className="w-6 h-6 text-emerald-400" />
               ) : (
-                <Users className="w-6 h-6 text-[#00AEB8]" />
+                <Users className="w-6 h-6 text-[#4B9FE1]" />
               )}
             </div>
             <div>
@@ -740,7 +740,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               <button
                 onClick={() => setAdminView('directory')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                  adminView === 'directory' ? 'bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  adminView === 'directory' ? 'bg-gradient-to-r from-amber-400 via-[#1769AA] to-rose-600 text-slate-950 shadow-md font-extrabold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 <Users className="w-3.5 h-3.5" /> Directory
@@ -901,7 +901,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                               src={a.photoURL}
                               alt={a.name || 'Super Admin Avatar'}
                               onError={() => setFailedAvatarUrls(prev => ({ ...prev, [a.photoURL!]: true }))}
-                              className="w-10 h-10 rounded-2xl object-cover border border-amber-500/40 hover:border-[#00AEB8] transition-all shadow-md bg-slate-800"
+                              className="w-10 h-10 rounded-2xl object-cover border border-amber-500/40 hover:border-[#1769AA] transition-all shadow-md bg-slate-800"
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-black text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40">
@@ -957,11 +957,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   aria-pressed={sectionFilter === 'all'}
                   className={`flex items-center gap-4 p-5 rounded-3xl border text-left transition-all backdrop-blur-xl ${
                     sectionFilter === 'all'
-                      ? 'bg-[#16395E]/40 border-[#00AEB8]/50 ring-2 ring-[#00AEB8]/20 shadow-xl'
+                      ? 'bg-[#16395E]/40 border-[#1769AA]/50 ring-2 ring-[#1769AA]/20 shadow-xl'
                       : 'bg-[#082344]/70 border-[#16395E]/60 hover:border-[#16395E]/50'
                   }`}
                 >
-                  <div className="p-3 rounded-2xl bg-[#16395E]/60 text-[#00AEB8] border border-[#00AEB8]/30">
+                  <div className="p-3 rounded-2xl bg-[#16395E]/60 text-[#4B9FE1] border border-[#1769AA]/30">
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
@@ -1009,7 +1009,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                       placeholder="Search by name, email, UID, faculty, disability..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#00AEB8]/30 focus:border-[#00AEB8] outline-none transition-all"
+                      className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#1769AA]/30 focus:border-[#1769AA] outline-none transition-all"
                     />
                   </div>
                   <div className="flex items-center gap-1.5 p-1 bg-[#082344]/95 border border-[#16395E]/60 rounded-2xl overflow-x-auto custom-scrollbar">
@@ -1060,7 +1060,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                         key={sec}
                         onClick={() => setSectionFilter(sec)}
                         className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
-                          sectionFilter === sec ? 'bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 text-slate-950 font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                          sectionFilter === sec ? 'bg-gradient-to-r from-amber-400 via-[#1769AA] to-rose-600 text-slate-950 font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                         }`}
                       >
                         {sec === 'all' ? 'All' : SECTION_META[sec].label}
@@ -1094,7 +1094,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               {/* User Directory Table */}
               {loading ? (
                 <div className="flex flex-col items-center justify-center p-24">
-                  <Loader2 className="w-10 h-10 text-[#00AEB8] animate-spin" />
+                  <Loader2 className="w-10 h-10 text-[#4B9FE1] animate-spin" />
                   <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-4">Loading directory...</p>
                 </div>
               ) : (
@@ -1140,10 +1140,10 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                       src={u.photoURL}
                                       alt={u.name || 'User Avatar'}
                                       onError={() => setFailedAvatarUrls(prev => ({ ...prev, [u.photoURL!]: true }))}
-                                      className="w-10 h-10 rounded-2xl object-cover border border-[#16395E]/60 group-hover/avatar:border-[#00AEB8] group-hover/avatar:scale-105 transition-all shadow-md bg-slate-800"
+                                      className="w-10 h-10 rounded-2xl object-cover border border-[#16395E]/60 group-hover/avatar:border-[#1769AA] group-hover/avatar:scale-105 transition-all shadow-md bg-slate-800"
                                     />
                                   ) : (
-                                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-[#16395E]/60 text-[#00AEB8] shadow-inner">
+                                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-[#16395E]/60 text-[#4B9FE1] shadow-inner">
                                       {(u.name || u.email || '?').charAt(0).toUpperCase()}
                                     </div>
                                   )}
@@ -1154,7 +1154,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                 </div>
 
                                 <div className="min-w-0">
-                                  <div className="font-bold text-white group-hover:text-[#00AEB8] transition-colors flex items-center gap-1.5 truncate">
+                                  <div className="font-bold text-white group-hover:text-[#4B9FE1] transition-colors flex items-center gap-1.5 truncate">
                                     <span className="truncate">{u.name || u.email?.split('@')[0] || 'Unnamed User'}</span>
                                     {presence.status === 'online' && (
                                       <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
@@ -1169,7 +1169,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                     </span>
                                     <button
                                       onClick={(e) => { e.stopPropagation(); copyToClipboard(u.uid, `UID copied: ${u.uid}`); }}
-                                      className="text-slate-500 hover:text-[#00AEB8] p-0.5 transition-colors"
+                                      className="text-slate-500 hover:text-[#4B9FE1] p-0.5 transition-colors"
                                       title="Copy Firebase UID"
                                     >
                                       {copiedText === u.uid ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
@@ -1400,7 +1400,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#16395E]/40 text-[#00AEB8] border border-[#00AEB8]/30">
+                <div className="p-2 rounded-xl bg-[#16395E]/40 text-[#4B9FE1] border border-[#1769AA]/30">
                   <Eye className="w-5 h-5" />
                 </div>
                 <div>
@@ -1430,7 +1430,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   className="max-h-[60vh] max-w-full rounded-xl object-contain shadow-2xl"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-3xl flex items-center justify-center font-black text-3xl bg-slate-800 border border-[#16395E]/50 text-[#00AEB8]">
+                <div className="w-24 h-24 rounded-3xl flex items-center justify-center font-black text-3xl bg-slate-800 border border-[#16395E]/50 text-[#4B9FE1]">
                   {(photoLightboxUser?.name || photoLightboxUser?.email || '?').charAt(0).toUpperCase()}
                 </div>
               )}
@@ -1459,7 +1459,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 </a>
                 <button
                   onClick={() => copyToClipboard(photoLightboxUrl, 'Photo URL copied')}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-400 via-[#00AEB8] to-rose-600 hover:bg-[#00AEB8] text-slate-950 rounded-xl text-xs font-black transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-400 via-[#1769AA] to-rose-600 hover:bg-[#1769AA] text-slate-950 rounded-xl text-xs font-black transition-colors"
                 >
                   <Copy className="w-3 h-3" /> Copy URL
                 </button>

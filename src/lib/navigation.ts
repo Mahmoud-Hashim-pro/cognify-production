@@ -8,6 +8,7 @@
 
 import { AppView, isAccessibilityUser, homeViewFor } from './access';
 import { UserProfile } from '../types';
+import { ProductSectionId, getProductSection } from './sections';
 
 export type DisabilityTab =
   | 'hub'
@@ -28,11 +29,12 @@ export type DisabilityTab =
 export interface RouteState {
   view: AppView;
   tab?: DisabilityTab;
+  section?: ProductSectionId;
   params?: Record<string, string>;
 }
 
 export const VALID_VIEWS: readonly AppView[] = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -74,6 +76,29 @@ export function parseRoute(hashString: string): RouteState {
   if (clean === 'intelligence') return { view: 'profile' };
   if (clean === 'admin' || clean === 'users' || clean === 'database') return { view: 'admin' };
 
+  // ── Six Official Product Sections Routes (Deep Linking & Refresh Support) ──
+  // Matches: #see_understand, #read_learn, #work_create, #move_explore, #communicate, #personalize
+  // Also supports prefixes #sections/..., #section/..., kebab-case, and shorthands
+  const secClean = clean.toLowerCase().replace(/^(sections?|section)[/_]/, '');
+  if (['see_understand', 'see-understand', 'see_and_understand', 'see', 'vision_section'].includes(secClean)) {
+    return { view: 'disability', tab: 'hub', section: 'see_understand', params: { section: 'see_understand' } };
+  }
+  if (['read_learn', 'read-learn', 'read_and_learn', 'readlearn'].includes(secClean)) {
+    return { view: 'disability', tab: 'hub', section: 'read_learn', params: { section: 'read_learn' } };
+  }
+  if (['work_create', 'work-create', 'work_and_create', 'workcreate'].includes(secClean)) {
+    return { view: 'disability', tab: 'hub', section: 'work_create', params: { section: 'work_create' } };
+  }
+  if (['move_explore', 'move-explore', 'move_and_explore', 'moveexplore'].includes(secClean)) {
+    return { view: 'disability', tab: 'hub', section: 'move_explore', params: { section: 'move_explore' } };
+  }
+  if (['communicate', 'communicate_express', 'hear_express_section'].includes(secClean)) {
+    return { view: 'disability', tab: 'hub', section: 'communicate', params: { section: 'communicate' } };
+  }
+  if (['personalize', 'personalize_passport', 'passport_section', 'personalize_settings', 'passport'].includes(secClean)) {
+    return { view: 'disability', tab: 'hub', section: 'personalize', params: { section: 'personalize' } };
+  }
+
   // Handle direct visual tool shortcuts (e.g. #currency, #cash, #money, #color, #object, #ocr, #face)
   if (['currency', 'cash', 'money', 'banknotes'].includes(clean)) {
     return { view: 'disability', tab: 'vision', params: { tool: 'currency' } };
@@ -95,6 +120,7 @@ export function parseRoute(hashString: string): RouteState {
   }
 
   // Handle direct disability tab shorthands (e.g. #vision, #deaf, #hub, #progress, #book_studio, #toolkit)
+  if (clean === 'hear_express' || clean === 'hear' || clean === 'express' || clean === 'aac' || clean === 'captions') return { view: 'hear_express' };
   if (clean === 'toolkit' || clean === 'assistant' || clean === 'scanner' || clean === 'stickers') return { view: 'toolkit' };
   if (clean === 'studio' || clean === 'book_studio' || clean === 'book-studio' || clean === 'books') return { view: 'book_studio' };
   if (clean === 'vision') return { view: 'disability', tab: 'vision' };
@@ -140,6 +166,10 @@ export function parseRoute(hashString: string): RouteState {
  * Builds a canonical URL hash from a RouteState.
  */
 export function buildHash(route: RouteState): string {
+  const sectionId = route.section || route.params?.section;
+  if (route.view === 'disability' && sectionId) {
+    return `#${sectionId}`;
+  }
   if (route.view === 'disability') {
     if (route.tab && route.tab !== 'hub') {
       if (route.tab === 'vision' && route.params?.tool && route.params.tool !== 'scene') {
@@ -155,6 +185,7 @@ export function buildHash(route: RouteState): string {
 export interface ReturnDestination {
   view: AppView;
   tab?: DisabilityTab;
+  section?: ProductSectionId;
   hash: string;
   timestamp: number;
 }
@@ -240,7 +271,10 @@ export function isSameRoute(a: RouteState, b: RouteState): boolean {
   if (a.view === 'disability') {
     const tabA = a.tab || 'hub';
     const tabB = b.tab || 'hub';
-    return tabA === tabB;
+    if (tabA !== tabB) return false;
+    const secA = a.section || a.params?.section;
+    const secB = b.section || b.params?.section;
+    return secA === secB;
   }
   return true;
 }
@@ -250,6 +284,7 @@ export interface BreadcrumbItem {
   label: string;
   view: AppView;
   tab?: DisabilityTab;
+  section?: ProductSectionId;
   current?: boolean;
 }
 
@@ -257,6 +292,14 @@ export interface BreadcrumbItem {
  * Returns human-readable page title for given RouteState and locale.
  */
 export function getRouteTitle(route: RouteState, lang?: string): string {
+  const isArLang = lang === 'Arabic' || lang === 'Egyptian Ammiya' || lang === 'ar';
+  const sectionId = (route.section || route.params?.section) as ProductSectionId | undefined;
+  if (sectionId) {
+    const sec = getProductSection(sectionId);
+    if (sec) {
+      return isArLang ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`;
+    }
+  }
   const isAr = lang === 'Arabic' || lang === 'Egyptian Ammiya' || lang === 'ar';
   
   if (route.view === 'disability') {
@@ -329,11 +372,11 @@ export function getRouteBreadcrumbs(route: RouteState, lang?: string): Breadcrum
     label: hubLabel,
     view: 'disability',
     tab: 'hub',
-    current: route.view === 'disability' && (!route.tab || route.tab === 'hub'),
+    current: route.view === 'disability' && (!route.tab || route.tab === 'hub') && !route.section && !route.params?.section,
   };
 
   // If we are at the hub root, return single item
-  if (route.view === 'disability' && (!route.tab || route.tab === 'hub')) {
+  if (route.view === 'disability' && (!route.tab || route.tab === 'hub') && !route.section && !route.params?.section) {
     return [rootBreadcrumb];
   }
 
