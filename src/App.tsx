@@ -90,10 +90,11 @@ const AccessibleBookStudioView = lazyWithRetry(() => import("./components/Access
 const UnifiedAccessibilityToolkitView = lazyWithRetry(() => import("./components/UnifiedAccessibilityToolkitView"));
 const AudioDocumentIntelligenceView = lazyWithRetry(() => import("./components/AudioDocumentIntelligenceView"));
 const HearAndExpressView = lazyWithRetry(() => import("./components/HearAndExpressView"));
+const AccessibleProductivityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleProductivityWorkspaceView"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -1220,6 +1221,30 @@ export default function App() {
             profile={activeProfile}
             onNavigateBack={handleBack}
             onOpenSignStudio={() => navigateTo('disability', 'deaf')}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'productivity':
+        return (
+          <AccessibleProductivityWorkspaceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={() => {
+              if (currentSection === 'work_create') {
+                handleSelectSection('work_create');
+              } else {
+                handleBack();
+              }
+            }}
+            initialTool={disabilityTab as any}
+            onOpenBookStudio={(content, title) => {
+              if (content) {
+                try {
+                  sessionStorage.setItem('cognify_book_studio_import', JSON.stringify({ text: content, title }));
+                } catch {}
+              }
+              navigateTo('book_studio');
+            }}
             isDarkMode={isDarkMode}
           />
         );

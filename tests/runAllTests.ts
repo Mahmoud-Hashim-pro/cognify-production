@@ -110,6 +110,7 @@ import { runGlobalExperiencePhase6Verification } from './globalExperiencePhase6V
 import { runVisualCompanionPhase6Verification } from './visualCompanionPhase6Verification.js';
 import { runAudioDocumentIntelligencePhase7Verification } from './audioDocumentIntelligencePhase7Verification.js';
 import { runPhase8Verification } from './phase8UnifiedNavigationVerification.js';
+import { runPhase9ProductivityTests } from './phase9ProductivityAssistantVerification.js';
 import { BRAND_CONFIG, getBrandName, getBrandTagline } from '../src/config/brand.js';
 import { resolveSeoMetadata, applySeoMetadata } from '../src/lib/seoEngine.js';
 
@@ -2485,6 +2486,14 @@ Keep practicing closures with higher-order functions!
     const phase8Res = runPhase8Verification();
     totalPassed += phase8Res.passed;
     totalFailed += phase8Res.failed;
+  }
+
+  // 79. Rafiqi Work & Create — Productivity Assistant (Phase 9)
+  console.log('\n[79] Rafiqi Work & Create — Productivity Assistant (Phase 9)');
+  {
+    const phase9Res = await runPhase9ProductivityTests();
+    totalPassed += phase9Res.passed;
+    totalFailed += phase9Res.failed;
   }
 
   console.log(`\n========================================`);

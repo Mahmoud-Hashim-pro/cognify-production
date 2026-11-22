@@ -38,6 +38,11 @@ import {
   Shield,
   LifeBuoy,
   Volume2,
+  Mail,
+  Presentation,
+  Table,
+  CheckSquare,
+  FileText,
 } from 'lucide-react';
 
 export type ProductSectionId =
@@ -314,6 +319,111 @@ export const PRODUCT_SECTIONS: ProductSectionDefinition[] = [
     accentBg: 'rgba(23, 105, 170, 0.12)',
     features: [
       {
+        id: 'feat_productivity_workspace',
+        titleEn: 'Accessible Productivity Workspace & AI Assistant',
+        titleAr: 'مساحة الإنتاجية ومساعد العمل والإبداع الذكي',
+        descEn: 'Voice-dictated documents, writing & email assistant, PowerPoint presentation creator, spreadsheet & formula analyst, chart describer, and accessible form filling.',
+        descAr: 'إنشاء المستندات بالصوت، مساعد الصياغة والبريد الإلكتروني، صانع العروض التقديمية، مساعد الجداول والصيغ، واصف المخططات، وتعبئة النماذج الذكية.',
+        iconName: 'Briefcase',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Voice Docs', 'Email Assistant', 'PowerPoint PPTX', 'Excel Formulas', 'Chart Description', 'Form Assistant'],
+        tagsAr: ['مستندات صوتية', 'صياغة البريد', 'عروض PPTX', 'صيغ إكسل', 'وصف المخططات', 'مساعد النماذج'],
+        targetView: 'productivity',
+        isPrimaryAction: true,
+      },
+      {
+        id: 'feat_voice_doc_creation',
+        titleEn: 'Voice Document Creation & Dictation',
+        titleAr: 'إنشاء المستندات بالصوت والإملاء الذكي',
+        descEn: 'Dictate headings, paragraphs, lists, and punctuation with real-time spoken confirmation, safe replacement guards, and editable transcript.',
+        descAr: 'إملاء العناوين والفقرات والقوائم وعلامات الترقيم بالصوت مع تأكيد صوتي فوري، حماية المستندات من الاستبدال، وتعديل النص المفرغ.',
+        iconName: 'Mic',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Voice Dictation', 'Punctuation Commands', 'Spoken Feedback', 'DOCX Export'],
+        tagsAr: ['إملاء صوتي', 'أوامر الترقيم', 'تأكيد صوتي', 'تصدير DOCX'],
+        targetView: 'productivity',
+        targetTab: 'voice_doc',
+      },
+      {
+        id: 'feat_writing_email_assistant',
+        titleEn: 'Writing & Email Assistant',
+        titleAr: 'مساعد الصياغة وتحرير البريد الإلكتروني',
+        descEn: 'Draft, polish, and summarize messages in formal Arabic, Egyptian Ammiya, and English with tone/length controls and zero unauthorized sending.',
+        descAr: 'صياغة وتنقيح وتلخيص الرسائل بالفصحى والعامية المصرية والإنجليزية مع ضبط النبرة والحجم وبدون إرسال غير مصرح.',
+        iconName: 'Mail',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Tone & Length', 'Formal/Egyptian/English', 'Subject & Sign-off', 'Draft Review'],
+        tagsAr: ['النبرة والحجم', 'فصحى/عامية/إنجليزية', 'العنوان والتوقيع', 'مراجعة المسودة'],
+        targetView: 'productivity',
+        targetTab: 'writing_assistant',
+      },
+      {
+        id: 'feat_powerpoint_creator',
+        titleEn: 'Accessible PowerPoint & Slide Creator',
+        titleAr: 'صانع العروض التقديمية الميسر (PowerPoint)',
+        descEn: 'Generate structured presentations with titles, bullet points, speaker notes, screen-reader sequential review, and verified .PPTX export.',
+        descAr: 'إنشاء عروض تقديمية منظمة مع عناوين ونقاط وملاحظات المتحدث، تصفح تتابعي لقارئ الشاشة، وتصدير PPTX حقيقي مجرب.',
+        iconName: 'Presentation',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Slide Titles', 'Speaker Notes', 'Screen Reader Review', 'Verified PPTX'],
+        tagsAr: ['عناوين الشرائح', 'ملاحظات المتحدث', 'تصفح تتابعي', 'تصدير PPTX مجرب'],
+        targetView: 'productivity',
+        targetTab: 'powerpoint_creator',
+      },
+      {
+        id: 'feat_excel_assistant',
+        titleEn: 'Excel & Data Spreadsheet Assistant',
+        titleAr: 'مساعد الجداول والبيانات وصيغ إكسل',
+        descEn: 'Inspect table dimensions, summarize numeric columns, evaluate formulas (SUM, AVERAGE, IF), and safely update cells without silent overwriting.',
+        descAr: 'قراءة أبعاد الجداول، تلخيص الأعمدة الرقمية، تقييم وشرح الصيغ (SUM, AVERAGE, IF)، والتعديل الآمن بدون الكتابة فوق البيانات دون تأكيد.',
+        iconName: 'Table',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Table Summary', 'Formula Explainer', 'Formula Safety', 'CSV/TSV Export'],
+        tagsAr: ['ملخص الجدول', 'شرح الصيغ', 'أمان المعادلات', 'تصدير CSV/TSV'],
+        targetView: 'productivity',
+        targetTab: 'excel_assistant',
+      },
+      {
+        id: 'feat_chart_describer',
+        titleEn: 'Chart & Visual Data Describer',
+        titleAr: 'واصف الرسوم البيانية والمخططات',
+        descEn: 'Explains chart types, axes, series, trends, comparisons, and limitations with structured text equivalents and zero hallucinated numbers.',
+        descAr: 'شرح نوع المخطط والمحاور والسلاسل والاتجاهات والمقارنات والقيود مع جدول بديل كامل وبدون افتعال أرقام غير موجودة.',
+        iconName: 'BarChart3',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Axes & Scales', 'Trend Analysis', 'Text Equivalent', 'Grounded Data'],
+        tagsAr: ['المحاور والمقاييس', 'تحليل الاتجاهات', 'بديل نصي كامل', 'بيانات مثبتة'],
+        targetView: 'productivity',
+        targetTab: 'chart_describer',
+      },
+      {
+        id: 'feat_smart_form_filler',
+        titleEn: 'Smart Form Assistant & Reviewer',
+        titleAr: 'مساعد تعبئة النماذج والاستمارات الذكي',
+        descEn: 'Step-by-step form guidance explaining required vs optional fields, accessible entry, zero sensitive guessing, and explicit confirmation before submission.',
+        descAr: 'إرشاد خطوة بخطوة للنماذج، توضيح الحقول الإلزامية والاختيارية، عدم تخمين البيانات الحساسة، وتأكيد صريح قبل أي اعتماد.',
+        iconName: 'CheckSquare',
+        status: 'ready',
+        statusLabelEn: 'Ready',
+        statusLabelAr: 'جاهز للاستخدام',
+        tagsEn: ['Required/Optional', 'Sensitive Data Guard', 'Step-by-Step Review', 'Safe Confirmation'],
+        tagsAr: ['إلزامي واختياري', 'حماية البيانات الحساسة', 'مراجعة خطوة بخطوة', 'تأكيد صريح'],
+        targetView: 'productivity',
+        targetTab: 'form_filler',
+      },
+      {
         id: 'feat_academic_planner',
         titleEn: 'Academic Command Center & Planner',
         titleAr: 'الجدول الأكاديمي والمهام الدراسية',
@@ -326,7 +436,6 @@ export const PRODUCT_SECTIONS: ProductSectionDefinition[] = [
         tagsEn: ['Exam Timetable', 'Deadlines', 'Auditory Reminders'],
         tagsAr: ['جدول الاختبارات', 'مواعيد التسليم', 'تنبيهات صوتية'],
         targetView: 'planner',
-        isPrimaryAction: true,
       },
       {
         id: 'feat_goals_gpa',
@@ -635,6 +744,11 @@ export function getSectionIconComponent(iconName: string): React.ComponentType<{
     case 'Shield': return Shield;
     case 'LifeBuoy': return LifeBuoy;
     case 'Volume2': return Volume2;
+    case 'Mail': return Mail;
+    case 'Presentation': return Presentation;
+    case 'Table': return Table;
+    case 'CheckSquare': return CheckSquare;
+    case 'FileText': return FileText;
     default: return Sparkles;
   }
 }

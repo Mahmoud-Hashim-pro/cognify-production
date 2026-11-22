@@ -34,7 +34,7 @@ export interface RouteState {
 }
 
 export const VALID_VIEWS: readonly AppView[] = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
@@ -75,6 +75,10 @@ export function parseRoute(hashString: string): RouteState {
   if (clean === 'privacy') return { view: 'privacy_security' };
   if (clean === 'intelligence') return { view: 'profile' };
   if (clean === 'admin' || clean === 'users' || clean === 'database') return { view: 'admin' };
+  if (clean === 'productivity' || clean.startsWith('productivity/')) {
+    const subTool = clean.split('/')[1] as any;
+    return { view: 'productivity', tab: subTool, params: subTool ? { tool: subTool } : undefined };
+  }
 
   // ── Six Official Product Sections Routes (Deep Linking & Refresh Support) ──
   // Matches: #see_understand, #read_learn, #work_create, #move_explore, #communicate, #personalize
@@ -323,6 +327,8 @@ export function getRouteTitle(route: RouteState, lang?: string): string {
   }
 
   switch (route.view) {
+    case 'productivity':
+      return isAr ? 'مساحة الإنتاجية ومساعد العمل والإبداع' : 'Productivity Workspace & Assistant';
     case 'book_studio':
       return isAr ? 'استوديو الكتب والمستندات' : 'Accessible Book Studio';
     case 'toolkit':
