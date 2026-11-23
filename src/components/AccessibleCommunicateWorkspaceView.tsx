@@ -514,6 +514,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         type="checkbox"
                         checked={consentCamera}
                         onChange={(e) => setConsentCamera(e.target.checked)}
+                        aria-label={localize(profile.language, 'Share camera feed with companion', 'بث كاميرا الهاتف للمرافق')}
                         className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#22354E] bg-[#131E2E]"
                       />
                       <span>{localize(profile.language, 'I explicitly agree to share my real-time camera feed with the sighted companion.', 'أوافق صراحة على بث كاميرا الهاتف للمرافق المبصر أثناء المكالمة فقط.')}</span>
@@ -524,6 +525,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         type="checkbox"
                         checked={consentMic}
                         onChange={(e) => setConsentMic(e.target.checked)}
+                        aria-label={localize(profile.language, 'Share microphone for voice conversation', 'مشاركة الميكروفون للمحادثة الصوتية')}
                         className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#22354E] bg-[#131E2E]"
                       />
                       <span>{localize(profile.language, 'I explicitly agree to share my microphone audio for two-way voice conversation.', 'أوافق صراحة على فتح الميكروفون للتحدث الصوتي المتبادل أثناء المكالمة.')}</span>

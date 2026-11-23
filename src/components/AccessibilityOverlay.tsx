@@ -39,9 +39,6 @@ import { Hands, Results, HAND_CONNECTIONS } from "@mediapipe/hands";
 import { Camera as MediaPipeCamera } from "@mediapipe/camera_utils";
 import { geminiService } from "../services/geminiService";
 import { setManualAccessibilityPreference, recordAccessibilityFeedback } from "../lib/accessibilityStateEngine";
-// Type-only import keeps TensorFlow.js out of this chunk; the implementation is
-// dynamically imported in startVision so tfjs only loads when the camera is used.
-import type { SignClassifier } from "../lib/signClassifier";
 
 interface AccessibilityOverlayProps {
   mode: AccessibilityMode;
@@ -78,8 +75,6 @@ export default function AccessibilityOverlay({
   const streamRef = useRef<MediaStream | null>(null);
   const handsRef = useRef<Hands | null>(null);
   const cameraRef = useRef<MediaPipeCamera | null>(null);
-  // Local in-browser ASL fingerspelling recognizer (TF.js); loaded on demand.
-  const signClfRef = useRef<SignClassifier | null>(null);
   const [liveLetter, setLiveLetter] = useState("");
   // Enlarge the camera preview to a big centered panel (toggle).
   const [camExpanded, setCamExpanded] = useState(false);
@@ -93,8 +88,6 @@ export default function AccessibilityOverlay({
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      signClfRef.current?.dispose();
-      signClfRef.current = null;
       try { cameraRef.current?.stop(); } catch { /* ignore */ }
       try { handsRef.current?.close(); } catch { /* ignore */ }
       streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -333,56 +326,24 @@ export default function AccessibilityOverlay({
   const [visionStatus, setVisionStatus] = useState("Idle");
   const [transcription, setTranscription] = useState("");
 
-  // Per-frame hand results from MediaPipe. Recognition now runs fully locally
-  // via the TF.js fingerspelling model — no per-frame network calls to Gemini.
+  // Per-frame hand results from MediaPipe tracking.
   const onResults = (results: Results) => {
     const video = videoRef.current;
-    const clf = signClfRef.current;
     // A stopped camera nulls streamRef; bail so a late frame can't mutate state.
-    if (!video || !clf || !streamRef.current) return;
+    if (!video || !streamRef.current) return;
 
     const landmarks = results.multiHandLandmarks?.[0];
     const handScore = results.multiHandedness?.[0]?.score ?? 0;
 
-    // No reliable hand: let the smoother know so a repeated letter can re-fire.
+    // No reliable hand:
     if (!landmarks || landmarks.length === 0 || handScore <= 0.7) {
       setDetectionConfidence(0);
       setLiveLetter("");
-      clf.smoother.handLost();
       return;
     }
 
     setDetectionConfidence(handScore);
-
-    // Local classification of the 24 static letters A–Y (~30fps, zero cost).
-    const pred = clf.classify(video, landmarks as any);
-    if (!pred) return;
-
-    setLiveLetter(`${pred.letter} · ${(pred.confidence * 100).toFixed(0)}%`);
-
-    // Temporal smoother turns noisy per-frame predictions into committed letters.
-    const stable = clf.smoother.push(pred);
-    if (stable) {
-      // Build up the fingerspelled word; the user confirms it to send to the AI.
-      setTranscription((prev) => prev + stable);
-
-      // Optional audio feedback for the committed letter. Read live values via
-      // refs (this handler was registered once and would otherwise be stale).
-      if (
-        "speechSynthesis" in window &&
-        autoSpeakRef.current &&
-        (modeRef.current === "Sign-Only" || modeRef.current === "Vocal-Deaf")
-      ) {
-        const utterance = new SpeechSynthesisUtterance(stable);
-        utterance.lang =
-          langRef.current === "Egyptian Ammiya"
-            ? "ar-EG"
-            : langRef.current === "Arabic"
-              ? "ar-SA"
-              : "en-US";
-        setTimeout(() => window.speechSynthesis.speak(utterance), 50);
-      }
-    }
+    setLiveLetter(localize(profile.language, "Hand Tracked", "تم رصد اليد"));
   };
 
   const startVision = async () => {
@@ -396,19 +357,6 @@ export default function AccessibilityOverlay({
       return;
     }
     try {
-      // Lazy-load the recognizer (and TF.js) the first time the camera starts.
-      if (!signClfRef.current) {
-        setVisionStatus("Loading recognizer...");
-        const { SignClassifier } = await import("../lib/signClassifier");
-        const clf = new SignClassifier();
-        // Don't hang forever on weak hospital wifi — bound the model load.
-        await Promise.race([
-          clf.load("/models/sign/model.json"),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("model-timeout")), 20000)),
-        ]);
-        signClfRef.current = clf;
-      }
-
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480, facingMode: "user" },
       });
@@ -486,7 +434,6 @@ export default function AccessibilityOverlay({
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-    signClfRef.current?.smoother.reset();
     setIsVisionActive(false);
     setIsVisionAnalyzing(false);
     setVisionStatus("Idle");
@@ -895,7 +842,6 @@ export default function AccessibilityOverlay({
                     <button
                       onClick={() => {
                         setTranscription("");
-                        signClfRef.current?.smoother.reset();
                       }}
                       disabled={!transcription}
                       className="px-2 py-1 bg-surface-3 text-text-muted text-[9px] font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
@@ -920,7 +866,6 @@ export default function AccessibilityOverlay({
                         if (!transcription.trim()) return;
                         onTranscription(transcription.trim());
                         setTranscription("");
-                        signClfRef.current?.smoother.reset();
                       }}
                       disabled={!transcription.trim()}
                       className="px-2 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase rounded-lg hover:bg-emerald-600 disabled:opacity-40"

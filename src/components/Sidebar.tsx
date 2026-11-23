@@ -1,9 +1,39 @@
 import { localize, isArabicLocale, getTranslation } from '../lib/translations';
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
-  User, Settings, LifeBuoy, MessageSquare, AlertCircle, Database, 
-  LogOut, Plus, X, Moon, Sun, Mic, Sparkles, Shield, Eye, Ear, Layers, ShieldCheck, Zap, BookOpen, LayoutDashboard, Headphones, Compass, Briefcase, Activity, Home
+  User, 
+  Settings, 
+  LifeBuoy, 
+  MessageSquare, 
+  AlertCircle, 
+  Database, 
+  LogOut, 
+  Plus, 
+  X, 
+  Moon, 
+  Sun, 
+  Mic, 
+  Sparkles, 
+  Shield, 
+  Eye, 
+  Ear, 
+  Layers, 
+  ShieldCheck, 
+  Zap, 
+  BookOpen, 
+  LayoutDashboard, 
+  Headphones, 
+  Compass, 
+  Briefcase, 
+  Activity, 
+  Home,
+  CheckCircle2,
+  ChevronRight,
+  ChevronLeft,
+  Sliders,
+  PanelLeftClose,
+  PanelLeftOpen
 } from "lucide-react";
 import { logout, db, cleanDataForFirestore } from "../lib/firebase";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
@@ -13,7 +43,7 @@ import type { DisabilityTab } from "./DisabilityModeView";
 import { BrandLogo } from "./ui/BrandLogo";
 import { PRODUCT_SECTIONS, ProductSectionId, getSectionIconComponent } from "../lib/sections";
 
-interface SidebarProps {
+export interface SidebarProps {
   profile: UserProfile;
   setProfile: (profile: UserProfile) => void;
   currentView: AppView;
@@ -44,6 +74,25 @@ export default function Sidebar({
   onClose,
   onLogout,
 }: SidebarProps) {
+  // Collapsible sidebar state for desktop
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('cognify_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('cognify_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const handleChange = (key: keyof UserProfile, value: string) => {
     const updated = { ...profile, [key]: value };
     setProfile(updated);
@@ -53,6 +102,8 @@ export default function Sidebar({
   };
 
   const isAdmin = isAdminUser(profile);
+  const isAr = isArabicLocale(profile.language);
+  const t = (en: string, ar: string) => (isAr ? ar : en);
 
   const navigateToDisabilityTab = (tab: DisabilityTab) => {
     onClose?.();
@@ -84,194 +135,308 @@ export default function Sidebar({
     setCurrentView('chat');
   };
 
-  const isTabActive = (tab: DisabilityTab) => {
-    if (currentView !== 'disability') return false;
-    const currentTab = activeDisabilityTab || 'chat';
-    if (tab === 'chat') return currentTab === 'chat';
-    if (tab === 'deaf') return currentTab === 'deaf' || currentTab === 'bridge' || currentTab === 'radar';
-    return currentTab === tab;
+  // ── GROUP 1: MAIN NAVIGATION (HOME ONLY) ──
+  // Note: Visual Assistant (المساعد البصري) is primary feature of Section 1 (See & Understand)
+  const isHomeActive = currentView === 'disability' && !currentSection && (activeDisabilityTab === 'hub' || !activeDisabilityTab);
+  const handleHomeClick = () => {
+    onClose?.();
+    if (onSelectSection) onSelectSection(null);
+    navigateToDisabilityTab('hub');
+    window.location.hash = '#disability/hub';
   };
 
-  const isAr = isArabicLocale(profile.language);
+  // ── GROUP 2: OFFICIAL SIX PRODUCT SECTIONS (1 TO 6) ──
+  const primarySectionItems = PRODUCT_SECTIONS.map((sec) => ({
+    id: sec.id,
+    numericOrder: sec.numericOrder,
+    label: isAr ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`,
+    shortTitle: isAr ? sec.titleAr : sec.titleEn,
+    icon: getSectionIconComponent(sec.iconName),
+    action: () => {
+      onClose?.();
+      if (onSelectSection) {
+        onSelectSection(sec.id);
+      }
+      setCurrentView('disability');
+      window.location.hash = `#${sec.id}`;
+    },
+    active: currentView === 'disability' && currentSection === sec.id,
+  }));
 
-  // Dedicated Six Official Product Sections Navigation List
-  const assistiveItems = [
-    {
-      id: 'hub',
-      label: localize(profile.language, 'Dashboard Hub', 'لوحة الميزات الرئيسية'),
-      icon: LayoutDashboard,
-      action: () => {
-        onClose?.();
-        if (onSelectSection) onSelectSection(null);
-        navigateToDisabilityTab('hub');
-      },
-      active: currentView === 'disability' && !currentSection && (activeDisabilityTab === 'hub' || !activeDisabilityTab),
-    },
-    {
-      id: 'vision_shortcut',
-      label: localize(profile.language, 'Visual Assistant', 'المساعد البصري'),
-      icon: Eye,
-      action: () => {
-        onClose?.();
-        if (onSelectSection) onSelectSection(null);
-        navigateToDisabilityTab('vision');
-      },
-      active: currentView === 'disability' && !currentSection && isTabActive('vision'),
-    },
-    ...PRODUCT_SECTIONS.map((sec) => ({
-      id: sec.id,
-      label: isAr ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`,
-      icon: getSectionIconComponent(sec.iconName),
-      action: () => {
-        onClose?.();
-        if (onSelectSection) {
-          onSelectSection(sec.id);
-        } else {
-          setCurrentView('disability');
-          window.location.hash = `#${sec.id}`;
-        }
-      },
-      active: currentView === 'disability' && currentSection === sec.id,
-    })),
+  // ── GROUP 3: WORKSPACE (MY PROGRESS & ASSISTIVE CHAT) ──
+  const workspaceItems = [
     {
       id: 'progress',
-      label: localize(profile.language, 'My Progress', 'تقدمي'),
+      label: t('My Progress', 'تقدمي'),
       icon: Activity,
       action: () => {
         onClose?.();
         if (onSelectSection) onSelectSection(null);
         onSelectDisabilityTab?.('progress');
         setCurrentView('profile');
+        window.location.hash = '#profile';
       },
       active: currentView === 'profile' || (currentView === 'disability' && !currentSection && activeDisabilityTab === 'progress'),
     },
+  ];
+
+  // ── GROUP 4: SUPPORT & SYSTEM CONTROLS ──
+  const supportItems = [
+    {
+      id: 'support',
+      label: t('Help & Support', 'الدعم والمساعدة'),
+      icon: LifeBuoy,
+      action: () => {
+        onClose?.();
+        if (onSelectSection) onSelectSection(null);
+        setCurrentView('support');
+        window.location.hash = '#support';
+      },
+      active: currentView === 'support',
+    },
     {
       id: 'settings',
-      label: localize(profile.language, 'Settings', 'الإعدادات'),
+      label: t('Settings', 'الإعدادات'),
       icon: Settings,
       action: () => {
         onClose?.();
         if (onSelectSection) onSelectSection(null);
         onSelectDisabilityTab?.('settings');
         setCurrentView('settings');
+        window.location.hash = '#settings';
       },
       active: currentView === 'settings' || (currentView === 'disability' && !currentSection && activeDisabilityTab === 'settings'),
-    },
-    {
-      id: 'privacy_security',
-      label: localize(profile.language, 'Privacy & Security', 'الخصوصية وأمان البيانات'),
-      icon: ShieldCheck,
-      action: () => {
-        onClose?.();
-        if (onSelectSection) onSelectSection(null);
-        setCurrentView('privacy_security');
-      },
-      active: currentView === 'privacy_security',
-    },
-    {
-      id: 'support',
-      label: localize(profile.language, 'Accessible Support', 'الدعم والمساعدة'),
-      icon: LifeBuoy,
-      action: () => {
-        onClose?.();
-        if (onSelectSection) onSelectSection(null);
-        setCurrentView('support');
-      },
-      active: currentView === 'support',
     },
   ];
 
   const navBtn = (active: boolean) =>
-    `group flex items-center gap-3 w-full px-3 min-h-[44px] py-2 rounded-xl text-[13px] font-medium text-start transition-all relative select-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none ${
+    `group flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'} w-full min-h-[44px] py-2 rounded-xl text-[13px] font-medium text-start transition-all relative select-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none cursor-pointer ${
       active
         ? isDarkMode
-          ? 'bg-rafiqi-surface-elevated border border-rafiqi-primary/50 text-rafiqi-primary-muted font-bold shadow-sm'
-          : 'bg-rafiqi-primary-light border border-rafiqi-primary/30 text-rafiqi-primary-dark font-bold shadow-sm'
+          ? 'bg-[#1769AA]/20 border border-[#1769AA]/50 text-white font-bold shadow-xs'
+          : 'bg-[#1769AA]/10 border border-[#1769AA]/30 text-rafiqi-primary-dark font-bold shadow-xs'
         : isDarkMode
-          ? 'text-stone-300 hover:bg-rafiqi-surface-dark hover:text-white border border-transparent hover:border-rafiqi-border-dark active:scale-[0.98]'
-          : 'text-stone-700 hover:bg-rafiqi-primary-light/60 hover:text-stone-950 border border-transparent hover:border-rafiqi-primary/20 active:scale-[0.98]'
+          ? 'text-slate-300 hover:bg-[#1A283D] hover:text-white border border-transparent hover:border-[#22354E]'
+          : 'text-slate-700 hover:bg-[#1769AA]/5 hover:text-slate-950 border border-transparent hover:border-[#1769AA]/20'
     }`;
-  const navIcon = (_active: boolean) => `w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-110 group-focus-visible:scale-110 text-rafiqi-primary dark:text-rafiqi-primary-muted`;
+
+  const navIcon = (active: boolean) => 
+    `w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105 group-focus-visible:scale-105 ${
+      active ? 'text-[#1769AA] dark:text-[#4B9FE1]' : 'text-slate-500 dark:text-slate-400 group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1]'
+    }`;
 
   const userInitial = (profile.name || profile.email || 'U').trim().charAt(0).toUpperCase();
 
   return (
-    <div className={`w-[284px] max-w-[85vw] h-full shrink-0 ${
-      isDarkMode 
-        ? 'bg-cognify-bg-dark/98 text-stone-200 border-stone-800' 
-        : 'bg-cognify-bg-light/98 text-stone-800 border-stone-200'
-    } border-e backdrop-blur-2xl flex flex-col px-[18px] py-[22px]`}>
-      {/* Brand & Mobile Close Button */}
-      <div className="flex items-center justify-between px-1.5 pb-1">
-        <BrandLogo
-          variant="horizontal"
-          size="md"
-          badgeText="A11y"
-          subtitle={localize(profile.language, 'Assistive Technology Suite', 'منظومة ذوي الهمم والإتاحة')}
-        />
+    <aside 
+      aria-label={t('Main Navigation Sidebar', 'شريط التنقل الجانبي الرئيسي')}
+      className={`${
+        isCollapsed ? 'w-[74px]' : 'w-[280px]'
+      } max-w-[85vw] h-full shrink-0 ${
+        isDarkMode 
+          ? 'bg-[#0B1523] text-slate-200 border-[#1E2E44]' 
+          : 'bg-white text-slate-800 border-slate-200'
+      } border-e backdrop-blur-2xl flex flex-col px-3 py-4 select-none transition-[width] duration-200`}
+    >
+      {/* ── Brand Logo Header & Mobile Close ── */}
+      <div className="flex items-center justify-between px-1 pb-1">
+        {isCollapsed ? (
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-tr from-[#0D4778] to-[#1769AA] flex items-center justify-center text-white shadow-xs font-black text-base cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] outline-none"
+            title={t('Expand sidebar', 'توسيع القائمة')}
+            aria-label={t('Expand sidebar', 'توسيع القائمة')}
+          >
+            R
+          </button>
+        ) : (
+          <BrandLogo
+            variant="horizontal"
+            size="md"
+            badgeText="A11y"
+            subtitle={t('Your Everyday Companion', 'رفيقك اليومي للإتاحة')}
+          />
+        )}
+
+        {/* Mobile Close Button */}
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className={`p-1.5 rounded-xl ${isDarkMode ? 'text-stone-400 hover:text-white hover:bg-stone-800' : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200'} transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none`}
-            aria-label={localize(profile.language, 'Close menu', 'إغلاق القائمة')}
+            className={`lg:hidden p-1.5 rounded-xl ${
+              isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            } transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none`}
+            aria-label={t('Close navigation drawer', 'إغلاق القائمة')}
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
         )}
+
+        {/* Desktop Collapse Toggle Button (When expanded) */}
+        {!isCollapsed && (
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className={`hidden lg:flex p-1.5 rounded-xl ${
+              isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            } transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none`}
+            title={t('Collapse sidebar', 'طي الشريط الجانبي')}
+            aria-label={t('Collapse sidebar', 'طي الشريط الجانبي')}
+          >
+            <PanelLeftClose className="w-4 h-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
-      {/* New chat with Accessible Tutor */}
-      <div className="mt-3">
+      {/* ── Primary Action: New Assistive Chat ── */}
+      <div className="mt-2.5">
         <button
           type="button"
           onClick={startNewChat}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-rafiqi-primary hover:bg-rafiqi-primary-dark active:bg-[#09355B] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-rafiqi-primary/20 active:scale-[0.98] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none"
+          title={getTranslation(profile.language, 'newThread')}
+          className={`w-full min-h-[44px] flex items-center justify-center gap-2 py-2 px-2.5 rounded-xl bg-rafiqi-primary hover:bg-rafiqi-primary-dark active:bg-[#09355B] text-white font-bold text-xs uppercase tracking-wider shadow-sm shadow-[#1769AA]/20 active:scale-[0.98] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none`}
         >
-          <Plus className="w-[17px] h-[17px] text-white" aria-hidden="true" /> {getTranslation(profile.language, 'newThread')}
+          <Plus className="w-4 h-4 text-white shrink-0" aria-hidden="true" />
+          {!isCollapsed && <span>{getTranslation(profile.language, 'newThread')}</span>}
         </button>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto custom-scrollbar -mx-1 my-[16px] px-1 flex flex-col gap-[3px]">
-        <div className={`text-xs font-bold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider px-3 pt-1.5 pb-1 uppercase`}>
-          {localize(profile.language, 'Assistive Ecosystem', 'أدوات الإتاحة والتكيّف')}
+      {/* ── Scrollable Navigation Container ── */}
+      <nav className="flex-1 overflow-y-auto custom-scrollbar -mx-1 my-2.5 px-1 flex flex-col gap-1">
+        
+        {/* ── 1. MAIN (HOME ONLY) ── */}
+        <div className="flex flex-col gap-0.5">
+          {!isCollapsed && (
+            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+              {t('Main', 'الرئيسية')}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleHomeClick}
+            className={navBtn(isHomeActive)}
+            aria-current={isHomeActive ? 'page' : undefined}
+            title={t('Home', 'الرئيسية')}
+          >
+            <Home className={navIcon(isHomeActive)} aria-hidden="true" />
+            {!isCollapsed && <span className="truncate">{t('Home', 'الرئيسية')}</span>}
+          </button>
         </div>
 
-        {assistiveItems.map((item) => (
-          <button
-            type="button"
-            key={item.id}
-            onClick={item.action}
-            className={navBtn(item.active)}
-            aria-current={item.active ? 'page' : undefined}
-          >
-            <item.icon className={navIcon(item.active)} aria-hidden="true" />
-            <span className="truncate">{item.label}</span>
-          </button>
-        ))}
+        {/* ── 2. OFFICIAL SECTIONS (EXACTLY SIX) ── */}
+        <div className="pt-2 pb-0.5">
+          {!isCollapsed && (
+            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase flex items-center justify-between`}>
+              <span>{t('Official Sections', 'أقسام رفيقي الستة')}</span>
+              <span className="text-[10px] font-mono text-[#1769AA] dark:text-[#4B9FE1] font-bold">1–6</span>
+            </div>
+          )}
 
-        {/* Admin Portal (Staff Only) */}
-        {isAdmin && (
-          <button
-            type="button"
-            onClick={() => { onClose?.(); setCurrentView('admin'); }}
-            className={navBtn(currentView === 'admin' || (currentView === 'disability' && activeDisabilityTab === 'admin')) + ' relative mt-2'}
-            aria-current={currentView === 'admin' || (currentView === 'disability' && activeDisabilityTab === 'admin') ? 'page' : undefined}
-          >
-            <Database className={navIcon(currentView === 'admin')} aria-hidden="true" />
-            {localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}
-            <span className={`ms-auto text-xs font-semibold ${isDarkMode ? 'text-stone-300 bg-stone-800 border-stone-700' : 'text-stone-800 bg-stone-100 border-stone-300'} border px-2 py-0.5 rounded-md`}>
-              {localize(profile.language, 'Admin', 'مشرف')}
-            </span>
-          </button>
-        )}
+          <div className="flex flex-col gap-0.5">
+            {primarySectionItems.map((sec) => (
+              <button
+                type="button"
+                key={sec.id}
+                onClick={sec.action}
+                className={navBtn(sec.active)}
+                aria-current={sec.active ? 'page' : undefined}
+                title={sec.label}
+              >
+                <sec.icon className={navIcon(sec.active)} aria-hidden="true" />
+                {!isCollapsed && (
+                  <>
+                    <span className="truncate flex-1">{sec.label}</span>
+                    {sec.active && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#1769AA] dark:bg-[#4B9FE1] shrink-0" />
+                    )}
+                  </>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {/* Recent Accessible Tutor Threads */}
-        {(profile.chatThreads?.length || 0) > 0 && (
-          <>
-            <div className="flex items-center justify-between px-3 pt-4 pb-1">
-              <span className={`text-xs font-bold ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} tracking-wider uppercase`}>
+        {/* ── 3. WORKSPACE (MY PROGRESS & RECENTS) ── */}
+        <div className="pt-2 pb-0.5">
+          {!isCollapsed && (
+            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+              {t('Workspace', 'مساحة العمل')}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-0.5">
+            {workspaceItems.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                onClick={item.action}
+                className={navBtn(item.active)}
+                aria-current={item.active ? 'page' : undefined}
+                title={item.label}
+              >
+                <item.icon className={navIcon(item.active)} aria-hidden="true" />
+                {!isCollapsed && <span className="truncate">{item.label}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── 4. SUPPORT & SYSTEM (HELP, SETTINGS, ADMIN) ── */}
+        <div className="pt-2 pb-0.5">
+          {!isCollapsed && (
+            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+              {t('Support & System', 'الدعم والنظام')}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-0.5">
+            {supportItems.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                onClick={item.action}
+                className={navBtn(item.active)}
+                aria-current={item.active ? 'page' : undefined}
+                title={item.label}
+              >
+                <item.icon className={navIcon(item.active)} aria-hidden="true" />
+                {!isCollapsed && <span className="truncate">{item.label}</span>}
+              </button>
+            ))}
+
+            {/* Admin Portal (Staff Only) */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => { 
+                  onClose?.(); 
+                  setCurrentView('admin'); 
+                  window.location.hash = '#admin';
+                }}
+                className={navBtn(currentView === 'admin' || (currentView === 'disability' && activeDisabilityTab === 'admin')) + ' relative mt-0.5'}
+                aria-current={currentView === 'admin' || (currentView === 'disability' && activeDisabilityTab === 'admin') ? 'page' : undefined}
+                title={t('Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}
+              >
+                <Database className={navIcon(currentView === 'admin')} aria-hidden="true" />
+                {!isCollapsed && (
+                  <>
+                    <span className="truncate">{t('Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
+                    <span className={`ms-auto text-[9px] font-bold ${isDarkMode ? 'text-amber-300 bg-amber-950/40 border-amber-800' : 'text-amber-800 bg-amber-50 border-amber-300'} border px-1.5 py-0.5 rounded`}>
+                      {t('Admin', 'مشرف')}
+                    </span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── RECENT ASSISTIVE CHATS (When expanded) ── */}
+        {!isCollapsed && (profile.chatThreads?.length || 0) > 0 && (
+          <div className="pt-2">
+            <div className="flex items-center justify-between px-3 pb-1">
+              <span className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider uppercase`}>
                 {getTranslation(profile.language, 'chatHistory')}
               </span>
               <button
@@ -285,147 +450,131 @@ export default function Sidebar({
                     });
                   }
                 }}
-                aria-label={localize(profile.language, 'Clear all chats', 'مسح جميع المحادثات')}
-                className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none rounded"
+                aria-label={t('Clear all chats', 'مسح جميع المحادثات')}
+                className="text-[10px] font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-1 focus-visible:ring-rose-400 focus:outline-none rounded"
                 title="Clear all chats"
               >
                 {getTranslation(profile.language, 'clearAll')}
               </button>
             </div>
-            {profile.chatThreads?.slice().reverse().map((t) => {
-              const active = profile.activeThreadId === t.id;
+            {profile.chatThreads?.slice().reverse().map((th) => {
+              const active = profile.activeThreadId === th.id;
               return (
-                <div key={t.id} className={`group flex items-center gap-1 rounded-xl transition-all ${
+                <div key={th.id} className={`group flex items-center gap-1 rounded-xl transition-all ${
                   active 
-                    ? isDarkMode ? 'bg-rafiqi-surface-elevated border border-rafiqi-primary/50' : 'bg-rafiqi-primary-light border border-rafiqi-primary/30'
-                    : isDarkMode ? 'hover:bg-rafiqi-surface-dark border border-transparent' : 'hover:bg-rafiqi-primary-light/40 border border-transparent'
+                    ? isDarkMode ? 'bg-[#1769AA]/20 border border-[#1769AA]/50' : 'bg-[#1769AA]/10 border border-[#1769AA]/30'
+                    : isDarkMode ? 'hover:bg-[#1A283D] border border-transparent' : 'hover:bg-slate-100 border border-transparent'
                 }`}>
                   <button
                     type="button"
-                    onClick={() => switchThread(t.id)}
-                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1.5 text-start overflow-hidden min-w-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none rounded-lg"
+                    onClick={() => switchThread(th.id)}
+                    className="flex flex-col flex-1 items-start justify-center gap-0.5 px-3 min-h-[44px] py-1 text-start overflow-hidden min-w-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none rounded-lg"
                     aria-current={active ? 'true' : undefined}
                   >
-                    <span className={`text-[13px] font-semibold truncate w-full max-w-[200px] ${isDarkMode ? 'text-stone-200' : 'text-stone-900'}`}>{t.title}</span>
-                    <span className={`text-[11px] truncate w-full max-w-[200px] ${isDarkMode ? 'text-stone-400' : 'text-stone-500'}`}>{t.lastMessageSnippet || (localize(profile.language, 'No messages yet', 'لا رسائل بعد'))}</span>
+                    <span className={`text-xs font-semibold truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-200' : 'text-slate-900'}`}>{th.title}</span>
+                    <span className={`text-[10px] truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{th.lastMessageSnippet || t('No messages yet', 'لا توجد رسائل بعد')}</span>
                   </button>
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const updated = profile.chatThreads?.filter((th) => th.id !== t.id) || [];
-                      const nextActive = t.id === profile.activeThreadId
+                      const updated = profile.chatThreads?.filter((item) => item.id !== th.id) || [];
+                      const nextActive = th.id === profile.activeThreadId
                         ? (updated.length ? updated[updated.length - 1].id : undefined)
                         : profile.activeThreadId;
                       setProfile({ ...profile, chatThreads: updated, activeThreadId: nextActive });
-                      if (profile.uid) deleteDoc(doc(db, `users/${profile.uid}/threads/${t.id}`)).catch((er) => console.error(er));
+                      if (profile.uid) deleteDoc(doc(db, `users/${profile.uid}/threads/${th.id}`)).catch((er) => console.error(er));
                     }}
-                    className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 min-w-[36px] min-h-[36px] flex items-center justify-center p-2 me-1 text-stone-400 hover:text-rose-500 focus-visible:text-rose-500 rounded-lg transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none"
-                    title={localize(profile.language, 'Delete chat', 'حذف المحادثة')}
-                    aria-label={localize(profile.language, 'Delete chat', 'حذف المحادثة')}
+                    className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 min-w-[32px] min-h-[32px] flex items-center justify-center p-1.5 me-1 text-slate-400 hover:text-rose-500 focus-visible:text-rose-500 rounded-lg transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none"
+                    title={t('Delete chat', 'حذف المحادثة')}
+                    aria-label={t('Delete chat', 'حذف المحادثة')}
                   >
-                    <X className="w-4 h-4" aria-hidden="true" />
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
               );
             })}
-          </>
+          </div>
         )}
       </nav>
 
-      {/* Footer: theme + language, profile chip, captions + logout */}
-      <div className={`border-t ${isDarkMode ? 'border-stone-800' : 'border-stone-200'} pt-3 flex flex-col gap-2`}>
-        <div className="flex gap-[7px]">
-          <button 
-            type="button"
-            onClick={toggleTheme} 
-            aria-label={isDarkMode ? localize(profile.language, 'Switch to Light Theme', 'التبديل إلى الوضع الفاتح') : localize(profile.language, 'Switch to Dark Theme', 'التبديل إلى الوضع الداكن')}
-            className={`flex-1 flex items-center justify-center gap-[7px] min-h-[44px] py-2.5 rounded-xl border ${
-              isDarkMode 
-                ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:text-white hover:bg-stone-800' 
-                : 'border-stone-200 bg-white text-stone-800 hover:text-stone-950 hover:bg-stone-100'
-            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none`}
-          >
-            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" aria-hidden="true" /> : <Moon className="w-4 h-4 text-stone-600" aria-hidden="true" />}
-            {isDarkMode ? (localize(profile.language, 'Light', 'فاتح')) : (localize(profile.language, 'Dark', 'داكن'))}
-          </button>
-          <div className="flex-1 relative">
-            <select
-              value={profile.language || 'English'}
-              onChange={(e) => handleChange('language', e.target.value)}
-              className={`w-full h-full min-h-[44px] appearance-none cursor-pointer text-center py-2.5 px-2 rounded-xl border ${
-                isDarkMode
-                  ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:border-rafiqi-primary focus:border-rafiqi-primary [color-scheme:dark]'
-                  : 'border-stone-200 bg-white text-stone-800 hover:border-rafiqi-primary focus:border-rafiqi-primary [color-scheme:light]'
-              } text-xs font-semibold transition-all outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary`}
-              aria-label={localize(profile.language, 'Select Language', 'اختر اللغة')}
-            >
-              {['English', 'Arabic', 'Egyptian Ammiya', 'French', 'Spanish'].map((l) => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className={`flex items-center gap-2.5 w-full px-2.5 min-h-[50px] py-1.5 rounded-2xl border ${
-          isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200'
+      {/* ── Footer: Profile Chip, Captions + Logout ── */}
+      <div className={`border-t ${isDarkMode ? 'border-[#1E2E44]' : 'border-slate-200'} pt-2.5 flex flex-col gap-2`}>
+        {/* Profile Card & Settings Quick Trigger */}
+        <div className={`flex items-center ${isCollapsed ? 'justify-center p-1' : 'gap-2.5 px-2.5'} w-full min-h-[48px] py-1 rounded-2xl border ${
+          isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-slate-50 border-slate-200'
         } backdrop-blur-md transition-all ${
           currentView === 'profile' || currentView === 'settings' 
-            ? 'border-rafiqi-primary shadow-sm'
-            : isDarkMode ? 'hover:border-stone-700' : 'hover:border-rafiqi-primary/40'
+            ? 'border-[#1769AA] shadow-xs'
+            : isDarkMode ? 'hover:border-slate-700' : 'hover:border-[#1769AA]/40'
         }`}>
           <button 
             type="button"
             onClick={() => {
               onClose?.();
               setCurrentView('profile');
+              window.location.hash = '#profile';
             }} 
-            className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-start group cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none rounded-xl" 
-            title={localize(profile.language, 'View Profile', 'الملف الشخصي وجواز الإتاحة')}
-            aria-label={localize(profile.language, 'View Profile and Accommodation Passport', 'الملف الشخصي وجواز الإتاحة')}
+            className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5 flex-1'} min-w-0 min-h-[44px] text-start group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none rounded-xl`} 
+            title={t('View Profile', 'الملف الشخصي وجواز الإتاحة')}
+            aria-label={t('View Profile and Accommodation Passport', 'الملف الشخصي وجواز الإتاحة')}
           >
             <div className="relative shrink-0">
-              <div className="w-[36px] h-[36px] rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 overflow-hidden shadow-sm bg-gradient-to-br from-rafiqi-primary-dark to-rafiqi-primary group-hover:scale-105 transition-transform ring-1 ring-rafiqi-primary/30">
+              <div className="w-[32px] h-[32px] rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 overflow-hidden shadow-xs bg-gradient-to-br from-[#0D4778] to-[#1769AA] group-hover:scale-105 transition-transform ring-1 ring-[#1769AA]/30">
                 {profile.photoURL ? <img src={profile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : userInitial}
               </div>
-              <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rafiqi-primary ring-2 ${isDarkMode ? 'ring-[#0B131E]' : 'ring-white'}`} aria-hidden="true" />
+              <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ${isDarkMode ? 'ring-[#0B1523]' : 'ring-white'}`} aria-hidden="true" />
             </div>
-            <div className="leading-tight overflow-hidden flex-1">
-              <div className={`text-sm font-bold ${isDarkMode ? 'text-stone-100 group-hover:text-rafiqi-primary-muted' : 'text-stone-900 group-hover:text-rafiqi-primary-dark'} truncate transition-colors`}>{profile.name || profile.email?.split('@')[0] || 'User'}</div>
-              <div className={`text-xs ${isDarkMode ? 'text-stone-400' : 'text-stone-500'} truncate`}>{profile.disabilityType || profile.accessibilityMode || 'Assistive Learning'}</div>
-            </div>
+            {!isCollapsed && (
+              <div className="leading-tight overflow-hidden flex-1">
+                <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'} truncate`}>
+                  {profile.name || profile.email?.split('@')[0] || 'User'}
+                </div>
+                <div className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'} truncate`}>
+                  {profile.disabilityType || profile.accessibilityMode || t('Assistive Learning', 'التعلم الميسر')}
+                </div>
+              </div>
+            )}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              onClose?.();
-              setCurrentView('settings');
-            }}
-            className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none ${
-              currentView === 'settings'
-                ? 'bg-rafiqi-primary-light dark:bg-rafiqi-surface-elevated text-rafiqi-primary-dark dark:text-rafiqi-primary-muted border border-rafiqi-primary/40'
-                : 'text-stone-600 dark:text-stone-400 hover:text-rafiqi-primary hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-            title={localize(profile.language, 'Settings', 'الإعدادات')}
-            aria-label={localize(profile.language, 'Settings', 'الإعدادات')}
-          >
-            <Settings className="w-4 h-4" aria-hidden="true" />
-          </button>
+
+          {!isCollapsed && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose?.();
+                setCurrentView('settings');
+                window.location.hash = '#settings';
+              }}
+              className={`min-w-[36px] min-h-[36px] flex items-center justify-center p-2 rounded-xl transition-all shrink-0 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none ${
+                currentView === 'settings'
+                  ? 'bg-[#1769AA]/20 text-[#1769AA] dark:text-[#4B9FE1] border border-[#1769AA]/40'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-[#1769AA] hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+              title={t('Settings', 'الإعدادات')}
+              aria-label={t('Settings', 'الإعدادات')}
+            >
+              <Settings className="w-4 h-4" aria-hidden="true" />
+            </button>
+          )}
         </div>
 
-        <div className="flex gap-[7px]">
+        {/* Live Captions and Logout row */}
+        <div className={`flex ${isCollapsed ? 'flex-col' : 'flex-row'} gap-1.5`}>
           <button 
             type="button"
             onClick={openLiveCaptions} 
-            aria-label={localize(profile.language, 'Open Live Captions', 'فتح الكابشن المباشر')}
-            className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] py-2.5 rounded-xl border ${
+            aria-label={t('Open Live Captions', 'فتح الكابشن المباشر')}
+            title={t('Open Live Captions', 'فتح الكابشن المباشر')}
+            className={`flex-1 flex items-center justify-center gap-1.5 min-h-[44px] py-2 px-2 rounded-xl border ${
               isDarkMode 
-                ? 'border-stone-800 bg-cognify-surface-dark text-stone-200 hover:bg-stone-800 hover:border-rafiqi-border-dark' 
-                : 'border-stone-200 bg-white text-stone-800 hover:bg-stone-100 hover:border-rafiqi-primary/30'
-            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rafiqi-primary focus:outline-none`}
+                ? 'border-[#22354E] bg-[#131E2E] text-slate-200 hover:bg-slate-800' 
+                : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
+            } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none`}
           >
-            <Mic className={`w-4 h-4 text-rafiqi-primary dark:text-rafiqi-primary-muted`} aria-hidden="true" /> {localize(profile.language, 'Captions', 'الكابشن')}
+            <Mic className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1] shrink-0" aria-hidden="true" /> 
+            {!isCollapsed && <span>{t('Live Captions', 'الكابشن المباشر')}</span>}
           </button>
+
           <button 
             type="button"
             onClick={async () => {
@@ -436,10 +585,10 @@ export default function Sidebar({
                 await logout();
               }
             }} 
-            className={`flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] px-3.5 py-2.5 rounded-xl border ${
+            className={`flex items-center justify-center min-w-[44px] min-h-[44px] p-2.5 rounded-xl border ${
               isDarkMode 
-                ? 'border-rose-900/40 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 hover:border-rose-700/60' 
-                : 'border-rose-200 bg-white text-rose-600 hover:bg-rose-50 hover:border-rose-400'
+                ? 'border-rose-900/40 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40' 
+                : 'border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100'
             } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus:outline-none`} 
             title={getTranslation(profile.language, 'logout')} 
             aria-label={getTranslation(profile.language, 'logout')}
@@ -448,6 +597,6 @@ export default function Sidebar({
           </button>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

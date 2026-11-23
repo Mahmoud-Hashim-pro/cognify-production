@@ -1083,19 +1083,7 @@ export async function* generateAdaptiveResponseStream(
       
       if (!isMissingBackend) {
         if (res.status === 401) {
-          const isGuest =
-            !auth.currentUser ||
-            profile.uid === 'guest-explorer' ||
-            profile.uid === 'guest_preview' ||
-            Boolean(profile.email?.includes('guest'));
-
-          const authErrMsg = isGuest
-            ? isArabic
-              ? "وضع المعاينة الاستكشافية: ميزات الذكاء الاصطناعي السحابية تتطلب تسجيل الدخول. يمكنك تسجيل حسابك مجاناً لتفعيل الكاميرا الذكية بكامل قدراتها."
-              : isFrench
-              ? "Mode Aperçu : Les fonctionnalités d'IA cloud nécessitent une connexion. Veuillez vous connecter ou créer un compte gratuit pour activer la caméra intelligente."
-              : "Preview Mode: Live AI cloud vision requires sign-in. Please sign in or create a free account to activate full camera intelligence."
-            : isArabic
+          const authErrMsg = isArabic
             ? "انتهت صلاحية جلسة تسجيل الدخول. يرجى تسجيل الخروج ثم الدخول مجدداً."
             : isFrench
             ? "La session d'authentification a expiré. Veuillez vous reconnecter."
@@ -1104,11 +1092,7 @@ export async function* generateAdaptiveResponseStream(
           toast.error(
             authErrMsg,
             isArabic
-              ? isGuest
-                ? "تسجيل الدخول مطلوب"
-                : "جلسة منتهية"
-              : isGuest
-              ? "Sign In Required"
+              ? "جلسة منتهية"
               : "Session Expired"
           );
           yield { text: `⚠️ **${authErrMsg}**`, done: true, error: true };

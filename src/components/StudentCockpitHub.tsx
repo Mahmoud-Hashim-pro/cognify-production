@@ -241,7 +241,7 @@ export default function StudentCockpitHub({
   const [isAddingTask, setIsAddingTask] = useState(false);
 
   useEffect(() => {
-    if (!profile.uid || profile.uid === 'guest-explorer') return;
+    if (!profile.uid) return;
     const unsub = subscribeToTasks(profile.uid, (taskList) => {
       setTasks(taskList);
     });
@@ -251,7 +251,7 @@ export default function StudentCockpitHub({
   const handleToggleTask = async (task: PlannerTask) => {
     const updated = { ...task, completed: !task.completed };
     setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)));
-    if (profile.uid && profile.uid !== 'guest-explorer') {
+    if (profile.uid) {
       try {
         await saveTask(profile.uid, updated);
       } catch {}
@@ -275,7 +275,7 @@ export default function StudentCockpitHub({
     setNewTaskTitle('');
     setIsAddingTask(false);
 
-    if (profile.uid && profile.uid !== 'guest-explorer') {
+    if (profile.uid) {
       try {
         await saveTask(profile.uid, newTask);
         toast.success(

@@ -33,7 +33,7 @@ if (typeof globalThis.window === 'undefined') {
 }
 
 import { cleanVisionDescription } from '../../src/components/VisionCompanionView.js';
-import { SIGN_LETTERS, SignSmoother } from '../../src/lib/signClassifier.js';
+import { SIGN_LETTERS, SignSmoother } from '../../src/modules/hearAndExpress/signLanguage/index.js';
 import { isAccessibilityUser, canAccessView, homeViewFor, type AppView } from '../../src/lib/access.js';
 const DEFAULT_HEAD_TRACKING_CONFIG = { dwellTimeMs: 1200, sensitivity: 1.0, smoothing: 0.5 };
 import { recommendAdaptiveAdjustments } from '../../src/lib/adaptiveAccessibility.js';

@@ -356,19 +356,40 @@ export default function HearAndExpressView({
           </div>
         </div>
 
-        {/* Global Stop Speech Button */}
-        <button
-          type="button"
-          onClick={() => {
-            cancelSpeech();
-            announce(isAr ? 'تم إيقاف الصوت.' : 'Speech stopped.');
-          }}
-          aria-label={isAr ? 'إيقاف نطق الصوت' : 'Stop voice speech'}
-          className="px-3 py-1.5 rounded-xl bg-[#C43D4D]/20 hover:bg-[#C43D4D]/40 text-[#FFA4A4] border border-[#C43D4D]/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-        >
-          <VolumeX className="w-4 h-4" />
-          <span>{isAr ? 'إيقاف الصوت' : 'Stop Audio'}</span>
-        </button>
+        {/* Global Stop Speech Button & Communication Status */}
+        <div className="flex items-center gap-2">
+          <div
+            data-testid="communication-state-indicator"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#09101A] border border-[#22354E] text-[11px] font-bold"
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isListening
+                  ? 'bg-red-400 animate-pulse'
+                  : 'bg-emerald-400'
+              }`}
+            />
+            <span className="text-[#94A3B8]">
+              {isListening
+                ? (isAr ? 'تفريغ نشط' : 'Listening Active')
+                : (isAr ? 'جاهز للتواصل' : 'Ready')}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            data-testid="speech-controls"
+            onClick={() => {
+              cancelSpeech();
+              announce(isAr ? 'تم إيقاف الصوت.' : 'Speech stopped.');
+            }}
+            aria-label={isAr ? 'إيقاف نطق الصوت' : 'Stop voice speech'}
+            className="px-3 py-1.5 rounded-xl bg-[#C43D4D]/20 hover:bg-[#C43D4D]/40 text-[#FFA4A4] border border-[#C43D4D]/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+          >
+            <VolumeX className="w-4 h-4" />
+            <span>{isAr ? 'إيقاف الصوت' : 'Stop Audio'}</span>
+          </button>
+        </div>
       </header>
 
       {/* Module Navigation Tabs */}
@@ -413,7 +434,7 @@ export default function HearAndExpressView({
             TAB 1: LIVE SPEECH-TO-TEXT CAPTIONS
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'captions' && (
-          <section className="space-y-4">
+          <section data-testid="live-captions-view" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#131E2E] border border-[#22354E]">
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -462,6 +483,18 @@ export default function HearAndExpressView({
 
                 <button
                   type="button"
+                  onClick={toggleListening}
+                  data-testid="captions-retry-btn"
+                  aria-label={isAr ? 'إعادة محاولة الاستماع' : 'Retry listening'}
+                  className="px-3 py-2 rounded-xl bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA] text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5 transition-all cursor-pointer"
+                  title={isAr ? 'إعادة المحاولة' : 'Retry'}
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{isAr ? 'إعادة المحاولة' : 'Retry'}</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={copyCaptions}
                   aria-label={isAr ? 'نسخ النصوص' : 'Copy captions'}
                   className="p-2 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white"
@@ -489,16 +522,24 @@ export default function HearAndExpressView({
               } min-h-[300px] max-h-[500px] overflow-y-auto custom-scrollbar flex flex-col justify-end space-y-3`}
             >
               {captionHistory.length === 0 && !captionText && (
-                <div className="text-center py-16 space-y-3 my-auto">
+                <div data-testid="captions-empty-state" className="text-center py-16 space-y-3 my-auto">
                   <Mic className="w-10 h-10 text-[#4B9FE1]/50 mx-auto" />
                   <p className="text-sm font-bold text-[#F8FAFC]">
-                    {isAr ? 'التفريغ الصوتي المباشر جاهز' : 'Live captions ready'}
+                    {isAr ? 'لا توجد نصوص مفرغة بعد (التفريغ المباشر جاهز)' : 'No captions recorded yet (Live captions ready)'}
                   </p>
                   <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
                     {isAr
                       ? 'اضغط على زر "بدء التفريغ" وسيبدأ رفيقي في كتابة ما يسمعه فوراً بخط عالي التباين.'
                       : 'Click "Start Captions" and Rafiqi will immediately display spoken words in high-contrast text.'}
                   </p>
+                </div>
+              )}
+
+              {/* In-Flight Listening & Progress Indicator */}
+              {isListening && (
+                <div data-testid="captions-loading-progress" className="px-3 py-1.5 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 text-[#4B9FE1] text-xs font-bold flex items-center gap-2 animate-pulse w-fit">
+                  <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+                  <span>{isAr ? 'جاري الاستماع والمعالجة المباشرة...' : 'Loading / Listening in progress...'}</span>
                 </div>
               )}
 
@@ -546,6 +587,7 @@ export default function HearAndExpressView({
                 </label>
                 <input
                   id="custom-speech-input"
+                  data-testid="text-entry-input"
                   type="text"
                   value={typedMessage}
                   onChange={(e) => setTypedMessage(e.target.value)}
@@ -579,7 +621,7 @@ export default function HearAndExpressView({
                 <span>{isAr ? 'ردود سريعة بلمسة واحدة (نطق فوري)' : 'One-Touch Quick Responses (Instant Voice)'}</span>
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div data-testid="quick-responses-grid" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {QUICK_RESPONSES.map((item) => {
                   const text = isAr ? item.ar : item.en;
                   return (
@@ -604,7 +646,7 @@ export default function HearAndExpressView({
             TAB 3: AAC COMMUNICATION BOARD & SENTENCE BUILDER
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'aac' && (
-          <section className="space-y-5">
+          <section data-testid="aac-board-view" className="space-y-5">
             {/* Sentence Strip Builder */}
             <div className="p-4 rounded-3xl bg-[#131E2E] border-2 border-[#1769AA] space-y-3 shadow-lg">
               <div className="flex items-center justify-between">

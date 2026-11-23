@@ -1,71 +1,54 @@
-import { useEffect, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 /**
- * Self-contained "Welcome to Rafiqi" splash screen.
- * Matches the new modern dark UI aesthetic with ambient glow and vibrant brand gradient.
+ * Rafiqi (رفيقى) — Temporary Full-Screen Splash Screen
+ * 
+ * 1. Displays the official Rafiqi artwork full screen for ~1 second (500ms on prefers-reduced-motion).
+ * 2. Zero external buttons, menus, header, footer, or text outside the artwork image.
+ * 3. Fades out smoothly and unmounts, revealing the underlying Sign-In page directly.
+ * 4. Does not require user interaction.
+ * 5. Mounted once at root in main.tsx, so it never re-appears when switching auth views.
  */
 export default function SplashScreen() {
   const [phase, setPhase] = useState<'show' | 'fade' | 'gone'>('show');
 
   useEffect(() => {
-    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ? true : false;
-    const hold = reduce ? 500 : 1600;
+    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    // Hold for ~1.2s (~1 second), or 500ms if reduce motion is preferred
+    const hold = reduce ? 500 : 1200;
+    const fadeDuration = reduce ? 250 : 400;
+
     const t1 = setTimeout(() => setPhase('fade'), hold);
-    const t2 = setTimeout(() => setPhase('gone'), hold + 500);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t2 = setTimeout(() => setPhase('gone'), hold + fadeDuration);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   if (phase === 'gone') return null;
 
-  const isAr = (typeof navigator !== 'undefined' ? navigator.language : '').toLowerCase().startsWith('ar');
-
   return (
     <div
-      dir={isAr ? 'rtl' : 'ltr'}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0E1416] text-white select-none overflow-hidden"
+      role="status"
+      aria-label="Rafiqi · رفيقى"
+      aria-live="polite"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#071B33] select-none overflow-hidden pointer-events-none"
       style={{
         opacity: phase === 'fade' ? 0 : 1,
-        transition: 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-        pointerEvents: phase === 'fade' ? 'none' : 'auto',
+        transition: 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
-      {/* Background ambient lighting */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-teal-600/15 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-teal-500/15 rounded-full blur-[120px]" />
-        <div className="absolute -top-20 right-1/3 w-80 h-80 bg-teal-400/10 rounded-full blur-[100px]" />
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-500">
-        {/* Modern Brand Icon */}
-        <div className="w-20 h-20 rounded-[24px] bg-gradient-to-tr from-teal-700 to-teal-500 p-0.5 shadow-2xl shadow-teal-700/20 flex items-center justify-center">
-          <div className="w-full h-full bg-[#121B1E] rounded-[22px] flex items-center justify-center">
-            <Sparkles className="w-9 h-9 text-teal-400 animate-pulse" />
-          </div>
-        </div>
-
-        {/* Brand Text */}
-        <div className="text-center space-y-2">
-          <div className="text-xs font-bold uppercase tracking-[0.25em] text-stone-400">
-            {isAr ? 'أهلاً بك في' : 'Welcome to'}
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-none">
-            {isAr ? 'رفيقي · Rafiqi' : 'Rafiqi'}
-          </h1>
-          <p className="text-xs sm:text-sm font-medium text-stone-400 pt-1">
-            {isAr ? 'رفيقك الذكي المتكيف' : 'Your adaptive AI study mentor'}
-          </p>
-        </div>
-      </div>
-
-      {/* Modern 3-Color Pulsing Dots */}
-      <div className="absolute bottom-14 flex items-center gap-2 z-10">
-        <span className="w-2 h-2 rounded-full bg-teal-600 animate-bounce" style={{ animationDelay: '0s' }} />
-        <span className="w-2 h-2 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: '0.15s' }} />
-        <span className="w-2 h-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: '0.3s' }} />
-      </div>
+      <img
+        src="/assets/welcome-hero-doorway.jpg"
+        alt="Rafiqi · رفيقى"
+        width={1536}
+        height={864}
+        className="w-full h-full object-contain object-center select-none"
+        loading="eager"
+        decoding="sync"
+      />
     </div>
   );
 }
-

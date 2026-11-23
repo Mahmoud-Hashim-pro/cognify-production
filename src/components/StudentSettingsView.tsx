@@ -459,7 +459,7 @@ export default function StudentSettingsView({
 
         if (setProfile) setProfile(updatedProfile);
 
-        if (currentProfile.uid && currentProfile.uid !== 'guest-explorer') {
+        if (currentProfile.uid) {
           await setDoc(doc(db, `users/${currentProfile.uid}`), cleanDataForFirestore(updatedProfile), { merge: true });
         }
 
@@ -666,7 +666,7 @@ export default function StudentSettingsView({
       if (setProfile) setProfile(resetProfile);
 
       const activeUid = profile.uid;
-      if (activeUid && activeUid !== 'guest-explorer') {
+      if (activeUid) {
         await setDoc(doc(db, `users/${activeUid}`), cleanDataForFirestore(resetProfile), { merge: true });
       }
 
@@ -897,6 +897,7 @@ export default function StudentSettingsView({
                         <input
                           type="checkbox"
                           checked={reduceMotion}
+                          aria-label={localize(profile.language, 'Reduce Motion', 'تقليل الحركة والوميض')}
                           onChange={(e) => setReduceMotion(e.target.checked)}
                           className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA]"
                         />
@@ -909,6 +910,7 @@ export default function StudentSettingsView({
                         <input
                           type="checkbox"
                           checked={screenReader}
+                          aria-label={localize(profile.language, 'Auto Screen Reader', 'قراءة الشاشة التلقائية')}
                           onChange={(e) => setScreenReader(e.target.checked)}
                           className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA]"
                         />
@@ -1227,6 +1229,7 @@ export default function StudentSettingsView({
                     max="2.0"
                     step="0.05"
                     value={audioSpeed}
+                    aria-label={localize(profile.language, 'Speech Speed (Rate)', 'سرعة النطق والقراءة')}
                     onChange={(e) => setAudioSpeed(parseFloat(e.target.value))}
                     className="w-full accent-[#1769AA] cursor-pointer"
                   />
@@ -1249,6 +1252,7 @@ export default function StudentSettingsView({
                     max="1.5"
                     step="0.05"
                     value={audioPitch}
+                    aria-label={localize(profile.language, 'Speech Pitch', 'طبقة الصوت')}
                     onChange={(e) => setAudioPitch(parseFloat(e.target.value))}
                     className="w-full accent-[#1769AA] cursor-pointer"
                   />
@@ -1266,6 +1270,7 @@ export default function StudentSettingsView({
                     <input
                       type="checkbox"
                       checked={pronounceTashkeel}
+                      aria-label={localize(profile.language, 'Pronounce Arabic Tashkeel Marks', 'نطق علامات التشكيل وحركات الإعراب')}
                       onChange={(e) => setPronounceTashkeel(e.target.checked)}
                       className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA]"
                     />
@@ -1606,6 +1611,7 @@ export default function StudentSettingsView({
                 <input
                   type="checkbox"
                   checked={readingHistoryEnabled}
+                  aria-label={localize(profile.language, 'Track Reading Bookmarks & Lecture Timestamps', 'تسجيل مواضع التوقف في الكتب والمحاضرات')}
                   onChange={(e) => setReadingHistoryEnabled(e.target.checked)}
                   className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA]"
                 />
@@ -1746,6 +1752,7 @@ export default function StudentSettingsView({
                   <input
                     type="checkbox"
                     checked={memoryOptIn}
+                    aria-label={localize(profile.language, 'Enable Assistant Memory (Opt-in)', 'تفعيل ذاكرة المساعد (اختياري)')}
                     onChange={(e) => setMemoryOptIn(e.target.checked)}
                     className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA]"
                   />
@@ -1763,6 +1770,7 @@ export default function StudentSettingsView({
                   <input
                     type="checkbox"
                     checked={isMemoryPaused}
+                    aria-label={localize(profile.language, 'Pause Memory Recording', 'إيقاف مؤقت لحفظ الذاكرة')}
                     onChange={(e) => setIsMemoryPaused(e.target.checked)}
                     className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA]"
                   />

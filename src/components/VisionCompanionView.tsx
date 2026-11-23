@@ -2168,6 +2168,128 @@ Examine what is visible in front of the camera right now with utmost precision:
           </section>
         )}
 
+        {/* ── VISUAL COMPANION WORKSPACE STATUS & CONTROLS HUD ── */}
+        <section
+          data-testid="visual-companion-hud"
+          aria-label={t('Visual Workspace Controls & Status', 'حالة وتحكم الرفيق البصري')}
+          className="p-4 sm:p-5 rounded-3xl bg-[#082344] border border-[#07558A] shadow-lg flex flex-col md:flex-row items-center justify-between gap-4"
+        >
+          {/* Status Indicators */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            {/* Camera Status */}
+            <div
+              data-testid="camera-status-indicator"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+                status === 'ready' && streamRef.current
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                  : status === 'starting-camera' || status === 'analyzing'
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  status === 'ready' && streamRef.current
+                    ? 'bg-emerald-400 animate-pulse'
+                    : status === 'starting-camera' || status === 'analyzing'
+                    ? 'bg-amber-400 animate-ping'
+                    : 'bg-slate-500'
+                }`}
+              />
+              <span>
+                {status === 'ready' && streamRef.current
+                  ? t('Camera: Live Streaming', 'الكاميرا: بث مباشر نشط')
+                  : status === 'starting-camera'
+                  ? t('Camera: Starting...', 'الكاميرا: قيد التشغيل...')
+                  : status === 'analyzing'
+                  ? t('Camera: Analyzing Frame...', 'الكاميرا: جاري التحليل...')
+                  : t('Camera: Standby / Off', 'الكاميرا: في وضع الاستعداد')}
+              </span>
+            </div>
+
+            {/* Mic Status */}
+            <div
+              data-testid="mic-status-indicator"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+                isVoiceCommandsActive
+                  ? 'bg-red-500/15 border-red-500/40 text-red-300'
+                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+              }`}
+            >
+              {isVoiceCommandsActive ? (
+                <Mic className="w-3.5 h-3.5 text-red-400 animate-bounce" />
+              ) : (
+                <MicOff className="w-3.5 h-3.5 text-slate-500" />
+              )}
+              <span>
+                {isVoiceCommandsActive
+                  ? t('Mic: Listening for Commands', 'الميكروفون: يستمع للأوامر')
+                  : t('Mic: Muted / Standby', 'الميكروفون: غير مفعّل')}
+              </span>
+            </div>
+
+            {/* Speech Status */}
+            <div
+              data-testid="speech-status-indicator"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+                isSpeaking
+                  ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
+                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+              }`}
+            >
+              <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-blue-400 animate-pulse' : 'text-slate-500'}`} />
+              <span>
+                {isSpeaking
+                  ? t('Voice: Speaking Description', 'الصوت: جاري النطق')
+                  : t('Voice: Ready', 'الصوت: جاهز')}
+              </span>
+            </div>
+          </div>
+
+          {/* Large Start / Stop Controls */}
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+            <button
+              type="button"
+              onClick={status === 'ready' && streamRef.current ? stopCamera : () => startCamera()}
+              data-testid="vision-start-stop-cam-btn"
+              aria-label={
+                status === 'ready' && streamRef.current
+                  ? t('Stop Camera Feed', 'إيقاف بث الكاميرا')
+                  : t('Start Camera Feed', 'بدء تشغيل الكاميرا')
+              }
+              className={`px-6 py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-lg active:scale-95 cursor-pointer ${
+                status === 'ready' && streamRef.current
+                  ? 'bg-[#C43D4D] hover:bg-[#A82B3A] text-white shadow-[#C43D4D]/30'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
+              }`}
+            >
+              {status === 'ready' && streamRef.current ? (
+                <>
+                  <CameraOff className="w-4 h-4" />
+                  <span>{t('Stop Camera', 'إيقاف الكاميرا')}</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="w-4 h-4" />
+                  <span>{t('Start Camera', 'تشغيل الكاميرا')}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </section>
+
+        {/* Safety Disclaimer Banner */}
+        <section
+          data-testid="visual-safety-notice"
+          aria-label={t('Safety Notice', 'تنبيه السلامة والأمان')}
+          className="p-3.5 sm:p-4 rounded-2xl bg-[#092747] border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3"
+        >
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed opacity-90">
+            {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN}
+          </p>
+        </section>
+
         {/* ── 2. CAMERA PREVIEW VIEW FINDER ── */}
         <section
           aria-label={t('Camera Viewfinder', 'شاشة الكاميرا')}
@@ -2703,6 +2825,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
         {/* ── 4. LATEST RESULT SECTION ("آخر نتيجة") ── */}
         <section
+          data-testid="live-description-panel"
           aria-label={t('Latest Analysis Result', 'آخر نتيجة')}
           className="p-5 sm:p-6 md:p-7 rounded-3xl bg-[#092747] border border-[#07558A] shadow-xl space-y-5 text-start"
         >
@@ -2803,6 +2926,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   <button
                     type="button"
                     onClick={toggleSpeech}
+                    data-testid="speech-replay-pause-btn"
                     aria-label={
                       isSpeaking
                         ? t('Stop speech readout', 'إيقاف الصوت')
@@ -3240,6 +3364,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               {showFollowUp && (
                 <div
                   role="region"
+                  data-testid="scene-conversation-panel"
                   aria-label={t('Follow-up Q&A', 'الأسئلة الاستفسارية')}
                   className="p-4 sm:p-5 rounded-2xl bg-[#082344] border border-[#07558A] space-y-3.5 text-start"
                 >
@@ -3347,6 +3472,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
         {/* ── 5. SAVED MEMORIES & SPATIAL ASSISTANCE HUB ── */}
         <section
+          data-testid="scene-history-panel"
           aria-label={t('Saved Memories and Locations', 'ذاكرة الأماكن والمقتنيات المحفوظة')}
           className="p-5 sm:p-6 md:p-7 rounded-3xl bg-[#082344] border border-[#07558A] shadow-xl space-y-4 text-start"
         >

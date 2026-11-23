@@ -98,14 +98,14 @@ assert(fbCode.includes('await signOut(auth)'),
 // 4. Route Protection & Unauthenticated Access Gate
 // ─────────────────────────────────────────────────────────────────────────────
 const appCode = fs.readFileSync(path.join(repoRoot, 'src/App.tsx'), 'utf8');
-assert(appCode.includes('if (!user && !isGuestPreview) {') && appCode.includes('<Login onDirectPreview='),
-  'Route Protection', 'App gates all views with <Login /> when unauthenticated (!user && !isGuestPreview)');
+assert(appCode.includes('if (!user) {') && appCode.includes('<Login />'),
+  'Route Protection', 'App gates all views with <Login /> when unauthenticated (!user)');
 
 assert(appCode.includes('handleLogout = async () => {') && appCode.includes('setProfile(null)'),
   'Session Termination', 'handleLogout sets profile to null upon sign out');
 
-assert(appCode.includes('setIsGuestPreview(false)'),
-  'Session Termination', 'handleLogout resets guest preview flag upon sign out');
+assert(!appCode.includes('isGuestPreview'),
+  'Session Termination', 'App does not maintain or allow unauthenticated guest preview state');
 
 assert(appCode.includes("window.location.hash = ''") && appCode.includes('window.history.replaceState'),
   'Session Termination', 'handleLogout cleanses URL hash and history state upon sign out');

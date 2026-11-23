@@ -29,7 +29,7 @@ import {
   validateNonDiagnosticInvariant,
 } from '../../src/lib/accessibilityIntelligenceEngine.js';
 import { cleanForSpeech } from '../../src/lib/tts.js';
-import { SignSmoother, SignPrediction } from '../../src/lib/signClassifier.js';
+import { SignSmoother, type SignPrediction } from '../../src/modules/hearAndExpress/signLanguage/index.js';
 import { parsePhraseBank, EuphoniaPhraseDef } from '../../src/lib/euphoniaPhraseBank.js';
 import { Profile } from '../../api/_lib/ai.js';
 

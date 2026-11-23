@@ -99,10 +99,10 @@ window.addEventListener('error', (e) => {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <SplashScreen />
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
-    <SplashScreen />
     <Analytics />
     <SpeedInsights />
   </StrictMode>,

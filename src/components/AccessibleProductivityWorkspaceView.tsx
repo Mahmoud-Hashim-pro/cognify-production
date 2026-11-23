@@ -882,6 +882,7 @@ Database Systems,90,3,270`;
                     type="text"
                     value={emailInput.recipient}
                     onChange={(e) => setEmailInput({ ...emailInput, recipient: e.target.value })}
+                    aria-label={localize(profile.language, 'Recipient Name / Title', 'اسم أو صفة المستلم')}
                     className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                   />
                 </div>
@@ -894,6 +895,7 @@ Database Systems,90,3,270`;
                     type="text"
                     value={emailInput.purpose}
                     onChange={(e) => setEmailInput({ ...emailInput, purpose: e.target.value })}
+                    aria-label={localize(profile.language, 'Core Purpose / Subject', 'الغرض الرئيسي من الرسالة')}
                     className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                   />
                 </div>
@@ -972,6 +974,7 @@ Database Systems,90,3,270`;
                     type="text"
                     value={emailInput.deadlineOrNextStep || ''}
                     onChange={(e) => setEmailInput({ ...emailInput, deadlineOrNextStep: e.target.value })}
+                    aria-label={localize(profile.language, 'Deadline or Desired Action', 'الموعد النهائي أو الإجراء المطلوب')}
                     className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                   />
                 </div>
@@ -1470,6 +1473,7 @@ Database Systems,90,3,270`;
                   type="text"
                   value={cellEditValue}
                   onChange={(e) => setCellEditValue(e.target.value)}
+                  aria-label={localize(profile.language, 'Edit selected cell value', 'تعديل قيمة الخلية المحددة')}
                   className="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-sm text-[#F8FAFC] font-mono"
                 />
                 <button
@@ -1732,6 +1736,7 @@ Database Systems,90,3,270`;
                           id={`field_${field.id}`}
                           type={field.type}
                           value={formFieldValues[field.id] || ''}
+                          aria-label={isAr ? field.labelAr : field.labelEn}
                           onChange={(e) =>
                             setFormFieldValues({ ...formFieldValues, [field.id]: e.target.value })
                           }

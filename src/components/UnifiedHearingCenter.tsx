@@ -219,68 +219,12 @@ Question: "${q}"`;
   const streamRef = useRef<MediaStream | null>(null);
   const handsRef = useRef<Hands | null>(null);
   const cameraRef = useRef<MediaPipeCamera | null>(null);
-  const lastDetectedSignRef = useRef<string>('');
-  const lastSignTimeRef = useRef<number>(0);
   const showSkeletonRef = useRef<boolean>(true);
   showSkeletonRef.current = showSkeleton;
   const autoVoiceRef = useRef<boolean>(false);
   autoVoiceRef.current = autoVoice;
 
-  // Gesture heuristic analyzer based on 21 MediaPipe hand landmarks
-  const analyzeLandmarksGesture = useCallback((landmarks: Array<{ x: number; y: number; z: number }>): string | null => {
-    if (!landmarks || landmarks.length < 21) return null;
-
-    const thumbTip = landmarks[4];
-    const thumbBase = landmarks[2];
-    const indexTip = landmarks[8];
-    const indexPip = landmarks[6];
-    const middleTip = landmarks[12];
-    const middlePip = landmarks[10];
-    const ringTip = landmarks[16];
-    const ringPip = landmarks[14];
-    const pinkyTip = landmarks[20];
-    const pinkyPip = landmarks[18];
-
-    const isIndexExtended = indexTip.y < indexPip.y;
-    const isMiddleExtended = middleTip.y < middlePip.y;
-    const isRingExtended = ringTip.y < ringPip.y;
-    const isPinkyExtended = pinkyTip.y < pinkyPip.y;
-    const isThumbUp = thumbTip.y < thumbBase.y && thumbTip.y < indexPip.y;
-
-    // 1. I Love You / Deaf Symbol (🤟): Thumb, Index, Pinky extended; Middle and Ring curled
-    if (isThumbUp && isIndexExtended && !isMiddleExtended && !isRingExtended && isPinkyExtended) {
-      return isEgyptian ? 'أنا أصم' : isAr ? 'أنا أصم' : 'I am deaf';
-    }
-
-    // 2. Thumbs Up (👍): Thumb extended up, all 4 other fingers curled
-    if (isThumbUp && !isIndexExtended && !isMiddleExtended && !isRingExtended && !isPinkyExtended) {
-      return isEgyptian ? 'تمام وموافق' : isAr ? 'نعم أوافق' : 'Yes, OK';
-    }
-
-    // 3. Open Hand / Greeting (👋): All 5 fingers extended
-    if (isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended) {
-      return isEgyptian ? 'أهلاً وسهلاً' : isAr ? 'السلام عليكم' : 'Hello';
-    }
-
-    // 4. Index Point / "I / Need" (☝️): Only Index extended
-    if (isIndexExtended && !isMiddleExtended && !isRingExtended && !isPinkyExtended) {
-      return isEgyptian ? 'أنا محتاج مساعدة' : isAr ? 'أحتاج مساعدة' : 'I need help';
-    }
-
-    // 5. Peace / Two (✌️): Index & Middle extended, others curled
-    if (isIndexExtended && isMiddleExtended && !isRingExtended && !isPinkyExtended) {
-      return isEgyptian ? 'لحظة واحدة' : isAr ? 'لحظة واحدة' : 'One moment';
-    }
-
-    // 6. Fist (✊): All fingers curled
-    if (!isIndexExtended && !isMiddleExtended && !isRingExtended && !isPinkyExtended && !isThumbUp) {
-      return isEgyptian ? 'لا شكراً' : isAr ? 'لا شكراً' : 'No thank you';
-    }
-
-    return null;
-  }, [isAr, isEgyptian]);
-
-  // Handle MediaPipe hands results
+  // Handle MediaPipe hands results: tracks hand landmarks reliably without pseudo-heuristic gesture translation
   const onHandsResults = useCallback((results: Results) => {
     if (!canvasRef.current || !videoRef.current) return;
     const canvas = canvasRef.current;
@@ -310,33 +254,15 @@ Question: "${q}"`;
         }
       }
 
-      // Analyze gesture
-      const recognized = analyzeLandmarksGesture(landmarks as any);
-      if (recognized) {
-        setDetectedSign(recognized);
-
-        const now = Date.now();
-        // Debounce repeated emissions: 1.8 seconds cooldown for same sign
-        if (now - lastSignTimeRef.current > 1800 || lastDetectedSignRef.current !== recognized) {
-          lastSignTimeRef.current = now;
-          lastDetectedSignRef.current = recognized;
-          triggerHapticAlert('single-pulse');
-
-          // Append to recognized text
-          setAccumulatedText((prev) => {
-            const separator = prev.trim() ? ' ' : '';
-            return prev + separator + recognized;
-          });
-
-          if (autoVoiceRef.current) {
-            speak(recognized, dialect);
-          }
-        }
-      }
+      setDetectedSign(
+        isAr
+          ? 'تم تتبع معالم اليد (التعرف اللحظي قيد التطوير البحثي)'
+          : 'Hand landmarks tracked (Continuous recognition in empirical development)'
+      );
     } else {
       setDetectedSign('');
     }
-  }, [analyzeLandmarksGesture, dialect]);
+  }, [isAr]);
 
   // Start Camera handler
   const handleStartCamera = async () => {

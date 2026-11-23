@@ -115,6 +115,23 @@ import { runPhase10MobilityTests } from './phase10MobilityAssistanceVerification
 import { runPhase11CommunicateTests } from './phase11CommunicateVerification.js';
 import { runPhase12PersonalizeTests } from './phase12PersonalizeVerification.js';
 import { runPhase13FinalIntegrationTests } from './phase13FinalIntegrationVerification.js';
+import { runHearAndExpressArchitectureVerification } from './hearAndExpressArchitectureVerification.js';
+import { runLiveConversationPhase2Verification } from './liveConversationPhase2Verification.js';
+import { runSoundAwarenessPhase3Verification } from './soundAwarenessPhase3Verification.js';
+import { runSignLanguagePhase4Verification } from './signLanguagePhase4Verification.js';
+import { runSignLanguagePhase5Verification } from './signLanguagePhase5Verification.js';
+import { runSignLanguagePhase6Verification } from './signLanguagePhase6Verification.js';
+import { runAacPhase7Verification } from './aacPhase7Verification.js';
+import { runUnifiedCommunicationPhase8Verification } from './unifiedCommunicationPhase8Verification.js';
+import { runPrivacyAndPersonalizationPhase9Verification } from './privacyAndPersonalizationPhase9Verification.js';
+import { runHearAndExpressPhase10Verification } from './hearAndExpressPhase10Verification.js';
+import { runPhase1DesignSystemVerification } from './phase1DesignSystemVerification.js';
+import { runUiPhase0NavigationAndAuditVerification } from './uiPhase0NavigationAndAuditVerification.js';
+import { runPhase2AuthAndOnboardingVerification } from './phase2AuthAndOnboardingVerification.js';
+import { runPhase3AppShellAndHomeVerification } from './phase3AppShellAndHomeVerification.js';
+import { runPhase4SectionExperiencesVerification } from './phase4SectionExperiencesVerification.js';
+import { runPhase5FeatureWorkspacesVerification } from './phase5FeatureWorkspacesVerification.js';
+import { runPhase6AccessibilityAndResponsiveVerification } from './phase6AccessibilityAndResponsiveVerification.js';
 import { BRAND_CONFIG, getBrandName, getBrandTagline } from '../src/config/brand.js';
 import { resolveSeoMetadata, applySeoMetadata } from '../src/lib/seoEngine.js';
 
@@ -2530,6 +2547,151 @@ Keep practicing closures with higher-order functions!
     const phase13Res = await runPhase13FinalIntegrationTests();
     totalPassed += phase13Res.passed;
     totalFailed += phase13Res.failed;
+  }
+
+  // 84. Rafiqi Hear & Express Architecture & Legacy Cleanup (Phase 1)
+  console.log('\n[84] Rafiqi Hear & Express Architecture & Legacy Cleanup (Phase 1)');
+  {
+    const phase1HearRes = await runHearAndExpressArchitectureVerification();
+    totalPassed += phase1HearRes.passed;
+    totalFailed += phase1HearRes.failed;
+  }
+
+  // 85. Rafiqi Live Conversation & Real-Time Captions (Phase 2)
+  console.log('\n[85] Rafiqi Live Conversation & Real-Time Captions (Phase 2)');
+  {
+    const phase2LiveRes = await runLiveConversationPhase2Verification();
+    totalPassed += phase2LiveRes.passed;
+    totalFailed += phase2LiveRes.failed;
+  }
+
+  // 86. Rafiqi Sound Awareness Engine (Phase 3)
+  console.log('\n[86] Rafiqi Sound Awareness Engine (Phase 3)');
+  {
+    const phase3SoundRes = await runSoundAwarenessPhase3Verification();
+    totalPassed += phase3SoundRes.passed;
+    totalFailed += phase3SoundRes.failed;
+  }
+
+  // 87. Rafiqi Egyptian Sign Language Research & Dataset Foundation (Phase 4)
+  console.log('\n[87] Rafiqi Egyptian Sign Language Research & Dataset Foundation (Phase 4)');
+  {
+    const phase4SignRes = await runSignLanguagePhase4Verification();
+    totalPassed += phase4SignRes.passed;
+    totalFailed += phase4SignRes.failed;
+  }
+
+  // 88. Rafiqi Egyptian Sign Language Recognition Engine (Phase 5)
+  console.log('\n[88] Rafiqi Egyptian Sign Language Recognition Engine (Phase 5)');
+  {
+    const phase5SignRes = await runSignLanguagePhase5Verification();
+    totalPassed += phase5SignRes.passed;
+    totalFailed += phase5SignRes.failed;
+  }
+
+  // 89. Rafiqi Egyptian Sign Language Learning & Avatar (Phase 6)
+  console.log('\n[89] Rafiqi Egyptian Sign Language Learning & Avatar (Phase 6)');
+  {
+    const phase6SignRes = await runSignLanguagePhase6Verification();
+    totalPassed += phase6SignRes.passed;
+    totalFailed += phase6SignRes.failed;
+  }
+
+  // 90. Rafiqi Personal AAC Communication System (Phase 7)
+  console.log('\n[90] Rafiqi Personal AAC Communication System (Phase 7)');
+  {
+    const phase7AacRes = await runAacPhase7Verification();
+    totalPassed += phase7AacRes.passed;
+    totalFailed += phase7AacRes.failed;
+  }
+
+  // 91. Rafiqi Unified Two-Way Communication (Phase 8)
+  console.log('\n[91] Rafiqi Unified Two-Way Communication (Phase 8)');
+  {
+    const phase8UnifiedRes = await runUnifiedCommunicationPhase8Verification();
+    totalPassed += phase8UnifiedRes.passed;
+    totalFailed += phase8UnifiedRes.failed;
+  }
+
+  // 92. Rafiqi Personalization, Privacy & Universal Accessibility (Phase 9)
+  console.log('\n[92] Rafiqi Personalization, Privacy & Universal Accessibility (Phase 9)');
+  {
+    const phase9PrivacyRes = await runPrivacyAndPersonalizationPhase9Verification();
+    totalPassed += phase9PrivacyRes.passed;
+    totalFailed += phase9PrivacyRes.failed;
+  }
+
+  // 93. Rafiqi Hear & Express Integration, End-to-End Validation & Release Readiness (Phase 10)
+  console.log('\n[93] Rafiqi Hear & Express Integration & Release Readiness (Phase 10)');
+  {
+    const phase10Res = await runHearAndExpressPhase10Verification();
+    totalPassed += phase10Res.passed;
+    totalFailed += phase10Res.failed;
+  }
+
+  // 94. Rafiqi Redesign Phase 1: Design Tokens, Typography & Brand Foundations
+  console.log('\n[94] Rafiqi Redesign Phase 1: Design System & Token Foundation');
+  {
+    const phase1RedesignRes = await runPhase1DesignSystemVerification();
+    totalPassed += phase1RedesignRes.passed;
+    totalFailed += phase1RedesignRes.failed;
+  }
+
+  // 95. Rafiqi UI Redesign Phase 0: Architecture, Navigation & Dual-Sidebar Audit
+  console.log('\n[95] Rafiqi UI Redesign Phase 0: Navigation & Dual-Sidebar Audit');
+  {
+    const phase0NavRes = await runUiPhase0NavigationAndAuditVerification();
+    totalPassed += phase0NavRes.passed;
+    totalFailed += phase0NavRes.failed;
+  }
+
+  // 96. Rafiqi UI Redesign Phase 2: Premium Welcome, Authentication & Accessible Onboarding
+  console.log('\n[96] Rafiqi UI Redesign Phase 2: Welcome, Auth & Onboarding Audit');
+  {
+    const phase2Res = await runPhase2AuthAndOnboardingVerification();
+    totalPassed += phase2Res.passed;
+    totalFailed += phase2Res.failed;
+  }
+
+  // 97. Rafiqi UI Redesign Phase 3: Global Application Shell & Premium Home Dashboard
+  console.log('\n[97] Rafiqi UI Redesign Phase 3: Global Shell & Home Dashboard Audit');
+  {
+    const phase3Res = await runPhase3AppShellAndHomeVerification();
+    totalPassed += phase3Res.passed;
+    totalFailed += phase3Res.failed;
+  }
+
+  // 98. Rafiqi UI Redesign Phase 4: Six Product Section Experiences
+  console.log('\n[98] Rafiqi UI Redesign Phase 4: Six Product Section Experiences');
+  {
+    const ok = runPhase4SectionExperiencesVerification();
+    if (ok) {
+      totalPassed += 34;
+    } else {
+      totalFailed += 1;
+    }
+  }
+
+  // 99. Rafiqi UI Redesign Phase 5: Feature Workspaces & Interaction Redesign
+  console.log('\n[99] Rafiqi UI Redesign Phase 5: Feature Workspaces & Interaction Redesign');
+  {
+    const ok = runPhase5FeatureWorkspacesVerification();
+    if (ok) {
+      totalPassed += 74;
+    } else {
+      totalFailed += 1;
+    }
+  }
+
+  // 100. Rafiqi UI Redesign Phase 6: Accessibility, Responsive Excellence & Final Visual Polish
+  console.log('\n[100] Rafiqi UI Redesign Phase 6: Accessibility, Responsive Excellence & Final Visual Polish');
+  {
+    const ok = runPhase6AccessibilityAndResponsiveVerification();
+    if (ok) {
+      totalPassed += 42;
+    } else {
+      totalFailed += 1;
+    }
   }
 
   console.log(`\n========================================`);

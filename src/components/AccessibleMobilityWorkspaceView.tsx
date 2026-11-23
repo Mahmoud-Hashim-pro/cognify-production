@@ -741,6 +741,7 @@ export default function AccessibleMobilityWorkspaceView({
                     type="text"
                     value={doorTypeInput}
                     onChange={(e) => setDoorTypeInput(e.target.value)}
+                    aria-label={localize(profile.language, 'Observed Door / Entrance Type', 'نوع الباب / المدخل المرصود')}
                     className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-xs text-[#F8FAFC]"
                   />
                 </div>

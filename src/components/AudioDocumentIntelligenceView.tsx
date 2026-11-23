@@ -865,6 +865,7 @@ export default function AudioDocumentIntelligenceView({
                 <input
                   ref={audioInputRef}
                   type="file"
+                  data-testid="lecture-upload-input"
                   accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.aac,.flac"
                   onChange={handleAudioUpload}
                   className="hidden"
@@ -924,7 +925,7 @@ export default function AudioDocumentIntelligenceView({
 
               {/* Transcription Progress Banner */}
               {isTranscribing && (
-                <div className="p-3.5 rounded-2xl bg-[#131E2E] border border-[#1769AA] space-y-2">
+                <div data-testid="processing-status-bar" className="p-3.5 rounded-2xl bg-[#131E2E] border border-[#1769AA] space-y-2">
                   <div className="flex justify-between text-xs font-bold text-[#4B9FE1]">
                     <span>{transcriptionStatusMsg}</span>
                     <span>{transcriptionProgress}%</span>
@@ -937,6 +938,21 @@ export default function AudioDocumentIntelligenceView({
                   </div>
                 </div>
               )}
+
+              {/* Empty State when no transcript is generated yet */}
+              {!transcript && !isTranscribing && (
+                <div data-testid="lecture-empty-state" className="p-8 text-center rounded-2xl bg-[#0D2542]/40 border border-dashed border-[#1769AA]/30 space-y-2">
+                  <Headphones className="w-8 h-8 text-[#4B9FE1] mx-auto opacity-70" />
+                  <h3 className="text-sm font-bold text-white">
+                    {isAr ? 'لا توجد محاضرة مفرغة حالياً' : 'No lecture transcribed yet'}
+                  </h3>
+                  <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
+                    {isAr
+                      ? 'اختر ملفاً صوتياً من جهازك ثم اضغط "بدء التفريغ الصوتي" لتوليد النص المتزامن والفصول.'
+                      : 'Choose an audio file from your device and click "Start Transcription" to generate synchronized transcript and chapters.'}
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Transcript Reader & Chapters */}
@@ -944,6 +960,7 @@ export default function AudioDocumentIntelligenceView({
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Chapters List */}
                 <section
+                  data-testid="chapter-navigation"
                   aria-labelledby="chapters-title"
                   className="p-4 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-3"
                 >
@@ -1013,6 +1030,7 @@ export default function AudioDocumentIntelligenceView({
 
                 {/* Synchronized Segments View */}
                 <section
+                  data-testid="transcript-view"
                   aria-labelledby="transcript-reader-title"
                   className="lg:col-span-2 p-5 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4"
                 >
@@ -1023,7 +1041,7 @@ export default function AudioDocumentIntelligenceView({
                     </h3>
 
                     {/* Speed Controls */}
-                    <div className="flex items-center gap-1.5 text-xs font-bold">
+                    <div data-testid="audio-playback-controls" className="flex items-center gap-1.5 text-xs font-bold">
                       <span className="text-[#94A3B8] text-[11px]">{isAr ? 'السرعة:' : 'Speed:'}</span>
                       {[0.75, 1.0, 1.25, 1.5, 2.0].map((rate) => (
                         <button
@@ -1161,6 +1179,7 @@ export default function AudioDocumentIntelligenceView({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Summary Generator Card */}
                 <section
+                  data-testid="lecture-summary"
                   aria-labelledby="lecture-summary-title"
                   className="p-5 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4"
                 >
@@ -1316,6 +1335,7 @@ export default function AudioDocumentIntelligenceView({
                 <input
                   ref={docInputRef}
                   type="file"
+                  data-testid="doc-upload-input"
                   accept=".pdf,.docx,.epub,.txt"
                   onChange={handleDocUpload}
                   className="hidden"
@@ -1376,6 +1396,7 @@ export default function AudioDocumentIntelligenceView({
                   <input
                     type="checkbox"
                     checked={readingConsent}
+                    aria-label={isAr ? 'تذكر موضع القراءة بموافقتي' : 'Remember reading position with my consent'}
                     onChange={(e) => {
                       setReadingConsent(e.target.checked);
                       announce(
@@ -1394,7 +1415,7 @@ export default function AudioDocumentIntelligenceView({
 
               {/* Reading Controls Bar */}
               {docPages.length > 0 && (
-                <div className="p-4 rounded-2xl bg-[#0D2542] border border-[#1769AA]/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div data-testid="reading-controls" className="p-4 rounded-2xl bg-[#0D2542] border border-[#1769AA]/30 flex flex-wrap items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-white">
                       {isAr ? `الصفحة ${currentPage} من ${docPages.length}` : `Page ${currentPage} of ${docPages.length}`}
@@ -1512,6 +1533,7 @@ export default function AudioDocumentIntelligenceView({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Ask Document Q&A */}
             <section
+              data-testid="ask-content-panel"
               aria-labelledby="ask-doc-title"
               className="p-5 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4"
             >
@@ -1552,6 +1574,7 @@ export default function AudioDocumentIntelligenceView({
 
             {/* Quiz Generator */}
             <section
+              data-testid="quiz-notes-panel"
               aria-labelledby="quiz-gen-title"
               className="p-5 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4"
             >

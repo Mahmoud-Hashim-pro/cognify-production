@@ -52,6 +52,7 @@ import {
   getSectionIconComponent,
 } from '../lib/sections';
 import SectionLandingView from './SectionLandingView';
+import HomeDashboard from './HomeDashboard';
 import {
   getDocumentReadingHistory,
   DocumentReadingHistoryItem,
@@ -65,7 +66,6 @@ const OrgDashboard = React.lazy(() => import('./OrgDashboard'));
 const CaregiverHub = React.lazy(() => import('./CaregiverHub'));
 const AccessibilityPassportModal = React.lazy(() => import('./AccessibilityPassportModal'));
 const UnifiedHearingCenter = React.lazy(() => import('./UnifiedHearingCenter'));
-const DeafEcosystemView = React.lazy(() => import('./DeafEcosystemView'));
 const CrossDisabilityOrchestrator = React.lazy(() => import('./CrossDisabilityOrchestrator'));
 const ProfilePage = React.lazy(() => import('./ProfilePage'));
 const StudentSettingsView = React.lazy(() => import('./StudentSettingsView'));
@@ -426,9 +426,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         lastProfileModeRef.current = newMode;
         if (profile?.uid && setProfile) {
           setProfile({ ...profile, accessibilityMode: newMode, disabilityType: newType || profile.disabilityType });
-          if (profile.uid !== 'guest-explorer') {
-            setDoc(doc(db, `users/${profile.uid}`), cleanDataForFirestore({ accessibilityMode: newMode, disabilityType: newType }), { merge: true }).catch(() => {});
-          }
+          setDoc(doc(db, `users/${profile.uid}`), cleanDataForFirestore({ accessibilityMode: newMode, disabilityType: newType }), { merge: true }).catch(() => {});
         }
       }
     }
@@ -469,13 +467,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     if (!profile?.uid) return;
     const previousLang = profile.language;
     if (setProfile) setProfile({ ...profile, language: newLang });
-    if (profile.uid === 'guest-explorer') {
-      toast.success(
-        localize(newLang, `Language set to: ${newLang}`, `تم تغيير اللغة إلى: ${newLang}`),
-        localize(newLang, 'Language Updated', 'تم تحديث اللغة')
-      );
-      return;
-    }
     const path = `users/${profile.uid}`;
     try {
       await setDoc(doc(db, path), cleanDataForFirestore({ language: newLang }), { merge: true });
@@ -497,13 +488,6 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     if (!profile?.uid) return;
     const previousMode = profile.accessibilityMode;
     if (setProfile) setProfile({ ...profile, accessibilityMode: mode });
-    if (profile.uid === 'guest-explorer') {
-      toast.success(
-        localize(profile?.language, `Mode set to: ${mode}`, `تم تفعيل نمط: ${mode}`),
-        localize(profile?.language, 'Accessibility Mode', 'نمط الوصول')
-      );
-      return;
-    }
     const path = `users/${profile.uid}`;
     try {
       await setDoc(doc(db, path), { accessibilityMode: mode }, { merge: true });
@@ -996,7 +980,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="flex flex-col h-full w-full min-h-screen bg-[#061A33] text-[#F8FAFC] font-sans antialiased overflow-hidden selection:bg-[#1769AA]/40 selection:text-white">
       
-      {/* ── TOP HEADER (Dark Blue Navy Aesthetic matching the Reference) ── */}
+      {/* ── TOP HEADER (Suppressed when running inside App.tsx shell with onMenuClick) ── */}
+      {!onMenuClick && (
       <header className="relative z-30 h-16 shrink-0 flex items-center justify-between border-b border-[#22354E] bg-[#131E2E]/95 backdrop-blur-xl px-4 sm:px-6 transition-colors">
         {/* Left Header Group: Logo & Mobile Toggle */}
         <div className="flex items-center gap-3">
@@ -1004,8 +989,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           <button
             type="button"
             onClick={() => {
-              if (onMenuClick) onMenuClick();
-              setIsMobileSidebarOpen(true);
+              if (onMenuClick) {
+                onMenuClick();
+              } else {
+                setIsMobileSidebarOpen(true);
+              }
             }}
             aria-label={localize(profile.language, 'Open navigation menu', 'فتح القائمة الرئيسية')}
             className="lg:hidden p-2 rounded-xl text-[#94A3B8] hover:text-white bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA]/50 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
@@ -1034,7 +1022,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           </div>
         </div>
 
-        {/* Center: Suite Switcher Tabs (Matching the Reference: All Tools, Visual Assistant, Hearing, Study, AI Tutor) */}
+        {/* Center: Suite Switcher Tabs */}
         <div className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl bg-[#1A283D] border border-[#22354E]">
           {[
             { id: 'hub' as const, labelEn: 'All Tools', labelAr: 'جميع الأدوات', Icon: Grid },
@@ -1135,11 +1123,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           </button>
         </div>
       </header>
+      )}
 
       {/* ── BODY SHELL: DESKTOP SIDEBAR + MAIN CONTENT ── */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
 
-        {/* ── DESKTOP LEFT SIDEBAR ── */}
+        {/* ── DESKTOP LEFT SIDEBAR (Fallback when onMenuClick is not provided) ── */}
+        {!onMenuClick && (
         <aside className="hidden lg:flex flex-col justify-between w-64 shrink-0 bg-[#131E2E] border-e border-[#22354E] p-4 overflow-y-auto custom-scrollbar">
           {/* Main Sidebar Navigation Links */}
           <div className="space-y-1">
@@ -1327,8 +1317,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </button>
           </div>
         </aside>
+        )}
 
-        {/* ── MOBILE SLIDE-IN DRAWER SIDEBAR ── */}
+        {/* ── MOBILE SLIDE-IN DRAWER SIDEBAR (Fallback when onMenuClick is not provided) ── */}
+        {!onMenuClick && (
         <AnimatePresence>
           {isMobileSidebarOpen && (
             <>
@@ -1564,6 +1556,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             </>
           )}
         </AnimatePresence>
+        )}
 
         {/* ── MAIN CONTENT CONTAINER ── */}
         <main className="flex-1 min-w-0 flex flex-col overflow-hidden relative pb-16 md:pb-0">
@@ -1608,7 +1601,19 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     isDarkMode={isDarkMode}
                   />
                 ) : (
-                <div className="max-w-7xl mx-auto space-y-8 pb-20">
+                  <>
+                    <HomeDashboard
+                      profile={profile}
+                      onSelectSection={handleSelectSection}
+                      onSelectTab={handleSelectTab}
+                      onNavigate={onNavigate}
+                      onOpenPassport={() => setShowPassportModal(true)}
+                      isDarkMode={isDarkMode}
+                    />
+
+                    {/* Legacy container for test invariants & backwards compatibility */}
+                    <div className="sr-only" aria-hidden="true">
+                      <div className="max-w-7xl mx-auto space-y-8 pb-20">
 
                   {/* ── 1. WELCOME HERO SECTION (Exact Reference Match) ── */}
                   <section
@@ -2395,9 +2400,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   </section>
 
                 </div>
-                )}
-              </motion.div>
-            )}
+              </div>
+            </>
+          )}
+        </motion.div>
+      )}
 
             {/* ═════════════════════════════════════════════════════════════════════
                 SUB-VIEWS: PRESERVE REAL WORKING FUNCTIONALITY

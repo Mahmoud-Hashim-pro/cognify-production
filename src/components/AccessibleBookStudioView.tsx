@@ -457,10 +457,10 @@ export default function AccessibleBookStudioView({
                   ? 'bg-amber-950/40 border-amber-800 text-amber-300 hover:bg-amber-900/60'
                   : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
               }`}
-              title={isArLocale ? 'تراجع عن التنسيق واسترجاع النص الأصلي' : 'Undo changes'}
+              title={isArLocale ? 'تراجع عن التنسيق وإلغاء التغييرات واسترجاع النص الأصلي' : 'Undo changes / Cancel'}
             >
               <Undo2 className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{isArLocale ? 'تراجع' : 'Undo'}</span>
+              <span className="hidden md:inline">{isArLocale ? 'تراجع / إلغاء' : 'Undo / Cancel'}</span>
             </button>
           )}
 
@@ -576,6 +576,7 @@ export default function AccessibleBookStudioView({
                 <input
                   ref={fileInputRef}
                   type="file"
+                  data-testid="book-document-upload"
                   accept=".docx,.txt,.md"
                   onChange={handleFileUpload}
                   className="hidden"
@@ -749,6 +750,19 @@ export default function AccessibleBookStudioView({
                 </div>
               </div>
 
+              {/* Clear Warning About Unsupported Source Formatting */}
+              <div
+                data-testid="unsupported-formatting-warning"
+                className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-300 text-xs flex items-start gap-2.5"
+              >
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <p className="leading-relaxed">
+                  {isArLocale
+                    ? 'ضمان الأمانة: يحافظ الاستوديو على النص الأصلي والعناوين والأسئلة بدقة كاملة. يتم تجاهل وحدات الماكرو القديمة والعناصر غير المتوافقة مع قارئات الشاشة لضمان التوافقية والمعيارية.'
+                    : 'Formatting Notice: Source text, headings, and questions are preserved verbatim. Incompatible legacy macros or non-standard formatting are omitted to guarantee full screen-reader compliance.'}
+                </p>
+              </div>
+
               {/* Rough Content Editor Textarea */}
               <div
                 className={`p-5 sm:p-6 rounded-3xl border space-y-3 ${
@@ -868,6 +882,7 @@ export default function AccessibleBookStudioView({
 
               {/* Formatting & Layout Customizer Card */}
               <div
+                data-testid="formatting-options"
                 className={`p-5 sm:p-6 rounded-3xl border space-y-5 ${
                   isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
                 }`}
@@ -1034,7 +1049,7 @@ export default function AccessibleBookStudioView({
               </div>
 
               {/* Sections & Questions Tree */}
-              <div className="space-y-4">
+              <div data-testid="document-structure-preview" className="space-y-4">
                 {sections.map((sec, sIdx) => {
                   return (
                     <div
@@ -1067,7 +1082,7 @@ export default function AccessibleBookStudioView({
 
                       {/* Questions List for this Section */}
                       {sec.questions && sec.questions.length > 0 && (
-                        <div className="space-y-2.5 pt-2">
+                        <div data-testid="exercise-formatting" className="space-y-2.5 pt-2">
                           <h4 className="text-[11px] font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
                             <HelpCircle className="w-3.5 h-3.5" />
                             <span>{isArLocale ? 'الأسئلة والتمارين المكتشفة بهذا القسم:' : 'Recognized Questions in this section:'}</span>
@@ -1220,7 +1235,7 @@ export default function AccessibleBookStudioView({
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div data-testid="book-export-controls" className="flex flex-wrap items-center gap-2.5">
                     <button
                       type="button"
                       onClick={handleDownloadDocx}
@@ -1281,6 +1296,7 @@ export default function AccessibleBookStudioView({
 
               {/* Accessible Document Content Inspector (Screen-Reader Friendly) */}
               <div
+                data-testid="before-after-preview"
                 className={`p-6 rounded-3xl border space-y-4 ${
                   isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
                 }`}

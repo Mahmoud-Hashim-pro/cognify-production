@@ -352,12 +352,13 @@ html.high-contrast button:focus-visible {
   min-width: 48px;
 }
 
-/* Cognify Reusable Design System Component Utilities (Phase 2) */
+/* Rafiqi Reusable Design System Component Utilities */
+.rafiqi-btn-primary,
 .cognify-btn-primary {
-  min-height: 44px;
-  background-color: var(--color-cognify-indigo, #243B73);
+  min-height: 48px;
+  background-color: var(--color-rafiqi-primary, #1769AA);
   color: #FFFFFF;
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   padding: 0.625rem 1.25rem;
   font-weight: 700;
   display: inline-flex;
@@ -365,25 +366,34 @@ html.high-contrast button:focus-visible {
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 0 16px -2px rgba(23, 105, 170, 0.25);
   cursor: pointer;
 }
+.rafiqi-btn-primary:hover,
 .cognify-btn-primary:hover {
-  background-color: var(--color-cognify-indigo-dark, #1B2D59);
+  background-color: var(--color-rafiqi-primary-dark, #0D4778);
+  box-shadow: 0 4px 12px -2px rgba(23, 105, 170, 0.35);
+  transform: translateY(-1px);
 }
+.rafiqi-btn-primary:active,
 .cognify-btn-primary:active {
   transform: scale(0.98);
 }
+.rafiqi-btn-primary:disabled,
 .cognify-btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
+.rafiqi-btn-secondary,
 .cognify-btn-secondary {
-  min-height: 44px;
-  background-color: var(--color-cognify-teal, #087F8C);
-  color: #FFFFFF;
-  border-radius: 0.75rem;
+  min-height: 48px;
+  background-color: var(--color-rafiqi-primary-light, #EAF4FC);
+  color: var(--color-rafiqi-primary-dark, #0D4778);
+  border: 1px solid var(--color-cognify-border-light, #DCE7F3);
+  border-radius: 0.875rem;
   padding: 0.625rem 1.25rem;
   font-weight: 700;
   display: inline-flex;
@@ -394,24 +404,52 @@ html.high-contrast button:focus-visible {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   cursor: pointer;
 }
-.cognify-btn-secondary:hover {
-  background-color: var(--color-cognify-teal-dark, #06626C);
+.dark .rafiqi-btn-secondary,
+.dark .cognify-btn-secondary {
+  background-color: var(--color-rafiqi-surface-elevated, #1A283D);
+  color: var(--color-rafiqi-primary-muted, #4B9FE1);
+  border-color: var(--color-rafiqi-border-dark, #22354E);
 }
+.rafiqi-btn-secondary:hover,
+.cognify-btn-secondary:hover {
+  background-color: #D8EAF9;
+  border-color: #1769AA;
+}
+.dark .rafiqi-btn-secondary:hover,
+.dark .cognify-btn-secondary:hover {
+  background-color: #22354E;
+  border-color: #4B9FE1;
+}
+.rafiqi-btn-secondary:active,
 .cognify-btn-secondary:active {
   transform: scale(0.98);
 }
 
+.rafiqi-card,
 .cognify-card {
   background-color: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 1rem;
+  border: 1px solid var(--color-cognify-border-light, #DCE7F3);
+  border-radius: 1.25rem;
   padding: 1.25rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
+.dark .rafiqi-card,
 .dark .cognify-card {
-  background-color: #121B1E;
-  border-color: #1F2937;
-  color: #F3F4F6;
+  background-color: var(--color-rafiqi-surface-dark, #131E2E);
+  border-color: var(--color-rafiqi-border-dark, #22354E);
+  color: #F8FAFC;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Restrained Futuristic AI Glow Accents */
+.rafiqi-glow-primary {
+  box-shadow: 0 0 24px -4px rgba(23, 105, 170, 0.25);
+}
+.rafiqi-glow-subtle {
+  box-shadow: 0 0 16px -2px rgba(23, 105, 170, 0.15);
+}
+.rafiqi-glow-accent {
+  box-shadow: 0 0 20px -2px rgba(75, 159, 225, 0.25);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -424,19 +462,19 @@ html.high-contrast button:focus-visible {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #0D9488;
+  background: #1769AA;
   border-radius: 9999px;
-  border: 1px solid rgba(20, 184, 166, 0.2);
+  border: 1px solid rgba(23, 105, 170, 0.25);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #0F766E;
-  border-color: rgba(20, 184, 166, 0.4);
+  background: #0D4778;
+  border-color: rgba(23, 105, 170, 0.5);
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #0D9488 transparent;
+  scrollbar-color: #1769AA transparent;
 }
 
 /* Hide scrollbar completely while maintaining scroll functionality */
