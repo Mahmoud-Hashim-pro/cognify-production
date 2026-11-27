@@ -18,7 +18,7 @@
  *    - getPrerequisiteChain(conceptId)
  */
 
-import { CONCEPT_REGISTRY, ConceptNode } from '../lib/conceptGraph.js';
+import { CONCEPT_REGISTRY, ConceptNode } from '../../src/lib/conceptGraph.js';
 
 export type EvaluationDomain =
   | 'computer_science'

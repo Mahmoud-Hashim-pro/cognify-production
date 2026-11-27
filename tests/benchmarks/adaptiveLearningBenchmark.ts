@@ -18,7 +18,7 @@ import {
   EvaluationItem,
   EvaluationDomain,
   BloomLevel,
-} from '../../src/data/evaluationDataset.js';
+} from '../fixtures/evaluationDataset.js';
 import {
   CONCEPT_REGISTRY,
   diagnosePrerequisiteGap,

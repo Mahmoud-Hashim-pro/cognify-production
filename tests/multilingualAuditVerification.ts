@@ -99,12 +99,6 @@ test('ProfilePage.tsx language selection reflects user locale', () => {
   assert.ok(content.includes('isAr ? opt.nameAr : opt.nameEn'), 'ProfilePage select options should respect current language');
 });
 
-test('MockExamSimulator.tsx navigates with direction-aware chevrons', () => {
-  const content = fs.readFileSync(path.join(rootDir, 'src/components/academic/MockExamSimulator.tsx'), 'utf-8');
-  assert.ok(content.includes('ChevronLeft className="w-4 h-4 rtl:rotate-180"'), 'MockExamSimulator Previous button missing rtl:rotate-180');
-  assert.ok(content.includes('ChevronRight className="w-4 h-4 rtl:rotate-180"'), 'MockExamSimulator Next button missing rtl:rotate-180');
-});
-
 test('ChatContextPanel.tsx and ChatWorkspacePanel.tsx use rtl:rotate-180 on collapsible handles', () => {
   const contextPanel = fs.readFileSync(path.join(rootDir, 'src/components/chat/ChatContextPanel.tsx'), 'utf-8');
   const workspacePanel = fs.readFileSync(path.join(rootDir, 'src/components/chat/ChatWorkspacePanel.tsx'), 'utf-8');

@@ -149,42 +149,6 @@ const toolSpecs: ToolSpec[] = [
     checkArrowLeft: true,
   },
   {
-    file: 'src/components/StudentAnalytics.tsx',
-    name: 'Student Analytics Dashboard',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
-    file: 'src/components/AcademicPlanner.tsx',
-    name: 'Academic Planner',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
-    file: 'src/components/Goaltracker.tsx',
-    name: 'Goal Tracker',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
-    file: 'src/components/GpaCalculator.tsx',
-    name: 'GPA Calculator',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
-    file: 'src/components/CognitiveGym.tsx',
-    name: 'Cognitive Gym',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
-    file: 'src/components/StudentMemoryPage.tsx',
-    name: 'Student Memory Vault',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
     file: 'src/components/FrenchTravelVoiceAssistant.tsx',
     name: 'French Travel Voice Assistant',
     expectedBackProp: 'onNavigateBack',

@@ -18,7 +18,7 @@
    - Cross-account access is strictly prevented at both the application layer (memory cache partitioning) and the database security layer (`firestore.rules`).
 
 3. **User Sovereignty & Right to Erasure**:
-   - Students have complete control to inspect, export (full JSON archive), or permanently erase their entire account data at any time through the **Student Privacy Center** (`src/components/StudentPrivacyCenter.tsx`).
+   - Students have complete control to inspect, export (full JSON archive), or permanently erase their entire account data at any time through the **Privacy & Security Center** (`src/components/PrivacySecurityCenter.tsx`, reachable from Settings > Privacy & Security).
 
 ---
 
