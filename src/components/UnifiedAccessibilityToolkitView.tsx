@@ -48,7 +48,7 @@ import {
   Brain,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { toast } from './Toast';
 import { AdaptiveEnvironmentPanel } from './AdaptiveEnvironmentPanel';
 import { ReadingSupportPanel } from './ReadingSupportPanel';
@@ -175,7 +175,7 @@ export default function UnifiedAccessibilityToolkitView({
         // Save to persistent activity
         saveToolkitActivity({
           type: 'sticker_image',
-          title: file.name.replace(/\.[^/.]+$/, '') || (isAr ? 'ملصق صورة' : 'Image Sticker'),
+          title: file.name.replace(/\.[^/.]+$/, '') || (isAr ? 'ملصق صورة' : L('Image Sticker')),
           snippet: result.summary,
           fullContent: result.detailedDescription,
           mediaUrl: dataUrl,
@@ -190,7 +190,7 @@ export default function UnifiedAccessibilityToolkitView({
     } catch (err: any) {
       console.error('Failed to process sticker file:', err);
       setIsAnalyzingSticker(false);
-      toast.error(isAr ? 'فشل فحص الملصق' : 'Failed to analyze sticker');
+      toast.error(isAr ? 'فشل فحص الملصق' : L('Failed to analyze sticker'));
     }
   };
 
@@ -222,18 +222,18 @@ export default function UnifiedAccessibilityToolkitView({
         await scanVideoRef.current.play();
       }
       setIsCameraActive(true);
-      announceToScreenReader(isAr ? 'تم تشغيل كاميرا مسح المستندات' : 'Document scanner camera ready');
+      announceToScreenReader(isAr ? 'تم تشغيل كاميرا مسح المستندات' : L('Document scanner camera ready'));
     } catch (err: any) {
       console.error('Camera access denied:', err);
       const camName = err?.name || '';
       if (camName === 'NotFoundError' || camName === 'DevicesNotFoundError') {
-        toast.error(isAr ? 'مفيش كاميرا متوصلة بالجهاز.' : 'No camera was found on this device.');
+        toast.error(isAr ? 'مفيش كاميرا متوصلة بالجهاز.' : L('No camera was found on this device.'));
       } else if (camName === 'NotReadableError' || camName === 'TrackStartError') {
-        toast.error(isAr ? 'الكاميرا مستخدمة في برنامج تاني. اقفليه وجربي تاني.' : 'The camera is in use by another app. Close it and try again.');
+        toast.error(isAr ? 'الكاميرا مستخدمة في برنامج تاني. اقفليه وجربي تاني.' : L('The camera is in use by another app. Close it and try again.'));
       } else if (camName === 'NotAllowedError' || camName === 'PermissionDeniedError') {
-        toast.error(isAr ? 'الكاميرا محظورة: اضغطي رمز القفل جنب العنوان، Site settings، Camera، Allow، وحدّثي الصفحة.' : 'Camera is blocked: click the lock icon, Site settings, Camera, Allow, then reload.');
+        toast.error(isAr ? 'الكاميرا محظورة: اضغطي رمز القفل جنب العنوان، Site settings، Camera، Allow، وحدّثي الصفحة.' : L('Camera is blocked: click the lock icon, Site settings, Camera, Allow, then reload.'));
       } else {
-        toast.error(isAr ? 'تعذر الوصول للكاميرا' : 'Camera access denied');
+        toast.error(isAr ? 'تعذر الوصول للكاميرا' : L('Camera access denied'));
       }
     }
   };
@@ -294,7 +294,7 @@ export default function UnifiedAccessibilityToolkitView({
           height: p.height,
           pageNumber: p.pageNumber,
         })),
-        isAr ? 'مستند ممسوح ضوئياً - رفيقي' : 'Rafiqi Scanned Document'
+        isAr ? 'مستند ممسوح ضوئياً - رفيقي' : L('Rafiqi Scanned Document')
       );
 
       const url = URL.createObjectURL(pdfBlob);
@@ -306,7 +306,7 @@ export default function UnifiedAccessibilityToolkitView({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success(isAr ? 'تم تصدير ملف PDF بنجاح 📄' : 'PDF exported successfully 📄');
+      toast.success(isAr ? 'تم تصدير ملف PDF بنجاح 📄' : L('PDF exported successfully 📄'));
 
       // Save to Activity Store
       saveToolkitActivity({
@@ -317,7 +317,7 @@ export default function UnifiedAccessibilityToolkitView({
       });
     } catch (err: any) {
       console.error('Failed to compile PDF:', err);
-      toast.error(isAr ? 'فشل تصدير ملف PDF' : 'Failed to export PDF');
+      toast.error(isAr ? 'فشل تصدير ملف PDF' : L('Failed to export PDF'));
     } finally {
       setIsCompilingPdf(false);
     }
@@ -350,19 +350,19 @@ export default function UnifiedAccessibilityToolkitView({
           toast.success(isAr ? `تم تحميل ${res.pageCount} صفحة بنجاح!` : `Loaded ${res.pageCount} pages!`);
           announceToScreenReader(isAr ? `تم فتح مستند ${file.name}` : `Opened document ${file.name}`);
         } else {
-          toast.error(res.errorMessage || (isAr ? 'تعذر قراءة ملف PDF' : 'Failed to read PDF'));
+          toast.error(res.errorMessage || (isAr ? 'تعذر قراءة ملف PDF' : L('Failed to read PDF')));
         }
       } else if (file.name.endsWith('.docx')) {
         const res = await extractTextFromDocx(buffer);
         if (res.valid) {
           setPdfTextContent(res.text);
           setPdfPages([res.text]);
-          toast.success(isAr ? 'تم استخراج نصوص المستند' : 'Document text extracted');
+          toast.success(isAr ? 'تم استخراج نصوص المستند' : L('Document text extracted'));
         }
       }
     } catch (err: any) {
       console.error('Failed to load PDF for evidence assistant:', err);
-      toast.error(isAr ? 'فشل معالجة المستند' : 'Failed to process document');
+      toast.error(isAr ? 'فشل معالجة المستند' : L('Failed to process document'));
     }
   };
 
@@ -376,7 +376,7 @@ export default function UnifiedAccessibilityToolkitView({
       setIsSearchingEvidence(false);
 
       // Announce answer and quote
-      const speakText = `${result.answer}. ${isAr ? 'الدليل من صفحة' : 'Evidence from page'} ${result.pageNumber}: ${result.evidenceQuote}`;
+      const speakText = `${result.answer}. ${isAr ? 'الدليل من صفحة' : L('Evidence from page')} ${result.pageNumber}: ${result.evidenceQuote}`;
       announceToScreenReader(speakText);
       speak(speakText, isAr ? 'Arabic' : 'English');
 
@@ -391,7 +391,7 @@ export default function UnifiedAccessibilityToolkitView({
     } catch (err: any) {
       console.error('Evidence query error:', err);
       setIsSearchingEvidence(false);
-      toast.error(isAr ? 'فشل البحث عن الدليل' : 'Failed to search evidence');
+      toast.error(isAr ? 'فشل البحث عن الدليل' : L('Failed to search evidence'));
     }
   };
 
@@ -450,7 +450,7 @@ export default function UnifiedAccessibilityToolkitView({
                 if (v === 'disability' && onNavigateBack) onNavigateBack();
               }}
               onNavigateBack={onNavigateBack}
-              backLabel={isAr ? 'لوحة الميزات' : 'Hub'}
+              backLabel={isAr ? 'لوحة الميزات' : L('Hub')}
               isDarkMode={isDarkMode}
             />
           </div>
@@ -458,7 +458,7 @@ export default function UnifiedAccessibilityToolkitView({
             <button
               type="button"
               onClick={onNavigateBack}
-              aria-label={isAr ? 'الرجوع للوحة الميزات' : 'Back'}
+              aria-label={isAr ? 'الرجوع للوحة الميزات' : L('Back')}
               className={`min-h-[44px] min-w-[44px] p-2.5 rounded-xl border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
                 isDarkMode ? 'bg-stone-800/80 border-stone-700 text-teal-400' : 'bg-stone-100 border-stone-200 text-teal-700'
               }`}
@@ -765,7 +765,7 @@ export default function UnifiedAccessibilityToolkitView({
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   className="hidden"
                   id="pecs-sticker-upload"
-                  aria-label={isAr ? 'رفع صورة لبطاقة التواصل المرئي' : 'Upload PECS card image'}
+                  aria-label={isAr ? 'رفع صورة لبطاقة التواصل المرئي' : L('Upload PECS card image')}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) handleProcessStickerFile(f);
@@ -824,7 +824,7 @@ export default function UnifiedAccessibilityToolkitView({
                       <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="px-2.5 py-1 rounded-xl bg-teal-500/20 border border-teal-500/40 text-teal-400 text-xs font-bold">
-                            {localize(profile.language, 'Tone / Emotion', 'المشاعر والنبرة')}: {stickerResult.emotionOrVibe || (isAr ? 'عفوية' : 'Neutral')}
+                            {localize(profile.language, 'Tone / Emotion', 'المشاعر والنبرة')}: {stickerResult.emotionOrVibe || (isAr ? 'عفوية' : L('Neutral'))}
                           </span>
                           {stickerResult.inscribedText && (
                             <span className="px-2.5 py-1 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold">
@@ -860,7 +860,7 @@ export default function UnifiedAccessibilityToolkitView({
                             type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(stickerResult.detailedDescription);
-                              toast.success(isAr ? 'تم نسخ الوصف' : 'Description copied');
+                              toast.success(isAr ? 'تم نسخ الوصف' : L('Description copied'));
                             }}
                             className="px-3 py-1.5 rounded-xl border border-stone-700 hover:bg-stone-800 text-stone-300 font-bold text-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
                           >
@@ -1257,7 +1257,7 @@ export default function UnifiedAccessibilityToolkitView({
                       onClick={() => {
                         clearToolkitActivities();
                         setActivityList([]);
-                        toast.info(isAr ? 'تم مسح السجل' : 'Activity cleared');
+                        toast.info(isAr ? 'تم مسح السجل' : L('Activity cleared'));
                       }}
                       className="px-3 py-1.5 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs font-bold cursor-pointer"
                     >
@@ -1306,7 +1306,7 @@ export default function UnifiedAccessibilityToolkitView({
                             type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(item.fullContent || item.snippet);
-                              toast.success(isAr ? 'تم النسخ' : 'Copied');
+                              toast.success(isAr ? 'تم النسخ' : L('Copied'));
                             }}
                             className="p-2 rounded-xl border border-stone-700 hover:bg-stone-800 text-stone-300 cursor-pointer"
                             aria-label={localize(profile.language, 'Copy Text', 'نسخ النص')}

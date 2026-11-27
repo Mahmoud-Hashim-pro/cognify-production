@@ -1,4 +1,4 @@
-import { localize, isArabicLocale, getTranslation } from '../lib/translations';
+import { localize, isArabicLocale, getTranslation, L } from '../lib/translations';
 import React, { useState, useEffect } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
@@ -106,7 +106,7 @@ export default function Sidebar({
 
   const isAdmin = isAdminUser(profile);
   const isAr = isArabicLocale(profile.language);
-  const t = (en: string, ar: string) => (isAr ? ar : en);
+  const t = (en: string, ar: string) => (isAr ? ar : L(en));
 
   const navigateToDisabilityTab = (tab: DisabilityTab) => {
     onClose?.();
