@@ -291,7 +291,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         isDarkMode 
           ? 'bg-[#0E2745]/95 border-[#1E2E44] text-slate-100' 
           : 'bg-white/95 border-slate-200 text-slate-900'
-      } backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-3 z-30 transition-colors select-none`}
+      } backdrop-blur-md px-2 sm:px-6 flex items-center justify-between gap-1 sm:gap-3 z-30 transition-colors select-none`}
     >
       {/* ── LEFT ZONE: HAMBURGER (Mobile) + BRAND IDENTITY + BREADCRUMBS ── */}
       <div className="flex items-center gap-1 sm:gap-3 min-w-0">
@@ -315,11 +315,11 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         <button
           type="button"
           onClick={() => onNavigate?.('disability', 'hub')}
-          className="max-sm:hidden flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] rounded-xl p-1 -m-1 transition-transform active:scale-95 text-start"
+          className="flex items-center gap-2 shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] rounded-xl p-1 -m-1 transition-transform active:scale-95 text-start"
           title={t('Rafiqi Home', 'رئيسية رفيقي')}
           aria-label={t('Rafiqi Home', 'رئيسية رفيقي')}
         >
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0D4778] to-[#1769AA] flex items-center justify-center text-white shadow-xs shrink-0">
+          <div className="w-8 h-8 max-sm:w-7 max-sm:h-7 rounded-xl bg-gradient-to-tr from-[#0D4778] to-[#1769AA] flex items-center justify-center text-white shadow-xs shrink-0">
             <span className="font-black text-sm tracking-tighter">R</span>
           </div>
           <div className="hidden sm:flex items-center gap-1.5">
@@ -336,7 +336,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         <div className="hidden sm:block h-5 w-[1px] bg-slate-200 dark:bg-[#1E2E44] shrink-0" aria-hidden="true" />
 
         {/* Dynamic Breadcrumbs */}
-        <nav aria-label={t('Breadcrumbs', 'مسار الصفحة')} className="flex items-center gap-1.5 text-xs sm:text-sm font-bold min-w-0 overflow-hidden">
+        <nav aria-label={t('Breadcrumbs', 'مسار الصفحة')} className="max-sm:hidden flex items-center gap-1.5 text-xs sm:text-sm font-bold min-w-0 overflow-hidden">
           <button
             type="button"
             onClick={() => onNavigate?.('disability', 'hub')}

@@ -85,7 +85,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
       <div
         role="group"
         aria-label={isAr ? 'اختيار مظهر التطبيق' : 'Theme mode selector'}
-        className={cn('inline-flex items-center gap-1 p-1 rounded-xl bg-rafiqi-primary-light/40 dark:bg-rafiqi-surface-elevated border border-rafiqi-primary/20 dark:border-rafiqi-border-dark', className)}
+        className={cn('inline-flex items-center gap-1 max-sm:gap-0 p-1 max-sm:p-0.5 rounded-xl bg-rafiqi-primary-light/40 dark:bg-rafiqi-surface-elevated border border-rafiqi-primary/20 dark:border-rafiqi-border-dark', className)}
       >
         {options.map((opt) => {
           const isSelected = activeMode === opt.id;
@@ -97,8 +97,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               aria-pressed={isSelected}
               title={isAr ? opt.labelAr : opt.labelEn}
               className={cn(
-                'min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] select-none',
-                opt.id === 'system' && 'max-sm:hidden',
+                'min-h-[44px] min-w-[44px] max-sm:min-w-[36px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] select-none',
                 'focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2',
                 isSelected
                   ? 'bg-rafiqi-primary text-white shadow-xs font-bold'
