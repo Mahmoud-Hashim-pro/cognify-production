@@ -62,12 +62,12 @@ export default function AccessibilityOverlay({
   // Lets the user hide the floating mic / camera / voice controls (remembered).
   const [controlsHidden, setControlsHidden] = useState<boolean>(() => {
     // Default: collapsed into one small launcher so the controls never sit on
-    // page content. Blind (Visual) mode keeps the controls open as before.
+    // page content. One tap on the launcher opens them (same buttons, same logic).
     try {
       const v2 = localStorage.getItem("rafiqi_a11y_hidden_v2");
       if (v2 !== null) return v2 === "1";
     } catch { /* ignore */ }
-    return mode !== "Visual";
+    return true;
   });
   const toggleControlsHidden = (next: boolean) => {
     setControlsHidden(next);

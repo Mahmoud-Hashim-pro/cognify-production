@@ -13,6 +13,7 @@
  * 6. Smart Form Assistant (field-by-field guidance, sensitive data protection, validation, and explicit confirmation)
  */
 
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -508,7 +509,7 @@ Database Systems,90,3,270`;
       {/* ── HEADER & NAVIGATION ── */}
       <header
         role="banner"
-        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
+        className="sticky top-0 z-30 flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
@@ -541,32 +542,40 @@ Database Systems,90,3,270`;
                 {localize(profile.language, 'WCAG 2.2 AA Verified', 'معتمد لإمكانية الوصول')}
               </span>
             </div>
-            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] line-clamp-2">
-              {localize(
-                profile.language,
-                'Accessible Productivity Workspace & AI Assistant',
-                'مساحة الإنتاجية ومساعد العمل والإبداع الذكي'
-              )}
+            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] truncate">
+              <span>{localize(profile.language, 'Work & Create', 'العمل والإبداع')}</span>
+              <span className="hidden">
+                {localize(
+                  profile.language,
+                  'Accessible Productivity Workspace & AI Assistant',
+                  'مساحة الإنتاجية ومساعد العمل والإبداع الذكي'
+                )}
+              </span>
             </h1>
           </div>
         </div>
 
-        {/* Global Sound Controls */}
-        <div className="flex items-center gap-2">
-          {isSpeaking ? (
-            <button
-              type="button"
-              onClick={stopSpeaking}
-              aria-label={localize(profile.language, 'Stop Voice Reading', 'إيقاف النطق الصوتي')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-amber-400"
-            >
-              <VolumeX className="w-4 h-4 animate-pulse" />
-              <span>{localize(profile.language, 'Stop Audio', 'إيقاف الصوت')}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
+          <HeaderMenu
+            ariaLabel={localize(profile.language, 'More actions', 'المزيد')}
+            isDarkMode={isDarkMode}
+            items={[
+              isSpeaking
+                ? {
+                    key: 'stop',
+                    label: localize(profile.language, 'Stop Audio', 'إيقاف الصوت'),
+                    ariaLabel: localize(profile.language, 'Stop Voice Reading', 'إيقاف النطق الصوتي'),
+                    icon: <VolumeX className="w-4 h-4" />,
+                    danger: true,
+                    onSelect: stopSpeaking,
+                  }
+                : {
+                    key: 'read',
+                    label: localize(profile.language, 'Read Aloud', 'قراءة صوتية'),
+                    ariaLabel: localize(profile.language, 'Read Workspace Content Aloud', 'قراءة محتوى مساحة العمل بصوت واضح'),
+                    icon: <Volume2 className="w-4 h-4" />,
+                    onSelect: () => {
                 const currentText =
                   activeTool === 'voice_doc'
                     ? exportDocumentToPlainText(voiceDoc)
@@ -582,25 +591,19 @@ Database Systems,90,3,270`;
                     ? 'متتبع الحضور والغياب: أضف موادك وسجل حضورك وغيابك لتعرف نسبتك والغيابات المتبقية قبل الحرمان.'
                     : selectedFormTemplate.descriptionAr;
                 speakText(currentText);
-              }}
-              aria-label={localize(profile.language, 'Read Workspace Content Aloud', 'قراءة محتوى مساحة العمل بصوت واضح')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40 hover:bg-[#1769AA]/30 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
-            >
-              <Volume2 className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {localize(profile.language, 'Read Aloud', 'قراءة صوتية')}
-              </span>
-            </button>
-          )}
+                    },
+                  },
+            ]}
+          />
         </div>
       </header>
 
       {/* ── SUB-NAV: 6 ACCESSIBLE PRODUCTIVITY TABS ── */}
       <nav
         aria-label={localize(profile.language, 'Productivity Workspace Tools', 'أدوات مساحة الإنتاجية')}
-        className="bg-[#0D2542] border-b border-[#24476F] px-4 sm:px-6 py-2.5"
+        className="bg-[#0D2542] border-b border-[#24476F] px-3 sm:px-6 py-2"
       >
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto custom-scrollbar">
           {tools.map((t) => {
             const Icon = t.icon;
             const isActive = activeTool === t.id;
@@ -613,7 +616,7 @@ Database Systems,90,3,270`;
                   speakText(isAr ? t.titleAr : t.titleEn);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`min-h-[44px] px-3 py-2.5 flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
+                className={`shrink-0 whitespace-nowrap min-h-[44px] px-3 py-2.5 justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
                   isActive
                     ? 'bg-[#1769AA] text-white shadow-md'
                     : 'bg-[#112C4F] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#17355C] border border-[#24476F]'

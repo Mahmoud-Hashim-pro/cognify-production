@@ -251,16 +251,16 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
         onPointerCancel={handlePressEnd}
         onPointerLeave={handlePressEnd}
         onContextMenu={(e) => e.preventDefault()}
-        className={`fixed bottom-5 end-5 z-[70] w-20 h-20 rounded-full flex items-center justify-center shadow-2xl border-4 transition-all select-none touch-none ${
+        className={`fixed bottom-4 end-4 z-[70] w-14 h-14 rounded-full flex items-center justify-center shadow-xl border-2 transition-all select-none touch-none ${
           voice.status === 'listening'
             ? 'bg-red-600 border-red-300 scale-110 animate-pulse'
             : voice.status === 'processing'
             ? 'bg-amber-500 border-amber-200'
             : 'bg-teal-600 border-teal-300 hover:bg-teal-500'
         } text-white`}
-        style={{ minWidth: 80, minHeight: 80 }}
+        style={{ minWidth: 56, minHeight: 56 }}
       >
-        <Mic className="w-10 h-10" aria-hidden="true" />
+        <Mic className="w-6 h-6" aria-hidden="true" />
         <span className="sr-only" aria-live="polite">
           {voice.status === 'listening'
             ? (isArabic ? 'بسمعك دلوقتي' : 'Listening now')
