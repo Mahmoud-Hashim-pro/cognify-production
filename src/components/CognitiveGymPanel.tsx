@@ -11,11 +11,14 @@
  *      attempts (stored locally) keeps the preview exploratory.
  */
 import React, { useMemo, useRef, useState } from 'react';
-import { Brain, Dumbbell, ListChecks, RotateCcw, ShieldAlert, TrendingUp, Volume2, VolumeX } from 'lucide-react';
+import { Brain, Dumbbell, Grid3x3, ListChecks, RotateCcw, ShieldAlert, TrendingUp, Volume2, VolumeX } from 'lucide-react';
 import { compareQuizzes, type QuizComparisonResult } from '../lib/evaluationEngine';
 import {
   ambientNoise,
+  generateMemoryGridSequence,
+  evaluateMemoryGridAnswer,
   sliceTaskIntoMicroSteps,
+  type MemoryGridRound,
   type NoiseType,
   type TaskSlicerDecomposition,
 } from '../lib/cognitiveEngine';
@@ -89,6 +92,55 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
   const [taskInput, setTaskInput] = useState('');
   const [slicedTask, setSlicedTask] = useState<TaskSlicerDecomposition | null>(null);
   const [doneSteps, setDoneSteps] = useState<Record<string, boolean>>({});
+
+  // Memory grid game state
+  const [gridRound, setGridRound] = useState<MemoryGridRound | null>(null);
+  const [gridPhase, setGridPhase] = useState<'idle' | 'showing' | 'input' | 'result'>('idle');
+  const [gridHighlight, setGridHighlight] = useState<number | null>(null);
+  const [gridUserTaps, setGridUserTaps] = useState<number[]>([]);
+  const [gridSpan, setGridSpan] = useState(3);
+  const [gridBestSpan, setGridBestSpan] = useState(0);
+  const [gridResult, setGridResult] = useState<{ isCorrect: boolean; matchedCount: number; maxSpan: number } | null>(null);
+  const gridTimers = useRef<number[]>([]);
+
+  const clearGridTimers = () => {
+    gridTimers.current.forEach((t) => window.clearTimeout(t));
+    gridTimers.current = [];
+  };
+
+  const startGridRound = (span: number) => {
+    clearGridTimers();
+    const round = generateMemoryGridSequence(span, 3, false);
+    setGridRound(round);
+    setGridUserTaps([]);
+    setGridResult(null);
+    setGridPhase('showing');
+    round.sequence.forEach((cellIdx, i) => {
+      gridTimers.current.push(window.setTimeout(() => setGridHighlight(cellIdx), i * 700));
+      gridTimers.current.push(window.setTimeout(() => setGridHighlight(null), i * 700 + 450));
+    });
+    gridTimers.current.push(
+      window.setTimeout(() => setGridPhase('input'), round.sequence.length * 700 + 200)
+    );
+  };
+
+  const tapGridCell = (idx: number) => {
+    if (gridPhase !== 'input' || !gridRound) return;
+    const taps = [...gridUserTaps, idx];
+    setGridUserTaps(taps);
+    if (taps.length === gridRound.sequence.length) {
+      const result = evaluateMemoryGridAnswer(gridRound, taps);
+      setGridResult(result);
+      setGridPhase('result');
+      if (result.isCorrect) {
+        setGridBestSpan((b) => Math.max(b, gridRound.sequence.length));
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    return () => clearGridTimers();
+  }, []);
 
   // Learning-gain calculator state
   const [preScoreInput, setPreScoreInput] = useState('');
@@ -382,6 +434,124 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
           </button>
         </div>
       )}
+
+      {/* ── Working-memory grid trainer ── */}
+      <div className={`p-5 rounded-3xl border space-y-3 ${cardCls}`} data-testid="memory-grid-trainer">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Grid3x3 className="w-5 h-5 text-violet-400" aria-hidden="true" />
+            <h3 className={`text-sm font-black ${textCls}`}>
+              {isArabic ? 'مدرب الذاكرة العاملة (الشبكة)' : 'Working-memory grid trainer'}
+            </h3>
+          </div>
+          {gridBestSpan > 0 && (
+            <span className={`text-[11px] font-bold ${subCls}`}>
+              {isArabic ? `أفضل سلسلة: ${gridBestSpan}` : `Best span: ${gridBestSpan}`}
+            </span>
+          )}
+        </div>
+        <p className={`text-[11px] leading-relaxed ${subCls}`}>
+          {isArabic
+            ? 'شاهد الخلايا وهي تضيء بالترتيب، ثم اضغط عليها بنفس الترتيب. كل نجاح يزيد طول السلسلة.'
+            : 'Watch the cells light up in order, then tap them in the same order. Each success grows the sequence.'}
+        </p>
+        {gridPhase === 'idle' && (
+          <button
+            type="button"
+            onClick={() => startGridRound(gridSpan)}
+            className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            {isArabic ? `ابدأ (سلسلة من ${gridSpan})` : `Start (span of ${gridSpan})`}
+          </button>
+        )}
+        {gridPhase !== 'idle' && gridRound && (
+          <div className="space-y-3">
+            <div
+              className="grid grid-cols-3 gap-1.5 max-w-[220px]"
+              role="group"
+              aria-label={isArabic ? 'شبكة الذاكرة' : 'Memory grid'}
+            >
+              {Array.from({ length: gridRound.gridSize * gridRound.gridSize }, (_, idx) => {
+                const isHighlighted = gridHighlight === idx;
+                const wasTapped = gridUserTaps.includes(idx);
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    disabled={gridPhase !== 'input'}
+                    onClick={() => tapGridCell(idx)}
+                    aria-label={`${isArabic ? 'خلية' : 'Cell'} ${idx + 1}`}
+                    className={`aspect-square rounded-xl border transition-all cursor-pointer ${
+                      isHighlighted
+                        ? 'bg-violet-500 border-violet-400 scale-105'
+                        : wasTapped
+                          ? 'bg-[#1769AA]/40 border-[#4B9FE1]'
+                          : isDarkMode
+                            ? 'bg-stone-800 border-stone-700'
+                            : 'bg-stone-100 border-stone-300'
+                    } ${gridPhase === 'input' ? 'hover:border-violet-400' : ''}`}
+                  />
+                );
+              })}
+            </div>
+            {gridPhase === 'showing' && (
+              <p className={`text-[11px] font-bold ${subCls}`}>
+                {isArabic ? 'شاهد الترتيب...' : 'Watch the sequence...'}
+              </p>
+            )}
+            {gridPhase === 'input' && (
+              <p className={`text-[11px] font-bold ${textCls}`}>
+                {isArabic
+                  ? `دورك: اضغط ${gridRound.sequence.length} خلايا بالترتيب (${gridUserTaps.length}/${gridRound.sequence.length})`
+                  : `Your turn: tap ${gridRound.sequence.length} cells in order (${gridUserTaps.length}/${gridRound.sequence.length})`}
+              </p>
+            )}
+            {gridPhase === 'result' && gridResult && (
+              <div className="space-y-2">
+                <p className={`text-xs font-black ${gridResult.isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {gridResult.isCorrect
+                    ? isArabic
+                      ? `✓ ممتاز! تذكرت السلسلة كاملة (${gridResult.maxSpan} خلايا).`
+                      : `✓ Great! You recalled the full ${gridResult.maxSpan}-cell sequence.`
+                    : isArabic
+                      ? `✗ وصلت إلى ${gridResult.matchedCount} من ${gridResult.maxSpan} بالترتيب الصحيح.`
+                      : `✗ You matched ${gridResult.matchedCount} of ${gridResult.maxSpan} in the right order.`}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextSpan = gridResult.isCorrect
+                        ? Math.min(8, gridRound.sequence.length + 1)
+                        : Math.max(2, gridRound.sequence.length - 1);
+                      setGridSpan(nextSpan);
+                      startGridRound(nextSpan);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    {gridResult.isCorrect
+                      ? isArabic ? 'الجولة التالية (أصعب)' : 'Next round (harder)'
+                      : isArabic ? 'حاول مجدداً (أسهل)' : 'Try again (easier)'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearGridTimers();
+                      setGridPhase('idle');
+                      setGridRound(null);
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${
+                      isDarkMode ? 'bg-stone-800 text-stone-200 hover:bg-stone-700' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                    }`}
+                  >
+                    {isArabic ? 'إيقاف' : 'Stop'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ── Task slicer (executive-function support) ── */}
       <div className={`p-5 rounded-3xl border space-y-3 ${cardCls}`} data-testid="task-slicer">
