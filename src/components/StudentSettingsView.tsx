@@ -1,4 +1,4 @@
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { UserProfile, AccessibilityPassport, LanguagePreference, PedagogyStyle } from '../types';
@@ -86,7 +86,7 @@ function formatSavedTime(date: Date, isAr: boolean): string {
       ? `${day} ${month} ${year} - ${hours}:${minutes} ${period}`
       : `${month} ${day}, ${year} - ${hours}:${minutes} ${period}`;
   } catch {
-    return isAr ? 'تم الحفظ' : 'Saved';
+    return isAr ? 'تم الحفظ' : L('Saved');
   }
 }
 
@@ -175,20 +175,20 @@ export default function StudentSettingsView({
       setSavedApiKey(trimmed);
       if (trimmed) {
         toast.success(
-          isAr ? 'تم تشفير وحفظ مفتاح Gemini بنجاح' : 'Gemini API Key encrypted and saved securely',
-          isAr ? 'حفظ المفتاح' : 'API Key Saved'
+          isAr ? 'تم تشفير وحفظ مفتاح Gemini بنجاح' : L('Gemini API Key encrypted and saved securely'),
+          isAr ? 'حفظ المفتاح' : L('API Key Saved')
         );
       } else {
         toast.info(
-          isAr ? 'تم مسح مفتاح Gemini' : 'Gemini API Key removed',
-          isAr ? 'إلغاء المفتاح' : 'API Key Removed'
+          isAr ? 'تم مسح مفتاح Gemini' : L('Gemini API Key removed'),
+          isAr ? 'إلغاء المفتاح' : L('API Key Removed')
         );
       }
     } catch (err) {
       console.error('Failed to save API key:', err);
       toast.error(
-        isAr ? 'تعذر حفظ المفتاح، يرجى المحاولة ثانية' : 'Failed to save API key securely',
-        isAr ? 'خطأ في الحفظ' : 'Save Error'
+        isAr ? 'تعذر حفظ المفتاح، يرجى المحاولة ثانية' : L('Failed to save API key securely'),
+        isAr ? 'خطأ في الحفظ' : L('Save Error')
       );
     } finally {
       setIsSavingKey(false);
@@ -202,8 +202,8 @@ export default function StudentSettingsView({
       setApiKeyInput('');
       setSavedApiKey('');
       toast.info(
-        isAr ? 'تمت إزالة المفتاح الخاص' : 'Personal API key removed',
-        isAr ? 'إزالة المفتاح' : 'Key Removed'
+        isAr ? 'تمت إزالة المفتاح الخاص' : L('Personal API key removed'),
+        isAr ? 'إزالة المفتاح' : L('Key Removed')
       );
     } catch (err) {
       console.error('Failed to clear API key:', err);
@@ -229,14 +229,14 @@ export default function StudentSettingsView({
 
   // ── Interface & Explanation Language ──
   const [interfaceLanguage, setInterfaceLanguage] = useState<LanguagePreference>(
-    () => (isArabicLocale(profile.language) ? 'Arabic' : 'English')
+    () => (isArabicLocale(profile.language) ? 'Arabic' : profile.language === 'French' ? 'French' : 'English')
   );
 
   // Single source of truth: follow the global header language switcher.
   // Without this sync the page kept (and on save re-wrote) its own stale value,
   // which made the header toggle look broken on this page.
   useEffect(() => {
-    const lang: LanguagePreference = isArabicLocale(profile.language) ? 'Arabic' : 'English';
+    const lang: LanguagePreference = isArabicLocale(profile.language) ? 'Arabic' : profile.language === 'French' ? 'French' : 'English';
     setInterfaceLanguage((prev) => (prev === lang ? prev : lang));
   }, [profile.language]);
   const [explanationLanguage, setExplanationLanguage] = useState<string>(
@@ -527,7 +527,7 @@ export default function StudentSettingsView({
       ? 'مرحباً بك في رفيقي. إعدادات الصوت والقراءة الشخصية تعمل بنجاح وبوضوح.'
       : 'Welcome to Rafiqi. Your personal voice and reading settings are active and calibrated.';
 
-    speak(phrase, interfaceLanguage === 'English' ? 'English' : 'Arabic', {
+    speak(phrase, interfaceLanguage === 'English' ? 'English' : interfaceLanguage === 'French' ? 'French' : 'Arabic', {
       rate: audioSpeed,
       onEnd: () => setIsPlayingPreview(false),
       onError: () => setIsPlayingPreview(false)
@@ -545,7 +545,7 @@ export default function StudentSettingsView({
           : `Privacy Guard: ${sanitized.blockedReasonEn}`
       );
       toast.error(
-        isAr ? 'تم منع حفظ بيانات حساسة لحمايتك' : 'Sensitive data blocked for your security'
+        isAr ? 'تم منع حفظ بيانات حساسة لحمايتك' : L('Sensitive data blocked for your security')
       );
       return;
     }
@@ -563,7 +563,7 @@ export default function StudentSettingsView({
       localStorage.setItem(PERSONALIZE_STORAGE_KEYS.ASSISTANT_MEMORY, JSON.stringify(updated));
     } catch {}
     toast.success(
-      isAr ? 'تمت إضافة الذاكرة بأمان' : 'Memory entry saved safely'
+      isAr ? 'تمت إضافة الذاكرة بأمان' : L('Memory entry saved safely')
     );
   };
 
@@ -573,7 +573,7 @@ export default function StudentSettingsView({
     try {
       localStorage.setItem(PERSONALIZE_STORAGE_KEYS.ASSISTANT_MEMORY, JSON.stringify(updated));
     } catch {}
-    toast.info(isAr ? 'تم حذف الإدخال' : 'Memory entry deleted');
+    toast.info(isAr ? 'تم حذف الإدخال' : L('Memory entry deleted'));
   };
 
   const handleClearAllMemory = () => {
@@ -582,7 +582,7 @@ export default function StudentSettingsView({
       localStorage.removeItem(PERSONALIZE_STORAGE_KEYS.ASSISTANT_MEMORY);
     } catch {}
     setShowClearMemoryConfirm(false);
-    toast.info(isAr ? 'تم مسح كامل الذاكرة بنجاح' : 'All assistant memory erased');
+    toast.info(isAr ? 'تم مسح كامل الذاكرة بنجاح' : L('All assistant memory erased'));
   };
 
   // ── Reading History Handlers ──
@@ -592,14 +592,14 @@ export default function StudentSettingsView({
     try {
       localStorage.setItem(PERSONALIZE_STORAGE_KEYS.READING_HISTORY, JSON.stringify(updated));
     } catch {}
-    toast.info(isAr ? 'تم حذف السجل' : 'Reading item removed');
+    toast.info(isAr ? 'تم حذف السجل' : L('Reading item removed'));
   };
 
   const handleClearAllHistory = () => {
     clearAllReadingHistory();
     setReadingHistory([]);
     setShowClearHistoryConfirm(false);
-    toast.info(isAr ? 'تم مسح سجل القراءة كاملاً' : 'Reading history cleared');
+    toast.info(isAr ? 'تم مسح سجل القراءة كاملاً' : L('Reading history cleared'));
   };
 
   // ── Shortcuts Handlers ──
@@ -609,7 +609,7 @@ export default function StudentSettingsView({
     try {
       localStorage.setItem('rafiqi_personal_shortcuts', JSON.stringify(DEFAULT_SHORTCUTS));
     } catch {}
-    toast.success(isAr ? 'تمت استعادة الاختصارات الافتراضية' : 'Default shortcuts restored');
+    toast.success(isAr ? 'تمت استعادة الاختصارات الافتراضية' : L('Default shortcuts restored'));
   };
 
   // ── Reset All Defaults Handler ──
@@ -748,11 +748,11 @@ export default function StudentSettingsView({
             <div className="flex items-center gap-2 shrink-0">
               <span
                 role="status"
-                title={isOnline ? (isAr ? 'متصل بالإنترنت' : 'Online') : (isAr ? 'وضع عدم الاتصال' : 'Offline Mode')}
+                title={isOnline ? (isAr ? 'متصل بالإنترنت' : L('Online')) : (isAr ? 'وضع عدم الاتصال' : L('Offline Mode'))}
                 className={`inline-flex items-center gap-1.5 text-xs font-bold ${isOnline ? 'text-emerald-500' : 'text-amber-500'}`}
               >
                 <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'}`} aria-hidden="true" />
-                <span className="sr-only">{isOnline ? (isAr ? 'متصل بالإنترنت' : 'Online') : (isAr ? 'وضع عدم الاتصال' : 'Offline Mode')}</span>
+                <span className="sr-only">{isOnline ? (isAr ? 'متصل بالإنترنت' : L('Online')) : (isAr ? 'وضع عدم الاتصال' : L('Offline Mode'))}</span>
               </span>
               <ToolSwitcherSlot />
               <HeaderMenu
@@ -810,7 +810,7 @@ export default function StudentSettingsView({
                   }`}
                 >
                   <TabIcon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-[#1769AA] dark:text-[#4B9FE1]'}`} />
-                  <span>{isAr ? t.labelAr : t.labelEn}</span>
+                  <span>{isAr ? t.labelAr : L(t.labelEn)}</span>
                 </button>
               );
             })}
@@ -866,10 +866,10 @@ export default function StudentSettingsView({
                                 : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD] hover:border-[#1769AA]/40'
                             }`}
                           >
-                            {scale === 'normal' && (isAr ? 'عادي (100%)' : 'Normal')}
-                            {scale === 'medium' && (isAr ? 'متوسط (115%)' : 'Medium')}
-                            {scale === 'large' && (isAr ? 'كبير (130%)' : 'Large')}
-                            {scale === 'extra-large' && (isAr ? 'أكبر (145%)' : 'Extra Large')}
+                            {scale === 'normal' && (isAr ? 'عادي (100%)' : L('Normal'))}
+                            {scale === 'medium' && (isAr ? 'متوسط (115%)' : L('Medium'))}
+                            {scale === 'large' && (isAr ? 'كبير (130%)' : L('Large'))}
+                            {scale === 'extra-large' && (isAr ? 'أكبر (145%)' : L('Extra Large'))}
                           </button>
                         ))}
                       </div>
@@ -897,9 +897,9 @@ export default function StudentSettingsView({
                                 : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD] hover:border-[#1769AA]/40'
                             }`}
                           >
-                            {mode === 'dark' && (isAr ? 'داكن أزرق' : 'Dark Blue')}
-                            {mode === 'light' && (isAr ? 'فاتح' : 'Light')}
-                            {mode === 'contrast' && (isAr ? 'عالي التباين' : 'High Contrast')}
+                            {mode === 'dark' && (isAr ? 'داكن أزرق' : L('Dark Blue'))}
+                            {mode === 'light' && (isAr ? 'فاتح' : L('Light'))}
+                            {mode === 'contrast' && (isAr ? 'عالي التباين' : L('High Contrast'))}
                           </button>
                         ))}
                       </div>
@@ -962,7 +962,7 @@ export default function StudentSettingsView({
                       <label className="text-xs font-bold text-slate-900 dark:text-[#F4F7FB] block">
                         {localize(profile.language, 'Interface Language', 'لغة واجهة الاستخدام')}
                       </label>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-3 gap-3">
                         <button
                           type="button"
                           onClick={() => setInterfaceLanguage('Arabic')}
@@ -984,6 +984,17 @@ export default function StudentSettingsView({
                           }`}
                         >
                           <span>English (LTR)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInterfaceLanguage('French')}
+                          className={`py-3 px-4 rounded-xl border text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                            interfaceLanguage === 'French'
+                              ? 'bg-[#1769AA] border-[#4B9FE1] text-white shadow-md'
+                              : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD] hover:border-[#1769AA]/40'
+                          }`}
+                        >
+                          <span>Français (LTR)</span>
                         </button>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
@@ -1012,9 +1023,9 @@ export default function StudentSettingsView({
                                 : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD] hover:border-[#1769AA]/40'
                             }`}
                           >
-                            {det === 'concise' && (isAr ? 'موجز وسريع' : 'Concise')}
-                            {det === 'balanced' && (isAr ? 'متوازن' : 'Balanced')}
-                            {det === 'detailed' && (isAr ? 'مفصل ودقيق' : 'Detailed')}
+                            {det === 'concise' && (isAr ? 'موجز وسريع' : L('Concise'))}
+                            {det === 'balanced' && (isAr ? 'متوازن' : L('Balanced'))}
+                            {det === 'detailed' && (isAr ? 'مفصل ودقيق' : L('Detailed'))}
                           </button>
                         ))}
                       </div>
@@ -1179,7 +1190,7 @@ export default function StudentSettingsView({
                   className="px-5 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md self-start sm:self-auto"
                 >
                   {isPlayingPreview ? <VolumeX className="w-4 h-4 text-amber-300 animate-pulse" /> : <Play className="w-4 h-4" />}
-                  <span>{isPlayingPreview ? (isAr ? 'إيقاف الاختبار' : 'Stop Preview') : (isAr ? 'تجربة الصوت' : 'Preview Voice')}</span>
+                  <span>{isPlayingPreview ? (isAr ? 'إيقاف الاختبار' : L('Stop Preview')) : (isAr ? 'تجربة الصوت' : L('Preview Voice'))}</span>
                 </button>
               </div>
 
@@ -1187,7 +1198,7 @@ export default function StudentSettingsView({
               <div className="p-4 rounded-2xl bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] text-xs text-slate-600 dark:text-[#A9C4DD] space-y-1">
                 <div className="flex items-center gap-2 text-[#1769AA] dark:text-[#4B9FE1] font-bold">
                   <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{isAr ? 'ملاحظة توافقية المتصفح ونظام التشغيل' : 'Browser & OS Compatibility Notice'}</span>
+                  <span>{isAr ? 'ملاحظة توافقية المتصفح ونظام التشغيل' : L('Browser & OS Compatibility Notice')}</span>
                 </div>
                 <p className="leading-relaxed">
                   {isAr ? voiceSupport.explanationAr : voiceSupport.explanationEn}
@@ -1222,7 +1233,7 @@ export default function StudentSettingsView({
                     onChange={(e) => setVoiceSelection(e.target.value)}
                     className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
-                    <option value="default">{isAr ? 'الصوت الافتراضي للمنظومة' : 'System Default Voice'}</option>
+                    <option value="default">{isAr ? 'الصوت الافتراضي للمنظومة' : L('System Default Voice')}</option>
                     {availableVoices.map((v, i) => (
                       <option key={`${v.name}-${i}`} value={v.name}>
                         {v.name} ({v.lang})
@@ -1248,9 +1259,9 @@ export default function StudentSettingsView({
                     className="w-full accent-[#1769AA] cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-slate-600 dark:text-[#A9C4DD]">
-                    <span>0.5x ({isAr ? 'بطيء' : 'Slow'})</span>
-                    <span>1.0x ({isAr ? 'طبيعي' : 'Normal'})</span>
-                    <span>2.0x ({isAr ? 'سريع' : 'Fast'})</span>
+                    <span>0.5x ({isAr ? 'بطيء' : L('Slow')})</span>
+                    <span>1.0x ({isAr ? 'طبيعي' : L('Normal')})</span>
+                    <span>2.0x ({isAr ? 'سريع' : L('Fast')})</span>
                   </div>
                 </div>
 
@@ -1309,9 +1320,9 @@ export default function StudentSettingsView({
                     onChange={(e) => setNumeralPronunciation(e.target.value as NumeralPronunciation)}
                     className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
-                    <option value="arabic_words">{isAr ? 'ألفاظ عربية كاملة (مثال: خمسة وعشرون)' : 'Full Number in Words (e.g. Twenty Five)'}</option>
-                    <option value="individual_digits">{isAr ? 'أرقام منفصلة خانة بخانة (مثال: اثنان خمسة)' : 'Individual Digits (e.g. Two Five)'}</option>
-                    <option value="full_number">{isAr ? 'عدد مركب قياسي' : 'Standard Compound'}</option>
+                    <option value="arabic_words">{isAr ? 'ألفاظ عربية كاملة (مثال: خمسة وعشرون)' : L('Full Number in Words (e.g. Twenty Five)')}</option>
+                    <option value="individual_digits">{isAr ? 'أرقام منفصلة خانة بخانة (مثال: اثنان خمسة)' : L('Individual Digits (e.g. Two Five)')}</option>
+                    <option value="full_number">{isAr ? 'عدد مركب قياسي' : L('Standard Compound')}</option>
                   </select>
                 </div>
               </div>
@@ -1362,9 +1373,9 @@ export default function StudentSettingsView({
                           : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD]'
                       }`}
                     >
-                      <span className="block font-black">{isAr ? 'موجز وسريع' : 'Concise'}</span>
+                      <span className="block font-black">{isAr ? 'موجز وسريع' : L('Concise')}</span>
                       <span className="text-xs opacity-80 mt-1 block">
-                        {isAr ? 'يركز على العناصر الأساسية والعوائق فوراً' : 'Focuses on critical items and obstacles fast'}
+                        {isAr ? 'يركز على العناصر الأساسية والعوائق فوراً' : L('Focuses on critical items and obstacles fast')}
                       </span>
                     </button>
 
@@ -1377,9 +1388,9 @@ export default function StudentSettingsView({
                           : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD]'
                       }`}
                     >
-                      <span className="block font-black">{isAr ? 'مفصل شامل' : 'Detailed'}</span>
+                      <span className="block font-black">{isAr ? 'مفصل شامل' : L('Detailed')}</span>
                       <span className="text-xs opacity-80 mt-1 block">
-                        {isAr ? 'يصف الألوان، الإضاءة، العلاقات المكانية والأبعاد' : 'Includes colors, lighting, spatial relations, bounds'}
+                        {isAr ? 'يصف الألوان، الإضاءة، العلاقات المكانية والأبعاد' : L('Includes colors, lighting, spatial relations, bounds')}
                       </span>
                     </button>
                   </div>
@@ -1395,9 +1406,9 @@ export default function StudentSettingsView({
                     onChange={(e) => setDescLanguage(e.target.value as any)}
                     className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
-                    <option value="Arabic">{isAr ? 'العربية الفصحى المبسطة' : 'Simplified Modern Standard Arabic'}</option>
-                    <option value="Egyptian Ammiya">{isAr ? 'العامية المصرية الودودة' : 'Friendly Egyptian Arabic (Ammiya)'}</option>
-                    <option value="English">{isAr ? 'الإنجليزية' : 'English'}</option>
+                    <option value="Arabic">{isAr ? 'العربية الفصحى المبسطة' : L('Simplified Modern Standard Arabic')}</option>
+                    <option value="Egyptian Ammiya">{isAr ? 'العامية المصرية الودودة' : L('Friendly Egyptian Arabic (Ammiya)')}</option>
+                    <option value="English">{isAr ? 'الإنجليزية' : L('English')}</option>
                   </select>
                 </div>
 
@@ -1411,11 +1422,11 @@ export default function StudentSettingsView({
                     onChange={(e) => setPreferredCurrency(e.target.value as PreferredCurrency)}
                     className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
-                    <option value="EGP">{isAr ? 'الجنيه المصري (EGP)' : 'Egyptian Pound (EGP)'}</option>
-                    <option value="SAR">{isAr ? 'الريال السعودي (SAR)' : 'Saudi Riyal (SAR)'}</option>
-                    <option value="AED">{isAr ? 'الدرهم الإماراتي (AED)' : 'UAE Dirham (AED)'}</option>
-                    <option value="USD">{isAr ? 'الدولار الأمريكي (USD)' : 'US Dollar (USD)'}</option>
-                    <option value="EUR">{isAr ? 'اليورو (EUR)' : 'Euro (EUR)'}</option>
+                    <option value="EGP">{isAr ? 'الجنيه المصري (EGP)' : L('Egyptian Pound (EGP)')}</option>
+                    <option value="SAR">{isAr ? 'الريال السعودي (SAR)' : L('Saudi Riyal (SAR)')}</option>
+                    <option value="AED">{isAr ? 'الدرهم الإماراتي (AED)' : L('UAE Dirham (AED)')}</option>
+                    <option value="USD">{isAr ? 'الدولار الأمريكي (USD)' : L('US Dollar (USD)')}</option>
+                    <option value="EUR">{isAr ? 'اليورو (EUR)' : L('Euro (EUR)')}</option>
                   </select>
                   <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
                     {isAr 
@@ -1439,7 +1450,7 @@ export default function StudentSettingsView({
                           : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD]'
                       }`}
                     >
-                      <span>{isAr ? 'المتر والسنتيمتر (متري)' : 'Meters & Centimeters (Metric)'}</span>
+                      <span>{isAr ? 'المتر والسنتيمتر (متري)' : L('Meters & Centimeters (Metric)')}</span>
                     </button>
                     <button
                       type="button"
@@ -1450,7 +1461,7 @@ export default function StudentSettingsView({
                           : 'bg-slate-100 dark:bg-[#082344] border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD]'
                       }`}
                     >
-                      <span>{isAr ? 'القدم والبوصة (إمبراطوري)' : 'Feet & Inches (Imperial)'}</span>
+                      <span>{isAr ? 'القدم والبوصة (إمبراطوري)' : L('Feet & Inches (Imperial)')}</span>
                     </button>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
@@ -1512,7 +1523,7 @@ export default function StudentSettingsView({
                     type="text"
                     value={personalVoiceCommandPhrase}
                     onChange={(e) => setPersonalVoiceCommandPhrase(e.target.value)}
-                    placeholder={isAr ? 'مثال: رفيقي استمع' : 'e.g. Rafiqi Listen'}
+                    placeholder={isAr ? 'مثال: رفيقي استمع' : L('e.g. Rafiqi Listen')}
                     className="flex-1 bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                 </div>
@@ -1534,10 +1545,10 @@ export default function StudentSettingsView({
                   <table className="w-full text-start text-xs border-collapse">
                     <thead>
                       <tr className="bg-slate-100 dark:bg-[#082344] border-b border-slate-200 dark:border-[#16395E] text-[#1769AA] dark:text-[#4B9FE1] font-bold">
-                        <th className="p-3 text-start">{isAr ? 'المفتاح' : 'Key'}</th>
-                        <th className="p-3 text-start">{isAr ? 'الإجراء' : 'Action'}</th>
-                        <th className="p-3 text-start">{isAr ? 'الوصف' : 'Description'}</th>
-                        <th className="p-3 text-start">{isAr ? 'الفئة' : 'Category'}</th>
+                        <th className="p-3 text-start">{isAr ? 'المفتاح' : L('Key')}</th>
+                        <th className="p-3 text-start">{isAr ? 'الإجراء' : L('Action')}</th>
+                        <th className="p-3 text-start">{isAr ? 'الوصف' : L('Description')}</th>
+                        <th className="p-3 text-start">{isAr ? 'الفئة' : L('Category')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-[#16395E]/50">
@@ -1549,7 +1560,7 @@ export default function StudentSettingsView({
                             </span>
                           </td>
                           <td className="p-3 font-bold text-slate-900 dark:text-[#F4F7FB]">
-                            {isAr ? sc.labelAr : sc.labelEn}
+                            {isAr ? sc.labelAr : L(sc.labelEn)}
                           </td>
                           <td className="p-3 text-slate-600 dark:text-[#A9C4DD] leading-relaxed">
                             {isAr ? sc.descriptionAr : sc.descriptionEn}
@@ -1613,7 +1624,7 @@ export default function StudentSettingsView({
               <div className="p-4 rounded-2xl bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] text-xs text-slate-600 dark:text-[#A9C4DD] space-y-1">
                 <div className="flex items-center gap-2 text-[#1769AA] dark:text-[#4B9FE1] font-bold">
                   <ShieldCheck className="w-4 h-4 shrink-0" />
-                  <span>{isAr ? 'شفافية التخزين المحلي والخصوصية' : 'Storage Provenance & Privacy'}</span>
+                  <span>{isAr ? 'شفافية التخزين المحلي والخصوصية' : L('Storage Provenance & Privacy')}</span>
                 </div>
                 <p className="leading-relaxed">
                   {getReadingHistoryStorageExplanation(isAr ? 'Arabic' : 'English')}
@@ -1678,7 +1689,7 @@ export default function StudentSettingsView({
                                 : (isAr ? `توقف عند الصفحة ${item.lastPosition}` : `At page ${item.lastPosition}`)}
                             </span>
                             <span>•</span>
-                            <span>{item.progressPercent}% {isAr ? 'مكتمل' : 'completed'}</span>
+                            <span>{item.progressPercent}% {isAr ? 'مكتمل' : L('completed')}</span>
                           </div>
 
                           {/* Progress Bar */}
@@ -1753,7 +1764,7 @@ export default function StudentSettingsView({
               <div className="p-4 rounded-2xl bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] text-xs text-slate-600 dark:text-[#A9C4DD] space-y-1">
                 <div className="flex items-center gap-2 text-[#1769AA] dark:text-[#4B9FE1] font-bold">
                   <Lock className="w-4 h-4 shrink-0" />
-                  <span>{isAr ? 'سياسة الخصوصية الصارمة' : 'Strict Privacy Policy'}</span>
+                  <span>{isAr ? 'سياسة الخصوصية الصارمة' : L('Strict Privacy Policy')}</span>
                 </div>
                 <p className="leading-relaxed">
                   {getMemoryPrivacyNotice(isAr ? 'Arabic' : 'English')}
@@ -1812,11 +1823,11 @@ export default function StudentSettingsView({
                       onChange={(e) => setNewMemoryCategory(e.target.value as any)}
                       className="bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                     >
-                      <option value="topic_interest">{isAr ? 'اهتمامات دراسية' : 'Topic Interest'}</option>
-                      <option value="room_landmark">{isAr ? 'معلم مكاني بالغرفة' : 'Room Landmark'}</option>
-                      <option value="voice_preference">{isAr ? 'تفضيل صوتي خاص' : 'Voice Preference'}</option>
-                      <option value="companion_contact">{isAr ? 'جهة مساعدة' : 'Contact'}</option>
-                      <option value="custom">{isAr ? 'ملاحظة عامة' : 'Custom Note'}</option>
+                      <option value="topic_interest">{isAr ? 'اهتمامات دراسية' : L('Topic Interest')}</option>
+                      <option value="room_landmark">{isAr ? 'معلم مكاني بالغرفة' : L('Room Landmark')}</option>
+                      <option value="voice_preference">{isAr ? 'تفضيل صوتي خاص' : L('Voice Preference')}</option>
+                      <option value="companion_contact">{isAr ? 'جهة مساعدة' : L('Contact')}</option>
+                      <option value="custom">{isAr ? 'ملاحظة عامة' : L('Custom Note')}</option>
                     </select>
 
                     <input
@@ -1826,7 +1837,7 @@ export default function StudentSettingsView({
                         setNewMemoryInput(e.target.value);
                         setMemoryValidationError(null);
                       }}
-                      placeholder={isAr ? 'اكتب ملاحظة (مثال: مفاتيح الخزانة في الدرج العلوي)' : 'Write a note (e.g. Desk is near window)'}
+                      placeholder={isAr ? 'اكتب ملاحظة (مثال: مفاتيح الخزانة في الدرج العلوي)' : L('Write a note (e.g. Desk is near window)')}
                       className="sm:col-span-2 bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                     />
                   </div>
@@ -1889,7 +1900,7 @@ export default function StudentSettingsView({
                         <button
                           type="button"
                           onClick={() => handleDeleteMemoryEntry(mem.id)}
-                          aria-label={isAr ? 'حذف هذه الملاحظة' : 'Delete note'}
+                          aria-label={isAr ? 'حذف هذه الملاحظة' : L('Delete note')}
                           className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors shrink-0"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1936,7 +1947,7 @@ export default function StudentSettingsView({
                     isOnline ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400'
                   }`}>
                     <Wifi className="w-4 h-4" />
-                    <span>{isOnline ? (isAr ? 'الإنترنت متصل حالياً' : 'Online Connected') : (isAr ? 'غير متصل بالإنترنت' : 'Offline Mode Active')}</span>
+                    <span>{isOnline ? (isAr ? 'الإنترنت متصل حالياً' : L('Online Connected')) : (isAr ? 'غير متصل بالإنترنت' : L('Offline Mode Active'))}</span>
                   </span>
                 </div>
               </div>
@@ -1946,9 +1957,9 @@ export default function StudentSettingsView({
                 <table className="w-full text-start text-xs border-collapse">
                   <thead>
                     <tr className="bg-slate-100 dark:bg-[#082344] border-b border-slate-200 dark:border-[#16395E] text-[#1769AA] dark:text-[#4B9FE1] font-bold">
-                      <th className="p-3 text-start">{isAr ? 'الميزة والخدمة' : 'Feature'}</th>
-                      <th className="p-3 text-start">{isAr ? 'العمل دون إنترنت' : 'Offline Status'}</th>
-                      <th className="p-3 text-start">{isAr ? 'التوضيح الفني والحقيقة' : 'Technical Truth'}</th>
+                      <th className="p-3 text-start">{isAr ? 'الميزة والخدمة' : L('Feature')}</th>
+                      <th className="p-3 text-start">{isAr ? 'العمل دون إنترنت' : L('Offline Status')}</th>
+                      <th className="p-3 text-start">{isAr ? 'التوضيح الفني والحقيقة' : L('Technical Truth')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-[#16395E]/50">
@@ -1961,11 +1972,11 @@ export default function StudentSettingsView({
                           {cap.worksOffline ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                               <Check className="w-3 h-3" />
-                              <span>{isAr ? 'يعمل دون إنترنت' : 'Works Offline'}</span>
+                              <span>{isAr ? 'يعمل دون إنترنت' : L('Works Offline')}</span>
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD]">
-                              <span>{isAr ? 'يتطلب اتصال سحابي' : 'Requires Cloud'}</span>
+                              <span>{isAr ? 'يتطلب اتصال سحابي' : L('Requires Cloud')}</span>
                             </span>
                           )}
                         </td>
