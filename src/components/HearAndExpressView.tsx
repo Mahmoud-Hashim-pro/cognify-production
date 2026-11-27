@@ -40,6 +40,28 @@ const SoundAwarenessInterface = React.lazy(() =>
     default: m.SoundAwarenessInterface,
   }))
 );
+
+const SignRecognitionInterface = React.lazy(() =>
+  import('../modules/hearAndExpress/signLanguage/components/SignRecognitionInterface').then((m) => ({
+    default: m.SignRecognitionInterface,
+  }))
+);
+const SignLanguageLearningInterface = React.lazy(() =>
+  import('../modules/hearAndExpress/signLanguage/components/SignLanguageLearningInterface').then((m) => ({
+    default: m.SignLanguageLearningInterface,
+  }))
+);
+const UnifiedTwoWayCommunicationView = React.lazy(() =>
+  import('../modules/hearAndExpress/unifiedCommunication/components/UnifiedTwoWayCommunicationView').then((m) => ({
+    default: m.UnifiedTwoWayCommunicationView,
+  }))
+);
+
+const ModuleLoadingFallback: React.FC<{ labelAr: string; labelEn: string; isAr: boolean }> = ({ labelAr, labelEn, isAr }) => (
+  <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] text-xs text-[#94A3B8]">
+    {isAr ? labelAr : labelEn}
+  </div>
+);
 import { localize, isArabicLocale } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { BrandLogo } from './ui/BrandLogo';
@@ -51,7 +73,7 @@ interface HearAndExpressViewProps {
   isDarkMode?: boolean;
 }
 
-type CommunicationTab = 'captions' | 'tts_quick' | 'aac' | 'alerts' | 'esl';
+type CommunicationTab = 'captions' | 'tts_quick' | 'aac' | 'alerts' | 'esl' | 'twoway';
 
 // Preset Quick Response Messages
 export const QUICK_RESPONSES = [
@@ -410,6 +432,7 @@ export default function HearAndExpressView({
           { id: 'aac' as const, labelAr: '🧩 لوحات التواصل الرمزي (AAC)', labelEn: '🧩 AAC Board' },
           { id: 'alerts' as const, labelAr: '⚡ منارة التنبيه البصري', labelEn: '⚡ Visual & Vibration Alert' },
           { id: 'esl' as const, labelAr: '🤟 لغة الإشارة المصرية (3D)', labelEn: '🤟 Egyptian Sign Language' },
+          { id: 'twoway' as const, labelAr: '🔄 محادثة ثنائية الاتجاه', labelEn: '🔄 Two-Way Conversation' },
         ].map((tab) => {
           const isSelected = activeTab === tab.id;
           return (
@@ -752,11 +775,7 @@ export default function HearAndExpressView({
         {activeTab === 'alerts' && (
           <section className="space-y-6">
             {/* Live sound radar: real-time environmental sound detection for deaf users */}
-            <React.Suspense fallback={
-              <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] text-xs text-[#94A3B8]">
-                {isAr ? 'جاري تحميل رادار الأصوات...' : 'Loading sound radar...'}
-              </div>
-            }>
+            <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل رادار الأصوات...' labelEn='Loading sound radar...' isAr={isAr} />}>
               <SoundAwarenessInterface isArabic={isAr} />
             </React.Suspense>
 
@@ -830,6 +849,27 @@ export default function HearAndExpressView({
                 )}
               </div>
             </div>
+
+            {/* Real camera sign recognition (MediaPipe landmarks, on-device) */}
+            <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل التعرف على الإشارة...' labelEn='Loading sign recognition...' isAr={isAr} />}>
+              <SignRecognitionInterface isArabic={isAr} />
+            </React.Suspense>
+
+            {/* Guided ESL learning path */}
+            <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل دروس لغة الإشارة...' labelEn='Loading sign lessons...' isAr={isAr} />}>
+              <SignLanguageLearningInterface isArabic={isAr} />
+            </React.Suspense>
+          </section>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            TAB 6: TWO-WAY DEAF <-> HEARING CONVERSATION
+           ══════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'twoway' && (
+          <section className="space-y-6">
+            <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل المحادثة الثنائية...' labelEn='Loading two-way conversation...' isAr={isAr} />}>
+              <UnifiedTwoWayCommunicationView isArabic={isAr} />
+            </React.Suspense>
           </section>
         )}
 
