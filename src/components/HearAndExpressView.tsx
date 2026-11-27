@@ -25,6 +25,7 @@ import {
   Send,
   Zap,
   Ear,
+  Settings2,
   Eye,
   Sliders,
   ChevronRight,
@@ -33,6 +34,7 @@ import {
   RotateCcw,
   AlertTriangle,
 } from 'lucide-react';
+import { ConversationEngine } from '../modules/hearAndExpress/liveConversation/conversationEngine';
 import { UserProfile } from '../types';
 
 const SoundAwarenessInterface = React.lazy(() =>
@@ -49,6 +51,21 @@ const SignRecognitionInterface = React.lazy(() =>
 const SignLanguageLearningInterface = React.lazy(() =>
   import('../modules/hearAndExpress/signLanguage/components/SignLanguageLearningInterface').then((m) => ({
     default: m.SignLanguageLearningInterface,
+  }))
+);
+const CaptionInterface = React.lazy(() =>
+  import('../modules/hearAndExpress/liveConversation/components/CaptionInterface').then((m) => ({
+    default: m.CaptionInterface,
+  }))
+);
+const PersonalAacWorkspaceView = React.lazy(() =>
+  import('../modules/hearAndExpress/personalAac/components/PersonalAacWorkspaceView').then((m) => ({
+    default: m.PersonalAacWorkspaceView,
+  }))
+);
+const HearAndExpressPersonalizationCenter = React.lazy(() =>
+  import('../modules/hearAndExpress/privacyAndPersonalization/components/HearAndExpressPersonalizationCenter').then((m) => ({
+    default: m.HearAndExpressPersonalizationCenter,
   }))
 );
 const UnifiedTwoWayCommunicationView = React.lazy(() =>
@@ -175,6 +192,13 @@ export default function HearAndExpressView({
 }: HearAndExpressViewProps) {
   const isAr = isArabicLocale(profile.language);
   const [activeTab, setActiveTab] = useState<CommunicationTab>('captions');
+
+  // Live-conversation engine (captions, vocabulary, notes) - created once per view
+  const conversationEngineRef = React.useRef<ConversationEngine | null>(null);
+  if (!conversationEngineRef.current) {
+    conversationEngineRef.current = new ConversationEngine();
+  }
+  const [personalizationOpen, setPersonalizationOpen] = useState(false);
   const [announceText, setAnnounceText] = useState('');
 
   // 1. Live Captions State
@@ -386,6 +410,14 @@ export default function HearAndExpressView({
 
         {/* Global Stop Speech Button & Communication Status */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPersonalizationOpen(true)}
+            aria-label={isAr ? 'إعدادات التخصيص والخصوصية' : 'Personalization and privacy settings'}
+            className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#1769AA]/40 transition-colors focus:ring-2 focus:ring-[#1769AA] cursor-pointer"
+          >
+            <Settings2 className="w-5 h-5" />
+          </button>
           <div
             data-testid="communication-state-indicator"
             className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#09101A] border border-[#22354E] text-xs font-bold"
@@ -595,6 +627,21 @@ export default function HearAndExpressView({
                 </div>
               )}
             </div>
+
+            {/* Full conversation workspace: session history, personal vocabulary, notes */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-black text-[#F8FAFC]">
+                {isAr ? '🗂️ مساحة المحادثة الكاملة' : '🗂️ Full Conversation Workspace'}
+              </h3>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                {isAr
+                  ? 'محادثة متواصلة مع سجل الجمل، قاموس الكلمات الشخصية، والملاحظات - كلها محفوظة على جهازك فقط.'
+                  : 'A continuous conversation with sentence history, your personal vocabulary, and notes - all stored only on your device.'}
+              </p>
+              <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل مساحة المحادثة...' labelEn='Loading conversation workspace...' isAr={isAr} />}>
+                <CaptionInterface engine={conversationEngineRef.current} language={isAr ? 'ar' : 'en'} />
+              </React.Suspense>
+            </div>
           </section>
         )}
 
@@ -766,6 +813,16 @@ export default function HearAndExpressView({
                 );
               })}
             </div>
+
+            {/* Personal AAC workspace: custom phrases, scenarios, usage stats */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-black text-[#F8FAFC]">
+                {isAr ? '⭐ لوحاتي الشخصية' : '⭐ My Personal Boards'}
+              </h3>
+              <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل اللوحات الشخصية...' labelEn='Loading personal boards...' isAr={isAr} />}>
+                <PersonalAacWorkspaceView isArabic={isAr} />
+              </React.Suspense>
+            </div>
           </section>
         )}
 
@@ -874,6 +931,36 @@ export default function HearAndExpressView({
         )}
 
       </main>
+
+      {/* Personalization & privacy center (caption styling, speech/AAC defaults, alert preferences, local data) */}
+      {personalizationOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isAr ? 'إعدادات التخصيص والخصوصية' : 'Personalization and privacy settings'}
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => setPersonalizationOpen(false)}
+        >
+          <div
+            className="max-w-3xl w-full max-h-[85vh] overflow-y-auto rounded-3xl bg-[#0D1626] border border-[#22354E] p-4 custom-scrollbar"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end mb-2">
+              <button
+                type="button"
+                onClick={() => setPersonalizationOpen(false)}
+                aria-label={isAr ? 'إغلاق الإعدادات' : 'Close settings'}
+                className="px-3 py-1.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
+              >
+                {isAr ? 'إغلاق' : 'Close'}
+              </button>
+            </div>
+            <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل الإعدادات...' labelEn='Loading settings...' isAr={isAr} />}>
+              <HearAndExpressPersonalizationCenter isArabic={isAr} />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
