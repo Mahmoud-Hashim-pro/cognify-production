@@ -1250,7 +1250,11 @@ export default function App() {
             isDarkMode={isDarkMode}
           />
         );
+      case 'gym':
       case 'toolkit':
+        if (currentView === 'gym') {
+          try { sessionStorage.setItem('rafiqi_toolkit_category', 'cognitive_gym'); } catch {}
+        }
         return (
           <UnifiedAccessibilityToolkitView
             profile={activeProfile}

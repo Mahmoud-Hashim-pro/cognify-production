@@ -17,6 +17,8 @@ export function sectionToolButtons(sectionId: ProductSectionId): SectionFeatureI
   if (!section) return [];
   const seen = new Set<string>();
   return section.features.filter((f) => {
+    // These views have no screen yet (they would land on Home). Keep them out of the switcher.
+    if (['planner', 'goals', 'analytics'].includes(f.targetView)) return false;
     const k = featureKey(f);
     if (seen.has(k)) return false;
     seen.add(k);

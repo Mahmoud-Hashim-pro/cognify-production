@@ -96,7 +96,16 @@ export default function UnifiedAccessibilityToolkitView({
   isDarkMode = true,
 }: UnifiedAccessibilityToolkitViewProps) {
   const isAr = isArabicLocale(profile.language);
-  const [activeCategory, setActiveCategory] = useState<ToolkitCategory>('see_understand');
+  const [activeCategory, setActiveCategory] = useState<ToolkitCategory>(() => {
+    try {
+      const c = sessionStorage.getItem('rafiqi_toolkit_category');
+      if (c) {
+        sessionStorage.removeItem('rafiqi_toolkit_category');
+        return c as ToolkitCategory;
+      }
+    } catch {}
+    return 'see_understand';
+  });
 
   // Screen-reader live announcement region
   const [announcement, setAnnouncement] = useState('');
