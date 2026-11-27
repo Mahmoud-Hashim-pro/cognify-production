@@ -56,7 +56,7 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
   ];
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="flex-1 h-screen overflow-y-auto bg-rafiqi-bg-dark text-slate-100 relative selection:bg-rafiqi-focus/30 selection:text-rafiqi-focus overflow-x-hidden font-sans flex flex-col custom-scrollbar p-6 md:p-10 gap-6">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="tool-auto flex-1 h-screen overflow-y-auto bg-rafiqi-bg-dark text-slate-100 relative selection:bg-rafiqi-focus/30 selection:text-rafiqi-focus overflow-x-hidden font-sans flex flex-col custom-scrollbar p-6 md:p-10 gap-6">
       {/* Ambient Lighting Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px]" />
@@ -93,7 +93,7 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
 
       <div className="max-w-3xl w-full space-y-6 pb-10">
         {/* Contact card */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-amber-400/90 via-blue-600/90 to-indigo-600/90 border border-rafiqi-focus/30 text-white rounded-[28px] p-6 md:p-8 shadow-2xl shadow-[#E5A93C]/10 flex flex-col md:flex-row md:items-center gap-5">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#1769AA] via-[#1769AA] to-[#0D4778] border border-rafiqi-focus/30 text-white rounded-[28px] p-6 md:p-8 shadow-2xl shadow-[#1769AA]/10 flex flex-col md:flex-row md:items-center gap-5">
           <div className="flex-1">
             <h2 className="font-display text-xl font-bold tracking-tight">{t('Need a hand?', 'محتاج مساعدة؟')}</h2>
             <p className="text-sm text-rafiqi-focus/90 mt-1 font-medium">{t('Email our team and we’ll get back to you.', 'ابعتلنا إيميل وهنرد عليك في أقرب وقت.')}</p>

@@ -1278,3 +1278,11 @@ html.high-contrast button:focus-visible {
 .dark .app-navy .accent-\[\#12CFE0\] { accent-color: #4B9FE1; }
 .dark .app-navy .text-cyan-400 { color: #4B9FE1 !important; }
 .dark .app-navy .bg-cyan-600 { background-color: #1769AA !important; }
+
+/* Support page: hard-dark tokens follow the theme */
+:root:not(.dark) .tool-auto.bg-rafiqi-bg-dark { background-color: #F5F9FD; color: #0F172A; }
+:root:not(.dark) .tool-auto .bg-rafiqi-bg-dark\/95, :root:not(.dark) .tool-auto .bg-rafiqi-surface-dark { background-color: #FFFFFF !important; }
+:root:not(.dark) .tool-auto .border-rafiqi-border-dark\/60, :root:not(.dark) .tool-auto .border-rafiqi-border-dark\/50 { border-color: #BFD3E6 !important; }
+:root:not(.dark) .tool-auto .text-slate-300 { color: #334155 !important; }
+.dark .app-navy .bg-rafiqi-bg-dark { background-color: #061A33; }
+.dark .app-navy .bg-rafiqi-surface-dark { background-color: #0D2B4E; }
