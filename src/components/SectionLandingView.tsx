@@ -92,6 +92,7 @@ export default function SectionLandingView({
 
   // Keyboard navigation focus state
   const [activeHelpModal, setActiveHelpModal] = useState(false);
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
   // Real recent activity loaded from local storage (no fabricated data)
   const [recentItems, setRecentItems] = useState<Array<{ id: string; label: string; timestamp: string; featureId?: string }>>([]);
@@ -382,6 +383,19 @@ export default function SectionLandingView({
   };
 
   const featureGroups = getFeatureGroups();
+  // Big sections (more than 8 tools in 2+ groups) show one group at a time as tabs
+  const tabGroups = featureGroups
+    .map((g) => ({
+      id: g.id,
+      titleEn: g.titleEn,
+      titleAr: g.titleAr,
+      icon: g.icon,
+      count: section ? section.features.filter((f) => g.featureIds.includes(f.id)).length : 0,
+    }))
+    .filter((g) => g.count > 0);
+  const useTabs = !!section && section.features.length > 8 && tabGroups.length >= 2;
+  const currentGroupId =
+    activeGroupId && tabGroups.some((g) => g.id === activeGroupId) ? activeGroupId : tabGroups[0]?.id ?? null;
 
   return (
     <div
@@ -722,16 +736,50 @@ export default function SectionLandingView({
 
       {/* ── 2. FEATURE GROUPS WITH DISTINCTIVE CLUSTERS ── */}
       <section className="space-y-3" aria-label={isAr ? 'مجموعات ميزات القسم' : 'Feature Groups'}>
+        {useTabs && (
+          <div
+            role="tablist"
+            aria-label={isAr ? 'مجموعات الأدوات' : 'Tool groups'}
+            data-testid="section-group-tabs"
+            className="flex flex-wrap gap-2"
+          >
+            {tabGroups.map((g) => {
+              const selected = g.id === currentGroupId;
+              const TabIcon = g.icon;
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setActiveGroupId(g.id)}
+                  className={`min-h-[44px] px-3.5 rounded-xl border text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary text-start ${
+                    selected
+                      ? 'bg-rafiqi-primary text-white border-rafiqi-primary'
+                      : isDarkMode
+                      ? 'bg-[#131E2E] border-[#22354E] text-slate-200 hover:border-rafiqi-primary'
+                      : 'bg-white border-slate-200 text-slate-800 hover:border-rafiqi-primary'
+                  }`}
+                >
+                  <TabIcon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span className="line-clamp-2 break-words">{isAr ? g.titleAr : g.titleEn}</span>
+                  <span className="opacity-70 text-xs shrink-0">{g.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         {featureGroups.map((group) => {
           const GroupIcon = group.icon;
           const groupFeatures = section.features.filter((f) => group.featureIds.includes(f.id));
 
           if (groupFeatures.length === 0) return null;
+          if (useTabs && group.id !== currentGroupId) return null;
 
           return (
             <div key={group.id} className="space-y-2">
               {/* Group Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 border-slate-200 dark:border-[#22354E]">
+              <div className={`${useTabs ? 'hidden ' : ''}flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 border-slate-200 dark:border-[#22354E]`}>
                 <div className="flex items-center gap-3">
                   <div className="w-7 h-7 rounded-lg bg-rafiqi-primary/15 text-rafiqi-primary dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
                     <GroupIcon className="w-4 h-4" />
