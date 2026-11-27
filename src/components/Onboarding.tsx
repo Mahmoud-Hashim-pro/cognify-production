@@ -32,7 +32,7 @@ import {
   Check
 } from "lucide-react";
 import { auth, logout } from "../lib/firebase";
-import { getTranslation, isRTL, localize, isArabicLocale } from "../lib/translations";
+import { getTranslation, isRTL, localize, isArabicLocale, frOf } from "../lib/translations";
 import { speak } from "../lib/tts";
 import { PRODUCT_SECTIONS, getSectionIconComponent } from "../lib/sections";
 import { ThemeSelector, ThemeMode } from "./ui/ThemeSelector";
@@ -69,7 +69,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
   const [optionalAssistiveMode, setOptionalAssistiveMode] = useState<'Visual' | 'Vocal-Deaf' | 'Speech' | 'None'>('None');
 
   const isRtl = isArabicLocale(language);
-  const t = (en: string, ar: string) => (isRtl ? ar : en);
+  const t = (en: string, ar: string) => (isRtl ? ar : language === 'French' ? frOf(en) : en);
 
   // Apply real-time visual changes so the user sees the preview immediately
   useEffect(() => {
@@ -180,6 +180,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         {[
           { id: 'Arabic', label: 'العربية (Arabic)', badge: 'موصى به' },
           { id: 'English', label: 'English', badge: 'Full Support' },
+          { id: 'French', label: 'Français', badge: 'Support complet' },
         ].map((langOpt) => (
           <button
             key={langOpt.id}
