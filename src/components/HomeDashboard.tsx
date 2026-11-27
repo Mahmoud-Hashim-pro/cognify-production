@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { scoreFeature } from '../lib/featureSearch';
 import { 
   UserProfile, 
   ChatThread 
@@ -170,6 +171,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       iconName: string;
       targetTab?: string;
       targetView?: string;
+      score?: number;
     }> = [];
 
     PRODUCT_SECTIONS.forEach((sec) => {
@@ -192,16 +194,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       }
 
       sec.features.forEach((feat) => {
-        const featMatch = 
-          feat.titleEn.toLowerCase().includes(q) ||
-          feat.titleAr.toLowerCase().includes(q) ||
-          feat.descEn.toLowerCase().includes(q) ||
-          feat.descAr.toLowerCase().includes(q) ||
-          feat.tagsEn.some((tag) => tag.toLowerCase().includes(q)) ||
-          feat.tagsAr.some((tag) => tag.toLowerCase().includes(q));
+        const featScore = scoreFeature(feat, q);
 
-        if (featMatch) {
+        if (featScore > 0) {
           matches.push({
+            score: featScore,
             type: 'feature',
             sectionId: sec.id,
             sectionTitle: secTitle,
@@ -215,7 +212,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       });
     });
 
-    return matches.slice(0, 6);
+    const secs = matches.filter((m) => m.type === 'section');
+    const feats = matches.filter((m) => m.type === 'feature').sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    return [...feats, ...secs].slice(0, 8);
   }, [searchQuery, isAr]);
 
   // Recommended tools customized by authentic user preferences (Phase 3 invariant)
@@ -384,11 +383,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t(
-                'Search tools across the 6 sections (e.g. Visual Assistant, OCR, Signs, Books)...',
-                'ابحث في أدوات الأقسام الستة (مثل المساعد البصري، قراءة النصوص، قاموس الإشارة)...'
-              )}
-              className={`w-full min-h-[40px] text-xs font-medium ps-9 pe-10 py-2 rounded-xl border ${
+              placeholder={t('Search any tool', 'ابحث عن أي أداة')}
+              className={`w-full min-h-[48px] text-sm font-medium ps-9 pe-10 py-2 rounded-xl border ${
                 isDarkMode 
                   ? 'bg-[#0B1523] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                   : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'
@@ -429,7 +425,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                         onSelectSection(item.sectionId);
                       }
                     }}
-                    className={`w-full min-h-[40px] px-3 py-1.5 rounded-lg text-start flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer ${
+                    className={`w-full min-h-[44px] px-3 py-1.5 rounded-lg text-start flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer ${
                       isDarkMode ? 'hover:bg-[#1A283D] text-slate-200' : 'hover:bg-slate-100 text-slate-800'
                     }`}
                   >

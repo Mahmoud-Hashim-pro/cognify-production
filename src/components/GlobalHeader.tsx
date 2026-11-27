@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { scoreFeature } from '../lib/featureSearch';
 import { 
   Menu, 
   Search, 
@@ -67,26 +68,25 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   // Real global search over every section feature (title + tags, AR & EN)
   const searchResults = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = searchQuery.trim();
     if (!q) return [];
-    const out: Array<{ id: string; title: string; section: string; targetView: string; targetTab?: string }> = [];
+    const out: Array<{ id: string; title: string; section: string; targetView: string; targetTab?: string; score: number }> = [];
     for (const section of PRODUCT_SECTIONS) {
       for (const f of section.features) {
-        const hay = [f.titleEn, f.titleAr, ...(f.tagsEn || []), ...(f.tagsAr || [])]
-          .join(' ')
-          .toLowerCase();
-        if (hay.includes(q)) {
+        const score = scoreFeature(f, q);
+        if (score > 0) {
           out.push({
             id: f.id,
             title: isAr ? f.titleAr : f.titleEn,
             section: isAr ? section.titleAr : section.titleEn,
             targetView: f.targetView,
             targetTab: f.targetTab || f.targetTool,
+            score,
           });
         }
       }
     }
-    return out.slice(0, 8);
+    return out.sort((a, b) => b.score - a.score).slice(0, 8);
   }, [searchQuery, isAr]);
 
   const handlePickResult = (r: { targetView: string; targetTab?: string }) => {
