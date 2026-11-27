@@ -990,3 +990,53 @@ html.high-contrast button:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Light theme for the tool pages (Communicate, Move, Work, ...).
+   Those pages are written with a fixed dark palette; in light mode the
+   page root gets .tool-light and these rules map each dark token to a
+   light one. Text colors are chosen for WCAG AA contrast on white.
+   ───────────────────────────────────────────────────────────── */
+.tool-light { color-scheme: light; }
+.tool-light .bg-\[\#061A33\] { background-color: #F5F9FD !important; }
+.tool-light .bg-\[\#131E2E\],
+.tool-light .bg-\[\#131E2E\]\/95 { background-color: #FFFFFF !important; }
+.tool-light .bg-\[\#1A283D\],
+.tool-light .bg-\[\#1A283D\]\/60,
+.tool-light .bg-\[\#1A283D\]\/50 { background-color: #F1F5F9 !important; }
+.tool-light .bg-\[\#0D2542\] { background-color: #EAF1FA !important; }
+.tool-light .bg-\[\#1F1A0D\] { background-color: #FFF8E6 !important; }
+.tool-light .border-\[\#22354E\],
+.tool-light .border-\[\#22354E\]\/40,
+.tool-light .border-\[\#22354E\]\/50 { border-color: #CBD5E1 !important; }
+.tool-light .text-\[\#F8FAFC\],
+.tool-light .hover\:text-\[\#F8FAFC\]:hover { color: #0F172A !important; }
+.tool-light .text-\[\#CBD5E1\] { color: #334155 !important; }
+.tool-light .text-\[\#94A3B8\],
+.tool-light .text-\[\#64748B\] { color: #475569 !important; }
+.tool-light .text-\[\#4B9FE1\] { color: #1769AA !important; }
+.tool-light .text-\[\#22354E\] { color: #94A3B8 !important; }
+.tool-light .placeholder-\[\#64748B\]::placeholder { color: #64748B !important; }
+.tool-light .text-amber-100,
+.tool-light .text-amber-200 { color: #78350F !important; }
+.tool-light .text-amber-300,
+.tool-light .text-amber-400 { color: #92400E !important; }
+.tool-light .text-emerald-300,
+.tool-light .text-emerald-400 { color: #047857 !important; }
+.tool-light .text-red-300,
+.tool-light .text-red-400 { color: #B91C1C !important; }
+.tool-light .text-slate-300,
+.tool-light .text-slate-400 { color: #475569 !important; }
+.tool-light .text-slate-100,
+.tool-light .text-slate-200 { color: #1E293B !important; }
+/* Filled blue buttons and selected tabs keep white text */
+.tool-light .bg-\[\#1769AA\],
+.tool-light .bg-\[\#1769AA\] *,
+.tool-light .bg-\[\#0D4778\],
+.tool-light .bg-\[\#0D4778\] * { color: #FFFFFF !important; }
+.tool-light .bg-\[\#1769AA\]\/15 .text-white,
+.tool-light .bg-\[\#1769AA\]\/20 .text-white,
+.tool-light .bg-\[\#1769AA\]\/30 .text-white,
+.tool-light .bg-\[\#1769AA\]\/15.text-white,
+.tool-light .bg-\[\#1769AA\]\/20.text-white,
+.tool-light .bg-\[\#1769AA\]\/30.text-white { color: #0F172A !important; }

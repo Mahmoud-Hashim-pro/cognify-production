@@ -249,7 +249,7 @@ export default function AccessibleCommunicateWorkspaceView({
   return (
     <div
       className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
-        'bg-[#061A33] text-[#F8FAFC]'
+        isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'tool-light bg-[#F5F9FD] text-[#061A33]'
       } font-sans selection:bg-[#1769AA]/30`}
       dir={isAr ? 'rtl' : 'ltr'}
     >

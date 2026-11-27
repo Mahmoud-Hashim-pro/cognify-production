@@ -301,7 +301,7 @@ export default function AccessibleMobilityWorkspaceView({
   return (
     <div
       className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
-        isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'bg-[#F5F9FD] text-[#061A33]'
+        isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'tool-light bg-[#F5F9FD] text-[#061A33]'
       } font-sans selection:bg-[#1769AA]/30`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
@@ -435,9 +435,9 @@ export default function AccessibleMobilityWorkspaceView({
       {/* ── SUB-NAV: 7 ACCESSIBLE MOBILITY TABS ── */}
       <nav
         aria-label={localize(profile.language, 'Mobility Assistant Tools', 'أدوات مساعد الحركة والاستكشاف')}
-        className="bg-[#0D4778]/20 border-b border-[#22354E] px-4 sm:px-6 py-2 overflow-x-auto lg:overflow-x-visible lg:flex-wrap custom-scrollbar scroll-fade-x"
+        className="bg-[#0D2542] border-b border-[#22354E] px-4 sm:px-6 py-2.5"
       >
-        <div className="flex items-center gap-2 min-w-max">
+        <div className="flex flex-wrap items-center gap-2">
           {tools.map((t) => {
             const Icon = t.icon;
             const isActive = activeTool === t.id;
@@ -450,7 +450,7 @@ export default function AccessibleMobilityWorkspaceView({
                   speakText(isAr ? t.titleAr : t.titleEn);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
+                className={`min-h-[44px] px-3 py-2.5 flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
                   isActive
                     ? 'bg-[#1769AA] text-white shadow-md'
                     : 'bg-[#131E2E] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D] border border-[#22354E]'
