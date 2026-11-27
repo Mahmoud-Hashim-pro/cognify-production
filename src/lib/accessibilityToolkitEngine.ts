@@ -15,6 +15,7 @@ export type ToolkitCategory =
   | 'read_scan'
   | 'listen_transcribe'
   | 'format_edu'
+  | 'environment'
   | 'saved_activity';
 
 export interface ScannedPageItem {

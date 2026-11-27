@@ -47,6 +47,7 @@ import {
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
+import { AdaptiveEnvironmentPanel } from './AdaptiveEnvironmentPanel';
 import { Breadcrumbs } from './ui/Breadcrumbs';
 import { getRouteBreadcrumbs } from '../lib/navigation';
 import { speak, cancelSpeech } from '../lib/tts';
@@ -472,6 +473,7 @@ export default function UnifiedAccessibilityToolkitView({
           { id: 'read_scan' as const, labelAr: '📄 اقرأ وامسح (سكانر و PDF)', labelEn: '📄 Read & Scan (Scanner & PDF)' },
           { id: 'listen_transcribe' as const, labelAr: '🎙️ استمع وفرّغ (المحاضرات)', labelEn: '🎙️ Listen & Transcribe' },
           { id: 'format_edu' as const, labelAr: '📖 استوديو الكتب والامتحانات', labelEn: '📖 Educational Book Studio' },
+          { id: 'environment' as const, labelAr: '🌿 مساعد البيئة (إضاءة وضوضاء)', labelEn: '🌿 Environment Assistant (Light & Noise)' },
           { id: 'saved_activity' as const, labelAr: '🕒 السجل والنتائج المحفوظة', labelEn: '🕒 Saved Results & Activity' },
         ].map((cat) => {
           const isSelected = activeCategory === cat.id;
@@ -1138,6 +1140,29 @@ export default function UnifiedAccessibilityToolkitView({
           {/* ═════════════════════════════════════════════════════════════════
               CATEGORY 5: SAVED RESULTS AND RECENT ACTIVITY HUB
              ═════════════════════════════════════════════════════════════════ */}
+          {activeCategory === 'environment' && (
+            <div className="space-y-6">
+              <div
+                className={`p-6 rounded-3xl border ${
+                  isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+                }`}
+              >
+                <h2
+                  className={`text-lg font-black mb-3 ${
+                    isDarkMode ? 'text-stone-100' : 'text-stone-900'
+                  }`}
+                >
+                  {localize(profile.language, 'Environment Assistant', 'مساعد البيئة')}
+                </h2>
+                <AdaptiveEnvironmentPanel
+                  isArabic={isArabicLocale(profile.language)}
+                  isDarkMode={isDarkMode}
+                  currentA11y={profile.disabilityType ?? ''}
+                />
+              </div>
+            </div>
+          )}
+
           {activeCategory === 'saved_activity' && (
             <div className="space-y-6">
               <div
