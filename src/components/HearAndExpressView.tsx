@@ -81,7 +81,7 @@ const UnifiedTwoWayCommunicationView = React.lazy(() =>
 );
 
 const ModuleLoadingFallback: React.FC<{ labelAr: string; labelEn: string; isAr: boolean }> = ({ labelAr, labelEn, isAr }) => (
-  <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] text-xs text-[#94A3B8]">
+  <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] text-xs text-[#94A3B8]">
     {isAr ? labelAr : labelEn}
   </div>
 );
@@ -410,7 +410,7 @@ export default function HearAndExpressView({
               type="button"
               onClick={onNavigateBack}
               aria-label={isAr ? 'الرجوع للوحة الميزات' : 'Back to dashboard'}
-              className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+              className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
             >
               <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
             </button>
@@ -439,7 +439,7 @@ export default function HearAndExpressView({
           </button>
           <div
             data-testid="communication-state-indicator"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#09101A] border border-[#22354E] text-xs font-bold"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#09101A] border border-[#1D426B] text-xs font-bold"
           >
             <span
               className={`w-2 h-2 rounded-full ${
@@ -475,7 +475,7 @@ export default function HearAndExpressView({
       <nav
         role="tablist"
         aria-label={isAr ? 'أدوات التواصل والتعبير' : 'Communication sub-modules'}
-        className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-[#131E2E] border-b border-[#22354E]"
+        className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-[#0D2B4E] border-b border-[#1D426B]"
       >
         {[
           { id: 'captions' as const, labelAr: '🎙️ تفريغ الكلام المباشر', labelEn: '🎙️ Live Captions' },
@@ -498,7 +498,7 @@ export default function HearAndExpressView({
               className={`px-4 py-2 rounded-xl text-xs font-bold  transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center text-center ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/35 border border-[#4B9FE1]'
-                  : 'bg-[#1A283D] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#22354E]'
+                  : 'bg-[#12365E] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#1D426B]'
               }`}
             >
               {isAr ? tab.labelAr : tab.labelEn}
@@ -515,7 +515,7 @@ export default function HearAndExpressView({
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'captions' && (
           <section data-testid="live-captions-view" className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#131E2E] border border-[#22354E]">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#0D2B4E] border border-[#1D426B]">
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <Mic className="w-5 h-5 text-[#4B9FE1]" />
@@ -545,7 +545,7 @@ export default function HearAndExpressView({
                 </button>
 
                 {/* Font Scaling Toggle */}
-                <div className="flex items-center gap-1 bg-[#1A283D] p-1 rounded-xl border border-[#22354E]">
+                <div className="flex items-center gap-1 bg-[#12365E] p-1 rounded-xl border border-[#1D426B]">
                   {(['normal', 'large', 'xl'] as const).map((sz) => (
                     <button
                       key={sz}
@@ -566,7 +566,7 @@ export default function HearAndExpressView({
                   onClick={toggleListening}
                   data-testid="captions-retry-btn"
                   aria-label={isAr ? 'إعادة محاولة الاستماع' : 'Retry listening'}
-                  className="px-3 py-2 rounded-xl bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA] text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3 py-2 rounded-xl bg-[#12365E] border border-[#1D426B] hover:border-[#1769AA] text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5 transition-all cursor-pointer"
                   title={isAr ? 'إعادة المحاولة' : 'Retry'}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -577,7 +577,7 @@ export default function HearAndExpressView({
                   type="button"
                   onClick={copyCaptions}
                   aria-label={isAr ? 'نسخ النصوص' : 'Copy captions'}
-                  className="p-2 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white"
+                  className="p-2 rounded-xl bg-[#12365E] border border-[#1D426B] text-[#94A3B8] hover:text-white"
                   title={isAr ? 'نسخ النص' : 'Copy Text'}
                 >
                   {copiedSuccess ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -587,7 +587,7 @@ export default function HearAndExpressView({
                   type="button"
                   onClick={clearCaptions}
                   aria-label={isAr ? 'مسح كل النصوص' : 'Clear all captions'}
-                  className="p-2 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-rose-400"
+                  className="p-2 rounded-xl bg-[#12365E] border border-[#1D426B] text-[#94A3B8] hover:text-rose-400"
                   title={isAr ? 'مسح' : 'Clear'}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -598,7 +598,7 @@ export default function HearAndExpressView({
             {/* Captions Display Screen */}
             <div
               className={`p-6 rounded-3xl bg-[#09101A] border-2 ${
-                isListening ? 'border-[#1769AA]' : 'border-[#22354E]'
+                isListening ? 'border-[#1769AA]' : 'border-[#1D426B]'
               } min-h-[300px] max-h-[500px] overflow-y-auto custom-scrollbar flex flex-col justify-end space-y-3`}
             >
               {captionHistory.length === 0 && !captionText && (
@@ -627,7 +627,7 @@ export default function HearAndExpressView({
               {captionHistory.map((phrase, idx) => (
                 <div
                   key={idx}
-                  className={`p-3 rounded-2xl bg-[#131E2E] border border-[#22354E] text-[#F8FAFC] leading-relaxed ${
+                  className={`p-3 rounded-2xl bg-[#0D2B4E] border border-[#1D426B] text-[#F8FAFC] leading-relaxed ${
                     fontSize === 'normal' ? 'text-sm' : fontSize === 'large' ? 'text-lg font-bold' : 'text-2xl font-black'
                   }`}
                 >
@@ -670,7 +670,7 @@ export default function HearAndExpressView({
         {activeTab === 'tts_quick' && (
           <section className="space-y-4">
             {/* Custom Typed Speech Input */}
-            <div className="p-5 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4">
+            <div className="p-5 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Volume2 className="w-4 h-4 text-[#4B9FE1]" />
                 <span>{isAr ? 'كتابة نص لنطقه بصوت مسموع (لغير الناطقين)' : 'Type to Speak Aloud (Non-Speaking Users)'}</span>
@@ -694,14 +694,14 @@ export default function HearAndExpressView({
                       ? 'اكتب هنا ما تريد أن ينطقه رفيقي نيابة عنك...'
                       : 'Type here what you want Rafiqi to say for you...'
                   }
-                  className="flex-1 p-3.5 rounded-2xl bg-[#09101A] border border-[#22354E] text-sm text-white placeholder:text-[#94A3B8]/60 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
+                  className="flex-1 p-3.5 rounded-2xl bg-[#09101A] border border-[#1D426B] text-sm text-white placeholder:text-[#94A3B8]/60 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                 />
                 <button
                   type="button"
                   onClick={() => handleSpeakTyped()}
                   disabled={!typedMessage.trim()}
                   aria-label={isAr ? 'نطق النص المكتوب' : 'Speak typed message'}
-                  className="px-5 py-3.5 rounded-2xl bg-[#1769AA] hover:bg-[#0D4778] disabled:bg-[#1A283D] disabled:text-[#94A3B8] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
+                  className="px-5 py-3.5 rounded-2xl bg-[#1769AA] hover:bg-[#0D4778] disabled:bg-[#12365E] disabled:text-[#94A3B8] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   <span>{isAr ? 'انطق' : 'Speak'}</span>
@@ -725,7 +725,7 @@ export default function HearAndExpressView({
                       type="button"
                       onClick={() => handleSpeakTyped(text)}
                       aria-label={`${isAr ? 'نطق عبارة:' : 'Speak phrase:'} ${text}`}
-                      className="p-4 rounded-2xl bg-[#1A283D] hover:bg-[#1769AA]/20 border border-[#22354E] hover:border-[#1769AA] text-[#F8FAFC] text-start flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-sm active:scale-98"
+                      className="p-4 rounded-2xl bg-[#12365E] hover:bg-[#1769AA]/20 border border-[#1D426B] hover:border-[#1769AA] text-[#F8FAFC] text-start flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-sm active:scale-98"
                     >
                       <span className="text-sm font-bold leading-relaxed">{text}</span>
                       <Volume2 className="w-4 h-4 text-[#4B9FE1] group-hover:scale-110 shrink-0" />
@@ -743,7 +743,7 @@ export default function HearAndExpressView({
         {activeTab === 'aac' && (
           <section data-testid="aac-board-view" className="space-y-5">
             {/* Sentence Strip Builder */}
-            <div className="p-4 rounded-3xl bg-[#131E2E] border-2 border-[#1769AA] space-y-3 shadow-lg">
+            <div className="p-4 rounded-3xl bg-[#0D2B4E] border-2 border-[#1769AA] space-y-3 shadow-lg">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-[#4B9FE1] uppercase tracking-wider">
                   {isAr ? 'شريط بناء الجملة المنطوقة (AAC)' : 'Spoken Sentence Strip'}
@@ -754,7 +754,7 @@ export default function HearAndExpressView({
                     onClick={handleSpeakSentence}
                     disabled={sentenceStrip.length === 0}
                     aria-label={isAr ? 'نطق الجملة الكاملة بصوت مسموع' : 'Speak full sentence'}
-                    className="px-4 py-2 rounded-xl bg-[#16845B] hover:bg-[#126b49] disabled:bg-[#1A283D] text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-sm"
+                    className="px-4 py-2 rounded-xl bg-[#16845B] hover:bg-[#126b49] disabled:bg-[#12365E] text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-sm"
                   >
                     <Volume2 className="w-4 h-4" />
                     <span>{isAr ? 'نطق الجملة' : 'Speak Sentence'}</span>
@@ -764,7 +764,7 @@ export default function HearAndExpressView({
                     onClick={handleClearSentence}
                     disabled={sentenceStrip.length === 0}
                     aria-label={isAr ? 'مسح شريط الجملة' : 'Clear sentence'}
-                    className="p-2 rounded-xl bg-[#1A283D] text-[#94A3B8] hover:text-white"
+                    className="p-2 rounded-xl bg-[#12365E] text-[#94A3B8] hover:text-white"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -772,7 +772,7 @@ export default function HearAndExpressView({
               </div>
 
               {/* Strip Items */}
-              <div className="min-h-[48px] p-2.5 rounded-2xl bg-[#09101A] border border-[#22354E] flex flex-wrap items-center gap-2">
+              <div className="min-h-[48px] p-2.5 rounded-2xl bg-[#09101A] border border-[#1D426B] flex flex-wrap items-center gap-2">
                 {sentenceStrip.length === 0 ? (
                   <span className="text-xs text-[#94A3B8]/70 px-2">
                     {isAr
@@ -805,7 +805,7 @@ export default function HearAndExpressView({
                     className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#1769AA] text-white border border-[#4B9FE1]'
-                        : 'bg-[#131E2E] text-[#94A3B8] border border-[#22354E]'
+                        : 'bg-[#0D2B4E] text-[#94A3B8] border border-[#1D426B]'
                     }`}
                   >
                     {isAr ? cat.titleAr : cat.titleEn}
@@ -824,7 +824,7 @@ export default function HearAndExpressView({
                     type="button"
                     onClick={() => handleAddAacTile(tile)}
                     aria-label={`${isAr ? 'إضافة ونطق رمز:' : 'Add and speak tile:'} ${label}`}
-                    className="p-4 rounded-2xl bg-[#1A283D] hover:bg-[#1769AA]/25 border border-[#22354E] hover:border-[#1769AA] text-center flex flex-col items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-sm group"
+                    className="p-4 rounded-2xl bg-[#12365E] hover:bg-[#1769AA]/25 border border-[#1D426B] hover:border-[#1769AA] text-center flex flex-col items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-sm group"
                   >
                     <span className="text-3xl group-hover:scale-110 transition-transform">{tile.emoji}</span>
                     <span className="text-xs font-bold text-[#F8FAFC]">{label}</span>
@@ -864,7 +864,7 @@ export default function HearAndExpressView({
                       className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors cursor-pointer ${
                         euphoniaCategory === cat
                           ? 'bg-[#1769AA] text-white'
-                          : 'bg-[#1A283D] text-[#94A3B8] hover:bg-[#1769AA]/30 border border-[#22354E]'
+                          : 'bg-[#12365E] text-[#94A3B8] hover:bg-[#1769AA]/30 border border-[#1D426B]'
                       }`}
                     >
                       {cat === 'all' ? (isAr ? 'الكل' : 'All') : `${getCategoryIcon(cat)} ${cat}`}
@@ -880,7 +880,7 @@ export default function HearAndExpressView({
                         type="button"
                         onClick={() => speak(ph.text, profile.language)}
                         aria-label={`${isAr ? 'نطق العبارة:' : 'Speak phrase:'} ${ph.text}`}
-                        className="p-3 rounded-2xl bg-[#131E2E] hover:bg-[#1769AA]/20 border border-[#22354E] hover:border-[#1769AA] text-start text-xs font-bold text-[#F8FAFC] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                        className="p-3 rounded-2xl bg-[#0D2B4E] hover:bg-[#1769AA]/20 border border-[#1D426B] hover:border-[#1769AA] text-start text-xs font-bold text-[#F8FAFC] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
                       >
                         <span aria-hidden="true">{getCategoryIcon(ph.category)}</span>
                         <span>{ph.text}</span>
@@ -902,7 +902,7 @@ export default function HearAndExpressView({
               <SoundAwarenessInterface isArabic={isAr} />
             </React.Suspense>
 
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Radio className="w-5 h-5 text-amber-400" />
                 <span>{isAr ? 'منارة التنبيه البصري واللمسي (للصم وضعاف السمع)' : 'Visual & Vibration Alert Beacon'}</span>
@@ -913,7 +913,7 @@ export default function HearAndExpressView({
                   : 'Emits a bright full-screen visual flash and haptic vibration patterns to notify deaf users of incoming calls, alarms, or urgent environmental sounds.'}
               </p>
 
-              <div className="p-4 rounded-2xl bg-[#09101A] border border-[#22354E] flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-[#09101A] border border-[#1D426B] flex items-center justify-between">
                 <div>
                   <h3 className="text-xs font-bold text-white">
                     {isAr ? 'اختبار منارة التنبيه الآن' : 'Test Alert Beacon Now'}
@@ -941,7 +941,7 @@ export default function HearAndExpressView({
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'esl' && (
           <section className="space-y-4">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{isAr ? 'لغة الإشارة المصرية المعتمدة (ESL/ArSL)' : 'Egyptian Sign Language (ESL/ArSL)'}</span>
@@ -1008,7 +1008,7 @@ export default function HearAndExpressView({
           onClick={() => setPersonalizationOpen(false)}
         >
           <div
-            className="max-w-3xl w-full max-h-[85vh] overflow-y-auto rounded-3xl bg-[#0D1626] border border-[#22354E] p-4 custom-scrollbar"
+            className="max-w-3xl w-full max-h-[85vh] overflow-y-auto rounded-3xl bg-[#0D1626] border border-[#1D426B] p-4 custom-scrollbar"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-end mb-2">

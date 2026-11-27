@@ -262,14 +262,14 @@ export default function AccessibleCommunicateWorkspaceView({
       {/* ── HEADER ── */}
       <header
         role="banner"
-        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#131E2E]/95 backdrop-blur-md border-b border-[#22354E] shadow-md"
+        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#0D2B4E]/95 backdrop-blur-md border-b border-[#1D426B] shadow-md"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={onNavigateBack}
             aria-label={localize(profile.language, 'Back to Move & Explore', 'الرجوع للقسم السابق')}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] border border-[#1D426B] text-[#94A3B8] hover:text-white hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
           >
             <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
           </button>
@@ -278,7 +278,7 @@ export default function AccessibleCommunicateWorkspaceView({
             type="button"
             onClick={onMenuClick}
             aria-label={localize(profile.language, 'Open navigation menu', 'فتح القائمة الرئيسية')}
-            className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+            className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] border border-[#1D426B] text-[#94A3B8] hover:text-white cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -318,7 +318,7 @@ export default function AccessibleCommunicateWorkspaceView({
             type="button"
             onClick={() => setShowPrivacyModal(true)}
             aria-label={localize(profile.language, 'Communication Safety & Privacy Guidelines', 'إرشادات أمان وخصوصية التواصل')}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#4B9FE1] hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] border border-[#1D426B] text-[#4B9FE1] hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
           >
             <ShieldCheck className="w-5 h-5" />
           </button>
@@ -329,7 +329,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <section
         role="region"
         aria-label={localize(profile.language, 'Privacy and Assistance Boundary Notice', 'تنبيه الخصوصية وحدود المساعدة')}
-        className="px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#22354E] flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs"
+        className="px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#1D426B] flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs"
       >
         <div className="flex items-center gap-2.5 text-[#94A3B8]">
           <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0" />
@@ -359,7 +359,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Communication Tools', 'أدوات التواصل')}
-        className="z-20 flex items-center flex-wrap gap-2 px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#22354E]"
+        className="z-20 flex items-center flex-wrap gap-2 px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#1D426B]"
       >
         {tools.map((t) => {
           const IconComponent = t.icon;
@@ -376,7 +376,7 @@ export default function AccessibleCommunicateWorkspaceView({
               className={`flex items-center justify-center gap-2 px-3.5 py-2 min-h-[44px] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/40 border border-[#4B9FE1]'
-                  : 'bg-[#1A283D] text-[#94A3B8] border border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]/50'
+                  : 'bg-[#12365E] text-[#94A3B8] border border-[#1D426B] hover:text-[#F8FAFC] hover:border-[#1769AA]/50'
               }`}
             >
               <IconComponent className="w-4 h-4 text-[#4B9FE1]" />
@@ -409,7 +409,7 @@ export default function AccessibleCommunicateWorkspaceView({
               </p>
               </ClampedNotice>
             </div>
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4 text-start shadow-xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
@@ -437,7 +437,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                         : session.state === 'connecting'
                         ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
-                        : 'bg-[#1A283D] text-[#94A3B8] border-[#22354E]'
+                        : 'bg-[#12365E] text-[#94A3B8] border-[#1D426B]'
                     }`}
                   >
                     {session.state === 'connected'
@@ -488,7 +488,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         className={`p-3.5 rounded-2xl border text-start flex items-center gap-3 transition-all cursor-pointer ${
                           selectedProvider === 'trusted_contact'
                             ? 'bg-[#1769AA]/20 border-[#1769AA] text-white shadow-md'
-                            : 'bg-[#1A283D] border-[#22354E] text-[#94A3B8]'
+                            : 'bg-[#12365E] border-[#1D426B] text-[#94A3B8]'
                         }`}
                       >
                         <Users className="w-5 h-5 text-[#4B9FE1]" />
@@ -504,7 +504,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         className={`p-3.5 rounded-2xl border text-start flex items-center gap-3 transition-all cursor-pointer ${
                           selectedProvider === 'verified_volunteer'
                             ? 'bg-[#1769AA]/20 border-[#1769AA] text-white shadow-md'
-                            : 'bg-[#1A283D] border-[#22354E] text-[#94A3B8]'
+                            : 'bg-[#12365E] border-[#1D426B] text-[#94A3B8]'
                         }`}
                       >
                         <ShieldCheck className="w-5 h-5 text-[#4B9FE1]" />
@@ -517,7 +517,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   </div>
 
                   {/* Informed Consent Checkboxes */}
-                  <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-3">
+                  <div className="p-4 rounded-2xl bg-[#12365E] border border-[#1D426B] space-y-3">
                     <h4 className="text-xs font-bold text-[#F8FAFC] flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-[#4B9FE1]" />
                       <span>{localize(profile.language, 'Explicit Privacy Consent (Mandatory)', 'الموافقة الصريحة على مشاركة الوسائط (إلزامية)')}</span>
@@ -529,7 +529,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         checked={consentCamera}
                         onChange={(e) => setConsentCamera(e.target.checked)}
                         aria-label={localize(profile.language, 'Share camera feed with companion', 'بث كاميرا الهاتف للمرافق')}
-                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#22354E] bg-[#131E2E]"
+                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#1D426B] bg-[#0D2B4E]"
                       />
                       <span>{localize(profile.language, 'I explicitly agree to share my real-time camera feed with the sighted companion.', 'أوافق صراحة على بث كاميرا الهاتف للمرافق المبصر أثناء المكالمة فقط.')}</span>
                     </label>
@@ -540,7 +540,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         checked={consentMic}
                         onChange={(e) => setConsentMic(e.target.checked)}
                         aria-label={localize(profile.language, 'Share microphone for voice conversation', 'مشاركة الميكروفون للمحادثة الصوتية')}
-                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#22354E] bg-[#131E2E]"
+                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#1D426B] bg-[#0D2B4E]"
                       />
                       <span>{localize(profile.language, 'I explicitly agree to share my microphone audio for two-way voice conversation.', 'أوافق صراحة على فتح الميكروفون للتحدث الصوتي المتبادل أثناء المكالمة.')}</span>
                     </label>
@@ -571,7 +571,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'handwriting' && (
           <div className="space-y-4">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <FileText className="w-6 h-6" />
@@ -599,7 +599,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   value={handwritingInput}
                   onChange={(e) => setHandwritingInput(e.target.value)}
                   rows={3}
-                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-sm text-[#F8FAFC] focus:border-[#1769AA] focus:ring-1 focus:ring-[#1769AA] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                  className="w-full p-4 rounded-2xl bg-[#12365E] border border-[#1D426B] text-sm text-[#F8FAFC] focus:border-[#1769AA] focus:ring-1 focus:ring-[#1769AA] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -617,7 +617,7 @@ export default function AccessibleCommunicateWorkspaceView({
 
               {/* Results Breakdown */}
               {handwritingResult && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-4">
+                <div className="p-5 rounded-2xl bg-[#12365E] border border-[#1D426B] space-y-4">
                   {handwritingResult.hasUncertainty && (
                     <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/40 flex items-center gap-2.5 text-amber-300 text-xs">
                       <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
@@ -636,7 +636,7 @@ export default function AccessibleCommunicateWorkspaceView({
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                             token.isUncertain
                               ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
-                              : 'bg-[#131E2E] text-[#F8FAFC] border border-[#22354E]'
+                              : 'bg-[#0D2B4E] text-[#F8FAFC] border border-[#1D426B]'
                           }`}
                         >
                           {token.isUncertain ? `[${token.word}?]` : token.word}
@@ -661,7 +661,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         setIsInspectingSource(!isInspectingSource);
                         speakText(handwritingResult.sourceReplayNoticeAr);
                       }}
-                      className="px-4 py-2 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all"
+                      className="px-4 py-2 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all"
                     >
                       <ZoomIn className="w-4 h-4" />
                       <span>
@@ -673,9 +673,9 @@ export default function AccessibleCommunicateWorkspaceView({
                   </div>
 
                   {isInspectingSource && (
-                    <div className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] space-y-2">
+                    <div className="p-4 rounded-xl bg-[#0D2B4E] border border-[#1D426B] space-y-2">
                       <p className="text-xs text-[#94A3B8]">{handwritingResult.sourceReplayNoticeAr}</p>
-                      <div className="p-6 rounded-lg bg-[#061A33] border border-[#22354E] text-center font-mono text-sm text-[#4B9FE1]">
+                      <div className="p-6 rounded-lg bg-[#061A33] border border-[#1D426B] text-center font-mono text-sm text-[#4B9FE1]">
                         [عالية التباين: صورة الوثيقة اليدوية مكبرة 200%]
                       </div>
                     </div>
@@ -691,7 +691,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'form_reader' && (
           <div className="space-y-4">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <CheckCircle2 className="w-6 h-6" />
@@ -711,7 +711,7 @@ export default function AccessibleCommunicateWorkspaceView({
               </div>
 
               {/* Anti-Fabrication Notice */}
-              <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] flex items-center gap-3 text-xs text-[#94A3B8]">
+              <div className="p-4 rounded-2xl bg-[#12365E] border border-[#1D426B] flex items-center gap-3 text-xs text-[#94A3B8]">
                 <ShieldCheck className="w-5 h-5 text-[#4B9FE1] shrink-0" />
                 <p>{formResult?.safetyAntiFabricationRuleAr}</p>
               </div>
@@ -727,7 +727,7 @@ export default function AccessibleCommunicateWorkspaceView({
                     {formResult.fields.map((field) => (
                       <div
                         key={field.id}
-                        className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start"
+                        className="p-4 rounded-2xl bg-[#12365E] border border-[#1D426B] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start"
                       >
                         <div>
                           <div className="flex items-center gap-2 mb-1">
@@ -782,7 +782,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'voice_notes' && (
           <div className="space-y-4">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <Volume2 className="w-6 h-6" />
@@ -802,15 +802,15 @@ export default function AccessibleCommunicateWorkspaceView({
               </div>
 
               {/* Privacy Disclosure */}
-              <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-xs text-[#94A3B8] flex items-center gap-3">
+              <div className="p-4 rounded-2xl bg-[#12365E] border border-[#1D426B] text-xs text-[#94A3B8] flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-[#4B9FE1] shrink-0" />
                 <p>{voiceResult?.externalProcessingNoticeAr}</p>
               </div>
 
               {/* Voice Message Content Card */}
               {voiceResult && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#22354E]">
+                <div className="p-5 rounded-2xl bg-[#12365E] border border-[#1D426B] space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#1D426B]">
                     <div>
                       <h4 className="text-sm font-bold text-[#F8FAFC]">{voiceResult.fileName}</h4>
                       <p className="text-xs text-[#94A3B8]">
@@ -838,7 +838,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   </div>
 
                   {/* Summary Box */}
-                  <div className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] space-y-1.5">
+                  <div className="p-4 rounded-xl bg-[#0D2B4E] border border-[#1D426B] space-y-1.5">
                     <h5 className="text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>{localize(profile.language, 'AI Summary', 'ملخص الرسالة الذكي')}</span>
@@ -851,7 +851,7 @@ export default function AccessibleCommunicateWorkspaceView({
                     <h5 className="text-xs font-bold text-[#94A3B8]">
                       {localize(profile.language, 'Full Transcript', 'النص الكامل المفرغ:')}
                     </h5>
-                    <p className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC] leading-relaxed">
+                    <p className="p-4 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-xs text-[#F8FAFC] leading-relaxed">
                       {voiceResult.transcriptText}
                     </p>
                   </div>
@@ -866,7 +866,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'social_assistant' && (
           <div className="space-y-4">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <ImageIcon className="w-6 h-6" />
@@ -887,7 +887,7 @@ export default function AccessibleCommunicateWorkspaceView({
 
               {/* Image Description Box */}
               {socialImageDescription && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-3">
+                <div className="p-5 rounded-2xl bg-[#12365E] border border-[#1D426B] space-y-3">
                   <h4 className="text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5">
                     <Eye className="w-4 h-4" />
                     <span>{localize(profile.language, 'Image Description in Message:', 'وصف الصورة المرفقة في الرسالة:')}</span>
@@ -896,7 +896,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   <button
                     type="button"
                     onClick={() => speakText(socialImageDescription.descriptionAr)}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                     <span>{localize(profile.language, 'Listen to Description', 'استمع للوصف')}</span>
@@ -905,7 +905,7 @@ export default function AccessibleCommunicateWorkspaceView({
               )}
 
               {/* Reply Drafter */}
-              <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-4">
+              <div className="p-5 rounded-2xl bg-[#12365E] border border-[#1D426B] space-y-4">
                 <h4 className="text-xs font-bold text-[#F8FAFC] flex items-center gap-1.5">
                   <Send className="w-4 h-4 text-[#4B9FE1]" />
                   <span>{localize(profile.language, 'Draft Suggested Reply', 'صياغة رد مقترح:')}</span>
@@ -926,7 +926,7 @@ export default function AccessibleCommunicateWorkspaceView({
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         replyTone === t
                           ? 'bg-[#1769AA] text-white shadow-sm'
-                          : 'bg-[#131E2E] text-[#94A3B8] border border-[#22354E]'
+                          : 'bg-[#0D2B4E] text-[#94A3B8] border border-[#1D426B]'
                       }`}
                     >
                       {t === 'polite'
@@ -944,7 +944,7 @@ export default function AccessibleCommunicateWorkspaceView({
                       value={replyDraft.draftText}
                       onChange={(e) => setReplyDraft({ ...replyDraft, draftText: e.target.value })}
                       rows={3}
-                      className="w-full p-4 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC] leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                      className="w-full p-4 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-xs text-[#F8FAFC] leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                     />
 
                     {/* Strict review-before-send disclaimer */}
@@ -973,7 +973,7 @@ export default function AccessibleCommunicateWorkspaceView({
                       <button
                         type="button"
                         onClick={() => speakText(replyDraft.draftText)}
-                        className="px-4 py-2.5 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer"
                       >
                         <Volume2 className="w-4 h-4" />
                         <span>{localize(profile.language, 'Listen to Draft', 'استمع للمسودة')}</span>
@@ -991,7 +991,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'payment_guidance' && (
           <div className="space-y-4">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+            <div className="p-6 rounded-3xl bg-[#0D2B4E] border border-[#1D426B] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <Banknote className="w-6 h-6" />
@@ -1032,7 +1032,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   value={paymentOcrText}
                   onChange={(e) => setPaymentOcrText(e.target.value)}
                   rows={2}
-                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-xs text-[#F8FAFC] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                  className="w-full p-4 rounded-2xl bg-[#12365E] border border-[#1D426B] text-xs text-[#F8FAFC] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -1050,23 +1050,23 @@ export default function AccessibleCommunicateWorkspaceView({
 
               {/* Payment Guidance Breakdown */}
               {paymentResult && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-3.5">
+                <div className="p-5 rounded-2xl bg-[#12365E] border border-[#1D426B] space-y-3.5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
+                    <div className="p-3.5 rounded-xl bg-[#0D2B4E] border border-[#1D426B]">
                       <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Service Provider', 'جهة الخدمة')}</span>
                       <p className="text-sm font-bold text-[#4B9FE1] mt-0.5">
                         {paymentResult.paymentProviderDetected?.toUpperCase() || 'إشعار عام'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
+                    <div className="p-3.5 rounded-xl bg-[#0D2B4E] border border-[#1D426B]">
                       <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Reference Code', 'رقم الكود / المرجع')}</span>
                       <p className="text-sm font-bold text-[#F8FAFC] mt-0.5">
                         {paymentResult.referenceNumber || 'غير مذكور'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
+                    <div className="p-3.5 rounded-xl bg-[#0D2B4E] border border-[#1D426B]">
                       <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Amount Due', 'المبلغ المطلوب')}</span>
                       <p className="text-sm font-bold text-emerald-400 mt-0.5">
                         {paymentResult.dueAmount || 'غير محدد'}
@@ -1074,7 +1074,7 @@ export default function AccessibleCommunicateWorkspaceView({
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] space-y-1.5">
+                  <div className="p-4 rounded-xl bg-[#0D2B4E] border border-[#1D426B] space-y-1.5">
                     <h5 className="text-xs font-bold text-[#F8FAFC]">{localize(profile.language, 'Guidance Summary:', 'ملخص الإرشادات:')}</h5>
                     <p className="text-xs text-[#94A3B8] leading-relaxed">{paymentResult.guidanceTextAr}</p>
                   </div>
@@ -1102,7 +1102,7 @@ export default function AccessibleCommunicateWorkspaceView({
           aria-label={localize(profile.language, 'Communication Privacy & Safety Principles', 'مبادئ أمان وخصوصية التواصل')}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
         >
-          <div className="max-w-lg w-full rounded-3xl bg-[#131E2E] border border-[#22354E] p-6 space-y-5 text-start shadow-2xl">
+          <div className="max-w-lg w-full rounded-3xl bg-[#0D2B4E] border border-[#1D426B] p-6 space-y-5 text-start shadow-2xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                 <ShieldCheck className="w-6 h-6" />
@@ -1118,17 +1118,17 @@ export default function AccessibleCommunicateWorkspaceView({
             </div>
 
             <div className="space-y-3 text-xs text-[#94A3B8] leading-relaxed">
-              <div className="p-3.5 rounded-xl bg-[#1A283D] border border-[#22354E] space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#12365E] border border-[#1D426B] space-y-1">
                 <strong className="text-[#F8FAFC] block">1. لا محاكاة لمساعدين بشريين وهميين:</strong>
                 <p>نلتزم بالشفافية الكاملة وتوضيح ما إذا كانت المساعدة آلية أو بشرية حقيقية، مع اشتراط الموافقة الصريحة قبل فتح الكاميرا.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#1A283D] border border-[#22354E] space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#12365E] border border-[#1D426B] space-y-1">
                 <strong className="text-[#F8FAFC] block">2. حظر تنفيذ المعاملات المالية المباشرة:</strong>
                 <p>التطبيق إرشادي فقط ولا ينفذ أي مدفوعات أو تحويلات، ولا يدعي قدرة الكاميرا على كشف الأوراق النقدية المزيفة.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#1A283D] border border-[#22354E] space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#12365E] border border-[#1D426B] space-y-1">
                 <strong className="text-[#F8FAFC] block">3. منع الإرسال التلقائي دون مراجعة:</strong>
                 <p>لن يتم إرسال أو نشر أي رسالة نصية أو بريد إلكتروني دون مراجعتك ونقرك الصريح على زر الإرسال أو النسخ.</p>
               </div>

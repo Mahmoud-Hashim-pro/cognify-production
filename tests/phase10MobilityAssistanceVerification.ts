@@ -368,7 +368,7 @@ export async function runPhase10MobilityTests() {
   assert(!viewContent.includes('#00AEB8'), 'src/components/AccessibleMobilityWorkspaceView.tsx contains ZERO legacy cyan #00AEB8');
   assert(viewContent.includes('#1769AA'), 'AccessibleMobilityWorkspaceView uses Unified Blue #1769AA primary brand');
   assert(viewContent.includes('#0D4778'), 'AccessibleMobilityWorkspaceView uses Unified Blue #0D4778 navy dark');
-  assert(viewContent.includes('#131E2E'), 'AccessibleMobilityWorkspaceView uses Unified Blue #131E2E surface');
+  assert(viewContent.includes('#0D2B4E'), 'AccessibleMobilityWorkspaceView uses Unified Blue #0D2B4E surface');
   assert(viewContent.includes('#061A33'), 'AccessibleMobilityWorkspaceView uses Unified Blue #061A33 deep background');
   assert(viewContent.includes('role="region"'), 'AccessibleMobilityWorkspaceView provides semantic ARIA regions');
   assert(viewContent.includes('aria-live'), 'AccessibleMobilityWorkspaceView provides aria-live announcements');

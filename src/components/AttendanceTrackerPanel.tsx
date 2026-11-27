@@ -64,7 +64,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
     return () => unsub();
   }, [uid, isArabic]);
 
-  const cardCls = isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-stone-200';
+  const cardCls = isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B]' : 'bg-white border-stone-200';
   const textCls = isDarkMode ? 'text-[#F8FAFC]' : 'text-stone-900';
   const subCls = isDarkMode ? 'text-[#94A3B8]' : 'text-stone-500';
 
@@ -132,7 +132,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
             aria-label={isArabic ? 'اسم المادة' : 'Subject name'}
             placeholder={isArabic ? 'اسم المادة (مثال: فيزياء)' : 'Subject name (e.g., Physics)'}
             className={`p-3 rounded-2xl border text-xs ${
-              isDarkMode ? 'bg-[#09101A] border-[#22354E] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
+              isDarkMode ? 'bg-[#09101A] border-[#1D426B] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
           />
           <input
@@ -144,7 +144,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
             aria-label={isArabic ? 'نسبة الحضور المطلوبة' : 'Required attendance percent'}
             placeholder={isArabic ? 'النسبة المطلوبة % (افتراضي 75)' : 'Required % (default 75)'}
             className={`p-3 rounded-2xl border text-xs ${
-              isDarkMode ? 'bg-[#09101A] border-[#22354E] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
+              isDarkMode ? 'bg-[#09101A] border-[#1D426B] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
           />
           <input
@@ -155,7 +155,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
             aria-label={isArabic ? 'إجمالي المحاضرات المخططة' : 'Total planned sessions'}
             placeholder={isArabic ? 'إجمالي المحاضرات (اختياري)' : 'Total sessions (optional)'}
             className={`p-3 rounded-2xl border text-xs ${
-              isDarkMode ? 'bg-[#09101A] border-[#22354E] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
+              isDarkMode ? 'bg-[#09101A] border-[#1D426B] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
           />
         </div>

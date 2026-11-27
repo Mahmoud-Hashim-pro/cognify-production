@@ -28,8 +28,8 @@
   --color-rafiqi-bg: #F5F9FD;
   --color-rafiqi-bg-dark: #061A33;
   --color-rafiqi-surface-dark: #131E2E;
-  --color-rafiqi-surface-elevated: #1A283D;
-  --color-rafiqi-border-dark: #22354E;
+  --color-rafiqi-surface-elevated: #12365E;
+  --color-rafiqi-border-dark: #1D426B;
   --color-rafiqi-success: #16845B;
   --color-rafiqi-warning: #C17A16;
   --color-rafiqi-error: #C43D4D;
@@ -49,10 +49,10 @@
   
   --color-rafiqi-bg-dark: #061A33;
   --color-rafiqi-surface-dark: #131E2E;
-  --color-rafiqi-surface-elevated: #1A283D;
+  --color-rafiqi-surface-elevated: #12365E;
   --color-rafiqi-text-dark-primary: #F8FAFC;
   --color-rafiqi-text-dark-secondary: #94A3B8;
-  --color-rafiqi-border-dark: #22354E;
+  --color-rafiqi-border-dark: #1D426B;
 
   --color-rafiqi-focus: #F59E0B;
 
@@ -408,9 +408,9 @@ html.high-contrast button:focus-visible {
 }
 .dark .rafiqi-btn-secondary,
 .dark .rafiqi-btn-secondary {
-  background-color: var(--color-rafiqi-surface-elevated, #1A283D);
+  background-color: var(--color-rafiqi-surface-elevated, #12365E);
   color: var(--color-rafiqi-primary-muted, #4B9FE1);
-  border-color: var(--color-rafiqi-border-dark, #22354E);
+  border-color: var(--color-rafiqi-border-dark, #1D426B);
 }
 .rafiqi-btn-secondary:hover,
 .rafiqi-btn-secondary:hover {
@@ -419,7 +419,7 @@ html.high-contrast button:focus-visible {
 }
 .dark .rafiqi-btn-secondary:hover,
 .dark .rafiqi-btn-secondary:hover {
-  background-color: #22354E;
+  background-color: #1D426B;
   border-color: #4B9FE1;
 }
 .rafiqi-btn-secondary:active,
@@ -438,7 +438,7 @@ html.high-contrast button:focus-visible {
 .dark .rafiqi-card,
 .dark .rafiqi-card {
   background-color: var(--color-rafiqi-surface-dark, #131E2E);
-  border-color: var(--color-rafiqi-border-dark, #22354E);
+  border-color: var(--color-rafiqi-border-dark, #1D426B);
   color: #F8FAFC;
   box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
 }
@@ -999,23 +999,23 @@ html.high-contrast button:focus-visible {
    ───────────────────────────────────────────────────────────── */
 .tool-light { color-scheme: light; }
 .tool-light .bg-\[\#061A33\] { background-color: #F5F9FD !important; }
-.tool-light .bg-\[\#131E2E\],
-.tool-light .bg-\[\#131E2E\]\/95 { background-color: #FFFFFF !important; }
-.tool-light .bg-\[\#1A283D\],
-.tool-light .bg-\[\#1A283D\]\/60,
-.tool-light .bg-\[\#1A283D\]\/50 { background-color: #F1F5F9 !important; }
+.tool-light .bg-\[\#0D2B4E\],
+.tool-light .bg-\[\#0D2B4E\]\/95 { background-color: #FFFFFF !important; }
+.tool-light .bg-\[\#12365E\],
+.tool-light .bg-\[\#12365E\]\/60,
+.tool-light .bg-\[\#12365E\]\/50 { background-color: #F1F5F9 !important; }
 .tool-light .bg-\[\#0D2542\] { background-color: #EAF1FA !important; }
 .tool-light .bg-\[\#1F1A0D\] { background-color: #FFF8E6 !important; }
-.tool-light .border-\[\#22354E\],
-.tool-light .border-\[\#22354E\]\/40,
-.tool-light .border-\[\#22354E\]\/50 { border-color: #CBD5E1 !important; }
+.tool-light .border-\[\#1D426B\],
+.tool-light .border-\[\#1D426B\]\/40,
+.tool-light .border-\[\#1D426B\]\/50 { border-color: #CBD5E1 !important; }
 .tool-light .text-\[\#F8FAFC\],
 .tool-light .hover\:text-\[\#F8FAFC\]:hover { color: #0F172A !important; }
 .tool-light .text-\[\#CBD5E1\] { color: #334155 !important; }
 .tool-light .text-\[\#94A3B8\],
 .tool-light .text-\[\#64748B\] { color: #475569 !important; }
 .tool-light .text-\[\#4B9FE1\] { color: #1769AA !important; }
-.tool-light .text-\[\#22354E\] { color: #94A3B8 !important; }
+.tool-light .text-\[\#1D426B\] { color: #94A3B8 !important; }
 .tool-light .placeholder-\[\#64748B\]::placeholder { color: #64748B !important; }
 .tool-light .text-amber-100,
 .tool-light .text-amber-200 { color: #78350F !important; }
@@ -1090,10 +1090,10 @@ html.high-contrast button:focus-visible {
 .tool-blue .text-teal-600, .tool-blue .text-teal-700 { color: #1769AA !important; }
 .tool-blue .border-teal-500, .tool-blue .border-teal-600, .tool-blue .border-teal-700,
 .tool-blue .border-teal-500\/20, .tool-blue .border-teal-500\/40, .tool-blue .border-teal-500\/60 { border-color: #1769AA !important; }
-.tool-blue .border-stone-800, .tool-blue .border-stone-700 { border-color: #22354E !important; }
+.tool-blue .border-stone-800, .tool-blue .border-stone-700 { border-color: #1D426B !important; }
 .tool-blue .bg-\[\#0E1416\] { background-color: #061A33 !important; }
-.tool-blue .bg-\[\#121B1E\], .tool-blue .bg-\[\#162327\] { background-color: #131E2E !important; }
-.tool-blue .bg-stone-800 { background-color: #1A283D !important; }
+.tool-blue .bg-\[\#121B1E\], .tool-blue .bg-\[\#162327\] { background-color: #0D2B4E !important; }
+.tool-blue .bg-stone-800 { background-color: #12365E !important; }
 .tool-blue .bg-\[\#FAF8F5\] { background-color: #F5F9FD !important; }
 .tool-blue .bg-teal-50, .tool-blue .bg-teal-50\/50, .tool-blue .bg-teal-100 { background-color: #EAF1FA !important; }
 .tool-blue .border-teal-200, .tool-blue .border-teal-400, .tool-blue .border-teal-500\/50, .tool-blue .border-teal-800\/40 { border-color: #9CC3E4 !important; }
@@ -1101,7 +1101,7 @@ html.high-contrast button:focus-visible {
 .tool-blue .from-teal-500 { --tw-gradient-from: #1769AA !important; }
 .tool-blue .to-emerald-600 { --tw-gradient-to: #0D4778 !important; }
 .tool-blue .bg-stone-900, .tool-blue .bg-stone-900\/40, .tool-blue .bg-stone-900\/60, .tool-blue .bg-stone-900\/70, .tool-blue .bg-stone-900\/80 { background-color: #0D2542 !important; }
-.tool-blue .bg-stone-800\/60, .tool-blue .bg-stone-800\/80 { background-color: #1A283D !important; }
+.tool-blue .bg-stone-800\/60, .tool-blue .bg-stone-800\/80 { background-color: #12365E !important; }
 .tool-blue .bg-rafiqi-bg-dark, .tool-blue .bg-rafiqi-bg-dark\/95 { background-color: #061A33 !important; }
 .tool-blue .bg-stone-50 { background-color: #F5F9FD !important; }
 .tool-blue .bg-stone-100 { background-color: #EAF1FA !important; }
@@ -1117,18 +1117,18 @@ html.high-contrast button:focus-visible {
 }
 .dark .app-navy .bg-white,
 .dark .app-navy .bg-bg-card {
-  background-color: #131E2E !important;
-  border-color: #22354E !important;
+  background-color: #0D2B4E !important;
+  border-color: #1D426B !important;
   color: #F8FAFC !important;
 }
 .dark .app-navy .bg-slate-100,
 .dark .app-navy .bg-\[\#f1f5f9\] {
-  background-color: #1A283D !important;
+  background-color: #12365E !important;
   border-color: #2B4160 !important;
   color: #F8FAFC !important;
 }
 .dark .app-navy .bg-slate-200 {
-  background-color: #1A283D !important;
+  background-color: #12365E !important;
 }
 .dark .app-navy .text-slate-900,
 .dark .app-navy .text-black,
@@ -1148,10 +1148,10 @@ html.high-contrast button:focus-visible {
 .dark .app-navy .border-slate-200,
 .dark .app-navy .border-slate-300,
 .dark .app-navy .border-border {
-  border-color: #22354E !important;
+  border-color: #1D426B !important;
 }
-.dark .app-navy .bg-surface-2 { background-color: #1A283D !important; }
-.dark .app-navy .bg-surface-3 { background-color: #1A283D !important; }
+.dark .app-navy .bg-surface-2 { background-color: #12365E !important; }
+.dark .app-navy .bg-surface-3 { background-color: #12365E !important; }
 .dark .app-navy .text-faint { color: #64748B !important; }
 .dark .app-navy .border-border-2 { border-color: #2B4160 !important; }
 .dark .app-navy .bg-primary { background-color: #1769AA !important; }
@@ -1169,7 +1169,7 @@ html.high-contrast button:focus-visible {
 }
 .dark .app-navy .bg-slate-900,
 .dark .app-navy .bg-slate-950 {
-  background-color: #1A283D !important;
+  background-color: #12365E !important;
 }
 .dark .app-navy .bg-slate-900.text-white {
   background-color: #0D4778 !important;
@@ -1179,23 +1179,23 @@ html.high-contrast button:focus-visible {
 /* Auto light scope: same mapping, follows the theme without a prop */
 :root:not(.dark) .tool-auto { color-scheme: light; }
 :root:not(.dark) .tool-auto .bg-\[\#061A33\] { background-color: #F5F9FD !important; }
-:root:not(.dark) .tool-auto .bg-\[\#131E2E\],
-:root:not(.dark) .tool-auto .bg-\[\#131E2E\]\/95 { background-color: #FFFFFF !important; }
-:root:not(.dark) .tool-auto .bg-\[\#1A283D\],
-:root:not(.dark) .tool-auto .bg-\[\#1A283D\]\/60,
-:root:not(.dark) .tool-auto .bg-\[\#1A283D\]\/50 { background-color: #F1F5F9 !important; }
+:root:not(.dark) .tool-auto .bg-\[\#0D2B4E\],
+:root:not(.dark) .tool-auto .bg-\[\#0D2B4E\]\/95 { background-color: #FFFFFF !important; }
+:root:not(.dark) .tool-auto .bg-\[\#12365E\],
+:root:not(.dark) .tool-auto .bg-\[\#12365E\]\/60,
+:root:not(.dark) .tool-auto .bg-\[\#12365E\]\/50 { background-color: #F1F5F9 !important; }
 :root:not(.dark) .tool-auto .bg-\[\#0D2542\] { background-color: #EAF1FA !important; }
 :root:not(.dark) .tool-auto .bg-\[\#1F1A0D\] { background-color: #FFF8E6 !important; }
-:root:not(.dark) .tool-auto .border-\[\#22354E\],
-:root:not(.dark) .tool-auto .border-\[\#22354E\]\/40,
-:root:not(.dark) .tool-auto .border-\[\#22354E\]\/50 { border-color: #CBD5E1 !important; }
+:root:not(.dark) .tool-auto .border-\[\#1D426B\],
+:root:not(.dark) .tool-auto .border-\[\#1D426B\]\/40,
+:root:not(.dark) .tool-auto .border-\[\#1D426B\]\/50 { border-color: #CBD5E1 !important; }
 :root:not(.dark) .tool-auto .text-\[\#F8FAFC\],
 :root:not(.dark) .tool-auto .hover\:text-\[\#F8FAFC\]:hover { color: #0F172A !important; }
 :root:not(.dark) .tool-auto .text-\[\#CBD5E1\] { color: #334155 !important; }
 :root:not(.dark) .tool-auto .text-\[\#94A3B8\],
 :root:not(.dark) .tool-auto .text-\[\#64748B\] { color: #475569 !important; }
 :root:not(.dark) .tool-auto .text-\[\#4B9FE1\] { color: #1769AA !important; }
-:root:not(.dark) .tool-auto .text-\[\#22354E\] { color: #94A3B8 !important; }
+:root:not(.dark) .tool-auto .text-\[\#1D426B\] { color: #94A3B8 !important; }
 :root:not(.dark) .tool-auto .placeholder-\[\#64748B\]::placeholder { color: #64748B !important; }
 :root:not(.dark) .tool-auto .text-amber-100,
 :root:not(.dark) .tool-auto .text-amber-200 { color: #78350F !important; }
@@ -1262,3 +1262,19 @@ html.high-contrast button:focus-visible {
 :root:not(.dark) .tool-auto .bg-\[\#102D4D\]\/50 { background-color: #EAF1FA !important; }
 
 :root:not(.dark) .tool-auto.bg-\[\#061A33\] { background-color: #F5F9FD !important; color:#0F172A !important; }
+
+/* Light mode: the dark-tuned slate-500/600 tokens are too pale on light pages */
+:root:not(.dark) .app-navy .text-slate-600 { color: #334155; }
+:root:not(.dark) .app-navy .text-slate-500 { color: #475569; }
+:root:not(.dark) .app-navy .border-slate-600 { border-color: #94A3B8; }
+
+/* Dark: cyan accents in Sign Studio and Hear & Express use the app blue */
+.dark .app-navy .text-\[\#12CFE0\], .dark .app-navy .hover\:text-\[\#12CFE0\]:hover { color: #4B9FE1 !important; }
+.dark .app-navy .border-\[\#12CFE0\] { border-color: #4B9FE1 !important; }
+.dark .app-navy .border-\[\#12CFE0\]\/15, .dark .app-navy .border-\[\#12CFE0\]\/20,
+.dark .app-navy .border-\[\#12CFE0\]\/25, .dark .app-navy .border-\[\#12CFE0\]\/30,
+.dark .app-navy .border-\[\#12CFE0\]\/40, .dark .app-navy .border-\[\#12CFE0\]\/50,
+.dark .app-navy .border-\[\#12CFE0\]\/60 { border-color: rgb(75 159 225 / 0.35) !important; }
+.dark .app-navy .accent-\[\#12CFE0\] { accent-color: #4B9FE1; }
+.dark .app-navy .text-cyan-400 { color: #4B9FE1 !important; }
+.dark .app-navy .bg-cyan-600 { background-color: #1769AA !important; }

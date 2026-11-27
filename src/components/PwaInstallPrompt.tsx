@@ -129,10 +129,10 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
       role="alert"
       aria-live="polite"
       aria-label={L('Install Rafiqi Application', 'تثبيت تطبيق رفيقي')}
-      className="fixed bottom-5 start-4 end-4 sm:start-auto sm:end-6 max-w-md z-50 bg-[#0E0610]/90 border border-[#4A1224]/50 shadow-2xl rounded-3xl p-5 backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+      className="fixed bottom-24 start-4 end-4 sm:start-auto sm:end-6 max-w-md z-50 bg-[#0D2542] border border-[#1D426B]/50 shadow-2xl rounded-3xl p-5 backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="flex items-start gap-3.5">
-        <div className="p-3 bg-rose-500/15 text-rose-400 rounded-2xl shrink-0 mt-0.5 border border-rose-500/20">
+        <div className="p-3 bg-[#1769AA]/15 text-sky-400 rounded-2xl shrink-0 mt-0.5 border border-sky-400/20">
           <Smartphone className="w-6 h-6" />
         </div>
 
@@ -140,11 +140,11 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-black text-white flex items-center gap-1.5">
               <span>{L('Install Rafiqi on Phone', 'تثبيت رفيقي على هاتفك')}</span>
-              <Sparkles className="w-3.5 h-3.5 text-rose-400" />
+              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
             </h3>
             <button
               onClick={handleDismiss}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#1A0C1D] transition-colors"
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#16395E] transition-colors"
               aria-label={L('Close install banner', 'إغلاق نافذة التثبيت')}
             >
               <X className="w-4 h-4" />
@@ -162,15 +162,15 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
           {isIosDevice ? (
             <div className="mt-3.5 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 text-xs text-slate-200">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black flex items-center justify-center shrink-0">1</span>
+                <span className="w-5 h-5 rounded-full bg-[#1769AA]/20 text-sky-400 text-xs font-black flex items-center justify-center shrink-0">1</span>
                 <span className="flex items-center gap-1">
-                  {L('Tap Safari Share button', 'اضغط زر المشاركة في سفاري')} <Share2 className="w-3.5 h-3.5 text-rose-400 inline" />
+                  {L('Tap Safari Share button', 'اضغط زر المشاركة في سفاري')} <Share2 className="w-3.5 h-3.5 text-sky-400 inline" />
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black flex items-center justify-center shrink-0">2</span>
+                <span className="w-5 h-5 rounded-full bg-[#1769AA]/20 text-sky-400 text-xs font-black flex items-center justify-center shrink-0">2</span>
                 <span className="flex items-center gap-1">
-                  {L('Select "Add to Home Screen"', 'اختر "إضافة إلى الشاشة الرئيسية"')} <PlusSquare className="w-3.5 h-3.5 text-rose-400 inline" />
+                  {L('Select "Add to Home Screen"', 'اختر "إضافة إلى الشاشة الرئيسية"')} <PlusSquare className="w-3.5 h-3.5 text-sky-400 inline" />
                 </span>
               </div>
               <button
@@ -186,7 +186,7 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
               <button
                 onClick={handleInstall}
                 disabled={isInstalling}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-rose-500/20 hover:opacity-95 active:scale-95 transition-all"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white text-xs font-black shadow-lg shadow-[#1769AA]/30 hover:opacity-95 active:scale-95 transition-all"
               >
                 <Download className="w-4 h-4" />
                 <span>{L('Install Rafiqi App', 'تثبيت تطبيق رفيقي')}</span>

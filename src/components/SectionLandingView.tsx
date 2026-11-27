@@ -418,7 +418,7 @@ export default function SectionLandingView({
             onClick={onNavigateBack}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
               isDarkMode
-                ? 'hover:text-white hover:bg-[#1A283D]'
+                ? 'hover:text-white hover:bg-[#12365E]'
                 : 'hover:text-slate-900 hover:bg-slate-200'
             }`}
           >
@@ -443,7 +443,7 @@ export default function SectionLandingView({
           onClick={() => setActiveHelpModal(!activeHelpModal)}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
             isDarkMode
-              ? 'bg-[#131E2E] border-[#22354E] text-slate-300 hover:text-white hover:border-rafiqi-primary'
+              ? 'bg-[#0D2B4E] border-[#1D426B] text-slate-300 hover:text-white hover:border-rafiqi-primary'
               : 'bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:border-rafiqi-primary'
           }`}
           aria-expanded={activeHelpModal}
@@ -466,7 +466,7 @@ export default function SectionLandingView({
             data-testid="section-back"
             aria-label={isAr ? 'رجوع' : 'Back'}
             className={`w-11 h-11 shrink-0 rounded-xl border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary ${
-              isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-300 text-slate-800'
+              isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B] text-white' : 'bg-white border-slate-300 text-slate-800'
             }`}
           >
             {isAr ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
@@ -515,7 +515,7 @@ export default function SectionLandingView({
             aria-expanded={activeHelpModal}
             aria-label={isAr ? 'معلومات وإرشادات عن هذا القسم' : 'Notes and tips about this section'}
             className={`w-11 h-11 shrink-0 rounded-full border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary text-rafiqi-primary ${
-              isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-300'
+              isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B]' : 'bg-white border-slate-300'
             }`}
           >
             <Info className="w-5 h-5" />
@@ -588,7 +588,7 @@ export default function SectionLandingView({
         <section
           aria-label={isAr ? 'إجراءات التعلم السريعة' : 'Quick Learning Actions'}
           className={`p-3 rounded-xl border ${
-            isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-200'
+            isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B]' : 'bg-white border-slate-200'
           }`}
         >
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -600,7 +600,7 @@ export default function SectionLandingView({
               }}
               className={`min-h-[48px] p-2.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
                 isDarkMode
-                  ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary text-white'
+                  ? 'bg-[#12365E] border-[#1D426B] hover:border-rafiqi-primary text-white'
                   : 'bg-slate-50 border-slate-200 hover:border-rafiqi-primary text-slate-900'
               }`}
             >
@@ -621,7 +621,7 @@ export default function SectionLandingView({
               }}
               className={`min-h-[48px] p-2.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
                 isDarkMode
-                  ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary text-white'
+                  ? 'bg-[#12365E] border-[#1D426B] hover:border-rafiqi-primary text-white'
                   : 'bg-slate-50 border-slate-200 hover:border-rafiqi-primary text-slate-900'
               }`}
             >
@@ -642,7 +642,7 @@ export default function SectionLandingView({
               }}
               className={`min-h-[48px] p-2.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
                 isDarkMode
-                  ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary text-white'
+                  ? 'bg-[#12365E] border-[#1D426B] hover:border-rafiqi-primary text-white'
                   : 'bg-slate-50 border-slate-200 hover:border-rafiqi-primary text-slate-900'
               }`}
             >
@@ -713,7 +713,7 @@ export default function SectionLandingView({
           aria-label={isAr ? 'حدود لغة الإشارة المعتمدة' : 'Verified Sign Language Boundary'}
           className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
-              ? 'bg-[#151D2A] border-[#22354E] text-slate-200'
+              ? 'bg-[#151D2A] border-[#1D426B] text-slate-200'
               : 'bg-slate-50 border-slate-200 text-slate-800'
           }`}
         >
@@ -783,7 +783,7 @@ export default function SectionLandingView({
                     selected
                       ? 'bg-rafiqi-primary text-white border-rafiqi-primary'
                       : isDarkMode
-                      ? 'bg-[#131E2E] border-[#22354E] text-slate-200 hover:border-rafiqi-primary'
+                      ? 'bg-[#0D2B4E] border-[#1D426B] text-slate-200 hover:border-rafiqi-primary'
                       : 'bg-white border-slate-200 text-slate-800 hover:border-rafiqi-primary'
                   }`}
                 >
@@ -805,7 +805,7 @@ export default function SectionLandingView({
           return (
             <div key={group.id} className="space-y-2">
               {/* Group Header */}
-              <div className={`${useTabs || hideGroupHeaders ? 'hidden ' : ''}flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 border-slate-200 dark:border-[#22354E]`}>
+              <div className={`${useTabs || hideGroupHeaders ? 'hidden ' : ''}flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 border-slate-200 dark:border-[#1D426B]`}>
                 <div className="flex items-center gap-3">
                   <div className="w-7 h-7 rounded-lg bg-rafiqi-primary/15 text-rafiqi-primary dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
                     <GroupIcon className="w-4 h-4" />
@@ -820,7 +820,7 @@ export default function SectionLandingView({
                   </div>
                 </div>
 
-                <span className="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200/50 dark:bg-[#1A283D] text-slate-600 dark:text-slate-400 self-center">
+                <span className="hidden text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200/50 dark:bg-[#12365E] text-slate-600 dark:text-slate-400 self-center">
                   {isAr ? `${groupFeatures.length} أدوات` : `${groupFeatures.length} features`}
                 </span>
               </div>
@@ -850,7 +850,7 @@ export default function SectionLandingView({
                         feature.id === primaryFeature?.id
                           ? 'bg-rafiqi-primary border-rafiqi-primary text-white hover:bg-rafiqi-primary-dark'
                           : isDarkMode
-                          ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary hover:bg-[#1E2F48]'
+                          ? 'bg-[#12365E] border-[#1D426B] hover:border-rafiqi-primary hover:bg-[#1E2F48]'
                           : 'bg-white border-slate-200 hover:border-rafiqi-primary hover:bg-slate-50'
                       }`}
                     >
@@ -860,7 +860,7 @@ export default function SectionLandingView({
                           <div
                             className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-all duration-200 shadow-xs ${
                               isDarkMode
-                                ? 'bg-[#131E2E] border-[#22354E] text-[#4B9FE1] group-hover:bg-rafiqi-primary group-hover:text-white'
+                                ? 'bg-[#0D2B4E] border-[#1D426B] text-[#4B9FE1] group-hover:bg-rafiqi-primary group-hover:text-white'
                                 : 'bg-slate-100 border-slate-200 text-rafiqi-primary group-hover:bg-rafiqi-primary group-hover:text-white'
                             }`}
                           >
@@ -909,7 +909,7 @@ export default function SectionLandingView({
                               key={tIdx}
                               className={`px-2 py-0.5 rounded-md text-xs border ${
                                 isDarkMode
-                                  ? 'bg-[#131E2E] text-slate-400 border-[#22354E]'
+                                  ? 'bg-[#0D2B4E] text-slate-400 border-[#1D426B]'
                                   : 'bg-slate-100 text-slate-600 border-slate-200'
                               }`}
                             >
@@ -920,7 +920,7 @@ export default function SectionLandingView({
                       </div>
 
                       {/* Bottom Action Hint */}
-                      <div className="hidden pt-4 mt-4 border-t border-slate-200 dark:border-[#22354E] items-center justify-between text-xs font-bold text-rafiqi-primary dark:text-[#4B9FE1]">
+                      <div className="hidden pt-4 mt-4 border-t border-slate-200 dark:border-[#1D426B] items-center justify-between text-xs font-bold text-rafiqi-primary dark:text-[#4B9FE1]">
                         <span>{isAr ? 'فتح الأداة مباشرة' : 'Launch Feature'}</span>
                         <ChevronRight
                           className={`w-4 h-4 transition-transform ${
@@ -941,7 +941,7 @@ export default function SectionLandingView({
       <section
         aria-labelledby="recent-activity-heading"
         className={`hidden p-3 rounded-xl border ${
-          isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-200'
+          isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B]' : 'bg-white border-slate-200'
         }`}
       >
         <div className="flex items-center justify-between mb-2">
@@ -968,7 +968,7 @@ export default function SectionLandingView({
               <div
                 key={item.id || idx}
                 className={`p-3 rounded-xl border flex flex-col justify-between text-start ${
-                  isDarkMode ? 'bg-[#1A283D] border-[#22354E]' : 'bg-slate-50 border-slate-200'
+                  isDarkMode ? 'bg-[#12365E] border-[#1D426B]' : 'bg-slate-50 border-slate-200'
                 }`}
               >
                 <div className="text-xs font-bold truncate mb-1">{item.label}</div>
@@ -1023,7 +1023,7 @@ export default function SectionLandingView({
         data-testid="section-quick-tips"
         aria-label={isAr ? 'إرشادات الوصول السريع والتنقل' : 'Accessibility and Keyboard Tips'}
         className={`p-5 rounded-2xl border space-y-2.5 transition-all ${
-          isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-200'
+          isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B]' : 'bg-white border-slate-200'
         }`}
       >
         <div className="flex items-center gap-2 text-rafiqi-primary dark:text-[#4B9FE1]">
