@@ -563,6 +563,7 @@ export default function VisionCompanionView({
   const [selectedMemoryCategory, setSelectedMemoryCategory] = useState<'all' | 'person' | 'object' | 'document'>('all');
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
 
   // Camera acquisition helper with prompt detection, proper timer cleanup, and prevention of retry cascades
@@ -1967,9 +1968,9 @@ Examine what is visible in front of the camera right now with utmost precision:
         aria-hidden="true"
       />
 
-      <div className="max-w-6xl mx-auto w-full space-y-6 sm:space-y-8 pb-16">
+      <div className="max-w-6xl mx-auto w-full space-y-3 sm:space-y-4 pb-20">
         {/* ── TOP ACCESSIBILITY & PREFERENCES TOOLBAR ── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#082344]/80 p-3 sm:p-4 rounded-2xl border border-[#07558A]/80 backdrop-blur-md">
+        <div className="flex items-center justify-between gap-3 bg-[#082344]/80 p-2 sm:p-2.5 rounded-2xl border border-[#07558A]/80 backdrop-blur-md">
           {onNavigateBack ? (
             <button
               type="button"
@@ -1986,27 +1987,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             <div />
           )}
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            {/* Beginner / Advanced Mode Toggle */}
-            <button
-              type="button"
-              onClick={toggleUserMode}
-              data-testid="user-mode-toggle"
-              aria-label={
-                userMode === 'beginner'
-                  ? t('Switch to Advanced Mode', 'التبديل إلى الوضع المتقدم')
-                  : t('Switch to Beginner Mode', 'التبديل إلى الوضع المبسط')
-              }
-              className={`px-3 py-1.5 min-h-[38px] rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                userMode === 'beginner'
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-[#1769AA]/15 border-[#1769AA]/40 text-[#1769AA]'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>{userMode === 'beginner' ? t('Mode: Simple', 'الوضع: مبسط') : t('Mode: Advanced', 'الوضع: متقدم')}</span>
-            </button>
-
+          <div className="relative flex items-center gap-2">
             {/* Voice Command Recognition Mic Toggle */}
             <button
               type="button"
@@ -2022,7 +2003,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   ? t('Listening for commands...', 'جاري الاستماع للأوامر الصوتية...')
                   : t('Voice commands', 'أوامر صوتية')
               }
-              className={`px-3 py-1.5 min-h-[38px] rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 min-h-[44px] rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 isVoiceCommandsActive
                   ? 'bg-red-500/20 border-red-500 text-red-400 animate-pulse'
                   : 'bg-[#092747] border-[#07558A] text-[#B9CDE3] hover:text-white'
@@ -2038,6 +2019,52 @@ Examine what is visible in front of the camera right now with utmost precision:
               </span>
             </button>
 
+            {/* One compact settings menu: mode, detail, speed, language, shortcuts, quick guide */}
+            <button
+              type="button"
+              onClick={() => setShowSettingsMenu((v) => !v)}
+              data-testid="vision-settings-toggle"
+              aria-expanded={showSettingsMenu}
+              aria-haspopup="true"
+              aria-label={t('Settings', 'الإعدادات')}
+              className="min-h-[44px] px-3 rounded-xl bg-[#092747] border border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#1769AA] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+            >
+              <Settings2 className="w-4 h-4 text-[#1769AA]" aria-hidden="true" />
+              <span>{t('Settings', 'الإعدادات')}</span>
+            </button>
+            {showSettingsMenu && (
+              <div
+                role="group"
+                aria-label={t('Vision settings', 'إعدادات الرؤية')}
+                onKeyDown={(e) => { if (e.key === 'Escape') setShowSettingsMenu(false); }}
+                className="absolute end-0 top-full mt-2 z-30 w-[min(92vw,22rem)] p-3 rounded-2xl bg-[#082344] border border-[#07558A] shadow-2xl flex flex-col gap-3 text-start"
+              >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-bold text-[#B9CDE3]">{t('Mode', 'الوضع')}</span>
+            {/* Beginner / Advanced Mode Toggle */}
+            <button
+              type="button"
+              onClick={toggleUserMode}
+              data-testid="user-mode-toggle"
+              aria-label={
+                userMode === 'beginner'
+                  ? t('Switch to Advanced Mode', 'التبديل إلى الوضع المتقدم')
+                  : t('Switch to Beginner Mode', 'التبديل إلى الوضع المبسط')
+              }
+              className={`px-3 py-1.5 min-h-[44px] rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                userMode === 'beginner'
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                  : 'bg-[#1769AA]/15 border-[#1769AA]/40 text-[#1769AA]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>{userMode === 'beginner' ? t('Mode: Simple', 'الوضع: مبسط') : t('Mode: Advanced', 'الوضع: متقدم')}</span>
+            </button>
+
+
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-bold text-[#B9CDE3]">{t('Detail', 'مستوى التفصيل')}</span>
             {/* Detail Level Selector */}
             <div
               data-testid="detail-level-selector"
@@ -2077,6 +2104,10 @@ Examine what is visible in front of the camera right now with utmost precision:
               </button>
             </div>
 
+
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-bold text-[#B9CDE3]">{t('Speed', 'السرعة')}</span>
             {/* Speech Rate Selector */}
             <div
               data-testid="speech-rate-selector"
@@ -2099,6 +2130,10 @@ Examine what is visible in front of the camera right now with utmost precision:
               ))}
             </div>
 
+
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-bold text-[#B9CDE3]">{t('Language', 'اللغة')}</span>
             {/* Language Selector */}
             <div
               role="group"
@@ -2119,6 +2154,9 @@ Examine what is visible in front of the camera right now with utmost precision:
               ))}
             </div>
 
+
+              </div>
+              <div className="flex flex-col gap-2">
             {/* Keyboard Shortcuts Help Dialog Trigger */}
             <button
               type="button"
@@ -2126,27 +2164,31 @@ Examine what is visible in front of the camera right now with utmost precision:
               data-testid="shortcuts-help-btn"
               aria-label={t('Keyboard Shortcuts Help (?)', 'مساعدة اختصارات لوحة المفاتيح (?)')}
               title={t('Keyboard Shortcuts (?)', 'اختصارات لوحة المفاتيح (?)')}
-              className="p-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#1769AA] hover:text-white hover:border-[#1769AA] transition-all cursor-pointer"
+              className="min-h-[44px] px-3 flex items-center gap-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#1769AA] hover:text-white hover:border-[#1769AA] transition-all cursor-pointer"
             >
               <HelpCircle className="w-4 h-4" />
+              <span className="text-xs font-bold">{t('Keyboard shortcuts', 'اختصارات لوحة المفاتيح')}</span>
             </button>
+              </div>
+                {userMode === 'beginner' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowGuide((v) => !v)}
+                    aria-expanded={showGuide}
+                    className="w-full min-h-[44px] px-3 rounded-xl bg-[#092747] border border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#1769AA] text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#1769AA]" aria-hidden="true" />
+                    {showGuide
+                      ? t('Hide the quick 3-step guide', 'إخفاء دليل الخطوات الثلاث السريع')
+                      : t('Show the quick 3-step guide', 'إظهار دليل الخطوات الثلاث السريع')}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* ── BEGINNER MODE 3-STEP GUIDE (COLLAPSIBLE, CLOSED BY DEFAULT) ── */}
-        {userMode === 'beginner' && (
-          <button
-            type="button"
-            onClick={() => setShowGuide((v) => !v)}
-            aria-expanded={showGuide}
-            className="w-full min-h-[44px] px-4 rounded-2xl bg-[#092747] border border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#1769AA] text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
-          >
-            <Sparkles className="w-4 h-4 text-[#1769AA]" aria-hidden="true" />
-            {showGuide
-              ? t('Hide the quick 3-step guide', 'إخفاء دليل الخطوات الثلاث السريع')
-              : t('Show the quick 3-step guide', 'إظهار دليل الخطوات الثلاث السريع')}
-          </button>
-        )}
         {userMode === 'beginner' && showGuide && (
           <div
             role="region"
@@ -2196,15 +2238,12 @@ Examine what is visible in front of the camera right now with utmost precision:
               <SlidersHorizontal className="w-4 h-4" />
               <span>{t('Select Visual Tool', 'اختر أداة الرؤية المتخصصة', 'Choisir l\'outil visuel')}</span>
             </div>
-            <span className="text-xs text-[#B9CDE3]/70 hidden sm:inline">
-              {t('Shortcuts: C = Cash, T = OCR, S = Stop voice, V = Scene, O = Item Finder, P = Face', 'اختصارات لوحة المفاتيح: C = نقود، T = نص، S = إيقاف الصوت، V = مشهد، O = أشياء، P = وجوه')}
-            </span>
           </div>
 
           <div
             role="tablist"
             aria-label={t('Visual Tools', 'أدوات الرؤية')}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5"
+            className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"
           >
             {VISUAL_TOOLS.map((tool) => {
               const isSelected = activeTool === tool.id;
@@ -2219,7 +2258,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => handleSwitchTool(tool.id)}
-                  className={`min-h-[64px] p-2.5 sm:p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+                  className={`min-h-[64px] min-w-0 p-2 sm:p-2.5 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                     isSelected
                       ? 'bg-[#1769AA]/15 border-[#1769AA] text-[#F5F8FF] shadow-lg shadow-[#1769AA]/20 ring-1 ring-[#1769AA]'
                       : 'bg-[#082344] border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#1769AA]/60 hover:bg-[#092747]'
@@ -2238,8 +2277,8 @@ Examine what is visible in front of the camera right now with utmost precision:
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold leading-tight truncate">{title}</h3>
-                    <p className="text-xs text-[#B9CDE3]/70 truncate">{badge}</p>
+                    <h3 className="text-xs font-bold leading-tight line-clamp-2 break-words">{title}</h3>
+                    <p className="hidden xl:block text-xs text-[#B9CDE3]/70 truncate">{badge}</p>
                   </div>
                 </button>
               );
@@ -2298,14 +2337,14 @@ Examine what is visible in front of the camera right now with utmost precision:
         <section
           data-testid="visual-companion-hud"
           aria-label={t('Visual Workspace Controls & Status', 'حالة وتحكم الرفيق البصري')}
-          className="p-4 sm:p-5 rounded-3xl bg-[#082344] border border-[#07558A] shadow-lg flex flex-col md:flex-row items-center justify-between gap-4"
+          className="p-3 sm:p-3.5 rounded-2xl bg-[#082344] border border-[#07558A] shadow-lg flex flex-col md:flex-row items-center justify-between gap-3"
         >
           {/* Status Indicators */}
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             {/* Camera Status */}
             <div
               data-testid="camera-status-indicator"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+              className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
                 status === 'ready' && streamRef.current
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
                   : status === 'starting-camera' || status === 'analyzing'
@@ -2336,7 +2375,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             {/* Mic Status */}
             <div
               data-testid="mic-status-indicator"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+              className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
                 isVoiceCommandsActive
                   ? 'bg-red-500/15 border-red-500/40 text-red-300'
                   : 'bg-[#061A33] border-[#07558A] text-slate-400'
@@ -2357,7 +2396,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             {/* Speech Status */}
             <div
               data-testid="speech-status-indicator"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+              className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
                 isSpeaking
                   ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
                   : 'bg-[#061A33] border-[#07558A] text-slate-400'
