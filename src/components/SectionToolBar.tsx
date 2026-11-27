@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import HeaderMenu from './HeaderMenu';
 import { ProductSectionId, SectionFeatureItem, getProductSection, getSectionIconComponent } from '../lib/sections';
 import { FEATURE_SHORT_NAMES } from '../lib/sectionShortNames';
 
@@ -33,7 +35,44 @@ interface Props {
 export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, onSelect }: Props) {
   const section = getProductSection(sectionId);
   const buttons = sectionToolButtons(sectionId);
+  // A tool page can host the switcher in its own header row (ToolSwitcherSlot).
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    const el = document.getElementById('tool-switcher-slot');
+    if (el !== slot) setSlot(el);
+  });
+  // The page loads lazily, so watch for its header slot appearing or going away.
+  useEffect(() => {
+    const root = document.getElementById('main-content') || document.body;
+    const check = () => {
+      const el = document.getElementById('tool-switcher-slot');
+      setSlot((prev) => (prev === el ? prev : el));
+    };
+    const mo = new MutationObserver(check);
+    mo.observe(root, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, []);
   if (!section || buttons.length < 2) return null;
+  if (slot) {
+    const items = buttons.map((f) => {
+      const Icon = getSectionIconComponent(f.iconName);
+      const short = FEATURE_SHORT_NAMES[f.id];
+      const label = short ? (isAr ? short[1] : short[0]) : (isAr ? f.titleAr : f.titleEn);
+      return { key: f.id, label, icon: <Icon className="w-4 h-4 shrink-0" />, active: isActive(f), onSelect: () => onSelect(f) };
+    });
+    const current = items.find((i) => i.active);
+    return createPortal(
+      <HeaderMenu
+        testId="section-tool-bar"
+        items={items}
+        label={current?.label || (isAr ? section.titleAr : section.titleEn)}
+        ariaLabel={isAr ? `أدوات ${section.titleAr}` : `${section.titleEn} tools`}
+        isDarkMode={isDarkMode}
+        align="start"
+      />,
+      slot,
+    );
+  }
   return (
     <nav
       aria-label={isAr ? section.titleAr : section.titleEn}

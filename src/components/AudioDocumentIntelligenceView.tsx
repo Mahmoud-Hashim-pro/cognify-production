@@ -48,7 +48,12 @@ import {
   Save,
   FileQuestion,
   ShieldCheck,
+  Mic,
+  Lightbulb,
+  Microscope,
 } from 'lucide-react';
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
+import ClampedNotice from './ClampedNotice';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
@@ -766,54 +771,51 @@ export default function AudioDocumentIntelligenceView({
         {announceText}
       </div>
 
-      {/* Top Header */}
-      <header className="px-4 py-3 border-b border-[#1769AA]/30 bg-[#0D2542] flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-3">
-          {onNavigateBack && (
-            <button
-              type="button"
-              onClick={onNavigateBack}
-              aria-label={isAr ? 'الرجوع للقائمة السابقة' : 'Navigate back'}
-              className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
-            >
-              <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
-            </button>
-          )}
-          <span className="hidden"><BrandLogo size="sm" /></span>
-          <div>
-            <h1 className="text-base font-bold text-white flex items-center gap-2">
-              <Headphones className="w-5 h-5 text-[#4B9FE1]" />
-              <span>{isAr ? 'رفيقي — ذكاء الصوت والمستندات' : 'Rafiqi — Audio & Document Intelligence'}</span>
-            </h1>
-            <p className="hidden text-xs text-[#94A3B8]">
-              {isAr ? 'قسم: اقرأ وتعلّم (المرحلة 6)' : 'Section: Read & Learn (Phase 6)'}
-            </p>
-          </div>
-        </div>
-
-        {/* Global Stop Speech Button */}
-        <button
-          type="button"
-          onClick={pauseOrStopAudio}
-          aria-label={isAr ? 'إيقاف الصوت فوراً' : 'Stop voice playback immediately'}
-          className="px-3 py-1.5 rounded-xl bg-[#C43D4D]/20 hover:bg-[#C43D4D]/40 text-[#FFA4A4] border border-[#C43D4D]/40 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-        >
-          <VolumeX className="w-4 h-4" />
-          <span>{isAr ? 'إيقاف الصوت' : 'Stop Voice'}</span>
-        </button>
+      {/* Top Header: back, title, tool switcher, "..." menu */}
+      <header className="px-3 sm:px-4 py-2.5 border-b border-[#1769AA]/30 bg-[#0D2542] flex items-center gap-2 shadow-md">
+        {onNavigateBack && (
+          <button
+            type="button"
+            onClick={onNavigateBack}
+            aria-label={isAr ? 'الرجوع للقائمة السابقة' : 'Navigate back'}
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+          >
+            <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
+          </button>
+        )}
+        <span className="hidden"><BrandLogo size="sm" /></span>
+        <h1 className="flex-1 min-w-0 truncate text-base font-bold text-white">
+          <span>{isAr ? 'الصوت والمستندات' : 'Audio & Documents'}</span>
+          <span className="hidden">{isAr ? 'رفيقي — ذكاء الصوت والمستندات' : 'Rafiqi — Audio & Document Intelligence'}</span>
+        </h1>
+        <ToolSwitcherSlot />
+        <HeaderMenu
+          ariaLabel={isAr ? 'المزيد' : 'More actions'}
+          isDarkMode={isDarkMode}
+          items={[
+            {
+              key: 'stop',
+              label: isAr ? 'إيقاف الصوت' : 'Stop Voice',
+              ariaLabel: isAr ? 'إيقاف الصوت فوراً' : 'Stop voice playback immediately',
+              icon: <VolumeX className="w-4 h-4" />,
+              danger: true,
+              onSelect: pauseOrStopAudio,
+            },
+          ]}
+        />
       </header>
 
       {/* 4 Accessible Module Navigation Tabs */}
       <nav
         role="tablist"
         aria-label={isAr ? 'أقسام ذكاء الصوت والمستندات' : 'Intelligence subphases'}
-        className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-[#112C4F] border-b border-[#24476F]"
+        className="flex flex-nowrap items-center gap-2 px-3 sm:px-4 py-2 bg-[#112C4F] border-b border-[#24476F] overflow-x-auto custom-scrollbar"
       >
         {[
-          { id: 'lecture' as const, labelAr: '🎙️ تفريغ ومحاضرات ذكية', labelEn: '🎙️ Lecture Intelligence' },
-          { id: 'reader' as const, labelAr: '📄 قارئ المستندات (PDF/Word/EPUB)', labelEn: '📄 Document Reader' },
-          { id: 'ask_content' as const, labelAr: '💡 اسأل المحتوى والاختبارات', labelEn: '💡 Ask Your Content' },
-          { id: 'advanced' as const, labelAr: '🔬 قراءة الجداول والمعادلات وبرايل', labelEn: '🔬 Advanced Reading' },
+          { id: 'lecture' as const, labelAr: 'تفريغ ومحاضرات ذكية', labelEn: 'Lecture Intelligence', shortAr: 'محاضرات', shortEn: 'Lecture', Icon: Mic },
+          { id: 'reader' as const, labelAr: 'قارئ المستندات (PDF/Word/EPUB)', labelEn: 'Document Reader', shortAr: 'قارئ المستندات', shortEn: 'Reader', Icon: FileText },
+          { id: 'ask_content' as const, labelAr: 'اسأل المحتوى والاختبارات', labelEn: 'Ask Your Content', shortAr: 'اسأل', shortEn: 'Ask', Icon: Lightbulb },
+          { id: 'advanced' as const, labelAr: 'قراءة الجداول والمعادلات وبرايل', labelEn: 'Advanced Reading', shortAr: 'متقدم', shortEn: 'Advanced', Icon: Microscope },
         ].map((tab) => {
           const isSelected = activeTab === tab.id;
           return (
@@ -825,13 +827,15 @@ export default function AudioDocumentIntelligenceView({
                 setActiveTab(tab.id);
                 announce(isAr ? tab.labelAr : tab.labelEn);
               }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center text-center cursor-pointer focus:ring-2 focus:ring-[#1769AA] ${
+              title={isAr ? tab.labelAr : tab.labelEn}
+              className={`shrink-0 min-h-[44px] px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer focus:ring-2 focus:ring-[#1769AA] ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md'
                   : 'text-[#94A3B8] hover:text-white hover:bg-[#24476F]'
               }`}
             >
-              {isAr ? tab.labelAr : tab.labelEn}
+              <tab.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>{isAr ? tab.shortAr : tab.shortEn}</span>
             </button>
           );
         })}
@@ -884,11 +888,11 @@ export default function AudioDocumentIntelligenceView({
 
               {/* Privacy Notice Disclosure */}
               <div className="p-3 rounded-2xl bg-[#0D2542]/70 border border-[#1769AA]/30 text-xs text-[#94A3B8] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0" />
-                  <span className="text-xs leading-relaxed">
+                <div className="flex items-start gap-2 min-w-0 flex-1">
+                  <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0 mt-0.5" />
+                  <ClampedNotice isAr={isAr} className="flex-1">
                     {isAr ? CLOUD_PROCESSING_PRIVACY_NOTICE_AR : CLOUD_PROCESSING_PRIVACY_NOTICE_EN}
-                  </span>
+                  </ClampedNotice>
                 </div>
               </div>
 
