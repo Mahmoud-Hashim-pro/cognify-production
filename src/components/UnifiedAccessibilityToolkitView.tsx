@@ -6,6 +6,7 @@
  * (Phase 7: Integrated Visual Assistant, Document Scanner, PDF Evidence Assistant & Sticker Explainer)
  */
 
+import { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -43,6 +44,8 @@ import {
   Palette,
   Users,
   ScanLine,
+  Leaf,
+  Brain,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
@@ -417,33 +420,41 @@ export default function UnifiedAccessibilityToolkitView({
           isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200 shadow-sm'
         }`}
       >
-        <div className="flex items-center gap-3">
-          <Breadcrumbs
-            items={getRouteBreadcrumbs({ view: 'toolkit' }, profile?.language)}
-            onNavigate={(v) => {
-              if (v === 'disability' && onNavigateBack) onNavigateBack();
-            }}
-            onNavigateBack={onNavigateBack}
-            backLabel={isAr ? 'لوحة الميزات' : 'Hub'}
-            isDarkMode={isDarkMode}
-          />
-
-          <div className="flex items-center gap-2.5 hidden md:flex">
-            <div className="w-9 h-9 rounded-xl bg-teal-600/20 border border-teal-500/40 text-teal-400 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-            </div>
-            <div>
-              <h1 className="text-sm sm:text-base font-black leading-tight">
-                {localize(profile.language, 'Integrated Accessibility Toolkit', 'منظومة الوصول المتكاملة والمساعد البصري')}
-              </h1>
-              <p className="text-xs text-stone-400">
-                {localize(profile.language, 'Unified Vision, Document Scanner, PDF Assistant & Sticker Explainer', 'الرؤية، الماسح الضوئي، ومساعد المستندات وشرح الملصقات')}
-              </p>
-            </div>
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="hidden">
+            <Breadcrumbs
+              items={getRouteBreadcrumbs({ view: 'toolkit' }, profile?.language)}
+              onNavigate={(v) => {
+                if (v === 'disability' && onNavigateBack) onNavigateBack();
+              }}
+              onNavigateBack={onNavigateBack}
+              backLabel={isAr ? 'لوحة الميزات' : 'Hub'}
+              isDarkMode={isDarkMode}
+            />
           </div>
+          {onNavigateBack && (
+            <button
+              type="button"
+              onClick={onNavigateBack}
+              aria-label={isAr ? 'الرجوع للوحة الميزات' : 'Back'}
+              className={`min-h-[44px] min-w-[44px] p-2.5 rounded-xl border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
+                isDarkMode ? 'bg-stone-800/80 border-stone-700 text-teal-400' : 'bg-stone-100 border-stone-200 text-teal-700'
+              }`}
+            >
+              <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+          <h1 className="text-base font-black leading-tight truncate">
+            <span>{localize(profile.language, 'Vision & Tools', 'الرؤية والأدوات')}</span>
+            <span className="hidden">{localize(profile.language, 'Integrated Accessibility Toolkit', 'منظومة الوصول المتكاملة والمساعد البصري')}</span>
+          </h1>
+          <p className="hidden">
+            {localize(profile.language, 'Unified Vision, Document Scanner, PDF Assistant & Sticker Explainer', 'الرؤية، الماسح الضوئي، ومساعد المستندات وشرح الملصقات')}
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
           <button
             type="button"
             onClick={() => setShowUsageModal(true)}
@@ -466,18 +477,18 @@ export default function UnifiedAccessibilityToolkitView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Toolkit Categories', 'أقسام المنظومة الميسرة')}
-        className={`px-3 py-2 border-b flex flex-wrap items-center gap-1.5 shrink-0 ${
+        className={`px-3 py-2 border-b flex flex-nowrap overflow-x-auto custom-scrollbar items-center gap-1.5 shrink-0 ${
           isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
         }`}
       >
         {[
-          { id: 'see_understand' as const, labelAr: '👁️ شاهد وافهم (ملصقات ومشاهد)', labelEn: '👁️ See & Understand (Stickers & Scene)' },
-          { id: 'read_scan' as const, labelAr: '📄 اقرأ وامسح (سكانر و PDF)', labelEn: '📄 Read & Scan (Scanner & PDF)' },
-          { id: 'listen_transcribe' as const, labelAr: '🎙️ استمع وفرّغ (المحاضرات)', labelEn: '🎙️ Listen & Transcribe' },
-          { id: 'format_edu' as const, labelAr: '📖 استوديو الكتب والامتحانات', labelEn: '📖 Educational Book Studio' },
-          { id: 'environment' as const, labelAr: '🌿 مساعد البيئة (إضاءة وضوضاء)', labelEn: '🌿 Environment Assistant (Light & Noise)' },
-          { id: 'cognitive_gym' as const, labelAr: '🧠 صالة التفكير والتركيز', labelEn: '🧠 Thinking & Focus Gym' },
-          { id: 'saved_activity' as const, labelAr: '🕒 السجل والنتائج المحفوظة', labelEn: '🕒 Saved Results & Activity' },
+          { id: 'see_understand' as const, labelAr: 'شاهد وافهم (ملصقات ومشاهد)', labelEn: 'See & Understand (Stickers & Scene)', Icon: Eye },
+          { id: 'read_scan' as const, labelAr: 'اقرأ وامسح (سكانر و PDF)', labelEn: 'Read & Scan (Scanner & PDF)', Icon: ScanLine },
+          { id: 'listen_transcribe' as const, labelAr: 'استمع وفرّغ (المحاضرات)', labelEn: 'Listen & Transcribe', Icon: Headphones },
+          { id: 'format_edu' as const, labelAr: 'استوديو الكتب والامتحانات', labelEn: 'Educational Book Studio', Icon: BookOpen },
+          { id: 'environment' as const, labelAr: 'مساعد البيئة (إضاءة وضوضاء)', labelEn: 'Environment Assistant (Light & Noise)', Icon: Leaf },
+          { id: 'cognitive_gym' as const, labelAr: 'صالة التفكير والتركيز', labelEn: 'Thinking & Focus Gym', Icon: Brain },
+          { id: 'saved_activity' as const, labelAr: 'السجل والنتائج المحفوظة', labelEn: 'Saved Results & Activity', Icon: Clock },
         ].map((cat) => {
           const isSelected = activeCategory === cat.id;
           return (
@@ -489,7 +500,7 @@ export default function UnifiedAccessibilityToolkitView({
                 setActiveCategory(cat.id);
                 announceToScreenReader(localize(profile.language, cat.labelEn, cat.labelAr));
               }}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center text-center gap-1.5 flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none min-h-[44px] ${
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center text-center gap-1.5 shrink-0 whitespace-nowrap min-h-[44px] sm:basis-auto sm:flex-none min-h-[44px] ${
                 isSelected
                   ? 'bg-teal-700 text-white shadow-sm font-black'
                   : isDarkMode
@@ -497,6 +508,7 @@ export default function UnifiedAccessibilityToolkitView({
                   : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200'
               }`}
             >
+              <cat.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
               <span>{localize(profile.language, cat.labelEn, cat.labelAr)}</span>
             </button>
           );
