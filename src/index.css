@@ -26,7 +26,7 @@
   --color-rafiqi-primary-light: #EAF4FC;
   --color-rafiqi-primary-muted: #4B9FE1;
   --color-rafiqi-bg: #F5F9FD;
-  --color-rafiqi-bg-dark: #0B131E;
+  --color-rafiqi-bg-dark: #061A33;
   --color-rafiqi-surface-dark: #131E2E;
   --color-rafiqi-surface-elevated: #1A283D;
   --color-rafiqi-border-dark: #22354E;
@@ -47,7 +47,7 @@
   --color-rafiqi-text-secondary: #4B5C74;
   --color-rafiqi-border-light: #DCE7F3;
   
-  --color-rafiqi-bg-dark: #0B131E;
+  --color-rafiqi-bg-dark: #061A33;
   --color-rafiqi-surface-dark: #131E2E;
   --color-rafiqi-surface-elevated: #1A283D;
   --color-rafiqi-text-dark-primary: #F8FAFC;
@@ -1105,3 +1105,160 @@ html.high-contrast button:focus-visible {
 .tool-blue .bg-rafiqi-bg-dark, .tool-blue .bg-rafiqi-bg-dark\/95 { background-color: #061A33 !important; }
 .tool-blue .bg-stone-50 { background-color: #F5F9FD !important; }
 .tool-blue .bg-stone-100 { background-color: #EAF1FA !important; }
+
+/* ── App-wide navy palette (signed-in app only; splash and sign-in keep their own look) ── */
+.dark body:has(.app-navy) {
+  background-color: #061A33 !important;
+}
+.dark .app-navy .bg-slate-50,
+.dark .app-navy .bg-bg-main {
+  background-color: #061A33 !important;
+  color: #F8FAFC !important;
+}
+.dark .app-navy .bg-white,
+.dark .app-navy .bg-bg-card {
+  background-color: #131E2E !important;
+  border-color: #22354E !important;
+  color: #F8FAFC !important;
+}
+.dark .app-navy .bg-slate-100,
+.dark .app-navy .bg-\[\#f1f5f9\] {
+  background-color: #1A283D !important;
+  border-color: #2B4160 !important;
+  color: #F8FAFC !important;
+}
+.dark .app-navy .bg-slate-200 {
+  background-color: #1A283D !important;
+}
+.dark .app-navy .text-slate-900,
+.dark .app-navy .text-black,
+.dark .app-navy .text-text-main {
+  color: #F8FAFC !important;
+}
+.dark .app-navy .text-slate-800,
+.dark .app-navy .text-slate-700 {
+  color: #CBD5E1 !important;
+}
+.dark .app-navy .text-slate-600,
+.dark .app-navy .text-slate-500,
+.dark .app-navy .text-text-muted {
+  color: #94A3B8 !important;
+}
+.dark .app-navy .border-slate-100,
+.dark .app-navy .border-slate-200,
+.dark .app-navy .border-slate-300,
+.dark .app-navy .border-border {
+  border-color: #22354E !important;
+}
+.dark .app-navy .bg-surface-2 { background-color: #1A283D !important; }
+.dark .app-navy .bg-surface-3 { background-color: #1A283D !important; }
+.dark .app-navy .text-faint { color: #64748B !important; }
+.dark .app-navy .border-border-2 { border-color: #2B4160 !important; }
+.dark .app-navy .bg-primary { background-color: #1769AA !important; }
+.dark .app-navy .bg-primary-soft { background-color: #0D2542 !important; }
+.dark .app-navy .bg-accent-soft { background-color: #0D2542 !important; }
+.dark .app-navy .bg-danger-soft { background-color: #2C1517 !important; }
+.dark .app-navy .text-primary { color: #4B9FE1 !important; }
+.dark .app-navy .text-accent { color: #4B9FE1 !important; }
+.dark .app-navy .shadow-sm,
+.dark .app-navy .shadow-md,
+.dark .app-navy .shadow-lg,
+.dark .app-navy .shadow-xl,
+.dark .app-navy .shadow-2xl {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 14px 34px -16px rgba(0,0,0,0.75) !important;
+}
+.dark .app-navy .bg-slate-900,
+.dark .app-navy .bg-slate-950 {
+  background-color: #1A283D !important;
+}
+.dark .app-navy .bg-slate-900.text-white {
+  background-color: #0D4778 !important;
+}
+:root:not(.dark) body:has(.app-navy) { background-color: #F5F9FD !important; }
+
+/* Auto light scope: same mapping, follows the theme without a prop */
+:root:not(.dark) .tool-auto { color-scheme: light; }
+:root:not(.dark) .tool-auto .bg-\[\#061A33\] { background-color: #F5F9FD !important; }
+:root:not(.dark) .tool-auto .bg-\[\#131E2E\],
+:root:not(.dark) .tool-auto .bg-\[\#131E2E\]\/95 { background-color: #FFFFFF !important; }
+:root:not(.dark) .tool-auto .bg-\[\#1A283D\],
+:root:not(.dark) .tool-auto .bg-\[\#1A283D\]\/60,
+:root:not(.dark) .tool-auto .bg-\[\#1A283D\]\/50 { background-color: #F1F5F9 !important; }
+:root:not(.dark) .tool-auto .bg-\[\#0D2542\] { background-color: #EAF1FA !important; }
+:root:not(.dark) .tool-auto .bg-\[\#1F1A0D\] { background-color: #FFF8E6 !important; }
+:root:not(.dark) .tool-auto .border-\[\#22354E\],
+:root:not(.dark) .tool-auto .border-\[\#22354E\]\/40,
+:root:not(.dark) .tool-auto .border-\[\#22354E\]\/50 { border-color: #CBD5E1 !important; }
+:root:not(.dark) .tool-auto .text-\[\#F8FAFC\],
+:root:not(.dark) .tool-auto .hover\:text-\[\#F8FAFC\]:hover { color: #0F172A !important; }
+:root:not(.dark) .tool-auto .text-\[\#CBD5E1\] { color: #334155 !important; }
+:root:not(.dark) .tool-auto .text-\[\#94A3B8\],
+:root:not(.dark) .tool-auto .text-\[\#64748B\] { color: #475569 !important; }
+:root:not(.dark) .tool-auto .text-\[\#4B9FE1\] { color: #1769AA !important; }
+:root:not(.dark) .tool-auto .text-\[\#22354E\] { color: #94A3B8 !important; }
+:root:not(.dark) .tool-auto .placeholder-\[\#64748B\]::placeholder { color: #64748B !important; }
+:root:not(.dark) .tool-auto .text-amber-100,
+:root:not(.dark) .tool-auto .text-amber-200 { color: #78350F !important; }
+:root:not(.dark) .tool-auto .text-amber-300,
+:root:not(.dark) .tool-auto .text-amber-400 { color: #92400E !important; }
+:root:not(.dark) .tool-auto .text-emerald-300,
+:root:not(.dark) .tool-auto .text-emerald-400 { color: #047857 !important; }
+:root:not(.dark) .tool-auto .text-red-300,
+:root:not(.dark) .tool-auto .text-red-400 { color: #B91C1C !important; }
+:root:not(.dark) .tool-auto .text-slate-300,
+:root:not(.dark) .tool-auto .text-slate-400 { color: #475569 !important; }
+:root:not(.dark) .tool-auto .text-slate-100,
+:root:not(.dark) .tool-auto .text-slate-200 { color: #1E293B !important; }
+/* Filled blue buttons and selected tabs keep white text */
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\],
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\] *,
+:root:not(.dark) .tool-auto .bg-\[\#0D4778\],
+:root:not(.dark) .tool-auto .bg-\[\#0D4778\] * { color: #FFFFFF !important; }
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\]\/15 .text-white,
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\]\/20 .text-white,
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\]\/30 .text-white,
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\]\/15.text-white,
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\]\/20.text-white,
+:root:not(.dark) .tool-auto .bg-\[\#1769AA\]\/30.text-white { color: #0F172A !important; }
+
+/* Vision companion palette (light mode) */
+:root:not(.dark) .tool-auto .bg-\[\#082344\],
+:root:not(.dark) .tool-auto .bg-\[\#092747\] { background-color: #EAF1FA !important; }
+:root:not(.dark) .tool-auto .bg-\[\#061A33\]\/85 { background-color: #F1F5F9 !important; }
+:root:not(.dark) .tool-auto .border-\[\#07558A\],
+:root:not(.dark) .tool-auto .border-\[\#07558A\]\/60,
+:root:not(.dark) .tool-auto .border-\[\#07558A\]\/80 { border-color: #BFD3E6 !important; }
+:root:not(.dark) .tool-auto .text-\[\#B9CDE3\] { color: #334155 !important; }
+:root:not(.dark) .tool-auto .text-\[\#F5F8FF\] { color: #0F172A !important; }
+:root:not(.dark) .tool-auto .bg-\[\#082344\]\/80,
+:root:not(.dark) .tool-auto .bg-\[\#092747\]\/90 { background-color: #EAF1FA !important; }
+:root:not(.dark) .tool-auto .bg-\[\#07558A\] { background-color: #1769AA !important; }
+:root:not(.dark) .tool-auto .bg-\[\#082344\]\/60 { background-color: #EAF1FA !important; }
+:root:not(.dark) .tool-auto .bg-\[\#061A33\]\/80 { background-color: #F1F5F9 !important; }
+:root:not(.dark) .tool-auto .bg-\[\#0B131E\],
+:root:not(.dark) .tool-auto .bg-\[\#09101A\] { background-color: #F1F5F9 !important; }
+:root:not(.dark) .tool-auto .text-\[\#FFA4A4\] { color: #B91C1C !important; }
+:root:not(.dark) .tool-auto .text-\[\#93FFD8\] { color: #047857 !important; }
+:root:not(.dark) .tool-auto .bg-\[\#0D2542\]\/40,
+:root:not(.dark) .tool-auto .bg-\[\#0D2542\]\/70,
+:root:not(.dark) .tool-auto .bg-\[\#0D2542\]\/60,
+:root:not(.dark) .tool-auto .bg-\[\#0D2542\]\/50 { background-color: #EAF1FA !important; }
+/* Live conversation / hearing palette (light mode) */
+:root:not(.dark) .tool-auto .bg-\[\#102D4D\],
+:root:not(.dark) .tool-auto .bg-\[\#15385E\] { background-color: #EAF1FA !important; }
+:root:not(.dark) .tool-auto .bg-\[\#071B33\],
+:root:not(.dark) .tool-auto .bg-\[\#071B33\]\/85 { background-color: #F5F9FD !important; }
+:root:not(.dark) .tool-auto .text-\[\#F4F7FB\] { color: #0F172A !important; }
+:root:not(.dark) .tool-auto .text-\[\#A9BDD3\] { color: #334155 !important; }
+:root:not(.dark) .tool-auto .text-\[\#12CFE0\] { color: #0E7490 !important; }
+:root:not(.dark) .tool-auto .border-\[\#12CFE0\],
+:root:not(.dark) .tool-auto .border-\[\#12CFE0\]\/15,
+:root:not(.dark) .tool-auto .border-\[\#12CFE0\]\/20,
+:root:not(.dark) .tool-auto .border-\[\#12CFE0\]\/25,
+:root:not(.dark) .tool-auto .border-\[\#12CFE0\]\/30,
+:root:not(.dark) .tool-auto .border-\[\#12CFE0\]\/50 { border-color: #BFD3E6 !important; }
+:root:not(.dark) .tool-auto .bg-\[\#102D4D\]\/70,
+:root:not(.dark) .tool-auto .bg-\[\#102D4D\]\/60,
+:root:not(.dark) .tool-auto .bg-\[\#102D4D\]\/50 { background-color: #EAF1FA !important; }
+
+:root:not(.dark) .tool-auto.bg-\[\#061A33\] { background-color: #F5F9FD !important; color:#0F172A !important; }

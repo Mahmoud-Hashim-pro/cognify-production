@@ -119,7 +119,7 @@ export default function SectionLandingView({
 
   if (!section) {
     return (
-      <div className={`p-8 text-center space-y-4 ${isDarkMode ? 'bg-[#0B131E] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'}`}>
+      <div className={`p-8 text-center space-y-4 ${isDarkMode ? 'bg-[#061A33] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'}`}>
         <p className="text-sm text-slate-400">
           {isAr ? 'القسم المطلوب غير موجود.' : 'Section not found.'}
         </p>
@@ -403,7 +403,7 @@ export default function SectionLandingView({
   return (
     <div
       className={`min-h-full flex flex-col p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 select-none transition-colors duration-200 ${
-        isDarkMode ? 'bg-[#0B131E] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'
+        isDarkMode ? 'bg-[#061A33] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'
       }`}
       dir={isAr ? 'rtl' : 'ltr'}
     >

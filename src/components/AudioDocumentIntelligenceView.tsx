@@ -930,7 +930,7 @@ export default function AudioDocumentIntelligenceView({
                     <span>{transcriptionStatusMsg}</span>
                     <span>{transcriptionProgress}%</span>
                   </div>
-                  <div className="w-full bg-[#0B131E] rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-[#061A33] rounded-full h-2 overflow-hidden">
                     <div
                       className="bg-[#1769AA] h-2 transition-all duration-300"
                       style={{ width: `${transcriptionProgress}%` }}
@@ -1000,7 +1000,7 @@ export default function AudioDocumentIntelligenceView({
                               type="text"
                               value={editingChapterTitle}
                               onChange={(e) => setEditingChapterTitle(e.target.value)}
-                              className="w-full px-2 py-1 rounded-lg bg-[#0B131E] border border-[#1769AA] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                              className="w-full px-2 py-1 rounded-lg bg-[#061A33] border border-[#1769AA] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                               aria-label={isAr ? 'اسم الفصل الجديد' : 'New chapter title'}
                             />
                             <div className="flex gap-2 justify-end">
@@ -1104,7 +1104,7 @@ export default function AudioDocumentIntelligenceView({
                           className={`p-3.5 rounded-2xl text-xs leading-relaxed transition-all ${
                             isActive
                               ? 'bg-[#1769AA]/30 border-2 border-[#1769AA] text-white shadow-md'
-                              : 'bg-[#0B131E] border border-[#22354E] text-[#94A3B8] hover:text-white'
+                              : 'bg-[#061A33] border border-[#22354E] text-[#94A3B8] hover:text-white'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2 mb-1.5 border-b border-white/5 pb-1">
@@ -1283,7 +1283,7 @@ export default function AudioDocumentIntelligenceView({
                       onChange={(e) => setLectureQuestion(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAskLecture()}
                       placeholder={isAr ? 'ماذا قال المحاضر عن...؟' : 'What did the lecturer say about...?'}
-                      className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-[#061A33] border border-[#22354E] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                     />
                     <button
                       type="button"
@@ -1384,7 +1384,7 @@ export default function AudioDocumentIntelligenceView({
                       className={`px-2.5 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
                         readingMode === mode.id
                           ? 'bg-[#1769AA] text-white shadow-sm'
-                          : 'bg-[#0B131E] border border-[#22354E] text-[#94A3B8] hover:text-white'
+                          : 'bg-[#061A33] border border-[#22354E] text-[#94A3B8] hover:text-white'
                       }`}
                     >
                       {isAr ? mode.labelAr : mode.labelEn}
@@ -1462,7 +1462,7 @@ export default function AudioDocumentIntelligenceView({
 
               {/* Page Content Display */}
               {docPages.length > 0 && (
-                <div className="p-5 rounded-2xl bg-[#0B131E] border border-[#22354E] text-xs text-[#94A3B8] leading-relaxed max-h-96 overflow-y-auto custom-scrollbar select-text">
+                <div className="p-5 rounded-2xl bg-[#061A33] border border-[#22354E] text-xs text-[#94A3B8] leading-relaxed max-h-96 overflow-y-auto custom-scrollbar select-text">
                   <h4 className="text-white font-bold text-sm mb-3">{docTitle} — {isAr ? `صفحة ${currentPage}` : `Page ${currentPage}`}</h4>
                   <p className="whitespace-pre-wrap">{docPages[currentPage - 1]?.text}</p>
                 </div>
@@ -1549,7 +1549,7 @@ export default function AudioDocumentIntelligenceView({
                   onChange={(e) => setContentQuestion(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAskContent()}
                   placeholder={isAr ? 'اطرح سؤالاً عن المستند (مثال: ما هي شروط التسجيل؟)...' : 'Ask a question from document...'}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#061A33] border border-[#22354E] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -1658,7 +1658,7 @@ export default function AudioDocumentIntelligenceView({
                                     ? isCorrect
                                       ? 'bg-[#16845B]/30 border border-[#16845B] text-[#93FFD8]'
                                       : 'bg-[#C43D4D]/30 border border-[#C43D4D] text-[#FFA4A4]'
-                                    : 'bg-[#0B131E] border border-[#22354E] text-[#94A3B8] hover:text-white'
+                                    : 'bg-[#061A33] border border-[#22354E] text-[#94A3B8] hover:text-white'
                                 }`}
                               >
                                 {opt}
@@ -1675,7 +1675,7 @@ export default function AudioDocumentIntelligenceView({
                             value={shortAnswers[q.id] || ''}
                             onChange={(e) => setShortAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
                             placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer here...'}
-                            className="w-full px-3 py-1.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
+                            className="w-full px-3 py-1.5 rounded-xl bg-[#061A33] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                             aria-label={isAr ? `إجابة السؤال ${qIdx + 1}` : `Answer for question ${qIdx + 1}`}
                           />
                           <div className="flex items-center justify-between">
@@ -1753,7 +1753,7 @@ export default function AudioDocumentIntelligenceView({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                     {structuredNotes.sections.map((sec, sIdx) => (
-                      <div key={sIdx} className="p-3 rounded-xl bg-[#0B131E] border border-[#22354E] space-y-1.5">
+                      <div key={sIdx} className="p-3 rounded-xl bg-[#061A33] border border-[#22354E] space-y-1.5">
                         <span className="font-bold text-[#4B9FE1] block">{sec.heading}</span>
                         <ul className="list-disc list-inside text-[#94A3B8] space-y-1">
                           {sec.points.map((pt, pIdx) => (
@@ -1835,7 +1835,7 @@ export default function AudioDocumentIntelligenceView({
                     </div>
 
                     {/* Current Cell Announcement */}
-                    <div className="p-3 rounded-xl bg-[#0B131E] border border-[#22354E] font-bold text-white">
+                    <div className="p-3 rounded-xl bg-[#061A33] border border-[#22354E] font-bold text-white">
                       <span>{isAr ? 'الخلية النشطة:' : 'Active Cell:'} </span>
                       <span className="text-[#4B9FE1]">
                         [{parsedTable.headers[tableSelectedCell.col] || `Col ${tableSelectedCell.col + 1}`}]:{' '}
@@ -1861,7 +1861,7 @@ export default function AudioDocumentIntelligenceView({
                     type="text"
                     value={sampleMathText}
                     onChange={(e) => setSampleMathText(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white font-mono text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#061A33] border border-[#22354E] text-white font-mono text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                     aria-label={isAr ? 'صيغة المعادلة الرياضية' : 'Mathematical expression formula'}
                   />
 
@@ -1919,7 +1919,7 @@ export default function AudioDocumentIntelligenceView({
                   value={brailleInputText}
                   onChange={(e) => handleConvertBraille(e.target.value)}
                   placeholder={isAr ? 'اكتب نصاً لتحويله إلى رموز برايل...' : 'Type text to convert to Braille...'}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#061A33] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
 
                 <div className="p-4 rounded-2xl bg-[#0D2542] border border-[#1769AA]/40 text-lg tracking-widest text-[#93FFD8] select-all font-mono">
@@ -1953,7 +1953,7 @@ export default function AudioDocumentIntelligenceView({
                   onChange={(e) => setLookupWord(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLookupWord()}
                   placeholder={isAr ? 'ابحث عن شرح وترجمة أي كلمة أو مصطلح...' : 'Search term explanation and translation...'}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#061A33] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -1980,7 +1980,7 @@ export default function AudioDocumentIntelligenceView({
                   <span className="text-xs font-bold text-white block">{isAr ? 'المفردات المحفوظة:' : 'Saved Terms:'}</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     {savedVocabulary.map((v) => (
-                      <div key={v.id} className="p-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] flex items-center justify-between gap-2">
+                      <div key={v.id} className="p-2.5 rounded-xl bg-[#061A33] border border-[#22354E] flex items-center justify-between gap-2">
                         <div>
                           <strong className="text-[#4B9FE1] block">{v.word}</strong>
                           <span className="text-xs text-[#94A3B8] line-clamp-1">{v.definition}</span>

@@ -388,7 +388,7 @@ export default function HearAndExpressView({
           aria-live="assertive"
           className="fixed inset-0 z-50 pointer-events-none bg-amber-400/30 animate-pulse border-8 border-amber-400 flex items-center justify-center"
         >
-          <div className="bg-[#0B131E] border-2 border-amber-400 text-amber-300 font-bold px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+          <div className="bg-[#061A33] border-2 border-amber-400 text-amber-300 font-bold px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
             <Zap className="w-6 h-6 text-amber-400 animate-bounce" />
             <span className="text-sm">
               {isAr ? 'تنبيه بصري: صوت أو مكالمة جديدة!' : 'Visual Alert: New sound or incoming speech!'}

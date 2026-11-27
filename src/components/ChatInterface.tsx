@@ -1453,7 +1453,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   };
 
   return (
-    <div className={`flex-1 flex flex-col bg-[#0B131E] text-[#F8FAFC] overflow-hidden relative selection:bg-[#1769AA]/25 selection:text-white ${isEmbedded ? 'h-full' : 'h-[var(--app-h,100dvh)]'}`}>
+    <div className={`tool-auto flex-1 flex flex-col bg-[#061A33] text-[#F8FAFC] overflow-hidden relative selection:bg-[#1769AA]/25 selection:text-white ${isEmbedded ? 'h-full' : 'h-[var(--app-h,100dvh)]'}`}>
 
       {/* File Preview Modal */}
       <AnimatePresence>
@@ -1543,7 +1543,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 <iframe
                   src={`data:application/pdf;base64,${previewFile.data}`}
                   title={previewFile.name}
-                  className="w-full flex-1 border-0 bg-[#0B131E]"
+                  className="w-full flex-1 border-0 bg-[#061A33]"
                 />
               </div>
             ) : (
@@ -1582,7 +1582,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       </AnimatePresence>
 
       {/* A. Compact module toolbar (the app shell's GlobalHeader owns navigation chrome) */}
-      <header className="bg-white dark:bg-[#0B131E] border-b border-slate-200 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] h-12 px-3 sm:px-6 flex justify-between items-center z-10 shrink-0 transition-colors">
+      <header className="bg-white dark:bg-[#061A33] border-b border-slate-200 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] h-12 px-3 sm:px-6 flex justify-between items-center z-10 shrink-0 transition-colors">
         <div className="flex items-center gap-3">
           {/* Back to Hub Button */}
           <button
@@ -1705,7 +1705,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         </div>
 
         {/* Center Column: Conversation Area & Composer */}
-        <div className="flex flex-col flex-1 min-w-0 h-full relative overflow-hidden bg-[#0B131E]">
+        <div className="flex flex-col flex-1 min-w-0 h-full relative overflow-hidden bg-[#061A33]">
           
           {/* In-Session Search Bar */}
           <AnimatePresence>
@@ -2018,7 +2018,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                         : localize(profile.language, 'Show in sign language', 'اعرض بلغة الإشارة')}
                                     </button>
                                     {signingId === m.id && (
-                                      <div className="mt-2 h-64 sm:h-72 rounded-xl overflow-hidden bg-[#0B131E] border border-[#22354E] relative">
+                                      <div className="mt-2 h-64 sm:h-72 rounded-xl overflow-hidden bg-[#061A33] border border-[#22354E] relative">
                                         <React.Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#64748B] text-xs font-bold">Loading avatar…</div>}>
                                           <SignAvatar3D words={wordsForSigning(m.content)} playing={true} onDone={() => {}} />
                                         </React.Suspense>
