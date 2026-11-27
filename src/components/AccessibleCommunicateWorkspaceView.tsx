@@ -249,7 +249,7 @@ export default function AccessibleCommunicateWorkspaceView({
   return (
     <div
       className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
-        isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'bg-[#F5F9FD] text-[#061A33]'
+        'bg-[#061A33] text-[#F8FAFC]'
       } font-sans selection:bg-[#1769AA]/30`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
@@ -329,7 +329,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <section
         role="region"
         aria-label={localize(profile.language, 'Privacy and Assistance Boundary Notice', 'تنبيه الخصوصية وحدود المساعدة')}
-        className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#0D4778]/50 via-[#131E2E] to-[#0D4778]/50 border-b border-[#22354E] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs"
+        className="px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#22354E] flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs"
       >
         <div className="flex items-center gap-2.5 text-[#94A3B8]">
           <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0" />
@@ -359,7 +359,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Communication Tools', 'أدوات التواصل')}
-        className="sticky top-[69px] z-20 flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-[#0D4778]/80 backdrop-blur-md border-b border-[#22354E] overflow-x-auto lg:overflow-x-visible lg:flex-wrap custom-scrollbar scroll-fade-x"
+        className="z-20 flex items-center flex-wrap gap-2 px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#22354E]"
       >
         {tools.map((t) => {
           const IconComponent = t.icon;
@@ -373,7 +373,7 @@ export default function AccessibleCommunicateWorkspaceView({
                 setActiveTool(t.id);
                 speakText(isAr ? t.titleAr : t.titleEn);
               }}
-              className={`flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] shrink-0 ${
+              className={`flex items-center justify-center gap-2 px-3.5 py-2 min-h-[44px] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/40 border border-[#4B9FE1]'
                   : 'bg-[#1A283D] text-[#94A3B8] border border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]/50'
@@ -396,7 +396,7 @@ export default function AccessibleCommunicateWorkspaceView({
             {/* Persistent honesty notice: this service is not live yet */}
             <div
               role="status"
-              className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-sm font-bold flex items-start gap-3"
+              className="p-4 rounded-2xl bg-[#1F1A0D] border border-amber-500/50 text-amber-100 text-sm font-bold flex items-start gap-3"
             >
               <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
               <ClampedNotice isAr={isAr}>
