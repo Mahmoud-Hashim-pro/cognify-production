@@ -676,7 +676,7 @@ html.high-contrast button:focus-visible {
 .dark .bg-\[\#080409\],
 .dark .bg-\[\#080409\]\/90,
 .dark .bg-\[\#080409\]\/95 {
-  background-color: #0E1416 !important;
+  background-color: #0A2342 !important;
 }
 
 .dark .bg-\[\#0E0610\],
@@ -694,24 +694,24 @@ html.high-contrast button:focus-visible {
 .dark .bg-\[\#1A0713\],
 .dark .bg-\[\#1C060F\],
 .dark .bg-\[\#1F0D22\] {
-  background-color: #121B1E !important;
+  background-color: #112C4F !important;
 }
 
 .dark [class*="border-\[\#4A1224\]"],
 .dark [class*="border-\[\#831843\]"],
 .dark [class*="border-\[\#2D0B16\]"] {
-  border-color: rgba(20, 184, 166, 0.25) !important;
+  border-color: #24476F !important;
 }
 
 .dark [class*="bg-\[\#4A1224\]"],
 .dark [class*="bg-\[\#831843\]"],
 .dark [class*="bg-\[\#2D0B16\]"] {
-  background-color: rgba(15, 118, 110, 0.25) !important;
+  background-color: rgba(23, 105, 170, 0.25) !important;
 }
 
 .dark [class*="text-\[\#4A1224\]"],
 .dark [class*="text-\[\#831843\]"] {
-  color: #2DD4BF !important;
+  color: #5BB0F0 !important;
 }
 
 /* ── LIGHT MODE OVERRIDES ────────────────────────────────────────────────── */

@@ -291,10 +291,10 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         isDarkMode 
           ? 'bg-[#0E2745]/95 border-[#1E2E44] text-slate-100' 
           : 'bg-white/95 border-slate-200 text-slate-900'
-      } backdrop-blur-md px-2 sm:px-6 flex items-center justify-between gap-1 sm:gap-3 z-30 transition-colors select-none`}
+      } backdrop-blur-md px-1 sm:px-6 flex items-center justify-between gap-0.5 sm:gap-3 z-30 transition-colors select-none`}
     >
       {/* ── LEFT ZONE: HAMBURGER (Mobile) + BRAND IDENTITY + BREADCRUMBS ── */}
-      <div className="flex items-center gap-1 sm:gap-3 min-w-0">
+      <div className="flex items-center gap-0.5 sm:gap-3 shrink-0">
         {/* Mobile Hamburger Button (Only on < lg screens) */}
         {onMenuClick && (
           <button
@@ -488,7 +488,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       </div>
 
       {/* ── RIGHT ZONE: LANGUAGE, THEME, NOTIFICATIONS & PROFILE MENU ── */}
-      <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+      <div className="flex items-center gap-0.5 sm:gap-3 shrink-0">
         {/* Phone: search icon opens the search box */}
         <button
           type="button"

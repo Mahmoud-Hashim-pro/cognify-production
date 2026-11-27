@@ -346,7 +346,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-[#4A1224]/30 border border-[#E5A93C]/30 rounded-2xl text-[#E5A93C]">
+                <div className="p-3 bg-[#4A1224]/30 border border-[#5BB0F0]/30 rounded-2xl text-[#5BB0F0]">
                   <Shield className="w-7 h-7" />
                 </div>
                 <div>
@@ -366,14 +366,14 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Lock className="w-3.5 h-3.5" /> FERPA / GDPR Compliant
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#4A1224]/30 text-[#5BB0F0] border border-[#5BB0F0]/20">
                 <Cpu className="w-3.5 h-3.5" /> SHA-256 Guarded
               </span>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex flex-wrap gap-2 mt-8 border-b border-[#4A1224]/60 pb-4">
+          <div className="flex flex-nowrap overflow-x-auto custom-scrollbar gap-2 mt-4 sm:mt-8 border-b border-[#4A1224]/60 pb-4">
             {[
               { id: 'dp', label: isArabic ? 'الخصوصية التفاضلية' : 'Differential Privacy', icon: Cpu },
               { id: 'export', label: isArabic ? 'تصدير البيانات المستقل' : 'Self-Service Export', icon: Download },
@@ -386,9 +386,9 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-2 shrink-0 whitespace-nowrap min-h-[44px] px-4 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold shadow-lg shadow-[#E5A93C]/20'
+                      ? 'bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold shadow-lg shadow-[#5BB0F0]/20'
                       : 'bg-[#080409] text-slate-300 border border-[#4A1224]/60 hover:border-[#4A1224]/50 hover:text-white'
                   }`}
                 >
@@ -406,7 +406,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="lg:col-span-2 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 backdrop-blur-xl shadow-2xl space-y-6">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-[#E5A93C]" />
+                  <Cpu className="w-5 h-5 text-[#5BB0F0]" />
                   {isArabic ? 'محاكي الخصوصية التفاضلية (Laplace Mechanism)' : 'Laplace Mechanism Simulator'}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -419,7 +419,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1 text-slate-300">
                     <span>Target Metric Value (e.g. Class Pointers Mastery %)</span>
-                    <span className="text-[#E5A93C] font-mono">{testMetric}%</span>
+                    <span className="text-[#5BB0F0] font-mono">{testMetric}%</span>
                   </div>
                   <input
                     type="range"
@@ -429,14 +429,14 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     aria-label={isArabic ? 'القيمة الخام الأصلية' : 'Raw query test metric'}
                     aria-valuetext={`${testMetric}%`}
                     onChange={e => setTestMetric(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#5BB0F0]"
                   />
                 </div>
 
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1 text-slate-300">
                     <span>Privacy Parameter ($\epsilon$): Smaller = More Noise / Greater Privacy</span>
-                    <span className="text-[#E5A93C] font-mono">ε = {epsilon}</span>
+                    <span className="text-[#5BB0F0] font-mono">ε = {epsilon}</span>
                   </div>
                   <input
                     type="range"
@@ -447,7 +447,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     aria-label={isArabic ? 'معامل الخصوصية التفاضلية إبسيلون' : 'Differential privacy parameter epsilon'}
                     aria-valuetext={`epsilon ${epsilon}`}
                     onChange={e => setEpsilon(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#5BB0F0]"
                   />
                   <div className="flex justify-between text-xs text-slate-500 mt-1">
                     <span>0.1 (High Anonymity / Strong Noise)</span>
@@ -457,7 +457,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
                 <button
                   onClick={handleApplyDP}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold rounded-2xl hover:opacity-95 transition shadow-lg shadow-[#E5A93C]/20 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold rounded-2xl hover:opacity-95 transition shadow-lg shadow-[#5BB0F0]/20 flex items-center justify-center gap-2"
                 >
                   <RefreshCw className="w-4 h-4" />
                   {isArabic ? 'تطبيق ضوضاء الخصوصية وخصم الميزانية' : 'Apply Laplace Noise & Query Anonymized Aggregate'}
@@ -466,14 +466,14 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
               {/* Perturbation Result Box */}
               {lastPerturbation && (
-                <div className="p-4 bg-[#080409] border border-[#E5A93C]/30 rounded-2xl grid grid-cols-3 gap-4 text-center">
+                <div className="p-4 bg-[#080409] border border-[#5BB0F0]/30 rounded-2xl grid grid-cols-3 gap-4 text-center">
                   <div>
                     <span className="text-xs text-slate-400 uppercase font-bold block">Raw True Value</span>
                     <span className="text-xl font-bold font-mono text-slate-200">{testMetric}%</span>
                   </div>
                   <div>
-                    <span className="text-xs text-[#E5A93C] uppercase font-bold block">Laplace Noise</span>
-                    <span className={`text-xl font-bold font-mono ${lastPerturbation.noise >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    <span className="text-xs text-[#5BB0F0] uppercase font-bold block">Laplace Noise</span>
+                    <span className={`text-xl font-bold font-mono ${lastPerturbation.noise >= 0 ? 'text-emerald-400' : 'text-sky-400'}`}>
                       {lastPerturbation.noise > 0 ? `+${lastPerturbation.noise}` : lastPerturbation.noise}
                     </span>
                   </div>
@@ -489,7 +489,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 backdrop-blur-xl shadow-2xl flex flex-col justify-between">
               <div>
                 <h3 className="text-md font-bold text-white flex items-center gap-2">
-                  <Key className="w-4 h-4 text-amber-400" />
+                  <Key className="w-4 h-4 text-sky-400" />
                   {isArabic ? 'ميزانية الخصوصية الإجمالية' : 'Differential Privacy Budget'}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -499,7 +499,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <div className="mt-6 space-y-4">
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs text-slate-400">Remaining Budget</span>
-                    <span className="text-2xl font-bold font-mono text-[#E5A93C]">
+                    <span className="text-2xl font-bold font-mono text-[#5BB0F0]">
                       {dpBudget.remainingBudget.toFixed(2)} / {dpBudget.totalBudget.toFixed(1)} ε
                     </span>
                   </div>
@@ -511,7 +511,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                         dpBudget.remainingBudget > 4
                           ? 'bg-emerald-500'
                           : dpBudget.remainingBudget > 1.5
-                          ? 'bg-amber-500'
+                          ? 'bg-sky-500'
                           : 'bg-rose-500'
                       }`}
                       style={{ width: `${(dpBudget.remainingBudget / dpBudget.totalBudget) * 100}%` }}
@@ -547,7 +547,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Download className="w-5 h-5 text-[#E5A93C]" />
+                  <Download className="w-5 h-5 text-[#5BB0F0]" />
                   {isArabic ? 'تصدير البيانات الشخصية (GDPR Article 20)' : 'Self-Service Data Portability'}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -557,7 +557,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
               <button
                 onClick={handleGenerateExport}
-                className="py-2.5 px-5 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold rounded-2xl hover:bg-[#E5A93C] transition shadow-lg shadow-[#E5A93C]/20 flex items-center gap-2 text-sm"
+                className="py-2.5 px-5 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold rounded-2xl hover:bg-[#5BB0F0] transition shadow-lg shadow-[#5BB0F0]/20 flex items-center gap-2 text-sm"
               >
                 <Download className="w-4 h-4" />
                 {isArabic ? 'إنشاء حزمة التصدير الآن' : 'Generate Export Package'}
@@ -588,7 +588,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
-                    className="text-[#E5A93C] hover:underline font-semibold"
+                    className="text-[#5BB0F0] hover:underline font-semibold"
                   >
                     Download .json file
                   </button>
@@ -681,7 +681,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
                 <div className="pt-2 border-t border-[#4A1224]/60">
                   <span className="text-xs text-slate-400 block font-semibold">Cryptographic Erasure Receipt Hash</span>
-                  <span className="text-xs font-mono text-[#E5A93C] break-all">{erasureManifest.receiptHash}</span>
+                  <span className="text-xs font-mono text-[#5BB0F0] break-all">{erasureManifest.receiptHash}</span>
                 </div>
               </div>
             )}
@@ -694,7 +694,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-[#E5A93C]" />
+                  <FileCheck className="w-5 h-5 text-[#5BB0F0]" />
                   {isArabic ? 'سجل التدقيق المشفر بالسلاسل' : 'Tamper-Resistant Chained Audit Trail'}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -713,7 +713,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 ) : (
                   <button
                     onClick={repairChain}
-                    className="py-2 px-3.5 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 rounded-xl text-xs font-bold hover:bg-[#E5A93C] transition"
+                    className="py-2 px-3.5 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white rounded-xl text-xs font-bold hover:bg-[#5BB0F0] transition"
                   >
                     Restore & Recalculate Chain
                   </button>
@@ -753,10 +753,10 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-[#E5A93C] font-mono font-bold">
+                      <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-[#5BB0F0] font-mono font-bold">
                         Block #{index}
                       </span>
-                      <span className="px-2 py-0.5 rounded-lg bg-[#4A1224]/40 text-[#E5A93C] font-semibold">
+                      <span className="px-2 py-0.5 rounded-lg bg-[#4A1224]/40 text-[#5BB0F0] font-semibold">
                         {entry.action}
                       </span>
                       <span className="text-slate-400 font-mono">actor: {entry.actorUid}</span>
@@ -773,7 +773,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     </div>
                     <div className="truncate">
                       <span className="text-slate-500">entryHash: </span>
-                      <span className="text-[#E5A93C]">{entry.entryHash.slice(0, 24)}...</span>
+                      <span className="text-[#5BB0F0]">{entry.entryHash.slice(0, 24)}...</span>
                     </div>
                   </div>
                 </div>

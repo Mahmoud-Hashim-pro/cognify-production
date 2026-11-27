@@ -491,7 +491,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     }`} dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <header className={`pb-4 border-b flex items-center justify-between gap-3 mb-6 flex-wrap transition-colors duration-300 ${
-        isDarkMode ? 'border-[#4A1224]/60' : 'border-amber-200/80'
+        isDarkMode ? 'border-[#4A1224]/60' : 'border-sky-200/80'
       }`}>
         <div className="flex items-center gap-2.5">
           {onNavigateBack && (
@@ -501,7 +501,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               className={`min-w-[44px] min-h-[44px] p-2.5 rounded-xl border transition-all flex items-center justify-center cursor-pointer ${
                 isDarkMode
                   ? 'bg-[#150917] hover:bg-slate-800 text-slate-200 hover:text-white border-[#4A1224]/50'
-                  : 'bg-amber-50 hover:bg-amber-100 text-slate-700 hover:text-slate-950 border-amber-200'
+                  : 'bg-sky-50 hover:bg-sky-100 text-slate-700 hover:text-slate-950 border-sky-200'
               }`}
             >
               <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
@@ -510,8 +510,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           <div className="flex items-center gap-2">
             <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center shadow-lg ${
               isDarkMode
-                ? 'bg-amber-500/15 border-amber-500/30 text-amber-400 shadow-amber-950/40'
-                : 'bg-amber-100 border-amber-300 text-amber-800 shadow-amber-200/50'
+                ? 'bg-sky-500/15 border-sky-500/30 text-sky-400 shadow-sky-950/40'
+                : 'bg-sky-100 border-sky-300 text-sky-800 shadow-sky-200/50'
             }`}>
               <Shield className="w-5 h-5" />
             </div>
@@ -530,9 +530,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           {onOpenPassport && (
             <button
               onClick={onOpenPassport}
-              className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-950/40 active:scale-95 transition-all cursor-pointer"
+              className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#1769AA] to-[#1769AA] hover:from-[#1f7bc4] hover:to-[#1f7bc4] text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-950/40 active:scale-95 transition-all cursor-pointer"
             >
-              <ShieldCheck className="w-4 h-4 text-slate-950" />
+              <ShieldCheck className="w-4 h-4 text-white" />
               <span>{t('Accessibility Passport', 'جواز السفر الميسر', 'Passeport Accessibilité')}</span>
             </button>
           )}
@@ -540,9 +540,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             onClick={() => {
               window.location.hash = '#parent';
             }}
-            className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#4A1224]/60 hover:bg-[#831843]/60 text-[#E5A93C] border border-[#E5A93C]/40 font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#2D0B16]/50 active:scale-95 transition-all cursor-pointer"
+            className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#4A1224]/60 hover:bg-[#831843]/60 text-[#5BB0F0] border border-[#5BB0F0]/40 font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#2D0B16]/50 active:scale-95 transition-all cursor-pointer"
           >
-            <Heart className="w-4 h-4 text-[#E5A93C]" />
+            <Heart className="w-4 h-4 text-[#5BB0F0]" />
             <span>{t('Parent Intelligence & Growth', 'بوابة ولي الأمر والنمو الإدراكي', 'Portail Parental & Croissance')}</span>
           </button>
         </div>
@@ -552,8 +552,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       <div className="max-w-5xl mx-auto w-full space-y-6">
         {/* Pending Caregiver Link Requests */}
         {pendingLinkRequests.length > 0 && (
-          <div className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-lg space-y-3">
-            <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
+          <div className="p-4 rounded-3xl bg-sky-500/10 border border-sky-500/30 shadow-lg space-y-3">
+            <div className="flex items-center gap-2 text-sky-300 font-bold text-sm">
               <Shield className="w-5 h-5" />
               <span>
                 {t('Caregiver access requests', 'طلبات ربط مرافق/ولي أمر', "Demandes de liaison d'accompagnant")}
@@ -599,12 +599,12 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           <div className="p-4 rounded-3xl bg-[#150917] border border-[#4A1224]/50 shadow-lg space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-slate-200 font-bold text-sm">
-                <Users className="w-5 h-5 text-amber-400" />
+                <Users className="w-5 h-5 text-sky-400" />
                 <span>
                   {t('Linked caregivers & specialists', 'المرافقين والمختصين المرتبطين', 'Accompagnants et spécialistes liés')}
                 </span>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-xs font-black bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              <span className="px-2.5 py-1 rounded-full text-xs font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">
                 {linkedCaregivers.length}
               </span>
             </div>
@@ -694,12 +694,12 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
             <div className="flex items-center gap-3 text-xs font-mono text-slate-400 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-400" />
-                <span>{t('Peak Overload Window:', 'ذروة نوبات الضغط:')} <strong className="text-amber-300 font-bold">{isAr ? patternAnalysis.peakTimeWindow : patternAnalysis.peakTimeWindowEn}</strong></span>
+                <Clock className="w-4 h-4 text-sky-400" />
+                <span>{t('Peak Overload Window:', 'ذروة نوبات الضغط:')} <strong className="text-sky-300 font-bold">{isAr ? patternAnalysis.peakTimeWindow : patternAnalysis.peakTimeWindowEn}</strong></span>
               </div>
               <button
                 onClick={handlePrintWeeklyClinicalReport}
-                className="min-h-[40px] px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 hover:text-white border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="min-h-[40px] px-3.5 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 hover:text-white border border-sky-500/40 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
                 title={t('Print Clinical Summary for SLP / ABA Therapist', 'طباعة التقرير السريري لأخصائي التخاطب والسلوك')}
               >
                 <Printer className="w-3.5 h-3.5" />
@@ -710,9 +710,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
           {/* ABA Routine Correlation Alert Banner */}
           {patternAnalysis.scheduleCorrelation && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-purple-500/15 to-indigo-500/15 border border-amber-500/40 space-y-1.5 shadow-lg">
-              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs">
-                <Lightbulb className="w-4 h-4 text-amber-400" />
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-500/15 via-purple-500/15 to-indigo-500/15 border border-sky-500/40 space-y-1.5 shadow-lg">
+              <div className="flex items-center gap-2 text-sky-300 font-bold text-xs">
+                <Lightbulb className="w-4 h-4 text-sky-400" />
                 <span>{t('Actionable Clinical Insight & Routine Correlation:', 'اكتشاف ارتباط سريري بالروتين اليومي (ABA Insight):')}</span>
               </div>
               <p className="text-xs text-slate-200 leading-relaxed font-medium">
@@ -732,7 +732,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
               <div className="space-y-2 text-xs">
                 {[
-                  { label: t('Morning (06:00 - 12:00)', 'الصباح (06:00 - 12:00)'), count: patternAnalysis.timeOfDayDistribution.morning, color: 'bg-amber-400' },
+                  { label: t('Morning (06:00 - 12:00)', 'الصباح (06:00 - 12:00)'), count: patternAnalysis.timeOfDayDistribution.morning, color: 'bg-sky-400' },
                   { label: t('Afternoon (12:00 - 17:00)', 'بعد الظهر (12:00 - 17:00)'), count: patternAnalysis.timeOfDayDistribution.afternoon, color: 'bg-rose-400' },
                   { label: t('Evening (17:00 - 22:00)', 'المساء (17:00 - 22:00)'), count: patternAnalysis.timeOfDayDistribution.evening, color: 'bg-purple-400' },
                   { label: t('Night (22:00 - 06:00)', 'الليل (22:00 - 06:00)'), count: patternAnalysis.timeOfDayDistribution.night, color: 'bg-blue-400' },
@@ -853,7 +853,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
         <div className="p-5 rounded-3xl bg-[#150917] border border-[#4A1224]/50 space-y-4 shadow-xl">
           <div>
             <h3 className="font-black text-base flex items-center gap-2 text-white">
-              <FileJson className="w-5 h-5 text-amber-400" />
+              <FileJson className="w-5 h-5 text-sky-400" />
               <span>{t('Configuration Backup & Clinical Export', 'النسخ الاحتياطي وتصدير التقرير للمختص')}</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -871,7 +871,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             </button>
             <button
               onClick={handlePrintWeeklyClinicalReport}
-              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 font-bold text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>{t('Print Weekly Clinical Report (ABA/SLP)', 'طباعة التقرير السريري الأسبوعي (ABA/SLP)')}</span>

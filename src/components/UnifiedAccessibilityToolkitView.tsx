@@ -106,6 +106,10 @@ export default function UnifiedAccessibilityToolkitView({
     } catch {}
     return 'see_understand';
   });
+  useEffect(() => {
+    document.querySelector(`[data-toolkit-cat="${activeCategory}"]`)?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [activeCategory]);
+
 
   // Screen-reader live announcement region
   const [announcement, setAnnouncement] = useState('');
@@ -502,6 +506,7 @@ export default function UnifiedAccessibilityToolkitView({
           const isSelected = activeCategory === cat.id;
           return (
             <button
+              data-toolkit-cat={cat.id}
               key={cat.id}
               role="tab"
               aria-selected={isSelected}
