@@ -13,7 +13,7 @@
     "lint": "tsc --noEmit && eslint . --quiet",
     "fix": "npx eslint . --fix",
     "check:fix": "node scripts/check-and-fix.mjs",
-    "test:unit": "node scripts/check-function-count.mjs && npx tsx tests/runAllTests.ts && npx tsx tests/phase8TestingStrategyVerification.ts && npx tsx tests/learningPathRemovalAndProgressSafetyVerification.ts && npx tsx tests/criticalBugFixVerification.ts",
+    "test:unit": "node scripts/check-function-count.mjs && npx tsx tests/runAllTests.ts && npx tsx tests/phase8TestingStrategyVerification.ts && npx tsx tests/learningPathRemovalAndProgressSafetyVerification.ts && npx tsx tests/criticalBugFixVerification.ts && npx tsx tests/voiceDockVerification.ts",
     "test:learning-removal": "npx tsx tests/learningPathRemovalAndProgressSafetyVerification.ts",
     "test:golden": "npx tsx tests/goldenAdaptiveScenario.ts",
     "test:api-adaptive": "npx tsx tests/realAdaptiveApiVerification.ts",

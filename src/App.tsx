@@ -1607,6 +1607,20 @@ export default function App() {
               {renderView()}
             </Suspense>
           </main>
+
+          {/* Global blind-first controls: floating hold-to-talk voice button,
+            triple-tap / shake SOS, and the SOS modal — available on EVERY screen
+            for blind and low-vision users. */}
+        {user && profile?.accessibilityMode === 'Visual' && (
+          <Suspense fallback={null}>
+            <GlobalVoiceControls
+              profile={profile}
+              isArabic={isArabicLocale(profile?.language)}
+              onNavigate={(view, tab) => navigateTo(view, tab)}
+              setProfile={setProfile}
+            />
+          </Suspense>
+        )}
         </div>
 
         {/* The floating accessibility overlay (sign avatar / mic / vision) is ONLY for
@@ -1651,19 +1665,6 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Global blind-first controls: floating hold-to-talk voice button,
-            triple-tap / shake SOS, and the SOS modal — available on EVERY screen
-            for blind and low-vision users. */}
-        {user && profile?.accessibilityMode === 'Visual' && (
-          <Suspense fallback={null}>
-            <GlobalVoiceControls
-              profile={profile}
-              isArabic={isArabicLocale(profile?.language)}
-              onNavigate={(view, tab) => navigateTo(view, tab)}
-              setProfile={setProfile}
-            />
-          </Suspense>
-        )}
 
 
       </div>

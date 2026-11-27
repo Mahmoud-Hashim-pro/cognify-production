@@ -709,7 +709,7 @@ export default function AccessibilityOverlay({
         onClick={() => toggleControlsHidden(false)}
         title="Show accessibility controls"
         aria-label="Show accessibility controls"
-        className="fixed bottom-24 start-3 md:bottom-4 md:start-24 z-50 w-11 h-11 rounded-full bg-[#112C4F]/90 text-[#4B9FE1] shadow-md border border-[#24476F] backdrop-blur-md flex items-center justify-center hover:bg-[#24476F] hover:text-white active:scale-95 pointer-events-auto transition-all"
+        className="fixed bottom-24 start-3 md:bottom-20 md:start-24 z-50 w-11 h-11 rounded-full bg-[#112C4F]/90 text-[#4B9FE1] shadow-md border border-[#24476F] backdrop-blur-md flex items-center justify-center hover:bg-[#24476F] hover:text-white active:scale-95 pointer-events-auto transition-all"
       >
         <Eye className="w-4 h-4" />
       </button>
@@ -729,7 +729,7 @@ export default function AccessibilityOverlay({
       }}
       dragElastic={0.2}
       dragMomentum={false}
-      className="fixed bottom-32 start-4 md:bottom-16 md:start-24 z-50 flex flex-col gap-6 pointer-events-none max-w-[calc(100vw-1.5rem)]"
+      className="fixed bottom-32 start-4 md:bottom-28 md:start-24 z-50 flex flex-col gap-6 pointer-events-none max-w-[calc(100vw-1.5rem)]"
     >
       {/* Hide all accessibility controls */}
       <button

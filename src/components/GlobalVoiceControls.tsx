@@ -144,7 +144,39 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
   const pressActiveRef = useRef(false);
   const pressFiredRef = useRef(false);
 
+  // Tap-to-start / tap-to-stop mode (keyboard Enter/Space, screen-reader activation,
+  // or a quick tap). Hold-to-talk and the triple-tap SOS below are unchanged.
+  const latchedRef = useRef(false);
+  const pressStartTsRef = useRef(0);
+  const lastPointerTsRef = useRef(0);
+  const [latched, setLatched] = useState(false);
+  const setLatch = (v: boolean) => { latchedRef.current = v; setLatched(v); };
+
+  const registerTap = useCallback(() => {
+    const now = Date.now();
+    tapTimesRef.current = tapTimesRef.current.filter((t) => now - t < 700);
+    tapTimesRef.current.push(now);
+    if (tapTimesRef.current.length >= 3) {
+      tapTimesRef.current = [];
+      if (latchedRef.current) { latchedRef.current = false; setLatched(false); }
+      voice.stopListening();
+      sosRef.current.triggerEmergencySOS('button');
+      return true;
+    }
+    return false;
+  }, [voice]);
+
   const handlePressStart = useCallback(() => {
+    pressStartTsRef.current = Date.now();
+    lastPointerTsRef.current = Date.now();
+    if (latchedRef.current) {
+      // Second tap while latched: stop listening.
+      pressActiveRef.current = false;
+      setLatch(false);
+      voice.stopListening();
+      registerTap();
+      return;
+    }
     pressActiveRef.current = true;
     pressFiredRef.current = false;
     // Ask iOS for motion permission from this user gesture (needed for shake-SOS).
@@ -164,20 +196,40 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
         pressFiredRef.current = true;
       }
     }, 250);
-  }, [motionPermissionAsked, voice]);
+  }, [motionPermissionAsked, voice, profile, registerTap]);
 
   const handlePressEnd = useCallback(() => {
+    lastPointerTsRef.current = Date.now();
     if (!pressActiveRef.current) return;
     pressActiveRef.current = false;
-    voice.stopListening();
-    const now = Date.now();
-    tapTimesRef.current = tapTimesRef.current.filter((t) => now - t < 700);
-    tapTimesRef.current.push(now);
-    if (tapTimesRef.current.length >= 3) {
-      tapTimesRef.current = [];
-      sosRef.current.triggerEmergencySOS('button');
+    const quickTap = Date.now() - pressStartTsRef.current < 250;
+    const fired = registerTap();
+    if (fired) return;
+    if (quickTap) {
+      // A quick tap keeps listening on (tap-to-start). Tap again to stop.
+      setLatch(true);
+      return;
     }
-  }, [voice]);
+    voice.stopListening();
+  }, [voice, registerTap]);
+
+  // Keyboard (Enter/Space) and screen-reader activation arrive as a click without
+  // a real pointer press (detail 0). Toggle listening.
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (e.detail !== 0) return;
+    if (Date.now() - lastPointerTsRef.current < 700) return;
+    if (latchedRef.current || voice.status === 'listening') {
+      setLatch(false);
+      voice.stopListening();
+      return;
+    }
+    if (!hasMediaConsent(profile)) {
+      setShowMediaConsent(true);
+      return;
+    }
+    setLatch(true);
+    voice.startListening();
+  }, [voice, profile]);
 
   // ── Global SOS request event (any view can ask for the SOS flow) ──────────
   useEffect(() => {
@@ -238,20 +290,31 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
           }}
         />
       )}
-      {/* Floating hold-to-talk voice button */}
+      {/* Fixed voice dock: a built-in row at the bottom of the layout (not a floating overlay) */}
+      <div
+        role="region"
+        aria-label={isArabic ? 'التحكم الصوتي' : 'Voice control'}
+        data-voice-dock
+        className="shrink-0 w-full flex items-center justify-end gap-3 px-4 py-2 bg-[#0B1F3A] border-t border-[#24476F]"
+      >
+        <span className="text-sm flex-1 text-start" style={{ color: "#E2E8F0" }} aria-hidden="true">
+          {isArabic ? 'اضغط مطولا واتكلم، أو اضغط مرة للبدء ومرة للإيقاف' : 'Hold to talk, or tap once to start and once to stop'}
+        </span>
       <button
         type="button"
         aria-label={
           isArabic
-            ? 'زر التحكم الصوتي. اضغط مطولا واتكلم. ثلاث ضغطات سريعة للطوارئ.'
-            : 'Voice control button. Press and hold to talk. Triple tap for emergency.'
+            ? 'زر التحكم الصوتي. اضغط مطولا واتكلم، أو اضغط مرة للبدء ومرة للإيقاف. ثلاث ضغطات سريعة للطوارئ.'
+            : 'Voice control button. Press and hold to talk, or tap once to start and once to stop. Triple tap for emergency.'
         }
+        aria-pressed={latched || voice.status === 'listening'}
+        onClick={handleClick}
         onPointerDown={handlePressStart}
         onPointerUp={handlePressEnd}
         onPointerCancel={handlePressEnd}
         onPointerLeave={handlePressEnd}
         onContextMenu={(e) => e.preventDefault()}
-        className={`fixed bottom-4 end-4 z-[70] w-14 h-14 rounded-full flex items-center justify-center shadow-xl border-2 transition-all select-none touch-none ${
+        className={`w-14 h-14 rounded-full focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-white flex items-center justify-center shadow-xl border-2 transition-all select-none touch-none ${
           voice.status === 'listening'
             ? 'bg-red-600 border-red-300 scale-110 animate-pulse'
             : voice.status === 'processing'
@@ -269,6 +332,7 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
             : ''}
         </span>
       </button>
+      </div>
 
       {/* Global SOS countdown / status modal */}
       {sos.showEmergencyModal && (
