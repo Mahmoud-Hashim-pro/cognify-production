@@ -402,10 +402,6 @@ export default function ProfilePage({
             <h1 className="text-2xl sm:text-3xl font-black text-[#F4F7FB] tracking-tight">
               {localize(profile.language, 'Academic Profile', 'الملف الأكاديمي')}
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#1769AA]/25 text-[#18C6C3] border border-[#1769AA]/40 shadow-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#18C6C3]" />
-              <span>{localize(profile.language, 'Verified Scholar', 'طالب موثّق')}</span>
-            </span>
           </div>
           <p className="text-xs sm:text-sm text-[#B8C7D9] font-medium leading-relaxed">
             {localize(
@@ -647,13 +643,6 @@ export default function ProfilePage({
                   </label>
                 )}
 
-                {/* Verified Shield Check Badge at Bottom Right */}
-                <div 
-                  className="absolute bottom-0 end-0 w-7 h-7 rounded-full bg-[#1769AA] border-2 border-[#0D2542] flex items-center justify-center text-white shadow-md z-10"
-                  title="Verified Scholar"
-                >
-                  <ShieldCheck className="w-4 h-4 text-white" />
-                </div>
               </div>
 
               {/* Student Name */}

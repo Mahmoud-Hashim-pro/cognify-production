@@ -1260,7 +1260,6 @@ export default function App() {
                 handleBack();
               }
             }}
-            initialTool={disabilityTab as any}
             onOpenBookStudio={(content, title) => {
               if (content) {
                 try {
@@ -1284,7 +1283,6 @@ export default function App() {
                 handleBack();
               }
             }}
-            initialTool={disabilityTab as any}
             isDarkMode={isDarkMode}
           />
         );
@@ -1302,7 +1300,6 @@ export default function App() {
               }
             }}
             onOpenHearingSuite={() => navigateTo('hear_express')}
-            initialTool={disabilityTab as any}
             isDarkMode={isDarkMode}
           />
         );

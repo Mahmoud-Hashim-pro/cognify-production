@@ -549,7 +549,21 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       onEnd: () => setSpeakingMessageId((prev) => (prev === messageId ? null : prev)),
       onError: (err) => {
         setSpeakingMessageId((prev) => (prev === messageId ? null : prev));
-        if (err === 'silent-fail' || err === 'synth-error' || err === 'unsupported') {
+        if (err === 'audio-play-blocked') {
+          toast.warning(
+            isAr
+              ? 'المتصفح منع تشغيل الصوت تلقائياً. اضغط زر الاستماع مرة تانية عشان يشتغل.'
+              : 'The browser blocked automatic audio playback. Tap the listen button again to play it.',
+            isAr ? 'الصوت متوقف' : 'Playback blocked',
+          );
+        } else if (err === 'audio-fallback-fail') {
+          toast.warning(
+            isAr
+              ? 'معرفتش أوصل لخدمة الصوت البديلة. اتأكد من اتصالك بالإنترنت وحاول تاني.'
+              : 'Could not reach the backup speech service. Check your internet connection and try again.',
+            isAr ? 'تعذّر النطق' : 'Speech unavailable',
+          );
+        } else if (err === 'silent-fail' || err === 'synth-error' || err === 'unsupported') {
           toast.warning(
             isAr
               ? 'معرفتش أشغّل الصوت. جرّب تاكد إن صوت اللغة دي متثبت على جهازك، أو استخدم قارئ الشاشة.'

@@ -77,6 +77,9 @@ export type MobilityToolId =
   | 'gps_nav'
   | 'indoor_boundary';
 
+const VALID_MOBILITY_TOOLS: readonly MobilityToolId[] = ['place_desc', 'sign_reader', 'entrance_door', 'transit_assistant', 'places_directory', 'gps_nav', 'indoor_boundary'];
+
+
 interface AccessibleMobilityWorkspaceViewProps {
   profile: UserProfile;
   onNavigateBack: () => void;
@@ -95,7 +98,9 @@ export default function AccessibleMobilityWorkspaceView({
   const isAr = isArabicLocale(profile.language);
   const langKey = isAr ? 'ar' : 'en';
 
-  const [activeTool, setActiveTool] = useState<MobilityToolId>(initialTool);
+  const [activeTool, setActiveTool] = useState<MobilityToolId>(() =>
+    VALID_MOBILITY_TOOLS.includes(initialTool) ? initialTool : 'place_desc'
+  );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showSafetyModal, setShowSafetyModal] = useState(false);
 

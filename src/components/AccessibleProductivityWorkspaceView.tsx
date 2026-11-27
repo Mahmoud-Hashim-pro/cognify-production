@@ -106,6 +106,9 @@ export type ProductivityToolId =
   | 'chart_describer'
   | 'form_filler';
 
+const VALID_PRODUCTIVITY_TOOLS: readonly ProductivityToolId[] = ['voice_doc', 'writing_assistant', 'powerpoint_creator', 'excel_assistant', 'chart_describer', 'form_filler'];
+
+
 interface AccessibleProductivityWorkspaceViewProps {
   profile: UserProfile;
   onNavigateBack: () => void;
@@ -126,7 +129,9 @@ export default function AccessibleProductivityWorkspaceView({
   const isAr = isArabicLocale(profile.language);
   const langKey = isAr ? 'ar' : 'en';
 
-  const [activeTool, setActiveTool] = useState<ProductivityToolId>(initialTool);
+  const [activeTool, setActiveTool] = useState<ProductivityToolId>(() =>
+    VALID_PRODUCTIVITY_TOOLS.includes(initialTool) ? initialTool : 'voice_doc'
+  );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 

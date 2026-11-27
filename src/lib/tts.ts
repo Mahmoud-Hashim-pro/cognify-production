@@ -74,7 +74,6 @@ export function cleanForSpeech(text: string): string {
     .replace(/[*+#_`~\[\]()<>]/g, "")
     // Strip stray system placeholder tokens in speech
     .replace(/\bOther\b/gi, "")
-    .replace(/\besraahosni\w*\b/gi, "")
     .replace(/\bN\/A\b/gi, "")
     .replace(/\s{2,}/g, " ")
     .trim();

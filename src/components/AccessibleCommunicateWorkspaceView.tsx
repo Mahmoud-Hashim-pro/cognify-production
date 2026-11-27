@@ -84,6 +84,9 @@ export type CommunicateToolId =
   | 'payment_guidance'
   | 'hearing_suite_link';
 
+const VALID_COMMUNICATE_TOOLS: readonly CommunicateToolId[] = ['human_assist', 'handwriting', 'form_reader', 'voice_notes', 'social_assistant', 'payment_guidance', 'hearing_suite_link'];
+
+
 interface AccessibleCommunicateWorkspaceViewProps {
   profile: UserProfile;
   onMenuClick: () => void;
@@ -104,7 +107,9 @@ export default function AccessibleCommunicateWorkspaceView({
   const isAr = isArabicLocale(profile.language);
 
   // Active Tool state
-  const [activeTool, setActiveTool] = useState<CommunicateToolId>(initialTool);
+  const [activeTool, setActiveTool] = useState<CommunicateToolId>(() =>
+    VALID_COMMUNICATE_TOOLS.includes(initialTool) ? initialTool : 'human_assist'
+  );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
@@ -201,35 +206,25 @@ export default function AccessibleCommunicateWorkspaceView({
       return;
     }
 
-    // Update state to connecting
-    let updated = updateAssistanceSessionState(session, 'connecting');
-    updated.consent = {
+    // Human assistance is NOT a live service yet. Never fake a connection:
+    // a blind user must never believe a real human is watching their camera.
+    // Record that consent was reviewed, keep the session idle, and say plainly
+    // that the service is under development and nothing is being shared.
+    const reviewed = updateAssistanceSessionState(session, 'idle');
+    reviewed.consent = {
       userAgreed: true,
-      shareCamera: consentCamera,
-      shareMicrophone: consentMic,
+      shareCamera: false,
+      shareMicrophone: false,
       shareLocation: false,
       consentTimestamp: Date.now(),
     };
-    updated.providerType = selectedProvider;
-    setSession(updated);
+    setSession(reviewed);
 
-    const connectingMsg = isAr
-      ? 'جاري إنشاء الاتصال الآمن مع المرافق المعتمد... الكاميرا لم تبث بعد.'
-      : 'Initiating secure stream with verified companion... video not yet broadcasting.';
-    toast.loading(connectingMsg, { id: 'connect_toast' });
-    speakText(connectingMsg);
-
-    // Simulate verified connection establishment
-    setTimeout(() => {
-      toast.dismiss('connect_toast');
-      const connectedSession = updateAssistanceSessionState(updated, 'connected', true);
-      setSession(connectedSession);
-      const successMsg = isAr
-        ? `تم الاتصال بنجاح. البث الحي نشط الآن وتشارك الكاميرا والميكروفون مع (${connectedSession.providerNameAr}). زر القطع الفوري متاح دائماً.`
-        : `Connected successfully. Live sharing is active with (${connectedSession.providerNameEn}). Instant disconnect button is always accessible.`;
-      toast.success(successMsg);
-      speakText(successMsg);
-    }, 1800);
+    const unavailableMsg = isAr
+      ? 'خدمة المساعدة البشرية المباشرة لسه قيد التطوير ومش متاحة دلوقتي. مفيش أي شخص حقيقي متصل، والكاميرا والميكروفون مش بتبث أي حاجة. هنعلمك أول ما الخدمة تشتغل فعلاً.'
+      : 'Live human assistance is still under development and not available yet. No real person is connected, and your camera and microphone are not broadcasting anything. We will let you know once the service is truly live.';
+    toast.info(unavailableMsg, isAr ? 'الخدمة قيد التطوير' : 'Under development', 8000);
+    speakText(unavailableMsg);
   };
 
   const handleDisconnectAssistance = () => {
@@ -395,6 +390,20 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'human_assist' && (
           <div className="space-y-6">
+            {/* Persistent honesty notice: this service is not live yet */}
+            <div
+              role="status"
+              className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-sm font-bold flex items-start gap-3"
+            >
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+              <p className="leading-relaxed">
+                {localize(
+                  profile.language,
+                  'Under development: live human assistance is not available yet. No real person can connect, and your camera and microphone never broadcast from this screen. The controls below are a preview of how it will work.',
+                  'قيد التطوير: خدمة المساعدة البشرية المباشرة لسه مش متاحة. مفيش أي شخص حقيقي يقدر يتصل، والكاميرا والميكروفون مش بتبث أي حاجة من الشاشة دي. الأزرار اللي تحت معاينة لشكل الخدمة لما تشتغل.'
+                )}
+              </p>
+            </div>
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
