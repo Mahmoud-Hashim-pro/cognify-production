@@ -7,7 +7,8 @@ import {
   getRedirectResult,
   signOut, 
   createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword 
+  signInWithEmailAndPassword,
+  signInAnonymously
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -239,6 +240,7 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
 export const registerWithEmail = (email: string, pass: string) => createUserWithEmailAndPassword(auth, email, pass);
 export const loginWithEmail = (email: string, pass: string) => signInWithEmailAndPassword(auth, email, pass);
+export const signInAsGuest = () => signInAnonymously(auth);
 
 // Session-scoped choices made on the login screen (account path / disability /
 // org code). These MUST be cleared on logout — they are per-sign-in, not

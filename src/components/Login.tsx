@@ -4,6 +4,7 @@ import {
   signInWithGoogleRedirect, 
   loginWithEmail, 
   registerWithEmail, 
+  signInAsGuest,
   auth 
 } from '../lib/firebase';
 import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
@@ -21,6 +22,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { ThemeSelector } from './ui/ThemeSelector';
+import { speak } from '../lib/tts';
 
 interface LoginProps {
   onLoginSuccess?: () => void;
@@ -312,6 +314,45 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
     }
   };
 
+  // One-tap guest access: the fastest path to the camera for blind users.
+  // Needs the Anonymous provider enabled in Firebase Auth; if it is off we say
+  // so in plain Egyptian Arabic instead of showing a raw Firebase error.
+  const handleGuestAccess = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await signInAsGuest();
+    } catch (err: any) {
+      console.warn('Guest sign-in failed:', err);
+      setError(t(
+        'Guest access is not available right now. Please sign in with Google or email instead.',
+        'الدخول كضيف مش متاح دلوقتي. جرب تسجل بجوجل أو بالإيميل.'
+      ));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // First-launch spoken welcome: for blind users the real hook is the first
+  // spoken word, not the artwork. Speaks once per browser session; browsers
+  // that require a user gesture first simply skip it.
+  const welcomedRef = useRef(false);
+  useEffect(() => {
+    if (welcomedRef.current) return;
+    welcomedRef.current = true;
+    try {
+      if (sessionStorage.getItem('rafiqi_welcomed')) return;
+      sessionStorage.setItem('rafiqi_welcomed', '1');
+    } catch { /* storage unavailable - still try once */ }
+    speak(
+      isRtl
+        ? 'أهلاً بيكي في رفيقي. موبايلك يشوفلك الدنيا. سجلي دخولك، أو كملي كضيف من غير حساب.'
+        : 'Welcome to Rafiqi. Your phone sees the world for you. Sign in, or continue as a guest without an account.',
+      isRtl ? 'Arabic' : 'English'
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div
       className="min-h-screen bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-[#F8FAFC] flex flex-col items-center justify-between p-3 sm:p-6 font-sans relative selection:bg-[#1769AA]/50 selection:text-white"
@@ -351,12 +392,17 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-[#1769AA] to-[#00C2FF] flex items-center justify-center shadow-md shadow-[#00C2FF]/20 text-white font-black text-base sm:text-lg shrink-0">
                 R
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {isRtl ? 'رفيقى' : 'Rafiqi'}
-                </span>
-                <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] font-bold text-[9px] uppercase">
-                  A11y
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {isRtl ? 'رفيقى' : 'Rafiqi'}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] font-bold text-[9px] uppercase">
+                    A11y
+                  </span>
+                </div>
+                <span className="text-[10px] sm:text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] leading-tight">
+                  {t('Your phone sees the world for you.', 'موبايلك يشوفلك الدنيا.')}
                 </span>
               </div>
             </div>
@@ -689,6 +735,17 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                   {t('Direct Google Sign-In (No Pop-ups)', 'تسجيل جوجل المباشر (بدون نوافذ منبثقة)')}
                 </button>
               )}
+
+              {/* Guest Access: the biggest, lowest-friction path to the camera */}
+              <button
+                type="button"
+                onClick={handleGuestAccess}
+                disabled={loading}
+                className="w-full min-h-[52px] py-3 px-4 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] active:scale-[0.98] text-white text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-[#4B9FE1]/60 shadow-lg shadow-[#1769AA]/25 disabled:opacity-50 mt-1"
+              >
+                <Accessibility className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <span>{t('Continue as Guest - no account needed', 'كملي كضيف - من غير حساب')}</span>
+              </button>
             </form>
           )}
 
