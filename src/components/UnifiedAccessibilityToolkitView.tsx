@@ -499,6 +499,21 @@ export default function UnifiedAccessibilityToolkitView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Toolkit Categories', 'أقسام المنظومة الميسرة')}
+        onKeyDown={(e) => {
+          // Arrow / Home / End move focus between tabs (focus only; Enter or Space still selects).
+          const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+          if (!keys.includes(e.key)) return;
+          const tabs = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]'));
+          const i = tabs.indexOf(document.activeElement as HTMLElement);
+          if (i < 0) return;
+          const rtl = getComputedStyle(e.currentTarget).direction === 'rtl';
+          let n = i;
+          if (e.key === 'Home') n = 0;
+          else if (e.key === 'End') n = tabs.length - 1;
+          else n = (i + (e.key === 'ArrowRight' ? 1 : -1) * (rtl ? -1 : 1) + tabs.length) % tabs.length;
+          e.preventDefault();
+          tabs[n]?.focus();
+        }}
         className={`px-3 py-2 border-b flex flex-nowrap overflow-x-auto custom-scrollbar items-center gap-1.5 shrink-0 ${
           isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
         }`}

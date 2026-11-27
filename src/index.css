@@ -92,7 +92,7 @@
   --color-surface-3: #E1EDF8;
   --color-text-main: #0E1726;
   --color-text-muted: #4B5C74;
-  --color-faint: #6B7E98;
+  --color-faint: #5A6D87;
   --color-border: #DCE7F3;
   --color-border-2: #C5D8EC;
 
@@ -562,7 +562,7 @@ html.high-contrast button:focus-visible {
 /* Design tokens — v2 dark values. */
 .dark .bg-surface-2 { background-color: #17171C !important; }
 .dark .bg-surface-3 { background-color: #1C1C22 !important; }
-.dark .text-faint { color: #65656F !important; }
+.dark .text-faint { color: #9A9AA6 !important; }
 .dark .border-border-2 { border-color: #2E2E35 !important; }
 .dark .bg-primary { background-color: #0D9488 !important; }
 .dark .bg-primary-soft { background-color: #132E2B !important; }
@@ -1152,7 +1152,7 @@ html.high-contrast button:focus-visible {
 }
 .dark .app-navy .bg-surface-2 { background-color: #17355C !important; }
 .dark .app-navy .bg-surface-3 { background-color: #17355C !important; }
-.dark .app-navy .text-faint { color: #64748B !important; }
+.dark .app-navy .text-faint { color: #94A3B8 !important; }
 .dark .app-navy .border-border-2 { border-color: #2B4160 !important; }
 .dark .app-navy .bg-primary { background-color: #1769AA !important; }
 .dark .app-navy .bg-primary-soft { background-color: #0D2542 !important; }

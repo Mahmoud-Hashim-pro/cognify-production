@@ -735,6 +735,7 @@ export default function AccessibilityOverlay({
       <button
         onClick={() => toggleControlsHidden(true)}
         title="Hide accessibility controls"
+        aria-label="Hide accessibility controls"
         className="self-start pointer-events-auto w-9 h-9 rounded-full bg-[#112C4F]/90 backdrop-blur border border-[#24476F] text-slate-300 shadow flex items-center justify-center hover:text-white active:scale-95"
       >
         <EyeOff className="w-4 h-4" />
@@ -805,6 +806,7 @@ export default function AccessibilityOverlay({
                       ? "bg-rose-500 border-rose-400 text-white animate-pulse"
                       : "bg-[#112C4F] border-[#24476F] text-white hover:bg-[#17355C]"
                   }`}
+                  aria-pressed={isListening}
                   title={isListening ? "Stop listening" : "Start listening"}
                   aria-label={isListening ? "Stop listening" : "Start listening"}
                 >
