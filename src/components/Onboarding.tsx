@@ -357,7 +357,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 fontSizeScale === scale
                   ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
-                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-[#31486B] bg-slate-50 dark:bg-[#0B1523] text-slate-700 dark:text-slate-200'
               }`}
             >
               {scale === 'normal' ? t('Normal', 'عادي') :
@@ -456,7 +456,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 speechRate === rate
                   ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
-                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-[#31486B] bg-slate-50 dark:bg-[#0B1523] text-slate-700 dark:text-slate-200'
               }`}
             >
               {rate}x
@@ -483,7 +483,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
                 descriptionDetail === item.id
                   ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
-                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-[#31486B] bg-slate-50 dark:bg-[#0B1523] text-slate-700 dark:text-slate-200'
               }`}
             >
               <span>{t(item.labelEn, item.labelAr)}</span>
@@ -693,17 +693,25 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
       <div className="w-full bg-slate-50 dark:bg-[#0B1523] p-4 rounded-2xl border border-slate-200 dark:border-[#22354E] text-start space-y-2.5 text-xs">
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Language', 'اللغة')}</span>
-          <span className="font-bold text-slate-900 dark:text-white">{language} ({dialect})</span>
+          <span className="font-bold text-slate-900 dark:text-white">
+            {language === 'Arabic' ? t('Arabic', 'العربية') : t('English', 'الإنجليزية')}
+            {dialect ? ` (${dialect === 'ar-EG' ? t('Egyptian', 'مصري') : dialect})` : ''}
+          </span>
         </div>
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Appearance', 'المظهر والتباين')}</span>
           <span className="font-bold text-slate-900 dark:text-white capitalize">
-            {themeMode} · {highContrast ? t('High Contrast', 'تباين عالي') : t('Standard', 'قياسي')}
+            {themeMode === 'dark' ? t('Dark', 'داكن') : themeMode === 'light' ? t('Light', 'فاتح') : t('System', 'تلقائي')} · {highContrast ? t('High Contrast', 'تباين عالي') : t('Standard', 'قياسي')}
           </span>
         </div>
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Text Scale', 'حجم الخط')}</span>
-          <span className="font-bold text-slate-900 dark:text-white capitalize">{fontSizeScale}</span>
+          <span className="font-bold text-slate-900 dark:text-white capitalize">
+            {fontSizeScale === 'normal' ? t('Normal', 'عادي')
+              : fontSizeScale === 'medium' ? t('Medium', 'متوسط')
+              : fontSizeScale === 'large' ? t('Large', 'كبير')
+              : t('Extra Large', 'كبير جداً')}
+          </span>
         </div>
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Speech Speed', 'سرعة النطق')}</span>
@@ -711,7 +719,14 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Assistive Focus', 'محور المساعدة')}</span>
-          <span className="font-bold text-[#1769AA] dark:text-[#4B9FE1]">{optionalAssistiveMode}</span>
+          <span className="font-bold text-[#1769AA] dark:text-[#4B9FE1]">
+            {!optionalAssistiveMode || optionalAssistiveMode === 'None'
+              ? t('General access', 'الوصول الشامل')
+              : optionalAssistiveMode === 'Visual' ? t('Visual', 'إعاقة بصرية')
+              : optionalAssistiveMode === 'Vocal-Deaf' ? t('Hearing', 'إعاقة سمعية')
+              : optionalAssistiveMode === 'Speech' ? t('Speech', 'صعوبات النطق')
+              : optionalAssistiveMode}
+          </span>
         </div>
       </div>
 

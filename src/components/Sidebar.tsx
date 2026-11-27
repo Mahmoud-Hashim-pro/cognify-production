@@ -531,7 +531,18 @@ export default function Sidebar({
                   {profile.name || profile.email?.split('@')[0] || 'User'}
                 </div>
                 <div className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'} truncate`}>
-                  {profile.disabilityType || profile.accessibilityMode || t('Assistive Learning', 'التعلم الميسر')}
+                  {(() => {
+                    const raw = profile.disabilityType || profile.accessibilityMode || '';
+                    if (!raw || raw === 'None') return t('Assistive Learning', 'التعلم الميسر');
+                    const labels: Record<string, [string, string]> = {
+                      Visual: ['Visual', 'إعاقة بصرية'],
+                      Hearing: ['Hearing', 'إعاقة سمعية'],
+                      Motor: ['Motor', 'إعاقة حركية'],
+                      Cognitive: ['Cognitive', 'إعاقة ذهنية'],
+                    };
+                    const l = labels[raw];
+                    return l ? t(l[0], l[1]) : raw;
+                  })()}
                 </div>
               </div>
             )}

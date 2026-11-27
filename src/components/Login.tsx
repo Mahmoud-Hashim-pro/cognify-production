@@ -615,7 +615,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               {/* Remember me & Forgot Password Options (Login Mode) */}
               {mode === 'email-login' && (
                 <div className="flex items-center justify-between text-xs pt-0.5">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white transition-colors font-bold">
                     <input
                       type="checkbox"
                       checked={rememberMe}

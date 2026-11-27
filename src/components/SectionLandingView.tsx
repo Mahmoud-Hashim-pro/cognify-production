@@ -483,7 +483,7 @@ export default function SectionLandingView({
             </p>
 
             {/* Detailed Purpose */}
-            <p className={`text-xs sm:text-sm leading-relaxed max-w-2xl ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+            <p className={`text-xs sm:text-sm leading-relaxed max-w-2xl ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
               {isAr ? section.detailedPurposeAr : section.detailedPurposeEn}
             </p>
           </div>
@@ -958,7 +958,7 @@ export default function SectionLandingView({
           </h3>
         </div>
 
-        <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+        <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
           {isAr
             ? 'يمكنك التنقل بين هذه الأدوات باستخدام لوحة المفاتيح عبر زر Tab والتنقل العكسي بـ Shift+Tab والضغط على Enter لتشغيل الأداة مباشرة. تدعم جميع الأدوات التوجيه الصوتي وتكبير الخط وقارئات الشاشة (NVDA / TalkBack / VoiceOver).'
             : 'Navigate between features using Tab, reverse with Shift+Tab, and press Enter to launch. All tools support screen readers (NVDA, TalkBack, VoiceOver), spoken prompts, high-contrast themes, and dynamic font scaling.'}
