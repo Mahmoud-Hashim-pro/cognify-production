@@ -642,21 +642,6 @@ export async function generateLogicResponse(
     const isHtml = res.headers.get('Content-Type')?.includes('text/html');
     if (!res.ok || isHtml) {
       if (isHtml || res.status === 404) backendUp = false;
-      // The server already knows why it failed (provider overloaded, usage limit, setup problem).
-      // Say that, kindly, instead of falling to a browser-side path that has no keys and only says "busy".
-      if (!isHtml && (res.status === 503 || res.status === 429)) {
-        let code = '';
-        try { code = (await res.clone().json())?.code || ''; } catch {}
-        if (res.status === 429) {
-          return isAr ? '⚠️ وصلنا للحد المسموح للذكاء الاصطناعي دلوقتي. جرّب تاني بعد شوية 🙏' : '⚠️ The AI has reached its usage limit for now. Please try again in a little while 🙏';
-        }
-        if (code === 'PROVIDER_OVERLOADED') {
-          return isAr ? '⚠️ مزود الذكاء الاصطناعي عليه ضغط كبير دلوقتي. جرّب تاني بعد دقيقة 🙏' : '⚠️ The AI provider is under heavy load right now. Please try again in a minute 🙏';
-        }
-        if (code === 'SERVER_CONFIG_MISSING') {
-          return isAr ? '⚠️ فيه مشكلة في إعدادات الذكاء الاصطناعي عندنا. الفريق هيصلحها، جرّب بعد شوية 🙏' : '⚠️ There is a problem with our AI setup. The team will fix it, please try again later 🙏';
-        }
-      }
       return direct();
     }
     const data = await res.json();
@@ -1282,6 +1267,21 @@ export async function generateAdaptiveResponse(
     const isHtml = res.headers.get('Content-Type')?.includes('text/html');
     if (!res.ok || isHtml) {
       if (isHtml || res.status === 404) backendUp = false;
+      // The server already knows why it failed (provider overloaded, usage limit, setup problem).
+      // Say that, kindly, instead of falling to a browser-side path that has no keys and only says "busy".
+      if (!isHtml && (res.status === 503 || res.status === 429)) {
+        let code = '';
+        try { code = (await res.clone().json())?.code || ''; } catch {}
+        if (res.status === 429) {
+          return isAr ? '⚠️ وصلنا للحد المسموح للذكاء الاصطناعي دلوقتي. جرّب تاني بعد شوية 🙏' : '⚠️ The AI has reached its usage limit for now. Please try again in a little while 🙏';
+        }
+        if (code === 'PROVIDER_OVERLOADED') {
+          return isAr ? '⚠️ مزود الذكاء الاصطناعي عليه ضغط كبير دلوقتي. جرّب تاني بعد دقيقة 🙏' : '⚠️ The AI provider is under heavy load right now. Please try again in a minute 🙏';
+        }
+        if (code === 'SERVER_CONFIG_MISSING') {
+          return isAr ? '⚠️ فيه مشكلة في إعدادات الذكاء الاصطناعي عندنا. الفريق هيصلحها، جرّب بعد شوية 🙏' : '⚠️ There is a problem with our AI setup. The team will fix it, please try again later 🙏';
+        }
+      }
       return direct();
     }
     const data = await res.json();
