@@ -514,10 +514,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       <SecIcon className="w-4.5 h-4.5" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors truncate">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors line-clamp-2 break-words">
                         {isAr ? sec.titleAr : sec.titleEn}
                       </h3>
-                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] truncate">
+                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] hidden">
                         {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
                       </p>
                     </div>
@@ -573,7 +573,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 <Eye className="w-4 h-4" aria-hidden="true" />
               </div>
               <div className="min-w-0 text-start">
-                <span className="truncate block leading-tight">{t('Launch Visual Assistant', 'تشغيل المساعد البصري')}</span>
+                <span className="line-clamp-2 break-words block leading-tight">{t('Launch Visual Assistant', 'تشغيل المساعد البصري')}</span>
                 <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('See & Understand', 'الرؤية والفهم')}</span>
               </div>
             </div>
@@ -596,7 +596,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 <Mic className="w-4 h-4" aria-hidden="true" />
               </div>
               <div className="min-w-0 text-start">
-                <span className="truncate block leading-tight">{t('Live Captions', 'التفريغ الصوتي المباشر')}</span>
+                <span className="line-clamp-2 break-words block leading-tight">{t('Live Captions', 'التفريغ الصوتي المباشر')}</span>
                 <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('Communicate', 'التواصل والتعبير')}</span>
               </div>
             </div>
@@ -619,7 +619,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 <ShieldCheck className="w-4 h-4" aria-hidden="true" />
               </div>
               <div className="min-w-0 text-start">
-                <span className="truncate block leading-tight">{t('Accessibility Passport', 'جواز التسهيلات الموحد')}</span>
+                <span className="line-clamp-2 break-words block leading-tight">{t('Accessibility Passport', 'جواز التسهيلات الموحد')}</span>
                 <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('Personalize', 'التخصيص')}</span>
               </div>
             </div>
