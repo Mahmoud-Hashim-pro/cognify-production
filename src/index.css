@@ -474,6 +474,16 @@ html.high-contrast button:focus-visible {
   border-color: rgba(23, 105, 170, 0.5);
 }
 
+/* Visible hint that a horizontal strip scrolls: fade the overflowing edge */
+.scroll-fade-x {
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 56px), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - 56px), transparent);
+}
+[dir="rtl"] .scroll-fade-x {
+  -webkit-mask-image: linear-gradient(to left, black calc(100% - 56px), transparent);
+  mask-image: linear-gradient(to left, black calc(100% - 56px), transparent);
+}
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #1769AA transparent;

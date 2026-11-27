@@ -356,7 +356,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Communication Tools', 'أدوات التواصل')}
-        className="sticky top-[69px] z-20 flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-[#0D4778]/80 backdrop-blur-md border-b border-[#22354E] overflow-x-auto custom-scrollbar"
+        className="sticky top-[69px] z-20 flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-[#0D4778]/80 backdrop-blur-md border-b border-[#22354E] overflow-x-auto custom-scrollbar scroll-fade-x"
       >
         {tools.map((t) => {
           const IconComponent = t.icon;

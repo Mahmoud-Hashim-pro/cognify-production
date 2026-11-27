@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Menu, 
   Search, 
@@ -18,7 +18,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { ProductSectionId, getProductSection } from '../lib/sections';
+import { ProductSectionId, getProductSection, PRODUCT_SECTIONS } from '../lib/sections';
 import { isArabicLocale, localize } from '../lib/translations';
 import { ThemeSelector, ThemeMode } from './ui/ThemeSelector';
 import { logout } from '../lib/firebase';
@@ -56,6 +56,69 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+
+  // Real global search over every section feature (title + tags, AR & EN)
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    const out: Array<{ id: string; title: string; section: string; targetView: string; targetTab?: string }> = [];
+    for (const section of PRODUCT_SECTIONS) {
+      for (const f of section.features) {
+        const hay = [f.titleEn, f.titleAr, ...(f.tagsEn || []), ...(f.tagsAr || [])]
+          .join(' ')
+          .toLowerCase();
+        if (hay.includes(q)) {
+          out.push({
+            id: f.id,
+            title: isAr ? f.titleAr : f.titleEn,
+            section: isAr ? section.titleAr : section.titleEn,
+            targetView: f.targetView,
+            targetTab: f.targetTab || f.targetTool,
+          });
+        }
+      }
+    }
+    return out.slice(0, 8);
+  }, [searchQuery, isAr]);
+
+  const handlePickResult = (r: { targetView: string; targetTab?: string }) => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+    if (onNavigate) onNavigate(r.targetView, r.targetTab);
+  };
+
+  // Cmd/Ctrl+K focuses the search box
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Close the results dropdown on outside click / escape
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsSearchOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, []);
   
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -168,16 +231,28 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const userInitial = (profile.name || profile.email || 'U').trim().charAt(0).toUpperCase();
 
   // Functional Notifications (Never fake: reads authentic system state)
-  const functionalNotifications = [
-    {
-      id: 'a11y_active',
-      title: t('Accessibility Passport Active', 'جواز التيسير مفعّل'),
-      desc: t('Visual, speech, and contrast preferences applied.', 'تم تطبيق تفضيلات العرض والنطق والتباين.'),
-      time: t('Just now', 'الآن'),
-      icon: ShieldCheck,
-      type: 'info',
-    },
-  ];
+  const functionalNotifications = useMemo(() => {
+    const list: Array<{ id: string; title: string; desc: string; icon: any; type: string }> = [];
+    if (profile.accessibilityMode && profile.accessibilityMode !== 'None') {
+      list.push({
+        id: 'a11y_active',
+        title: t('Accessibility Passport Active', 'جواز التيسير مفعّل'),
+        desc: t('Visual, speech, and contrast preferences applied.', 'تم تطبيق تفضيلات العرض والنطق والتباين.'),
+        icon: ShieldCheck,
+        type: 'info',
+      });
+    }
+    if (!profile.onboardingComplete) {
+      list.push({
+        id: 'onboarding_pending',
+        title: t('Complete your setup', 'أكمل إعداد حسابك'),
+        desc: t('Finish the accessibility setup so Rafiqi adapts to you.', 'أكمل إعداد إمكانية الوصول عشان رفيقي يتظبط على احتياجك.'),
+        icon: Sparkles,
+        type: 'info',
+      });
+    }
+    return list;
+  }, [profile.accessibilityMode, profile.onboardingComplete, isAr]);
 
   const handleLanguageChange = (newLang: string) => {
     setProfile({ ...profile, language: newLang as any });
@@ -185,7 +260,9 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch) {
+    if (searchResults.length > 0) {
+      handlePickResult(searchResults[0]);
+    } else if (onSearch) {
       onSearch(searchQuery);
     } else if (onNavigate) {
       // Default to section search
@@ -274,15 +351,24 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       </div>
 
       {/* ── CENTER ZONE: SEARCH INPUT ── */}
-      <div className="hidden md:flex flex-1 max-w-md mx-2">
+      <div className="hidden md:flex flex-1 max-w-md mx-2" ref={searchBoxRef}>
         <form onSubmit={handleSearchSubmit} className="relative w-full">
           <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
             <Search className="w-4 h-4" aria-hidden="true" />
           </div>
           <input
+            ref={searchInputRef}
             type="search"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setIsSearchOpen(true);
+            }}
+            onFocus={() => setIsSearchOpen(true)}
+            role="combobox"
+            aria-expanded={isSearchOpen && searchQuery.trim().length > 0}
+            aria-controls="global-search-results"
+            aria-autocomplete="list"
             placeholder={t('Search tools, features, sign dictionary...', 'ابحث في الأدوات، الميزات، وقاموس الإشارة...')}
             className={`w-full min-h-[40px] text-xs font-medium ps-9 pe-12 py-2 rounded-xl border ${
               isDarkMode 
@@ -296,6 +382,40 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               ⌘K
             </kbd>
           </div>
+
+          {/* Live results dropdown */}
+          {isSearchOpen && searchQuery.trim().length > 0 && (
+            <div
+              id="global-search-results"
+              role="listbox"
+              aria-label={t('Search results', 'نتائج البحث')}
+              className={`absolute top-full mt-2 start-0 end-0 rounded-2xl border shadow-xl z-50 overflow-hidden ${
+                isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-200 text-slate-900'
+              }`}
+            >
+              {searchResults.length === 0 ? (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center py-4 px-3">
+                  {t('No tools match your search.', 'مفيش أدوات مطابقة لبحثك.')}
+                </p>
+              ) : (
+                searchResults.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    role="option"
+                    aria-selected="false"
+                    onClick={() => handlePickResult(r)}
+                    className={`w-full text-start px-3.5 py-2.5 flex flex-col gap-0.5 cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1769AA] ${
+                      isDarkMode ? 'hover:bg-[#1A283D]' : 'hover:bg-slate-100'
+                    }`}
+                  >
+                    <span className="text-xs font-bold leading-tight">{r.title}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">{r.section}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </form>
       </div>
 
@@ -355,7 +475,9 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             } flex items-center justify-center relative cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
           >
             <Bell className="w-4 h-4" aria-hidden="true" />
-            <span className="absolute top-2 end-2 w-2 h-2 rounded-full bg-[#1769AA] ring-2 ring-white dark:ring-[#0B1523]" />
+            {functionalNotifications.length > 0 && (
+              <span className="absolute top-2 end-2 w-2 h-2 rounded-full bg-[#1769AA] ring-2 ring-white dark:ring-[#0B1523]" />
+            )}
           </button>
 
           {isNotificationsOpen && (
@@ -370,17 +492,25 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 <span className="text-xs font-bold text-slate-900 dark:text-white">
                   {t('Functional Notifications', 'الإشعارات والتنبيهات')}
                 </span>
-                <span className="text-[10px] text-slate-500 font-mono">1 active</span>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  {functionalNotifications.length > 0
+                    ? `${functionalNotifications.length} ${t('active', 'نشط')}`
+                    : t('none', 'لا يوجد')}
+                </span>
               </div>
 
               <div className="space-y-1.5">
+                {functionalNotifications.length === 0 && (
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center py-3">
+                    {t('No notifications right now.', 'مفيش إشعارات دلوقتي.')}
+                  </p>
+                )}
                 {functionalNotifications.map((notif) => (
                   <div key={notif.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0B1523] border border-slate-200 dark:border-[#22354E] flex items-start gap-2.5">
                     <notif.icon className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1] shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold leading-tight">{notif.title}</p>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{notif.desc}</p>
-                      <span className="text-[9px] text-slate-400 font-mono mt-1 block">{notif.time}</span>
                     </div>
                   </div>
                 ))}

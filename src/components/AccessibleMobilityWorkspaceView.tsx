@@ -432,7 +432,7 @@ export default function AccessibleMobilityWorkspaceView({
       {/* ── SUB-NAV: 7 ACCESSIBLE MOBILITY TABS ── */}
       <nav
         aria-label={localize(profile.language, 'Mobility Assistant Tools', 'أدوات مساعد الحركة والاستكشاف')}
-        className="bg-[#0D4778]/20 border-b border-[#22354E] px-4 sm:px-6 py-2 overflow-x-auto custom-scrollbar"
+        className="bg-[#0D4778]/20 border-b border-[#22354E] px-4 sm:px-6 py-2 overflow-x-auto custom-scrollbar scroll-fade-x"
       >
         <div className="flex items-center gap-2 min-w-max">
           {tools.map((t) => {

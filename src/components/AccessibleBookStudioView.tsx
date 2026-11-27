@@ -114,8 +114,16 @@ export default function AccessibleBookStudioView({
       title: initialTitle || (isArLocale ? 'كتاب العلوم التطبيقية الشامل' : 'Applied Science Comprehensive Textbook'),
       subtitle: isArLocale ? 'الوحدة الدراسية الأولى: الطاقة والحركة' : 'Unit 1: Energy & Motion',
       author: profile?.name || 'الأستاذ الدكتور / المشرف الأكاديمي',
-      subject: profile?.field || (isArLocale ? 'العلوم الطبيعية والفيزياء' : 'Physics & Natural Science'),
-      gradeLevel: profile?.educationLevel || (isArLocale ? 'المرحلة الثانوية / الجامعية' : 'High School / University'),
+      subject: profile?.field
+        ? (isArLocale
+            ? ({ Medicine: 'الطب', Engineering: 'الهندسة', Business: 'إدارة الأعمال', General: 'عام', Other: 'أخرى' } as Record<string, string>)[profile.field] || profile.field
+            : profile.field)
+        : (isArLocale ? 'العلوم الطبيعية والفيزياء' : 'Physics & Natural Science'),
+      gradeLevel: profile?.educationLevel
+        ? (isArLocale
+            ? ({ Primary: 'المرحلة الابتدائية', Secondary: 'المرحلة الثانوية', University: 'المرحلة الجامعية', Professional: 'المستوى المهني' } as Record<string, string>)[profile.educationLevel] || profile.educationLevel
+            : profile.educationLevel)
+        : (isArLocale ? 'المرحلة الثانوية / الجامعية' : 'High School / University'),
       institution: profile?.organization || (isArLocale ? 'منصة رفيقي للتعليم الميسر' : 'Rafiqi Inclusive Learning Platform'),
       date: new Date().toLocaleDateString(isArLocale ? 'ar-EG' : 'en-US'),
       language: isArLocale ? 'ar' : 'en',
@@ -436,7 +444,7 @@ export default function AccessibleBookStudioView({
             <h1 className="font-black text-sm sm:text-base leading-tight truncate">
               {localize(profile?.language, 'Accessible Book & Document Studio', 'استوديو الكتب والمستندات التعليمية الميسرة')}
             </h1>
-            <p className="text-[10px] sm:text-xs text-stone-500 dark:text-stone-400 truncate">
+            <p className="text-[10px] sm:text-xs text-stone-500 dark:text-stone-400 leading-snug">
               {localize(
                 profile?.language,
                 'Transform rough educational notes into structured Word (.docx) & PDF documents',
