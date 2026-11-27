@@ -628,14 +628,14 @@ Database Systems,90,3,270`;
       </nav>
 
       {/* ── MAIN CONTENT AREA ── */}
-      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-5 pb-24 space-y-4">
         {/* ═════════════════════════════════════════════════════════════════════
             1. VOICE DOCUMENT CREATION TAB
            ═════════════════════════════════════════════════════════════════════ */}
         {activeTool === 'voice_doc' && (
           <section
             aria-label={localize(profile.language, 'Voice Document Creation', 'إنشاء المستندات الصوتية')}
-            className="space-y-6"
+            className="space-y-4"
           >
             {/* Action Bar & Dictation Controls */}
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-5 shadow-lg space-y-4">
@@ -766,7 +766,7 @@ Database Systems,90,3,270`;
                         'Document as Markdown'
                       )
                     }
-                    className="min-h-[36px] px-3 py-1.5 rounded-lg bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] text-xs font-semibold border border-[#22354E] flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                    className="min-h-[44px] px-3 py-1.5 rounded-lg bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] text-xs font-semibold border border-[#22354E] flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   >
                     {copiedKey === 'doc_md' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{localize(profile.language, 'Copy Markdown', 'نسخ Markdown')}</span>
@@ -785,7 +785,7 @@ Database Systems,90,3,270`;
                         setVoiceDoc((prev) => ({ ...prev, blocks: [] }));
                       }
                     }}
-                    className="min-h-[36px] px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold border border-red-500/30 flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                    className="min-h-[44px] px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold border border-red-500/30 flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>{localize(profile.language, 'Clear All', 'مسح الكل')}</span>
@@ -842,7 +842,7 @@ Database Systems,90,3,270`;
                           type="button"
                           onClick={() => speakText(block.text)}
                           aria-label={localize(profile.language, `Read block ${idx + 1}`, `استمع للفقرة ${idx + 1}`)}
-                          className="min-h-[36px] min-w-[36px] p-2 rounded-lg bg-[#1A283D] text-[#4B9FE1] hover:bg-[#1769AA]/20 transition-all cursor-pointer"
+                          className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#1A283D] text-[#4B9FE1] hover:bg-[#1769AA]/20 transition-all cursor-pointer"
                         >
                           <Volume2 className="w-4 h-4" />
                         </button>
@@ -856,7 +856,7 @@ Database Systems,90,3,270`;
                             speakText(isAr ? 'تم حذف العنصر' : 'Block removed');
                           }}
                           aria-label={localize(profile.language, `Delete block ${idx + 1}`, `حذف الفقرة ${idx + 1}`)}
-                          className="min-h-[36px] min-w-[36px] p-2 rounded-lg bg-[#1A283D] text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
+                          className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#1A283D] text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1023,7 +1023,7 @@ Database Systems,90,3,270`;
                     <button
                       type="button"
                       onClick={() => speakText(generatedDraft.fullDraftText)}
-                      className="min-h-[36px] px-3 py-1.5 rounded-lg bg-[#1A283D] text-[#4B9FE1] hover:bg-[#1769AA]/20 text-xs font-bold border border-[#22354E] flex items-center gap-1.5 cursor-pointer"
+                      className="min-h-[44px] px-3 py-1.5 rounded-lg bg-[#1A283D] text-[#4B9FE1] hover:bg-[#1769AA]/20 text-xs font-bold border border-[#22354E] flex items-center gap-1.5 cursor-pointer"
                     >
                       <Volume2 className="w-3.5 h-3.5" />
                       <span>{localize(profile.language, 'Listen', 'استماع')}</span>
@@ -1038,7 +1038,7 @@ Database Systems,90,3,270`;
                           'Email Draft'
                         )
                       }
-                      className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      className="min-h-[44px] px-3.5 py-1.5 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
                     >
                       {copiedKey === 'email_draft' ? (
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -1075,7 +1075,7 @@ Database Systems,90,3,270`;
         {activeTool === 'powerpoint_creator' && (
           <section
             aria-label={localize(profile.language, 'PowerPoint Presentation Creator', 'صانع العروض التقديمية')}
-            className="space-y-6"
+            className="space-y-4"
           >
             {/* Topic Input & Generation Bar */}
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
@@ -1265,7 +1265,7 @@ Database Systems,90,3,270`;
         {activeTool === 'excel_assistant' && (
           <section
             aria-label={localize(profile.language, 'Excel and Spreadsheet Assistant', 'مساعد الجداول وصيغ إكسل')}
-            className="space-y-6"
+            className="space-y-4"
           >
             {/* Summary Cards */}
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
@@ -1505,7 +1505,7 @@ Database Systems,90,3,270`;
         {activeTool === 'chart_describer' && (
           <section
             aria-label={localize(profile.language, 'Chart and Visual Description', 'واصف الرسوم البيانية')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1643,7 +1643,7 @@ Database Systems,90,3,270`;
         {activeTool === 'form_filler' && (
           <section
             aria-label={localize(profile.language, 'Smart Form Assistant', 'مساعد النماذج والاستمارات الذكي')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1831,7 +1831,7 @@ Database Systems,90,3,270`;
         {activeTool === 'attendance' && (
           <section
             aria-label={localize(profile.language, 'Attendance Tracker', 'متتبع الحضور والغياب')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">

@@ -384,12 +384,12 @@ export default function AccessibleCommunicateWorkspaceView({
       </nav>
 
       {/* ── MAIN WORKSPACE CONTENT ── */}
-      <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-5 pb-24 space-y-4">
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* TOOL 1: HUMAN & LIVE VIDEO ASSISTANCE                              */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'human_assist' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Persistent honesty notice: this service is not live yet */}
             <div
               role="status"
@@ -565,7 +565,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 2: HANDWRITING READER                                        */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'handwriting' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
@@ -685,7 +685,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 3: FORM & INVOICE ASSISTANT                                   */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'form_reader' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
@@ -776,7 +776,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 4: VOICE MESSAGE TOOLS                                       */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'voice_notes' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
@@ -860,7 +860,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 5: SOCIAL & MESSAGING ASSISTANT                               */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'social_assistant' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
@@ -985,7 +985,7 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 6: PAYMENT & CURRENCY GUIDANCE                                */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'payment_guidance' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">

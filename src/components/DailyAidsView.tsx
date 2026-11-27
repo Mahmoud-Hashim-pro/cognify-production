@@ -91,7 +91,7 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
 
   return (
     <div className="flex-1 w-full h-full overflow-y-auto bg-slate-950 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
-      <div className="mx-auto w-full max-w-xl px-5 py-6 flex flex-col gap-6">
+      <div className="mx-auto w-full max-w-xl px-4 py-4 pb-24 flex flex-col gap-4">
         <header className="space-y-1">
           <h1 className="text-3xl font-black">{isArabic ? 'التذكيرات والمساعدات اليومية' : 'Daily reminders and aids'}</h1>
           <p className="text-base text-slate-300" role="note">

@@ -504,14 +504,14 @@ export default function UnifiedAccessibilityToolkitView({
       </nav>
 
       {/* ── TAB CONTENT REGION ── */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-6 md:p-8">
-        <div className="max-w-5xl mx-auto space-y-6">
+      <main className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 md:p-5 pb-24">
+        <div className="max-w-5xl mx-auto space-y-4">
 
           {/* ═════════════════════════════════════════════════════════════════
               CATEGORY 1: SEE AND UNDERSTAND (IMAGES, WHATSAPP STICKERS & SCENES)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'see_understand' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Visual Assistant Live Camera Tools Suite Card */}
               <div
                 className={`p-6 rounded-3xl border ${
@@ -830,7 +830,7 @@ export default function UnifiedAccessibilityToolkitView({
               CATEGORY 2: READ AND SCAN (MULTI-PAGE SCANNER & PDF CREATOR)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'read_scan' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -1050,7 +1050,7 @@ export default function UnifiedAccessibilityToolkitView({
               CATEGORY 3: LISTEN AND TRANSCRIBE (AUDIO LECTURES & SPEECH)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'listen_transcribe' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -1100,7 +1100,7 @@ export default function UnifiedAccessibilityToolkitView({
               CATEGORY 4: FORMAT EDUCATIONAL DOCUMENTS (BOOK STUDIO LINK)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'format_edu' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -1148,7 +1148,7 @@ export default function UnifiedAccessibilityToolkitView({
               CATEGORY 5: SAVED RESULTS AND RECENT ACTIVITY HUB
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'environment' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -1171,7 +1171,7 @@ export default function UnifiedAccessibilityToolkitView({
           )}
 
           {activeCategory === 'cognitive_gym' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <CognitiveGymPanel
                 isArabic={isArabicLocale(profile.language)}
                 isDarkMode={isDarkMode}
@@ -1180,7 +1180,7 @@ export default function UnifiedAccessibilityToolkitView({
           )}
 
           {activeCategory === 'saved_activity' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'

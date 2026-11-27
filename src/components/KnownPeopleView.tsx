@@ -172,7 +172,7 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
   if (!consent) {
     return (
       <div className="flex-1 w-full h-full overflow-y-auto bg-slate-950 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
-        <div className="mx-auto w-full max-w-xl px-5 py-8 flex flex-col gap-6">
+        <div className="mx-auto w-full max-w-xl px-4 py-4 pb-24 flex flex-col gap-4">
           <ShieldCheck className="w-16 h-16 text-teal-400" aria-hidden="true" />
           <h1 className="text-3xl font-black">{isArabic ? 'التعرف على الأشخاص المعروفين' : 'Known people recognition'}</h1>
           <p className="text-xl leading-relaxed" role="note">
@@ -201,7 +201,7 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
 
   return (
     <div className="flex-1 w-full h-full overflow-y-auto bg-slate-950 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
-      <div className="mx-auto w-full max-w-xl px-5 py-6 flex flex-col gap-5">
+      <div className="mx-auto w-full max-w-xl px-4 py-4 pb-24 flex flex-col gap-4">
         <header>
           <h1 className="text-3xl font-black flex items-center gap-2">
             <Users className="w-8 h-8" aria-hidden="true" />

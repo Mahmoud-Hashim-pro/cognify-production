@@ -838,13 +838,13 @@ export default function AudioDocumentIntelligenceView({
       </nav>
 
       {/* Main Content Viewport */}
-      <main className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">
+      <main className="flex-1 p-3 sm:p-4 pb-24 max-w-6xl mx-auto w-full space-y-4">
 
         {/* ═══════════════════════════════════════════════════════════════
             SUBPHASE 6.1: LECTURE INTELLIGENCE
            ═══════════════════════════════════════════════════════════════ */}
         {activeTab === 'lecture' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Audio Upload Card */}
             <section
               aria-labelledby="audio-upload-title"
@@ -1314,7 +1314,7 @@ export default function AudioDocumentIntelligenceView({
             SUBPHASE 6.2: DOCUMENT READER (PDF, DOCX, EPUB)
            ═══════════════════════════════════════════════════════════════ */}
         {activeTab === 'reader' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Upload Document Card */}
             <section
               aria-labelledby="doc-upload-title"
@@ -1784,7 +1784,7 @@ export default function AudioDocumentIntelligenceView({
             SUBPHASE 6.4: ADVANCED READING (TABLES, MATH, VOCAB, BRAILLE)
            ═══════════════════════════════════════════════════════════════ */}
         {activeTab === 'advanced' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Accessible Table Reader */}
               <section

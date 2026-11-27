@@ -565,8 +565,8 @@ export default function AccessibleBookStudioView({
       </nav>
 
       {/* ── MAIN WORKSPACE CONTENT ── */}
-      <main className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 sm:p-6 lg:p-8">
-        <div className="max-w-5xl mx-auto space-y-6 pb-20">
+      <main className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 sm:p-4 lg:p-5">
+        <div className="max-w-5xl mx-auto space-y-4 pb-24">
 
           {/* ═════════════════════════════════════════════════════════════════
               STEP 1: INPUT, IMPORT & EDUCATIONAL METADATA
@@ -577,7 +577,7 @@ export default function AccessibleBookStudioView({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="space-y-6"
+              className="space-y-4"
             >
               {/* Top Action Import Bar */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -830,7 +830,7 @@ export default function AccessibleBookStudioView({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="space-y-6"
+              className="space-y-4"
             >
               <div className="text-start">
                 <h2 className="text-base sm:text-lg font-black tracking-tight">
@@ -1037,7 +1037,7 @@ export default function AccessibleBookStudioView({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="space-y-6"
+              className="space-y-4"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -1224,7 +1224,7 @@ export default function AccessibleBookStudioView({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="space-y-6"
+              className="space-y-4"
             >
               {/* Document Overview Summary Banner */}
               <div

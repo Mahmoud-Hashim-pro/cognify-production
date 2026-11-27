@@ -507,7 +507,7 @@ export default function HearAndExpressView({
       </nav>
 
       {/* Main Content Body */}
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-6">
+      <main className="flex-1 max-w-5xl w-full mx-auto p-3 sm:p-4 pb-24 space-y-4">
 
         {/* ══════════════════════════════════════════════════════════════════
             TAB 1: LIVE SPEECH-TO-TEXT CAPTIONS
@@ -667,7 +667,7 @@ export default function HearAndExpressView({
             TAB 2: TEXT-TO-SPEECH & QUICK RESPONSE MESSAGES
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'tts_quick' && (
-          <section className="space-y-6">
+          <section className="space-y-4">
             {/* Custom Typed Speech Input */}
             <div className="p-5 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -895,7 +895,7 @@ export default function HearAndExpressView({
             TAB 4: VISUAL & VIBRATION ALERT BEACON
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'alerts' && (
-          <section className="space-y-6">
+          <section className="space-y-4">
             {/* Live sound radar: real-time environmental sound detection for deaf users */}
             <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل رادار الأصوات...' labelEn='Loading sound radar...' isAr={isAr} />}>
               <SoundAwarenessInterface isArabic={isAr} />
@@ -939,7 +939,7 @@ export default function HearAndExpressView({
             TAB 5: EGYPTIAN SIGN LANGUAGE (ESL) FOUNDATION HUB
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'esl' && (
-          <section className="space-y-6">
+          <section className="space-y-4">
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -988,7 +988,7 @@ export default function HearAndExpressView({
             TAB 6: TWO-WAY DEAF <-> HEARING CONVERSATION
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'twoway' && (
-          <section className="space-y-6">
+          <section className="space-y-4">
             <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل المحادثة الثنائية...' labelEn='Loading two-way conversation...' isAr={isAr} />}>
               <UnifiedTwoWayCommunicationView isArabic={isAr} />
             </React.Suspense>

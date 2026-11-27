@@ -462,14 +462,14 @@ export default function AccessibleMobilityWorkspaceView({
       </nav>
 
       {/* ── MAIN CONTENT ── */}
-      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-5 pb-24 space-y-4">
         {/* ═════════════════════════════════════════════════════════════════════
             1. PLACE & SCENE DESCRIPTION TAB
            ═════════════════════════════════════════════════════════════════════ */}
         {activeTool === 'place_desc' && (
           <section
             aria-label={localize(profile.language, 'Place and Landmark Description', 'وصف المكان والمعالم المحيطة')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -620,7 +620,7 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'sign_reader' && (
           <section
             aria-label={localize(profile.language, 'Signs and Direction Reader', 'قارئ اللافتات واللوحات')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -717,7 +717,7 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'entrance_door' && (
           <section
             aria-label={localize(profile.language, 'Entrance and Door Assistance', 'مرشد المداخل والأبواب')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -806,7 +806,7 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'transit_assistant' && (
           <section
             aria-label={localize(profile.language, 'Public Transport Assistant', 'مساعد وسائل النقل والمواصلات')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -914,7 +914,7 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'places_directory' && (
           <section
             aria-label={localize(profile.language, 'Accessible Places Directory', 'دليل الأماكن والخدمات المهيأة')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1011,7 +1011,7 @@ export default function AccessibleMobilityWorkspaceView({
                           )}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold text-xs flex items-center gap-1.5"
+                          className="min-h-[44px] px-3.5 py-1.5 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold text-xs flex items-center gap-1.5"
                         >
                           <Navigation className="w-3.5 h-3.5" />
                           <span>{localize(profile.language, 'Navigate via Maps', 'توجيه في الخرائط')}</span>
@@ -1032,7 +1032,7 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'gps_nav' && (
           <section
             aria-label={localize(profile.language, 'Navigation and GPS Integration', 'الملاحة وتكامل الخرائط')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1137,7 +1137,7 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'indoor_boundary' && (
           <section
             aria-label={localize(profile.language, 'Indoor Navigation Technical Boundary', 'حدود الملاحة الداخلية')}
-            className="space-y-6"
+            className="space-y-4"
           >
             <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex items-center gap-3">
