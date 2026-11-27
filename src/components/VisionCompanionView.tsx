@@ -562,6 +562,7 @@ export default function VisionCompanionView({
   const [memorySearchQuery, setMemorySearchQuery] = useState('');
   const [selectedMemoryCategory, setSelectedMemoryCategory] = useState<'all' | 'person' | 'object' | 'document'>('all');
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
 
   // Camera acquisition helper with prompt detection, proper timer cleanup, and prevention of retry cascades
@@ -2132,51 +2133,21 @@ Examine what is visible in front of the camera right now with utmost precision:
           </div>
         </div>
 
-        {/* ── 1. INTRODUCTION HERO SECTION (NO HUMAN ILLUSTRATION) ── */}
-        <section
-          aria-label={t('Visual Assistant Introduction', 'مقدمة المساعد البصري')}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#082344] via-[#092747] to-[#082344] border border-[#07558A] p-6 sm:p-8 shadow-xl"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative z-10">
-            {/* Left Column: Heading, Subtitle, and Tag */}
-            <div className="md:col-span-8 lg:col-span-8 space-y-3 text-start">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-[#1769AA]/15 text-[#1769AA] border border-[#1769AA]/30 shadow-xs">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{t('Welcome to Visual Assistant', 'مرحبًا بك في المساعد البصري')}</span>
-              </div>
-
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#F5F8FF] tracking-tight leading-tight">
-                {t('Discover the world around you', 'اكتشف العالم من حولك')}
-              </h1>
-
-              <p className="text-xs sm:text-sm md:text-base text-[#B9CDE3] leading-relaxed max-w-2xl font-normal">
-                {t(
-                  'Use the camera or upload an image to analyze scenes, read text, and deliver clear, accurate voice descriptions.',
-                  'استخدم الكاميرا أو ارفع صورة لتحليل المشاهد، قراءة النصوص، وتقديم أوصاف صوتية دقيقة وواضحة.'
-                )}
-              </p>
-            </div>
-
-            {/* Right Column: Abstract Glowing Eye Emblem (Completely Non-Human) */}
-            <div className="md:col-span-4 lg:col-span-4 flex items-center justify-center md:justify-end relative">
-              <div className="absolute inset-0 bg-radial from-[#1769AA]/25 via-[#0878BD]/15 to-transparent blur-2xl -z-10 rounded-full scale-125 pointer-events-none" />
-
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
-                {/* Concentric rings */}
-                <div className="absolute inset-0 rounded-full border border-dashed border-[#07558A]/80 animate-spin-slow pointer-events-none" />
-                <div className="absolute inset-2 rounded-full border border-[#1769AA]/25 pointer-events-none" />
-                
-                {/* Inner circular emblem with glowing eye */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-[#082344] via-[#092747] to-[#0878BD]/40 border-2 border-[#1769AA] flex items-center justify-center shadow-lg shadow-[#1769AA]/30 transition-transform duration-300 hover:scale-105">
-                  <Eye className="w-9 h-9 sm:w-11 sm:h-11 text-[#1769AA] drop-shadow-[0_0_12px_rgba(0,174,184,0.6)]" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── BEGINNER MODE 3-STEP GUIDE BANNER ── */}
+        {/* ── BEGINNER MODE 3-STEP GUIDE (COLLAPSIBLE, CLOSED BY DEFAULT) ── */}
         {userMode === 'beginner' && (
+          <button
+            type="button"
+            onClick={() => setShowGuide((v) => !v)}
+            aria-expanded={showGuide}
+            className="w-full min-h-[44px] px-4 rounded-2xl bg-[#092747] border border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#1769AA] text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+          >
+            <Sparkles className="w-4 h-4 text-[#1769AA]" aria-hidden="true" />
+            {showGuide
+              ? t('Hide the quick 3-step guide', 'إخفاء دليل الخطوات الثلاث السريع')
+              : t('Show the quick 3-step guide', 'إظهار دليل الخطوات الثلاث السريع')}
+          </button>
+        )}
+        {userMode === 'beginner' && showGuide && (
           <div
             role="region"
             aria-label={t('Simple Usage Guide', 'دليل الاستخدام السريع')}
