@@ -34,6 +34,12 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { UserProfile } from '../types';
+
+const SoundAwarenessInterface = React.lazy(() =>
+  import('../modules/hearAndExpress/soundAwareness/components/SoundAwarenessInterface').then((m) => ({
+    default: m.SoundAwarenessInterface,
+  }))
+);
 import { localize, isArabicLocale } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { BrandLogo } from './ui/BrandLogo';
@@ -745,6 +751,15 @@ export default function HearAndExpressView({
            ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'alerts' && (
           <section className="space-y-6">
+            {/* Live sound radar: real-time environmental sound detection for deaf users */}
+            <React.Suspense fallback={
+              <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] text-xs text-[#94A3B8]">
+                {isAr ? 'جاري تحميل رادار الأصوات...' : 'Loading sound radar...'}
+              </div>
+            }>
+              <SoundAwarenessInterface isArabic={isAr} />
+            </React.Suspense>
+
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Radio className="w-5 h-5 text-amber-400" />
