@@ -53,7 +53,7 @@ import {
   Microscope,
 } from 'lucide-react';
 import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
-import ClampedNotice from './ClampedNotice';
+import { ClampedNotice } from './ui/ClampedNotice';
 import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';

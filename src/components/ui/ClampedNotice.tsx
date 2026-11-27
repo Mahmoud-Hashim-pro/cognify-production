@@ -11,13 +11,13 @@ export const ClampedNotice: React.FC<{
 }> = ({ children, isAr, className = '' }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`flex-1 min-w-0 ${className}`}>
-      <div className={open ? '' : 'line-clamp-1'}>{children}</div>
+    <div className={`flex-1 min-w-0 flex gap-2 ${open ? 'flex-col items-start' : 'items-center'} ${className}`}>
+      <div className={`min-w-0 ${open ? '' : 'flex-1 line-clamp-1'}`}>{children}</div>
       <button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="min-h-[44px] px-1 text-xs font-bold underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9FE1] rounded"
+        className="shrink-0 min-h-[44px] px-1 text-xs font-bold underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9FE1] rounded"
       >
         {open ? (isAr ? 'عرض أقل' : 'Show less') : isAr ? 'اقرأ المزيد' : 'Read more'}
       </button>

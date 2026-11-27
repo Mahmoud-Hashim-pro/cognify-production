@@ -14,6 +14,7 @@
  * 7. Indoor Navigation Boundary: Transparent infrastructure boundary disclosures without fake positioning.
  */
 
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import { ClampedNotice } from './ui/ClampedNotice';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -319,7 +320,7 @@ export default function AccessibleMobilityWorkspaceView({
       {/* ── HEADER ── */}
       <header
         role="banner"
-        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
+        className="sticky top-0 z-30 flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
@@ -352,44 +353,47 @@ export default function AccessibleMobilityWorkspaceView({
                 {localize(profile.language, 'Safety Critical Zone', 'منطقة حساسة للأمان')}
               </span>
             </div>
-            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] line-clamp-2">
-              {localize(
-                profile.language,
-                'Mobility, Places & Public Transport Assistant',
-                'مساعد الحركة واستكشاف الأماكن والنقل الميسر'
-              )}
+            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] truncate">
+              <span>{localize(profile.language, 'Mobility & Places', 'الحركة والأماكن')}</span>
+              <span className="hidden">
+                {localize(
+                  profile.language,
+                  'Mobility, Places & Public Transport Assistant',
+                  'مساعد الحركة واستكشاف الأماكن والنقل الميسر'
+                )}
+              </span>
             </h1>
           </div>
         </div>
 
-        {/* Global Sound & Safety Actions */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowSafetyModal(true)}
-            aria-label={localize(profile.language, 'View Safety Advisory', 'عرض تعليمات الأمان والسلامة')}
-            className="min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
-          >
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
-            <span className="hidden sm:inline">
-              {localize(profile.language, 'Safety Rules', 'تعليمات الأمان')}
-            </span>
-          </button>
-
-          {isSpeaking ? (
-            <button
-              type="button"
-              onClick={stopSpeaking}
-              aria-label={localize(profile.language, 'Stop Voice Reading', 'إيقاف النطق الصوتي')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
-            >
-              <VolumeX className="w-4 h-4 animate-pulse" />
-              <span>{localize(profile.language, 'Stop Audio', 'إيقاف')}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
+          <HeaderMenu
+            ariaLabel={localize(profile.language, 'More actions', 'المزيد')}
+            isDarkMode={isDarkMode}
+            items={[
+              {
+                key: 'safety',
+                label: localize(profile.language, 'Safety Rules', 'تعليمات الأمان'),
+                ariaLabel: localize(profile.language, 'View Safety Advisory', 'عرض تعليمات الأمان والسلامة'),
+                icon: <ShieldAlert className="w-4 h-4 text-amber-400" />,
+                onSelect: () => setShowSafetyModal(true),
+              },
+              isSpeaking
+                ? {
+                    key: 'stop',
+                    label: localize(profile.language, 'Stop Audio', 'إيقاف'),
+                    ariaLabel: localize(profile.language, 'Stop Voice Reading', 'إيقاف النطق الصوتي'),
+                    icon: <VolumeX className="w-4 h-4" />,
+                    danger: true,
+                    onSelect: stopSpeaking,
+                  }
+                : {
+                    key: 'read',
+                    label: localize(profile.language, 'Read Aloud', 'قراءة صوتية'),
+                    ariaLabel: localize(profile.language, 'Read content aloud', 'قراءة المحتوى بصوت واضح'),
+                    icon: <Volume2 className="w-4 h-4" />,
+                    onSelect: () => {
                 const textToRead =
                   activeTool === 'place_desc'
                     ? placeAnalysis.spokenSummaryAr
@@ -405,14 +409,10 @@ export default function AccessibleMobilityWorkspaceView({
                     ? (userCoords ? `إحداثياتك الحالية محددة بدقة ${gpsAccuracyMeters} متراً.` : 'يرجى تفعيل زر تحديد الموقع.')
                     : indoorBoundary.disclaimerAr;
                 speakText(textToRead);
-              }}
-              aria-label={localize(profile.language, 'Read content aloud', 'قراءة المحتوى بصوت واضح')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40 hover:bg-[#1769AA]/30 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
-            >
-              <Volume2 className="w-4 h-4" />
-              <span className="hidden sm:inline">{localize(profile.language, 'Read Aloud', 'قراءة صوتية')}</span>
-            </button>
-          )}
+                    },
+                  },
+            ]}
+          />
         </div>
       </header>
 
@@ -435,9 +435,9 @@ export default function AccessibleMobilityWorkspaceView({
       {/* ── SUB-NAV: 7 ACCESSIBLE MOBILITY TABS ── */}
       <nav
         aria-label={localize(profile.language, 'Mobility Assistant Tools', 'أدوات مساعد الحركة والاستكشاف')}
-        className="bg-[#0D2542] border-b border-[#24476F] px-4 sm:px-6 py-2.5"
+        className="bg-[#0D2542] border-b border-[#24476F] px-3 sm:px-6 py-2"
       >
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto custom-scrollbar">
           {tools.map((t) => {
             const Icon = t.icon;
             const isActive = activeTool === t.id;
@@ -450,7 +450,7 @@ export default function AccessibleMobilityWorkspaceView({
                   speakText(isAr ? t.titleAr : t.titleEn);
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`min-h-[44px] px-3 py-2.5 flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
+                className={`shrink-0 whitespace-nowrap min-h-[44px] px-3 py-2.5 justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
                   isActive
                     ? 'bg-[#1769AA] text-white shadow-md'
                     : 'bg-[#112C4F] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#17355C] border border-[#24476F]'

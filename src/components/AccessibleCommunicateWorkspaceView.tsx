@@ -14,6 +14,7 @@
  * 7. Unified Navigation to Deaf/Hearing Suite for cross-disability inclusion
  */
 
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import { ClampedNotice } from './ui/ClampedNotice';
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -262,7 +263,7 @@ export default function AccessibleCommunicateWorkspaceView({
       {/* ── HEADER ── */}
       <header
         role="banner"
-        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
+        className="sticky top-0 z-30 flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
@@ -295,33 +296,40 @@ export default function AccessibleCommunicateWorkspaceView({
                 </span>
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] line-clamp-2">
-              {localize(profile.language, 'Accessible Communication Assistant', 'مساعد التواصل الشامل')}
+            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] truncate">
+              <span>{localize(profile.language, 'Communication', 'التواصل')}</span>
+              <span className="hidden">{localize(profile.language, 'Accessible Communication Assistant', 'مساعد التواصل الشامل')}</span>
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {isSpeaking && (
-            <button
-              type="button"
-              onClick={stopAudio}
-              aria-label={localize(profile.language, 'Stop Voice', 'إيقاف نطق الصوت')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-red-500/30 transition-all focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
-            >
-              <Square className="w-3.5 h-3.5 fill-current" />
-              <span className="hidden sm:inline">{localize(profile.language, 'Stop Audio', 'إيقاف الصوت')}</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowPrivacyModal(true)}
-            aria-label={localize(profile.language, 'Communication Safety & Privacy Guidelines', 'إرشادات أمان وخصوصية التواصل')}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] border border-[#24476F] text-[#4B9FE1] hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
-          >
-            <ShieldCheck className="w-5 h-5" />
-          </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
+          <HeaderMenu
+            ariaLabel={localize(profile.language, 'More actions', 'المزيد')}
+            isDarkMode={isDarkMode}
+            items={[
+              {
+                key: 'privacy',
+                label: localize(profile.language, 'Privacy rules', 'إرشادات الخصوصية'),
+                ariaLabel: localize(profile.language, 'Communication Safety & Privacy Guidelines', 'إرشادات أمان وخصوصية التواصل'),
+                icon: <ShieldCheck className="w-4 h-4" />,
+                onSelect: () => setShowPrivacyModal(true),
+              },
+              ...(isSpeaking
+                ? [
+                    {
+                      key: 'stop',
+                      label: localize(profile.language, 'Stop Audio', 'إيقاف الصوت'),
+                      ariaLabel: localize(profile.language, 'Stop Voice', 'إيقاف نطق الصوت'),
+                      icon: <Square className="w-3.5 h-3.5 fill-current" />,
+                      danger: true,
+                      onSelect: stopAudio,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </div>
       </header>
 
@@ -359,7 +367,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Communication Tools', 'أدوات التواصل')}
-        className="z-20 flex items-center flex-wrap gap-2 px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#24476F]"
+        className="z-20 shrink-0 flex items-center flex-nowrap overflow-x-auto custom-scrollbar gap-2 px-3 sm:px-6 py-2 bg-[#0D2542] border-b border-[#24476F]"
       >
         {tools.map((t) => {
           const IconComponent = t.icon;
@@ -373,7 +381,7 @@ export default function AccessibleCommunicateWorkspaceView({
                 setActiveTool(t.id);
                 speakText(isAr ? t.titleAr : t.titleEn);
               }}
-              className={`flex items-center justify-center gap-2 px-3.5 py-2 min-h-[44px] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
+              className={`shrink-0 whitespace-nowrap flex items-center justify-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/40 border border-[#4B9FE1]'
                   : 'bg-[#17355C] text-[#94A3B8] border border-[#24476F] hover:text-[#F8FAFC] hover:border-[#1769AA]/50'

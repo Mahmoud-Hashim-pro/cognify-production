@@ -1,4 +1,5 @@
 import { localize, isArabicLocale } from '../lib/translations';
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { UserProfile, AccessibilityPassport, LanguagePreference, PedagogyStyle } from '../types';
 import { 
@@ -721,8 +722,8 @@ export default function StudentSettingsView({
 
         {/* ── PAGE HEADER (Exact Match with Reference & Canonical Requirements) ── */}
         <div className="space-y-3 text-start">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0">
               {onNavigateBack && (
                 <button
                   type="button"
@@ -736,36 +737,41 @@ export default function StudentSettingsView({
                 </button>
               )}
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-[#F4F7FB] tracking-tight">
-                  {localize(profile.language, 'Personalize & Accommodation Passport', 'التخصيص وجواز التيسير')}
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-[#F4F7FB] tracking-tight truncate">
+                  <span>{localize(profile.language, 'Personalize', 'التخصيص')}</span>
+                  <span className="hidden">{localize(profile.language, 'Personalize & Accommodation Passport', 'التخصيص وجواز التيسير')}</span>
                 </h1>
-                <div className="w-8 h-8 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#1769AA] dark:text-[#4B9FE1] shrink-0">
-                  <Settings className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
-                </div>
               </div>
             </div>
 
-            {/* Live Online Badge & Reset Button */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                isOnline ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400'
-              }`}>
-                <Wifi className="w-3.5 h-3.5" />
-                <span>{isOnline ? (isAr ? 'متصل بالإنترنت' : 'Online') : (isAr ? 'وضع عدم الاتصال' : 'Offline Mode')}</span>
-              </span>
-
-              <button
-                type="button"
-                onClick={() => setShowResetConfirm(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-[#082344] hover:bg-white hover:dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] text-xs font-bold text-slate-600 dark:text-[#A9C4DD] hover:text-white transition-all cursor-pointer flex items-center gap-1.5"
+            {/* Switcher, online dot and "..." menu (Reset All Defaults) */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span
+                role="status"
+                title={isOnline ? (isAr ? 'متصل بالإنترنت' : 'Online') : (isAr ? 'وضع عدم الاتصال' : 'Offline Mode')}
+                className={`inline-flex items-center gap-1.5 text-xs font-bold ${isOnline ? 'text-emerald-500' : 'text-amber-500'}`}
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>{localize(profile.language, 'Reset All Defaults', 'استعادة الافتراضي')}</span>
-              </button>
+                <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'}`} aria-hidden="true" />
+                <span className="sr-only">{isOnline ? (isAr ? 'متصل بالإنترنت' : 'Online') : (isAr ? 'وضع عدم الاتصال' : 'Offline Mode')}</span>
+              </span>
+              <ToolSwitcherSlot />
+              <HeaderMenu
+                ariaLabel={localize(profile.language, 'More actions', 'المزيد')}
+                isDarkMode={isDarkMode}
+                items={[
+                  {
+                    key: 'reset',
+                    label: localize(profile.language, 'Reset All Defaults', 'استعادة الافتراضي'),
+                    icon: <RotateCcw className="w-4 h-4" />,
+                    danger: true,
+                    onSelect: () => setShowResetConfirm(true),
+                  },
+                ]}
+              />
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-[#A9C4DD] font-medium leading-relaxed">
+          <p className="hidden text-xs sm:text-sm text-slate-600 dark:text-[#A9C4DD] font-medium leading-relaxed">
             {localize(
               profile.language,
               'Personalize Rafiqi to match your vision, hearing, speech speed, language preferences, shortcuts, and privacy.',
@@ -777,7 +783,7 @@ export default function StudentSettingsView({
           <div 
             role="tablist"
             aria-label={localize(profile.language, 'Personalization Sections', 'أقسام التخصيص والإعدادات')}
-            className="flex items-center gap-2 flex-wrap pb-2 pt-2 border-b border-slate-200 dark:border-[#16395E]"
+            className="flex items-center gap-2 flex-nowrap overflow-x-auto custom-scrollbar pb-2 pt-2 border-b border-slate-200 dark:border-[#16395E]"
           >
             {tabsConfig.map((t) => {
               const TabIcon = t.icon;
@@ -797,7 +803,7 @@ export default function StudentSettingsView({
                       window.location.hash = t.id === 'general' ? '#settings' : `#settings/${t.id}`;
                     }
                   }}
-                  className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+                  className={`shrink-0 min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                     isSelected 
                       ? 'bg-[#1769AA] text-white shadow-md' 
                       : 'bg-slate-100 dark:bg-[#082344] text-slate-600 dark:text-[#A9C4DD] hover:text-slate-900 hover:dark:text-[#F4F7FB] hover:bg-white hover:dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E]'
