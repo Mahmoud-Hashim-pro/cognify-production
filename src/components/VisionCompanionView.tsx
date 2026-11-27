@@ -487,6 +487,9 @@ export default function VisionCompanionView({
   });
 
   const isAr = companionLang === 'ar';
+  // Layout direction follows the APP UI language, not the tool's content language,
+  // so the scrollbar side and navigation stay consistent with the rest of the app.
+  const isAppRtl = isArabicLang(profile.language);
 
   const t = useCallback(
     (en: string, ar: string, fr?: string) => {
@@ -1945,7 +1948,7 @@ Examine what is visible in front of the camera right now with utmost precision:
       className={`flex-1 flex flex-col h-full w-full bg-[#061A33] text-[#F5F8FF] overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 select-none transition-colors ${
         isFullscreen ? 'fixed inset-0 z-[99999] p-4 bg-[#061A33]' : ''
       }`}
-      dir={isAr ? 'rtl' : 'ltr'}
+      dir={isAppRtl ? 'rtl' : 'ltr'}
     >
       {/* Screen-reader live region */}
       <div className="sr-only" role="status" aria-live="assertive" aria-atomic="true">

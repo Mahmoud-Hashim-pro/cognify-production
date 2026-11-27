@@ -514,7 +514,7 @@ export default function AccessibleBookStudioView({
       {/* ── WORKFLOW STEP NAVIGATOR (Screen-reader Accessible Tablist) ── */}
       <nav
         aria-label={isArLocale ? 'خطوات استوديو الكتب التعليمية' : 'Book Studio Steps'}
-        className={`px-4 py-2 border-b shrink-0 flex items-center justify-between gap-2 overflow-x-auto custom-scrollbar ${
+        className={`px-4 py-2 border-b shrink-0 flex items-center justify-start gap-2 overflow-x-auto custom-scrollbar ${
           isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-100 border-stone-200'
         }`}
       >
@@ -549,7 +549,7 @@ export default function AccessibleBookStudioView({
         </div>
 
         {/* Quick Word & Question Counter Badge */}
-        <div className="hidden sm:flex items-center gap-2 text-[11px] text-stone-500 dark:text-stone-400 font-bold shrink-0">
+        <div className="hidden sm:flex items-center gap-2 text-[11px] text-stone-500 dark:text-stone-400 font-bold shrink-0 ms-auto">
           <span>{stats.words} {isArLocale ? 'كلمة' : 'words'}</span>
           <span>•</span>
           <span>{stats.questionsCount} {isArLocale ? 'سؤال مكتشف' : 'questions'}</span>
