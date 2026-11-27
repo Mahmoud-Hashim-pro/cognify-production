@@ -385,7 +385,7 @@ export default function SectionLandingView({
 
   return (
     <div
-      className={`min-h-full flex flex-col p-4 sm:p-6 lg:p-8 space-y-8 select-none transition-colors duration-200 ${
+      className={`min-h-full flex flex-col p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 select-none transition-colors duration-200 ${
         isDarkMode ? 'bg-[#0B131E] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'
       }`}
       dir={isAr ? 'rtl' : 'ltr'}
@@ -440,14 +440,14 @@ export default function SectionLandingView({
       {/* ── 1. SECTION HERO & DOMINANT PRIMARY ACTION ── */}
       <section
         aria-labelledby="section-hero-title"
-        className={`relative overflow-hidden rounded-3xl border p-6 sm:p-8 lg:p-10 shadow-xl transition-all ${
+        className={`relative overflow-hidden rounded-2xl border p-4 sm:p-5 shadow-lg transition-all ${
           isDarkMode
             ? 'bg-gradient-to-br from-[#131E2E] via-[#1A283D] to-[#101826] border-[#22354E]'
             : 'bg-gradient-to-br from-white via-[#F0F6FC] to-[#E4EFF9] border-slate-200 shadow-slate-200/50'
         }`}
       >
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 relative z-10">
-          <div className="space-y-4 max-w-3xl text-start">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 relative z-10">
+          <div className="space-y-2 max-w-3xl min-w-0 text-start">
             {/* Top Order Badge */}
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black tracking-wide bg-rafiqi-primary/15 text-rafiqi-primary dark:text-[#4B9FE1] border border-rafiqi-primary/30">
@@ -458,56 +458,52 @@ export default function SectionLandingView({
                     : `Section ${section.numericOrder} of 6`}
                 </span>
               </span>
-
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 py-0.5 rounded bg-black/10 dark:bg-white/5">
-                {section.id.replace('_', ' ')}
-              </span>
             </div>
 
             {/* Title */}
             <h1
               id="section-hero-title"
-              className={`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight flex items-center gap-3.5 ${
+              className={`text-xl sm:text-2xl font-black tracking-tight flex items-center gap-3 ${
                 isDarkMode ? 'text-white' : 'text-slate-900'
               }`}
             >
-              <div className="w-12 h-12 rounded-2xl bg-rafiqi-primary/20 border border-rafiqi-primary/30 flex items-center justify-center text-rafiqi-primary dark:text-[#4B9FE1] shrink-0 shadow-sm">
-                <SectionIcon className="w-7 h-7" />
+              <div className="w-10 h-10 rounded-xl bg-rafiqi-primary/20 border border-rafiqi-primary/30 flex items-center justify-center text-rafiqi-primary dark:text-[#4B9FE1] shrink-0 shadow-sm">
+                <SectionIcon className="w-6 h-6" />
               </div>
               <span>{isAr ? section.titleAr : section.titleEn}</span>
             </h1>
 
             {/* Short Explanation */}
-            <p className={`text-base sm:text-lg leading-relaxed font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+            <p className={`text-sm sm:text-base leading-snug font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
               {isAr ? section.shortExplanationAr : section.shortExplanationEn}
             </p>
 
             {/* Detailed Purpose */}
-            <p className={`text-xs sm:text-sm leading-relaxed max-w-2xl ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+            <p className={`hidden xl:block text-xs leading-relaxed max-w-2xl line-clamp-2 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
               {isAr ? section.detailedPurposeAr : section.detailedPurposeEn}
             </p>
           </div>
 
           {/* Primary Quick Start Action */}
           {primaryFeature && (
-            <div className="w-full lg:w-auto shrink-0 flex flex-col items-stretch gap-2.5">
+            <div className="w-full lg:w-72 xl:w-80 max-w-full min-w-0 lg:shrink-0 flex flex-col items-stretch gap-1.5">
               <button
                 type="button"
                 onClick={() => onSelectFeature(primaryFeature)}
                 aria-label={`${isAr ? 'تشغيل الميزة الأساسية للقسم:' : 'Launch primary feature:'} ${
                   isAr ? primaryFeature.titleAr : primaryFeature.titleEn
                 }`}
-                className="w-full lg:min-w-[280px] px-8 py-5 rounded-2xl bg-rafiqi-primary hover:bg-rafiqi-primary-dark active:scale-[0.98] text-white font-black text-base shadow-xl shadow-rafiqi-primary/30 flex items-center justify-between gap-4 cursor-pointer transition-all duration-150 focus-visible:ring-4 focus-visible:ring-rafiqi-primary/50"
+                className="w-full max-w-full min-h-[52px] px-4 py-2.5 rounded-xl bg-rafiqi-primary hover:bg-rafiqi-primary-dark active:scale-[0.98] text-white font-black text-sm shadow-lg shadow-rafiqi-primary/30 flex items-center justify-between gap-3 cursor-pointer transition-all duration-150 focus-visible:ring-4 focus-visible:ring-rafiqi-primary/50"
               >
-                <div className="text-start">
+                <div className="text-start min-w-0">
                   <div className="text-xs font-medium text-blue-200 uppercase tracking-wider">
                     {isAr ? 'الميزة الأساسية' : 'Primary Quick Start'}
                   </div>
-                  <div className="text-base font-bold line-clamp-1">
+                  <div className="text-sm font-bold line-clamp-2 break-words">
                     {isAr ? primaryFeature.titleAr : primaryFeature.titleEn}
                   </div>
                 </div>
-                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
                   {isAr ? (
                     <ArrowLeft className="w-5 h-5 text-white" />
                   ) : (
@@ -516,7 +512,7 @@ export default function SectionLandingView({
                 </div>
               </button>
 
-              <p className="text-xs text-center text-slate-400">
+              <p className="hidden lg:block text-xs text-center text-slate-400">
                 {isAr ? 'اضغط Enter أو المس لتشغيل الأداة فوراً' : 'Press Enter or click to launch instantly'}
               </p>
             </div>
@@ -528,7 +524,7 @@ export default function SectionLandingView({
       {sectionId === 'see_understand' && (
         <section
           aria-label={isAr ? 'تنبيه إرشادات الكاميرا الحية' : 'Live Camera Guidance'}
-          className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-4 ${
+          className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#102035] border-[#1769AA]/40 text-blue-100'
               : 'bg-blue-50 border-blue-200 text-blue-950'
@@ -538,10 +534,10 @@ export default function SectionLandingView({
             <Eye className="w-5 h-5" />
           </div>
           <div className="space-y-1 text-start">
-            <h2 className="text-sm font-bold">
+            <h2 className="text-xs sm:text-sm font-bold">
               {isAr ? 'المساعد البصري الذكي: توجيه فوري للمشهد بدون هلوسة' : 'AI Visual Companion: Real-Time Hallucination-Free Vision'}
             </h2>
-            <p className="text-xs leading-relaxed opacity-90">
+            <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'يعتمد النظام على تحليل الإطارات الحية للكاميرا بنظام ساعة الاتجاهات لتحديد العوائق والمقتنيات بدقة وأمانة، مع الاعتراف الفوري عند عدم وضوح الرؤية.'
                 : 'Operates on live camera frame analysis with directional clock coordinates. Unambiguously reports optical ambiguity and low certainty without fabricating surroundings.'}
@@ -553,18 +549,18 @@ export default function SectionLandingView({
       {sectionId === 'read_learn' && (
         <section
           aria-label={isAr ? 'إجراءات التعلم السريعة' : 'Quick Learning Actions'}
-          className={`p-5 rounded-2xl border ${
+          className={`p-3 rounded-xl border ${
             isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-200'
           }`}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => {
                 const bookFeat = section.features.find((f) => f.id === 'feat_book_studio') || primaryFeature;
                 onSelectFeature(bookFeat);
               }}
-              className={`p-3.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
+              className={`min-h-[48px] p-2.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
                 isDarkMode
                   ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary text-white'
                   : 'bg-slate-50 border-slate-200 hover:border-rafiqi-primary text-slate-900'
@@ -585,7 +581,7 @@ export default function SectionLandingView({
                 const lectureFeat = section.features.find((f) => f.id === 'feat_audio_doc_intelligence') || primaryFeature;
                 onSelectFeature(lectureFeat);
               }}
-              className={`p-3.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
+              className={`min-h-[48px] p-2.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
                 isDarkMode
                   ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary text-white'
                   : 'bg-slate-50 border-slate-200 hover:border-rafiqi-primary text-slate-900'
@@ -606,7 +602,7 @@ export default function SectionLandingView({
                 const tutorFeat = section.features.find((f) => f.id === 'feat_accessible_tutor') || primaryFeature;
                 onSelectFeature(tutorFeat);
               }}
-              className={`p-3.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
+              className={`min-h-[48px] p-2.5 rounded-xl border flex items-center gap-3 text-start transition-all ${
                 isDarkMode
                   ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary text-white'
                   : 'bg-slate-50 border-slate-200 hover:border-rafiqi-primary text-slate-900'
@@ -627,7 +623,7 @@ export default function SectionLandingView({
       {sectionId === 'work_create' && (
         <section
           aria-label={isAr ? 'ضمان أمانة النص الأصلي' : 'Verbatim Source Text Preservation Guarantee'}
-          className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-4 ${
+          className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#0F231D] border-emerald-500/40 text-emerald-100'
               : 'bg-emerald-50 border-emerald-200 text-emerald-950'
@@ -640,7 +636,7 @@ export default function SectionLandingView({
             <h2 className="text-sm font-bold">
               {isAr ? 'ضمان أمانة النص الأصلي والتنسيق الحرفي' : 'Source Text Preservation Guarantee'}
             </h2>
-            <p className="text-xs leading-relaxed opacity-90">
+            <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'في استوديو تنسيق الكتب والمستندات: عند طلب التنسيق فقط، يلتزم رفيقي بالحفاظ على النص الأصلي حرفياً دون أي تعديل أو إعادة صياغة أو حذف.'
                 : 'In Word Book Formatting Studio: when formatting only is requested, Rafiqi guarantees the exact source text is preserved verbatim without alteration or omission.'}
@@ -652,7 +648,7 @@ export default function SectionLandingView({
       {sectionId === 'move_explore' && (
         <section
           aria-label={isAr ? 'تنبيه أمان الحركة والملاحة' : 'Critical Mobility and Road Safety Notice'}
-          className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-4 ${
+          className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#29160F] border-amber-500/40 text-amber-100'
               : 'bg-amber-50 border-amber-200 text-amber-950'
@@ -665,7 +661,7 @@ export default function SectionLandingView({
             <h2 className="text-sm font-bold">
               {isAr ? 'تنبيه أمان وإخلاء مسؤولية الحركة في الطرقات' : 'Road Safety Notice: Does Not Replace Mobility Aids'}
             </h2>
-            <p className="text-xs leading-relaxed opacity-90">
+            <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'أدوات الاستكشاف تقدم توجيهاً نوعياً للمحيط والمداخل والمعالم، ولكنها لا تضمن السلامة المطلقة في الطرقات ولا تحل بديلاً عن العصا البيضاء أو كلب الإرشاد أو الانتباه الشخصي.'
                 : 'Rafiqi orientation tools provide qualitative spatial cues and entrance descriptions, but never guarantee road safety or replace a white cane, guide dog, or physical mobility aids.'}
@@ -677,7 +673,7 @@ export default function SectionLandingView({
       {sectionId === 'communicate' && (
         <section
           aria-label={isAr ? 'حدود لغة الإشارة المعتمدة' : 'Verified Sign Language Boundary'}
-          className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-4 ${
+          className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#151D2A] border-[#22354E] text-slate-200'
               : 'bg-slate-50 border-slate-200 text-slate-800'
@@ -690,7 +686,7 @@ export default function SectionLandingView({
             <h2 className="text-sm font-bold">
               {isAr ? 'منظومة السمع والتعبير: اعتماد القاموس الإشاري الموثق' : 'Verified Egyptian Sign Language & Honest Validation Boundary'}
             </h2>
-            <p className="text-xs leading-relaxed opacity-90">
+            <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'استوديو لغة الإشارة يعتمد على القاموس المنهجي المعتمد. لا ندعي اكتمال الترجمة الإشارية الحرة غير الموثقة، ونوضح بدقة الحدود التقنية الحالية.'
                 : 'Sign Language features are powered by verified educational dictionaries. We do not claim complete or unvalidated open translation without verified data provenance.'}
@@ -702,7 +698,7 @@ export default function SectionLandingView({
       {sectionId === 'personalize' && (
         <section
           aria-label={isAr ? 'إتاحة شاملة دون شروط إفصاح' : 'Universal Accessibility Guarantee'}
-          className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-4 ${
+          className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#142338] border-rafiqi-primary/40 text-blue-100'
               : 'bg-blue-50 border-blue-200 text-blue-950'
@@ -715,7 +711,7 @@ export default function SectionLandingView({
             <h2 className="text-sm font-bold">
               {isAr ? 'إتاحة شاملة ومفتوحة لجميع المستخدمين بدون إفصاح طبي' : 'Universal Accessibility: No Disability Disclosure Required'}
             </h2>
-            <p className="text-xs leading-relaxed opacity-90">
+            <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'جميع أدوات التيسير وجواز الإتاحة متاحة لك بحرية تامة دون اشتراط تقديم أي تقارير طبية أو تصنيف إعاقة مسبق.'
                 : 'All accessibility tools and customization features are freely accessible to every user without requiring any medical disclosure or disability categorization.'}
@@ -725,7 +721,7 @@ export default function SectionLandingView({
       )}
 
       {/* ── 2. FEATURE GROUPS WITH DISTINCTIVE CLUSTERS ── */}
-      <section className="space-y-10" aria-label={isAr ? 'مجموعات ميزات القسم' : 'Feature Groups'}>
+      <section className="space-y-3" aria-label={isAr ? 'مجموعات ميزات القسم' : 'Feature Groups'}>
         {featureGroups.map((group) => {
           const GroupIcon = group.icon;
           const groupFeatures = section.features.filter((f) => group.featureIds.includes(f.id));
@@ -733,30 +729,30 @@ export default function SectionLandingView({
           if (groupFeatures.length === 0) return null;
 
           return (
-            <div key={group.id} className="space-y-4">
+            <div key={group.id} className="space-y-2">
               {/* Group Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 border-slate-200 dark:border-[#22354E]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 border-slate-200 dark:border-[#22354E]">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-rafiqi-primary/15 text-rafiqi-primary dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-rafiqi-primary/15 text-rafiqi-primary dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
                     <GroupIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className={`text-base font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                    <h2 className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                       {isAr ? group.titleAr : group.titleEn}
                     </h2>
-                    <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    <p className={`hidden lg:block text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                       {isAr ? group.descAr : group.descEn}
                     </p>
                   </div>
                 </div>
 
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200/50 dark:bg-[#1A283D] text-slate-600 dark:text-slate-400 self-start sm:self-center">
+                <span className="hidden sm:inline text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200/50 dark:bg-[#1A283D] text-slate-600 dark:text-slate-400 self-center">
                   {isAr ? `${groupFeatures.length} أدوات` : `${groupFeatures.length} features`}
                 </span>
               </div>
 
               {/* Group Features Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                 {groupFeatures.map((feature) => {
                   const FeatIcon = getSectionIconComponent(feature.iconName);
                   const isReady = feature.status === 'ready';
@@ -776,23 +772,23 @@ export default function SectionLandingView({
                       aria-label={`${isAr ? feature.titleAr : feature.titleEn} — ${
                         isAr ? feature.statusLabelAr : feature.statusLabelEn
                       }`}
-                      className={`group relative flex flex-col justify-between p-5 rounded-2xl border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary text-start ${
+                      className={`group relative flex flex-col justify-between p-3 rounded-xl border min-w-0 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary text-start ${
                         isDarkMode
                           ? 'bg-[#1A283D] border-[#22354E] hover:border-rafiqi-primary hover:bg-[#1E2F48]'
                           : 'bg-white border-slate-200 hover:border-rafiqi-primary hover:bg-slate-50'
                       }`}
                     >
-                      <div className="space-y-3">
+                      <div className="space-y-1.5 min-w-0">
                         {/* Top: Icon + Status Badge */}
                         <div className="flex items-center justify-between">
                           <div
-                            className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all duration-200 shadow-xs ${
+                            className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-all duration-200 shadow-xs ${
                               isDarkMode
                                 ? 'bg-[#131E2E] border-[#22354E] text-[#4B9FE1] group-hover:bg-rafiqi-primary group-hover:text-white'
                                 : 'bg-slate-100 border-slate-200 text-rafiqi-primary group-hover:bg-rafiqi-primary group-hover:text-white'
                             }`}
                           >
-                            <FeatIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+                            <FeatIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
                           </div>
 
                           {/* Status Badge */}
@@ -810,7 +806,7 @@ export default function SectionLandingView({
 
                         {/* Title */}
                         <h3
-                          className={`text-base font-bold transition-colors leading-snug line-clamp-1 ${
+                          className={`text-sm font-bold transition-colors leading-snug line-clamp-2 break-words ${
                             isDarkMode
                               ? 'text-white group-hover:text-[#4B9FE1]'
                               : 'text-slate-900 group-hover:text-rafiqi-primary'
@@ -821,7 +817,7 @@ export default function SectionLandingView({
 
                         {/* Description */}
                         <p
-                          className={`text-xs leading-relaxed line-clamp-3 min-h-[3rem] ${
+                          className={`text-xs leading-snug line-clamp-2 ${
                             isDarkMode ? 'text-slate-400' : 'text-slate-600'
                           }`}
                         >
@@ -829,7 +825,7 @@ export default function SectionLandingView({
                         </p>
 
                         {/* Tags */}
-                        <div className="flex flex-wrap gap-1.5 pt-1">
+                        <div className="hidden xl:flex flex-wrap gap-1.5 pt-0.5">
                           {(isAr ? feature.tagsAr : feature.tagsEn).map((tag, tIdx) => (
                             <span
                               key={tIdx}
@@ -846,7 +842,7 @@ export default function SectionLandingView({
                       </div>
 
                       {/* Bottom Action Hint */}
-                      <div className="pt-4 mt-4 border-t border-slate-200 dark:border-[#22354E] flex items-center justify-between text-xs font-bold text-rafiqi-primary dark:text-[#4B9FE1]">
+                      <div className="hidden pt-4 mt-4 border-t border-slate-200 dark:border-[#22354E] items-center justify-between text-xs font-bold text-rafiqi-primary dark:text-[#4B9FE1]">
                         <span>{isAr ? 'فتح الأداة مباشرة' : 'Launch Feature'}</span>
                         <ChevronRight
                           className={`w-4 h-4 transition-transform ${
@@ -866,11 +862,11 @@ export default function SectionLandingView({
       {/* ── 3. REAL RECENT ACTIVITY & HONEST EMPTY STATE ── */}
       <section
         aria-labelledby="recent-activity-heading"
-        className={`p-6 rounded-3xl border ${
+        className={`p-3 rounded-xl border ${
           isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-200'
         }`}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-rafiqi-primary dark:text-[#4B9FE1]" />
             <h2 id="recent-activity-heading" className="text-sm font-bold">
@@ -903,7 +899,7 @@ export default function SectionLandingView({
             ))}
           </div>
         ) : (
-          <div className="text-center py-6 px-4 space-y-3">
+          <div className="text-center py-2 px-4 space-y-2">
             <p className="text-xs text-slate-400 max-w-md mx-auto">
               {sectionId === 'see_understand' &&
                 (isAr
@@ -944,6 +940,7 @@ export default function SectionLandingView({
       </section>
 
       {/* ── 4. ACCESSIBLE KEYBOARD & NAVIGATION GUIDE ── */}
+      {activeHelpModal && (
       <section
         data-testid="section-quick-tips"
         aria-label={isAr ? 'إرشادات الوصول السريع والتنقل' : 'Accessibility and Keyboard Tips'}
@@ -964,6 +961,7 @@ export default function SectionLandingView({
             : 'Navigate between features using Tab, reverse with Shift+Tab, and press Enter to launch. All tools support screen readers (NVDA, TalkBack, VoiceOver), spoken prompts, high-contrast themes, and dynamic font scaling.'}
         </p>
       </section>
+      )}
     </div>
   );
 }
