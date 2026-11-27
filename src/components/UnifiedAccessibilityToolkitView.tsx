@@ -225,7 +225,16 @@ export default function UnifiedAccessibilityToolkitView({
       announceToScreenReader(isAr ? 'تم تشغيل كاميرا مسح المستندات' : 'Document scanner camera ready');
     } catch (err: any) {
       console.error('Camera access denied:', err);
-      toast.error(isAr ? 'تعذر الوصول للكاميرا' : 'Camera access denied');
+      const camName = err?.name || '';
+      if (camName === 'NotFoundError' || camName === 'DevicesNotFoundError') {
+        toast.error(isAr ? 'مفيش كاميرا متوصلة بالجهاز.' : 'No camera was found on this device.');
+      } else if (camName === 'NotReadableError' || camName === 'TrackStartError') {
+        toast.error(isAr ? 'الكاميرا مستخدمة في برنامج تاني. اقفليه وجربي تاني.' : 'The camera is in use by another app. Close it and try again.');
+      } else if (camName === 'NotAllowedError' || camName === 'PermissionDeniedError') {
+        toast.error(isAr ? 'الكاميرا محظورة: اضغطي رمز القفل جنب العنوان، Site settings، Camera، Allow، وحدّثي الصفحة.' : 'Camera is blocked: click the lock icon, Site settings, Camera, Allow, then reload.');
+      } else {
+        toast.error(isAr ? 'تعذر الوصول للكاميرا' : 'Camera access denied');
+      }
     }
   };
 

@@ -2745,6 +2745,12 @@ Examine what is visible in front of the camera right now with utmost precision:
                         'اضغط على رمز القفل أو الكاميرا في شريط المتصفح للسماح بالكاميرا، أو استخدم خيار رفع صورة من جهازك.'
                       )}
                     </p>
+                    <ol className="text-xs text-[#F5F8FF] leading-relaxed max-w-xs text-start list-decimal ps-5 space-y-1">
+                      <li>{t('Click the lock icon next to the site address.', 'اضغط على رمز القفل جنب عنوان الموقع.')}</li>
+                      <li>{t('Open Site settings, then find Camera.', 'افتح إعدادات الموقع (Site settings) وادخل على الكاميرا.')}</li>
+                      <li>{t('Choose Allow, then reload the page.', 'اختار السماح (Allow) وبعدها حدّث الصفحة.')}</li>
+                      <li>{t('If it still fails, close other apps using the camera (Zoom, Teams).', 'لو لسه مش شغالة، اقفل أي برنامج تاني بيستخدم الكاميرا زي Zoom أو Teams.')}</li>
+                    </ol>
                     <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                       <button
                         type="button"
