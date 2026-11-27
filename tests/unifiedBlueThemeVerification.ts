@@ -101,7 +101,7 @@ export async function runUnifiedBlueThemeVerification(): Promise<{ passed: numbe
   const appPath = path.resolve(process.cwd(), 'src', 'App.tsx');
   const appContent = fs.readFileSync(appPath, 'utf8');
   assert(appContent.includes('bg-[#F5F9FD]'), 'App.tsx uses #F5F9FD as light background');
-  assert(appContent.includes('bg-[#0B131E]'), 'App.tsx uses #0B131E as dark background');
+  assert(appContent.includes('bg-[#061A33]'), 'App.tsx uses #061A33 (navy) as dark background');
 
   const sidebarPath = path.resolve(process.cwd(), 'src', 'components', 'Sidebar.tsx');
   const sidebarContent = fs.readFileSync(sidebarPath, 'utf8');
