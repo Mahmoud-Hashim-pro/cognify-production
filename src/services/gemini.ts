@@ -833,6 +833,18 @@ ${otherThreadsSummary}
     }
     const rawData = typeof file.data === 'string' ? file.data.replace(/^data:[^;]+;base64,/, '') : file.data;
     if (rawData) {
+      // Vercel serverless rejects bodies above ~4.5MB with a bare platform 413,
+      // so stop oversized media here with a message the user actually sees
+      // instead of letting the request die at the platform.
+      const approxBytes = Math.round((rawData.length * 3) / 4);
+      if (approxBytes > 3 * 1024 * 1024) {
+        const isAudio = (mime || '').startsWith('audio/');
+        throw new Error(
+          isAudio
+            ? 'التسجيل طويل، جرّب مقطع أقصر (أقل من ٣ ميجا تقريبًا).'
+            : 'الملف كبير، جرّب ملف أصغر (أقل من ٣ ميجا تقريبًا).'
+        );
+      }
       currentParts.push({
         inlineData: {
           mimeType: mime || 'application/pdf',

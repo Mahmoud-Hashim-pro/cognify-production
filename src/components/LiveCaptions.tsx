@@ -339,7 +339,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError(isAr ? 'تتطلب التسميات التوضيحية المباشرة متصفحاً مدعوماً مثل Chrome أو Edge أو Safari.' : "Live captions need a supported browser such as Chrome, Edge, or Safari.");
+      setError(isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : "Speech recognition isn't supported in this browser. Try Chrome on Android or a recent Safari.");
       return;
     }
     recognitionRef.current = new SpeechRecognition();
@@ -588,9 +588,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       audioChunksRef.current = [];
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                       MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
                        MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
-      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      const mediaRecorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
@@ -647,9 +651,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
     try {
       audioChunksRef.current = [];
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                       MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
                        MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
-      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      const mediaRecorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };

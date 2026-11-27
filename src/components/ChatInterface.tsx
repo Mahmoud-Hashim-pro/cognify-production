@@ -692,7 +692,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!recognitionRef.current) {
       const isAr = isArabicLocale(profile.language);
       toast.warning(
-        isAr ? 'الإدخال الصوتي مش مدعوم في المتصفح ده. جرّب Chrome.' : 'Voice input isn’t supported in this browser. Try Chrome.',
+        isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : 'Voice input isn’t supported in this browser. Try Chrome on Android or a recent Safari.',
         isAr ? 'غير مدعوم' : 'Unsupported',
       );
       return;

@@ -959,7 +959,12 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
       unlockSpeechSynthesis();
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream);
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                       MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+      const mediaRecorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => {

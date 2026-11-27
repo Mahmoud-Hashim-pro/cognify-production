@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cognify-v15-prompt-updates';
+const CACHE_NAME = 'cognify-v16-cost-quota-budget';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
