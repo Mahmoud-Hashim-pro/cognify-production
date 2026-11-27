@@ -45,10 +45,10 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Auto-heal chunk mismatches caused by fresh deployments
     if (isChunkError(error)) {
-      const lastReload = Number(sessionStorage.getItem('cognify_eb_chunk_reload') || '0');
+      const lastReload = Number(sessionStorage.getItem('rafiqi_eb_chunk_reload') || '0');
       const now = Date.now();
       if (now - lastReload > 12000) {
-        sessionStorage.setItem('cognify_eb_chunk_reload', String(now));
+        sessionStorage.setItem('rafiqi_eb_chunk_reload', String(now));
         this.clearCachesAndReload();
         return;
       }
@@ -56,10 +56,10 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Auto-heal DOM reconciliation collisions caused by Google Translate or accessibility extensions
     if (isDOMNotFoundError(error)) {
-      const lastRecover = Number(sessionStorage.getItem('cognify_eb_dom_recover') || '0');
+      const lastRecover = Number(sessionStorage.getItem('rafiqi_eb_dom_recover') || '0');
       const now = Date.now();
       if (now - lastRecover > 3000) {
-        sessionStorage.setItem('cognify_eb_dom_recover', String(now));
+        sessionStorage.setItem('rafiqi_eb_dom_recover', String(now));
         setTimeout(() => {
           this.setState({ hasError: false, error: undefined });
         }, 80);

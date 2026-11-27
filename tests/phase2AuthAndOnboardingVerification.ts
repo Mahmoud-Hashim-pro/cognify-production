@@ -212,7 +212,7 @@ export async function runPhase2AuthAndOnboardingVerification(): Promise<{
   // Strict unauthenticated access gating in App.tsx
   assert(
     !appCode.includes('handleEnterGuestPreview') &&
-    !appCode.includes('cognify_guest_preview') &&
+    !appCode.includes('rafiqi_guest_preview') &&
     !appCode.includes('isGuestPreview'),
     'App.tsx must completely remove guest preview handlers and guest session state'
   );

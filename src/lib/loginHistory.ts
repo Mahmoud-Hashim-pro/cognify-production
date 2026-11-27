@@ -42,7 +42,7 @@ export async function pruneOldLoginHistory(uid: string): Promise<void> {
 export async function recordUserLoginSession(uid: string): Promise<void> {
   if (!uid || typeof window === 'undefined') return;
 
-  const sessionKey = `cognify_session_${uid}_recorded`;
+  const sessionKey = `rafiqi_session_${uid}_recorded`;
   if (window.sessionStorage.getItem(sessionKey)) {
     return; // Already recorded in this browser session
   }

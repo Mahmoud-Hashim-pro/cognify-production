@@ -51,10 +51,10 @@ function lazyWithRetry<T extends React.ComponentType<any>>(
     try {
       return await factory();
     } catch (err: any) {
-      const lastReload = Number(sessionStorage.getItem('cognify_lazy_reload') || '0');
+      const lastReload = Number(sessionStorage.getItem('rafiqi_lazy_reload') || '0');
       const now = Date.now();
       if (now - lastReload > 12000) {
-        sessionStorage.setItem('cognify_lazy_reload', String(now));
+        sessionStorage.setItem('rafiqi_lazy_reload', String(now));
         if (typeof caches !== 'undefined') {
           try {
             const keys = await caches.keys();
@@ -166,7 +166,7 @@ export default function App() {
     if (initialRouteRef.current.tab) return initialRouteRef.current.tab;
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('cognify_default_disability_tab');
+        const saved = localStorage.getItem('rafiqi_default_disability_tab');
         if (saved && (VALID_DISABILITY_TABS as readonly string[]).includes(saved)) {
           return saved as DisabilityTab;
         }
@@ -392,16 +392,16 @@ export default function App() {
       const root = document.documentElement;
 
       // Font size scaling
-      const fontScale = savedPassport?.fontSizeScale || (localStorage.getItem('cognify_font_scale') as any) || 'normal';
+      const fontScale = savedPassport?.fontSizeScale || (localStorage.getItem('rafiqi_font_scale') as any) || 'normal';
       root.classList.remove('font-scale-normal', 'font-scale-medium', 'font-scale-large', 'font-scale-extra-large');
       root.classList.add(`font-scale-${fontScale}`);
 
       // High contrast mode
-      const isHighContrast = Boolean(savedPassport?.highContrast || localStorage.getItem('cognify_high_contrast') === 'true');
+      const isHighContrast = Boolean(savedPassport?.highContrast || localStorage.getItem('rafiqi_high_contrast') === 'true');
       root.classList.toggle('high-contrast', isHighContrast);
 
       // Reduce motion
-      const isReduceMotion = Boolean(savedPassport?.reduceMotion || localStorage.getItem('cognify_reduce_motion') === 'true');
+      const isReduceMotion = Boolean(savedPassport?.reduceMotion || localStorage.getItem('rafiqi_reduce_motion') === 'true');
       root.classList.toggle('reduce-motion', isReduceMotion);
     } catch (e) {
       console.warn('Failed to apply global accessibility attributes:', e);
@@ -638,7 +638,7 @@ export default function App() {
           data.accessibilityMode = 'None';
           data.disabilityType = '';
           try {
-            localStorage.removeItem('cognify_default_disability_tab');
+            localStorage.removeItem('rafiqi_default_disability_tab');
             localStorage.removeItem('preLoginAccessibilityMode');
             localStorage.removeItem('preLoginDisability');
           } catch {}
@@ -649,7 +649,7 @@ export default function App() {
           if (preLoginDis) data.disabilityType = preLoginDis;
           try {
             const mappedTab = preLoginMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-            localStorage.setItem('cognify_default_disability_tab', mappedTab);
+            localStorage.setItem('rafiqi_default_disability_tab', mappedTab);
           } catch {}
           setDoc(doc(db, path), cleanDataForFirestore({ 
             accountPath: 'Special Needs', 
@@ -754,7 +754,7 @@ export default function App() {
 
           try {
             const mappedTab = accessibilityMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-            localStorage.setItem('cognify_default_disability_tab', mappedTab);
+            localStorage.setItem('rafiqi_default_disability_tab', mappedTab);
           } catch {}
 
           let visitorCountry: string | undefined;
@@ -805,7 +805,7 @@ export default function App() {
         } else {
           // If the student already completed onboarding on this device (or cached in localStorage),
           // preserve the local profile state instead of clobbering to null and looping back to step 1!
-          const cachedProfileJson = typeof window !== 'undefined' ? localStorage.getItem(`cognify_profile_${user.uid}`) : null;
+          const cachedProfileJson = typeof window !== 'undefined' ? localStorage.getItem(`rafiqi_profile_${user.uid}`) : null;
           if (cachedProfileJson) {
             try {
               const cached = JSON.parse(cachedProfileJson);
@@ -928,8 +928,8 @@ export default function App() {
 
     // Cache locally immediately to eliminate any race condition or snapshot reset loop
     try {
-      localStorage.setItem(`cognify_profile_${user.uid}`, JSON.stringify(newProfile));
-      localStorage.setItem(`cognify_onboarded_${user.uid}`, 'true');
+      localStorage.setItem(`rafiqi_profile_${user.uid}`, JSON.stringify(newProfile));
+      localStorage.setItem(`rafiqi_onboarded_${user.uid}`, 'true');
     } catch {}
 
     const cleanedProfile = cleanDataForFirestore(newProfile);
@@ -1222,7 +1222,7 @@ export default function App() {
             onOpenBookStudio={(content, title) => {
               if (content) {
                 try {
-                  sessionStorage.setItem('cognify_book_studio_import', JSON.stringify({ text: content, title }));
+                  sessionStorage.setItem('rafiqi_book_studio_import', JSON.stringify({ text: content, title }));
                 } catch {}
               }
               navigateTo('book_studio');
@@ -1263,7 +1263,7 @@ export default function App() {
             onOpenBookStudio={(content, title) => {
               if (content) {
                 try {
-                  sessionStorage.setItem('cognify_book_studio_import', JSON.stringify({ text: content, title }));
+                  sessionStorage.setItem('rafiqi_book_studio_import', JSON.stringify({ text: content, title }));
                 } catch {}
               }
               navigateTo('book_studio');

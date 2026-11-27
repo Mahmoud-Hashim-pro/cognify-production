@@ -76,7 +76,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   // 2. Read actual recent reading history (Zero fake data)
   const recentReadingItems = useMemo(() => {
     try {
-      const saved = localStorage.getItem('cognify_recent_books');
+      const saved = localStorage.getItem('rafiqi_recent_books');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, 3);

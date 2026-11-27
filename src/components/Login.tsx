@@ -66,7 +66,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
   
   const [email, setEmail] = useState(() => {
     try {
-      return localStorage.getItem('cognify_saved_email') || '';
+      return localStorage.getItem('rafiqi_saved_email') || '';
     } catch {
       return '';
     }
@@ -78,7 +78,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
   
   const [rememberMe, setRememberMe] = useState(() => {
     try {
-      return localStorage.getItem('cognify_remember_me') === 'true';
+      return localStorage.getItem('rafiqi_remember_me') === 'true';
     } catch {
       return false;
     }
@@ -226,13 +226,13 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       if (mode === 'email-login') {
         if (rememberMe) {
           try {
-            localStorage.setItem('cognify_saved_email', normalizedEmail);
-            localStorage.setItem('cognify_remember_me', 'true');
+            localStorage.setItem('rafiqi_saved_email', normalizedEmail);
+            localStorage.setItem('rafiqi_remember_me', 'true');
           } catch {}
         } else {
           try {
-            localStorage.removeItem('cognify_saved_email');
-            localStorage.setItem('cognify_remember_me', 'false');
+            localStorage.removeItem('rafiqi_saved_email');
+            localStorage.setItem('rafiqi_remember_me', 'false');
           } catch {}
         }
         await loginWithEmail(normalizedEmail, password.trim());

@@ -42,7 +42,7 @@ export interface SecurityAuditRecord {
   timestampMs: number;
 }
 
-export const LOCAL_STORAGE_SECURITY_KEY = 'cognify_security_audits_local';
+export const LOCAL_STORAGE_SECURITY_KEY = 'rafiqi_security_audits_local';
 const THROTTLE_WINDOW_MS = 15000; // 15 seconds per event type
 
 // Module-level IP cache & deduplication
@@ -61,7 +61,7 @@ export function resetClientIpCache(): void {
   pendingIpResolution = null;
   try {
     if (typeof window !== 'undefined' && window.sessionStorage) {
-      window.sessionStorage.removeItem('cognify_client_ip');
+      window.sessionStorage.removeItem('rafiqi_client_ip');
     }
   } catch {}
 }
@@ -82,7 +82,7 @@ export async function resolveClientIp(): Promise<string> {
   // 2. Check sessionStorage for previously resolved IP in this tab
   if (typeof window !== 'undefined' && window.sessionStorage) {
     try {
-      const stored = window.sessionStorage.getItem('cognify_client_ip');
+      const stored = window.sessionStorage.getItem('rafiqi_client_ip');
       if (stored) {
         cachedClientIp = stored;
         return stored;
@@ -120,7 +120,7 @@ export async function resolveClientIp(): Promise<string> {
           cachedClientIp = data.ip;
           try {
             if (typeof window !== 'undefined' && window.sessionStorage) {
-              window.sessionStorage.setItem('cognify_client_ip', data.ip);
+              window.sessionStorage.setItem('rafiqi_client_ip', data.ip);
             }
           } catch {}
           return cachedClientIp;
@@ -152,7 +152,7 @@ export async function resolveClientIp(): Promise<string> {
           cachedClientIp = data.ip;
           try {
             if (typeof window !== 'undefined' && window.sessionStorage) {
-              window.sessionStorage.setItem('cognify_client_ip', data.ip);
+              window.sessionStorage.setItem('rafiqi_client_ip', data.ip);
             }
           } catch {}
           return cachedClientIp;
@@ -234,7 +234,7 @@ export async function logSecurityEvent(
     console.debug('[SecurityTracker] Firestore offline/unauthenticated in test or restricted mode.');
   }
 
-  // 2. Append to localStorage backup (cognify_security_audits_local)
+  // 2. Append to localStorage backup (rafiqi_security_audits_local)
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const existingRaw = window.localStorage.getItem(LOCAL_STORAGE_SECURITY_KEY);
@@ -447,7 +447,7 @@ export function initSecurityTracker(
         get() {
           // If already triggered, return cached token without re-entering audit logging
           if (probeTriggered) {
-            return 'cognify_security_probe';
+            return 'rafiqi_security_probe';
           }
           probeTriggered = true;
 
@@ -471,7 +471,7 @@ export function initSecurityTracker(
             );
           }, 0);
 
-          return 'cognify_security_probe';
+          return 'rafiqi_security_probe';
         },
         configurable: true,
       });

@@ -88,7 +88,7 @@ assert(fbCode.includes('PER_USER_LOCAL_KEYS.forEach'),
 assert(fbCode.includes('sessionStorage.clear()'),
   'Session Cleanup', 'logout clears all sessionStorage');
 
-assert(fbCode.includes('cognify_student_memory_') && fbCode.includes('cognify_spatial_v2_'),
+assert(fbCode.includes('rafiqi_student_memory_') && fbCode.includes('rafiqi_spatial_v2_'),
   'Session Cleanup', 'logout purges AI student memory and spatial cache prefixes to prevent cross-user leakage');
 
 assert(fbCode.includes('await signOut(auth)'),

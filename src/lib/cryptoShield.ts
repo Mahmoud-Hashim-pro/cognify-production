@@ -32,7 +32,7 @@ const ENV_SECRET =
 function getDeviceEntropySeed(): string {
   if (typeof window === 'undefined') return 'node_env_isolated_seed';
   try {
-    const STORAGE_KEY = '__cognify_device_shield_key__';
+    const STORAGE_KEY = '__rafiqi_device_shield_key__';
     let seed = window.localStorage?.getItem(STORAGE_KEY);
     if (!seed || seed.length < 32) {
       if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
@@ -52,7 +52,7 @@ function getDeviceEntropySeed(): string {
   }
 }
 
-const DEFAULT_SEED = 'cognify_crypto_shield_v1_9a8b7c6d5e';
+const DEFAULT_SEED = 'rafiqi_crypto_shield_v1_9a8b7c6d5e';
 
 function getMasterSeed(): string {
   const deviceSeed = getDeviceEntropySeed();
@@ -355,9 +355,9 @@ export async function decryptSecret(cipherText: string): Promise<string> {
  */
 function getStorageKey(provider: string): string {
   const p = provider.toLowerCase().trim();
-  if (p === 'gemini') return 'cognify_gemini_api_key';
-  if (p === 'groq') return 'cognify_groq_api_key';
-  return `cognify_${p}_key`;
+  if (p === 'gemini') return 'rafiqi_gemini_api_key';
+  if (p === 'groq') return 'rafiqi_groq_api_key';
+  return `rafiqi_${p}_key`;
 }
 
 /**
@@ -489,8 +489,8 @@ export async function autoMigrateStorageKeys(): Promise<void> {
 
   // BYOK keys must leave localStorage entirely: move them (encrypted) to sessionStorage.
   const byokKeys = [
-    'cognify_gemini_api_key',
-    'cognify_groq_api_key',
+    'rafiqi_gemini_api_key',
+    'rafiqi_groq_api_key',
     'gemini_api_key',
     'groq_api_key',
   ];
@@ -508,7 +508,7 @@ export async function autoMigrateStorageKeys(): Promise<void> {
   }
 
   // Non-BYOK local secrets keep their persistence but are encrypted in place.
-  const keysToProtect = ['cognify_parent_pin'];
+  const keysToProtect = ['rafiqi_parent_pin'];
 
   for (const k of keysToProtect) {
     try {

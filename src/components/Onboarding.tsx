@@ -94,12 +94,12 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     try {
       // Save local caches
       try {
-        localStorage.setItem('cognify_font_scale', fontSizeScale);
-        localStorage.setItem('cognify_high_contrast', String(highContrast));
-        localStorage.setItem('cognify_reduce_motion', String(reduceMotion));
-        localStorage.setItem('cognify_tts_rate', String(speechRate));
-        localStorage.setItem('cognify_dialect', dialect);
-        localStorage.setItem('cognify_desc_depth', descriptionDetail);
+        localStorage.setItem('rafiqi_font_scale', fontSizeScale);
+        localStorage.setItem('rafiqi_high_contrast', String(highContrast));
+        localStorage.setItem('rafiqi_reduce_motion', String(reduceMotion));
+        localStorage.setItem('rafiqi_tts_rate', String(speechRate));
+        localStorage.setItem('rafiqi_dialect', dialect);
+        localStorage.setItem('rafiqi_desc_depth', descriptionDetail);
       } catch {}
 
       const passport: AccessibilityPassport = {

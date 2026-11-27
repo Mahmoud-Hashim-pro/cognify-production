@@ -113,9 +113,9 @@ console.log('\n[Area 2: Cross-User Database Isolation & Session Cache Purging]')
 
 it('Logout implementation purges user-specific memory, spatial, and event caches', () => {
   const firebaseFile = fs.readFileSync('src/lib/firebase.ts', 'utf8');
-  assert.ok(firebaseFile.includes('cognify_student_memory_'), 'Must purge student memory prefix');
-  assert.ok(firebaseFile.includes('cognify_spatial_v2_'), 'Must purge spatial memory prefix');
-  assert.ok(firebaseFile.includes('cognify_learning_events_'), 'Must purge learning event store prefix');
+  assert.ok(firebaseFile.includes('rafiqi_student_memory_'), 'Must purge student memory prefix');
+  assert.ok(firebaseFile.includes('rafiqi_spatial_v2_'), 'Must purge spatial memory prefix');
+  assert.ok(firebaseFile.includes('rafiqi_learning_events_'), 'Must purge learning event store prefix');
 });
 
 it('Spatial memory cache partitions physical objects strictly by UID', () => {

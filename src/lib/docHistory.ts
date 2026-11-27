@@ -23,7 +23,7 @@ export interface DocHistoryEntry {
 
 const MAX_ENTRIES = 20;
 
-const storageKey = (uid: string) => `cognify_doc_history_${uid}`;
+const storageKey = (uid: string) => `rafiqi_doc_history_${uid}`;
 
 export function loadDocHistory(uid: string): DocHistoryEntry[] {
   if (!uid) return [];

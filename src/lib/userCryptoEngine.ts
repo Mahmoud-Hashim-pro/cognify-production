@@ -11,7 +11,7 @@
  *  2. Device-Bound Random Vault Secret:
  *     Instead of predictable key derivation from UID alone, each device generates
  *     a cryptographically secure 256-bit random vault secret (`crypto.getRandomValues`)
- *     persisted in device storage (`cognify_device_vault_${userId}`).
+ *     persisted in device storage (`rafiqi_device_vault_${userId}`).
  *  3. Key Derivation:
  *     PBKDF2-HMAC-SHA256 with 100,000 iterations combines the device-bound secret with
  *     the user UID, or an optional user-held passphrase (KEK -> DEK pattern).
@@ -153,10 +153,10 @@ function base64ToBuffer(base64: string): Uint8Array {
 
 /**
  * Retrieves or initializes a 256-bit cryptographically secure device-bound vault secret.
- * Stored locally in device storage (`cognify_device_vault_${userId}`).
+ * Stored locally in device storage (`rafiqi_device_vault_${userId}`).
  */
 export function getDeviceVaultSecret(userId: string): Uint8Array {
-  const storageKey = `cognify_device_vault_${userId}`;
+  const storageKey = `rafiqi_device_vault_${userId}`;
   let storedBase64: string | null = null;
 
   if (typeof window !== 'undefined' && window.localStorage) {
@@ -208,13 +208,13 @@ async function getUserSalt(userId: string, isPassphraseMode: boolean = false): P
   const encoder = new TextEncoder();
 
   if (isPassphraseMode) {
-    const seed = encoder.encode(`cognify_kek_salt_v11_${userId}_portable`);
+    const seed = encoder.encode(`rafiqi_kek_salt_v11_${userId}_portable`);
     const hashBuffer = await subtle.digest('SHA-256', seed);
     return new Uint8Array(hashBuffer).slice(0, 16);
   }
 
   const deviceSecret = getDeviceVaultSecret(userId);
-  const uidBytes = encoder.encode(`cognify_device_salt_v11_${userId}`);
+  const uidBytes = encoder.encode(`rafiqi_device_salt_v11_${userId}`);
   const combined = new Uint8Array(deviceSecret.length + uidBytes.length);
   combined.set(deviceSecret, 0);
   combined.set(uidBytes, deviceSecret.length);
@@ -249,7 +249,7 @@ export function importDeviceVaultRecoveryKey(userId: string, recoveryKey: string
     throw new Error('[userCryptoEngine] Invalid recovery key length. Expected 32 bytes (256-bit).');
   }
 
-  const storageKey = `cognify_device_vault_${userId}`;
+  const storageKey = `rafiqi_device_vault_${userId}`;
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       window.localStorage.setItem(storageKey, trimmed);
@@ -290,10 +290,10 @@ export async function deriveUserEncryptionKey(
 
   let rawKeyMaterial: Uint8Array;
   if (effectivePassphrase) {
-    rawKeyMaterial = encoder.encode(`${userId}:${effectivePassphrase}:cognify_kek_v11`);
+    rawKeyMaterial = encoder.encode(`${userId}:${effectivePassphrase}:rafiqi_kek_v11`);
   } else {
     const deviceSecret = getDeviceVaultSecret(userId);
-    const prefix = encoder.encode(`cognify_device_bound_key:${userId}:`);
+    const prefix = encoder.encode(`rafiqi_device_bound_key:${userId}:`);
     rawKeyMaterial = new Uint8Array(prefix.length + deviceSecret.length);
     rawKeyMaterial.set(prefix, 0);
     rawKeyMaterial.set(deviceSecret, prefix.length);
@@ -353,21 +353,21 @@ export async function deriveLegacyUserEncryptionKey(
   let saltBytes: Uint8Array | null = null;
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
-      const storedSalt = window.localStorage.getItem(`cognify_salt_${userId}`);
+      const storedSalt = window.localStorage.getItem(`rafiqi_salt_${userId}`);
       if (storedSalt) saltBytes = base64ToBuffer(storedSalt);
     } catch {}
   }
 
   if (!saltBytes) {
     // Deterministic fallback seed
-    const rawSeed = encoder.encode(`cognify_zero_knowledge_v10_${userId}_spatial_chat_salt`);
+    const rawSeed = encoder.encode(`rafiqi_zero_knowledge_v10_${userId}_spatial_chat_salt`);
     const hashBuffer = await subtle.digest('SHA-256', rawSeed);
     saltBytes = new Uint8Array(hashBuffer).slice(0, 16);
   }
 
   const secretString = effectivePassphrase
-    ? `${userId}:${effectivePassphrase}:cognify_e2e_v10`
-    : `cognify_identity_vault:${userId}:device_held_secret_token_v1`;
+    ? `${userId}:${effectivePassphrase}:rafiqi_e2e_v10`
+    : `rafiqi_identity_vault:${userId}:device_held_secret_token_v1`;
 
   const rawKeyMaterial = encoder.encode(secretString);
 
@@ -437,13 +437,13 @@ export async function getCandidateDecryptionKeys(
   try {
     const subtle = getSubtle();
     const encoder = new TextEncoder();
-    const detSecret = new Uint8Array(await subtle.digest('SHA-256', encoder.encode(`cognify_device_seed_${userId}`)));
-    const uidBytes = encoder.encode(`cognify_device_salt_v11_${userId}`);
+    const detSecret = new Uint8Array(await subtle.digest('SHA-256', encoder.encode(`rafiqi_device_seed_${userId}`)));
+    const uidBytes = encoder.encode(`rafiqi_device_salt_v11_${userId}`);
     const combined = new Uint8Array(detSecret.length + uidBytes.length);
     combined.set(detSecret, 0);
     combined.set(uidBytes, detSecret.length);
     const saltBytes = new Uint8Array(await subtle.digest('SHA-256', combined)).slice(0, 16);
-    const prefix = encoder.encode(`cognify_device_bound_key:${userId}:`);
+    const prefix = encoder.encode(`rafiqi_device_bound_key:${userId}:`);
     const rawKeyMaterial = new Uint8Array(prefix.length + detSecret.length);
     rawKeyMaterial.set(prefix, 0);
     rawKeyMaterial.set(detSecret, prefix.length);

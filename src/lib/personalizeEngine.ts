@@ -108,12 +108,12 @@ export interface PersonalizePreferencesProfile {
 // ═════════════════════════════════════════════════════════════════════════════
 
 export const PERSONALIZE_STORAGE_KEYS = {
-  PREFERENCES: 'cognify_personalize_preferences',
-  READING_HISTORY: 'cognify_reading_history',
-  ASSISTANT_MEMORY: 'cognify_assistant_memory',
-  MEMORY_OPT_IN: 'cognify_assistant_memory_optin',
-  MEMORY_PAUSED: 'cognify_assistant_memory_paused',
-  READING_HISTORY_ENABLED: 'cognify_reading_history_enabled',
+  PREFERENCES: 'rafiqi_personalize_preferences',
+  READING_HISTORY: 'rafiqi_reading_history',
+  ASSISTANT_MEMORY: 'rafiqi_assistant_memory',
+  MEMORY_OPT_IN: 'rafiqi_assistant_memory_optin',
+  MEMORY_PAUSED: 'rafiqi_assistant_memory_paused',
+  READING_HISTORY_ENABLED: 'rafiqi_reading_history_enabled',
 } as const;
 
 export const DEFAULT_SHORTCUTS: PersonalShortcutItem[] = [

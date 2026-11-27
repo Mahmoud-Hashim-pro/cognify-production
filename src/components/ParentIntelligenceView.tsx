@@ -51,7 +51,7 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
 
   // Hydrate linked child academic state from Firestore
   useEffect(() => {
-    const childId = profile?.linkedChildUid || (typeof window !== 'undefined' ? localStorage.getItem('cognify_linked_child_uid') : null);
+    const childId = profile?.linkedChildUid || (typeof window !== 'undefined' ? localStorage.getItem('rafiqi_linked_child_uid') : null);
     if (!childId || student) return;
 
     let isMounted = true;
@@ -177,7 +177,7 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
     if (typeof window !== 'undefined') {
       // Remembered locally so this screen knows which child to *display* once
       // approved — this alone never grants any data access.
-      localStorage.setItem('cognify_linked_child_uid', cleanId);
+      localStorage.setItem('rafiqi_linked_child_uid', cleanId);
     }
     if (db) {
       setDoc(doc(db, `users/${profile.uid}`), { linkedChildUid: cleanId }, { merge: true }).catch(() => {});

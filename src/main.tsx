@@ -7,6 +7,10 @@ import SplashScreen from './components/SplashScreen';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './index.css';
+import {migrateCognifyStorageKeys} from './lib/storageKeyMigration';
+
+// Rename legacy cognify_* storage keys to rafiqi_* before anything reads them.
+migrateCognifyStorageKeys();
 
 // ── DOM Mutation Safety Net for Translation & Screen Readers (TalkBack/VoiceOver) ──
 // Prevents React from crashing with NotFoundError when external tools (Google Translate,
@@ -69,10 +73,10 @@ const BENIGN = /AbortError|aborted|ResizeObserver|Load failed|NetworkError when 
 window.addEventListener('vite:preloadError', (event) => {
   console.warn('Vite chunk preload error detected, purging cache and reloading...', event);
   event.preventDefault();
-  const lastReload = Number(sessionStorage.getItem('cognify_chunk_reload') || '0');
+  const lastReload = Number(sessionStorage.getItem('rafiqi_chunk_reload') || '0');
   const now = Date.now();
   if (now - lastReload > 10000) {
-    sessionStorage.setItem('cognify_chunk_reload', String(now));
+    sessionStorage.setItem('rafiqi_chunk_reload', String(now));
     if (typeof caches !== 'undefined') {
       caches.keys().then((names) => Promise.all(names.map((n) => caches.delete(n)))).catch(() => {}).finally(() => {
         window.location.reload();

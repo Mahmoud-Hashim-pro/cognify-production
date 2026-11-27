@@ -171,7 +171,7 @@ export function computeConceptAnswerUpdate(
   return { updatedRecord: record, outcomeRecord };
 }
 
-const STORAGE_PREFIX = 'cognify_student_state_';
+const STORAGE_PREFIX = 'rafiqi_student_state_';
 
 export function createInitialStudentState(uid: string, level?: string): StudentState {
   const initial: StudentState = {
@@ -695,7 +695,7 @@ export class StudentStateManager {
   private loadFromLocalCache(uid: string): StudentState | null {
     if (typeof window === 'undefined' || !window.localStorage) return null;
     try {
-      const raw = localStorage.getItem(`cognify_student_state_${uid}`);
+      const raw = localStorage.getItem(`rafiqi_student_state_${uid}`);
       if (!raw) return null;
       return JSON.parse(raw) as StudentState;
     } catch {
@@ -709,7 +709,7 @@ export class StudentStateManager {
   private saveToLocalCache() {
     if (typeof window === 'undefined' || !window.localStorage) return;
     try {
-      localStorage.setItem(`cognify_student_state_${this.state.uid}`, JSON.stringify(this.state));
+      localStorage.setItem(`rafiqi_student_state_${this.state.uid}`, JSON.stringify(this.state));
     } catch (e) {
       console.warn('[StudentStateManager] Local cache save failed:', e);
     }

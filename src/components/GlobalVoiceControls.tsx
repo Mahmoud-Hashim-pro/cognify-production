@@ -13,7 +13,7 @@ import MediaConsentGate from './MediaConsentGate';
 import { answerQuickQuestion } from '../lib/locationAwareness';
 
 export const VISION_AUTOSTART_KEY = 'rafiqi_vision_autostart_tool';
-const TTS_RATE_KEY = 'cognify_tts_rate';
+const TTS_RATE_KEY = 'rafiqi_tts_rate';
 
 export interface GlobalVoiceControlsProps {
   profile: UserProfile;

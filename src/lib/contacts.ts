@@ -22,7 +22,7 @@ export interface EmergencyContact {
   consentConfirmedAt?: string;
 }
 
-const STORAGE_KEY = 'cognify_saved_contacts';
+const STORAGE_KEY = 'rafiqi_saved_contacts';
 
 /**
  * IMPORTANT: caregiver/family/doctor numbers below are intentionally EMPTY,

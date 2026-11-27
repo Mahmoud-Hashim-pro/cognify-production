@@ -99,7 +99,7 @@ export interface DocFlashcard {
   flipped?: boolean;
 }
 
-export const DOC_HISTORY_KEY = 'cognify_vision_doc_history';
+export const DOC_HISTORY_KEY = 'rafiqi_vision_doc_history';
 
 export function downloadTextAsTxtFile(text: string, filename: string) {
   if (typeof window === 'undefined') return;
@@ -365,7 +365,7 @@ export default function DocumentStudioModal({
   const [audioLectureState, setAudioLectureState] = useState<AudioLectureState>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const raw = sessionStorage.getItem('cognify_doc_audio_lecture_draft');
+        const raw = sessionStorage.getItem('rafiqi_doc_audio_lecture_draft');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && (parsed.transcript || parsed.summaries)) {
@@ -384,7 +384,7 @@ export default function DocumentStudioModal({
   useEffect(() => {
     try {
       if (audioLectureState.transcript || audioLectureState.summaries?.short || audioLectureState.summaries?.detailed) {
-        sessionStorage.setItem('cognify_doc_audio_lecture_draft', JSON.stringify({
+        sessionStorage.setItem('rafiqi_doc_audio_lecture_draft', JSON.stringify({
           status: audioLectureState.status,
           file: audioLectureState.file,
           transcript: audioLectureState.transcript,
@@ -1835,7 +1835,7 @@ ${currentDoc.summary}
                             onClick={() => {
                               try {
                                 sessionStorage.setItem(
-                                  'cognify_book_studio_import',
+                                  'rafiqi_book_studio_import',
                                   JSON.stringify({
                                     text: currentDoc.fullText || currentDoc.summary || '',
                                     title: currentDoc.title || 'Document',

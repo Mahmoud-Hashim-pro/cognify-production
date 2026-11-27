@@ -104,7 +104,7 @@ export interface SavedBookStudioItem {
   wordCount: number;
 }
 
-export const BOOK_STUDIO_STORAGE_KEY = 'cognify_book_studio_history_v1';
+export const BOOK_STUDIO_STORAGE_KEY = 'rafiqi_book_studio_history_v1';
 
 export const TEMPLATE_PRESETS: Record<BookTemplateType, {
   labelAr: string;

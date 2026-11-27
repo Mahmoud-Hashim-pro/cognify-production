@@ -28,7 +28,7 @@ export interface HttpMetricsSnapshot {
 
 type MetricsListener = (snapshot: HttpMetricsSnapshot) => void;
 
-const STORAGE_KEY = 'cognify_http_tracker_v1';
+const STORAGE_KEY = 'rafiqi_http_tracker_v1';
 
 function getTodayKey(): string {
   try {

@@ -132,7 +132,7 @@ interface DisabilityModeViewProps {
  */
 function detectDirectDisabilityTab(_profile: UserProfile): DisabilityTab {
   try {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('rafiqi_default_disability_tab') : null;
     if (saved === 'chat' || saved === 'deaf' || saved === 'vision' || saved === 'hub') {
       return saved as DisabilityTab;
     }
@@ -386,7 +386,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
   const handleOpenSavedDoc = (docItem: SavedBookStudioItem) => {
     try {
-      sessionStorage.setItem('cognify_book_studio_active_source', docItem.rawSource);
+      sessionStorage.setItem('rafiqi_book_studio_active_source', docItem.rawSource);
     } catch {}
     if (onNavigate) {
       (onNavigate as any)('book_studio');
@@ -428,7 +428,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     onTabChange?.(targetTab);
     if (targetTab === 'vision' || targetTab === 'deaf' || targetTab === 'chat' || targetTab === 'hub') {
       try {
-        localStorage.setItem('cognify_default_disability_tab', targetTab);
+        localStorage.setItem('rafiqi_default_disability_tab', targetTab);
       } catch {}
       let newMode: AccessibilityMode | null = null;
       let newType: string | null = null;
@@ -454,7 +454,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     if (activeTab !== 'hub') {
       handleSelectTab('hub');
       try {
-        localStorage.setItem('cognify_default_disability_tab', 'hub');
+        localStorage.setItem('rafiqi_default_disability_tab', 'hub');
         window.history.pushState({ view: 'disability', tab: 'hub' }, '', '#disability/hub');
       } catch {}
     } else {

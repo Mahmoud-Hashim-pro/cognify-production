@@ -726,7 +726,7 @@ export interface DocumentReadingHistoryItem {
   wordCount: number;
 }
 
-export const DOCUMENT_READING_HISTORY_KEY = 'cognify_document_reading_history_v1';
+export const DOCUMENT_READING_HISTORY_KEY = 'rafiqi_document_reading_history_v1';
 
 /**
  * Saves document reading progress without storing the document body for privacy.
@@ -1468,7 +1468,7 @@ export interface VocabularyWordItem {
   addedTimestamp: number;
 }
 
-export const VOCABULARY_STORAGE_KEY = 'cognify_saved_vocabulary_v1';
+export const VOCABULARY_STORAGE_KEY = 'rafiqi_saved_vocabulary_v1';
 
 export function saveVocabularyWord(item: VocabularyWordItem): void {
   if (typeof localStorage === 'undefined') return;

@@ -47,12 +47,12 @@ export const VALID_DISABILITY_TABS: readonly DisabilityTab[] = [
 ] as const;
 
 export const STORAGE_KEYS = {
-  RETURN_DESTINATION: 'cognify_return_destination',
-  SESSION_EXPIRED: 'cognify_session_expired',
-  DEFAULT_TAB: 'cognify_default_disability_tab',
-  CHAT_DRAFT: 'cognify_chat_draft_input',
-  VISION_OBSERVATION: 'cognify_vision_last_observation',
-  DOC_STUDIO_DRAFT: 'cognify_doc_studio_active',
+  RETURN_DESTINATION: 'rafiqi_return_destination',
+  SESSION_EXPIRED: 'rafiqi_session_expired',
+  DEFAULT_TAB: 'rafiqi_default_disability_tab',
+  CHAT_DRAFT: 'rafiqi_chat_draft_input',
+  VISION_OBSERVATION: 'rafiqi_vision_last_observation',
+  DOC_STUDIO_DRAFT: 'rafiqi_doc_studio_active',
 } as const;
 
 /**

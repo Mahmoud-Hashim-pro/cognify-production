@@ -77,7 +77,7 @@ export default function Sidebar({
   // Collapsible sidebar state for desktop
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('cognify_sidebar_collapsed') === 'true';
+      return localStorage.getItem('rafiqi_sidebar_collapsed') === 'true';
     } catch {
       return false;
     }
@@ -87,7 +87,7 @@ export default function Sidebar({
     setIsCollapsed((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem('cognify_sidebar_collapsed', String(next));
+        localStorage.setItem('rafiqi_sidebar_collapsed', String(next));
       } catch {}
       return next;
     });
@@ -108,7 +108,7 @@ export default function Sidebar({
   const navigateToDisabilityTab = (tab: DisabilityTab) => {
     onClose?.();
     try {
-      localStorage.setItem('cognify_default_disability_tab', tab);
+      localStorage.setItem('rafiqi_default_disability_tab', tab);
     } catch {}
     if (onSelectDisabilityTab) {
       onSelectDisabilityTab(tab);

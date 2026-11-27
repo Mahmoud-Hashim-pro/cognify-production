@@ -61,7 +61,7 @@ export interface ToolkitActivityItem {
   metadata?: Record<string, any>;
 }
 
-export const TOOLKIT_STORAGE_KEY = 'cognify_accessibility_toolkit_activity_v1';
+export const TOOLKIT_STORAGE_KEY = 'rafiqi_accessibility_toolkit_activity_v1';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. WEBP / STICKER INSPECTION & HONEST FORMAT HANDLING

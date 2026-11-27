@@ -31,7 +31,7 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
 }) => {
   const [promotedStrategies, setPromotedStrategies] = useState<Record<string, string>>(() => {
     try {
-      const saved = localStorage.getItem('cognify_promoted_pedagogies');
+      const saved = localStorage.getItem('rafiqi_promoted_pedagogies');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -42,7 +42,7 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
     const updated = { ...promotedStrategies, [conceptTitle]: strategy };
     setPromotedStrategies(updated);
     try {
-      localStorage.setItem('cognify_promoted_pedagogies', JSON.stringify(updated));
+      localStorage.setItem('rafiqi_promoted_pedagogies', JSON.stringify(updated));
     } catch {}
     toast.success(
       isArabic

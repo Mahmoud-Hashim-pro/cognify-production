@@ -59,7 +59,7 @@ export default function ChatWorkspacePanel({
   studyMinutes,
   messageCount = 0,
 }: ChatWorkspacePanelProps) {
-  const storageKey = `cognify_workspace_subjects_${profile.uid || 'guest'}`;
+  const storageKey = `rafiqi_workspace_subjects_${profile.uid || 'guest'}`;
 
   const [subjects, setSubjects] = useState<StudySubject[]>(() => {
     try {

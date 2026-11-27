@@ -398,7 +398,7 @@ export default function AdminDatabaseHub({
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-black uppercase tracking-widest text-emerald-400">ALL SYSTEMS OPERATIONAL</span>
               <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-mono font-bold">
-                cognify_firestore (Encrypted)
+                rafiqi_firestore (Encrypted)
               </span>
             </div>
             <div className="text-xs font-mono text-slate-400 mt-0.5">

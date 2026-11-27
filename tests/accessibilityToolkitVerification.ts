@@ -263,7 +263,7 @@ export async function runAccessibilityToolkitVerification(): Promise<{ passed: n
   assert(afterDelete.length === 1, 'Successfully deleted specified activity item');
   assert(afterDelete[0].id === saved2.id, 'Remaining item matches preserved ID');
 
-  assert(TOOLKIT_STORAGE_KEY === 'cognify_accessibility_toolkit_activity_v1', 'Activity storage key matches constant');
+  assert(TOOLKIT_STORAGE_KEY === 'rafiqi_accessibility_toolkit_activity_v1', 'Activity storage key matches constant');
 
   // =========================================================================
   // Test Suite 6: Unified Toolkit Categories & Accessibility

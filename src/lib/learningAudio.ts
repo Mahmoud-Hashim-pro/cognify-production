@@ -9,7 +9,7 @@ class LearningAudioEngine {
 
   constructor() {
     try {
-      const saved = localStorage.getItem('cognify_learning_audio_muted');
+      const saved = localStorage.getItem('rafiqi_learning_audio_muted');
       this.isMuted = saved === 'true';
     } catch {
       this.isMuted = false;
@@ -33,7 +33,7 @@ class LearningAudioEngine {
   public setMuted(muted: boolean) {
     this.isMuted = muted;
     try {
-      localStorage.setItem('cognify_learning_audio_muted', String(muted));
+      localStorage.setItem('rafiqi_learning_audio_muted', String(muted));
     } catch {}
   }
 

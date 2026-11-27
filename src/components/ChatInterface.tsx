@@ -155,7 +155,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const [input, setInput] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        return sessionStorage.getItem('cognify_chat_draft_input') || '';
+        return sessionStorage.getItem('rafiqi_chat_draft_input') || '';
       } catch {}
     }
     return '';
@@ -165,9 +165,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   useEffect(() => {
     try {
       if (input) {
-        sessionStorage.setItem('cognify_chat_draft_input', input);
+        sessionStorage.setItem('rafiqi_chat_draft_input', input);
       } else {
-        sessionStorage.removeItem('cognify_chat_draft_input');
+        sessionStorage.removeItem('rafiqi_chat_draft_input');
       }
     } catch {}
   }, [input]);
@@ -208,14 +208,14 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   // Dynamic visual ergonomics & accessibility states
   const [fontScale, setFontScale] = useState<FontScale>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('cognify_chat_font_scale') as FontScale) || 'base';
+      return (localStorage.getItem('rafiqi_chat_font_scale') as FontScale) || 'base';
     }
     return 'base';
   });
 
   const [isEyeComfort, setIsEyeComfort] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('cognify_chat_eye_comfort') === 'true';
+      return localStorage.getItem('rafiqi_chat_eye_comfort') === 'true';
     }
     return false;
   });
@@ -224,7 +224,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const [bookmarkedInsights, setBookmarkedInsights] = useState<BookmarkedInsight[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`);
+        const saved = localStorage.getItem(`rafiqi_chat_bookmarks_${profile.uid || 'guest'}`);
         return saved ? JSON.parse(saved) : [];
       } catch {
         return [];
@@ -239,7 +239,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const handleChangeFontScale = (scale: FontScale) => {
     setFontScale(scale);
     try {
-      localStorage.setItem('cognify_chat_font_scale', scale);
+      localStorage.setItem('rafiqi_chat_font_scale', scale);
     } catch {}
   };
 
@@ -247,7 +247,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     setIsEyeComfort((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem('cognify_chat_eye_comfort', String(next));
+        localStorage.setItem('rafiqi_chat_eye_comfort', String(next));
       } catch {}
       return next;
     });
@@ -276,7 +276,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         );
       }
       try {
-        localStorage.setItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
+        localStorage.setItem(`rafiqi_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
       } catch {}
       return updated;
     });
@@ -286,7 +286,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     setBookmarkedInsights((prev) => {
       const updated = prev.filter((b) => b.id !== bookmarkId);
       try {
-        localStorage.setItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
+        localStorage.setItem(`rafiqi_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
       } catch {}
       return updated;
     });

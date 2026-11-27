@@ -166,7 +166,7 @@ class PersistentLearningEventStore {
   private appendLocalCache(event: LearningEvent): void {
     if (typeof window === 'undefined') return;
     try {
-      const key = `cognify_events_${event.uid}`;
+      const key = `rafiqi_events_${event.uid}`;
       const raw = localStorage.getItem(key);
       const list: LearningEvent[] = raw ? JSON.parse(raw) : [];
       list.push(event);
@@ -181,7 +181,7 @@ class PersistentLearningEventStore {
   public getLocalEvents(uid: string): LearningEvent[] {
     if (typeof window === 'undefined') return [];
     try {
-      const key = `cognify_events_${uid}`;
+      const key = `rafiqi_events_${uid}`;
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : [];
     } catch {
@@ -192,7 +192,7 @@ class PersistentLearningEventStore {
   public clearLocalEvents(uid: string): void {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.removeItem(`cognify_events_${uid}`);
+      localStorage.removeItem(`rafiqi_events_${uid}`);
     } catch {}
   }
 }

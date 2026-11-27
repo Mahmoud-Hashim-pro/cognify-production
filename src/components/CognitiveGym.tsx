@@ -91,7 +91,7 @@ export default function CognitiveGym({
   const [selectedDrill, setSelectedDrill] = useState<DrillType>('gonogo');
   const [isLowArousalMode, setIsLowArousalMode] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('cognify_gym_low_arousal') === 'true';
+      return localStorage.getItem('rafiqi_gym_low_arousal') === 'true';
     } catch {
       return false;
     }
@@ -101,7 +101,7 @@ export default function CognitiveGym({
     const next = !isLowArousalMode;
     setIsLowArousalMode(next);
     try {
-      localStorage.setItem('cognify_gym_low_arousal', String(next));
+      localStorage.setItem('rafiqi_gym_low_arousal', String(next));
     } catch {}
   };
 

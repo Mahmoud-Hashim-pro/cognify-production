@@ -56,10 +56,10 @@ export interface SensoryPatternAnalysis {
 }
 
 const STORAGE_KEYS = {
-  PECS: 'cognify_neurodiversity_pecs_cards',
-  SCHEDULE: 'cognify_neurodiversity_daily_schedule',
-  SENSORY_LOGS: 'cognify_sensory_emotion_logs',
-  VISUAL_COMFORT: 'cognify_visual_comfort_settings',
+  PECS: 'rafiqi_neurodiversity_pecs_cards',
+  SCHEDULE: 'rafiqi_neurodiversity_daily_schedule',
+  SENSORY_LOGS: 'rafiqi_sensory_emotion_logs',
+  VISUAL_COMFORT: 'rafiqi_visual_comfort_settings',
 };
 
 // In-memory fallback stores for SSR, Node testing, and offline resiliency

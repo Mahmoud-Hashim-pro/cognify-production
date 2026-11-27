@@ -270,11 +270,11 @@ export async function runAccessibilityAuditVerification(): Promise<{ passed: num
   {
     const passportContent = fs.readFileSync(path.join(componentsDir, 'AccessibilityPassportModal.tsx'), 'utf8');
     assert(
-      passportContent.includes('cognify_font_scale'),
+      passportContent.includes('rafiqi_font_scale'),
       'AccessibilityPassportModal persists font scale preference'
     );
     assert(
-      passportContent.includes('cognify_reduce_motion'),
+      passportContent.includes('rafiqi_reduce_motion'),
       'AccessibilityPassportModal persists reduce motion preference'
     );
   }

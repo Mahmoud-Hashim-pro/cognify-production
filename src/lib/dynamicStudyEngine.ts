@@ -241,7 +241,7 @@ export function rebalanceStudyPlan(
   };
 }
 
-const STORAGE_KEY = 'cognify_dynamic_study_plan';
+const STORAGE_KEY = 'rafiqi_dynamic_study_plan';
 
 export function loadSavedPlan(): DynamicStudyPlan | null {
   try {

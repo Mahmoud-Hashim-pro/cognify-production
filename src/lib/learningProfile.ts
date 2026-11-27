@@ -36,7 +36,7 @@ import { adaptDifficulty, detectLearningStyle } from '../services/learningAI';
 
 export { adaptDifficulty, detectLearningStyle };
 
-const LOCAL_STORAGE_KEY_PREFIX = 'cognify_learning_profile_';
+const LOCAL_STORAGE_KEY_PREFIX = 'rafiqi_learning_profile_';
 
 function safeStorageSet(key: string, value: string): void {
   try {
@@ -108,7 +108,7 @@ export function notifyLocalSubscribers(uid: string, profile: LearningProfile): v
   if (typeof window !== 'undefined') {
     try {
       window.dispatchEvent(
-        new CustomEvent('cognify_learning_profile_change', {
+        new CustomEvent('rafiqi_learning_profile_change', {
           detail: { uid, profile },
         })
       );
@@ -175,7 +175,7 @@ export function subscribeLearningProfile(
   };
 
   if (typeof window !== 'undefined') {
-    window.addEventListener('cognify_learning_profile_change', windowListener);
+    window.addEventListener('rafiqi_learning_profile_change', windowListener);
   }
 
   // 4. If guest or test user, skip Firestore onSnapshot to avoid PERMISSION_DENIED
@@ -183,7 +183,7 @@ export function subscribeLearningProfile(
     return () => {
       localSubscribers.get(uid)?.delete(onUpdate);
       if (typeof window !== 'undefined') {
-        window.removeEventListener('cognify_learning_profile_change', windowListener);
+        window.removeEventListener('rafiqi_learning_profile_change', windowListener);
       }
     };
   }
@@ -230,7 +230,7 @@ export function subscribeLearningProfile(
   return () => {
     localSubscribers.get(uid)?.delete(onUpdate);
     if (typeof window !== 'undefined') {
-      window.removeEventListener('cognify_learning_profile_change', windowListener);
+      window.removeEventListener('rafiqi_learning_profile_change', windowListener);
     }
     try {
       firestoreUnsub();

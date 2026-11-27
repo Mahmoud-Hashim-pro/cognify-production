@@ -146,7 +146,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
   // ── Speech profile for impairment type
   const [speechProfile, setSpeechProfile] = useState<string>(() =>
-    localStorage.getItem('cognify_speech_profile') || 'Standard'
+    localStorage.getItem('rafiqi_speech_profile') || 'Standard'
   );
 
   // ── Euphonia (direct audio) state
@@ -164,7 +164,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   // ── Phoneme pattern mappings
   const [euphoniaPatterns, setEuphoniaPatterns] = useState<EuphoniaPattern[]>(() => {
     try {
-      const saved = localStorage.getItem('cognify_euphonia_patterns');
+      const saved = localStorage.getItem('rafiqi_euphonia_patterns');
       return saved ? JSON.parse(saved) : [
         { id: 'ep1', phrase: "wa wa", translation: "Can I have some water?" },
         { id: 'ep2', phrase: "baf roo", translation: "Where is the restroom?" },
@@ -181,7 +181,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const [activeTab, setActiveTab] = useState<'essentials' | 'needs' | 'social' | 'emergencies' | 'favorites'>('essentials');
   const [favorites, setFavorites] = useState<SoundboardItem[]>(() => {
     try {
-      const saved = localStorage.getItem('cognify_speech_presets');
+      const saved = localStorage.getItem('rafiqi_speech_presets');
       return saved ? JSON.parse(saved) : [
         { id: 'fav1', emoji: '🏡', textEn: "I am ready to go home", textAr: "أنا جاهز للذهاب إلى المنزل" },
         { id: 'fav2', emoji: '☕', textEn: "I would love some coffee", textAr: "أود بعض القهوة" },
@@ -196,19 +196,19 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
   // ── Settings
   const [pauseThreshold, setPauseThreshold] = useState<number>(() =>
-    Number(localStorage.getItem('cognify_pause_threshold') || 2500)
+    Number(localStorage.getItem('rafiqi_pause_threshold') || 2500)
   );
   const [speechRate, setSpeechRate] = useState<number>(() =>
-    Number(localStorage.getItem('cognify_speech_rate') || 1.0)
+    Number(localStorage.getItem('rafiqi_speech_rate') || 1.0)
   );
   const [speechPitch, setSpeechPitch] = useState<number>(() =>
-    Number(localStorage.getItem('cognify_speech_pitch') || 1.0)
+    Number(localStorage.getItem('rafiqi_speech_pitch') || 1.0)
   );
   const [showSettings, setShowSettings] = useState(false);
   const [copiedState, setCopiedState] = useState(false);
   const [speechHistory, setSpeechHistory] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('cognify_speech_history');
+      const saved = localStorage.getItem('rafiqi_speech_history');
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
@@ -231,14 +231,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const isArabic = language.startsWith('ar');
 
   // ── Persist settings
-  useEffect(() => { localStorage.setItem('cognify_speech_history', JSON.stringify(speechHistory)); }, [speechHistory]);
-  useEffect(() => { localStorage.setItem('cognify_speech_presets', JSON.stringify(favorites)); }, [favorites]);
-  useEffect(() => { localStorage.setItem('cognify_euphonia_patterns', JSON.stringify(euphoniaPatterns)); }, [euphoniaPatterns]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_history', JSON.stringify(speechHistory)); }, [speechHistory]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_presets', JSON.stringify(favorites)); }, [favorites]);
+  useEffect(() => { localStorage.setItem('rafiqi_euphonia_patterns', JSON.stringify(euphoniaPatterns)); }, [euphoniaPatterns]);
   useEffect(() => { savePronDict(pronDict); }, [pronDict]);
-  useEffect(() => { localStorage.setItem('cognify_pause_threshold', String(pauseThreshold)); }, [pauseThreshold]);
-  useEffect(() => { localStorage.setItem('cognify_speech_rate', String(speechRate)); }, [speechRate]);
-  useEffect(() => { localStorage.setItem('cognify_speech_pitch', String(speechPitch)); }, [speechPitch]);
-  useEffect(() => { localStorage.setItem('cognify_speech_profile', speechProfile); }, [speechProfile]);
+  useEffect(() => { localStorage.setItem('rafiqi_pause_threshold', String(pauseThreshold)); }, [pauseThreshold]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_rate', String(speechRate)); }, [speechRate]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_pitch', String(speechPitch)); }, [speechPitch]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_profile', speechProfile); }, [speechProfile]);
 
   // Auto-scroll segments
   useEffect(() => {

@@ -73,7 +73,7 @@ export default function StudentCockpitHub({
   // ── Quick Accessibility State ───────────────────────────────────────────────
   const [fontScale, setFontScale] = useState<'normal' | 'large'>(() => {
     try {
-      const saved = localStorage.getItem('cognify_font_scale');
+      const saved = localStorage.getItem('rafiqi_font_scale');
       return saved === 'large' || saved === 'extra-large' ? 'large' : 'normal';
     } catch {
       return 'normal';
@@ -82,7 +82,7 @@ export default function StudentCockpitHub({
 
   const [highContrast, setHighContrast] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('cognify_high_contrast') === 'true';
+      return localStorage.getItem('rafiqi_high_contrast') === 'true';
     } catch {
       return false;
     }
@@ -90,7 +90,7 @@ export default function StudentCockpitHub({
 
   const [reduceMotion, setReduceMotion] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('cognify_reduce_motion') === 'true';
+      return localStorage.getItem('rafiqi_reduce_motion') === 'true';
     } catch {
       return false;
     }
@@ -102,7 +102,7 @@ export default function StudentCockpitHub({
   // ── Preferred Pedagogy State (Wired to Engine) ──────────────────────────────
   const [activePedagogy, setActivePedagogy] = useState<PedagogyStyle>(() => {
     try {
-      const saved = localStorage.getItem('cognify_preferred_pedagogy') as PedagogyStyle;
+      const saved = localStorage.getItem('rafiqi_preferred_pedagogy') as PedagogyStyle;
       if (saved) return saved;
     } catch {}
     return profile.preferredPedagogyStyle || 'scaffolded';
@@ -117,7 +117,7 @@ export default function StudentCockpitHub({
   const applyFontScale = (scale: 'normal' | 'large') => {
     setFontScale(scale);
     try {
-      localStorage.setItem('cognify_font_scale', scale);
+      localStorage.setItem('rafiqi_font_scale', scale);
       const root = document.documentElement;
       root.classList.remove('font-scale-normal', 'font-scale-large', 'font-scale-medium', 'font-scale-extra-large');
       root.classList.add(`font-scale-${scale}`);
@@ -132,7 +132,7 @@ export default function StudentCockpitHub({
     const next = !highContrast;
     setHighContrast(next);
     try {
-      localStorage.setItem('cognify_high_contrast', String(next));
+      localStorage.setItem('rafiqi_high_contrast', String(next));
       document.documentElement.classList.toggle('high-contrast', next);
       toast.success(
         next
@@ -147,7 +147,7 @@ export default function StudentCockpitHub({
     const next = !reduceMotion;
     setReduceMotion(next);
     try {
-      localStorage.setItem('cognify_reduce_motion', String(next));
+      localStorage.setItem('rafiqi_reduce_motion', String(next));
       document.documentElement.classList.toggle('reduce-motion', next);
       toast.success(
         next
@@ -201,7 +201,7 @@ export default function StudentCockpitHub({
     }
     setActivePedagogy(styleKey);
     try {
-      localStorage.setItem('cognify_preferred_pedagogy', styleKey);
+      localStorage.setItem('rafiqi_preferred_pedagogy', styleKey);
       if (setProfile) {
         setProfile({ ...profile, preferredPedagogyStyle: styleKey });
       }

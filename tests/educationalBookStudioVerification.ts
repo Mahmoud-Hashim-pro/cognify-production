@@ -280,7 +280,7 @@ WCAG stands for Web Content _____ Guidelines.
   // Test Suite 7: Storage Key & Non-Visual State Persistence
   // =========================================================================
   console.log('\n  [Suite 7: Storage Keys & Navigation Consistency]');
-  assert(BOOK_STUDIO_STORAGE_KEY === 'cognify_book_studio_history_v1', 'Persistent storage key is stable');
+  assert(BOOK_STUDIO_STORAGE_KEY === 'rafiqi_book_studio_history_v1', 'Persistent storage key is stable');
 
   console.log(`\nEducational Book Studio Verification Complete: ${passed} passed, ${failed} failed.`);
   return { passed, failed };

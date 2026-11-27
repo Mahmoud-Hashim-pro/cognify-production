@@ -350,7 +350,7 @@ type Status = 'idle' | 'starting-camera' | 'ready' | 'analyzing' | 'camera-denie
 
 const isArabicLang = (lang?: string) => isArabicLocale(lang);
 
-const COMPANION_LANG_STORAGE_KEY = 'cognify_vision_companion_lang';
+const COMPANION_LANG_STORAGE_KEY = 'rafiqi_vision_companion_lang';
 
 export { cleanVisionDescription } from '../lib/visionCleaner';
 import { cleanVisionDescription } from '../lib/visionCleaner';
@@ -427,7 +427,7 @@ export default function VisionCompanionView({
 
   const [observationTimestamp, setObservationTimestamp] = useState<number | null>(() => {
     try {
-      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      const raw = sessionStorage.getItem('rafiqi_vision_last_observation');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed?.timestamp) return parsed.timestamp;
@@ -438,7 +438,7 @@ export default function VisionCompanionView({
 
   const [observationType, setObservationType] = useState<'live' | 'previous' | 'uncertain' | 'uploaded' | null>(() => {
     try {
-      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      const raw = sessionStorage.getItem('rafiqi_vision_last_observation');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed?.description) return 'previous';
@@ -450,7 +450,7 @@ export default function VisionCompanionView({
   const [status, setStatus] = useState<Status>('starting-camera');
   const [lastDescription, setLastDescription] = useState<string>(() => {
     try {
-      const raw = sessionStorage.getItem('cognify_vision_last_observation');
+      const raw = sessionStorage.getItem('rafiqi_vision_last_observation');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed?.description) return parsed.description;
@@ -516,7 +516,7 @@ export default function VisionCompanionView({
   // Assistive UX Modes & Controls (Beginner vs Advanced, Detail Level, Speech Rate)
   const [userMode, setUserMode] = useState<'beginner' | 'advanced'>(() => {
     if (typeof window !== 'undefined') {
-      const saved = window.localStorage.getItem('cognify_vision_user_mode');
+      const saved = window.localStorage.getItem('rafiqi_vision_user_mode');
       if (saved === 'beginner' || saved === 'advanced') return saved;
     }
     return 'beginner';
@@ -524,7 +524,7 @@ export default function VisionCompanionView({
 
   const [detailLevel, setDetailLevel] = useState<'concise' | 'standard' | 'detailed'>(() => {
     if (typeof window !== 'undefined') {
-      const saved = window.localStorage.getItem('cognify_vision_detail_level');
+      const saved = window.localStorage.getItem('rafiqi_vision_detail_level');
       if (saved === 'concise' || saved === 'standard' || saved === 'detailed') return saved;
     }
     return 'standard';
@@ -532,7 +532,7 @@ export default function VisionCompanionView({
 
   const [speechRate, setSpeechRate] = useState<number>(() => {
     if (typeof window !== 'undefined') {
-      const saved = window.localStorage.getItem('cognify_vision_speech_rate');
+      const saved = window.localStorage.getItem('rafiqi_vision_speech_rate');
       if (saved) {
         const parsed = parseFloat(saved);
         if (!isNaN(parsed) && parsed >= 0.5 && parsed <= 2.0) return parsed;
@@ -1104,7 +1104,7 @@ export default function VisionCompanionView({
     const next = userMode === 'beginner' ? 'advanced' : 'beginner';
     setUserMode(next);
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('cognify_vision_user_mode', next);
+      window.localStorage.setItem('rafiqi_vision_user_mode', next);
     }
     const msg = companionLang === 'ar'
       ? (next === 'advanced' ? 'تم تفعيل الوضع المتقدم مع كامل الأدوات والتحكم.' : 'تم تفعيل وضع المبتدئ البسيط.')
@@ -1125,7 +1125,7 @@ export default function VisionCompanionView({
   const handleSpeechRateChange = (newRate: number) => {
     setSpeechRate(newRate);
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('cognify_vision_speech_rate', String(newRate));
+      window.localStorage.setItem('rafiqi_vision_speech_rate', String(newRate));
     }
     const msg = companionLang === 'ar' ? `سرعة الصوت: ${newRate}x` : `Speech speed: ${newRate}x`;
     setAnnounce(msg);
@@ -1135,7 +1135,7 @@ export default function VisionCompanionView({
   const handleDetailLevelChange = (newLevel: 'concise' | 'standard' | 'detailed') => {
     setDetailLevel(newLevel);
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('cognify_vision_detail_level', newLevel);
+      window.localStorage.setItem('rafiqi_vision_detail_level', newLevel);
     }
     const msg = companionLang === 'ar'
       ? (newLevel === 'concise' ? 'تم ضبط الوصف على الموجز.' : newLevel === 'detailed' ? 'تم ضبط الوصف على المفصل.' : 'تم ضبط الوصف على القياسي.')
@@ -1148,7 +1148,7 @@ export default function VisionCompanionView({
       toast.info(companionLang === 'ar' ? 'يرجى التقاط مشهد أولاً للمقارنة.' : 'Please capture a scene first to compare.');
       return;
     }
-    const prevDesc = previousDescriptionRef.current || sessionStorage.getItem('cognify_vision_last_observation');
+    const prevDesc = previousDescriptionRef.current || sessionStorage.getItem('rafiqi_vision_last_observation');
     if (!prevDesc) {
       const msg = companionLang === 'ar'
         ? 'لا يوجد مشهد سابق مسجل للمقارنة معه بعد. التقط مشهداً ثانياً وسأقارنه لك.'
@@ -1784,7 +1784,7 @@ Examine what is visible in front of the camera right now with utmost precision:
       }
 
       try {
-        sessionStorage.setItem('cognify_vision_last_observation', JSON.stringify({
+        sessionStorage.setItem('rafiqi_vision_last_observation', JSON.stringify({
           description: cleaned,
           timestamp: captureTimestamp,
           type: 'previous',

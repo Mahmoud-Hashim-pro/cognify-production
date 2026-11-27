@@ -15,7 +15,7 @@ interface PwaInstallPromptProps {
   language?: string;
 }
 
-const STORAGE_KEY = 'cognify_pwa_dismissed';
+const STORAGE_KEY = 'rafiqi_pwa_dismissed';
 
 export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);

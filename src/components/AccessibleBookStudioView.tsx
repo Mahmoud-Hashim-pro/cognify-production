@@ -97,7 +97,7 @@ export default function AccessibleBookStudioView({
     if (initialContent) return initialContent;
     if (typeof window !== 'undefined') {
       try {
-        const cached = sessionStorage.getItem('cognify_book_studio_active_source');
+        const cached = sessionStorage.getItem('rafiqi_book_studio_active_source');
         if (cached) return cached;
       } catch {}
     }
@@ -150,7 +150,7 @@ export default function AccessibleBookStudioView({
       const parsed = parseDocumentStructure(rawContent);
       setSections(parsed);
       try {
-        sessionStorage.setItem('cognify_book_studio_active_source', rawContent);
+        sessionStorage.setItem('rafiqi_book_studio_active_source', rawContent);
       } catch {}
     } else {
       setSections([]);
@@ -164,7 +164,7 @@ export default function AccessibleBookStudioView({
         const raw = localStorage.getItem(BOOK_STUDIO_STORAGE_KEY);
         if (raw) setHistoryItems(JSON.parse(raw));
 
-        const pendingImport = sessionStorage.getItem('cognify_book_studio_import');
+        const pendingImport = sessionStorage.getItem('rafiqi_book_studio_import');
         if (pendingImport) {
           const parsed = JSON.parse(pendingImport);
           if (parsed.text) {
@@ -173,7 +173,7 @@ export default function AccessibleBookStudioView({
               setMetadata((prev) => ({ ...prev, title: parsed.title }));
             }
           }
-          sessionStorage.removeItem('cognify_book_studio_import');
+          sessionStorage.removeItem('rafiqi_book_studio_import');
         }
       } catch {}
     }
@@ -267,8 +267,8 @@ export default function AccessibleBookStudioView({
   const handleImportFromFileReader = () => {
     if (typeof window === 'undefined') return;
     try {
-      const draft = sessionStorage.getItem('cognify_doc_audio_lecture_draft');
-      const visionObs = sessionStorage.getItem('cognify_vision_last_observation');
+      const draft = sessionStorage.getItem('rafiqi_doc_audio_lecture_draft');
+      const visionObs = sessionStorage.getItem('rafiqi_vision_last_observation');
 
       let imported = '';
       if (draft) {

@@ -106,7 +106,7 @@ export default function StudentPrivacyCenter({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `cognify_full_archive_${profile.uid.substring(0, 8)}_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `rafiqi_full_archive_${profile.uid.substring(0, 8)}_${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -155,7 +155,7 @@ export default function StudentPrivacyCenter({
           const keysToRemove: string[] = [];
           for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
-            if (k && (k.startsWith('cognify_') || k.startsWith('firebase:'))) {
+            if (k && (k.startsWith('rafiqi_') || k.startsWith('firebase:'))) {
               keysToRemove.push(k);
             }
           }

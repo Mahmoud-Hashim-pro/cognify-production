@@ -175,7 +175,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         const keysToRemove: string[] = [];
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && (k.startsWith('cognify_') || k.startsWith('firebase:') || k.includes(activeStudent.uid))) {
+          if (k && (k.startsWith('rafiqi_') || k.startsWith('firebase:') || k.includes(activeStudent.uid))) {
             keysToRemove.push(k);
           }
         }
@@ -584,7 +584,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `cognify_export_${activeStudent.uid}.json`;
+                      a.download = `rafiqi_export_${activeStudent.uid}.json`;
                       a.click();
                       URL.revokeObjectURL(url);
                     }}

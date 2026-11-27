@@ -254,7 +254,7 @@ export default function StudentSettingsView({
   const [speechLanguage, setSpeechLanguage] = useState<SpeechLanguage>('ar-SA');
   const [voiceSelection, setVoiceSelection] = useState<string>(() => {
     try {
-      return localStorage.getItem('cognify_settings_voice') || 'default';
+      return localStorage.getItem('rafiqi_settings_voice') || 'default';
     } catch {
       return 'default';
     }
@@ -280,7 +280,7 @@ export default function StudentSettingsView({
   const [personalVoiceCommandPhrase, setPersonalVoiceCommandPhrase] = useState<string>('رفيقي استمع');
   const [shortcutsList, setShortcutsList] = useState<PersonalShortcutItem[]>(() => {
     try {
-      const saved = localStorage.getItem('cognify_personal_shortcuts');
+      const saved = localStorage.getItem('rafiqi_personal_shortcuts');
       if (saved) return JSON.parse(saved);
     } catch {}
     return DEFAULT_SHORTCUTS;
@@ -375,7 +375,7 @@ export default function StudentSettingsView({
   // ── General Preferences & Persistence ──
   const [autoSave, setAutoSave] = useState<boolean>(() => {
     try {
-      const val = localStorage.getItem('cognify_auto_save_settings');
+      const val = localStorage.getItem('rafiqi_auto_save_settings');
       return val !== 'false';
     } catch {
       return true;
@@ -384,7 +384,7 @@ export default function StudentSettingsView({
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [lastSavedStr, setLastSavedStr] = useState<string>(() => {
     try {
-      const saved = localStorage.getItem('cognify_settings_last_saved');
+      const saved = localStorage.getItem('rafiqi_settings_last_saved');
       if (saved) return saved;
     } catch {}
     return formatSavedTime(new Date(), isAr);
@@ -475,13 +475,13 @@ export default function StudentSettingsView({
         const formatted = formatSavedTime(now, isAr);
         setLastSavedStr(formatted);
         try {
-          localStorage.setItem('cognify_settings_last_saved', formatted);
-          localStorage.setItem('cognify_settings_voice', voiceSelection);
-          localStorage.setItem('cognify_font_scale', fontSizeScale);
-          localStorage.setItem('cognify_high_contrast', String(contrastMode === 'contrast'));
-          localStorage.setItem('cognify_reduce_motion', String(reduceMotion));
-          localStorage.setItem('cognify_auto_save_settings', String(autoSave));
-          localStorage.setItem('cognify_personal_shortcuts', JSON.stringify(shortcutsList));
+          localStorage.setItem('rafiqi_settings_last_saved', formatted);
+          localStorage.setItem('rafiqi_settings_voice', voiceSelection);
+          localStorage.setItem('rafiqi_font_scale', fontSizeScale);
+          localStorage.setItem('rafiqi_high_contrast', String(contrastMode === 'contrast'));
+          localStorage.setItem('rafiqi_reduce_motion', String(reduceMotion));
+          localStorage.setItem('rafiqi_auto_save_settings', String(autoSave));
+          localStorage.setItem('rafiqi_personal_shortcuts', JSON.stringify(shortcutsList));
           localStorage.setItem(PERSONALIZE_STORAGE_KEYS.READING_HISTORY, JSON.stringify(readingHistory));
           localStorage.setItem(PERSONALIZE_STORAGE_KEYS.ASSISTANT_MEMORY, JSON.stringify(memoryEntries));
           localStorage.setItem(PERSONALIZE_STORAGE_KEYS.MEMORY_OPT_IN, String(memoryOptIn));
@@ -606,7 +606,7 @@ export default function StudentSettingsView({
     setShortcutsList(DEFAULT_SHORTCUTS);
     setPersonalVoiceCommandPhrase('رفيقي استمع');
     try {
-      localStorage.setItem('cognify_personal_shortcuts', JSON.stringify(DEFAULT_SHORTCUTS));
+      localStorage.setItem('rafiqi_personal_shortcuts', JSON.stringify(DEFAULT_SHORTCUTS));
     } catch {}
     toast.success(isAr ? 'تمت استعادة الاختصارات الافتراضية' : 'Default shortcuts restored');
   };
@@ -682,13 +682,13 @@ export default function StudentSettingsView({
       const formatted = formatSavedTime(now, isAr);
       setLastSavedStr(formatted);
       try {
-        localStorage.setItem('cognify_settings_last_saved', formatted);
-        localStorage.setItem('cognify_settings_voice', defaultVoice);
-        localStorage.setItem('cognify_font_scale', defaultScale);
-        localStorage.setItem('cognify_high_contrast', 'false');
-        localStorage.setItem('cognify_reduce_motion', 'false');
-        localStorage.setItem('cognify_auto_save_settings', 'true');
-        localStorage.setItem('cognify_personal_shortcuts', JSON.stringify(DEFAULT_SHORTCUTS));
+        localStorage.setItem('rafiqi_settings_last_saved', formatted);
+        localStorage.setItem('rafiqi_settings_voice', defaultVoice);
+        localStorage.setItem('rafiqi_font_scale', defaultScale);
+        localStorage.setItem('rafiqi_high_contrast', 'false');
+        localStorage.setItem('rafiqi_reduce_motion', 'false');
+        localStorage.setItem('rafiqi_auto_save_settings', 'true');
+        localStorage.setItem('rafiqi_personal_shortcuts', JSON.stringify(DEFAULT_SHORTCUTS));
         localStorage.removeItem(PERSONALIZE_STORAGE_KEYS.ASSISTANT_MEMORY);
         localStorage.setItem(PERSONALIZE_STORAGE_KEYS.MEMORY_OPT_IN, 'false');
       } catch {}

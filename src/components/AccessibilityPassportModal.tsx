@@ -162,10 +162,10 @@ export default function AccessibilityPassportModal({
 
     try {
       const mappedTab = resolvedMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-      localStorage.setItem('cognify_default_disability_tab', mappedTab);
-      localStorage.setItem('cognify_font_scale', passport.fontSizeScale || 'normal');
-      localStorage.setItem('cognify_high_contrast', String(passport.highContrast || false));
-      localStorage.setItem('cognify_reduce_motion', String(passport.reduceMotion || false));
+      localStorage.setItem('rafiqi_default_disability_tab', mappedTab);
+      localStorage.setItem('rafiqi_font_scale', passport.fontSizeScale || 'normal');
+      localStorage.setItem('rafiqi_high_contrast', String(passport.highContrast || false));
+      localStorage.setItem('rafiqi_reduce_motion', String(passport.reduceMotion || false));
     } catch {}
 
     const updatedProfile: UserProfile = {
@@ -303,7 +303,7 @@ export default function AccessibilityPassportModal({
                         const root = document.documentElement;
                         root.classList.remove('font-scale-normal', 'font-scale-medium', 'font-scale-large', 'font-scale-extra-large');
                         root.classList.add(`font-scale-${newScale}`);
-                        try { localStorage.setItem('cognify_font_scale', newScale); } catch {}
+                        try { localStorage.setItem('rafiqi_font_scale', newScale); } catch {}
                       }}
                       className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none ${
                         isCurrent

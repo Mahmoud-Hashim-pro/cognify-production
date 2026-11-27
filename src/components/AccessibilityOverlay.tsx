@@ -61,11 +61,11 @@ export default function AccessibilityOverlay({
   const [isVisionAnalyzing, setIsVisionAnalyzing] = useState(false);
   // Lets the user hide the floating mic / camera / voice controls (remembered).
   const [controlsHidden, setControlsHidden] = useState<boolean>(() => {
-    try { return localStorage.getItem("cognify_a11y_hidden") === "1"; } catch { return false; }
+    try { return localStorage.getItem("rafiqi_a11y_hidden") === "1"; } catch { return false; }
   });
   const toggleControlsHidden = (next: boolean) => {
     setControlsHidden(next);
-    try { localStorage.setItem("cognify_a11y_hidden", next ? "1" : "0"); } catch { /* ignore */ }
+    try { localStorage.setItem("rafiqi_a11y_hidden", next ? "1" : "0"); } catch { /* ignore */ }
   };
   const [isAvatarSigning, setIsAvatarSigning] = useState(false);
   const [detectionConfidence, setDetectionConfidence] = useState(0);
@@ -107,7 +107,7 @@ export default function AccessibilityOverlay({
       return profile.studentState.accessibilityState.vision.ttsAutoNarration;
     }
     try {
-      const stored = localStorage.getItem(`cognify_a11y_tts_${profile?.uid || 'anon'}`);
+      const stored = localStorage.getItem(`rafiqi_a11y_tts_${profile?.uid || 'anon'}`);
       if (stored !== null) return stored === '1';
     } catch { /* ignore */ }
     return mode === "Visual";
@@ -133,7 +133,7 @@ export default function AccessibilityOverlay({
           true
         );
       }
-      localStorage.setItem(`cognify_a11y_tts_${profile?.uid || 'anon'}`, nextVal ? '1' : '0');
+      localStorage.setItem(`rafiqi_a11y_tts_${profile?.uid || 'anon'}`, nextVal ? '1' : '0');
     } catch {
       /* ignore */
     }
