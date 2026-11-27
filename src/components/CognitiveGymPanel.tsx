@@ -11,7 +11,8 @@
  *      attempts (stored locally) keeps the preview exploratory.
  */
 import React, { useMemo, useRef, useState } from 'react';
-import { Brain, Dumbbell, ListChecks, RotateCcw, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
+import { Brain, Dumbbell, ListChecks, RotateCcw, ShieldAlert, TrendingUp, Volume2, VolumeX } from 'lucide-react';
+import { compareQuizzes, type QuizComparisonResult } from '../lib/evaluationEngine';
 import {
   ambientNoise,
   sliceTaskIntoMicroSteps,
@@ -88,6 +89,12 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
   const [taskInput, setTaskInput] = useState('');
   const [slicedTask, setSlicedTask] = useState<TaskSlicerDecomposition | null>(null);
   const [doneSteps, setDoneSteps] = useState<Record<string, boolean>>({});
+
+  // Learning-gain calculator state
+  const [preScoreInput, setPreScoreInput] = useState('');
+  const [postScoreInput, setPostScoreInput] = useState('');
+  const [gainResult, setGainResult] = useState<QuizComparisonResult | null>(null);
+  const [gainError, setGainError] = useState<string | null>(null);
 
   // Focus noise state
   const [activeNoise, setActiveNoise] = useState<NoiseType | null>(null);
@@ -442,6 +449,101 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                 </button>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Learning-gain calculator (pre/post quiz) ── */}
+      <div className={`p-5 rounded-3xl border space-y-3 ${cardCls}`} data-testid="gain-calculator">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-emerald-400" aria-hidden="true" />
+          <h3 className={`text-sm font-black ${textCls}`}>
+            {isArabic ? 'حاسبة مكاسب التعلم' : 'Learning-gain calculator'}
+          </h3>
+        </div>
+        <p className={`text-[11px] leading-relaxed ${subCls}`}>
+          {isArabic
+            ? 'أدخل درجتك في الاختبار القبلي والبعدي (من 100) لترى مقدار ما تعلمته فعلاً بمعيار Hake للتحصيل المعياري.'
+            : "Enter your pre-quiz and post-quiz scores (out of 100) to see how much you actually learned, using Hake's normalized gain standard."}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <input
+            type="number"
+            value={preScoreInput}
+            onChange={(e) => setPreScoreInput(e.target.value)}
+            min={0}
+            max={100}
+            aria-label={isArabic ? 'درجة الاختبار القبلي' : 'Pre-quiz score'}
+            placeholder={isArabic ? 'الدرجة القبلية' : 'Pre-quiz score'}
+            className={`w-32 p-3 rounded-2xl border text-xs ${
+              isDarkMode ? 'bg-stone-900 border-stone-700 text-stone-100 placeholder:text-stone-500' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
+            }`}
+          />
+          <input
+            type="number"
+            value={postScoreInput}
+            onChange={(e) => setPostScoreInput(e.target.value)}
+            min={0}
+            max={100}
+            aria-label={isArabic ? 'درجة الاختبار البعدي' : 'Post-quiz score'}
+            placeholder={isArabic ? 'الدرجة البعدية' : 'Post-quiz score'}
+            className={`w-32 p-3 rounded-2xl border text-xs ${
+              isDarkMode ? 'bg-stone-900 border-stone-700 text-stone-100 placeholder:text-stone-500' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
+            }`}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const pre = Number(preScoreInput);
+              const post = Number(postScoreInput);
+              if (
+                preScoreInput === '' || postScoreInput === '' ||
+                Number.isNaN(pre) || Number.isNaN(post) ||
+                pre < 0 || pre > 100 || post < 0 || post > 100
+              ) {
+                setGainResult(null);
+                setGainError(
+                  isArabic
+                    ? 'أدخل درجتين صحيحتين بين 0 و 100.'
+                    : 'Enter two valid scores between 0 and 100.'
+                );
+                return;
+              }
+              setGainError(null);
+              setGainResult(compareQuizzes(pre, post));
+            }}
+            className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            {isArabic ? 'احسب' : 'Calculate'}
+          </button>
+        </div>
+        {gainError && (
+          <p className="text-xs text-rose-400" role="alert">
+            {gainError}
+          </p>
+        )}
+        {gainResult && (
+          <div className={`p-4 rounded-2xl border space-y-2 ${innerCls}`}>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-2xl font-black text-[#4B9FE1]">
+                g = {gainResult.normalizedGain.toFixed(2)}
+              </span>
+              <span className={`px-3 py-1 rounded-full border text-[11px] font-black ${gainResult.categoryInfo.colorClass}`}>
+                {isArabic ? gainResult.categoryInfo.labelAr : gainResult.categoryInfo.labelEn}
+              </span>
+            </div>
+            <p className={`text-[11px] leading-relaxed ${subCls}`}>
+              {isArabic ? gainResult.categoryInfo.descriptionAr : gainResult.categoryInfo.descriptionEn}
+            </p>
+            <p className={`text-[11px] font-bold ${textCls}`}>
+              {gainResult.isImprovement
+                ? isArabic
+                  ? `تحسنت درجتك بمقدار ${gainResult.scoreDifference} درجة.`
+                  : `Your score improved by ${gainResult.scoreDifference} points.`
+                : isArabic
+                  ? `انخفضت درجتك بمقدار ${Math.abs(gainResult.scoreDifference)} درجة - راجع المفاهيم وحاول مجدداً.`
+                  : `Your score dropped by ${Math.abs(gainResult.scoreDifference)} points - review the concepts and try again.`}
+            </p>
           </div>
         )}
       </div>
