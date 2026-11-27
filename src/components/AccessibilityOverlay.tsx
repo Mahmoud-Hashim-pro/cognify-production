@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { prepareArabicForSpeech } from "../lib/tts";
 import { createPortal } from "react-dom";
 import { AccessibilityMode, UserProfile } from "../types";
 import { toast } from "./Toast";
@@ -245,7 +246,10 @@ export default function AccessibilityOverlay({
               cleanText.includes("يا باشا") ||
               cleanText.includes("تمام") ||
               cleanText.includes("ازيك");
-            const defaultLang = isEgyptian ? "ar-EG" : "ar-SA";
+            const defaultLang = "ar-EG"; // Egyptian voice first for all Arabic
+            void isEgyptian;
+            utterance.text = prepareArabicForSpeech(cleanText);
+            utterance.rate = 0.97;
             utterance.lang = defaultLang;
 
             const voices = window.speechSynthesis.getVoices();

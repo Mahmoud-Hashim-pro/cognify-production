@@ -146,6 +146,13 @@ export function playArabicAudioFallback(text: string, cb?: SpeakCallbacks): bool
   }
 }
 
+/** Gentle prep for Arabic speech: real pauses at line breaks, a breath inside very long run-on sentences, no tatweel. */
+export function prepareArabicForSpeech(text: string): string {
+  let t = text.replace(/\u0640/g, "").replace(/[ \t]*\n+[ \t]*/g, "\u060C ");
+  t = t.replace(/([^.!?\u061F\u060C,;:]{110,}?)\s(?=\S)/g, (m) => (/[.!?\u061F\u060C,;:]$/.test(m.trim()) ? m : m.trimEnd() + "\u060C "));
+  return t.replace(/\s{2,}/g, " ").trim();
+}
+
 /** Build a configured utterance with the best voice for the given language. */
 export function buildUtterance(
   text: string,
@@ -195,7 +202,10 @@ export function buildUtterance(
       clean.includes("تمام") ||
       clean.includes("ازيك") ||
       clean.includes("عامل ايه");
-    const defaultLang = isEgyptian ? "ar-EG" : "ar-SA";
+    // Egyptian voice first for all Arabic: it sounds closer to everyday speech than the Saudi one.
+    const defaultLang = "ar-EG";
+    void isEgyptian;
+    utterance.text = prepareArabicForSpeech(clean);
     utterance.lang = defaultLang;
     const voice = pickVoice(defaultLang) || pickVoice("ar-SA") || pickVoice("ar-EG") || pickVoice("ar");
     if (voice) {
@@ -204,7 +214,7 @@ export function buildUtterance(
     } else {
       utterance.lang = "ar-EG";
     }
-    utterance.rate = 0.92;
+    utterance.rate = 0.97;
     utterance.pitch = 1.0;
   }
 
