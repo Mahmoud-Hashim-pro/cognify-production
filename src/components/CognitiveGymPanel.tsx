@@ -11,16 +11,22 @@
  *      attempts (stored locally) keeps the preview exploratory.
  */
 import React, { useMemo, useRef, useState } from 'react';
-import { Brain, Dumbbell, Grid3x3, ListChecks, RotateCcw, ShieldAlert, TrendingUp, Volume2, VolumeX } from 'lucide-react';
+import { Brain, Dumbbell, Grid3x3, ListChecks, Palette, RotateCcw, ShieldAlert, Sigma, TrendingUp, Volume2, VolumeX } from 'lucide-react';
 import { compareQuizzes, type QuizComparisonResult } from '../lib/evaluationEngine';
 import {
   ambientNoise,
+  buildTenFrame,
+  CUISENAIRE_RODS,
+  generateConcreteMathProblem,
   generateMemoryGridSequence,
   evaluateMemoryGridAnswer,
+  generateStroopTrial,
   sliceTaskIntoMicroSteps,
   type MemoryGridRound,
   type NoiseType,
+  type StroopTrial,
   type TaskSlicerDecomposition,
+  type VisualArithmeticProblem,
 } from '../lib/cognitiveEngine';
 import {
   COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
@@ -141,6 +147,33 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
   React.useEffect(() => {
     return () => clearGridTimers();
   }, []);
+
+  // Stroop attention game state
+  const [stroopTrial, setStroopTrial] = useState<StroopTrial | null>(null);
+  const [stroopScore, setStroopScore] = useState({ correct: 0, total: 0 });
+  const [stroopFeedback, setStroopFeedback] = useState<'correct' | 'wrong' | null>(null);
+
+  // Concrete math visuals state
+  const [mathProblem, setMathProblem] = useState<VisualArithmeticProblem | null>(null);
+  const [mathRevealed, setMathRevealed] = useState(false);
+
+  const stroopOptions: Array<{ name: 'red' | 'blue' | 'green' | 'yellow'; hex: string; labelAr: string; labelEn: string }> = [
+    { name: 'red', hex: '#ef4444', labelAr: 'أحمر', labelEn: 'Red' },
+    { name: 'blue', hex: '#3b82f6', labelAr: 'أزرق', labelEn: 'Blue' },
+    { name: 'green', hex: '#10b981', labelAr: 'أخضر', labelEn: 'Green' },
+    { name: 'yellow', hex: '#f59e0b', labelAr: 'أصفر', labelEn: 'Yellow' },
+  ];
+
+  const answerStroop = (colorName: 'red' | 'blue' | 'green' | 'yellow') => {
+    if (!stroopTrial) return;
+    const correct = colorName === stroopTrial.colorName;
+    setStroopScore((prev) => ({ correct: prev.correct + (correct ? 1 : 0), total: prev.total + 1 }));
+    setStroopFeedback(correct ? 'correct' : 'wrong');
+    window.setTimeout(() => {
+      setStroopFeedback(null);
+      setStroopTrial(generateStroopTrial());
+    }, 700);
+  };
 
   // Learning-gain calculator state
   const [preScoreInput, setPreScoreInput] = useState('');
@@ -619,6 +652,177 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                 </button>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Stroop attention trainer ── */}
+      <div className={`p-5 rounded-3xl border space-y-3 ${cardCls}`} data-testid="stroop-trainer">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Palette className="w-5 h-5 text-rose-400" aria-hidden="true" />
+            <h3 className={`text-sm font-black ${textCls}`}>
+              {isArabic ? 'مدرب الانتباه (ستروب)' : 'Attention trainer (Stroop)'}
+            </h3>
+          </div>
+          {stroopScore.total > 0 && (
+            <span className={`text-[11px] font-bold ${subCls}`}>
+              {isArabic ? `النتيجة: ${stroopScore.correct}/${stroopScore.total}` : `Score: ${stroopScore.correct}/${stroopScore.total}`}
+            </span>
+          )}
+        </div>
+        <p className={`text-[11px] leading-relaxed ${subCls}`}>
+          {isArabic
+            ? 'ستظهر كلمة لون مكتوبة بحبر ملون. تجاهل معنى الكلمة واختر لون الحبر فقط - تمرين كلاسيكي للتركيز وكبح الاستجابة التلقائية.'
+            : 'A color word appears in colored ink. Ignore the word meaning and pick the INK color only - a classic focus and impulse-control exercise.'}
+        </p>
+        {!stroopTrial ? (
+          <button
+            type="button"
+            onClick={() => {
+              setStroopScore({ correct: 0, total: 0 });
+              setStroopTrial(generateStroopTrial());
+            }}
+            className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            {isArabic ? 'ابدأ' : 'Start'}
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <div className={`p-6 rounded-2xl border text-center ${innerCls}`}>
+              <span className="text-4xl font-black" style={{ color: stroopTrial.inkColorHex }}>
+                {stroopTrial.wordText}
+              </span>
+            </div>
+            {stroopFeedback && (
+              <p className={`text-xs font-black ${stroopFeedback === 'correct' ? 'text-emerald-400' : 'text-rose-400'}`} role="status">
+                {stroopFeedback === 'correct'
+                  ? isArabic ? '✓ صحيح!' : '✓ Correct!'
+                  : isArabic ? '✗ لون الحبر هو المطلوب، ليس معنى الكلمة' : '✗ Pick the ink color, not the word meaning'}
+              </p>
+            )}
+            <div className="grid grid-cols-4 gap-2">
+              {stroopOptions.map((opt) => (
+                <button
+                  key={opt.name}
+                  type="button"
+                  onClick={() => answerStroop(opt.name)}
+                  aria-label={isArabic ? `لون الحبر ${opt.labelAr}` : `Ink color ${opt.labelEn}`}
+                  className="p-3 rounded-2xl border-2 font-black text-xs transition-all active:scale-95 cursor-pointer"
+                  style={{ borderColor: opt.hex, color: opt.hex }}
+                >
+                  {isArabic ? opt.labelAr : opt.labelEn}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setStroopTrial(null)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${
+                isDarkMode ? 'bg-stone-800 text-stone-200 hover:bg-stone-700' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
+            >
+              {isArabic ? 'إيقاف' : 'Stop'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Concrete math visuals (ten-frame + Cuisenaire rods) ── */}
+      <div className={`p-5 rounded-3xl border space-y-3 ${cardCls}`} data-testid="math-visuals">
+        <div className="flex items-center gap-2">
+          <Sigma className="w-5 h-5 text-sky-400" aria-hidden="true" />
+          <h3 className={`text-sm font-black ${textCls}`}>
+            {isArabic ? 'الرياضيات بالصور (إطار العشرة والقضبان)' : 'Picture math (ten-frame & rods)'}
+          </h3>
+        </div>
+        <p className={`text-[11px] leading-relaxed ${subCls}`}>
+          {isArabic
+            ? 'مسألة جمع أو طرح بسيطة معروضة بصرياً بإطار العشرة وقضبان كويزنير - طريقة ملموسة لفهم الأعداد لمن يجد صعوبة في الحساب.'
+            : 'A simple addition or subtraction problem shown visually with a ten-frame and Cuisenaire rods - a concrete way to understand numbers for anyone who finds arithmetic hard.'}
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setMathProblem(generateConcreteMathProblem());
+              setMathRevealed(false);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            {mathProblem
+              ? isArabic ? 'مسألة جديدة' : 'New problem'
+              : isArabic ? 'اعرض مسألة' : 'Show a problem'}
+          </button>
+          {mathProblem && !mathRevealed && (
+            <button
+              type="button"
+              onClick={() => setMathRevealed(true)}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
+                isDarkMode ? 'bg-stone-800 text-stone-200 hover:bg-stone-700' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
+            >
+              {isArabic ? 'اعرض الحل' : 'Show answer'}
+            </button>
+          )}
+        </div>
+        {mathProblem && (
+          <div className="space-y-3">
+            <p className={`text-xl font-black text-center ${textCls}`} dir="ltr">
+              {mathProblem.a} {mathProblem.operator} {mathProblem.b} = {mathRevealed ? mathProblem.result : '؟'}
+            </p>
+            {/* Ten-frame for the first operand */}
+            <div className="space-y-1">
+              <p className={`text-[11px] font-bold ${subCls}`}>
+                {isArabic ? `إطار العشرة للعدد ${mathProblem.a}:` : `Ten-frame for ${mathProblem.a}:`}
+              </p>
+              <div className="grid grid-cols-10 gap-1 max-w-[340px]" aria-hidden="true">
+                {buildTenFrame(mathProblem.a).firstFrame.map((filled, i) => (
+                  <div
+                    key={`f${i}`}
+                    className={`aspect-square rounded-full border ${
+                      filled ? 'bg-[#4B9FE1] border-[#4B9FE1]' : isDarkMode ? 'border-stone-600' : 'border-stone-300'
+                    }`}
+                  />
+                ))}
+              </div>
+              {mathProblem.a > 10 && (
+                <div className="grid grid-cols-10 gap-1 max-w-[340px]" aria-hidden="true">
+                  {buildTenFrame(mathProblem.a).secondFrame.map((filled, i) => (
+                    <div
+                      key={`s${i}`}
+                      className={`aspect-square rounded-full border ${
+                        filled ? 'bg-[#1769AA] border-[#1769AA]' : isDarkMode ? 'border-stone-600' : 'border-stone-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Cuisenaire rods for both operands */}
+            <div className="space-y-1">
+              <p className={`text-[11px] font-bold ${subCls}`}>
+                {isArabic ? 'قضبان كويزنير:' : 'Cuisenaire rods:'}
+              </p>
+              {[mathProblem.a, mathProblem.b].map((v, vi) => {
+                const rod = CUISENAIRE_RODS[Math.min(10, Math.max(1, v))];
+                if (!rod) return null;
+                return (
+                  <div key={vi} className="flex items-center gap-2" aria-hidden="true">
+                    <div
+                      className="h-4 rounded-md"
+                      style={{ width: `${rod.widthPercent}%`, backgroundColor: rod.colorHex, maxWidth: '260px' }}
+                    />
+                    <span className={`text-[10px] font-bold ${subCls}`}>{v}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {mathRevealed && (
+              <p className={`text-[11px] leading-relaxed ${textCls}`} dir="auto">
+                {isArabic ? mathProblem.friendlyDecompositionAr : mathProblem.friendlyDecompositionEn}
+              </p>
+            )}
           </div>
         )}
       </div>
