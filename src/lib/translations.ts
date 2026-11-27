@@ -1676,3 +1676,6 @@ export function L(en: string): string {
 export function hasFrench(en: string): boolean {
   return !!EXTRA.French?.[en];
 }
+
+/** French lookup that does not depend on the active UI language (for tools with their own language switch). */
+export const frOf = (en: string): string => EXTRA.French?.[en] || en;

@@ -57,7 +57,7 @@ import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
 import { UserProfile, VisionMemory, SpatialObjectRecord } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, frOf } from '../lib/translations';
 import { generateAdaptiveResponse } from '../services/gemini';
 import { speak, cancelSpeech, unlockSpeechSynthesis } from '../lib/tts';
 import { hasMediaConsent, recordMediaConsent } from '../lib/mediaConsent';
@@ -505,7 +505,7 @@ export default function VisionCompanionView({
   const t = useCallback(
     (en: string, ar: string, fr?: string) => {
       if (companionLang === 'ar') return ar;
-      if (companionLang === 'fr') return fr || en;
+      if (companionLang === 'fr') return fr || frOf(en);
       return en;
     },
     [companionLang]
@@ -2289,7 +2289,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-[10px] sm:text-xs font-bold leading-tight line-clamp-2 break-words">{SHORT_TOOL[tool.id]?.[companionLang === 'ar' ? 1 : 0] || title}</h3>
+                    <h3 className="text-[10px] sm:text-xs font-bold leading-tight line-clamp-2 break-words">{(companionLang === 'ar' ? SHORT_TOOL[tool.id]?.[1] : companionLang === 'fr' ? (SHORT_TOOL[tool.id] ? frOf(SHORT_TOOL[tool.id][0]) : undefined) : SHORT_TOOL[tool.id]?.[0]) || title}</h3>
                     <p className="hidden text-xs text-[#B9CDE3]/70 truncate">{badge}</p>
                   </div>
                 </button>
