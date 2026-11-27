@@ -817,7 +817,7 @@ export default function SectionLandingView({
 
                         {/* Description */}
                         <p
-                          className={`text-xs leading-snug line-clamp-2 ${
+                          className={`text-xs leading-snug line-clamp-2 lg:line-clamp-1 ${
                             isDarkMode ? 'text-slate-400' : 'text-slate-600'
                           }`}
                         >
@@ -825,7 +825,7 @@ export default function SectionLandingView({
                         </p>
 
                         {/* Tags */}
-                        <div className="hidden xl:flex flex-wrap gap-1.5 pt-0.5">
+                        <div className="hidden flex-wrap gap-1.5 pt-0.5">
                           {(isAr ? feature.tagsAr : feature.tagsEn).map((tag, tIdx) => (
                             <span
                               key={tIdx}

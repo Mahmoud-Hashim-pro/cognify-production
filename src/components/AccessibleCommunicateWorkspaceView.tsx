@@ -247,7 +247,7 @@ export default function AccessibleCommunicateWorkspaceView({
 
   return (
     <div
-      className={`min-h-screen flex flex-col ${
+      className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
         isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'bg-[#F5F9FD] text-[#061A33]'
       } font-sans selection:bg-[#1769AA]/30`}
       dir={isAr ? 'rtl' : 'ltr'}
@@ -356,7 +356,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Communication Tools', 'أدوات التواصل')}
-        className="sticky top-[69px] z-20 flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-[#0D4778]/80 backdrop-blur-md border-b border-[#22354E] overflow-x-auto custom-scrollbar scroll-fade-x"
+        className="sticky top-[69px] z-20 flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-[#0D4778]/80 backdrop-blur-md border-b border-[#22354E] overflow-x-auto lg:overflow-x-visible lg:flex-wrap custom-scrollbar scroll-fade-x"
       >
         {tools.map((t) => {
           const IconComponent = t.icon;

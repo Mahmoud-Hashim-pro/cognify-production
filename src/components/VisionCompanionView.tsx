@@ -2458,7 +2458,7 @@ Examine what is visible in front of the camera right now with utmost precision:
         {/* ── 2. CAMERA PREVIEW VIEW FINDER ── */}
         <section
           aria-label={t('Camera Viewfinder', 'شاشة الكاميرا')}
-          className="relative rounded-3xl bg-[#082344] border border-[#07558A] overflow-hidden shadow-2xl min-h-[340px] sm:min-h-[420px] md:min-h-[480px] flex items-center justify-center group"
+          className="relative rounded-3xl bg-[#082344] border border-[#07558A] overflow-hidden shadow-2xl min-h-[300px] md:min-h-[300px] lg:min-h-[320px] flex items-center justify-center group"
         >
           {/* Active Tool Badge at Viewfinder Corner */}
           {(() => {

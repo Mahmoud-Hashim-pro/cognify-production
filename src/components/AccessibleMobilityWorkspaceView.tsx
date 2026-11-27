@@ -299,7 +299,7 @@ export default function AccessibleMobilityWorkspaceView({
 
   return (
     <div
-      className={`min-h-screen flex flex-col ${
+      className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
         isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'bg-[#F5F9FD] text-[#061A33]'
       } font-sans selection:bg-[#1769AA]/30`}
       dir={isAr ? 'rtl' : 'ltr'}
@@ -432,7 +432,7 @@ export default function AccessibleMobilityWorkspaceView({
       {/* ── SUB-NAV: 7 ACCESSIBLE MOBILITY TABS ── */}
       <nav
         aria-label={localize(profile.language, 'Mobility Assistant Tools', 'أدوات مساعد الحركة والاستكشاف')}
-        className="bg-[#0D4778]/20 border-b border-[#22354E] px-4 sm:px-6 py-2 overflow-x-auto custom-scrollbar scroll-fade-x"
+        className="bg-[#0D4778]/20 border-b border-[#22354E] px-4 sm:px-6 py-2 overflow-x-auto lg:overflow-x-visible lg:flex-wrap custom-scrollbar scroll-fade-x"
       >
         <div className="flex items-center gap-2 min-w-max">
           {tools.map((t) => {

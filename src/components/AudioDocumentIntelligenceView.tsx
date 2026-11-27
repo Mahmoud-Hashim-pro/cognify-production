@@ -751,7 +751,7 @@ export default function AudioDocumentIntelligenceView({
 
   return (
     <div
-      className={`min-h-screen flex flex-col ${
+      className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
         isDarkMode ? 'bg-[#0B131E] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'
       }`}
       dir={isAr ? 'rtl' : 'ltr'}
