@@ -689,7 +689,10 @@ export function aiBusyMessage(isAr: boolean): string {
   if (st === 429) {
     return isAr ? '⚠️ وصلنا للحد المسموح للذكاء الاصطناعي دلوقتي. جرّب تاني بعد شوية 🙏' : '⚠️ The AI has reached its usage limit for now. Please try again in a little while 🙏';
   }
-  if (st === 401 || st === 403) {
+  if (st === 400) {
+    return isAr ? '⚠️ الذكاء الاصطناعي ما قدرش يقبل الطلب ده (ممكن الصورة كبيرة أو مش واضحة). جرّب صورة أصغر أو أوضح 🙏' : '⚠️ The AI could not accept this request (the image may be too large or unclear). Try a smaller or clearer one 🙏';
+  }
+  if (st === 401 || st === 403 || st === 404) {
     return isAr ? '⚠️ فيه مشكلة في إعدادات الذكاء الاصطناعي عندنا. الفريق هيصلحها، جرّب بعد شوية 🙏' : '⚠️ There is a problem with our AI setup. The team will fix it, please try again later 🙏';
   }
   if (st === -1) {
