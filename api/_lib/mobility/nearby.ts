@@ -5,9 +5,9 @@
  * Returns the names of useful nearby places (pharmacies, shops, transport,
  * hospitals...) within ~300m via the Overpass API. Authenticated + rate limited.
  */
-import { applyCorsHeaders } from '../_lib/cors.js';
-import { verifyRequestAuth } from '../_lib/authGuard.js';
-import { checkDistributedRateLimit } from '../_lib/rateLimiter.js';
+import { applyCorsHeaders } from '../cors.js';
+import { verifyRequestAuth } from '../authGuard.js';
+import { checkDistributedRateLimit } from '../rateLimiter.js';
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 

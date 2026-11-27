@@ -11,9 +11,9 @@
 
 import dns from 'node:dns/promises';
 import net from 'node:net';
-import { checkDistributedRateLimit } from './_lib/rateLimiter.js';
-import { getOrGenerateTraceId, attachTraceId } from './_lib/tracing.js';
-import { applyCorsHeaders } from './_lib/cors.js';
+import { checkDistributedRateLimit } from '../rateLimiter.js';
+import { getOrGenerateTraceId, attachTraceId } from '../tracing.js';
+import { applyCorsHeaders } from '../cors.js';
 
 // Trusted image provider allowlist — bypasses ad-hoc DNS queries for known CDNs
 const ALLOWED_IMAGE_DOMAINS = new Set([

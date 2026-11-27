@@ -15,6 +15,26 @@
   },
   "rewrites": [
     {
+      "source": "/api/mobility/directions",
+      "destination": "/api/mobility?action=directions"
+    },
+    {
+      "source": "/api/mobility/geocode",
+      "destination": "/api/mobility?action=geocode"
+    },
+    {
+      "source": "/api/mobility/nearby",
+      "destination": "/api/mobility?action=nearby"
+    },
+    {
+      "source": "/api/weather",
+      "destination": "/api/proxy?action=weather"
+    },
+    {
+      "source": "/api/proxy-image",
+      "destination": "/api/proxy?action=image"
+    },
+    {
       "source": "/api/gemini/generateBenchmarkComparison",
       "destination": "/api/gemini/auxiliary"
     },

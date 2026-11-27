@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { isSafeImageUrl } from '../api/proxy-image.js';
+import { isSafeImageUrl } from '../api/_lib/proxy/proxy-image.js';
 import {
   sha256,
   sampleLaplace,

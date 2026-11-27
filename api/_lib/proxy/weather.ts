@@ -5,9 +5,9 @@
  * Authenticated + rate limited proxy over Open-Meteo (no API key required).
  * Returns a tiny current-weather payload suitable for spoken answers.
  */
-import { applyCorsHeaders } from './_lib/cors.js';
-import { verifyRequestAuth } from './_lib/authGuard.js';
-import { checkDistributedRateLimit } from './_lib/rateLimiter.js';
+import { applyCorsHeaders } from '../cors.js';
+import { verifyRequestAuth } from '../authGuard.js';
+import { checkDistributedRateLimit } from '../rateLimiter.js';
 
 const WMO_DESCRIPTIONS_AR: Record<number, string> = {
   0: 'صافي', 1: 'صافي في الغالب', 2: 'غائم جزئيا', 3: 'غائم',

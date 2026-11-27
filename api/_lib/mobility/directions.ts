@@ -6,9 +6,9 @@
  * never talks to a third party directly and every call is authenticated +
  * rate limited. Returns normalized, speakable walking steps.
  */
-import { applyCorsHeaders } from '../_lib/cors.js';
-import { verifyRequestAuth } from '../_lib/authGuard.js';
-import { checkDistributedRateLimit } from '../_lib/rateLimiter.js';
+import { applyCorsHeaders } from '../cors.js';
+import { verifyRequestAuth } from '../authGuard.js';
+import { checkDistributedRateLimit } from '../rateLimiter.js';
 
 const OSRM_BASE = 'https://router.project-osrm.org/route/v1/foot';
 

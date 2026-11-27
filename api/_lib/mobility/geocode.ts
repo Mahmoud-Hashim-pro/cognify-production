@@ -7,9 +7,9 @@
  * Authenticated + rate limited proxy over OpenStreetMap Nominatim with the
  * required identifying User-Agent, so the client never calls it directly.
  */
-import { applyCorsHeaders } from '../_lib/cors.js';
-import { verifyRequestAuth } from '../_lib/authGuard.js';
-import { checkDistributedRateLimit } from '../_lib/rateLimiter.js';
+import { applyCorsHeaders } from '../cors.js';
+import { verifyRequestAuth } from '../authGuard.js';
+import { checkDistributedRateLimit } from '../rateLimiter.js';
 
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
 const UA = 'rafiqi-accessibility-app/1.0 (contact: app operator)';
