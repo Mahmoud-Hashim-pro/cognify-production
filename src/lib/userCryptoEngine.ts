@@ -31,7 +31,7 @@
  *     records, automatically re-encrypting them on next persistence.
  */
 
-import type { Message, SpatialObjectRecord } from '../types';
+import type { Message, SpatialObjectRecord, VisionMemory } from '../types';
 
 export interface EncryptedPayload {
   encrypted: true;
@@ -686,5 +686,89 @@ export async function decryptSpatialRecord(
     return rawDocData as SpatialObjectRecord;
   }
 
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VISION MEMORY ENCRYPTION ADAPTERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Firestore shape of an encrypted vision memory: non-sensitive metadata stays
+ *  queryable (id, date, category); label/description/snapshot are encrypted. */
+export interface EncryptedVisionMemoryDoc extends EncryptedPayload {
+  id: string;
+  createdAt: string;
+  memoryType?: VisionMemory['memoryType'];
+}
+
+/**
+ * Encrypts a Visual Companion memory ("remember this as...") before it is
+ * written into the user document's visionMemories array. Same AES-256-GCM
+ * device-vault key as chat threads and spatial objects.
+ */
+export async function encryptVisionMemory(
+  memory: VisionMemory,
+  userId: string
+): Promise<EncryptedVisionMemoryDoc> {
+  const enc = await encryptData(
+    {
+      label: memory.label,
+      description: memory.description,
+      imageUrl: memory.imageUrl ?? null,
+    },
+    userId
+  );
+  return {
+    id: memory.id,
+    createdAt: memory.createdAt,
+    memoryType: memory.memoryType,
+    ...enc,
+  };
+}
+
+let hasWarnedVisionKeyMismatch = false;
+
+/**
+ * Decrypts one stored vision memory. Legacy plaintext records (saved before
+ * encryption shipped) pass through unchanged so they can be migrated.
+ * On key mismatch (memory saved on another device without a synced vault key)
+ * returns a non-destructive locked placeholder instead of dropping the record.
+ */
+export async function decryptVisionMemory(
+  raw: any,
+  userId: string
+): Promise<VisionMemory | null> {
+  if (!raw) return null;
+
+  if (isEncryptedPayload(raw)) {
+    try {
+      const dec = await decryptData<{ label: string; description: string; imageUrl?: string | null }>(raw, userId);
+      return {
+        id: raw.id,
+        createdAt: raw.createdAt || new Date().toISOString(),
+        memoryType: raw.memoryType,
+        label: dec.label,
+        description: dec.description,
+        imageUrl: dec.imageUrl ?? undefined,
+      };
+    } catch {
+      if (!hasWarnedVisionKeyMismatch) {
+        hasWarnedVisionKeyMismatch = true;
+        console.warn('[userCryptoEngine] Vision memories encrypted with inaccessible key. Preserving records.');
+      }
+      return {
+        id: raw.id || `encrypted_${Date.now()}`,
+        createdAt: raw.createdAt || new Date().toISOString(),
+        memoryType: raw.memoryType,
+        label: '🔒',
+        description: 'This memory was encrypted on another device. Sync your device vault key in Settings to read it.',
+      };
+    }
+  }
+
+  // Legacy plaintext fallback
+  if (typeof raw.label === 'string') {
+    return raw as VisionMemory;
+  }
   return null;
 }

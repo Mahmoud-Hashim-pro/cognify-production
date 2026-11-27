@@ -39,6 +39,7 @@ export const VALID_VIEWS: readonly AppView[] = [
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
   'blind_home', 'voice_navigation', 'daily_aids', 'known_people',
+  'privacy_policy', 'terms',
 ] as const;
 
 export const VALID_DISABILITY_TABS: readonly DisabilityTab[] = [
@@ -74,6 +75,8 @@ export function parseRoute(hashString: string): RouteState {
 
   // Handle direct aliases
   if (clean === 'privacy') return { view: 'privacy_security' };
+  if (clean === 'privacy-policy' || clean === 'privacy_policy' || clean === 'policy') return { view: 'privacy_policy' };
+  if (clean === 'terms' || clean === 'terms-of-service' || clean === 'terms_of_service') return { view: 'terms' };
   if (clean === 'intelligence') return { view: 'profile' };
   if (clean === 'admin' || clean === 'users' || clean === 'database') return { view: 'admin' };
   if (clean === 'productivity' || clean.startsWith('productivity/')) {
@@ -373,6 +376,10 @@ export function getRouteTitle(route: RouteState, lang?: string): string {
     case 'privacy_security':
     case 'privacy':
       return isAr ? 'الخصوصية وأمان البيانات' : 'Privacy & Security';
+    case 'privacy_policy':
+      return isAr ? 'سياسة الخصوصية' : 'Privacy Policy';
+    case 'terms':
+      return isAr ? 'شروط الاستخدام' : 'Terms of Use';
     case 'support':
       return isAr ? 'الدعم والمساعدة' : 'Accessible Support';
     case 'admin':

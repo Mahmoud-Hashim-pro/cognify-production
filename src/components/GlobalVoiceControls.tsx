@@ -8,6 +8,8 @@ import { useEmergencySOS } from '../hooks/useEmergencySOS';
 import { VoiceIntent, voiceCommandsHelp } from '../lib/voiceCommands';
 import { speak, cancelSpeech, replayLastSpeech } from '../lib/tts';
 import { loadContacts, makePhoneCall } from '../lib/contacts';
+import { hasMediaConsent, recordMediaConsent } from '../lib/mediaConsent';
+import MediaConsentGate from './MediaConsentGate';
 import { answerQuickQuestion } from '../lib/locationAwareness';
 
 export const VISION_AUTOSTART_KEY = 'rafiqi_vision_autostart_tool';
@@ -17,6 +19,7 @@ export interface GlobalVoiceControlsProps {
   profile: UserProfile;
   isArabic: boolean;
   onNavigate: (view: AppView, tab?: DisabilityTab) => void;
+  setProfile?: (p: UserProfile) => void;
 }
 
 /**
@@ -26,7 +29,7 @@ export interface GlobalVoiceControlsProps {
  * - Phone shake triggers the emergency SOS.
  * - The SOS countdown / status modal lives here so SOS works from ANY screen.
  */
-const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isArabic, onNavigate }) => {
+const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isArabic, onNavigate, setProfile }) => {
   const [speechRate, setSpeechRate] = useState<number>(() => {
     const saved = Number(localStorage.getItem(TTS_RATE_KEY));
     return saved >= 0.5 && saved <= 2 ? saved : 1;
@@ -132,6 +135,8 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
     [isArabic, speechRate, onNavigate]
   );
 
+  const [showMediaConsent, setShowMediaConsent] = useState(false);
+
   const voice = useGlobalVoiceControl({ isArabic, speechRate, onIntent: handleIntent });
 
   // ── Triple-tap the floating button => SOS ──────────────────────────────────
@@ -146,6 +151,11 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
     if (!motionPermissionAsked && typeof (window as any).DeviceMotionEvent?.requestPermission === 'function') {
       setMotionPermissionAsked(true);
       (window as any).DeviceMotionEvent.requestPermission().catch(() => undefined);
+    }
+    if (!hasMediaConsent(profile)) {
+      pressActiveRef.current = false;
+      setShowMediaConsent(true);
+      return;
     }
     voice.startListening();
     // If recognition is still not listening shortly after, this was a tap.
@@ -201,6 +211,33 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
 
   return (
     <>
+      {/* One-time informed consent before first microphone use (spoken + written) */}
+      {showMediaConsent && (
+        <MediaConsentGate
+          language={profile?.language}
+          onConsent={async () => {
+            setShowMediaConsent(false);
+            try {
+              await recordMediaConsent(profile, setProfile);
+            } catch (err) {
+              console.error('Failed to persist media consent:', err);
+            }
+            speak(
+              isArabic ? 'شكرًا. اضغط مطولًا على الزر واتكلم.' : 'Thank you. Press and hold the button and speak.',
+              isArabic ? 'Arabic' : 'English',
+              { rate: speechRate }
+            );
+          }}
+          onDecline={() => {
+            setShowMediaConsent(false);
+            speak(
+              isArabic ? 'تمام، المايكروفون مش هيشتغل. تقدر توافق في أي وقت.' : 'Okay. The microphone will stay off. You can agree anytime.',
+              isArabic ? 'Arabic' : 'English',
+              { rate: speechRate }
+            );
+          }}
+        />
+      )}
       {/* Floating hold-to-talk voice button */}
       <button
         type="button"

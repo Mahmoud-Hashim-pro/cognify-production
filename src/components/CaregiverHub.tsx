@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, SensoryEmotionLog } from '../types';
 import { EmergencyContact } from '../lib/contacts';
+import { decryptVisionMemory } from '../lib/userCryptoEngine';
 import { loadContacts, saveContacts, syncContactsToCloud, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import {
@@ -195,14 +196,25 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   };
 
   // Export Accessibility Profile JSON
-  const handleExportConfig = () => {
+  const handleExportConfig = async () => {
+    // Vision memories may be stored AES-GCM encrypted; export them readable.
+    let exportableMemories = profile.visionMemories;
+    try {
+      if (profile.visionMemories?.length) {
+        exportableMemories = (
+          await Promise.all(profile.visionMemories.map((m) => decryptVisionMemory(m, profile.uid)))
+        ).filter((m): m is NonNullable<typeof m> => !!m);
+      }
+    } catch (err) {
+      console.error('Failed to decrypt vision memories for export:', err);
+    }
     const backup = {
       uid: profile.uid,
       name: profile.name,
       language: profile.language,
       accessibilityMode: profile.accessibilityMode,
       accessibilityPassport: profile.accessibilityPassport,
-      visionMemories: profile.visionMemories,
+      visionMemories: exportableMemories,
       contacts: loadContacts(),
       sensoryLogs: sensoryLogs,
       exportedAt: new Date().toISOString(),

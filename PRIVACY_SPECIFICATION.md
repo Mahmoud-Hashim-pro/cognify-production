@@ -31,6 +31,7 @@
 | **Learning Event Stream** | Audit trail of practice answers, time-stamped learning milestones, feedback. | Firestore (5s debounce) + Local Cache | `/users/{uid}/learningEvents/{eventId}` | Persisted for longitudinal learning analytics. Purged completely upon account erasure. |
 | **Conversational Threads** | Chat history with AI assistant, explanations, and practice transcripts. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}/threads/{threadId}` | Encrypted at rest. Deletable per thread or full wipe via Privacy Center. |
 | **Spatial Object Locations** | Observed physical item names, rooms, surfaces, and 10-item movement history. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}/spatialObjects/{id}` | Encrypted at rest. Strictly isolated per UID. Can be cleared directly in Vision Companion or Privacy Center. |
+| **Vision Memories** | User-labeled camera snapshot descriptions ("remember this as..."), text-only. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}` field `visionMemories` | Encrypted at rest with the same device-vault key as threads and spatial objects. Auto-deleted after 90 days; instant wipe via "Clear all camera memory" in the Vision Companion. |
 | **Camera Video Frames** | Real-time object and hazard detection for visually impaired students. | **Ephemeral Cloud Multimodal Inference (0% Disk / 0% Database Persistence)** | In-Memory WebGL Canvas -> Transient TLS API Payload | **Ephemeral**: Discarded immediately after inference. Zero disk, database, or bucket persistence. |
 | **Microphone Audio Streams** | Voice input and Speech-to-Text translation. | **NEVER PERSISTED (0% Disk / 0% Cloud)** | In-Memory AudioBuffer Only | **Ephemeral**: Audio stream tracks are closed immediately upon speech termination. |
 | **DevTools Security Probes** | Detection of DOM tampering and unauthorized console inspection. | Firestore (Founder Only) | `/securityAudits/{auditId}` | Retained for system security integrity. Read-only strictly by primary founder. |
@@ -85,3 +86,13 @@ In the client-side single-page app, memory stores (`userSpatialCache`, `managerC
 2. **Web Crypto API AES-GCM for Client Secrets**:
    - For user-supplied Bring-Your-Own-Key (BYOK) configurations, Cognify uses the standard browser **Web Crypto API AES-GCM** (256-bit key derived with PBKDF2) for async encryption and integrity protection in local storage.
    - Synchronous reads utilize a client-side stream obfuscation cipher with randomized per-device salt to prevent plain-text memory inspection and shoulder-surfing.
+
+---
+
+## 6. Data Retention & Media Consent
+
+1. **Vision camera memories**: retained for a maximum of **90 days** from creation. Expired records are pruned automatically on every load of the Vision Companion, and the "Clear all camera memory" button on the camera page wipes the entire store immediately. Both paths are also reflected in the `/users/{uid}` document.
+2. **Chat threads, learning events, spatial objects**: retained until the user deletes them individually, resets memory from the Privacy Center, or erases the account (cascade deletion).
+3. **Ephemeral media**: camera frames and microphone audio are never written to our disk or database (see the taxonomy table); browser speech-recognition vendors (Google/Apple) and the Gemini API have their own retention, disclosed in Section 1.
+4. **Informed media consent**: before the first camera or microphone use, a one-time consent screen (also read aloud for blind users) explains exactly what is sent where and what is stored. Consent is recorded with the date and policy version in the user profile (`mediaConsent`); guests keep it in device-local storage. A material change to the consent text bumps the version and re-asks everyone.
+5. **Caregiver numbers**: a caregiver's phone number is the caregiver's personal data. It is saved only after an explicit in-app confirmation that the caregiver agreed, is used solely for emergency SOS alerts, and can be deleted anytime.

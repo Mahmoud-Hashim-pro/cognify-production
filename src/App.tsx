@@ -98,6 +98,8 @@ const VoiceNavigationView = lazyWithRetry(() => import("./components/VoiceNaviga
 const DailyAidsView = lazyWithRetry(() => import("./components/DailyAidsView"));
 const KnownPeopleView = lazyWithRetry(() => import("./components/KnownPeopleView"));
 const GlobalVoiceControls = lazyWithRetry(() => import("./components/GlobalVoiceControls"));
+const PrivacyPolicyPage = lazyWithRetry(() => import("./components/LegalPages").then(m => ({ default: m.PrivacyPolicyPage })));
+const TermsOfServicePage = lazyWithRetry(() => import("./components/LegalPages").then(m => ({ default: m.TermsOfServicePage })));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
@@ -1087,6 +1089,21 @@ export default function App() {
 
   const renderView = () => {
     const activeProfile = fullProfile || profile;
+    // Public legal pages: reachable by guests too (linked from the consent gate).
+    if (currentView === 'privacy_policy') {
+      return (
+        <Suspense fallback={null}>
+          <PrivacyPolicyPage language={activeProfile?.language} onBack={handleBack} />
+        </Suspense>
+      );
+    }
+    if (currentView === 'terms') {
+      return (
+        <Suspense fallback={null}>
+          <TermsOfServicePage language={activeProfile?.language} onBack={handleBack} />
+        </Suspense>
+      );
+    }
     if (!activeProfile) return null;
     switch (currentView) {
       case 'blind_home':
@@ -1615,6 +1632,7 @@ export default function App() {
               profile={profile}
               isArabic={isArabicLocale(profile?.language)}
               onNavigate={(view, tab) => navigateTo(view, tab)}
+              setProfile={setProfile}
             />
           </Suspense>
         )}

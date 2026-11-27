@@ -59,6 +59,9 @@ import { UserProfile, VisionMemory, SpatialObjectRecord } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { generateAdaptiveResponse } from '../services/gemini';
 import { speak, cancelSpeech, unlockSpeechSynthesis } from '../lib/tts';
+import { hasMediaConsent, recordMediaConsent } from '../lib/mediaConsent';
+import MediaConsentGate from './MediaConsentGate';
+import { encryptVisionMemory, decryptVisionMemory } from '../lib/userCryptoEngine';
 import { toast } from './Toast';
 import {
   extractSpatialObjectsFromVision,
@@ -642,6 +645,10 @@ export default function VisionCompanionView({
 
   const startCamera = useCallback(
     async (mode: 'environment' | 'user' = facingMode) => {
+      if (!hasMediaConsent(profile)) {
+        setMediaConsentAction(() => () => startCamera(mode));
+        return;
+      }
       if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         setStatus('unsupported');
         setAnnounce(companionLang === 'ar' ? 'يتطلب تشغيل الكاميرا اتصالاً آمناً (HTTPS).' : 'Camera requires a secure HTTPS connection.');
@@ -845,7 +852,7 @@ export default function VisionCompanionView({
       activeAcquisitionPromiseRef.current = currentPromise;
       await currentPromise;
     },
-    [facingMode, companionLang]
+    [facingMode, companionLang, profile]
   );
 
   const stopCamera = useCallback(() => {
@@ -906,6 +913,7 @@ export default function VisionCompanionView({
   const [spatialQueryInput, setSpatialQueryInput] = useState('');
   const [spatialQueryResult, setSpatialQueryResult] = useState<string | null>(null);
   const [showDocStudio, setShowDocStudio] = useState(false);
+  const [mediaConsentAction, setMediaConsentAction] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     if (profile?.uid) {
@@ -916,6 +924,77 @@ export default function VisionCompanionView({
       });
     }
   }, [profile?.uid]);
+
+  // Raw encrypted vision-memory docs keyed by id, captured during decryption so
+  // memories encrypted on ANOTHER device (undecryptable here) are written back
+  // byte-for-byte instead of being destroyed by re-encryption.
+  const encryptedMemoryRawRef = useRef<Record<string, any>>({});
+  // Signature of the local decrypted/plaintext copy we last produced ourselves,
+  // so the effect does not re-process its own output in a loop.
+  const handledPlaintextSigRef = useRef<string>('');
+  const VISION_MEMORY_RETENTION_DAYS = 90;
+
+  // Decrypt stored vision memories for display, migrate legacy plaintext
+  // records to encrypted ones, and prune memories older than the retention
+  // period (see PRIVACY_SPECIFICATION.md - Data Retention).
+  useEffect(() => {
+    const raw = profile?.visionMemories;
+    const uid = profile?.uid;
+    if (!uid || !raw || raw.length === 0) return;
+
+    const sig = raw.map((m: any) => `${m?.id}:${m?.encrypted === true ? 1 : 0}`).join('|');
+    const hadEncrypted = raw.some((m: any) => m?.encrypted === true);
+    const cutoff = Date.now() - VISION_MEMORY_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    const hadExpired = raw.some((m: any) => {
+      const ts = Date.parse(m?.createdAt || '');
+      return !Number.isNaN(ts) && ts < cutoff;
+    });
+    // Skip only our own freshly produced local plaintext copy (loop guard).
+    if (!hadEncrypted && !hadExpired && sig === handledPlaintextSigRef.current) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        raw.forEach((m: any) => {
+          if (m?.encrypted === true && m.id) encryptedMemoryRawRef.current[m.id] = m;
+        });
+        const decrypted = (
+          await Promise.all(raw.map((m: any) => decryptVisionMemory(m, uid)))
+        ).filter((m): m is VisionMemory => !!m);
+        const fresh = decrypted.filter((m) => {
+          const ts = Date.parse(m.createdAt || '');
+          return Number.isNaN(ts) || ts >= cutoff;
+        });
+        if (cancelled || !isMountedRef.current) return;
+
+        handledPlaintextSigRef.current = fresh.map((m) => `${m.id}:0`).join('|');
+        if (setProfile) setProfile({ ...profile, visionMemories: fresh });
+
+        // Persist only when the stored copy actually changes: legacy plaintext
+        // to encrypt, or expired records to drop. Never rewrite ciphertext we
+        // could not decrypt (other-device keys) - carry those raw docs over.
+        const hadPlaintext = raw.some((m: any) => m && m.encrypted !== true);
+        if (hadPlaintext || hadExpired) {
+          const toWrite = await Promise.all(
+            fresh.map((m) =>
+              m.label === '\u{1F512}' && encryptedMemoryRawRef.current[m.id]
+                ? encryptedMemoryRawRef.current[m.id]
+                : encryptVisionMemory(m, uid)
+            )
+          );
+          await setDoc(
+            doc(db, `users/${uid}`),
+            { visionMemories: cleanDataForFirestore(toWrite) },
+            { merge: true }
+          );
+        }
+      } catch (err) {
+        console.error('Vision memory decryption/migration failed:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.visionMemories, profile?.uid]);
 
   const memories = profile?.visionMemories || [];
 
@@ -1163,6 +1242,10 @@ export default function VisionCompanionView({
   };
 
   const toggleVoiceCommands = () => {
+    if (!isVoiceCommandsActive && !hasMediaConsent(profile)) {
+      setMediaConsentAction(() => toggleVoiceCommands);
+      return;
+    }
     if (isVoiceCommandsActive) {
       try { voiceRecognitionRef.current?.stop(); } catch {}
       setIsVoiceCommandsActive(false);
@@ -1278,9 +1361,16 @@ export default function VisionCompanionView({
     setAnnounce(msg);
     toast.info(msg);
     try {
+      const encrypted = await Promise.all(
+        updated.map((m) =>
+          m.label === '\u{1F512}' && encryptedMemoryRawRef.current[m.id]
+            ? encryptedMemoryRawRef.current[m.id]
+            : encryptVisionMemory(m, profile.uid)
+        )
+      );
       await setDoc(
         doc(db, `users/${profile.uid}`),
-        { visionMemories: cleanDataForFirestore(updated) },
+        { visionMemories: cleanDataForFirestore(encrypted) },
         { merge: true }
       );
     } catch (err) {
@@ -1832,9 +1922,16 @@ Examine what is visible in front of the camera right now with utmost precision:
     setAnnounce(msg);
     speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
     try {
+      const encrypted = await Promise.all(
+        updated.map((m) =>
+          m.label === '\u{1F512}' && encryptedMemoryRawRef.current[m.id]
+            ? encryptedMemoryRawRef.current[m.id]
+            : encryptVisionMemory(m, profile.uid)
+        )
+      );
       await setDoc(
         doc(db, `users/${profile.uid}`),
-        { visionMemories: cleanDataForFirestore(updated) },
+        { visionMemories: cleanDataForFirestore(encrypted) },
         { merge: true }
       );
     } catch (err) {
@@ -3942,6 +4039,31 @@ Examine what is visible in front of the camera right now with utmost precision:
         companionLang={companionLang}
         onAnnounce={(msg) => setAnnounce(msg)}
       />
+
+      {/* One-time informed consent before first camera/mic use (spoken + written) */}
+      {mediaConsentAction && (
+        <MediaConsentGate
+          language={companionLang === 'ar' ? 'ar' : companionLang === 'fr' ? 'fr' : profile?.language}
+          onConsent={async () => {
+            const action = mediaConsentAction;
+            setMediaConsentAction(null);
+            try {
+              await recordMediaConsent(profile, setProfile);
+            } catch (err) {
+              console.error('Failed to persist media consent:', err);
+            }
+            action();
+          }}
+          onDecline={() => {
+            setMediaConsentAction(null);
+            const msg = companionLang === 'ar'
+              ? 'تمام، مش هنشغل الكاميرا أو المايكروفون. تقدر توافق في أي وقت.'
+              : 'Okay. Camera and microphone will stay off. You can agree anytime.';
+            setAnnounce(msg);
+            speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
+          }}
+        />
+      )}
 
       {/* Parental Consent Modal for Minors */}
       <ParentalConsentModal

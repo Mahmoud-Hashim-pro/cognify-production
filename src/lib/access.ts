@@ -8,7 +8,8 @@ export type AppView =
   | 'gym' | 'iq' | 'institution' | 'france' | 'privacy' | 'intelligence'
   | 'teacher' | 'parent' | 'evaluation' | 'ai_quality'
   | 'resilience' | 'tenancy' | 'developer_api' | 'retention'
-  | 'blind_home' | 'voice_navigation' | 'daily_aids' | 'known_people';
+  | 'blind_home' | 'voice_navigation' | 'daily_aids' | 'known_people'
+  | 'privacy_policy' | 'terms';
 
 /** A user counts as an accessibility user if they picked the Special Needs path
  *  OR have a real accessibility mode enabled. */
