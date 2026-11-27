@@ -4,6 +4,7 @@
  * Reference-matched UI implementation with dark navy palette and teal primary action.
  */
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { ClampedNotice } from './ui/ClampedNotice';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Camera,
@@ -124,6 +125,16 @@ export interface VisualToolConfig {
   demoSampleAr: string;
   demoSampleFr: string;
 }
+
+const SHORT_TOOL: Record<string, [string, string]> = {
+  scene: ['Scene', 'المشهد'],
+  currency: ['Money', 'العملات'],
+  read: ['Text', 'النصوص'],
+  color: ['Colors', 'الألوان'],
+  object: ['Objects', 'الأشياء'],
+  face: ['Faces', 'الوجوه'],
+  product: ['Products', 'المنتجات'],
+};
 
 export const VISUAL_TOOLS: VisualToolConfig[] = [
   {
@@ -1970,7 +1981,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
       <div className="max-w-6xl mx-auto w-full space-y-3 sm:space-y-4 pb-20">
         {/* ── TOP ACCESSIBILITY & PREFERENCES TOOLBAR ── */}
-        <div className="flex items-center justify-between gap-3 bg-[#082344]/80 p-2 sm:p-2.5 rounded-2xl border border-[#07558A]/80 backdrop-blur-md">
+        <div className="flex items-center justify-between gap-2 bg-[#082344]/80 p-1.5 rounded-2xl border border-[#07558A]/80 backdrop-blur-md">
           {onNavigateBack ? (
             <button
               type="button"
@@ -1981,12 +1992,13 @@ Examine what is visible in front of the camera right now with utmost precision:
               className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#082344] hover:bg-[#0D2542] border border-[#07558A] hover:border-[#1769AA]/60 text-[#B9CDE3] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
             >
               <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#1769AA]" />
-              <span className="text-xs font-bold">{t('Back', 'رجوع', 'Retour')}</span>
+              <span className="text-xs font-bold hidden sm:inline">{t('Back', 'رجوع', 'Retour')}</span>
             </button>
           ) : (
             <div />
           )}
 
+          <span className="flex-1 min-w-0 truncate text-sm font-black text-[#F5F8FF] px-1">{t('Visual Assistant', 'المساعد البصري', 'Assistant visuel')}</span>
           <div className="relative flex items-center gap-2">
             {/* Voice Command Recognition Mic Toggle */}
             <button
@@ -2014,7 +2026,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               ) : (
                 <MicOff className="w-3.5 h-3.5 text-[#B9CDE3]" />
               )}
-              <span className="hidden sm:inline">
+              <span className="hidden">
                 {isVoiceCommandsActive ? t('Listening...', 'استماع...') : t('Voice Commands', 'أوامر صوتية')}
               </span>
             </button>
@@ -2233,7 +2245,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           aria-label={t('Visual Assistant Tools Selector', 'شريط أدوات المساعد البصري المتخصصة', 'Sélecteur d\'outils visuels')}
           className="space-y-2.5"
         >
-          <div className="flex items-center justify-between px-1">
+          <div className="hidden items-center justify-between px-1">
             <div className="flex items-center gap-2 text-xs font-bold text-[#1769AA]">
               <SlidersHorizontal className="w-4 h-4" />
               <span>{t('Select Visual Tool', 'اختر أداة الرؤية المتخصصة', 'Choisir l\'outil visuel')}</span>
@@ -2243,7 +2255,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           <div
             role="tablist"
             aria-label={t('Visual Tools', 'أدوات الرؤية')}
-            className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"
+            className="grid grid-cols-7 gap-1.5 sm:gap-2"
           >
             {VISUAL_TOOLS.map((tool) => {
               const isSelected = activeTool === tool.id;
@@ -2258,13 +2270,13 @@ Examine what is visible in front of the camera right now with utmost precision:
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => handleSwitchTool(tool.id)}
-                  className={`min-h-[64px] min-w-0 p-2 sm:p-2.5 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+                  className={`min-h-[56px] min-w-0 p-1 sm:p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                     isSelected
                       ? 'bg-[#1769AA]/15 border-[#1769AA] text-[#F5F8FF] shadow-lg shadow-[#1769AA]/20 ring-1 ring-[#1769AA]'
                       : 'bg-[#082344] border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#1769AA]/60 hover:bg-[#092747]'
                   }`}
                 >
-                  <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center justify-center w-full">
                     <div
                       className={`w-7 h-7 rounded-xl flex items-center justify-center ${
                         isSelected ? 'bg-[#1769AA] text-[#061A33]' : 'bg-[#092747] text-[#1769AA]'
@@ -2272,13 +2284,13 @@ Examine what is visible in front of the camera right now with utmost precision:
                     >
                       <ToolIcon className="w-4 h-4" />
                     </div>
-                    <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#1769AA] border border-[#07558A]/80">
+                    <span className="hidden text-xs font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#1769AA] border border-[#07558A]/80">
                       {tool.keyboardShortcut}
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold leading-tight line-clamp-2 break-words">{title}</h3>
-                    <p className="hidden xl:block text-xs text-[#B9CDE3]/70 truncate">{badge}</p>
+                    <h3 className="text-[10px] sm:text-xs font-bold leading-tight line-clamp-2 break-words">{SHORT_TOOL[tool.id]?.[companionLang === 'ar' ? 1 : 0] || title}</h3>
+                    <p className="hidden text-xs text-[#B9CDE3]/70 truncate">{badge}</p>
                   </div>
                 </button>
               );
@@ -2337,10 +2349,10 @@ Examine what is visible in front of the camera right now with utmost precision:
         <section
           data-testid="visual-companion-hud"
           aria-label={t('Visual Workspace Controls & Status', 'حالة وتحكم الرفيق البصري')}
-          className="p-3 sm:p-3.5 rounded-2xl bg-[#082344] border border-[#07558A] shadow-lg flex flex-col md:flex-row items-center justify-between gap-3"
+          className="p-2 rounded-2xl bg-[#082344] border border-[#07558A] shadow-lg flex flex-row items-center justify-between gap-2"
         >
           {/* Status Indicators */}
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
             {/* Camera Status */}
             <div
               data-testid="camera-status-indicator"
@@ -2375,7 +2387,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             {/* Mic Status */}
             <div
               data-testid="mic-status-indicator"
-              className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
+              className={`hidden items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
                 isVoiceCommandsActive
                   ? 'bg-red-500/15 border-red-500/40 text-red-300'
                   : 'bg-[#061A33] border-[#07558A] text-slate-400'
@@ -2396,7 +2408,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             {/* Speech Status */}
             <div
               data-testid="speech-status-indicator"
-              className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
+              className={`hidden items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
                 isSpeaking
                   ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
                   : 'bg-[#061A33] border-[#07558A] text-slate-400'
@@ -2412,7 +2424,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           </div>
 
           {/* Large Start / Stop Controls */}
-          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+          <div className="flex items-center gap-3 justify-end shrink-0">
             <button
               type="button"
               onClick={status === 'ready' && streamRef.current ? stopCamera : () => startCamera()}
@@ -2422,7 +2434,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   ? t('Stop Camera Feed', 'إيقاف بث الكاميرا')
                   : t('Start Camera Feed', 'بدء تشغيل الكاميرا')
               }
-              className={`px-6 py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-lg active:scale-95 cursor-pointer ${
+              className={`px-4 min-h-[44px] rounded-xl font-black text-xs flex items-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer ${
                 status === 'ready' && streamRef.current
                   ? 'bg-[#C43D4D] hover:bg-[#A82B3A] text-white shadow-[#C43D4D]/30'
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
@@ -2447,7 +2459,7 @@ Examine what is visible in front of the camera right now with utmost precision:
         <section
           data-testid="visual-safety-notice"
           aria-label={t('Safety Notice', 'تنبيه السلامة والأمان')}
-          className="p-3.5 sm:p-4 rounded-2xl bg-[#092747] border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3"
+          className="hidden p-3.5 sm:p-4 rounded-2xl bg-[#092747] border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3"
         >
           <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <p className="leading-relaxed opacity-90">
@@ -2465,7 +2477,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeTool) || VISUAL_TOOLS[0];
             const ToolIcon = activeToolConfig.Icon;
             return (
-              <div className="absolute top-6 start-6 z-20 pointer-events-none">
+              <div className="absolute top-3 start-3 z-20 pointer-events-none">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/85 border border-[#1769AA] text-[#F5F8FF] backdrop-blur-md shadow-md">
                   <ToolIcon className="w-3.5 h-3.5 text-[#1769AA]" />
                   <span>
@@ -2849,20 +2861,23 @@ Examine what is visible in front of the camera right now with utmost precision:
         </section>
 
         {/* ── Accessible Safety Notice Banner ── */}
-        <div className="rounded-2xl bg-[#092747]/90 border border-[#07558A] p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#B9CDE3]">
-          <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
-            <p className="leading-relaxed">
-              {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN}
-            </p>
+        <div className="rounded-2xl bg-[#092747]/90 border border-[#07558A] p-2 sm:p-3 flex flex-row items-center justify-between gap-2 text-xs text-[#B9CDE3]">
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-3" aria-hidden="true" />
+            <ClampedNotice isAr={companionLang === 'ar'}>
+              <p className="leading-relaxed pt-3">
+                {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN}
+              </p>
+            </ClampedNotice>
           </div>
           <button
             type="button"
             onClick={() => speak(companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN, companionLang)}
-            className="px-3.5 py-1.5 rounded-xl bg-[#07558A] hover:bg-[#1769AA] text-white hover:text-[#061A33] font-bold text-xs whitespace-nowrap cursor-pointer transition-all shrink-0"
+            className="px-3.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#07558A] hover:bg-[#1769AA] text-white hover:text-[#061A33] font-bold text-xs whitespace-nowrap cursor-pointer transition-all shrink-0"
             aria-label={companionLang === 'ar' ? 'قراءة تنبيه الأمان بصوت عالٍ' : 'Read safety notice aloud'}
           >
-            {companionLang === 'ar' ? 'قراءة تنبيه الأمان' : 'Read safety notice aloud'}
+            <Volume2 className="w-4 h-4 sm:hidden" aria-hidden="true" />
+            <span className="hidden sm:inline">{companionLang === 'ar' ? 'قراءة تنبيه الأمان' : 'Read safety notice aloud'}</span>
           </button>
         </div>
 
