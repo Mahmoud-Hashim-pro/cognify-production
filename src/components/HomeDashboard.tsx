@@ -340,7 +340,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         aria-label={t('Personal Welcome', 'الترحيب الشخصي')}
         className={`rounded-2xl border p-4 sm:p-5 shadow-xs transition-colors ${
           isDarkMode 
-            ? 'bg-[#0D2B4E] border-[#1D426B]' 
+            ? 'bg-[#131E2E] border-[#22354E]' 
             : 'bg-white border-slate-200'
         }`}
       >
@@ -374,7 +374,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
 
         {/* Global Compact Tool Search Bar */}
-        <div className="relative mt-3.5 pt-3 border-t border-slate-200 dark:border-[#1D426B]/80">
+        <div className="relative mt-3.5 pt-3 border-t border-slate-200 dark:border-[#22354E]/80">
           <div className="relative">
             <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
               <Search className="w-4 h-4" aria-hidden="true" />
@@ -386,7 +386,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               placeholder={t('Search any tool', 'ابحث عن أي أداة')}
               className={`w-full min-h-[48px] text-sm font-medium ps-9 pe-10 py-2 rounded-xl border ${
                 isDarkMode 
-                  ? 'bg-[#082440] border-[#1D426B] text-white placeholder-slate-400 focus:border-[#1769AA]' 
+                  ? 'bg-[#0B1523] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                   : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'
               } transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/30`}
               aria-label={t('Global Tool Search', 'البحث في الأدوات والخدمات')}
@@ -406,7 +406,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Interactive Search Results Dropdown */}
           {searchQuery.trim().length > 0 && (
             <div className={`mt-2 rounded-xl border ${
-              isDarkMode ? 'bg-[#082440] border-[#1D426B]' : 'bg-white border-slate-200'
+              isDarkMode ? 'bg-[#0B1523] border-[#22354E]' : 'bg-white border-slate-200'
             } shadow-lg p-2 space-y-1 z-20`}>
               {searchResults.length > 0 ? (
                 searchResults.map((item, idx) => (
@@ -426,7 +426,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       }
                     }}
                     className={`w-full min-h-[44px] px-3 py-1.5 rounded-lg text-start flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer ${
-                      isDarkMode ? 'hover:bg-[#12365E] text-slate-200' : 'hover:bg-slate-100 text-slate-800'
+                      isDarkMode ? 'hover:bg-[#1A283D] text-slate-200' : 'hover:bg-slate-100 text-slate-800'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
@@ -476,7 +476,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             onClick={() => onSelectTab('vision')}
             className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
               isDarkMode 
-                ? 'border-[#1D426B] bg-[#0D2B4E] hover:border-[#1769AA] text-white' 
+                ? 'border-[#22354E] bg-[#131E2E] hover:border-[#1769AA] text-white' 
                 : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
             } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
             aria-label={t('Launch Visual Assistant (Section 1)', 'تشغيل المساعد البصري (القسم 1)')}
@@ -499,7 +499,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             onClick={() => onSelectTab('deaf')}
             className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
               isDarkMode 
-                ? 'border-[#1D426B] bg-[#0D2B4E] hover:border-[#1769AA] text-white' 
+                ? 'border-[#22354E] bg-[#131E2E] hover:border-[#1769AA] text-white' 
                 : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
             } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
             aria-label={t('Live Captions (Section 5)', 'التفريغ الصوتي المباشر (القسم 5)')}
@@ -522,7 +522,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             onClick={onOpenPassport}
             className={`hidden min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
               isDarkMode 
-                ? 'border-[#1D426B] bg-[#0D2B4E] hover:border-[#1769AA] text-white' 
+                ? 'border-[#22354E] bg-[#131E2E] hover:border-[#1769AA] text-white' 
                 : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
             } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
             aria-label={t('Accessibility Passport (Section 6)', 'جواز التسهيلات الموحد (القسم 6)')}
@@ -580,7 +580,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 }}
                 className={`group p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2 shadow-xs ${
                   isDarkMode 
-                    ? 'bg-[#0D2B4E] border-[#1D426B] hover:border-[#1769AA]' 
+                    ? 'bg-[#131E2E] border-[#22354E] hover:border-[#1769AA]' 
                     : 'bg-white border-slate-200 hover:border-[#1769AA]'
                 } hover:-translate-y-0.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] min-h-[64px]`}
                 aria-label={isAr ? sec.titleAr : sec.titleEn}
@@ -614,7 +614,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   </p>
                 </div>
 
-                <div className="hidden pt-2 border-t border-slate-200 dark:border-[#1D426B] flex items-center justify-between text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
+                <div className="hidden pt-2 border-t border-slate-200 dark:border-[#22354E] flex items-center justify-between text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
                   <span>{t('Explore Section Suite', 'استكشف أدوات القسم')}</span>
                   <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isAr ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                 </div>
@@ -647,7 +647,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <div
                 key={item.id}
                 className={`p-3.5 rounded-2xl border text-start flex flex-col justify-between gap-2 ${
-                  isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B]' : 'bg-white border-slate-200'
+                  isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-200'
                 } shadow-xs`}
               >
                 <div>
@@ -677,7 +677,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         ) : (
           /* Honest Empty State for new users without reading, tasks, or conversations */
           <div className={`p-4 sm:p-5 rounded-2xl border text-center space-y-2 ${
-            isDarkMode ? 'bg-[#0D2B4E]/60 border-[#1D426B]' : 'bg-slate-50 border-slate-200'
+            isDarkMode ? 'bg-[#131E2E]/60 border-[#22354E]' : 'bg-slate-50 border-slate-200'
           }`}>
             <Clock className="w-5 h-5 text-slate-400 mx-auto" aria-hidden="true" />
             <div className="space-y-0.5">
@@ -707,7 +707,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       <section 
         aria-label={t('Support and Assistance', 'الدعم والمساعدة')}
         className={`px-4 py-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 ${
-          isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B]' : 'bg-slate-50 border-slate-200'
+          isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-slate-50 border-slate-200'
         } transition-colors`}
       >
         <div className="flex items-center gap-2.5">

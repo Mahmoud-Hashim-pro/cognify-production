@@ -508,14 +508,14 @@ Database Systems,90,3,270`;
       {/* ── HEADER & NAVIGATION ── */}
       <header
         role="banner"
-        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#0D2B4E]/95 backdrop-blur-md border-b border-[#1D426B] shadow-md"
+        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#131E2E]/95 backdrop-blur-md border-b border-[#22354E] shadow-md"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={onNavigateBack}
             aria-label={localize(profile.language, 'Back to Work & Create Section', 'الرجوع لقسم العمل والإبداع')}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
           >
             <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
           </button>
@@ -524,7 +524,7 @@ Database Systems,90,3,270`;
               type="button"
               onClick={onMenuClick}
               aria-label={localize(profile.language, 'Open Main Menu', 'فتح القائمة الرئيسية')}
-              className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+              className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -535,7 +535,7 @@ Database Systems,90,3,270`;
               <span className="text-xs font-bold text-[#4B9FE1] uppercase tracking-wider">
                 {localize(profile.language, 'Section 3: Work & Create', 'القسم 3: العمل والإبداع')}
               </span>
-              <span className="text-[#1D426B]">•</span>
+              <span className="text-[#22354E]">•</span>
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                 <ShieldCheck className="w-3 h-3" />
                 {localize(profile.language, 'WCAG 2.2 AA Verified', 'معتمد لإمكانية الوصول')}
@@ -598,7 +598,7 @@ Database Systems,90,3,270`;
       {/* ── SUB-NAV: 6 ACCESSIBLE PRODUCTIVITY TABS ── */}
       <nav
         aria-label={localize(profile.language, 'Productivity Workspace Tools', 'أدوات مساحة الإنتاجية')}
-        className="bg-[#0D2542] border-b border-[#1D426B] px-4 sm:px-6 py-2.5"
+        className="bg-[#0D2542] border-b border-[#22354E] px-4 sm:px-6 py-2.5"
       >
         <div className="flex flex-wrap items-center gap-2">
           {tools.map((t) => {
@@ -616,7 +616,7 @@ Database Systems,90,3,270`;
                 className={`min-h-[44px] px-3 py-2.5 flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
                   isActive
                     ? 'bg-[#1769AA] text-white shadow-md'
-                    : 'bg-[#0D2B4E] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#12365E] border border-[#1D426B]'
+                    : 'bg-[#131E2E] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D] border border-[#22354E]'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#4B9FE1]'}`} />
@@ -638,7 +638,7 @@ Database Systems,90,3,270`;
             className="space-y-4"
           >
             {/* Action Bar & Dictation Controls */}
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-5 shadow-lg space-y-4">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-5 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -686,7 +686,7 @@ Database Systems,90,3,270`;
                       toast.success(localize(profile.language, 'Exported Word (.docx)', 'تم تصدير مستند Word (.docx)'));
                       speakText(isAr ? 'تم تصدير ملف الوورد بنجاح' : 'Exported Word document successfully');
                     }}
-                    className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+                    className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                   >
                     <Download className="w-4 h-4" />
                     <span>{localize(profile.language, 'Download .DOCX', 'تحميل Word')}</span>
@@ -696,7 +696,7 @@ Database Systems,90,3,270`;
                     <button
                       type="button"
                       onClick={() => onOpenBookStudio(exportDocumentToPlainText(voiceDoc), voiceDoc.title)}
-                      className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#F8FAFC] border border-[#1D426B] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+                      className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#F8FAFC] border border-[#22354E] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                     >
                       <Layers className="w-4 h-4 text-[#1769AA]" />
                       <span>{localize(profile.language, 'Book Studio', 'استوديو الكتب')}</span>
@@ -706,7 +706,7 @@ Database Systems,90,3,270`;
               </div>
 
               {/* Typed / Voice Command Quick Box */}
-              <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#1D426B]">
+              <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#22354E]">
                 <input
                   type="text"
                   value={dictationInput}
@@ -722,7 +722,7 @@ Database Systems,90,3,270`;
                       ? 'اكتب أو أملِ جملتك (مثال: "عنوان رئيسي ملخص الاجتماع" أو "نقطة جديدة مناقشة الميزانية")'
                       : 'Type or dictate (e.g. "Heading 1 Project Roadmap" or "New bullet Review budget")'
                   }
-                  className="flex-1 min-h-[44px] px-4 py-2.5 bg-[#061A33] border border-[#1D426B] rounded-xl text-sm text-[#F8FAFC] placeholder-[#64748B] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+                  className="flex-1 min-h-[44px] px-4 py-2.5 bg-[#061A33] border border-[#22354E] rounded-xl text-sm text-[#F8FAFC] placeholder-[#64748B] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -735,7 +735,7 @@ Database Systems,90,3,270`;
               </div>
 
               {/* Dictation Cheatsheet */}
-              <div className="bg-[#12365E]/60 p-3 rounded-xl border border-[#1D426B] text-xs text-[#94A3B8] flex flex-wrap items-center gap-x-4 gap-y-1">
+              <div className="bg-[#1A283D]/60 p-3 rounded-xl border border-[#22354E] text-xs text-[#94A3B8] flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="font-bold text-[#F8FAFC]">{localize(profile.language, 'Voice Commands:', 'أوامر صوتية سريعة:')}</span>
                 <span>{isAr ? '• "عنوان رئيسي [النص]"' : '• "Heading 1 [Text]"'}</span>
                 <span>{isAr ? '• "عنوان فرعي [النص]"' : '• "Heading 2 [Text]"'}</span>
@@ -746,8 +746,8 @@ Database Systems,90,3,270`;
             </div>
 
             {/* Document Blocks Transcript */}
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#1D426B]">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#22354E]">
                 <span className="text-xs font-bold text-[#94A3B8] uppercase">
                   {localize(
                     profile.language,
@@ -766,7 +766,7 @@ Database Systems,90,3,270`;
                         'Document as Markdown'
                       )
                     }
-                    className="min-h-[44px] px-3 py-1.5 rounded-lg bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] text-xs font-semibold border border-[#1D426B] flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                    className="min-h-[44px] px-3 py-1.5 rounded-lg bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] text-xs font-semibold border border-[#22354E] flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   >
                     {copiedKey === 'doc_md' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{localize(profile.language, 'Copy Markdown', 'نسخ Markdown')}</span>
@@ -795,7 +795,7 @@ Database Systems,90,3,270`;
 
               {voiceDoc.blocks.length === 0 ? (
                 <div className="text-center py-12 text-[#94A3B8] space-y-2">
-                  <FileText className="w-10 h-10 mx-auto text-[#1D426B]" />
+                  <FileText className="w-10 h-10 mx-auto text-[#22354E]" />
                   <p className="font-semibold text-sm">
                     {localize(profile.language, 'Document is empty. Dictate or type above.', 'المستند فارغ حالياً. أملِ أو اكتب أعلاه لبدء العمل.')}
                   </p>
@@ -805,11 +805,11 @@ Database Systems,90,3,270`;
                   {voiceDoc.blocks.map((block, idx) => (
                     <article
                       key={block.id}
-                      className="p-4 rounded-xl bg-[#061A33] border border-[#1D426B] flex items-start justify-between gap-4 group hover:border-[#1769AA]/50 transition-all"
+                      className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] flex items-start justify-between gap-4 group hover:border-[#1769AA]/50 transition-all"
                     >
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold uppercase px-2 py-0.5 rounded bg-[#12365E] text-[#4B9FE1] border border-[#1D426B]">
+                          <span className="text-xs font-bold uppercase px-2 py-0.5 rounded bg-[#1A283D] text-[#4B9FE1] border border-[#22354E]">
                             {block.type}
                           </span>
                           <span className="text-xs text-[#64748B]">#{idx + 1}</span>
@@ -842,7 +842,7 @@ Database Systems,90,3,270`;
                           type="button"
                           onClick={() => speakText(block.text)}
                           aria-label={localize(profile.language, `Read block ${idx + 1}`, `استمع للفقرة ${idx + 1}`)}
-                          className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#12365E] text-[#4B9FE1] hover:bg-[#1769AA]/20 transition-all cursor-pointer"
+                          className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#1A283D] text-[#4B9FE1] hover:bg-[#1769AA]/20 transition-all cursor-pointer"
                         >
                           <Volume2 className="w-4 h-4" />
                         </button>
@@ -856,7 +856,7 @@ Database Systems,90,3,270`;
                             speakText(isAr ? 'تم حذف العنصر' : 'Block removed');
                           }}
                           aria-label={localize(profile.language, `Delete block ${idx + 1}`, `حذف الفقرة ${idx + 1}`)}
-                          className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#12365E] text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
+                          className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#1A283D] text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -878,7 +878,7 @@ Database Systems,90,3,270`;
             className="grid grid-cols-1 lg:grid-cols-12 gap-6"
           >
             {/* Form Inputs (Left / Top) */}
-            <div className="lg:col-span-5 bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="lg:col-span-5 bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
                 <Mail className="w-5 h-5 text-[#1769AA]" />
                 <span>{localize(profile.language, 'Draft Parameters & Controls', 'إعدادات الصياغة وضبط النبرة')}</span>
@@ -894,7 +894,7 @@ Database Systems,90,3,270`;
                     value={emailInput.recipient}
                     onChange={(e) => setEmailInput({ ...emailInput, recipient: e.target.value })}
                     aria-label={localize(profile.language, 'Recipient Name / Title', 'اسم أو صفة المستلم')}
-                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-[#F8FAFC]"
+                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                   />
                 </div>
 
@@ -907,7 +907,7 @@ Database Systems,90,3,270`;
                     value={emailInput.purpose}
                     onChange={(e) => setEmailInput({ ...emailInput, purpose: e.target.value })}
                     aria-label={localize(profile.language, 'Core Purpose / Subject', 'الغرض الرئيسي من الرسالة')}
-                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-[#F8FAFC]"
+                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                   />
                 </div>
 
@@ -919,7 +919,7 @@ Database Systems,90,3,270`;
                     <select
                       value={emailInput.dialect}
                       onChange={(e) => setEmailInput({ ...emailInput, dialect: e.target.value as WritingDialect })}
-                      className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-[#F8FAFC]"
+                      className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                     >
                       <option value="msa">{isAr ? 'فصحى معتمدة' : 'Formal MSA'}</option>
                       <option value="egyptian">{isAr ? 'عامية مصرية' : 'Egyptian Ammiya'}</option>
@@ -934,7 +934,7 @@ Database Systems,90,3,270`;
                     <select
                       value={emailInput.tone}
                       onChange={(e) => setEmailInput({ ...emailInput, tone: e.target.value as WritingTone })}
-                      className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-[#F8FAFC]"
+                      className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                     >
                       <option value="formal">{isAr ? 'رسمي' : 'Formal'}</option>
                       <option value="academic">{isAr ? 'أكاديمي' : 'Academic'}</option>
@@ -951,7 +951,7 @@ Database Systems,90,3,270`;
                     <select
                       value={emailInput.length}
                       onChange={(e) => setEmailInput({ ...emailInput, length: e.target.value as WritingLength })}
-                      className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-[#F8FAFC]"
+                      className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                     >
                       <option value="short">{isAr ? 'قصير' : 'Short'}</option>
                       <option value="medium">{isAr ? 'متوسط' : 'Medium'}</option>
@@ -973,7 +973,7 @@ Database Systems,90,3,270`;
                         keyPoints: e.target.value.split('\n').filter(Boolean),
                       })
                     }
-                    className="w-full p-3 rounded-xl bg-[#061A33] border border-[#1D426B] text-[#F8FAFC] leading-relaxed"
+                    className="w-full p-3 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC] leading-relaxed"
                   />
                 </div>
 
@@ -986,7 +986,7 @@ Database Systems,90,3,270`;
                     value={emailInput.deadlineOrNextStep || ''}
                     onChange={(e) => setEmailInput({ ...emailInput, deadlineOrNextStep: e.target.value })}
                     aria-label={localize(profile.language, 'Deadline or Desired Action', 'الموعد النهائي أو الإجراء المطلوب')}
-                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-[#F8FAFC]"
+                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-[#F8FAFC]"
                   />
                 </div>
 
@@ -1007,9 +1007,9 @@ Database Systems,90,3,270`;
             </div>
 
             {/* Generated Review Area (Right / Bottom) */}
-            <div className="lg:col-span-7 bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg flex flex-col justify-between space-y-4">
+            <div className="lg:col-span-7 bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg flex flex-col justify-between space-y-4">
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#1D426B]">
+                <div className="flex items-center justify-between pb-3 border-b border-[#22354E]">
                   <div>
                     <h3 className="text-base font-bold text-[#F8FAFC]">
                       {localize(profile.language, 'Generated Draft Review', 'مراجعة المسودة الكاملة')}
@@ -1023,7 +1023,7 @@ Database Systems,90,3,270`;
                     <button
                       type="button"
                       onClick={() => speakText(generatedDraft.fullDraftText)}
-                      className="min-h-[44px] px-3 py-1.5 rounded-lg bg-[#12365E] text-[#4B9FE1] hover:bg-[#1769AA]/20 text-xs font-bold border border-[#1D426B] flex items-center gap-1.5 cursor-pointer"
+                      className="min-h-[44px] px-3 py-1.5 rounded-lg bg-[#1A283D] text-[#4B9FE1] hover:bg-[#1769AA]/20 text-xs font-bold border border-[#22354E] flex items-center gap-1.5 cursor-pointer"
                     >
                       <Volume2 className="w-3.5 h-3.5" />
                       <span>{localize(profile.language, 'Listen', 'استماع')}</span>
@@ -1051,7 +1051,7 @@ Database Systems,90,3,270`;
                 </div>
 
                 {/* Draft Content Card */}
-                <div className="p-4 rounded-xl bg-[#061A33] border border-[#1D426B] space-y-3 font-mono text-sm text-[#F8FAFC] leading-relaxed whitespace-pre-wrap select-all">
+                <div className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-3 font-mono text-sm text-[#F8FAFC] leading-relaxed whitespace-pre-wrap select-all">
                   {generatedDraft.fullDraftText}
                 </div>
               </div>
@@ -1060,7 +1060,7 @@ Database Systems,90,3,270`;
               <div
                 role="note"
                 aria-label={localize(profile.language, 'Privacy notice', 'إشعار الخصوصية والأمان')}
-                className="p-3.5 rounded-xl bg-[#12365E] border border-[#1D426B] text-xs text-[#94A3B8] flex items-start gap-2.5"
+                className="p-3.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-xs text-[#94A3B8] flex items-start gap-2.5"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">{generatedDraft.disclaimer}</p>
@@ -1078,7 +1078,7 @@ Database Systems,90,3,270`;
             className="space-y-4"
           >
             {/* Topic Input & Generation Bar */}
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -1123,7 +1123,7 @@ Database Systems,90,3,270`;
                       URL.revokeObjectURL(url);
                       toast.success(localize(profile.language, 'Exported HTML Deck', 'تم تحميل العرض كصفحة ويب ميسرة'));
                     }}
-                    className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] font-bold text-xs flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+                    className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] font-bold text-xs flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                   >
                     <FileDown className="w-4 h-4" />
                     <span>{localize(profile.language, 'HTML Deck', 'صفحة HTML ميسرة')}</span>
@@ -1132,18 +1132,18 @@ Database Systems,90,3,270`;
               </div>
 
               {/* Topic Formulation */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-[#1D426B]">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-[#22354E]">
                 <input
                   type="text"
                   value={presentationTopic}
                   onChange={(e) => setPresentationTopic(e.target.value)}
                   placeholder={localize(profile.language, 'Presentation Topic...', 'عنوان أو موضوع العرض التقديمي...')}
-                  className="flex-1 min-h-[44px] px-4 py-2 bg-[#061A33] border border-[#1D426B] rounded-xl text-sm text-[#F8FAFC]"
+                  className="flex-1 min-h-[44px] px-4 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-sm text-[#F8FAFC]"
                 />
                 <select
                   value={slideCount}
                   onChange={(e) => setSlideCount(Number(e.target.value))}
-                  className="min-h-[44px] px-3 py-2 bg-[#061A33] border border-[#1D426B] rounded-xl text-xs text-[#F8FAFC]"
+                  className="min-h-[44px] px-3 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-xs text-[#F8FAFC]"
                 >
                   <option value={3}>{isAr ? '3 شرائح' : '3 Slides'}</option>
                   <option value={4}>{isAr ? '4 شرائح' : '4 Slides'}</option>
@@ -1168,8 +1168,8 @@ Database Systems,90,3,270`;
             </div>
 
             {/* Screen Reader Sequential Slide Navigator */}
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#1D426B]">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#22354E]">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-bold text-[#4B9FE1]">
                     {localize(
@@ -1195,7 +1195,7 @@ Database Systems,90,3,270`;
                       );
                     }}
                     aria-label={localize(profile.language, 'Previous Slide', 'الشريحة السابقة')}
-                    className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 disabled:opacity-40 text-[#4B9FE1] border border-[#1D426B] flex items-center justify-center cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 disabled:opacity-40 text-[#4B9FE1] border border-[#22354E] flex items-center justify-center cursor-pointer"
                   >
                     <ChevronLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
                   </button>
@@ -1211,7 +1211,7 @@ Database Systems,90,3,270`;
                       );
                     }}
                     aria-label={localize(profile.language, 'Next Slide', 'الشريحة التالية')}
-                    className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 disabled:opacity-40 text-[#4B9FE1] border border-[#1D426B] flex items-center justify-center cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 disabled:opacity-40 text-[#4B9FE1] border border-[#22354E] flex items-center justify-center cursor-pointer"
                   >
                     <ChevronRight className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
                   </button>
@@ -1229,7 +1229,7 @@ Database Systems,90,3,270`;
                   )}
                   className="p-6 rounded-2xl bg-[#061A33] border-2 border-[#1769AA]/60 space-y-4 shadow-xl"
                 >
-                  <h3 className="text-xl sm:text-2xl font-black text-[#F8FAFC] pb-2 border-b border-[#1D426B]">
+                  <h3 className="text-xl sm:text-2xl font-black text-[#F8FAFC] pb-2 border-b border-[#22354E]">
                     {presentationModel.slides[currentSlideIndex].title}
                   </h3>
 
@@ -1246,7 +1246,7 @@ Database Systems,90,3,270`;
                   <div
                     role="note"
                     aria-label={localize(profile.language, 'Speaker Notes', 'ملاحظات المتحدث')}
-                    className="p-4 rounded-xl bg-[#12365E] border-s-4 border-[#E5A93C] text-xs text-[#CBD5E1] space-y-1"
+                    className="p-4 rounded-xl bg-[#1A283D] border-s-4 border-[#E5A93C] text-xs text-[#CBD5E1] space-y-1"
                   >
                     <strong className="block text-[#F8FAFC]">
                       {localize(profile.language, 'Speaker Notes & Screen Reader Guide:', 'ملاحظات المتحدث ودليل قارئ الشاشة:')}
@@ -1268,7 +1268,7 @@ Database Systems,90,3,270`;
             className="space-y-4"
           >
             {/* Summary Cards */}
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -1291,7 +1291,7 @@ Database Systems,90,3,270`;
                       const sum = generateSpreadsheetSummary(spreadsheetModel);
                       speakText(isAr ? sum.summaryTextAr : sum.summaryTextEn);
                     }}
-                    className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+                    className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                   >
                     <Volume2 className="w-4 h-4" />
                     <span>{localize(profile.language, 'Verbalize Summary', 'استماع للتحليل الإحصائي')}</span>
@@ -1332,7 +1332,7 @@ Database Systems,90,3,270`;
                       URL.revokeObjectURL(url);
                       toast.success(localize(profile.language, 'Downloaded Excel XML file', 'تم تحميل ملف Excel XML'));
                     }}
-                    className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+                    className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                   >
                     <FileDown className="w-4 h-4" />
                     <span>{localize(profile.language, 'Excel XML', 'ملف Excel')}</span>
@@ -1341,14 +1341,14 @@ Database Systems,90,3,270`;
               </div>
 
               {/* Formula Evaluator Bar */}
-              <div className="p-4 rounded-xl bg-[#061A33] border border-[#1D426B] space-y-3">
+              <div className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-3">
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={formulaInput}
                     onChange={(e) => setFormulaInput(e.target.value)}
                     placeholder="=SUM(B1:B4) or =AVERAGE(B1:B4)"
-                    className="flex-1 min-h-[44px] px-4 py-2 font-mono text-sm bg-[#0D2B4E] border border-[#1D426B] rounded-xl text-[#F8FAFC]"
+                    className="flex-1 min-h-[44px] px-4 py-2 font-mono text-sm bg-[#131E2E] border border-[#22354E] rounded-xl text-[#F8FAFC]"
                   />
                   <button
                     type="button"
@@ -1368,7 +1368,7 @@ Database Systems,90,3,270`;
                 {evaluatedFormulaResult && (
                   <div
                     role="status"
-                    className="p-3 rounded-lg bg-[#12365E] border border-[#1D426B] text-xs text-[#CBD5E1] space-y-1"
+                    className="p-3 rounded-lg bg-[#1A283D] border border-[#22354E] text-xs text-[#CBD5E1] space-y-1"
                   >
                     <div className="flex items-center gap-2 font-bold text-[#F8FAFC]">
                       <span>{localize(profile.language, 'Formula Result:', 'ناتج المعادلة:')}</span>
@@ -1405,7 +1405,7 @@ Database Systems,90,3,270`;
                   <button
                     type="button"
                     onClick={() => setCellOverwriteWarning(null)}
-                    className="px-3 py-1.5 rounded-lg bg-[#0D2B4E] text-[#94A3B8] hover:text-white text-xs cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-[#131E2E] text-[#94A3B8] hover:text-white text-xs cursor-pointer"
                   >
                     {localize(profile.language, 'Cancel', 'إلغاء')}
                   </button>
@@ -1414,13 +1414,13 @@ Database Systems,90,3,270`;
             )}
 
             {/* Accessible Interactive Table */}
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg overflow-x-auto custom-scrollbar">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg overflow-x-auto custom-scrollbar">
               <table
                 className="w-full text-start border-collapse text-xs"
                 aria-label={spreadsheetModel.name}
               >
                 <thead>
-                  <tr className="border-b border-[#1D426B] text-[#94A3B8]">
+                  <tr className="border-b border-[#22354E] text-[#94A3B8]">
                     <th scope="col" className="p-3 text-center w-12 font-bold">#</th>
                     {spreadsheetModel.headers.map((h, cIdx) => (
                       <th scope="col" key={cIdx} className="p-3 font-bold text-start text-[#F8FAFC]">
@@ -1433,7 +1433,7 @@ Database Systems,90,3,270`;
                   {spreadsheetModel.rows.map((row, rIdx) => (
                     <tr
                       key={rIdx}
-                      className="border-b border-[#1D426B]/50 hover:bg-[#12365E]/60 transition-colors"
+                      className="border-b border-[#22354E]/50 hover:bg-[#1A283D]/60 transition-colors"
                     >
                       <th scope="row" className="p-3 text-center font-bold text-[#64748B]">
                         {rIdx + 1}
@@ -1476,7 +1476,7 @@ Database Systems,90,3,270`;
               </table>
 
               {/* Cell Editor Bar */}
-              <div className="mt-4 pt-4 border-t border-[#1D426B] flex flex-col sm:flex-row items-center gap-3">
+              <div className="mt-4 pt-4 border-t border-[#22354E] flex flex-col sm:flex-row items-center gap-3">
                 <span className="text-xs font-bold text-[#4B9FE1] min-w-[120px]">
                   {spreadsheetModel.headers[selectedCell.col]} ({localize(profile.language, `Row ${selectedCell.row + 1}`, `الصف ${selectedCell.row + 1}`)}):
                 </span>
@@ -1485,7 +1485,7 @@ Database Systems,90,3,270`;
                   value={cellEditValue}
                   onChange={(e) => setCellEditValue(e.target.value)}
                   aria-label={localize(profile.language, 'Edit selected cell value', 'تعديل قيمة الخلية المحددة')}
-                  className="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-sm text-[#F8FAFC] font-mono"
+                  className="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-sm text-[#F8FAFC] font-mono"
                 />
                 <button
                   type="button"
@@ -1507,7 +1507,7 @@ Database Systems,90,3,270`;
             aria-label={localize(profile.language, 'Chart and Visual Description', 'واصف الرسوم البيانية')}
             className="space-y-4"
           >
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -1546,7 +1546,7 @@ Database Systems,90,3,270`;
                         'Chart Description'
                       )
                     }
-                    className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12365E] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1D426B] text-xs font-bold flex items-center gap-2 cursor-pointer"
+                    className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] text-xs font-bold flex items-center gap-2 cursor-pointer"
                   >
                     {copiedKey === 'chart_desc' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     <span>{localize(profile.language, 'Copy Text', 'نسخ الوصف')}</span>
@@ -1555,8 +1555,8 @@ Database Systems,90,3,270`;
               </div>
 
               {/* Grounded Metrics Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-[#1D426B]">
-                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1D426B]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-[#22354E]">
+                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
                   <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Total Sum', 'المجموع الكلي')}
                   </span>
@@ -1564,7 +1564,7 @@ Database Systems,90,3,270`;
                     {chartAnalysis.comparisons.total} {chartModel.units || ''}
                   </span>
                 </div>
-                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1D426B]">
+                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
                   <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Arithmetic Average', 'المتوسط الحسابي')}
                   </span>
@@ -1572,7 +1572,7 @@ Database Systems,90,3,270`;
                     {chartAnalysis.comparisons.average} {chartModel.units || ''}
                   </span>
                 </div>
-                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1D426B]">
+                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
                   <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Peak Observation', 'أعلى قيمة مسجلة')}
                   </span>
@@ -1580,7 +1580,7 @@ Database Systems,90,3,270`;
                     {chartAnalysis.comparisons.highest.value} ({chartAnalysis.comparisons.highest.label})
                   </span>
                 </div>
-                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1D426B]">
+                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
                   <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Lowest Observation', 'أدنى قيمة مسجلة')}
                   </span>
@@ -1592,14 +1592,14 @@ Database Systems,90,3,270`;
             </div>
 
             {/* Structured Text Equivalent Table */}
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
-              <h3 className="text-sm font-bold text-[#F8FAFC] pb-2 border-b border-[#1D426B]">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+              <h3 className="text-sm font-bold text-[#F8FAFC] pb-2 border-b border-[#22354E]">
                 {localize(profile.language, 'Structured Tabular Equivalent', 'الجدول البديل الكامل للمخطط البياني')}
               </h3>
 
               <table className="w-full text-start border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-[#1D426B] text-[#94A3B8]">
+                  <tr className="border-b border-[#22354E] text-[#94A3B8]">
                     <th scope="col" className="p-3 text-start font-bold">
                       {chartModel.xAxisTitle || localize(profile.language, 'Category', 'الفئة')}
                     </th>
@@ -1613,7 +1613,7 @@ Database Systems,90,3,270`;
                 </thead>
                 <tbody>
                   {chartAnalysis.tabularEquivalent.map((row, idx) => (
-                    <tr key={idx} className="border-b border-[#1D426B]/40 hover:bg-[#12365E]/50">
+                    <tr key={idx} className="border-b border-[#22354E]/40 hover:bg-[#1A283D]/50">
                       <td className="p-3 font-semibold text-[#F8FAFC]">{row.label}</td>
                       <td className="p-3 font-mono font-bold text-[#4B9FE1]">
                         {row.value} {chartModel.units || ''}
@@ -1625,7 +1625,7 @@ Database Systems,90,3,270`;
               </table>
 
               {/* Disclosures & Limitations */}
-              <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1D426B] text-xs text-[#94A3B8] space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E] text-xs text-[#94A3B8] space-y-1">
                 <span className="font-bold text-[#F8FAFC]">
                   {localize(profile.language, 'Grounding & Integrity Disclosure:', 'إقرار الشفافية ومنع الهلوسة:')}
                 </span>
@@ -1645,7 +1645,7 @@ Database Systems,90,3,270`;
             aria-label={localize(profile.language, 'Smart Form Assistant', 'مساعد النماذج والاستمارات الذكي')}
             className="space-y-4"
           >
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -1667,7 +1667,7 @@ Database Systems,90,3,270`;
                         setFormIsSubmittedConfirmed(false);
                       }
                     }}
-                    className="min-h-[44px] px-3 py-2 rounded-xl bg-[#061A33] border border-[#1D426B] text-xs text-[#F8FAFC]"
+                    className="min-h-[44px] px-3 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-xs text-[#F8FAFC]"
                   >
                     {ACCESSIBLE_FORM_TEMPLATES.map((tpl) => (
                       <option key={tpl.id} value={tpl.id}>
@@ -1679,13 +1679,13 @@ Database Systems,90,3,270`;
               </div>
 
               {/* Form Fields Guided Walkthrough */}
-              <div className="space-y-4 pt-4 border-t border-[#1D426B]">
+              <div className="space-y-4 pt-4 border-t border-[#22354E]">
                 {selectedFormTemplate.fields.map((field) => {
                   const error = formValidationErrors[field.id];
                   return (
                     <div
                       key={field.id}
-                      className="p-4 rounded-xl bg-[#061A33] border border-[#1D426B] space-y-2"
+                      className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-2"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <label
@@ -1723,7 +1723,7 @@ Database Systems,90,3,270`;
                           onChange={(e) =>
                             setFormFieldValues({ ...formFieldValues, [field.id]: e.target.value })
                           }
-                          className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-xs text-[#F8FAFC]"
+                          className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC]"
                         >
                           <option value="">{localize(profile.language, 'Select option...', 'اختر اختياراً...')}</option>
                           {field.options?.map((opt, oIdx) => (
@@ -1740,7 +1740,7 @@ Database Systems,90,3,270`;
                           onChange={(e) =>
                             setFormFieldValues({ ...formFieldValues, [field.id]: e.target.value })
                           }
-                          className="w-full p-3 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-xs text-[#F8FAFC]"
+                          className="w-full p-3 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC]"
                         />
                       ) : (
                         <input
@@ -1751,7 +1751,7 @@ Database Systems,90,3,270`;
                           onChange={(e) =>
                             setFormFieldValues({ ...formFieldValues, [field.id]: e.target.value })
                           }
-                          className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#0D2B4E] border border-[#1D426B] text-xs text-[#F8FAFC]"
+                          className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC]"
                         />
                       )}
 
@@ -1762,7 +1762,7 @@ Database Systems,90,3,270`;
               </div>
 
               {/* Form Submission Confirmation Action */}
-              <div className="pt-4 border-t border-[#1D426B] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="pt-4 border-t border-[#22354E] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
                   <span>{isAr ? FORM_SECURITY_DISCLAIMER_AR : FORM_SECURITY_DISCLAIMER_EN}</span>
@@ -1820,7 +1820,7 @@ Database Systems,90,3,270`;
                     <Check className="w-4 h-4" />
                     <span>{localize(profile.language, 'Form Ready For Export', 'النموذج جاهز للاستخدام والتصدير')}</span>
                   </div>
-                  <pre className="p-3 rounded-lg bg-[#061A33] border border-[#1D426B] text-[#F8FAFC] whitespace-pre-wrap font-mono">
+                  <pre className="p-3 rounded-lg bg-[#061A33] border border-[#22354E] text-[#F8FAFC] whitespace-pre-wrap font-mono">
                     {JSON.stringify(formFieldValues, null, 2)}
                   </pre>
                 </div>
@@ -1833,7 +1833,7 @@ Database Systems,90,3,270`;
             aria-label={localize(profile.language, 'Attendance Tracker', 'متتبع الحضور والغياب')}
             className="space-y-4"
           >
-            <div className="bg-[#0D2B4E] border border-[#1D426B] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
               <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
                 <CalendarCheck className="w-5 h-5 text-[#1769AA]" />
                 <span>{localize(profile.language, 'Attendance & Absence Tracker', 'متتبع الحضور والغياب')}</span>
@@ -1864,7 +1864,7 @@ Database Systems,90,3,270`;
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0D2B4E] border-2 border-amber-500 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-start"
+              className="bg-[#131E2E] border-2 border-amber-500 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-start"
             >
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-400">
@@ -1888,14 +1888,14 @@ Database Systems,90,3,270`;
                 )}
               </p>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1D426B]">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#22354E]">
                 <button
                   type="button"
                   onClick={() => {
                     setShowReplacementWarning(false);
                     setPendingVoiceAction(null);
                   }}
-                  className="min-h-[44px] px-4 py-2 rounded-xl bg-[#12365E] text-[#94A3B8] hover:text-white text-xs font-bold cursor-pointer"
+                  className="min-h-[44px] px-4 py-2 rounded-xl bg-[#1A283D] text-[#94A3B8] hover:text-white text-xs font-bold cursor-pointer"
                 >
                   {localize(profile.language, 'Cancel (Keep Data)', 'إلغاء (الحفاظ على المحتوى)')}
                 </button>

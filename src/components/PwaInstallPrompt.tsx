@@ -129,7 +129,7 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
       role="alert"
       aria-live="polite"
       aria-label={L('Install Rafiqi Application', 'تثبيت تطبيق رفيقي')}
-      className="fixed bottom-24 start-4 end-4 sm:start-auto sm:end-6 max-w-md z-50 bg-[#0D2542] border border-[#1D426B]/50 shadow-2xl rounded-3xl p-5 backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+      className="fixed bottom-24 start-4 end-4 sm:start-auto sm:end-6 max-w-md z-50 bg-[#0D2542] border border-[#22354E]/50 shadow-2xl rounded-3xl p-5 backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="flex items-start gap-3.5">
         <div className="p-3 bg-[#1769AA]/15 text-sky-400 rounded-2xl shrink-0 mt-0.5 border border-sky-400/20">

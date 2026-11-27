@@ -289,7 +289,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       aria-label={t('Global Application Header', 'شريط العنوان والتحكم الرئيسي')}
       className={`relative ${mobileSearchOpen ? 'h-auto flex-wrap py-2 md:h-16 md:flex-nowrap md:py-0' : 'h-16'} w-full shrink-0 border-b ${
         isDarkMode 
-          ? 'bg-[#082440]/95 border-[#1E2E44] text-slate-100' 
+          ? 'bg-[#0B1523]/95 border-[#1E2E44] text-slate-100' 
           : 'bg-white/95 border-slate-200 text-slate-900'
       } backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-3 z-30 transition-colors select-none`}
     >
@@ -303,7 +303,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             aria-label={t('Open navigation menu', 'فتح القائمة الرئيسية')}
             className={`lg:hidden shrink-0 p-2 min-h-[44px] min-w-[44px] rounded-xl border ${
               isDarkMode 
-                ? 'border-[#1D426B] text-slate-300 hover:text-white hover:bg-slate-800' 
+                ? 'border-[#22354E] text-slate-300 hover:text-white hover:bg-slate-800' 
                 : 'border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
             } flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
           >
@@ -373,7 +373,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           aria-haspopup="true"
           data-testid="header-sections-menu"
           className={`min-h-[44px] px-3 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
-            isDarkMode ? 'border-[#1D426B] text-slate-200 hover:bg-slate-800' : 'border-slate-200 text-slate-800 hover:bg-slate-100'
+            isDarkMode ? 'border-[#22354E] text-slate-200 hover:bg-slate-800' : 'border-slate-200 text-slate-800 hover:bg-slate-100'
           }`}
         >
           <span>{t('Sections', 'الأقسام')}</span>
@@ -384,7 +384,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             role="menu"
             aria-label={t('Sections', 'الأقسام')}
             className={`absolute top-full mt-2 start-0 w-64 p-1.5 rounded-2xl border shadow-xl z-50 ${
-              isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B] text-white' : 'bg-white border-slate-200 text-slate-900'
+              isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
             {PRODUCT_SECTIONS.map((sec) => (
@@ -440,7 +440,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             placeholder={t('Search tools, features, sign dictionary...', 'ابحث في الأدوات، الميزات، وقاموس الإشارة...')}
             className={`w-full min-h-[44px] md:min-h-[40px] text-sm md:text-xs font-medium ps-9 pe-12 py-2 rounded-xl border ${
               isDarkMode 
-                ? 'bg-[#0D2B4E] border-[#1D426B] text-white placeholder-slate-400 focus:border-[#1769AA]' 
+                ? 'bg-[#131E2E] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                 : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'
             } transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/30`}
             aria-label={t('Global search', 'البحث العام في رفيقي')}
@@ -458,7 +458,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               role="listbox"
               aria-label={t('Search results', 'نتائج البحث')}
               className={`max-md:static md:absolute md:top-full mt-2 start-0 end-0 rounded-2xl border shadow-xl z-50 overflow-hidden ${
-                isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B] text-white' : 'bg-white border-slate-200 text-slate-900'
+                isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
               {searchResults.length === 0 ? (
@@ -474,7 +474,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                     aria-selected="false"
                     onClick={() => handlePickResult(r)}
                     className={`w-full text-start px-3.5 py-2.5 flex flex-col gap-0.5 cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1769AA] ${
-                      isDarkMode ? 'hover:bg-[#12365E]' : 'hover:bg-slate-100'
+                      isDarkMode ? 'hover:bg-[#1A283D]' : 'hover:bg-slate-100'
                     }`}
                   >
                     <span className="text-xs font-bold leading-tight">{r.title}</span>
@@ -501,7 +501,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           aria-expanded={mobileSearchOpen}
           aria-label={t('Search tools', 'ابحث عن أداة')}
           className={`md:hidden min-h-[44px] min-w-[44px] rounded-full border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
-            isDarkMode ? 'border-[#1D426B] text-slate-200 hover:bg-slate-800' : 'border-slate-200 text-slate-800 hover:bg-slate-100'
+            isDarkMode ? 'border-[#22354E] text-slate-200 hover:bg-slate-800' : 'border-slate-200 text-slate-800 hover:bg-slate-100'
           }`}
         >
           <Search className="w-5 h-5" aria-hidden="true" />
@@ -523,7 +523,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         <div
           role="group"
           aria-label={t('Language Selector', 'اختيار اللغة')}
-          className="hidden sm:flex items-center gap-0.5 p-0.5 bg-slate-100 dark:bg-[#0D2B4E] border border-slate-200 dark:border-[#1D426B] rounded-full"
+          className="hidden sm:flex items-center gap-0.5 p-0.5 bg-slate-100 dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-full"
         >
           <button
             type="button"
@@ -568,13 +568,13 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             aria-label={t('Functional notifications', 'التنبيهات والإشعارات الوظيفية')}
             className={`p-2 min-h-[44px] min-w-[44px] rounded-xl border ${
               isDarkMode 
-                ? 'border-[#1D426B] text-slate-300 hover:text-white hover:bg-slate-800' 
+                ? 'border-[#22354E] text-slate-300 hover:text-white hover:bg-slate-800' 
                 : 'border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-100'
             } flex items-center justify-center relative cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
           >
             <Bell className="w-4 h-4" aria-hidden="true" />
             {functionalNotifications.length > 0 && (
-              <span className="absolute top-2 end-2 w-2 h-2 rounded-full bg-[#1769AA] ring-2 ring-white dark:ring-[#082440]" />
+              <span className="absolute top-2 end-2 w-2 h-2 rounded-full bg-[#1769AA] ring-2 ring-white dark:ring-[#0B1523]" />
             )}
           </button>
 
@@ -583,10 +583,10 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               role="region"
               aria-label={t('Notifications panel', 'لوحة الإشعارات')}
               className={`absolute end-0 mt-2 w-72 sm:w-80 rounded-2xl border ${
-                isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B] text-white' : 'bg-white border-slate-200 text-slate-900'
+                isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-200 text-slate-900'
               } shadow-xl p-3 z-50 text-start space-y-2.5 animate-in fade-in duration-150`}
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#1D426B]">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]">
                 <span className="text-xs font-bold text-slate-900 dark:text-white">
                   {t('Functional Notifications', 'الإشعارات والتنبيهات')}
                 </span>
@@ -604,7 +604,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                   </p>
                 )}
                 {functionalNotifications.map((notif) => (
-                  <div key={notif.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#082440] border border-slate-200 dark:border-[#1D426B] flex items-start gap-2.5">
+                  <div key={notif.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0B1523] border border-slate-200 dark:border-[#22354E] flex items-start gap-2.5">
                     <notif.icon className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1] shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold leading-tight">{notif.title}</p>
@@ -627,7 +627,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             aria-label={t('Open user profile menu', 'فتح قائمة المستخدم')}
             className={`flex items-center gap-2 p-1.5 min-h-[44px] rounded-xl border ${
               isDarkMode 
-                ? 'border-[#1D426B] bg-[#0D2B4E] hover:bg-slate-800' 
+                ? 'border-[#22354E] bg-[#131E2E] hover:bg-slate-800' 
                 : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
             } cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all`}
           >
@@ -649,11 +649,11 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               role="menu"
               aria-label={t('User options', 'خيارات الحساب')}
               className={`absolute end-0 mt-2 w-64 rounded-2xl border ${
-                isDarkMode ? 'bg-[#0D2B4E] border-[#1D426B] text-white' : 'bg-white border-slate-200 text-slate-900'
+                isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-200 text-slate-900'
               } shadow-xl p-2 z-50 text-start space-y-1 animate-in fade-in duration-150`}
             >
               {/* User info chip */}
-              <div className="p-2.5 pb-2 border-b border-slate-200 dark:border-[#1D426B] mb-1">
+              <div className="p-2.5 pb-2 border-b border-slate-200 dark:border-[#22354E] mb-1">
                 <p className="text-xs font-black truncate">{profile.name || 'User'}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{profile.email || 'user@rafiqi.app'}</p>
                 <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1]">
@@ -692,7 +692,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 <span>{t('Settings', 'الإعدادات')}</span>
               </button>
 
-              <div className="pt-1 border-t border-slate-200 dark:border-[#1D426B]">
+              <div className="pt-1 border-t border-slate-200 dark:border-[#22354E]">
                 <button
                   type="button"
                   role="menuitem"
