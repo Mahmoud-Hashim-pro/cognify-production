@@ -347,12 +347,15 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
           alt=""
           width={1280}
           height={720}
-          className="absolute inset-0 w-full h-full object-cover object-[30%_center] md:object-center select-none"
+          className="absolute inset-0 w-full h-full object-cover object-[35%_center] md:object-center select-none"
           loading="eager"
           decoding="async"
           fetchPriority="high"
         />
-        <div className="absolute inset-0 bg-slate-950/45 dark:bg-slate-950/60" />
+        {/* Mobile: light scrim so the artwork shows through; a short top gradient keeps the
+            white header text readable. Desktop keeps the original even scrim (md+ unchanged). */}
+        <div className="absolute inset-0 bg-slate-950/20 dark:bg-slate-950/40 md:bg-slate-950/45 md:dark:bg-slate-950/60" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-slate-950/55 to-transparent md:hidden" />
       </div>
 
       {/* ── TOP HEADER: Brand Identity + Language Switcher + Theme Selector ── */}
@@ -442,16 +445,16 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       </header>
 
       {/* ── MAIN UNIFIED COMPOSITION: Natural, Centered Authentication Card (No Split-Screen) ── */}
-      <main className="w-full max-w-md my-auto z-10 py-3 sm:py-8">
+      <main className="w-full max-w-md my-auto z-10 py-2 sm:py-8">
         {/* Solid, readable authentication card over the full-page artwork. */}
-        <div className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-3xl p-4 sm:p-8 shadow-xl shadow-slate-900/5 dark:shadow-black/40 text-start transition-colors">
+        <div className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-3xl p-3.5 sm:p-8 shadow-xl shadow-slate-900/5 dark:shadow-black/40 text-start transition-colors">
           
           {/* Segmented Mode Selector: Sign In vs Create Account */}
           {mode !== 'reset-password' && (
             <div 
               role="tablist"
               aria-label={t('Authentication Options', 'خيارات تسجيل الدخول')}
-              className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-[#0B1523] border border-slate-200 dark:border-[#22354E] rounded-2xl mb-6"
+              className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-[#0B1523] border border-slate-200 dark:border-[#22354E] rounded-2xl mb-4 sm:mb-6"
             >
               <button
                 type="button"
@@ -487,7 +490,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
           )}
 
           {/* Form Card Header */}
-          <div className="space-y-1 mb-5">
+          <div className="space-y-1 mb-4 sm:mb-5">
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               {mode === 'email-login'
                 ? t('Welcome Back', 'أهلاً بك مجدداً')
@@ -521,7 +524,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
             </div>
           ) : mode === 'reset-password' ? (
             /* Password Reset Form */
-            <form onSubmit={handleResetPassword} className="space-y-4">
+            <form onSubmit={handleResetPassword} className="space-y-3 sm:space-y-4">
               <div className="space-y-1.5">
                 <label htmlFor="reset-email" className="text-xs font-bold text-slate-700 dark:text-[#F8FAFC]">
                   {t('Email Address', 'البريد الإلكتروني')}
@@ -571,7 +574,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
             <form 
               id={mode === 'email-login' ? 'panel-login' : 'panel-register'} 
               onSubmit={handleManualAuth} 
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
             >
               {/* Email Field */}
               <div className="space-y-1.5">
