@@ -63,6 +63,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +92,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   const handlePickResult = (r: { targetView: string; targetTab?: string }) => {
     setIsSearchOpen(false);
+    setMobileSearchOpen(false);
     setSearchQuery('');
     if (onNavigate) onNavigate(r.targetView, r.targetTab);
   };
@@ -115,7 +117,10 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       }
     };
     const onEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsSearchOpen(false);
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+        setMobileSearchOpen(false);
+      }
     };
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onEsc);
@@ -282,7 +287,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   return (
     <header 
       aria-label={t('Global Application Header', 'شريط العنوان والتحكم الرئيسي')}
-      className={`h-16 w-full shrink-0 border-b ${
+      className={`relative ${mobileSearchOpen ? 'h-auto flex-wrap py-2 md:h-16 md:flex-nowrap md:py-0' : 'h-16'} w-full shrink-0 border-b ${
         isDarkMode 
           ? 'bg-[#0B1523]/95 border-[#1E2E44] text-slate-100' 
           : 'bg-white/95 border-slate-200 text-slate-900'
@@ -310,7 +315,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         <button
           type="button"
           onClick={() => onNavigate?.('disability', 'hub')}
-          className="flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] rounded-xl p-1 -m-1 transition-transform active:scale-95 text-start"
+          className="max-sm:hidden flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] rounded-xl p-1 -m-1 transition-transform active:scale-95 text-start"
           title={t('Rafiqi Home', 'رئيسية رفيقي')}
           aria-label={t('Rafiqi Home', 'رئيسية رفيقي')}
         >
@@ -406,9 +411,17 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       </div>
 
       {/* ── CENTER ZONE: SEARCH INPUT ── */}
-      <div className="hidden md:flex flex-1 max-w-md mx-2" ref={searchBoxRef}>
+      <div
+        className={`${
+          mobileSearchOpen
+            ? 'flex order-last basis-full w-full pb-2 md:order-none md:basis-auto md:w-auto md:pb-0'
+            : 'hidden md:flex'
+        } flex-1 max-w-md mx-2 max-md:max-w-none max-md:mx-0`}
+        ref={searchBoxRef}
+        data-testid="header-search-box"
+      >
         <form onSubmit={handleSearchSubmit} className="relative w-full">
-          <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute top-0 h-11 md:h-full start-0 ps-3 flex items-center pointer-events-none text-slate-400">
             <Search className="w-4 h-4" aria-hidden="true" />
           </div>
           <input
@@ -425,14 +438,14 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             aria-controls="global-search-results"
             aria-autocomplete="list"
             placeholder={t('Search tools, features, sign dictionary...', 'ابحث في الأدوات، الميزات، وقاموس الإشارة...')}
-            className={`w-full min-h-[40px] text-xs font-medium ps-9 pe-12 py-2 rounded-xl border ${
+            className={`w-full min-h-[44px] md:min-h-[40px] text-sm md:text-xs font-medium ps-9 pe-12 py-2 rounded-xl border ${
               isDarkMode 
                 ? 'bg-[#131E2E] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                 : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'
             } transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/30`}
             aria-label={t('Global search', 'البحث العام في رفيقي')}
           />
-          <div className="absolute inset-y-0 end-0 pe-2.5 flex items-center pointer-events-none">
+          <div className="absolute top-0 h-11 md:h-full end-0 pe-2.5 flex items-center pointer-events-none">
             <kbd className="hidden lg:inline px-1.5 py-0.5 text-xs font-mono text-slate-400 bg-slate-200 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700">
               ⌘K
             </kbd>
@@ -444,7 +457,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               id="global-search-results"
               role="listbox"
               aria-label={t('Search results', 'نتائج البحث')}
-              className={`absolute top-full mt-2 start-0 end-0 rounded-2xl border shadow-xl z-50 overflow-hidden ${
+              className={`max-md:static md:absolute md:top-full mt-2 start-0 end-0 rounded-2xl border shadow-xl z-50 overflow-hidden ${
                 isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
@@ -475,7 +488,25 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       </div>
 
       {/* ── RIGHT ZONE: LANGUAGE, THEME, NOTIFICATIONS & PROFILE MENU ── */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        {/* Phone: search icon opens the search box */}
+        <button
+          type="button"
+          onClick={() => {
+            const next = !mobileSearchOpen;
+            setMobileSearchOpen(next);
+            if (next) setTimeout(() => searchInputRef.current?.focus(), 50);
+          }}
+          data-testid="header-search-toggle"
+          aria-expanded={mobileSearchOpen}
+          aria-label={t('Search tools', 'ابحث عن أداة')}
+          className={`md:hidden min-h-[44px] min-w-[44px] rounded-full border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+            isDarkMode ? 'border-[#22354E] text-slate-200 hover:bg-slate-800' : 'border-slate-200 text-slate-800 hover:bg-slate-100'
+          }`}
+        >
+          <Search className="w-5 h-5" aria-hidden="true" />
+        </button>
+
         {/* The one primary action of the whole app */}
         <button
           type="button"

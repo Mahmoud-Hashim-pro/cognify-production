@@ -98,6 +98,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               title={isAr ? opt.labelAr : opt.labelEn}
               className={cn(
                 'min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] select-none',
+                opt.id === 'system' && 'max-sm:hidden',
                 'focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2',
                 isSelected
                   ? 'bg-rafiqi-primary text-white shadow-xs font-bold'
