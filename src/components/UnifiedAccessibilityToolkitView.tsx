@@ -48,6 +48,7 @@ import { UserProfile } from '../types';
 import { localize, isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
 import { AdaptiveEnvironmentPanel } from './AdaptiveEnvironmentPanel';
+import { ReadingSupportPanel } from './ReadingSupportPanel';
 import { Breadcrumbs } from './ui/Breadcrumbs';
 import { getRouteBreadcrumbs } from '../lib/navigation';
 import { speak, cancelSpeech } from '../lib/tts';
@@ -1036,6 +1037,10 @@ export default function UnifiedAccessibilityToolkitView({
                   )}
                 </div>
               </div>
+              <ReadingSupportPanel
+                isArabic={isArabicLocale(profile.language)}
+                isDarkMode={isDarkMode}
+              />
             </div>
           )}
 
