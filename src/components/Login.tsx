@@ -451,7 +451,28 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       </header>
 
       {/* ── MAIN UNIFIED COMPOSITION: Natural, Centered Authentication Card (No Split-Screen) ── */}
-      <main className="w-full max-w-md my-auto z-10 py-3 sm:py-8">
+      <main className="w-full max-w-md lg:max-w-5xl my-auto z-10 py-3 sm:py-8">
+        {/* Chosen sign-in illustration: real asset, responsive, theme-safe panel.
+            Mobile: compact banner above the card. Large screens: side panel beside the card
+            (flex direction follows the page dir, so RTL keeps the natural reading order). */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
+        <figure className="mb-4 lg:mb-0 rounded-3xl overflow-hidden border border-slate-200 dark:border-[#22354E] shadow-xl shadow-slate-900/5 dark:shadow-black/40">
+          <img
+            src="/assets/signin-hero-cairo-sm.webp"
+            srcSet="/assets/signin-hero-cairo-sm.webp 768w, /assets/signin-hero-cairo.webp 1400w"
+            sizes="(min-width: 1024px) 44vw, 100vw"
+            width={768}
+            height={576}
+            alt={t(
+              'Illustration of students with disabilities - a blind woman with a white cane using her phone, a young man in a wheelchair with a laptop, and friends studying together - on the Cairo Nile corniche at night, with glowing icons of a tree, a bus stop, and a book above them.',
+              'رسم توضيحي لطلاب من ذوي الإعاقة - فتاة كفيفة بعصا بيضاء تستخدم هاتفها، وشاب على كرسي متحرك مع حاسوبه، وزملاء يذاكرون معاً - على كورنيش النيل بالقاهرة ليلاً، وفوقهم أيقونات مضيئة لشجرة وموقف أتوبيس وكتاب.'
+            )}
+            className="w-full h-40 sm:h-52 lg:h-auto object-cover object-center select-none"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
+        </figure>
         <div className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-3xl p-4 sm:p-8 shadow-xl shadow-slate-900/5 dark:shadow-black/40 text-start transition-colors">
           
           {/* Segmented Mode Selector: Sign In vs Create Account */}
@@ -763,6 +784,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
             </div>
           )}
 
+        </div>
         </div>
       </main>
 

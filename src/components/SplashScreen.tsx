@@ -34,20 +34,21 @@ export default function SplashScreen() {
       role="status"
       aria-label="Rafiqi · رفيقى"
       aria-live="polite"
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#071B33] select-none overflow-hidden pointer-events-none"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0a1526] select-none overflow-hidden pointer-events-none"
       style={{
         opacity: phase === 'fade' ? 0 : 1,
         transition: 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       <img
-        src="/assets/welcome-hero-doorway.jpg"
+        src="/assets/splash-sonar-rings.webp"
         alt="Rafiqi · رفيقى"
-        width={1536}
-        height={864}
-        className="w-full h-full object-contain object-center select-none"
+        width={608}
+        height={1080}
+        className="w-full h-full object-cover object-center select-none"
         loading="eager"
         decoding="sync"
+        fetchPriority="high"
       />
     </div>
   );
