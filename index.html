@@ -171,33 +171,56 @@
     <noscript>Rafiqi (رفيقي) — AI-Powered Adaptive Personal &amp; Accessibility Assistant requires JavaScript to run.</noscript>
 
     <!-- Inline splash: paints instantly from raw HTML/CSS (before React boots),
-         removed by main.tsx as soon as the app mounts. Honors reduced motion. -->
+         removed by main.tsx as soon as the app mounts. Mirrors the React splash
+         (chosen concept "A": ripples from a gold dot revealing the wordmark).
+         Honors reduced motion. -->
     <div id="rafiqi-inline-splash" aria-hidden="true">
-      <div class="rafiqi-splash-logo">
-        <img src="/assets/icon.svg" alt="" width="88" height="88" />
-        <span class="rafiqi-splash-pulse"></span>
-        <span class="rafiqi-splash-pulse rafiq-splash-pulse-2"></span>
-      </div>
+      <div class="rafiqi-splash-glow"></div>
+      <span class="rafiqi-splash-ring"></span>
+      <span class="rafiqi-splash-ring rafiqi-splash-ring-2"></span>
+      <span class="rafiqi-splash-ring rafiqi-splash-ring-3"></span>
+      <span class="rafiqi-splash-word">Rafiqi</span>
     </div>
     <style>
       #rafiqi-inline-splash {
         position: fixed; inset: 0; z-index: 99998;
         display: flex; align-items: center; justify-content: center;
-        background: #0d1b2e;
+        background: #0F172A;
       }
-      .rafiqi-splash-logo { position: relative; display: flex; align-items: center; justify-content: center; }
-      .rafiqi-splash-pulse {
-        position: absolute; width: 120px; height: 120px; border-radius: 50%;
-        border: 2px solid rgba(45, 212, 191, 0.6);
-        animation: rafiqi-sonar 1.8s ease-out infinite;
+      .rafiqi-splash-glow {
+        position: absolute; width: 360px; height: 360px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(229,169,60,0.38) 0%, rgba(229,169,60,0.14) 42%, rgba(229,169,60,0) 70%);
+        animation: rafiqi-glow-in 1.4s ease-out both;
       }
-      .rafiq-splash-pulse-2 { animation-delay: 0.9s; }
-      @keyframes rafiqi-sonar {
-        0% { transform: scale(0.6); opacity: 0.8; }
-        100% { transform: scale(2.2); opacity: 0; }
+      .rafiqi-splash-ring {
+        position: absolute; width: 170px; height: 170px; border-radius: 50%;
+        border: 2px solid rgba(75,159,225,0.55); opacity: 0;
+        animation: rafiqi-ripple 1.8s cubic-bezier(0.2, 0.6, 0.35, 1) both;
+      }
+      .rafiqi-splash-ring-2 { animation-delay: 0.45s; }
+      .rafiqi-splash-ring-3 { animation-delay: 0.9s; }
+      .rafiqi-splash-word {
+        position: relative; color: #fff; font-weight: 900; letter-spacing: -0.025em;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-size: clamp(2.75rem, 9vw, 4rem); line-height: 1;
+        animation: rafiqi-word-in 0.85s ease-out 0.2s both;
+      }
+      @keyframes rafiqi-ripple {
+        0% { transform: scale(0.5); opacity: 0; }
+        18% { opacity: 0.55; }
+        100% { transform: scale(2.6); opacity: 0; }
+      }
+      @keyframes rafiqi-glow-in {
+        0% { opacity: 0; transform: scale(0.75); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      @keyframes rafiqi-word-in {
+        0% { opacity: 0; transform: scale(0.94); }
+        100% { opacity: 1; transform: scale(1); }
       }
       @media (prefers-reduced-motion: reduce) {
-        .rafiqi-splash-pulse { animation: none; display: none; }
+        .rafiqi-splash-glow, .rafiqi-splash-word { animation: none; }
+        .rafiqi-splash-ring { animation: none; display: none; }
       }
     </style>
 
