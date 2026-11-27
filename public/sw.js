@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cognify-v14-blind-offline';
+const CACHE_NAME = 'cognify-v15-prompt-updates';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -14,8 +14,17 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
-    }).then(() => self.skipWaiting())
+    }).then(() => {
+      // Wait for the client's go-ahead before activating: index.html shows an
+      // update toast and sends SKIP_WAITING only after the user confirms.
+    })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {

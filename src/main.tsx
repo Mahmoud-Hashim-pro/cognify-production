@@ -1,6 +1,6 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
+import AppGate from './AppGate.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import {toast} from './components/Toast';
 import SplashScreen from './components/SplashScreen';
@@ -101,9 +101,25 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SplashScreen />
     <ErrorBoundary>
-      <App />
+      <AppGate />
     </ErrorBoundary>
     <Analytics />
     <SpeedInsights />
   </StrictMode>,
 );
+
+// Remove the inline pre-React splash from index.html once the app has mounted.
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.getElementById('rafiqi-inline-splash')?.remove();
+  });
+});
+
+// JetBrains Mono is only needed by code/notes surfaces deep in the app, so it
+// is kept out of the critical path and loaded once the page is idle.
+window.addEventListener('load', () => {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/fonts/fonts-deferred.css';
+  document.head.appendChild(link);
+});

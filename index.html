@@ -21,7 +21,7 @@
     <meta property="og:url" content="https://rafiqi-ai.vercel.app/" />
     <meta property="og:title" content="Rafiqi (رفيقي) — AI-Powered Adaptive Personal &amp; Accessibility Assistant" />
     <meta property="og:description" content="Empowering learners of all abilities with personalized AI coaching, real-time visual assistance, 3D sign language translation, and universal accessibility." />
-    <meta property="og:image" content="/assets/inclusive-learners-illustration.png" />
+    <meta property="og:image" content="/assets/inclusive-learners-illustration-og.jpg" />
     <meta property="og:locale" content="ar_EG" />
     <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:locale:alternate" content="fr_FR" />
@@ -30,7 +30,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Rafiqi (رفيقي) — AI-Powered Adaptive Personal &amp; Accessibility Assistant" />
     <meta name="twitter:description" content="Empowering learners of all abilities with personalized AI coaching, real-time visual assistance, 3D sign language translation, and universal accessibility." />
-    <meta name="twitter:image" content="/assets/inclusive-learners-illustration.png" />
+    <meta name="twitter:image" content="/assets/inclusive-learners-illustration-og.jpg" />
 
     <!-- PWA & Mobile Web App Meta -->
     <meta name="theme-color" content="#0F172A" />
@@ -41,6 +41,20 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="/assets/icon.svg" />
     <link rel="apple-touch-icon" href="/assets/icon.svg" />
+
+    <!-- Preload only the primary body fonts (Arabic + Latin 400); others swap in -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-400-arabic.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-400-latin.woff2" crossorigin />
+
+    <!-- LCP hero: preload the WebP before React boots -->
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/inclusive-learners-illustration-768.webp"
+      imagesrcset="/assets/inclusive-learners-illustration-480.webp 480w, /assets/inclusive-learners-illustration-768.webp 768w, /assets/inclusive-learners-illustration-1200.webp 1200w"
+      imagesizes="(min-width: 1024px) 420px, (min-width: 640px) 380px, 320px"
+      fetchpriority="high"
+    />
 
     <!-- JSON-LD Structured Data (Schema.org EducationalApplication & Accessibility) -->
     <script type="application/ld+json">
@@ -90,18 +104,61 @@
           }
         } catch (_) {}
 
-        // Register Service Worker for PWA mobile installability
+        // Register Service Worker for PWA mobile installability.
+        // Updates are NEVER applied via a forced reload: a new worker waits and
+        // the user confirms via a toast, so nobody ever downloads the site twice.
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-          var refreshing = false;
+          var updateAccepted = false;
           navigator.serviceWorker.addEventListener('controllerchange', function() {
-            if (!refreshing) {
-              refreshing = true;
-              window.location.reload();
-            }
+            if (updateAccepted) window.location.reload();
           });
+
+          function showUpdateToast(worker) {
+            if (document.getElementById('sw-update-toast')) return;
+            var toast = document.createElement('div');
+            toast.id = 'sw-update-toast';
+            toast.setAttribute('role', 'status');
+            toast.style.cssText = 'position:fixed;bottom:16px;left:16px;right:16px;max-width:420px;margin:0 auto;background:#1E293B;color:#F8FAFC;padding:12px 16px;border-radius:12px;display:flex;align-items:center;gap:12px;z-index:99999;font-family:ui-sans-serif,system-ui,sans-serif;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)';
+            var dir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr';
+            toast.dir = dir;
+            var msg = document.createElement('span');
+            msg.style.flex = '1';
+            msg.textContent = dir === 'rtl' ? 'في نسخة جديدة من رفيقي. تحديث؟' : 'A new version of Rafiqi is available. Update?';
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = dir === 'rtl' ? 'تحديث' : 'Update';
+            btn.style.cssText = 'background:#4B9FE1;color:#0F172A;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;min-height:44px';
+            btn.addEventListener('click', function() {
+              updateAccepted = true;
+              worker.postMessage({ type: 'SKIP_WAITING' });
+            });
+            var dismiss = document.createElement('button');
+            dismiss.type = 'button';
+            dismiss.setAttribute('aria-label', dir === 'rtl' ? 'لاحقًا' : 'Later');
+            dismiss.textContent = '\u00d7';
+            dismiss.style.cssText = 'background:transparent;color:#94A3B8;border:0;font-size:20px;cursor:pointer;min-width:44px;min-height:44px';
+            dismiss.addEventListener('click', function() { toast.remove(); });
+            toast.appendChild(msg);
+            toast.appendChild(btn);
+            toast.appendChild(dismiss);
+            document.body.appendChild(toast);
+          }
+
           window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').then(function(reg) {
               reg.update();
+              if (reg.waiting && navigator.serviceWorker.controller) {
+                showUpdateToast(reg.waiting);
+              }
+              reg.addEventListener('updatefound', function() {
+                var worker = reg.installing;
+                if (!worker) return;
+                worker.addEventListener('statechange', function() {
+                  if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                    showUpdateToast(worker);
+                  }
+                });
+              });
             }).catch(function(err) {
               console.warn('[SW Registration Error]:', err);
             });
@@ -112,6 +169,38 @@
   </head>
   <body>
     <noscript>Rafiqi (رفيقي) — AI-Powered Adaptive Personal &amp; Accessibility Assistant requires JavaScript to run.</noscript>
+
+    <!-- Inline splash: paints instantly from raw HTML/CSS (before React boots),
+         removed by main.tsx as soon as the app mounts. Honors reduced motion. -->
+    <div id="rafiqi-inline-splash" aria-hidden="true">
+      <div class="rafiqi-splash-logo">
+        <img src="/assets/icon.svg" alt="" width="88" height="88" />
+        <span class="rafiqi-splash-pulse"></span>
+        <span class="rafiqi-splash-pulse rafiq-splash-pulse-2"></span>
+      </div>
+    </div>
+    <style>
+      #rafiqi-inline-splash {
+        position: fixed; inset: 0; z-index: 99998;
+        display: flex; align-items: center; justify-content: center;
+        background: #0F172A;
+      }
+      .rafiqi-splash-logo { position: relative; display: flex; align-items: center; justify-content: center; }
+      .rafiqi-splash-pulse {
+        position: absolute; width: 120px; height: 120px; border-radius: 50%;
+        border: 2px solid rgba(75, 159, 225, 0.6);
+        animation: rafiqi-sonar 1.8s ease-out infinite;
+      }
+      .rafiq-splash-pulse-2 { animation-delay: 0.9s; }
+      @keyframes rafiqi-sonar {
+        0% { transform: scale(0.6); opacity: 0.8; }
+        100% { transform: scale(2.2); opacity: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .rafiqi-splash-pulse { animation: none; display: none; }
+      }
+    </style>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

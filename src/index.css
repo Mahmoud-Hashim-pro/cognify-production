@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&family=Instrument+Serif:ital@0;1&family=Alexandria:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Self-hosted fonts (latin + arabic subsets, font-display: swap) - no external CDN round-trip.
+   JetBrains Mono is deferred: loaded after window load in main.tsx (src/fonts-deferred.css). */
+@import './fonts.css';
 @import "tailwindcss";
 
 /* Make `dark:` variants follow the app's theme toggle (.dark class) instead of

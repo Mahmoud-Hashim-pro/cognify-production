@@ -27,7 +27,7 @@ import {
   GraduationCap, History, Clock, Trash2, Play, FileUp, Download, ExternalLink,
   RotateCcw, Search, X, Database, LogOut
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore, logout } from '../lib/firebase';
 import { toast } from './Toast';
@@ -243,6 +243,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   initialSection = null,
   onSectionChange,
 }, ref) {
+  const reduceMotion = useReducedMotion();
   const [selectedVisualTool, setSelectedVisualTool] = useState<VisualToolId>(() => {
     // Blind-first flows (BlindHomeView, global voice commands) ask for a specific
     // vision tool through sessionStorage before navigating here.
@@ -1337,7 +1338,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           {isMobileSidebarOpen && (
             <>
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileSidebarOpen(false)}
@@ -1580,7 +1581,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'hub' && (
               <motion.div
                 key={selectedSectionLanding ? `section-landing-${selectedSectionLanding}` : 'hub-features-view'}
-                initial={{ opacity: 0, y: 8 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
@@ -1684,11 +1685,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       {/* Right Column: Seamless Transparent Floating Illustration with Ambient Glow */}
                       <div className="lg:col-span-5 relative flex items-center justify-center">
                         <div className="absolute inset-0 bg-radial from-[#1769AA]/35 via-[#1769B0]/20 to-transparent blur-3xl -z-10 rounded-full scale-125 pointer-events-none" />
-                        <img
-                          src="/assets/inclusive-learners-illustration.png"
-                          alt={localize(profile.language, 'Diverse learners collaborating inclusively', 'طلاب متنوعون يتعلمون معاً في بيئة ميسرة')}
-                          className="w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px] object-contain drop-shadow-[0_15px_35px_rgba(8,127,140,0.35)] select-none pointer-events-none transform transition-transform duration-500 hover:scale-105"
-                        />
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcSet="/assets/inclusive-learners-illustration-480.webp 480w, /assets/inclusive-learners-illustration-768.webp 768w, /assets/inclusive-learners-illustration-1200.webp 1200w"
+                            sizes="(min-width: 1024px) 420px, (min-width: 640px) 380px, 320px"
+                          />
+                          <img
+                            src="/assets/inclusive-learners-illustration-768.webp"
+                            alt={localize(profile.language, 'Diverse learners collaborating inclusively', 'طلاب متنوعون يتعلمون معاً في بيئة ميسرة')}
+                            width={768}
+                            height={429}
+                            fetchPriority="high"
+                            loading="eager"
+                            decoding="async"
+                            className="w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px] object-contain drop-shadow-[0_15px_35px_rgba(8,127,140,0.35)] select-none pointer-events-none transform transition-transform duration-500 hover:scale-105"
+                          />
+                        </picture>
                       </div>
                     </div>
                   </section>
@@ -2424,7 +2437,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'vision' && (
               <motion.div
                 key="vision-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
@@ -2448,7 +2461,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {isDeafActive && (
               <motion.div
                 key="deaf-unified-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
@@ -2471,7 +2484,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'caregiver' && (
               <motion.div
                 key="caregiver-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
@@ -2494,7 +2507,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'orchestrator' && (
               <motion.div
                 key="orchestrator-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
@@ -2516,7 +2529,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'org' && (
               <motion.div
                 key="org-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
@@ -2534,7 +2547,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'chat' && (
               <motion.div
                 key="chat-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0 flex flex-col p-2 sm:p-4 pb-0"
@@ -2566,7 +2579,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'progress' && (
               <motion.div
                 key="progress-profile-view"
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
@@ -2593,7 +2606,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'settings' && (
               <motion.div
                 key="settings-view"
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
@@ -2619,7 +2632,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'admin' && isAdmin && (
               <motion.div
                 key="admin-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}

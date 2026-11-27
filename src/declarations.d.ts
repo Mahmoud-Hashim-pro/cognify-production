@@ -49,3 +49,5 @@ declare module 'react-aria-components/Button' {
   }
   export const Button: React.ForwardRefExoticComponent<ButtonProps & React.RefAttributes<HTMLButtonElement>>;
 }
+
+declare module "*.css";

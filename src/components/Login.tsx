@@ -110,16 +110,25 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' as any });
     }, 60);
 
-    getRedirectResult(auth).catch((err: any) => {
-      console.warn('Google Redirect Result:', err);
-      if (isMountedRef.current && err) {
-        if (err.code === 'auth/unauthorized-domain') {
-          setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
-        } else if (err.code !== 'auth/credential-already-in-use') {
-          setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please try again or use Email.', 'تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد.'));
+    // getRedirectResult boots the auth iframe (~95KB) plus gapi, so only pay
+    // that cost when a redirect sign-in was actually started. First-time
+    // visitors never trigger it and the landing page stays light.
+    const redirectPending = (() => {
+      try { return sessionStorage.getItem('rafiqi_auth_redirect_pending') === '1'; } catch { return false; }
+    })();
+    if (redirectPending) {
+      try { sessionStorage.removeItem('rafiqi_auth_redirect_pending'); } catch {}
+      getRedirectResult(auth).catch((err: any) => {
+        console.warn('Google Redirect Result:', err);
+        if (isMountedRef.current && err) {
+          if (err.code === 'auth/unauthorized-domain') {
+            setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
+          } else if (err.code !== 'auth/credential-already-in-use') {
+            setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please try again or use Email.', 'تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد.'));
+          }
         }
-      }
-    });
+      });
+    }
 
     return () => {
       isMountedRef.current = false;
@@ -133,6 +142,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
     setError(null);
     setLoading(true);
     try {
+      try { sessionStorage.setItem('rafiqi_auth_redirect_pending', '1'); } catch {}
       await signInWithGoogleRedirect();
     } catch (err: any) {
       if (!isMountedRef.current) return;
