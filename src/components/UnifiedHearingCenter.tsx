@@ -388,10 +388,10 @@ Question: "${q}"`;
               onClick={onNavigateBack}
               aria-label={loc('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
               title={loc('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
-              className="min-h-[44px] min-w-[44px] p-2.5 rounded-2xl bg-[#0D2542] hover:bg-[#102D4D] border border-[#12CFE0]/30 hover:border-[#12CFE0] text-[#12CFE0] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
+              className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] shrink-0"
             >
               <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-              <span className="text-xs font-bold hidden sm:inline">{loc('Back', 'رجوع')}</span>
+              <span className="text-xs font-bold hidden">{loc('Back', 'رجوع')}</span>
             </button>
           )}
           <div className="w-11 h-11 rounded-2xl bg-[#0D2542] border border-[#12CFE0]/30 text-[#12CFE0] flex items-center justify-center shadow-[0_0_20px_rgba(18,207,224,0.15)] shrink-0">

@@ -28,6 +28,7 @@ import {
   Settings2,
   Eye,
   Sliders,
+  ArrowLeft,
   ChevronRight,
   ChevronLeft,
   Check,
@@ -409,18 +410,18 @@ export default function HearAndExpressView({
               type="button"
               onClick={onNavigateBack}
               aria-label={isAr ? 'الرجوع للوحة الميزات' : 'Back to dashboard'}
-              className="p-2 rounded-xl text-white hover:bg-[#1769AA]/40 transition-colors focus:ring-2 focus:ring-[#1769AA] cursor-pointer"
+              className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
             >
-              {isAr ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+              <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
             </button>
           )}
-          <BrandLogo size="sm" />
+          <span className="hidden"><BrandLogo size="sm" /></span>
           <div>
             <h1 className="text-base font-bold text-white flex items-center gap-2">
               <Ear className="w-5 h-5 text-[#4B9FE1]" />
               <span>{isAr ? 'السمع والتعبير (Hear & Express)' : 'Hear & Express Communication'}</span>
             </h1>
-            <p className="text-xs text-[#94A3B8]">
+            <p className="hidden text-xs text-[#94A3B8]">
               {isAr ? 'القسم 5: التواصل والتعبير — شامل الصم وغير الناطقين' : 'Section 5: Communicate — Multi-sensory'}
             </p>
           </div>

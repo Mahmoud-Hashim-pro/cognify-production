@@ -263,7 +263,7 @@ export default function AccessibleCommunicateWorkspaceView({
         role="banner"
         className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#131E2E]/95 backdrop-blur-md border-b border-[#22354E] shadow-md"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={onNavigateBack}
@@ -277,14 +277,14 @@ export default function AccessibleCommunicateWorkspaceView({
             type="button"
             onClick={onMenuClick}
             aria-label={localize(profile.language, 'Open navigation menu', 'فتح القائمة الرئيسية')}
-            className="md:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+            className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
+              <span className="hidden text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
                 {localize(profile.language, 'Section 5 · Communication', 'القسم 5 · التواصل والتعبير')}
               </span>
               {session.state === 'connected' && (
@@ -294,7 +294,7 @@ export default function AccessibleCommunicateWorkspaceView({
                 </span>
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC]">
+            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] line-clamp-2">
               {localize(profile.language, 'Accessible Communication Assistant', 'مساعد التواصل الشامل')}
             </h1>
           </div>

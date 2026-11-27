@@ -50,7 +50,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
         >
           <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
           {backLabel && (
-            <span className="hidden sm:inline font-bold text-xs">{backLabel}</span>
+            <span className="hidden font-bold text-xs">{backLabel}</span>
           )}
         </button>
       )}

@@ -320,7 +320,7 @@ export default function AccessibleMobilityWorkspaceView({
         role="banner"
         className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#131E2E]/95 backdrop-blur-md border-b border-[#22354E] shadow-md"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={onNavigateBack}
@@ -334,14 +334,14 @@ export default function AccessibleMobilityWorkspaceView({
               type="button"
               onClick={onMenuClick}
               aria-label={localize(profile.language, 'Open Main Menu', 'فتح القائمة الرئيسية')}
-              className="lg:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+              className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
             >
               <Menu className="w-5 h-5" />
             </button>
           )}
 
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="hidden items-center gap-2">
               <span className="text-xs font-bold text-[#4B9FE1] uppercase tracking-wider">
                 {localize(profile.language, 'Section 4: Move & Explore', 'القسم 4: الحركة والاستكشاف')}
               </span>
@@ -351,7 +351,7 @@ export default function AccessibleMobilityWorkspaceView({
                 {localize(profile.language, 'Safety Critical Zone', 'منطقة حساسة للأمان')}
               </span>
             </div>
-            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC]">
+            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] line-clamp-2">
               {localize(
                 profile.language,
                 'Mobility, Places & Public Transport Assistant',
