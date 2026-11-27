@@ -11,7 +11,13 @@
  *      attempts (stored locally) keeps the preview exploratory.
  */
 import React, { useMemo, useRef, useState } from 'react';
-import { Brain, Dumbbell, RotateCcw, ShieldAlert } from 'lucide-react';
+import { Brain, Dumbbell, ListChecks, RotateCcw, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
+import {
+  ambientNoise,
+  sliceTaskIntoMicroSteps,
+  type NoiseType,
+  type TaskSlicerDecomposition,
+} from '../lib/cognitiveEngine';
 import {
   COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
   COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
@@ -68,9 +74,32 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
 
   // Daily workout state
   const workout = useMemo(() => getDailyGymWorkout(), []);
+
+  React.useEffect(() => {
+    return () => {
+      ambientNoise.stop();
+    };
+  }, []);
   const [workoutAnswer, setWorkoutAnswer] = useState<number | null>(null);
 
   const eligibility = checkIqCooldownEligibility(history.count, history.lastDateIso);
+
+  // Task slicer state
+  const [taskInput, setTaskInput] = useState('');
+  const [slicedTask, setSlicedTask] = useState<TaskSlicerDecomposition | null>(null);
+  const [doneSteps, setDoneSteps] = useState<Record<string, boolean>>({});
+
+  // Focus noise state
+  const [activeNoise, setActiveNoise] = useState<NoiseType | null>(null);
+  const toggleNoise = (type: NoiseType) => {
+    if (activeNoise === type) {
+      ambientNoise.stop();
+      setActiveNoise(null);
+    } else {
+      ambientNoise.play(type, 0.25);
+      setActiveNoise(type);
+    }
+  };
 
   const cardCls = isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200';
   const innerCls = isDarkMode ? 'bg-stone-900 border-stone-700' : 'bg-stone-50 border-stone-200';
@@ -346,6 +375,117 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
           </button>
         </div>
       )}
+
+      {/* ── Task slicer (executive-function support) ── */}
+      <div className={`p-5 rounded-3xl border space-y-3 ${cardCls}`} data-testid="task-slicer">
+        <div className="flex items-center gap-2">
+          <ListChecks className="w-5 h-5 text-sky-400" aria-hidden="true" />
+          <h3 className={`text-sm font-black ${textCls}`}>
+            {isArabic ? 'مقطّع المهام الكبيرة' : 'Big-task slicer'}
+          </h3>
+        </div>
+        <p className={`text-[11px] leading-relaxed ${subCls}`}>
+          {isArabic
+            ? 'اكتب مهمة تبدو ثقيلة (بحث، شيت مسائل، قراءة فصل) وسنحولها لخطوات صغيرة لا تتجاوز 3 دقائق لتسهيل البدء.'
+            : 'Write a task that feels heavy (essay, problem sheet, chapter reading) and we turn it into tiny steps under 3 minutes each to make starting easier.'}
+        </p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={taskInput}
+            onChange={(e) => setTaskInput(e.target.value)}
+            dir="auto"
+            aria-label={isArabic ? 'المهمة المراد تقسيمها' : 'Task to slice'}
+            placeholder={isArabic ? 'مثال: كتابة بحث عن الطاقة الشمسية' : 'e.g., Write an essay about solar energy'}
+            className={`flex-1 p-3 rounded-2xl border text-xs ${
+              isDarkMode ? 'bg-stone-900 border-stone-700 text-stone-100 placeholder:text-stone-500' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
+            }`}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (!taskInput.trim()) return;
+              setSlicedTask(sliceTaskIntoMicroSteps(taskInput));
+              setDoneSteps({});
+            }}
+            className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            {isArabic ? 'قسّم' : 'Slice'}
+          </button>
+        </div>
+        {slicedTask && (
+          <div className="space-y-2">
+            <p className={`text-[11px] font-bold ${subCls}`}>
+              {isArabic
+                ? `${slicedTask.steps.length} خطوات · حوالي ${slicedTask.totalEstMinutes} دقائق`
+                : `${slicedTask.steps.length} steps · about ${slicedTask.totalEstMinutes} minutes`}
+            </p>
+            {slicedTask.steps.map((step, si) => {
+              const done = !!doneSteps[step.id];
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => setDoneSteps((prev) => ({ ...prev, [step.id]: !prev[step.id] }))}
+                  aria-pressed={done}
+                  className={`w-full p-3 rounded-2xl border text-start text-xs font-bold flex items-start gap-2 transition-all cursor-pointer ${
+                    done
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 line-through'
+                      : isDarkMode
+                        ? 'bg-stone-800 border-stone-700 text-stone-200 hover:border-[#4B9FE1]'
+                        : 'bg-stone-100 border-stone-300 text-stone-700 hover:border-[#1769AA]'
+                  }`}
+                >
+                  <span aria-hidden="true">{done ? '✅' : `${si + 1}.`}</span>
+                  <span className="flex-1">{isArabic ? step.titleAr : step.titleEn}</span>
+                  <span className={`shrink-0 text-[10px] ${subCls}`}>~{step.estMinutes}m</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Focus noise generator (Web Audio, on-device) ── */}
+      <div className={`p-5 rounded-3xl border space-y-3 ${cardCls}`} data-testid="focus-noise">
+        <div className="flex items-center gap-2">
+          <Volume2 className="w-5 h-5 text-amber-400" aria-hidden="true" />
+          <h3 className={`text-sm font-black ${textCls}`}>
+            {isArabic ? 'ضوضاء التركيز الهادئة' : 'Calm focus noise'}
+          </h3>
+        </div>
+        <p className={`text-[11px] leading-relaxed ${subCls}`}>
+          {isArabic
+            ? 'خلفية صوتية ثابتة تُولَّد على جهازك للمساعدة على التركيز وتغطية الأصوات المشتتة. اضغط مرة للتشغيل ومرة أخرى للإيقاف.'
+            : 'A steady sound background generated on your device to help focus and mask distracting sounds. Tap once to play, again to stop.'}
+        </p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={isArabic ? 'أنواع الضوضاء' : 'Noise types'}>
+          {(['brown', 'pink', 'white'] as NoiseType[]).map((type) => {
+            const active = activeNoise === type;
+            const label = isArabic
+              ? type === 'brown' ? 'بنية (عميقة)' : type === 'pink' ? 'وردية (متوازنة)' : 'بيضاء (خفيفة)'
+              : type === 'brown' ? 'Brown (deep)' : type === 'pink' ? 'Pink (balanced)' : 'White (light)';
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => toggleNoise(type)}
+                aria-pressed={active}
+                className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  active
+                    ? 'bg-amber-500/20 border border-amber-500/50 text-amber-300'
+                    : isDarkMode
+                      ? 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+              >
+                {active ? <VolumeX className="w-3.5 h-3.5" aria-hidden="true" /> : <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />}
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
