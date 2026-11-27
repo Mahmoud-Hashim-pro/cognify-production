@@ -43,10 +43,10 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
           <div
             className={cn(
               'w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-150',
-              'bg-cognify-surface-light dark:bg-cognify-surface-dark border-cognify-border-light dark:border-cognify-border-dark',
+              'bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark border-rafiqi-border-light dark:border-rafiqi-border-dark',
               'peer-checked:border-rafiqi-primary peer-checked:bg-rafiqi-primary',
               'group-hover:border-rafiqi-primary/60 dark:group-hover:border-rafiqi-primary/60',
-              'peer-focus-visible:ring-2 peer-focus-visible:ring-cognify-focus peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-cognify-surface-light dark:peer-focus-visible:ring-offset-cognify-bg-dark'
+              'peer-focus-visible:ring-2 peer-focus-visible:ring-rafiqi-focus peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-rafiqi-surface-light dark:peer-focus-visible:ring-offset-rafiqi-bg-dark'
             )}
             aria-hidden="true"
           >
@@ -62,12 +62,12 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         {(label || description) && (
           <div className="space-y-0.5 min-w-0">
             {label && (
-              <span className="block text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary leading-tight">
+              <span className="block text-sm font-semibold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary leading-tight">
                 {label}
               </span>
             )}
             {description && (
-              <span id={descId} className="block text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-normal">
+              <span id={descId} className="block text-xs text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary leading-normal">
                 {description}
               </span>
             )}
@@ -120,7 +120,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
       className={cn('space-y-2 font-sans text-start', className)}
     >
       {label && (
-        <span className="block text-xs sm:text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary mb-1">
+        <span className="block text-xs sm:text-sm font-semibold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary mb-1">
           {label}
         </span>
       )}
@@ -145,7 +145,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
       </div>
 
       {errorMessage && (
-        <p className="text-xs text-cognify-error-text-light dark:text-cognify-error-text-dark font-medium" role="alert">
+        <p className="text-xs text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark font-medium" role="alert">
           {errorMessage}
         </p>
       )}

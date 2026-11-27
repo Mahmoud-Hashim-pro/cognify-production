@@ -17,7 +17,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   success: 'bg-[#EBF7F1] text-rafiqi-success border-rafiqi-success/30 dark:bg-[#0A261A] dark:text-[#22C55E] dark:border-rafiqi-success/40',
   warning: 'bg-[#FEF8EE] text-[#9A5B0B] border-rafiqi-warning/30 dark:bg-[#2D1B04] dark:text-[#FBBF24] dark:border-rafiqi-warning/40',
   danger: 'bg-[#FDF1F2] text-rafiqi-error border-rafiqi-error/30 dark:bg-[#2D0D12] dark:text-[#F87171] dark:border-rafiqi-error/40',
-  neutral: 'bg-cognify-bg-light text-cognify-text-secondary border-cognify-border-light dark:bg-cognify-surface-elevated dark:text-cognify-text-dark-secondary dark:border-cognify-border-dark',
+  neutral: 'bg-rafiqi-bg-light text-rafiqi-text-secondary border-rafiqi-border-light dark:bg-rafiqi-surface-elevated dark:text-rafiqi-text-dark-secondary dark:border-rafiqi-border-dark',
 };
 
 const sizeStyles: Record<BadgeSize, string> = {

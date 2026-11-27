@@ -594,7 +594,7 @@ export function generateFullSystemBackupJson(
   }
 
   const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `cognify-superadmin-backup-${dateStr}.json`;
+  const filename = `rafiqi-superadmin-backup-${dateStr}.json`;
 
   return { blob, filename, jsonString };
 }

@@ -515,7 +515,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     const a = document.createElement('a');
     const url = URL.createObjectURL(blob);
     a.href = url;
-    a.download = `cognify-all-users-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `rafiqi-all-users-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast.success(`Exported ${users.length} full user records as JSON.`, 'Backup Downloaded');
@@ -546,7 +546,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     const a = document.createElement('a');
     const url = URL.createObjectURL(blob);
     a.href = url;
-    a.download = `cognify-directory-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `rafiqi-directory-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast.success(`Exported ${users.length} users to CSV.`, 'Excel file ready');

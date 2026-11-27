@@ -349,7 +349,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'cognify-openapi-v2.0.json';
+                a.download = 'rafiqi-openapi-v2.0.json';
                 a.click();
                 URL.revokeObjectURL(url);
               }}

@@ -15,11 +15,11 @@ export interface IconButtonProps extends Omit<ReactAriaButtonProps, 'children'> 
 }
 
 const variantStyles: Record<IconButtonVariant, string> = {
-  default: 'bg-rafiqi-bg hover:bg-rafiqi-primary-light text-cognify-text-primary dark:bg-rafiqi-surface-elevated dark:hover:bg-rafiqi-surface-dark dark:text-cognify-text-dark-primary border border-cognify-border-light dark:border-cognify-border-dark',
+  default: 'bg-rafiqi-bg hover:bg-rafiqi-primary-light text-rafiqi-text-primary dark:bg-rafiqi-surface-elevated dark:hover:bg-rafiqi-surface-dark dark:text-rafiqi-text-dark-primary border border-rafiqi-border-light dark:border-rafiqi-border-dark',
   primary: 'bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white shadow-sm',
   teal: 'bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white shadow-sm',
-  ghost: 'bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
-  outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
+  ghost: 'bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary',
+  outline: 'border border-rafiqi-border-light dark:border-rafiqi-border-dark bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary',
   danger: 'bg-[#FDF1F2] hover:brightness-95 text-rafiqi-error dark:bg-[#2D0D12] dark:hover:brightness-125 dark:text-[#F87171] border border-rafiqi-error/30 dark:border-rafiqi-error/40',
 };
 
@@ -50,7 +50,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         className={(renderProps) =>
           cn(
             'inline-flex items-center justify-center shrink-0 cursor-pointer transition-all duration-150',
-            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-surface-light dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-rafiqi-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-rafiqi-surface-light dark:data-[focus-visible]:ring-offset-rafiqi-bg-dark',
             'data-[pressed]:scale-[0.96] motion-reduce:transition-none motion-reduce:data-[pressed]:scale-100',
             'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none',
             variantStyles[variant],

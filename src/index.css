@@ -35,46 +35,46 @@
   --color-rafiqi-error: #C43D4D;
 
   /* Master Brand Design Tokens (Mapped to Rafiqi Blue) */
-  --color-cognify-indigo: #1769AA;
-  --color-cognify-indigo-dark: #0D4778;
-  --color-cognify-indigo-light: #4B9FE1;
-  --color-cognify-teal: #1769AA;
-  --color-cognify-teal-dark: #0D4778;
-  --color-cognify-teal-light: #4B9FE1;
-  --color-cognify-bg-light: #F5F9FD;
-  --color-cognify-surface-light: #FFFFFF;
-  --color-cognify-text-primary: #0E1726;
-  --color-cognify-text-secondary: #4B5C74;
-  --color-cognify-border-light: #DCE7F3;
+  --color-rafiqi-indigo: #1769AA;
+  --color-rafiqi-indigo-dark: #0D4778;
+  --color-rafiqi-indigo-light: #4B9FE1;
+  --color-rafiqi-teal: #1769AA;
+  --color-rafiqi-teal-dark: #0D4778;
+  --color-rafiqi-teal-light: #4B9FE1;
+  --color-rafiqi-bg-light: #F5F9FD;
+  --color-rafiqi-surface-light: #FFFFFF;
+  --color-rafiqi-text-primary: #0E1726;
+  --color-rafiqi-text-secondary: #4B5C74;
+  --color-rafiqi-border-light: #DCE7F3;
   
-  --color-cognify-bg-dark: #0B131E;
-  --color-cognify-surface-dark: #131E2E;
-  --color-cognify-surface-elevated: #1A283D;
-  --color-cognify-text-dark-primary: #F8FAFC;
-  --color-cognify-text-dark-secondary: #94A3B8;
-  --color-cognify-border-dark: #22354E;
+  --color-rafiqi-bg-dark: #0B131E;
+  --color-rafiqi-surface-dark: #131E2E;
+  --color-rafiqi-surface-elevated: #1A283D;
+  --color-rafiqi-text-dark-primary: #F8FAFC;
+  --color-rafiqi-text-dark-secondary: #94A3B8;
+  --color-rafiqi-border-dark: #22354E;
 
-  --color-cognify-focus: #F59E0B;
+  --color-rafiqi-focus: #F59E0B;
 
-  --color-cognify-success-light: #EBF7F1;
-  --color-cognify-success-text-light: #16845B;
-  --color-cognify-success-dark: #0A261A;
-  --color-cognify-success-text-dark: #22C55E;
+  --color-rafiqi-success-light: #EBF7F1;
+  --color-rafiqi-success-text-light: #16845B;
+  --color-rafiqi-success-dark: #0A261A;
+  --color-rafiqi-success-text-dark: #22C55E;
 
-  --color-cognify-warning-light: #FEF8EE;
-  --color-cognify-warning-text-light: #9A5B0B;
-  --color-cognify-warning-dark: #2D1B04;
-  --color-cognify-warning-text-dark: #FBBF24;
+  --color-rafiqi-warning-light: #FEF8EE;
+  --color-rafiqi-warning-text-light: #9A5B0B;
+  --color-rafiqi-warning-dark: #2D1B04;
+  --color-rafiqi-warning-text-dark: #FBBF24;
 
-  --color-cognify-error-light: #FDF1F2;
-  --color-cognify-error-text-light: #C43D4D;
-  --color-cognify-error-dark: #2D0D12;
-  --color-cognify-error-text-dark: #F87171;
+  --color-rafiqi-error-light: #FDF1F2;
+  --color-rafiqi-error-text-light: #C43D4D;
+  --color-rafiqi-error-dark: #2D0D12;
+  --color-rafiqi-error-text-dark: #F87171;
 
-  --color-cognify-info-light: #EAF4FC;
-  --color-cognify-info-text-light: #1769AA;
-  --color-cognify-info-dark: #0F2744;
-  --color-cognify-info-text-dark: #60A5FA;
+  --color-rafiqi-info-light: #EAF4FC;
+  --color-rafiqi-info-text-light: #1769AA;
+  --color-rafiqi-info-dark: #0F2744;
+  --color-rafiqi-info-text-dark: #60A5FA;
 
   --color-primary: #1769AA;
   --color-primary-press: #0D4778;
@@ -201,7 +201,7 @@ bdi,
 }
 
 /* Premium Obsidian & Frosted Glass Design Tokens - Rafiqi Unified Blue */
-.cognify-aurora-bg {
+.rafiqi-aurora-bg {
   background-color: #0B131E;
   background-image: 
     radial-gradient(at 15% 15%, rgba(23, 105, 170, 0.22) 0px, transparent 55%),
@@ -219,7 +219,7 @@ bdi,
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.cognify-burgundy-hero {
+.rafiqi-burgundy-hero {
   position: relative;
   background: radial-gradient(circle at 50% 15%, rgba(23, 105, 170, 0.32) 0%, rgba(13, 71, 120, 0.4) 45%, rgba(11, 19, 30, 0.98) 100%);
   border: 1px solid rgba(23, 105, 170, 0.25);
@@ -356,7 +356,7 @@ html.high-contrast button:focus-visible {
 
 /* Rafiqi Reusable Design System Component Utilities */
 .rafiqi-btn-primary,
-.cognify-btn-primary {
+.rafiqi-btn-primary {
   min-height: 48px;
   background-color: var(--color-rafiqi-primary, #1769AA);
   color: #FFFFFF;
@@ -372,17 +372,17 @@ html.high-contrast button:focus-visible {
   cursor: pointer;
 }
 .rafiqi-btn-primary:hover,
-.cognify-btn-primary:hover {
+.rafiqi-btn-primary:hover {
   background-color: var(--color-rafiqi-primary-dark, #0D4778);
   box-shadow: 0 4px 12px -2px rgba(23, 105, 170, 0.35);
   transform: translateY(-1px);
 }
 .rafiqi-btn-primary:active,
-.cognify-btn-primary:active {
+.rafiqi-btn-primary:active {
   transform: scale(0.98);
 }
 .rafiqi-btn-primary:disabled,
-.cognify-btn-primary:disabled {
+.rafiqi-btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -390,11 +390,11 @@ html.high-contrast button:focus-visible {
 }
 
 .rafiqi-btn-secondary,
-.cognify-btn-secondary {
+.rafiqi-btn-secondary {
   min-height: 48px;
   background-color: var(--color-rafiqi-primary-light, #EAF4FC);
   color: var(--color-rafiqi-primary-dark, #0D4778);
-  border: 1px solid var(--color-cognify-border-light, #DCE7F3);
+  border: 1px solid var(--color-rafiqi-border-light, #DCE7F3);
   border-radius: 0.875rem;
   padding: 0.625rem 1.25rem;
   font-weight: 700;
@@ -407,36 +407,36 @@ html.high-contrast button:focus-visible {
   cursor: pointer;
 }
 .dark .rafiqi-btn-secondary,
-.dark .cognify-btn-secondary {
+.dark .rafiqi-btn-secondary {
   background-color: var(--color-rafiqi-surface-elevated, #1A283D);
   color: var(--color-rafiqi-primary-muted, #4B9FE1);
   border-color: var(--color-rafiqi-border-dark, #22354E);
 }
 .rafiqi-btn-secondary:hover,
-.cognify-btn-secondary:hover {
+.rafiqi-btn-secondary:hover {
   background-color: #D8EAF9;
   border-color: #1769AA;
 }
 .dark .rafiqi-btn-secondary:hover,
-.dark .cognify-btn-secondary:hover {
+.dark .rafiqi-btn-secondary:hover {
   background-color: #22354E;
   border-color: #4B9FE1;
 }
 .rafiqi-btn-secondary:active,
-.cognify-btn-secondary:active {
+.rafiqi-btn-secondary:active {
   transform: scale(0.98);
 }
 
 .rafiqi-card,
-.cognify-card {
+.rafiqi-card {
   background-color: #FFFFFF;
-  border: 1px solid var(--color-cognify-border-light, #DCE7F3);
+  border: 1px solid var(--color-rafiqi-border-light, #DCE7F3);
   border-radius: 1.25rem;
   padding: 1.25rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
 .dark .rafiqi-card,
-.dark .cognify-card {
+.dark .rafiqi-card {
   background-color: var(--color-rafiqi-surface-dark, #131E2E);
   border-color: var(--color-rafiqi-border-dark, #22354E);
   color: #F8FAFC;
@@ -772,7 +772,7 @@ html.high-contrast button:focus-visible {
   0%, 100% { box-shadow: 0 0 0 4px #fbbf24, 0 0 22px 6px rgba(251,191,36,.75); }
   50%      { box-shadow: 0 0 0 6px #fde68a, 0 0 34px 10px rgba(251,191,36,.95); }
 }
-.cognify-scan-hl {
+.rafiqi-scan-hl {
   outline: 4px solid #fbbf24 !important;
   outline-offset: 2px;
   border-radius: 14px;
@@ -780,24 +780,24 @@ html.high-contrast button:focus-visible {
   position: relative;
   z-index: 40;
 }
-.cognify-scan-hl-row {
+.rafiqi-scan-hl-row {
   outline: 3px dashed #38bdf8 !important;
   outline-offset: 2px;
   border-radius: 14px;
   background-color: rgba(56, 189, 248, .14) !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .cognify-scan-hl { animation: none; box-shadow: 0 0 0 5px #fbbf24; }
+  .rafiqi-scan-hl { animation: none; box-shadow: 0 0 0 5px #fbbf24; }
 }
 /* Keep the scanned item clear of the fixed switch bar at the bottom. */
-.cognify-scan-hl, .cognify-scan-hl-row { scroll-margin-bottom: 130px; scroll-margin-top: 90px; }
+.rafiqi-scan-hl, .rafiqi-scan-hl-row { scroll-margin-bottom: 130px; scroll-margin-top: 90px; }
 
 /* ── Phase 2 Design System Accessibility Utilities ──────────────────────── */
-.cognify-focus-ring {
+.rafiqi-focus-ring {
   outline: none;
   transition: box-shadow 0.15s ease-in-out;
 }
-.cognify-focus-ring:focus-visible {
+.rafiqi-focus-ring:focus-visible {
   outline: 2px solid #F59E0B;
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
@@ -818,16 +818,16 @@ html.high-contrast button:focus-visible {
   scroll-behavior: smooth;
 }
 
-.cognify-card {
-  border: 1px solid var(--color-cognify-border-light, #E2E8F0);
-  background-color: var(--color-cognify-surface-light, #FFFFFF);
+.rafiqi-card {
+  border: 1px solid var(--color-rafiqi-border-light, #E2E8F0);
+  background-color: var(--color-rafiqi-surface-light, #FFFFFF);
   border-radius: 1rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
-:is(.dark, .dark *) .cognify-card {
-  border-color: var(--color-cognify-border-dark, #243048);
-  background-color: var(--color-cognify-surface-dark, #171E2E);
+:is(.dark, .dark *) .rafiqi-card {
+  border-color: var(--color-rafiqi-border-dark, #243048);
+  background-color: var(--color-rafiqi-surface-dark, #171E2E);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
@@ -860,10 +860,10 @@ html.high-contrast button:focus-visible {
 
 /* ==========================================================================
    COGNIFY DISABILITY DASHBOARD — RESTYLED ACCESSIBLE UI & RTL TYPOGRAPHY
-   Scoped strictly to .cognify-dashboard-redesign to preserve modularity.
+   Scoped strictly to .rafiqi-dashboard-redesign to preserve modularity.
    ========================================================================== */
 
-.cognify-dashboard-redesign {
+.rafiqi-dashboard-redesign {
   background:
     radial-gradient(ellipse at 4% 0%, rgba(36, 59, 115, 0.07), transparent 38%),
     radial-gradient(ellipse at 96% 8%, rgba(8, 127, 140, 0.07), transparent 34%),
@@ -871,7 +871,7 @@ html.high-contrast button:focus-visible {
   color: #172033;
 }
 
-.dark .cognify-dashboard-redesign {
+.dark .rafiqi-dashboard-redesign {
   background:
     radial-gradient(ellipse at 4% 0%, rgba(52, 82, 155, 0.18), transparent 38%),
     radial-gradient(ellipse at 96% 8%, rgba(8, 127, 140, 0.12), transparent 34%),
@@ -879,75 +879,75 @@ html.high-contrast button:focus-visible {
   color: #F8FAFC;
 }
 
-.cognify-dashboard-shell {
+.rafiqi-dashboard-shell {
   width: min(100%, 1240px);
 }
 
 /* RTL Typography & Word Wrap safety */
-[dir="rtl"] .cognify-dashboard-redesign {
+[dir="rtl"] .rafiqi-dashboard-redesign {
   font-family: "IBM Plex Sans Arabic", Tajawal, Alexandria, "Inter", ui-sans-serif, system-ui, sans-serif;
   overflow-wrap: break-word;
   word-break: normal;
 }
 
-[dir="rtl"] .cognify-dashboard-redesign h1,
-[dir="rtl"] .cognify-dashboard-redesign h2,
-[dir="rtl"] .cognify-dashboard-redesign h3,
-[dir="rtl"] .cognify-dashboard-redesign h4 {
+[dir="rtl"] .rafiqi-dashboard-redesign h1,
+[dir="rtl"] .rafiqi-dashboard-redesign h2,
+[dir="rtl"] .rafiqi-dashboard-redesign h3,
+[dir="rtl"] .rafiqi-dashboard-redesign h4 {
   line-height: 1.55;
   letter-spacing: normal !important;
 }
 
-[dir="rtl"] .cognify-dashboard-redesign p,
-[dir="rtl"] .cognify-dashboard-redesign span,
-[dir="rtl"] .cognify-dashboard-redesign button {
+[dir="rtl"] .rafiqi-dashboard-redesign p,
+[dir="rtl"] .rafiqi-dashboard-redesign span,
+[dir="rtl"] .rafiqi-dashboard-redesign button {
   line-height: 1.65;
 }
 
 /* Card & Section styling */
-.cognify-dashboard-redesign section[aria-label],
-.cognify-dashboard-redesign [role="article"] {
+.rafiqi-dashboard-redesign section[aria-label],
+.rafiqi-dashboard-redesign [role="article"] {
   border-radius: 1.25rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.cognify-dashboard-redesign section[aria-label*="Welcome"],
-.cognify-dashboard-redesign section[aria-label*="الترحيب"] {
+.rafiqi-dashboard-redesign section[aria-label*="Welcome"],
+.rafiqi-dashboard-redesign section[aria-label*="الترحيب"] {
   border-color: rgba(36, 59, 115, 0.16);
   box-shadow: 0 4px 20px rgba(23, 32, 51, 0.04);
 }
 
-.dark .cognify-dashboard-redesign section[aria-label*="Welcome"],
-.dark .cognify-dashboard-redesign section[aria-label*="الترحيب"] {
+.dark .rafiqi-dashboard-redesign section[aria-label*="Welcome"],
+.dark .rafiqi-dashboard-redesign section[aria-label*="الترحيب"] {
   border-color: rgba(148, 163, 184, 0.18);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
-.cognify-dashboard-redesign [role="article"] {
+.rafiqi-dashboard-redesign [role="article"] {
   min-height: 230px;
   border-color: rgba(36, 59, 115, 0.12);
   box-shadow: 0 4px 16px rgba(23, 32, 51, 0.035);
 }
 
-.cognify-dashboard-redesign [role="article"]:hover {
+.rafiqi-dashboard-redesign [role="article"]:hover {
   transform: translateY(-2px);
   border-color: rgba(8, 127, 140, 0.45);
   box-shadow: 0 10px 28px rgba(23, 32, 51, 0.08);
 }
 
-.dark .cognify-dashboard-redesign [role="article"] {
+.dark .rafiqi-dashboard-redesign [role="article"] {
   border-color: rgba(148, 163, 184, 0.16);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
-.dark .cognify-dashboard-redesign [role="article"]:hover {
+.dark .rafiqi-dashboard-redesign [role="article"]:hover {
   border-color: rgba(94, 234, 212, 0.45);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
 }
 
 /* Inputs & Form Controls */
-.cognify-dashboard-redesign input[type="search"],
-.cognify-dashboard-redesign select {
+.rafiqi-dashboard-redesign input[type="search"],
+.rafiqi-dashboard-redesign select {
   min-height: 48px;
   border-radius: 0.85rem;
   border-color: #D8E0ED;
@@ -955,24 +955,24 @@ html.high-contrast button:focus-visible {
   color: #172033;
 }
 
-.dark .cognify-dashboard-redesign input[type="search"],
-.dark .cognify-dashboard-redesign select {
+.dark .rafiqi-dashboard-redesign input[type="search"],
+.dark .rafiqi-dashboard-redesign select {
   border-color: #334155;
   background: #171E2E;
   color: #F8FAFC;
 }
 
 /* High-contrast WCAG 2.2 Focus Indicators */
-.cognify-dashboard-redesign :is(button, a, input, select):focus-visible {
+.rafiqi-dashboard-redesign :is(button, a, input, select):focus-visible {
   outline: 3px solid #F59E0B !important;
   outline-offset: 3px !important;
 }
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
-  .cognify-dashboard-redesign *,
-  .cognify-dashboard-redesign *::before,
-  .cognify-dashboard-redesign *::after {
+  .rafiqi-dashboard-redesign *,
+  .rafiqi-dashboard-redesign *::before,
+  .rafiqi-dashboard-redesign *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;

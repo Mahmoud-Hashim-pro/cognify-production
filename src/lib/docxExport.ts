@@ -611,11 +611,11 @@ export async function downloadNativeDocx(options: DocxExportOptions) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const safeTitle = (options.title || 'cognify-document')
+  const safeTitle = (options.title || 'rafiqi-document')
     .replace(/[^\w\u0600-\u06FF\s-]/g, '')
     .trim()
     .replace(/\s+/g, '_');
-  a.download = `${safeTitle || 'cognify-document'}.docx`;
+  a.download = `${safeTitle || 'rafiqi-document'}.docx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

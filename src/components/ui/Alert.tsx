@@ -23,31 +23,31 @@ const variantConfig: Record<
   }
 > = {
   info: {
-    containerClass: 'bg-cognify-info-light dark:bg-cognify-info-dark border-cognify-info-text-light/20 dark:border-cognify-info-text-dark/30',
-    icon: <Info className="w-5 h-5 text-cognify-info-text-light dark:text-cognify-info-text-dark shrink-0" aria-hidden="true" />,
-    titleColor: 'text-cognify-info-text-light dark:text-cognify-info-text-dark',
-    textColor: 'text-cognify-info-text-light dark:text-cognify-info-text-dark',
+    containerClass: 'bg-rafiqi-info-light dark:bg-rafiqi-info-dark border-rafiqi-info-text-light/20 dark:border-rafiqi-info-text-dark/30',
+    icon: <Info className="w-5 h-5 text-rafiqi-info-text-light dark:text-rafiqi-info-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-rafiqi-info-text-light dark:text-rafiqi-info-text-dark',
+    textColor: 'text-rafiqi-info-text-light dark:text-rafiqi-info-text-dark',
     role: 'status',
   },
   success: {
-    containerClass: 'bg-cognify-success-light dark:bg-cognify-success-dark border-cognify-success-text-light/20 dark:border-cognify-success-text-dark/30',
-    icon: <CheckCircle2 className="w-5 h-5 text-cognify-success-text-light dark:text-cognify-success-text-dark shrink-0" aria-hidden="true" />,
-    titleColor: 'text-cognify-success-text-light dark:text-cognify-success-text-dark',
-    textColor: 'text-cognify-success-text-light dark:text-cognify-success-text-dark',
+    containerClass: 'bg-rafiqi-success-light dark:bg-rafiqi-success-dark border-rafiqi-success-text-light/20 dark:border-rafiqi-success-text-dark/30',
+    icon: <CheckCircle2 className="w-5 h-5 text-rafiqi-success-text-light dark:text-rafiqi-success-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-rafiqi-success-text-light dark:text-rafiqi-success-text-dark',
+    textColor: 'text-rafiqi-success-text-light dark:text-rafiqi-success-text-dark',
     role: 'status',
   },
   warning: {
-    containerClass: 'bg-cognify-warning-light dark:bg-cognify-warning-dark border-cognify-warning-text-light/20 dark:border-cognify-warning-text-dark/30',
-    icon: <AlertTriangle className="w-5 h-5 text-cognify-warning-text-light dark:text-cognify-warning-text-dark shrink-0" aria-hidden="true" />,
-    titleColor: 'text-cognify-warning-text-light dark:text-cognify-warning-text-dark',
-    textColor: 'text-cognify-warning-text-light dark:text-cognify-warning-text-dark',
+    containerClass: 'bg-rafiqi-warning-light dark:bg-rafiqi-warning-dark border-rafiqi-warning-text-light/20 dark:border-rafiqi-warning-text-dark/30',
+    icon: <AlertTriangle className="w-5 h-5 text-rafiqi-warning-text-light dark:text-rafiqi-warning-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-rafiqi-warning-text-light dark:text-rafiqi-warning-text-dark',
+    textColor: 'text-rafiqi-warning-text-light dark:text-rafiqi-warning-text-dark',
     role: 'alert',
   },
   error: {
-    containerClass: 'bg-cognify-error-light dark:bg-cognify-error-dark border-cognify-error-text-light/20 dark:border-cognify-error-text-dark/30',
-    icon: <AlertCircle className="w-5 h-5 text-cognify-error-text-light dark:text-cognify-error-text-dark shrink-0" aria-hidden="true" />,
-    titleColor: 'text-cognify-error-text-light dark:text-cognify-error-text-dark',
-    textColor: 'text-cognify-error-text-light dark:text-cognify-error-text-dark',
+    containerClass: 'bg-rafiqi-error-light dark:bg-rafiqi-error-dark border-rafiqi-error-text-light/20 dark:border-rafiqi-error-text-dark/30',
+    icon: <AlertCircle className="w-5 h-5 text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark shrink-0" aria-hidden="true" />,
+    titleColor: 'text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark',
+    textColor: 'text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark',
     role: 'alert',
   },
 };
@@ -91,7 +91,7 @@ export const Alert: React.FC<AlertProps> = ({
           type="button"
           onClick={onDismiss}
           aria-label={dismissLabel}
-          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-lg text-cognify-text-secondary hover:text-cognify-text-primary dark:text-cognify-text-dark-secondary dark:hover:text-cognify-text-dark-primary hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-lg text-rafiqi-text-secondary hover:text-rafiqi-text-primary dark:text-rafiqi-text-dark-secondary dark:hover:text-rafiqi-text-dark-primary hover:bg-rafiqi-bg-light dark:hover:bg-rafiqi-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-focus"
         >
           <X className="w-4 h-4" aria-hidden="true" />
         </button>

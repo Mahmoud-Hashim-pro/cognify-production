@@ -73,8 +73,8 @@ export async function runUnifiedBlueThemeVerification(): Promise<{ passed: numbe
   assert(cssContent.includes('--color-rafiqi-primary-light: #EAF4FC;'), 'index.css defines --color-rafiqi-primary-light');
   assert(cssContent.includes('--color-rafiqi-bg: #F5F9FD;'), 'index.css defines --color-rafiqi-bg');
   assert(cssContent.includes('--color-primary: #1769AA;'), 'index.css maps --color-primary to #1769AA');
-  assert(cssContent.includes('--color-cognify-indigo: #1769AA;'), 'index.css maps legacy indigo to #1769AA');
-  assert(cssContent.includes('--color-cognify-teal: #1769AA;'), 'index.css maps legacy teal to #1769AA');
+  assert(cssContent.includes('--color-rafiqi-indigo: #1769AA;'), 'index.css maps legacy indigo to #1769AA');
+  assert(cssContent.includes('--color-rafiqi-teal: #1769AA;'), 'index.css maps legacy teal to #1769AA');
 
   // 4. Shared UI Components Adherence
   const buttonPath = path.resolve(process.cwd(), 'src', 'components', 'ui', 'Button.tsx');

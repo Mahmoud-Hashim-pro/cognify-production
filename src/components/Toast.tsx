@@ -27,7 +27,7 @@ export const toast = {
       case "info": fallbackTitle = "Information"; break;
     }
     if (typeof window !== 'undefined' && typeof CustomEvent !== 'undefined') {
-      const event = new CustomEvent("cognify-toast", {
+      const event = new CustomEvent("rafiqi-toast", {
         detail: {
           id: Math.random().toString(36).substring(2, 9),
           type,
@@ -89,10 +89,10 @@ export function ToastContainer({ rtl = false }: ToastContainerProps) {
       }
     };
 
-    window.addEventListener("cognify-toast", handleAddToast);
+    window.addEventListener("rafiqi-toast", handleAddToast);
     const pending = timers.current;
     return () => {
-      window.removeEventListener("cognify-toast", handleAddToast);
+      window.removeEventListener("rafiqi-toast", handleAddToast);
       pending.forEach(clearTimeout);
       pending.clear();
     };

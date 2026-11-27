@@ -225,7 +225,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cognify-access-profile-${profile.name || 'user'}.json`;
+    a.download = `rafiqi-access-profile-${profile.name || 'user'}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(t('Profile exported successfully', 'تم تصدير ملف الإعدادات بنجاح'));

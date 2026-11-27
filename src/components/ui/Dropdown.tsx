@@ -70,7 +70,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             setIsOpen(true);
           }
         }}
-        className="cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus rounded-xl"
+        className="cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-focus rounded-xl"
       >
         {trigger}
       </div>
@@ -82,7 +82,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           aria-label={ariaLabel}
           className={cn(
             'absolute top-full mt-1.5 z-50 min-w-[200px] p-1.5 rounded-2xl shadow-xl font-sans',
-            'bg-cognify-surface-light dark:bg-cognify-surface-elevated border border-cognify-border-light dark:border-cognify-border-dark',
+            'bg-rafiqi-surface-light dark:bg-rafiqi-surface-elevated border border-rafiqi-border-light dark:border-rafiqi-border-dark',
             align === 'end' ? 'end-0' : 'start-0'
           )}
         >
@@ -98,11 +98,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
               }}
               className={cn(
                 'w-full min-h-[44px] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-between gap-3 transition-colors cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]',
-                'focus-visible:ring-2 focus-visible:ring-cognify-focus',
+                'focus-visible:ring-2 focus-visible:ring-rafiqi-focus',
                 item.disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
                 item.destructive
                   ? 'text-rafiqi-error hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400'
-                  : 'text-cognify-text-primary dark:text-cognify-text-dark-primary hover:bg-rafiqi-primary-light/60 dark:hover:bg-rafiqi-surface-dark'
+                  : 'text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary hover:bg-rafiqi-primary-light/60 dark:hover:bg-rafiqi-surface-dark'
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
@@ -110,7 +110,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 <span className="truncate">{item.label}</span>
               </div>
               {item.shortcut && (
-                <kbd className="text-xs text-cognify-text-muted dark:text-cognify-text-dark-secondary bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
+                <kbd className="text-xs text-rafiqi-text-muted dark:text-rafiqi-text-dark-secondary bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
                   {item.shortcut}
                 </kbd>
               )}

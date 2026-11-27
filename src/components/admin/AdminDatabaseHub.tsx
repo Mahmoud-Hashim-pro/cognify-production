@@ -160,7 +160,7 @@ export default function AdminDatabaseHub({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cognify-database-audit-${new Date().toISOString().slice(0, 10)}.md`;
+    a.download = `rafiqi-database-audit-${new Date().toISOString().slice(0, 10)}.md`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast.success('Generated infrastructure audit report.', 'Audit Report');
@@ -299,7 +299,7 @@ export default function AdminDatabaseHub({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cognify-user-${userDoc.uid || 'record'}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `rafiqi-user-${userDoc.uid || 'record'}-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast.success(`Exported user record & chat data (${userDoc.email || userDoc.uid}) to JSON.`, 'JSON Downloaded');

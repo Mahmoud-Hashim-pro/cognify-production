@@ -320,7 +320,7 @@ export async function runInstitutionPilotValidationSuite(): Promise<{ passed: nu
     'actor_registrar',
     'DATA_EXPORT',
     'institution_all_departments',
-    { exportFormat: 'cognify-export-v2.0', targetCount: 26, complianceStandard: 'FERPA_34_CFR_99' },
+    { exportFormat: 'rafiqi-export-v2.0', targetCount: 26, complianceStandard: 'FERPA_34_CFR_99' },
     entry1.entryHash,
     now - 4000
   );
@@ -384,7 +384,7 @@ export async function runInstitutionPilotValidationSuite(): Promise<{ passed: nu
   
   // Verify individual export integrity and FERPA statement
   for (const pkg of exportPackages) {
-    assert(pkg.formatVersion === 'cognify-export-v2.0', 'Export package conforms to format "cognify-export-v2.0"');
+    assert(pkg.formatVersion === 'rafiqi-export-v2.0', 'Export package conforms to format "rafiqi-export-v2.0"');
     assert(pkg.complianceStatement.includes('FERPA'), 'Compliance statement explicitly certifies FERPA compliance');
     assert(pkg.integrityChecksum.length === 64, 'Generated 64-character SHA-256 cryptographic checksum');
     
@@ -414,7 +414,7 @@ export async function runInstitutionPilotValidationSuite(): Promise<{ passed: nu
     receiptId: `receipt_batch_${Date.now()}`,
     institutionId: institutionTenantId,
     totalRecordsExported: exportPackages.length,
-    formatVersion: 'cognify-export-v2.0',
+    formatVersion: 'rafiqi-export-v2.0',
     batchReceiptHash,
     ferpaComplianceCertified: true,
     allChecksumsVerified: true,

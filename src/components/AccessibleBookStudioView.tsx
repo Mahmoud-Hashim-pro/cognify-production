@@ -414,14 +414,14 @@ export default function AccessibleBookStudioView({
     <div
       dir={metadata.language === 'ar' || metadata.language === 'mixed' ? 'rtl' : 'ltr'}
       className={`flex-1 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
-        isDarkMode ? 'bg-cognify-bg-dark text-stone-100' : 'bg-cognify-bg-light text-stone-900'
+        isDarkMode ? 'bg-rafiqi-bg-dark text-stone-100' : 'bg-rafiqi-bg-light text-stone-900'
       }`}
     >
       {/* ── TOP HEADER ── */}
       <header
         className={`px-4 py-2.5 sm:px-6 sm:py-3 border-b backdrop-blur-xl flex items-center justify-between gap-3 shrink-0 z-20 transition-colors duration-300 ${
           isDarkMode
-            ? 'border-stone-800 bg-cognify-bg-dark/95 text-white'
+            ? 'border-stone-800 bg-rafiqi-bg-dark/95 text-white'
             : 'border-stone-200/90 bg-white/95 text-stone-900 shadow-sm'
         }`}
       >
@@ -477,7 +477,7 @@ export default function AccessibleBookStudioView({
             onClick={() => setShowHistoryModal(true)}
             className={`p-2 rounded-xl border transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
               isDarkMode
-                ? 'bg-cognify-surface-dark border-stone-800 text-stone-300 hover:text-white'
+                ? 'bg-rafiqi-surface-dark border-stone-800 text-stone-300 hover:text-white'
                 : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950'
             }`}
             title={isArLocale ? 'أرشيف الكتب المحفوظة' : 'Document History'}
@@ -492,7 +492,7 @@ export default function AccessibleBookStudioView({
               onClick={toggleTheme}
               className={`p-2 rounded-xl border transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
                 isDarkMode
-                  ? 'bg-cognify-surface-dark border-stone-800 text-amber-400'
+                  ? 'bg-rafiqi-surface-dark border-stone-800 text-amber-400'
                   : 'bg-stone-100 border-stone-200 text-stone-700'
               }`}
               title={isDarkMode ? 'الوضع النهاري' : 'الوضع الليلي'}
@@ -508,7 +508,7 @@ export default function AccessibleBookStudioView({
               onClick={onMenuClick}
               className={`p-2 rounded-xl border transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
                 isDarkMode
-                  ? 'bg-cognify-surface-dark border-stone-800 text-stone-300 hover:text-white'
+                  ? 'bg-rafiqi-surface-dark border-stone-800 text-stone-300 hover:text-white'
                   : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950'
               }`}
               aria-label="Toggle menu"
@@ -523,7 +523,7 @@ export default function AccessibleBookStudioView({
       <nav
         aria-label={isArLocale ? 'خطوات استوديو الكتب التعليمية' : 'Book Studio Steps'}
         className={`px-4 py-2 border-b shrink-0 flex items-center justify-start gap-2 overflow-x-auto custom-scrollbar ${
-          isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-100 border-stone-200'
+          isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-100 border-stone-200'
         }`}
       >
         <div className="flex items-center gap-1 sm:gap-2">
@@ -597,7 +597,7 @@ export default function AccessibleBookStudioView({
                   disabled={isProcessingFile}
                   className={`p-4 rounded-2xl border text-start flex items-center gap-3 transition-all active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
                     isDarkMode
-                      ? 'bg-cognify-surface-dark border-stone-800 hover:border-teal-700 text-stone-200'
+                      ? 'bg-rafiqi-surface-dark border-stone-800 hover:border-teal-700 text-stone-200'
                       : 'bg-white border-stone-200 hover:border-teal-600 text-stone-800 shadow-sm'
                   }`}
                 >
@@ -619,7 +619,7 @@ export default function AccessibleBookStudioView({
                   onClick={handleImportFromFileReader}
                   className={`p-4 rounded-2xl border text-start flex items-center gap-3 transition-all active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
                     isDarkMode
-                      ? 'bg-cognify-surface-dark border-stone-800 hover:border-indigo-700 text-stone-200'
+                      ? 'bg-rafiqi-surface-dark border-stone-800 hover:border-indigo-700 text-stone-200'
                       : 'bg-white border-stone-200 hover:border-indigo-600 text-stone-800 shadow-sm'
                   }`}
                 >
@@ -638,7 +638,7 @@ export default function AccessibleBookStudioView({
 
                 <div
                   className={`p-4 rounded-2xl border flex items-center gap-3 ${
-                    isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-700'
+                    isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-700'
                   }`}
                 >
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
@@ -658,7 +658,7 @@ export default function AccessibleBookStudioView({
               {/* Educational Metadata Form Card */}
               <div
                 className={`p-5 sm:p-6 rounded-3xl border space-y-4 ${
-                  isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
+                  isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
                 }`}
               >
                 <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-xs sm:text-sm">
@@ -676,7 +676,7 @@ export default function AccessibleBookStudioView({
                       id="book-meta-title" aria-label={isArLocale ? 'عنوان الكتاب أو المستند' : 'Document Title'} value={metadata.title}
                       onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                       placeholder={isArLocale ? 'مثال: كتاب الفيزياء الحيوية' : 'e.g. Biophysics Lecture Notes'}
                     />
@@ -691,7 +691,7 @@ export default function AccessibleBookStudioView({
                       id="book-meta-subtitle" aria-label={isArLocale ? 'العنوان الفرعي أو الوحدة' : 'Subtitle or Unit'} value={metadata.subtitle || ''}
                       onChange={(e) => setMetadata({ ...metadata, subtitle: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                       placeholder={isArLocale ? 'مثال: الوحدة الأولى: الميكانيكا' : 'e.g. Unit 1: Mechanics'}
                     />
@@ -706,7 +706,7 @@ export default function AccessibleBookStudioView({
                       id="book-meta-author" aria-label={isArLocale ? 'المؤلف أو المعلم' : 'Author or Teacher'} value={metadata.author}
                       onChange={(e) => setMetadata({ ...metadata, author: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     />
                   </div>
@@ -720,7 +720,7 @@ export default function AccessibleBookStudioView({
                       id="book-meta-subject" aria-label={isArLocale ? 'المادة التخصصية' : 'Subject'} value={metadata.subject}
                       onChange={(e) => setMetadata({ ...metadata, subject: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     />
                   </div>
@@ -734,7 +734,7 @@ export default function AccessibleBookStudioView({
                       id="book-meta-grade" aria-label={isArLocale ? 'المرحلة أو الصف الدراسي' : 'Grade or Educational Level'} value={metadata.gradeLevel}
                       onChange={(e) => setMetadata({ ...metadata, gradeLevel: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     />
                   </div>
@@ -747,7 +747,7 @@ export default function AccessibleBookStudioView({
                       value={metadata.language}
                       onChange={(e) => setMetadata({ ...metadata, language: e.target.value as StudioLanguage })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
                       <option value="ar">{isArLocale ? 'العربية (RTL من اليمين لليسار)' : 'Arabic (RTL)'}</option>
@@ -774,7 +774,7 @@ export default function AccessibleBookStudioView({
               {/* Rough Content Editor Textarea */}
               <div
                 className={`p-5 sm:p-6 rounded-3xl border space-y-3 ${
-                  isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
+                  isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -792,7 +792,7 @@ export default function AccessibleBookStudioView({
                   onChange={(e) => setRawContent(e.target.value)}
                   rows={14}
                   className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed font-sans outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors custom-scrollbar ${
-                    isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                    isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                   }`}
                   placeholder={
                     isArLocale
@@ -857,7 +857,7 @@ export default function AccessibleBookStudioView({
                         isSelected
                           ? 'border-teal-600 bg-teal-50 dark:bg-teal-950/60 ring-2 ring-teal-600 shadow-md'
                           : isDarkMode
-                          ? 'border-stone-800 bg-cognify-surface-dark hover:border-teal-700/60'
+                          ? 'border-stone-800 bg-rafiqi-surface-dark hover:border-teal-700/60'
                           : 'border-stone-200 bg-white hover:border-teal-600/40 shadow-sm'
                       }`}
                     >
@@ -892,7 +892,7 @@ export default function AccessibleBookStudioView({
               <div
                 data-testid="formatting-options"
                 className={`p-5 sm:p-6 rounded-3xl border space-y-5 ${
-                  isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
+                  isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
                 }`}
               >
                 <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-xs sm:text-sm">
@@ -910,7 +910,7 @@ export default function AccessibleBookStudioView({
                       value={metadata.answerSpaceStyle}
                       onChange={(e) => setMetadata({ ...metadata, answerSpaceStyle: e.target.value as AnswerSpaceStyle })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
                       <option value="dots">{isArLocale ? 'نقاط متباعدة (..................)' : 'Dot leaders (......)'}</option>
@@ -929,7 +929,7 @@ export default function AccessibleBookStudioView({
                       value={metadata.fontFamily}
                       onChange={(e) => setMetadata({ ...metadata, fontFamily: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
                       <option value="Segoe UI">Segoe UI (موصى به للواجهات العربية المودرن)</option>
@@ -949,7 +949,7 @@ export default function AccessibleBookStudioView({
                       value={metadata.fontSizeScale}
                       onChange={(e) => setMetadata({ ...metadata, fontSizeScale: e.target.value as any })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
                       <option value="normal">{isArLocale ? 'حجم طبيعي (Standard 11pt/16pt)' : 'Normal (11pt/16pt)'}</option>
@@ -1063,7 +1063,7 @@ export default function AccessibleBookStudioView({
                     <div
                       key={sec.id}
                       className={`p-4 sm:p-5 rounded-2xl border space-y-3 ${
-                        isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
+                        isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-stone-200 dark:border-stone-800 pb-2">
@@ -1100,7 +1100,7 @@ export default function AccessibleBookStudioView({
                             <div
                               key={q.id}
                               className={`p-3 rounded-xl border text-xs space-y-2 ${
-                                isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
+                                isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
                               }`}
                             >
                               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1123,7 +1123,7 @@ export default function AccessibleBookStudioView({
                                       );
                                     }}
                                     className={`px-2 py-1 rounded-lg border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] cursor-pointer ${
-                                      isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-stone-200' : 'bg-white border-stone-300 text-stone-800'
+                                      isDarkMode ? 'bg-rafiqi-surface-dark border-stone-700 text-stone-200' : 'bg-white border-stone-300 text-stone-800'
                                     }`}
                                   >
                                     <option value="mcq">{isArLocale ? 'اختيار من متعدد (MCQ)' : 'Multiple Choice'}</option>
@@ -1155,7 +1155,7 @@ export default function AccessibleBookStudioView({
                                       );
                                     }}
                                     className={`w-12 px-1.5 py-0.5 rounded border text-center font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
-                                      isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-white border-stone-300 text-stone-900'
+                                      isDarkMode ? 'bg-rafiqi-surface-dark border-stone-700 text-white' : 'bg-white border-stone-300 text-stone-900'
                                     }`}
                                   />
                                 </div>
@@ -1229,7 +1229,7 @@ export default function AccessibleBookStudioView({
               {/* Document Overview Summary Banner */}
               <div
                 className={`p-6 sm:p-8 rounded-3xl border shadow-sm ${
-                  isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1263,7 +1263,7 @@ export default function AccessibleBookStudioView({
                       onClick={handlePrintPdf}
                       className={`px-4 py-3 rounded-2xl border font-bold text-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer ${
                         isDarkMode
-                          ? 'bg-cognify-surface-dark border-stone-800 text-stone-200 hover:text-white'
+                          ? 'bg-rafiqi-surface-dark border-stone-800 text-stone-200 hover:text-white'
                           : 'bg-stone-100 border-stone-200 text-stone-800 hover:text-stone-950'
                       }`}
                     >
@@ -1306,7 +1306,7 @@ export default function AccessibleBookStudioView({
               <div
                 data-testid="before-after-preview"
                 className={`p-6 rounded-3xl border space-y-4 ${
-                  isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
+                  isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-white border-stone-200 shadow-sm'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -1321,7 +1321,7 @@ export default function AccessibleBookStudioView({
 
                 <div
                   className={`p-4 rounded-2xl border max-h-[380px] overflow-y-auto custom-scrollbar text-xs leading-relaxed space-y-4 ${
-                    isDarkMode ? 'bg-cognify-bg-dark border-stone-800' : 'bg-stone-50 border-stone-200'
+                    isDarkMode ? 'bg-rafiqi-bg-dark border-stone-800' : 'bg-stone-50 border-stone-200'
                   }`}
                 >
                   {sections.map((sec, idx) => (
@@ -1387,7 +1387,7 @@ export default function AccessibleBookStudioView({
         >
           <div
             className={`max-w-2xl w-full max-h-[85vh] rounded-3xl border flex flex-col overflow-hidden shadow-2xl ${
-              isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+              isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
             }`}
           >
             <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
@@ -1416,7 +1416,7 @@ export default function AccessibleBookStudioView({
                   <div
                     key={item.id}
                     className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-colors ${
-                      isDarkMode ? 'bg-cognify-surface-dark border-stone-800 hover:border-teal-700' : 'bg-stone-50 border-stone-200 hover:border-teal-600'
+                      isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 hover:border-teal-700' : 'bg-stone-50 border-stone-200 hover:border-teal-600'
                     }`}
                   >
                     <div className="min-w-0">

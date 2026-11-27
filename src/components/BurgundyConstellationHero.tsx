@@ -106,7 +106,7 @@ export default function BurgundyConstellationHero({
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className="w-full relative overflow-hidden rounded-3xl cognify-burgundy-hero p-5 sm:p-8 md:p-10 select-none transition-all shadow-2xl"
+      className="w-full relative overflow-hidden rounded-3xl rafiqi-burgundy-hero p-5 sm:p-8 md:p-10 select-none transition-all shadow-2xl"
       style={{
         background: isDarkMode
           ? 'radial-gradient(circle at 50% 18%, rgba(23, 105, 170, 0.35) 0%, rgba(13, 71, 120, 0.45) 50%, rgba(11, 19, 30, 0.99) 100%)'

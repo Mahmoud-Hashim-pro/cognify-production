@@ -123,23 +123,23 @@ export const Dialog: React.FC<DialogProps> = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cn(
-          'relative w-full rounded-3xl bg-cognify-surface-light dark:bg-cognify-surface-dark border border-cognify-border-light dark:border-cognify-border-dark text-cognify-text-primary dark:text-cognify-text-dark-primary shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
+          'relative w-full rounded-3xl bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark border border-rafiqi-border-light dark:border-rafiqi-border-dark text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]',
           sizeClasses[size]
         )}
       >
         {/* Header */}
-        <div className="p-5 sm:p-6 pb-4 border-b border-cognify-border-light dark:border-cognify-border-dark flex items-start justify-between gap-4">
+        <div className="p-5 sm:p-6 pb-4 border-b border-rafiqi-border-light dark:border-rafiqi-border-dark flex items-start justify-between gap-4">
           <div className="space-y-1 min-w-0">
             <h2
               id={titleId}
-              className="text-lg sm:text-xl font-bold tracking-tight text-cognify-text-primary dark:text-cognify-text-dark-primary"
+              className="text-lg sm:text-xl font-bold tracking-tight text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary"
             >
               {title}
             </h2>
             {description && (
               <p
                 id={descId}
-                className="text-xs sm:text-sm text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-relaxed"
+                className="text-xs sm:text-sm text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary leading-relaxed"
               >
                 {description}
               </p>
@@ -151,7 +151,7 @@ export const Dialog: React.FC<DialogProps> = ({
             type="button"
             onClick={onClose}
             aria-label={effectiveDismissLabel}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-cognify-text-secondary hover:text-cognify-text-primary dark:text-cognify-text-dark-secondary dark:hover:text-cognify-text-dark-primary hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-rafiqi-text-secondary hover:text-rafiqi-text-primary dark:text-rafiqi-text-dark-secondary dark:hover:text-rafiqi-text-dark-primary hover:bg-rafiqi-bg-light dark:hover:bg-rafiqi-surface-elevated transition-colors cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2 focus-visible:ring-offset-rafiqi-surface-light dark:focus-visible:ring-offset-rafiqi-bg-dark"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>

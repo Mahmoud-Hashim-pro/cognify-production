@@ -79,7 +79,7 @@ export const Tabs: React.FC<TabsProps> = ({
       className={cn(
         'flex items-center gap-1.5 overflow-x-auto no-scrollbar font-sans select-none',
         variant === 'contained' && 'p-1.5 rounded-2xl bg-rafiqi-primary-light/40 dark:bg-rafiqi-surface-dark border border-rafiqi-primary/20 dark:border-rafiqi-border-dark',
-        variant === 'underline' && 'border-b border-cognify-border-light dark:border-cognify-border-dark gap-4',
+        variant === 'underline' && 'border-b border-rafiqi-border-light dark:border-rafiqi-border-dark gap-4',
         className
       )}
     >
@@ -103,23 +103,23 @@ export const Tabs: React.FC<TabsProps> = ({
             onKeyDown={(e) => handleKeyDown(e, idx)}
             className={cn(
               'min-h-[48px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 inline-flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] whitespace-nowrap',
-              'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2',
+              'focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2',
               tab.disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
               variant === 'pills' && [
                 isSelected
                   ? 'bg-rafiqi-primary text-white shadow-sm font-bold'
-                  : 'text-cognify-text-secondary dark:text-cognify-text-dark-secondary hover:text-cognify-text-primary dark:hover:text-white hover:bg-rafiqi-primary-light/50 dark:hover:bg-rafiqi-surface-elevated',
+                  : 'text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary hover:text-rafiqi-text-primary dark:hover:text-white hover:bg-rafiqi-primary-light/50 dark:hover:bg-rafiqi-surface-elevated',
               ],
               variant === 'contained' && [
                 isSelected
                   ? 'bg-rafiqi-primary text-white shadow-sm font-bold'
-                  : 'text-cognify-text-secondary dark:text-cognify-text-dark-secondary hover:text-cognify-text-primary dark:hover:text-white hover:bg-white/60 dark:hover:bg-rafiqi-surface-elevated',
+                  : 'text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary hover:text-rafiqi-text-primary dark:hover:text-white hover:bg-white/60 dark:hover:bg-rafiqi-surface-elevated',
               ],
               variant === 'underline' && [
                 'rounded-none border-b-2 -mb-[1px]',
                 isSelected
                   ? 'border-rafiqi-primary text-rafiqi-primary dark:text-rafiqi-primary-muted font-bold'
-                  : 'border-transparent text-cognify-text-secondary dark:text-cognify-text-dark-secondary hover:border-slate-300 dark:hover:border-slate-700 hover:text-cognify-text-primary dark:hover:text-white',
+                  : 'border-transparent text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary hover:border-slate-300 dark:hover:border-slate-700 hover:text-rafiqi-text-primary dark:hover:text-white',
               ]
             )}
           >
@@ -153,7 +153,7 @@ export const TabPanel: React.FC<TabPanelProps> = ({
       id={`tabpanel-${tabId}`}
       aria-labelledby={`tab-${tabId}`}
       tabIndex={0}
-      className={cn('outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus rounded-xl', className)}
+      className={cn('outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-focus rounded-xl', className)}
       {...props}
     >
       {children}
