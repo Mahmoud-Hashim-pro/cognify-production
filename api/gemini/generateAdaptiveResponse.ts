@@ -96,7 +96,9 @@ export default async function handler(req: any, res: any) {
       const body = JSON.stringify({
         contents: buildContents(message, safeHistory, safeAttachments),
         systemInstruction: { parts: [{ text: system }] },
-        generationConfig: { temperature: 0.7, topP: 0.95 },
+        // Vision/OCR reads numbers and text: low temperature avoids invented
+        // denominations/dates. Educational chat keeps the livelier 0.7.
+        generationConfig: isVision || isAudio ? { temperature: 0.2, topP: 0.8 } : { temperature: 0.7, topP: 0.95 },
       });
       const gResult = await geminiFetch('generateContent', body, { category, byokKey: req.byokKey });
       const gres = gResult.res;

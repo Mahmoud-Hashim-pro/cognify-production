@@ -26,7 +26,7 @@ export function validateAndSanitizeResponse(
     const isAr = options.language === 'Arabic' || options.language === 'Egyptian Ammiya';
     return {
       text: isAr
-        ? 'عذراً، لم أتمكن من إتمام الإجابة بالشكل المطلوب. يرجى إعادة طرح السؤال.'
+        ? 'مقدرتش أكمل الإجابة، جرب تاني.'
         : 'Apologies, I was unable to generate a complete answer. Please rephrase or try again.',
       isValid: false,
       warnings: ['EMPTY_RESPONSE'],
@@ -91,6 +91,30 @@ export function validateAndSanitizeResponse(
       warnings.push(`LEAKED_SECRET_REDACTED:${sp.name}`);
       sp.regex.lastIndex = 0;
       sanitized = sanitized.replace(sp.regex, '[REDACTED_SECRET]');
+    }
+  }
+
+  // 6. Uncertain visual reading guard: numbers + hedging language in a Visual
+  // mode answer (currency denominations, medicine strengths, expiry dates)
+  // means the user could act on a wrong number. Mark it uncertain, advise
+  // double-checking with a sighted person, and log a warning.
+  if (a11y === 'Visual') {
+    const hasDigits = /[0-9٠-٩]/.test(sanitized);
+    const hedgedAr = /غالبًا|غالباً|ممكن|مش واضح|مش متأكد|على الأرجح/.test(sanitized);
+    const hedgedEn = /probably|maybe|might be|not sure|unclear|i can't confirm|i cannot confirm/i.test(sanitized);
+    const hedgedFr = /probablement|peut-être|pas sûr|pas clair|je ne peux pas confirmer/i.test(sanitized);
+    if (hasDigits && (hedgedAr || hedgedEn || hedgedFr)) {
+      warnings.push('UNCERTAIN_NUMERIC_READING');
+      console.warn('[qualityGuard] Uncertain numeric visual reading flagged for sighted verification.');
+      const isAr = options.language === 'Arabic' || options.language === 'Egyptian Ammiya';
+      const alreadyAdvises = /راجع مع حد|double-check with someone|vérifiez avec quelqu/i.test(sanitized);
+      if (!alreadyAdvises) {
+        sanitized += isAr
+          ? '\nراجع مع حد يشوف قبل ما تعتمد على الرقم ده.'
+          : options.language === 'French'
+            ? "\nVérifiez avec quelqu'un qui voit avant de vous fier à ce chiffre."
+            : '\nPlease double-check with someone who can see before relying on this number.';
+      }
     }
   }
 

@@ -319,7 +319,7 @@ async function runE2ETest() {
   expect(fs.existsSync(privacySpecPath), 'PRIVACY_SPECIFICATION.md exists and is ratified in project root');
 
   const specText = fs.readFileSync(privacySpecPath, 'utf8');
-  expect(specText.includes('Zero-Knowledge Media Processing'), 'Spec enforces zero-knowledge media processing');
+  expect(specText.includes('Ephemeral Media Processing'), 'Spec enforces ephemeral media processing');
   expect(specText.includes('NEVER PERSISTED (0% Disk / 0% Cloud)'), 'Spec mandates 0% cloud/disk storage for camera/mic streams');
   expect(specText.includes('Strict Multi-Tenant Isolation'), 'Spec mandates strict UID partitioning');
 

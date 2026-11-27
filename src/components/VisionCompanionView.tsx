@@ -1196,9 +1196,9 @@ export default function VisionCompanionView({
         if (/ماذا|مشهد|أمام|شوف|انظر|look|scene|what/i.test(transcript)) {
           handleSwitchTool('scene');
           describeScene(companionLang, undefined, undefined, false, 'scene');
-        } else if (/اقرأ|نص|ورقة|كتاب|قراءة|read|text|ocr/i.test(transcript)) {
+        } else if (/دواء|علاج|برشام|أقراص|اقراص|علبة دواء|medicine|medication|pills/i.test(transcript)) {
           handleSwitchTool('read');
-          describeScene(companionLang, undefined, 'read', false, 'read');
+          describeScene(companionLang, undefined, 'medicine', false, 'read');
         } else if (/فلوس|نقود|عملة|جنيه|cash|money|currency|banknote/i.test(transcript)) {
           handleSwitchTool('currency');
           describeScene(companionLang, undefined, undefined, false, 'currency');
@@ -1247,6 +1247,26 @@ export default function VisionCompanionView({
     } catch (err) {
       console.error('Failed to start voice recognition:', err);
       setIsVoiceCommandsActive(false);
+    }
+  };
+
+  const clearAllMemories = async () => {
+    if (!profile?.uid || memories.length === 0) return;
+    const prevMemories = memories;
+    if (setProfile) setProfile({ ...profile, visionMemories: [] });
+    const msg = companionLang === 'ar' ? 'اتمسحت كل ذاكرة الكاميرا.' : 'All camera memories deleted.';
+    setAnnounce(msg);
+    toast.info(msg);
+    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+    try {
+      await setDoc(
+        doc(db, `users/${profile.uid}`),
+        { visionMemories: [] },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error('Failed to sync full memory deletion:', err);
+      if (setProfile) setProfile({ ...profile, visionMemories: prevMemories });
     }
   };
 
@@ -1332,7 +1352,7 @@ export default function VisionCompanionView({
   const describeScene = async (
     choiceLang?: 'ar' | 'en' | 'fr',
     forcedFrame?: string,
-    forcedAction?: 'summarize' | 'read',
+    forcedAction?: 'summarize' | 'read' | 'medicine',
     isUploadedPhoto: boolean = false,
     forcedTool?: VisualToolId
   ) => {
@@ -1349,7 +1369,7 @@ export default function VisionCompanionView({
       setActiveTool(forcedTool);
     }
     const activeReadAction = forcedAction || (effectiveTool === 'read' ? 'read' : readAction);
-    if (forcedAction) setReadAction(forcedAction);
+    if (forcedAction && forcedAction !== 'medicine') setReadAction(forcedAction);
 
     unlockSpeechSynthesis();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -1422,27 +1442,34 @@ export default function VisionCompanionView({
         ? 'CRITICAL MANDATE: You MUST reply entirely in English. Do NOT use any Arabic characters or Arabic script whatsoever.\n'
         : targetLang === 'fr'
         ? 'DIRECTIVE CRITIQUE : Vous DEVEZ répondre entièrement en français. Ne produisez AUCUN caractère arabe.\n'
-        : 'توجيه حاسم: تحدث باللغة العربية الواضحة والسهلة والودودة.\n';
+        : 'توجيه حاسم: تكلم بالعامية المصرية البسيطة بجمل قصيرة مناسبة للنطق الصوتي TTS.\n';
 
     if (effectiveTool === 'currency') {
       if (targetLang === 'ar') {
         prompt = `${langMandate}أنت رفيق ذكي ومتخصص في فحص وقراءة العملات النقدية الورقية والقطع المعدنية لمساعدة شخص كفيف عبر الكاميرا.
 افحص الصورة بدقة بالغة واذكر فوراً:
-1. القيمة والعملة: حدد الفئة واسم العملة بدقة فائقة (مثلاً: مئتا جنيه مصري، خمسون جنيهاً مصرياً، عشرون دولاراً أمريكياً، عشرة يورو، مئة ريال سعودي).
-2. التفاصيل والحالة: اذكر ما إذا كانت العملة جديدة أم متهالكة، وأي أرقام بارزة عليها.
-3. إذا لم تكن هناك عملة واضحة: قل باختصار: "لم أتمكن من التعرف على عملة نقدية واضحة، يرجى فرد الورقة وتقريب الكاميرا بإضاءة جيدة".
-تحدث بجملة أو جملتين بلغة عربية سهلة وودودة بدون أي نجوم ماركداون (**) أو عناوين روبوتية.`;
+1. القيمة والعملة: حدد الفئة واسم العملة وقولها مرة واحدة بوضوح. استخدم الأسماء المصرية المنطوقة: خمسة جنيه، عشرة، عشرين، خمسين، مية، ميتين (وللعملات الأجنبية: عشرين دولار، عشرة يورو، مية ريال).
+2. لو مش متأكد من الفئة 100% (طيّة، تمويه، جزء مقطوع، إضاءة وحشة): متخمنش أبدًا. قول "مش متأكد، قرّب الورقة وافردها وجرب تاني".
+3. لو فيه أكتر من ورقة: اقرأ كل ورقة لوحدها، ومتقولش المجموع إلا لو متأكد من كل ورقة.
+4. الزيّف: لو الورقة باينة غير سليمة أو مشبوهة قول "مش قادر أتأكد إنها أصلية".
+5. لو مفيش عملة واضحة: قل باختصار: "مش شايف عملة واضحة، افرد الورقة وقرّب الكاميرا في نور كويس".
+تحدث بجملة أو جملتين بالعامية المصرية السهلة بدون أي نجوم ماركداون (**) أو عناوين روبوتية.`;
       } else if (targetLang === 'fr') {
         prompt = `${langMandate}Vous êtes un assistant expert en reconnaissance de devises et billets pour une personne aveugle ou malvoyante via sa caméra.
 1. Dénomination et devise : Indiquez précisément la valeur et la monnaie (ex. : 200 livres égyptiennes, 20 dollars américains, 50 euros).
-2. Clarté : Si aucun billet n'est clairement visible, indiquez : "Aucun billet identifiable, veuillez déplier la coupure sous un bon éclairage."
+2. Ne devinez jamais : si vous n'êtes pas sûr à 100% (pli, flou, billet partiel), dites : "Je ne suis pas sûr, rapprochez le billet, dépliez-le et réessayez."
+3. Plusieurs billets : lisez chaque billet séparément, et ne donnez un total que si chaque billet est certain.
+4. Authenticité : si le billet semble suspect, dites : "Je ne peux pas confirmer que ce billet est authentique."
+5. Si aucun billet n'est clairement visible : "Aucun billet identifiable, veuillez déplier la coupure sous un bon éclairage."
 Fournissez 1 à 2 phrases directes sans astérisques markdown (**).`;
       } else {
         prompt = `${langMandate}You are an expert currency and banknote recognition assistant speaking aloud to a blind or low-vision user through their camera.
 Examine the captured image with extreme precision and state:
-1. Denomination & Currency: Clearly name the denomination and currency (e.g., 200 Egyptian Pounds, 20 US Dollars, 50 Euros, 100 Saudi Riyals).
-2. Orientation & Details: Note condition, visible features, or orientation if discernible.
-3. If no banknote is clear: Say "No clear currency detected in frame. Please unfold the banknote and ensure good lighting."
+1. Denomination & Currency: Name the denomination and currency once, clearly (e.g., 200 Egyptian Pounds, 20 US Dollars, 50 Euros).
+2. Never guess: if you are not 100% certain (fold, blur, partial note, bad light), say "I'm not sure, please bring the note closer, unfold it and try again."
+3. Multiple banknotes: read each one separately, and only give a total if you are certain about every note.
+4. Authenticity: if the note looks suspicious, say "I can't confirm this note is genuine."
+5. If no banknote is clear: say "No clear currency detected in frame. Please unfold the banknote and ensure good lighting."
 Deliver 1-2 conversational sentences without markdown asterisks (**) or robotic headings.`;
       }
     } else if (effectiveTool === 'color') {
@@ -1489,15 +1516,18 @@ Deliver 2 crisp sentences without markdown asterisks (**).`;
 افحص ما إذا كان هناك شخص أمام الكاميرا:
 1. وجود الأشخاص وموقعهم: هل يوجد شخص أمامك مباشرة، على اليمين، أو على اليسار، وعلى بعد كم تقريباً.
 2. المظهر والتعبير: تعبير الوجه (مبتسم، يتحدث)، والملابس البارزة للمساعدة على تمييزه.
-3. تحدث بلغة عربية ودودة وسلسة بدون نجوم ماركداون (**).`;
+3. لا تحاول أبدًا تعرّف مين الشخص ولا تخمّن اسمه أو هويته. لو المستخدم سأل "مين ده؟" قول: "مقدرش أعرف الناس، بس أقدر أوصفلك مكانهم وتعبيرهم".
+4. تحدث بلغة عربية ودودة وسلسة بدون نجوم ماركداون (**).`;
       } else if (targetLang === 'fr') {
         prompt = `${langMandate}Vous êtes un assistant expert en reconnaissance faciale et présence humaine pour une personne aveugle ou malvoyante.
 1. Présence et distance : Indiquez la présence de personnes, leur position (en face, à droite, à gauche) et la distance approximative.
-2. Expression et tenue : Notez l'expression (souriant, attentif) et la couleur principale des vêtements sans astérisques markdown (**).`;
+2. Expression et tenue : Notez l'expression (souriant, attentif) et la couleur principale des vêtements.
+3. N'identifiez jamais la personne : si on vous demande qui c'est, répondez : "Je ne peux pas identifier les personnes, mais je peux décrire leur position et leur expression." Sans astérisques markdown (**).`;
       } else {
         prompt = `${langMandate}You are an expert person and face recognition assistant speaking aloud to a blind or low-vision user through their camera.
 1. Person Presence & Distance: Note if someone is standing directly ahead, left, or right, and approximate distance.
 2. Expression & Appearance: Note facial expression (smiling, speaking) and clothing color cues.
+3. Never identify who the person is: if asked, say "I can't recognize people, but I can describe where they are and their expression."
 Deliver 2 warm, natural sentences without markdown asterisks (**).`;
       }
     } else if (effectiveTool === 'product') {
@@ -1505,7 +1535,7 @@ Deliver 2 warm, natural sentences without markdown asterisks (**).`;
         prompt = `${langMandate}أنت فاحص وخبير في قراءة وفهم عبوات المنتجات الاستهلاكية والباركود وتاريخ الصلاحية لشخص كفيف.
 المطلوب فحص العبوة وتوضيح ما يلي بدقة:
 1. الباركود والاسم التجاري: اقرأ أرقام الباركود واسم المنتج والعلامة بدقة.
-2. تواريخ الصلاحية والإنتاج: فرّق بوضوح بين تاريخ انتهاء الصلاحية وتاريخ الإنتاج ورقم التشغيلة. إذا كان التاريخ غير واضح اذكر ذلك صراحة.
+2. تواريخ الصلاحية والإنتاج: فرّق بوضوح بين تاريخ انتهاء الصلاحية وتاريخ الإنتاج ورقم التشغيلة. اقرأ التاريخ بالصيغة اللي قدامك (شهر/سنة) ومتسمّيش حاجة "تاريخ انتهاء" إلا لو مكتوب EXP أو "ينتهي". لو التاريخ مش واضح بالكامل قول "التاريخ غير واضح" ومتحزرش الشهر أو السنة أبدًا.
 3. ملصق العبوة: اقرأ النصوص المطبوعة على الملصق حرفياً. لا تخترع مكونات أو ادعاءات غير مكتوبة.
 4. تنبيه سلامة: وضح أن الفحص البصري استرشادي ولا يضمن صلاحية الاستهلاك.
 تحدث في جملتين أو ثلاث جمل بدون نجوم ماركداون (**).`;
@@ -1513,10 +1543,35 @@ Deliver 2 warm, natural sentences without markdown asterisks (**).`;
         prompt = `${langMandate}You are an expert consumer packaging, barcode, and expiration date assistant for a blind user.
 Instructions:
 1. Barcode & Product Name: Read barcode digits and brand/product name verbatim.
-2. Expiry vs. Production Dates: Differentiate expiration date (EXP) from manufacturing date (MFG/PRD) and batch number. If unclear, explicitly state so.
+2. Expiry vs. Production Dates: Differentiate expiration date (EXP) from manufacturing date (MFG/PRD) and batch number. Read the date exactly as printed; only call it an expiry date when EXP or "expiry" is written. If the date is not fully clear, say "the date is unclear" and never guess the month or year.
 3. Visible Label: Read printed packaging text verbatim. Never invent ingredients or safety claims.
 4. Safety Notice: State that visual reading is advisory and cannot guarantee consumption safety.
 Deliver 2-3 crisp sentences without markdown asterisks (**).`;
+      }
+    } else if (activeReadAction === 'medicine') {
+      if (targetLang === 'ar') {
+        prompt = `${langMandate}أنت مساعد قراءة علب الأدوية لشخص كفيف عبر الكاميرا.
+اقرأ من على العلبة حرفيًا زي ما هو مكتوب بالظبط:
+1. اسم الدواء والتركيز (مثلاً: 500 مجم) والشكل (أقراص، شراب، حقن).
+2. الجرعة المكتوبة على العلبة أو النشرة حرفيًا، وتاريخ الانتهاء لو ظاهر.
+3. لو أي رقم أو كلمة مش واضحة قول "الجزء ده مش مقروء" ومتكملش تخمين.
+4. ممنوع منعًا باتًا تنصح بجرعة، أو تقول إن الدواء مناسب أو آمن لحالته، أو تفسّر إستخدامه من عندك.
+5. اختم دايمًا بجملة: "اسأل الصيدلي أو الدكتور قبل الاستخدام".
+تحدث بالعامية المصرية البسيطة بدون نجوم ماركداون (**).`;
+      } else if (targetLang === 'fr') {
+        prompt = `${langMandate}Vous êtes un assistant de lecture de boîtes de médicaments pour une personne aveugle.
+1. Lisez mot pour mot : le nom du médicament, le dosage (ex. 500 mg), la forme (comprimés, sirop), la posologie imprimée et la date d'expiration si visible.
+2. Si un chiffre ou un mot est illisible, dites "cette partie est illisible" et ne devinez jamais.
+3. Il est STRICTEMENT INTERDIT de conseiller une dose, de dire que le médicament convient ou est sûr, ou d'interpréter son usage.
+4. Terminez toujours par : "Demandez conseil à votre pharmacien ou médecin avant utilisation."
+Sans astérisques markdown (**).`;
+      } else {
+        prompt = `${langMandate}You are a medicine-package reading assistant speaking aloud to a blind user through their camera.
+1. Read verbatim from the package: the medicine name, strength (e.g., 500 mg), form (tablets, syrup), the printed dosage instructions, and the expiry date if visible.
+2. If any number or word is unclear, say "that part is not readable" and never guess.
+3. You must NEVER recommend a dose, never say the medicine is suitable or safe for them, and never interpret its use.
+4. Always end with: "Ask your pharmacist or doctor before use."
+Deliver it in short clear sentences without markdown asterisks (**).`;
       }
     } else if (effectiveTool === 'read' || activeReadAction === 'read') {
       if (targetLang === 'ar') {
@@ -1675,8 +1730,8 @@ Examine what is visible in front of the camera right now with utmost precision:
       setStatus('ready');
       const errPrompt =
         targetLang === 'ar'
-          ? 'حصلت مشكلة في تحليل الصورة، من فضلك جرب ثانية أو ارفع صورة أخرى.'
-          : 'Something went wrong analyzing the image. Please try again.';
+          ? 'مقدرتش أقرا الصورة دلوقتي، جرب تاني.'
+          : 'I could not read the image right now, please try again.';
       setLastDescription(errPrompt);
       speak(errPrompt, targetLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
     }
@@ -3547,6 +3602,17 @@ Examine what is visible in front of the camera right now with utmost precision:
                 className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#1769AA]"
               />
             </div>
+
+            {memories.length > 0 && (
+              <button
+                type="button"
+                onClick={clearAllMemories}
+                aria-label={t('Delete all camera memories', 'امسح كل ذاكرة الكاميرا')}
+                className="min-h-[44px] px-4 py-1.5 rounded-xl bg-rose-600/15 text-rose-300 border border-rose-500/40 hover:bg-rose-600/30 text-xs font-bold transition-all cursor-pointer"
+              >
+                {t('Delete all camera memory', 'امسح كل ذاكرة الكاميرا')}
+              </button>
+            )}
           </div>
 
           {/* Memory Cards Grid */}

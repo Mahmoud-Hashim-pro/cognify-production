@@ -858,10 +858,10 @@ ${otherThreadsSummary}
   const body = JSON.stringify({
     contents,
     systemInstruction: { parts: [{ text: systemInstruction }] },
-    generationConfig: {
-      temperature: 0.7,
-      topP: 0.95
-    }
+    generationConfig: attachments.length > 0
+      // Vision/OCR reads numbers and text: low temperature avoids invented values.
+      ? { temperature: 0.2, topP: 0.8 }
+      : { temperature: 0.7, topP: 0.95 }
   });
 
   // Try each known-good model until one responds. A wrong model 404s, so this

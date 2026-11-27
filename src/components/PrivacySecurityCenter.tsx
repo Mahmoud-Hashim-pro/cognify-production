@@ -329,6 +329,18 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
       <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
+        {/* Plain-language disclosure: who can see what */}
+        <div className="bg-[#0E0610]/95 border border-[#4A1224]/40 rounded-2xl p-4 sm:p-5 text-xs leading-relaxed text-slate-300 space-y-1.5">
+          <p className="font-bold text-slate-100">
+            {isArabic ? 'مين يقدر يشوف بياناتك؟' : 'Who can see your data?'}
+          </p>
+          <p>
+            {isArabic
+              ? 'محادثاتك وذاكرة الكاميرا المكانية ليك إنت بس. فريق الدعم (الأدمن) يقدر يشوف بيانات الحساب والذاكرة التعليمية عند حل مشكلة، وده بيتسجل في سجل التدقيق. ممنوع أي حد تاني يقرا بياناتك.'
+              : 'Your chats and spatial camera memory are visible to you alone. Support admins can view account and learning-memory data when resolving an issue, and this is recorded in the audit trail. No one else can read your data.'}
+          </p>
+        </div>
+
         {/* Header Cockpit */}
         <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

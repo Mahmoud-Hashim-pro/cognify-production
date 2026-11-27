@@ -28,11 +28,12 @@ import {
   TrendingUp,
   BarChart2,
   Printer,
-  ShieldCheck
+  ShieldCheck,
+  Pencil
 } from 'lucide-react';
 import { UserProfile, SensoryEmotionLog } from '../types';
 import { EmergencyContact } from '../lib/contacts';
-import { loadContacts, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
+import { loadContacts, saveContacts, syncContactsToCloud, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import {
   listenPendingCaregiverRequests,
@@ -65,6 +66,52 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   const isFr = lang === 'French';
 
   const [contacts, setContacts] = useState<EmergencyContact[]>(loadContacts);
+  // Caregiver number editing + third-party consent: a caregiver's phone is
+  // THEIR personal data, so saving a number requires the user to confirm the
+  // caregiver agreed to receive the number and the emergency location.
+  const [editingContact, setEditingContact] = useState<EmergencyContact | null>(null);
+  const [editingPhone, setEditingPhone] = useState('');
+  const [consentChecked, setConsentChecked] = useState(false);
+
+  const openEditContact = (c: EmergencyContact) => {
+    setEditingContact(c);
+    setEditingPhone(c.phone || '');
+    setConsentChecked(Boolean(c.consentConfirmedAt));
+  };
+
+  const handleSaveContactPhone = async () => {
+    if (!editingContact) return;
+    const phone = editingPhone.trim();
+    if (phone && !isValidContactPhone(phone)) {
+      toast.error(t('Please enter a valid phone number with country code', 'اكتب الرقم صحيح بكود الدولة'));
+      return;
+    }
+    // Public emergency lines (like 123 ambulance) need no consent; personal
+    // numbers always do.
+    const isPublicLine = /^\d{3}$/.test(phone);
+    if (phone && !isPublicLine && !consentChecked) {
+      toast.warning(t('Please confirm the caregiver agreed to share their number', 'لازم تتأكد إن المرافق موافق على تسجيل رقمه'));
+      return;
+    }
+    const updated = contacts.map((c) =>
+      c.id === editingContact.id
+        ? {
+            ...c,
+            phone,
+            consentConfirmedAt: phone && !isPublicLine ? new Date().toISOString() : undefined,
+          }
+        : c
+    );
+    setContacts(updated);
+    saveContacts(updated);
+    if (profile.uid) void syncContactsToCloud(profile.uid, updated);
+    setEditingContact(null);
+    toast.success(
+      phone
+        ? t('Number saved. You can remove it anytime from here.', 'الرقم اتسجل. تقدر تمسحه من هنا في أي وقت.')
+        : t('Number removed.', 'الرقم اتمسح.')
+    );
+  };
   const [sensoryLogs, setSensoryLogs] = useState<SensoryEmotionLog[]>([]);
   const [schedule, setSchedule] = useState<VisualScheduleItem[]>([]);
 
@@ -749,6 +796,12 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
 
           {/* Registered Emergency Contacts List */}
+          <p className="text-[11px] leading-relaxed text-slate-400 bg-[#111622] border border-[#4A1224]/40 rounded-xl p-3">
+            {t(
+              'A caregiver\'s number is their personal data: in an emergency, their number and your location are sent to them. Only save a number after the person agrees, and you can delete it anytime.',
+              'رقم المرافق بيانات شخصية بتاعته: وقت الطوارئ رقمه وموقعك بيتبعتوا له. سجّل الرقم بس بعد ما يوافق، وتقدر تمسحه في أي وقت.'
+            )}
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-2">
             {contacts.map((c) => (
               <div key={c.id} className="p-3.5 rounded-2xl bg-[#111622] border border-[#4A1224]/60 flex items-center justify-between">
@@ -759,6 +812,15 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                   </div>
                   <div className="text-[11px] text-slate-400 font-mono mt-0.5">{c.phone || t('No number', 'بدون رقم')}</div>
                 </div>
+                <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => openEditContact(c)}
+                  className="min-w-[40px] min-h-[40px] p-2.5 rounded-xl bg-[#1A283D] text-slate-300 hover:bg-[#24344D] transition-all flex items-center justify-center cursor-pointer"
+                  title={t('Edit number', 'تعديل الرقم')}
+                  aria-label={t('Edit number for', 'تعديل رقم') + ' ' + (isAr ? (c.nameAr || c.nameEn) : c.nameEn)}
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
                 {c.phone && (
                   <button
                     onClick={() => sendWhatsAppMessage(c.phone, t('Test message from Rafiqi Caregiver Hub', 'رسالة تجربة من لوحة مرافق Rafiqi'))}
@@ -769,6 +831,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                     <MessageCircle className="w-4 h-4" />
                   </button>
                 )}
+                </div>
               </div>
             ))}
           </div>
@@ -804,6 +867,68 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
         </div>
       </div>
+
+      {/* Caregiver number edit + third-party consent modal */}
+      {editingContact && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="caregiver-consent-title"
+          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/70 p-4"
+        >
+          <div className="w-full max-w-md rounded-3xl bg-[#150917] border border-[#4A1224] p-6 space-y-4 shadow-2xl">
+            <h3 id="caregiver-consent-title" className="font-black text-base text-white">
+              {t('Edit contact number', 'تعديل رقم جهة الاتصال')}: {isAr ? (editingContact.nameAr || editingContact.nameEn) : editingContact.nameEn}
+            </h3>
+            <label className="block text-xs text-slate-400 font-bold">
+              {t('Phone number with country code', 'رقم التليفون بكود الدولة')}
+              <input
+                type="tel"
+                dir="ltr"
+                value={editingPhone}
+                onChange={(e) => setEditingPhone(e.target.value)}
+                placeholder="+2010XXXXXXXX"
+                className="mt-1.5 w-full min-h-[44px] rounded-xl bg-[#111622] border border-[#4A1224]/60 px-3 py-2 text-white font-mono text-sm outline-none focus:border-rose-400"
+              />
+            </label>
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              {t(
+                'In an emergency, Rafiqi sends this number an alert with your location. Their number is their personal data, so only save it if they agreed. You can delete it anytime.',
+                'وقت الطوارئ، رفيقي بيبعت للرقم ده تنبيه فيه موقعك. الرقم ده بيانات شخصية بتاعته، فمتسجلوش غير لو هو موافق. وتقدر تمسحه في أي وقت.'
+              )}
+            </p>
+            <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
+              <input
+                type="checkbox"
+                aria-label={t('I confirm this person agreed to store their number and receive emergency alerts', 'أؤكد إن الشخص موافق على تسجيل رقمه واستقبال تنبيهات الطوارئ')}
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                className="mt-1 w-5 h-5 accent-rose-500"
+              />
+              <span className="text-xs text-slate-200 font-bold leading-relaxed">
+                {t(
+                  'I confirm this person agreed that Rafiqi stores their number and sends it alerts with my location in an emergency.',
+                  'أؤكد إن الشخص ده موافق إن رفيقي يسجّل رقمه ويبعت له تنبيهات فيها موقعي وقت الطوارئ.'
+                )}
+              </span>
+            </label>
+            <div className="flex gap-2.5 pt-1">
+              <button
+                onClick={handleSaveContactPhone}
+                className="flex-1 min-h-[48px] rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-sm active:scale-95 transition-all cursor-pointer"
+              >
+                {editingPhone.trim() ? t('Save number', 'حفظ الرقم') : t('Remove number', 'مسح الرقم')}
+              </button>
+              <button
+                onClick={() => setEditingContact(null)}
+                className="min-h-[48px] px-5 rounded-2xl bg-[#1A283D] text-slate-300 font-bold text-sm active:scale-95 transition-all cursor-pointer"
+              >
+                {t('Cancel', 'إلغاء')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

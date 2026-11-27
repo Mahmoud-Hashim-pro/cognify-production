@@ -1506,7 +1506,7 @@ async function run() {
     assert(fs.existsSync(specPath), 'PRIVACY_SPECIFICATION.md exists in project root');
 
     const specContent = fs.readFileSync(specPath, 'utf8');
-    assert(specContent.includes('Zero-Knowledge Media Processing'), 'Spec documents Zero-Knowledge media processing');
+    assert(specContent.includes('Ephemeral Media Processing'), 'Spec documents ephemeral media processing');
     assert(specContent.includes('NEVER PERSISTED'), 'Spec guarantees camera and mic streams are never persisted');
     assert(specContent.includes('Strict Multi-Tenant Isolation'), 'Spec defines strict multi-tenant boundary rules');
 

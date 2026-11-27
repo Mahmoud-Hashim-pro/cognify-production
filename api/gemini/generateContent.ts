@@ -95,7 +95,12 @@ export default async function handler(req: any, res: any) {
 
     // 2. Execute with in-flight deduplication to avoid double-spend on rapid triggers
     const finalResult = await deduplicateInflight(cacheKey, async () => {
-      const body = JSON.stringify({ contents: [{ role: 'user', parts }] });
+      const body = JSON.stringify({
+        contents: [{ role: 'user', parts }],
+        // Vision/OCR reads numbers and text: low temperature avoids invented
+        // denominations/dates. Chat-only payloads keep the livelier 0.7.
+        generationConfig: hasMedia || isAudio ? { temperature: 0.2, topP: 0.8 } : { temperature: 0.7, topP: 0.95 },
+      });
       const timeoutMs = isAudio ? 60000 : 25000;
       const { res: gres } = await geminiFetch('generateContent', body, { category, timeoutMs, byokKey: req.byokKey });
       if (gres) {

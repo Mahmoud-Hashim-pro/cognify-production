@@ -13,6 +13,13 @@ export interface EmergencyContact {
   relationship: 'family' | 'doctor' | 'caregiver' | 'friend' | 'emergency';
   avatar: string;
   isPrimaryEmergency?: boolean;
+  /**
+   * Set when the user confirms the contact agreed that their number and the
+   * user's emergency location are shared with them during an SOS. Third-party
+   * numbers are someone else's personal data; saving without this stamp is
+   * blocked in the UI. ISO date string.
+   */
+  consentConfirmedAt?: string;
 }
 
 const STORAGE_KEY = 'cognify_saved_contacts';
