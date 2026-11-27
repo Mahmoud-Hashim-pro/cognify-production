@@ -35,10 +35,7 @@ export interface RouteState {
 
 export const VALID_VIEWS: readonly AppView[] = [
   'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'communication', 'admin', 'support', 'privacy_security',
-  'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
-  'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
-  'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
-  'blind_home', 'voice_navigation', 'daily_aids', 'known_people',
+ 'goals', 'analytics', 'planner', 'gym', 'privacy', 'intelligence', 'blind_home', 'voice_navigation', 'daily_aids', 'known_people',
   'privacy_policy', 'terms',
 ] as const;
 

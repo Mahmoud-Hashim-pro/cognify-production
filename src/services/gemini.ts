@@ -42,14 +42,14 @@ export function getGeminiKeys(): string[] {
   // honour encrypted user-pasted BYOK key first, or VITE_GEMINI_API_KEY configured in environment.
   const localKey = secureLoadKeySync('gemini');
   if (localKey) return splitKeys(localKey);
-  const envKey = (typeof import.meta !== 'undefined' && ((import.meta as any).env?.VITE_GEMINI_API_KEY || (import.meta as any).env?.GEMINI_API_KEY)) || '';
+  const envKey = (typeof import.meta !== 'undefined' && ('')) || '';
   return splitKeys(envKey);
 }
 
 export function getGroqKeys(): string[] {
   const localKey = secureLoadKeySync('groq');
   if (localKey) return splitKeys(localKey);
-  const envKey = (typeof import.meta !== 'undefined' && ((import.meta as any).env?.VITE_GROQ_API_KEY || (import.meta as any).env?.GROQ_API_KEY)) || '';
+  const envKey = (typeof import.meta !== 'undefined' && ('')) || '';
   return splitKeys(envKey);
 }
 

@@ -105,10 +105,7 @@ const TermsOfServicePage = lazyWithRetry(() => import("./components/LegalPages")
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
   'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'communication', 'admin', 'support', 'privacy_security',
-  'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
-  'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
-  'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
-] as const;
+ 'goals', 'analytics', 'planner', 'gym', 'privacy', 'intelligence', ] as const;
 
 export default function App() {
   const [user, loading, authError] = useAuthState(auth);

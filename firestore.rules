@@ -337,7 +337,8 @@ service cloud.firestore {
     }
 
     match /system/{docId} {
-      allow read: if true; // Connection test path
+      // Only the connection-test document is readable without sign-in.
+      allow read: if docId == 'ping';
     }
 
     // ── Emergency Incidents Persistent Audit Log ───────────────────────────
