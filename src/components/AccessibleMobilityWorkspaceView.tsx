@@ -14,6 +14,7 @@
  * 7. Indoor Navigation Boundary: Transparent infrastructure boundary disclosures without fake positioning.
  */
 
+import { ClampedNotice } from './ui/ClampedNotice';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -423,9 +424,11 @@ export default function AccessibleMobilityWorkspaceView({
       >
         <div className="max-w-7xl mx-auto flex items-start gap-2.5">
           <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-          <p className="leading-relaxed font-semibold">
-            {isAr ? MOBILITY_SAFETY_DISCLAIMER_AR : MOBILITY_SAFETY_DISCLAIMER_EN}
-          </p>
+          <ClampedNotice isAr={isAr}>
+            <p className="leading-relaxed font-semibold">
+              {isAr ? MOBILITY_SAFETY_DISCLAIMER_AR : MOBILITY_SAFETY_DISCLAIMER_EN}
+            </p>
+          </ClampedNotice>
         </div>
       </aside>
 

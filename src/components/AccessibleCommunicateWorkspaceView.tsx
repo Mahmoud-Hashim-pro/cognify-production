@@ -14,6 +14,7 @@
  * 7. Unified Navigation to Deaf/Hearing Suite for cross-disability inclusion
  */
 
+import { ClampedNotice } from './ui/ClampedNotice';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Users,
@@ -332,6 +333,7 @@ export default function AccessibleCommunicateWorkspaceView({
       >
         <div className="flex items-center gap-2.5 text-[#94A3B8]">
           <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0" />
+          <ClampedNotice isAr={isAr}>
           <p className="leading-relaxed">
             <strong className="text-[#F8FAFC]">
               {localize(profile.language, 'Strict Privacy Invariant:', 'مبدأ الخصوصية الصارم:')}
@@ -342,6 +344,7 @@ export default function AccessibleCommunicateWorkspaceView({
               'لن يتم مشاركة أي فيديو حي أو صوت أو بيانات شخصية دون موافقتك الصريحة. يُمنع إرسال الرسائل تلقائياً.'
             )}
           </p>
+          </ClampedNotice>
         </div>
         <button
           type="button"
@@ -396,6 +399,7 @@ export default function AccessibleCommunicateWorkspaceView({
               className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-sm font-bold flex items-start gap-3"
             >
               <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+              <ClampedNotice isAr={isAr}>
               <p className="leading-relaxed">
                 {localize(
                   profile.language,
@@ -403,6 +407,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   'قيد التطوير: خدمة المساعدة البشرية المباشرة لسه مش متاحة. مفيش أي شخص حقيقي يقدر يتصل، والكاميرا والميكروفون مش بتبث أي حاجة من الشاشة دي. الأزرار اللي تحت معاينة لشكل الخدمة لما تشتغل.'
                 )}
               </p>
+              </ClampedNotice>
             </div>
             <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
