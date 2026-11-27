@@ -243,7 +243,19 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   initialSection = null,
   onSectionChange,
 }, ref) {
-  const [selectedVisualTool, setSelectedVisualTool] = useState<VisualToolId>(initialTool);
+  const [selectedVisualTool, setSelectedVisualTool] = useState<VisualToolId>(() => {
+    // Blind-first flows (BlindHomeView, global voice commands) ask for a specific
+    // vision tool through sessionStorage before navigating here.
+    try {
+      const requested = sessionStorage.getItem('rafiqi_vision_autostart_tool');
+      if (requested) {
+        sessionStorage.removeItem('rafiqi_vision_autostart_tool');
+        const valid: VisualToolId[] = ['scene', 'currency', 'read', 'color', 'object', 'face', 'product'];
+        if (valid.includes(requested as VisualToolId)) return requested as VisualToolId;
+      }
+    } catch { /* sessionStorage unavailable */ }
+    return initialTool;
+  });
 
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => {
     const directTab = currentTab || detectDirectDisabilityTab(profile);

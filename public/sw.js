@@ -1,10 +1,14 @@
-const CACHE_NAME = 'cognify-v13-clean-cache';
+const CACHE_NAME = 'cognify-v14-blind-offline';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
   '/assets/icon.svg'
 ];
+
+// Blind-first offline support: the shell above loads offline; last-read texts,
+// emergency contacts and the SOS outbox live in localStorage on the client
+// (see emergencyDispatcher.ts), so the most critical info survives with no network.
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

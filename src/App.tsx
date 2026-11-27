@@ -93,6 +93,11 @@ const HearAndExpressView = lazyWithRetry(() => import("./components/HearAndExpre
 const AccessibleProductivityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleProductivityWorkspaceView"));
 const AccessibleMobilityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleMobilityWorkspaceView"));
 const AccessibleCommunicateWorkspaceView = lazyWithRetry(() => import("./components/AccessibleCommunicateWorkspaceView"));
+const BlindHomeView = lazyWithRetry(() => import("./components/BlindHomeView"));
+const VoiceNavigationView = lazyWithRetry(() => import("./components/VoiceNavigationView"));
+const DailyAidsView = lazyWithRetry(() => import("./components/DailyAidsView"));
+const KnownPeopleView = lazyWithRetry(() => import("./components/KnownPeopleView"));
+const GlobalVoiceControls = lazyWithRetry(() => import("./components/GlobalVoiceControls"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
@@ -1084,6 +1089,38 @@ export default function App() {
     const activeProfile = fullProfile || profile;
     if (!activeProfile) return null;
     switch (currentView) {
+      case 'blind_home':
+        return (
+          <BlindHomeView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigate={navigateTo}
+          />
+        );
+      case 'voice_navigation':
+        return (
+          <VoiceNavigationView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigateBack={handleBack}
+          />
+        );
+      case 'daily_aids':
+        return (
+          <DailyAidsView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigateBack={handleBack}
+          />
+        );
+      case 'known_people':
+        return (
+          <KnownPeopleView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigateBack={handleBack}
+          />
+        );
       case 'chat':
         return (
           <>
@@ -1568,6 +1605,19 @@ export default function App() {
             </Suspense>
           )}
         </AnimatePresence>
+
+        {/* Global blind-first controls: floating hold-to-talk voice button,
+            triple-tap / shake SOS, and the SOS modal — available on EVERY screen
+            for blind and low-vision users. */}
+        {user && profile?.accessibilityMode === 'Visual' && (
+          <Suspense fallback={null}>
+            <GlobalVoiceControls
+              profile={profile}
+              isArabic={isArabicLocale(profile?.language)}
+              onNavigate={(view, tab) => navigateTo(view, tab)}
+            />
+          </Suspense>
+        )}
 
 
       </div>

@@ -38,6 +38,7 @@ export const VALID_VIEWS: readonly AppView[] = [
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
+  'blind_home', 'voice_navigation', 'daily_aids', 'known_people',
 ] as const;
 
 export const VALID_DISABILITY_TABS: readonly DisabilityTab[] = [

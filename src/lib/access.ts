@@ -7,7 +7,8 @@ export type AppView =
   | 'learning' | 'goals' | 'gpa' | 'analytics' | 'planner' | 'memory'
   | 'gym' | 'iq' | 'institution' | 'france' | 'privacy' | 'intelligence'
   | 'teacher' | 'parent' | 'evaluation' | 'ai_quality'
-  | 'resilience' | 'tenancy' | 'developer_api' | 'retention';
+  | 'resilience' | 'tenancy' | 'developer_api' | 'retention'
+  | 'blind_home' | 'voice_navigation' | 'daily_aids' | 'known_people';
 
 /** A user counts as an accessibility user if they picked the Special Needs path
  *  OR have a real accessibility mode enabled. */
@@ -37,7 +38,11 @@ export function canAccessView(
   return true;
 }
 
-/** Where to send a user who lands in the app or hits a redirected view — always the Assistive Suite. */
-export function homeViewFor(_profile: UserProfile | null | undefined): AppView {
+/** Where to send a user who lands in the app or hits a redirected view.
+ *  Blind/low-vision users with voice-first mode land on the blind-first home. */
+export function homeViewFor(profile: UserProfile | null | undefined): AppView {
+  if (profile?.accessibilityMode === 'Visual' && (profile as any).voiceFirstMode) {
+    return 'blind_home';
+  }
   return 'disability';
 }

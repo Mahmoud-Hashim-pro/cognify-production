@@ -142,6 +142,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           optionalAssistiveMode === 'Vocal-Deaf' ? 'Hearing Impairment' : 'Speech & Communication'
         ),
         accessibilityPassport: passport,
+        voiceFirstMode: optionalAssistiveMode === 'Visual',
         level: formData.level || 'Intermediate',
         points: 150,
         onboardingComplete: true,

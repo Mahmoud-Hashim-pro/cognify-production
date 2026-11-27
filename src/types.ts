@@ -141,6 +141,8 @@ export interface UserProfile {
   points: number;
   quizDuration?: number; // in seconds
   onboardingComplete: boolean;
+  /** Blind-first mode: land on the voice-first home with four huge buttons and spoken guidance. Set during onboarding when the user picks a visual impairment. */
+  voiceFirstMode?: boolean;
   age?: number;
   isMinor?: boolean;
   photoURL?: string;
