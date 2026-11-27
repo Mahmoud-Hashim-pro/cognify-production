@@ -1,4 +1,5 @@
 import { localize, isArabicLocale, getTranslation } from '../lib/translations';
+import { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useRef, useEffect } from "react";
 import { Message, UserProfile, Task, PedagogyStyle } from "../types";
 import { generateAdaptiveResponseStream, generateBenchmarkComparison, generateProactiveInsights, generateChatTitle } from "../services/gemini";
@@ -1615,6 +1616,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
         {/* Header Right Actions */}
         <div className="flex items-center gap-2">
+          <ToolSwitcherSlot />
           {/* Search Toggle */}
           <button
             type="button"
