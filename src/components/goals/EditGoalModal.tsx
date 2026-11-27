@@ -40,6 +40,16 @@ export default function EditGoalModal({ goal, onClose, onSave, language }: EditG
     }
   }, [goal]);
 
+  // Close on Escape for keyboard and screen-reader users
+  useEffect(() => {
+    if (!goal) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [goal]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) {
@@ -84,7 +94,7 @@ export default function EditGoalModal({ goal, onClose, onSave, language }: EditG
   return (
     <AnimatePresence>
       {goal && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4" role="dialog" aria-modal="true">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
