@@ -11,6 +11,7 @@
  * 7. Universal accessibility: WCAG 2.2 AA contrast, screen reader live regions, keyboard navigation
  */
 
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Mic,
@@ -24,6 +25,9 @@ import {
   Trash2,
   Send,
   Zap,
+  Puzzle,
+  Hand,
+  ArrowLeftRight,
   Ear,
   Settings2,
   Eye,
@@ -402,72 +406,65 @@ export default function HearAndExpressView({
         {announceText}
       </div>
 
-      {/* Top Header */}
-      <header className="px-4 py-3 border-b border-[#1769AA]/30 bg-[#0D2542] flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-3">
-          {onNavigateBack && (
-            <button
-              type="button"
-              onClick={onNavigateBack}
-              aria-label={isAr ? 'الرجوع للوحة الميزات' : 'Back to dashboard'}
-              className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
-            >
-              <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
-            </button>
-          )}
-          <span className="hidden"><BrandLogo size="sm" /></span>
-          <div>
-            <h1 className="text-base font-bold text-white flex items-center gap-2">
-              <Ear className="w-5 h-5 text-[#4B9FE1]" />
-              <span>{isAr ? 'السمع والتعبير (Hear & Express)' : 'Hear & Express Communication'}</span>
-            </h1>
-            <p className="hidden text-xs text-[#94A3B8]">
-              {isAr ? 'القسم 5: التواصل والتعبير — شامل الصم وغير الناطقين' : 'Section 5: Communicate — Multi-sensory'}
-            </p>
-          </div>
+      {/* Top Header: back, title, tool switcher, status dot, "..." menu */}
+      <header className="px-3 sm:px-4 py-2.5 border-b border-[#1769AA]/30 bg-[#0D2542] flex items-center gap-2 shadow-md">
+        {onNavigateBack && (
+          <button
+            type="button"
+            onClick={onNavigateBack}
+            aria-label={isAr ? 'الرجوع للوحة الميزات' : 'Back to dashboard'}
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+          >
+            <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
+          </button>
+        )}
+        <span className="hidden"><BrandLogo size="sm" /></span>
+        <h1 className="flex-1 min-w-0 truncate text-base font-bold text-white">
+          <span>{isAr ? 'السمع والتعبير' : 'Hear & Express'}</span>
+          <span className="hidden">{isAr ? 'السمع والتعبير (Hear & Express)' : 'Hear & Express Communication'}</span>
+        </h1>
+
+        <div
+          data-testid="communication-state-indicator"
+          role="status"
+          className="flex items-center gap-1.5 text-xs font-bold shrink-0"
+        >
+          <span
+            className={`w-2.5 h-2.5 rounded-full ${isListening ? 'bg-red-400 animate-pulse' : 'bg-emerald-400'}`}
+            aria-hidden="true"
+          />
+          <span className="text-[#94A3B8] sr-only sm:not-sr-only">
+            {isListening
+              ? (isAr ? 'تفريغ نشط' : 'Listening Active')
+              : (isAr ? 'جاهز للتواصل' : 'Ready')}
+          </span>
         </div>
-
-        {/* Global Stop Speech Button & Communication Status */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setPersonalizationOpen(true)}
-            aria-label={isAr ? 'إعدادات التخصيص والخصوصية' : 'Personalization and privacy settings'}
-            className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#1769AA]/40 transition-colors focus:ring-2 focus:ring-[#1769AA] cursor-pointer"
-          >
-            <Settings2 className="w-5 h-5" />
-          </button>
-          <div
-            data-testid="communication-state-indicator"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#09101A] border border-[#24476F] text-xs font-bold"
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isListening
-                  ? 'bg-red-400 animate-pulse'
-                  : 'bg-emerald-400'
-              }`}
-            />
-            <span className="text-[#94A3B8]">
-              {isListening
-                ? (isAr ? 'تفريغ نشط' : 'Listening Active')
-                : (isAr ? 'جاهز للتواصل' : 'Ready')}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            data-testid="speech-controls"
-            onClick={() => {
-              cancelSpeech();
-              announce(isAr ? 'تم إيقاف الصوت.' : 'Speech stopped.');
-            }}
-            aria-label={isAr ? 'إيقاف نطق الصوت' : 'Stop voice speech'}
-            className="px-3 py-1.5 rounded-xl bg-[#C43D4D]/20 hover:bg-[#C43D4D]/40 text-[#FFA4A4] border border-[#C43D4D]/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-          >
-            <VolumeX className="w-4 h-4" />
-            <span>{isAr ? 'إيقاف الصوت' : 'Stop Audio'}</span>
-          </button>
+        <ToolSwitcherSlot />
+        <div data-testid="speech-controls" className="contents">
+        <HeaderMenu
+          ariaLabel={isAr ? 'المزيد' : 'More actions'}
+          isDarkMode={isDarkMode}
+          items={[
+            {
+              key: 'stop',
+              label: isAr ? 'إيقاف الصوت' : 'Stop Audio',
+              ariaLabel: isAr ? 'إيقاف نطق الصوت' : 'Stop voice speech',
+              icon: <VolumeX className="w-4 h-4" />,
+              danger: true,
+              onSelect: () => {
+                cancelSpeech();
+                announce(isAr ? 'تم إيقاف الصوت.' : 'Speech stopped.');
+              },
+            },
+            {
+              key: 'personalize',
+              label: isAr ? 'التخصيص والخصوصية' : 'Personalization & privacy',
+              ariaLabel: isAr ? 'إعدادات التخصيص والخصوصية' : 'Personalization and privacy settings',
+              icon: <Settings2 className="w-4 h-4" />,
+              onSelect: () => setPersonalizationOpen(true),
+            },
+          ]}
+        />
         </div>
       </header>
 
@@ -475,15 +472,15 @@ export default function HearAndExpressView({
       <nav
         role="tablist"
         aria-label={isAr ? 'أدوات التواصل والتعبير' : 'Communication sub-modules'}
-        className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-[#112C4F] border-b border-[#24476F]"
+        className="shrink-0 flex flex-nowrap overflow-x-auto custom-scrollbar items-center gap-2 px-3 sm:px-4 py-2 bg-[#112C4F] border-b border-[#24476F]"
       >
         {[
-          { id: 'captions' as const, labelAr: '🎙️ تفريغ الكلام المباشر', labelEn: '🎙️ Live Captions' },
-          { id: 'tts_quick' as const, labelAr: '💬 النطق والرسائل السريعة', labelEn: '💬 Spoken & Quick Messages' },
-          { id: 'aac' as const, labelAr: '🧩 لوحات التواصل الرمزي (AAC)', labelEn: '🧩 AAC Board' },
-          { id: 'alerts' as const, labelAr: '⚡ منارة التنبيه البصري', labelEn: '⚡ Visual & Vibration Alert' },
-          { id: 'esl' as const, labelAr: '🤟 لغة الإشارة المصرية (3D)', labelEn: '🤟 Egyptian Sign Language' },
-          { id: 'twoway' as const, labelAr: '🔄 محادثة ثنائية الاتجاه', labelEn: '🔄 Two-Way Conversation' },
+          { id: 'captions' as const, labelAr: 'تفريغ الكلام المباشر', labelEn: 'Live Captions', Icon: Mic },
+          { id: 'tts_quick' as const, labelAr: 'النطق والرسائل السريعة', labelEn: 'Spoken & Quick Messages', Icon: MessageSquare },
+          { id: 'aac' as const, labelAr: 'لوحات التواصل الرمزي (AAC)', labelEn: 'AAC Board', Icon: Puzzle },
+          { id: 'alerts' as const, labelAr: 'منارة التنبيه البصري', labelEn: 'Visual & Vibration Alert', Icon: Zap },
+          { id: 'esl' as const, labelAr: 'لغة الإشارة المصرية (3D)', labelEn: 'Egyptian Sign Language', Icon: Hand },
+          { id: 'twoway' as const, labelAr: 'محادثة ثنائية الاتجاه', labelEn: 'Two-Way Conversation', Icon: ArrowLeftRight },
         ].map((tab) => {
           const isSelected = activeTab === tab.id;
           return (
@@ -495,13 +492,14 @@ export default function HearAndExpressView({
                 setActiveTab(tab.id);
                 announce(isAr ? tab.labelAr : tab.labelEn);
               }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold  transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center text-center ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold  transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shrink-0 whitespace-nowrap min-h-[44px] flex items-center gap-2 ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/35 border border-[#4B9FE1]'
                   : 'bg-[#17355C] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#24476F]'
               }`}
             >
-              {isAr ? tab.labelAr : tab.labelEn}
+              <tab.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>{isAr ? tab.labelAr : tab.labelEn}</span>
             </button>
           );
         })}

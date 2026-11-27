@@ -6,6 +6,7 @@
  * (Phase 6: Dedicated Accessible Studio for Transforming Rough Content into Professional DOCX/PDF)
  */
 
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -425,108 +426,98 @@ export default function AccessibleBookStudioView({
             : 'border-stone-200/90 bg-white/95 text-stone-900 shadow-sm'
         }`}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <Breadcrumbs
-            items={getRouteBreadcrumbs({ view: 'book_studio' }, profile?.language)}
-            onNavigate={(v) => {
-              if (v === 'disability' && onNavigateBack) onNavigateBack();
-            }}
-            onNavigateBack={onNavigateBack}
-            backLabel={isArLocale ? 'لوحة الميزات' : 'Hub'}
-            isDarkMode={isDarkMode}
-          />
-
-          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center text-white shadow-md shrink-0 hidden md:flex">
-            <BookOpen className="w-5 h-5" />
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="hidden">
+            <Breadcrumbs
+              items={getRouteBreadcrumbs({ view: 'book_studio' }, profile?.language)}
+              onNavigate={(v) => {
+                if (v === 'disability' && onNavigateBack) onNavigateBack();
+              }}
+              onNavigateBack={onNavigateBack}
+              backLabel={isArLocale ? 'لوحة الميزات' : 'Hub'}
+              isDarkMode={isDarkMode}
+            />
           </div>
-
-          <div className="min-w-0 hidden lg:block">
-            <h1 className="font-black text-sm sm:text-base leading-tight truncate">
+          {onNavigateBack && (
+            <button
+              type="button"
+              onClick={onNavigateBack}
+              aria-label={isArLocale ? 'الرجوع للوحة الميزات' : 'Back'}
+              className={`min-h-[44px] min-w-[44px] p-2.5 rounded-xl border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
+                isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-[#4B9FE1]' : 'bg-stone-100 border-stone-200 text-[#1769AA]'
+              }`}
+            >
+              <ArrowLeft className={`w-5 h-5 ${isArLocale ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+          <h1 className="font-black text-base leading-tight truncate">
+            <span>{localize(profile?.language, 'Book Studio', 'استوديو الكتب')}</span>
+            <span className="hidden">
               {localize(profile?.language, 'Accessible Book & Document Studio', 'استوديو الكتب والمستندات التعليمية الميسرة')}
-            </h1>
-            <p className="text-xs sm:text-xs text-stone-500 dark:text-stone-400 leading-snug">
-              {localize(
-                profile?.language,
-                'Transform rough educational notes into structured Word (.docx) & PDF documents',
-                'تحويل المذكرات والملازم إلى كتب وامتحانات رسمية منسقة بملفات Word وPDF'
-              )}
-            </p>
-          </div>
+            </span>
+          </h1>
+          <p className="hidden">
+            {localize(
+              profile?.language,
+              'Transform rough educational notes into structured Word (.docx) & PDF documents',
+              'تحويل المذكرات والملازم إلى كتب وامتحانات رسمية منسقة بملفات Word وPDF'
+            )}
+          </p>
         </div>
 
-        {/* Header Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {rawSourceHistory.length > 0 && (
-            <button
-              type="button"
-              onClick={handleRevertToOriginal}
-              className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
-                isDarkMode
-                  ? 'bg-amber-950/40 border-amber-800 text-amber-300 hover:bg-amber-900/60'
-                  : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
-              }`}
-              title={isArLocale ? 'تراجع عن التنسيق وإلغاء التغييرات واسترجاع النص الأصلي' : 'Undo changes / Cancel'}
-            >
-              <Undo2 className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{isArLocale ? 'تراجع / إلغاء' : 'Undo / Cancel'}</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowHistoryModal(true)}
-            className={`p-2 rounded-xl border transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
-              isDarkMode
-                ? 'bg-rafiqi-surface-dark border-stone-800 text-stone-300 hover:text-white'
-                : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950'
-            }`}
-            title={isArLocale ? 'أرشيف الكتب المحفوظة' : 'Document History'}
-            aria-label={isArLocale ? 'أرشيف الكتب المحفوظة' : 'Document History'}
-          >
-            <History className="w-4 h-4" />
-          </button>
-
-          {toggleTheme && (
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
-                isDarkMode
-                  ? 'bg-rafiqi-surface-dark border-stone-800 text-amber-400'
-                  : 'bg-stone-100 border-stone-200 text-stone-700'
-              }`}
-              title={isDarkMode ? 'الوضع النهاري' : 'الوضع الليلي'}
-              aria-label="Toggle theme"
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-          )}
-
-          {onMenuClick && (
-            <button
-              type="button"
-              onClick={onMenuClick}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
-                isDarkMode
-                  ? 'bg-rafiqi-surface-dark border-stone-800 text-stone-300 hover:text-white'
-                  : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950'
-              }`}
-              aria-label="Toggle menu"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-          )}
+        {/* Header Actions: switcher and one "..." menu */}
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
+          <HeaderMenu
+            ariaLabel={isArLocale ? 'المزيد' : 'More actions'}
+            isDarkMode={isDarkMode}
+            items={[
+              ...(rawSourceHistory.length > 0
+                ? [{
+                    key: 'undo',
+                    label: isArLocale ? 'تراجع / إلغاء' : 'Undo / Cancel',
+                    ariaLabel: isArLocale ? 'تراجع عن التنسيق وإلغاء التغييرات واسترجاع النص الأصلي' : 'Undo changes / Cancel',
+                    icon: <Undo2 className="w-4 h-4" />,
+                    onSelect: handleRevertToOriginal,
+                  }]
+                : []),
+              {
+                key: 'history',
+                label: isArLocale ? 'أرشيف الكتب المحفوظة' : 'Document History',
+                icon: <History className="w-4 h-4" />,
+                onSelect: () => setShowHistoryModal(true),
+              },
+              ...(toggleTheme
+                ? [{
+                    key: 'theme',
+                    label: isDarkMode ? (isArLocale ? 'الوضع النهاري' : 'Light mode') : (isArLocale ? 'الوضع الليلي' : 'Dark mode'),
+                    ariaLabel: 'Toggle theme',
+                    icon: isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />,
+                    onSelect: toggleTheme,
+                  }]
+                : []),
+              ...(onMenuClick
+                ? [{
+                    key: 'menu',
+                    label: isArLocale ? 'القائمة' : 'Menu',
+                    ariaLabel: 'Toggle menu',
+                    icon: <Menu className="w-4 h-4" />,
+                    onSelect: onMenuClick,
+                  }]
+                : []),
+            ]}
+          />
         </div>
       </header>
 
       {/* ── WORKFLOW STEP NAVIGATOR (Screen-reader Accessible Tablist) ── */}
       <nav
         aria-label={isArLocale ? 'خطوات استوديو الكتب التعليمية' : 'Book Studio Steps'}
-        className={`px-4 py-2 border-b shrink-0 flex items-center justify-start gap-2 ${
+        className={`px-3 sm:px-4 py-2 border-b shrink-0 flex items-center justify-start gap-2 ${
           isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-100 border-stone-200'
         }`}
       >
-        <div className="flex flex-wrap items-center gap-1 sm:gap-2 w-full">
+        <div className="flex flex-nowrap overflow-x-auto custom-scrollbar items-center gap-1 sm:gap-2 w-full">
           {[
             { step: 1 as const, labelAr: '1. المصدر والمحتوى', labelEn: '1. Content & Source', icon: FileUp },
             { step: 2 as const, labelAr: '2. القالب والتنسيق', labelEn: '2. Template & Layout', icon: Settings2 },
@@ -541,7 +532,7 @@ export default function AccessibleBookStudioView({
                 type="button"
                 onClick={() => setActiveStep(item.step)}
                 aria-current={isActive ? 'step' : undefined}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none min-h-[44px] ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shrink-0 whitespace-nowrap min-h-[44px] ${
                   isActive
                     ? 'bg-teal-700 text-white shadow-sm font-black'
                     : isDarkMode

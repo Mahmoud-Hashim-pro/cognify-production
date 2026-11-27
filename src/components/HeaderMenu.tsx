@@ -5,6 +5,7 @@ export interface HeaderMenuItem {
   key: string;
   label: string;
   ariaLabel?: string;
+  testId?: string;
   icon?: React.ReactNode;
   active?: boolean;
   danger?: boolean;
@@ -84,6 +85,7 @@ export default function HeaderMenu({ items, ariaLabel, label, isDarkMode = true,
               type="button"
               role="menuitem"
               aria-label={it.ariaLabel}
+              data-testid={it.testId}
               onClick={() => {
                 setOpen(false);
                 it.onSelect();
