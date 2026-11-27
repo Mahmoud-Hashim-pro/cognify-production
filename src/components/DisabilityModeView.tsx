@@ -1086,7 +1086,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 min-h-[38px] min-w-[38px] rounded-xl border border-slate-200 dark:border-[#22354E] bg-slate-100 dark:bg-[#1A283D] text-slate-500 dark:text-[#94A3B8] hover:text-amber-400 hover:border-[#1769AA]/50 transition-all flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+              className="p-2 min-h-[36px] min-w-[38px] rounded-xl border border-slate-200 dark:border-[#22354E] bg-slate-100 dark:bg-[#1A283D] text-slate-500 dark:text-[#94A3B8] hover:text-amber-400 hover:border-[#1769AA]/50 transition-all flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               title={isDarkMode ? 'التبديل للوضع النهاري' : 'التبديل للوضع الليلي'}
               aria-label="Toggle light or dark theme"
             >
@@ -1123,7 +1123,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               if (onNavigate) (onNavigate as any)('profile');
               else setShowPassportModal(true);
             }}
-            className="flex items-center gap-2 px-3 py-1.5 min-h-[38px] rounded-full border border-slate-200 dark:border-[#22354E] bg-slate-100 dark:bg-[#1A283D] hover:bg-white hover:dark:bg-[#131E2E] hover:border-[#1769AA]/50 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+            className="flex items-center gap-2 px-3 py-1.5 min-h-[36px] rounded-full border border-slate-200 dark:border-[#22354E] bg-slate-100 dark:bg-[#1A283D] hover:bg-white hover:dark:bg-[#131E2E] hover:border-[#1769AA]/50 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
             aria-label={localize(profile.language, 'Open user profile', 'فتح الملف الشخصي')}
           >
             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#0D4778] to-[#1769AA] flex items-center justify-center text-xs font-bold text-white shadow-xs">

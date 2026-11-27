@@ -388,7 +388,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 'Search tools across the 6 sections (e.g. Visual Assistant, OCR, Signs, Books)...',
                 'ابحث في أدوات الأقسام الستة (مثل المساعد البصري، قراءة النصوص، قاموس الإشارة)...'
               )}
-              className={`w-full min-h-[42px] text-xs font-medium ps-9 pe-10 py-2 rounded-xl border ${
+              className={`w-full min-h-[40px] text-xs font-medium ps-9 pe-10 py-2 rounded-xl border ${
                 isDarkMode 
                   ? 'bg-[#0B1523] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                   : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'

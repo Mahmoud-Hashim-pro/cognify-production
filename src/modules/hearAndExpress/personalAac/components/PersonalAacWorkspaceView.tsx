@@ -493,7 +493,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             onClick={() => handleSpeak(false)}
             disabled={!sentenceText.trim()}
             aria-label={isArabic ? 'انطق الرسالة صوتياً' : 'Speak Message Aloud'}
-            className="min-h-[56px] px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-extrabold text-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+            className="min-h-[48px] px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-extrabold text-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
           >
             <Volume2 className="w-6 h-6" />
             {isArabic ? 'انطق (Enter)' : 'Speak (Enter)'}
@@ -526,7 +526,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 aria-selected={isSelected}
-                className={`min-h-[58px] p-2 rounded-xl flex flex-col items-center justify-center gap-1 text-center font-bold text-xs border transition-all ${
+                className={`min-h-[48px] p-2 rounded-xl flex flex-col items-center justify-center gap-1 text-center font-bold text-xs border transition-all ${
                   isScanFocused
                     ? 'ring-4 ring-yellow-400 scale-105 z-10 shadow-lg'
                     : ''

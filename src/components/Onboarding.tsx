@@ -185,7 +185,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             key={langOpt.id}
             type="button"
             onClick={() => setLanguage(langOpt.id as LanguagePreference)}
-            className={`min-h-[56px] p-4 rounded-2xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+            className={`min-h-[48px] p-4 rounded-2xl border-2 transition-all flex items-center justify-between cursor-pointer ${
               language === langOpt.id
                 ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] font-bold shadow-xs'
                 : 'border-slate-200 dark:border-[#22354E] bg-white dark:bg-[#131E2E] text-slate-700 dark:text-slate-300 hover:border-[#1769AA]/40'

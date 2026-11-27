@@ -797,7 +797,7 @@ export default function StudentSettingsView({
                       window.location.hash = t.id === 'general' ? '#settings' : `#settings/${t.id}`;
                     }
                   }}
-                  className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+                  className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                     isSelected 
                       ? 'bg-[#1769AA] text-white shadow-md' 
                       : 'bg-slate-100 dark:bg-[#082344] text-slate-600 dark:text-[#A9C4DD] hover:text-slate-900 hover:dark:text-[#F4F7FB] hover:bg-white hover:dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E]'

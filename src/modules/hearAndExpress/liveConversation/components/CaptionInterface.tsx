@@ -499,7 +499,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
         <button
           type="button"
           onClick={() => setShowBookmarksOnly((prev) => !prev)}
-          className={`py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all min-h-[38px] ${
+          className={`py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all min-h-[36px] ${
             showBookmarksOnly
               ? 'bg-[#1769AA] border-[#12CFE0] text-white shadow-sm'
               : 'bg-inherit/40 border-inherit/20 text-inherit/70 hover:bg-[#102D4D]'

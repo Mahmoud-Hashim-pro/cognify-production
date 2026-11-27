@@ -677,7 +677,7 @@ export default function HearAndExpressView({
               </div>
 
               {/* Strip Items */}
-              <div className="min-h-[56px] p-2.5 rounded-2xl bg-[#09101A] border border-[#22354E] flex flex-wrap items-center gap-2">
+              <div className="min-h-[48px] p-2.5 rounded-2xl bg-[#09101A] border border-[#22354E] flex flex-wrap items-center gap-2">
                 {sentenceStrip.length === 0 ? (
                   <span className="text-xs text-[#94A3B8]/70 px-2">
                     {isAr

@@ -592,7 +592,7 @@ Question: "${q}"`;
             </div>
 
             {/* Output Box */}
-            <div className="bg-[#071B33] border border-[#12CFE0]/20 rounded-xl p-3.5 min-h-[56px] flex items-center justify-between gap-3 shadow-inner">
+            <div className="bg-[#071B33] border border-[#12CFE0]/20 rounded-xl p-3.5 min-h-[48px] flex items-center justify-between gap-3 shadow-inner">
               <p
                 className={`text-sm sm:text-base font-semibold leading-relaxed ${
                   accumulatedText.trim() ? 'text-[#F4F7FB]' : 'text-[#A9BDD3]/60 font-normal text-xs'
