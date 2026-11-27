@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cognify-v16-cost-quota-budget';
+const CACHE_NAME = 'rafiqi-v17';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
