@@ -4,7 +4,7 @@ import { Message, UserProfile, Task, PedagogyStyle } from "../types";
 import { generateAdaptiveResponseStream, generateBenchmarkComparison, generateProactiveInsights, generateChatTitle } from "../services/gemini";
 import { geminiService } from "../services/geminiService";
 import { PEDAGOGY_STYLES } from "../lib/adaptiveLearning";
-import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, ArrowLeft, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, ArrowLeft, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
 
 import ChatBookmarksDrawer, { BookmarkedInsight } from "./chat/ChatBookmarksDrawer";
 import ChatErgonomicsBar, { FontScale } from "./chat/ChatErgonomicsBar";
@@ -1567,8 +1567,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         )}
       </AnimatePresence>
 
-      {/* A. Compact Page Header */}
-      <header className="bg-[#0B131E] border-b border-[#22354E] text-[#F8FAFC] h-[58px] px-3 sm:px-6 flex justify-between items-center z-10 shrink-0">
+      {/* A. Compact module toolbar (the app shell's GlobalHeader owns navigation chrome) */}
+      <header className="bg-white dark:bg-[#0B131E] border-b border-slate-200 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] h-12 px-3 sm:px-6 flex justify-between items-center z-10 shrink-0 transition-colors">
         <div className="flex items-center gap-3">
           {/* Back to Hub Button */}
           <button
@@ -1663,17 +1663,6 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             </button>
           )}
 
-          {/* Mobile Menu Button */}
-          {onMenuClick && (
-            <button
-              type="button"
-              onClick={onMenuClick}
-              className="p-2 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#64748B] hover:text-[#F8FAFC] lg:hidden cursor-pointer"
-              aria-label="Toggle Sidebar Menu"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </header>
 

@@ -245,7 +245,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         <div className="hidden sm:block h-5 w-[1px] bg-slate-200 dark:bg-[#1E2E44] shrink-0" aria-hidden="true" />
 
         {/* Dynamic Breadcrumbs */}
-        <nav aria-label={t('Breadcrumbs', 'مسار الصفحة')} className="flex items-center gap-1.5 text-xs sm:text-sm font-bold min-w-0">
+        <nav aria-label={t('Breadcrumbs', 'مسار الصفحة')} className="flex items-center gap-1.5 text-xs sm:text-sm font-bold min-w-0 overflow-hidden">
           <button
             type="button"
             onClick={() => onNavigate?.('disability', 'hub')}
@@ -258,14 +258,14 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
           <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
 
-          <span className="text-slate-900 dark:text-white font-extrabold truncate">
+          <span className="text-slate-900 dark:text-white font-extrabold truncate min-w-0 max-w-[38vw] sm:max-w-none" title={breadcrumbs.sectionTitle}>
             {breadcrumbs.sectionTitle}
           </span>
 
           {breadcrumbs.subTab && (
             <>
               <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
-              <span className="text-[#1769AA] dark:text-[#4B9FE1] font-bold truncate">
+              <span className="text-[#1769AA] dark:text-[#4B9FE1] font-bold truncate min-w-0 max-w-[26vw]" title={breadcrumbs.subTab}>
                 {breadcrumbs.subTab}
               </span>
             </>

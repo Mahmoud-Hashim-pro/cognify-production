@@ -228,8 +228,16 @@ export default function StudentSettingsView({
 
   // ── Interface & Explanation Language ──
   const [interfaceLanguage, setInterfaceLanguage] = useState<LanguagePreference>(
-    () => profile.language || 'Arabic'
+    () => (isArabicLocale(profile.language) ? 'Arabic' : 'English')
   );
+
+  // Single source of truth: follow the global header language switcher.
+  // Without this sync the page kept (and on save re-wrote) its own stale value,
+  // which made the header toggle look broken on this page.
+  useEffect(() => {
+    const lang: LanguagePreference = isArabicLocale(profile.language) ? 'Arabic' : 'English';
+    setInterfaceLanguage((prev) => (prev === lang ? prev : lang));
+  }, [profile.language]);
   const [explanationLanguage, setExplanationLanguage] = useState<string>(
     () => (profile as any).explanationLanguage || profile.language || 'Arabic'
   );
