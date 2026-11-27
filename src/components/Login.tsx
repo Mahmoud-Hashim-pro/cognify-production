@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { ThemeSelector } from './ui/ThemeSelector';
 import { speak } from '../lib/tts';
+import { frOf } from '../lib/translations';
 
 interface LoginProps {
   onLoginSuccess?: () => void;
@@ -30,7 +31,7 @@ interface LoginProps {
 }
 
 export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = 'email-login' }: LoginProps = {}) {
-  const [lang, setLang] = useState<'en' | 'ar'>(() => {
+  const [lang, setLang] = useState<'en' | 'ar' | 'fr'>(() => {
     if (typeof navigator !== 'undefined' && /^ar/i.test(navigator.language || '')) {
       return 'ar';
     }
@@ -89,7 +90,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
   const [showRedirectOption, setShowRedirectOption] = useState(false);
 
   const isRtl = lang === 'ar';
-  const t = (en: string, ar: string) => (lang === 'ar' ? ar : en);
+  const t = (en: string, ar: string) => (lang === 'ar' ? ar : lang === 'fr' ? frOf(en) : en);
 
   const isMountedRef = useRef(true);
   const authTimeoutRef = useRef<any>(null);
@@ -439,6 +440,18 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               }`}
             >
               EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang('fr')}
+              aria-pressed={lang === 'fr'}
+              className={`px-2.5 py-1 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+                lang === 'fr'
+                  ? 'bg-[#1769AA] text-white shadow-xs'
+                  : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              FR
             </button>
           </div>
         </div>
