@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { L } from '../lib/translations';
 import { UserProfile } from '../types';
 import { loadContacts, makePhoneCall } from '../lib/contacts';
 import { dispatchServerEmergencySOS } from '../lib/emergencyDispatcher';
@@ -92,7 +93,7 @@ export function useEmergencySOS({
 
       dispatchServerEmergencySOS({
         uid: profile?.uid,
-        studentName: profile?.name || (isArabic ? 'طالب رفيقي' : 'Rafiqi Student'),
+        studentName: profile?.name || (isArabic ? 'طالب رفيقي' : L('Rafiqi Student')),
         caregiverPhone,
         caregiverName,
         location: emergencyGeoCoords || undefined,
@@ -112,19 +113,19 @@ export function useEmergencySOS({
           speakSafe(
             isArabic
               ? 'تم تأكيد وصول نداء الاستغاثة بنجاح إلى الخادم والمرافقين'
-              : 'Emergency SOS confirmed and dispatched by server'
+              : L('Emergency SOS confirmed and dispatched by server')
           );
         } else {
           setSosDispatchStatus('failed');
           toast.error(
             isArabic
               ? 'تعذر الإرسال التلقائي عبر الخادم، يرجى الاتصال المباشر!'
-              : 'Server dispatch failed, please call directly'
+              : L('Server dispatch failed, please call directly')
           );
           speakSafe(
             isArabic
               ? 'تنبيه: تعذر الإرسال التلقائي، جاري التحويل للاتصال المباشر'
-              : 'Warning: Automated dispatch failed'
+              : L('Warning: Automated dispatch failed')
           );
           if (caregiverPhone) {
             makePhoneCall(caregiverPhone);

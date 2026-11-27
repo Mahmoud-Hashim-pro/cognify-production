@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { L } from '../lib/translations';
 import { Mic, PhoneCall, Siren, X } from 'lucide-react';
 import { UserProfile } from '../types';
 import { AppView } from '../lib/access';
@@ -275,7 +276,7 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
               console.error('Failed to persist media consent:', err);
             }
             speak(
-              isArabic ? 'شكرًا. اضغط مطولًا على الزر واتكلم.' : 'Thank you. Press and hold the button and speak.',
+              isArabic ? 'شكرًا. اضغط مطولًا على الزر واتكلم.' : L('Thank you. Press and hold the button and speak.'),
               isArabic ? 'Arabic' : 'English',
               { rate: speechRate }
             );
@@ -283,7 +284,7 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
           onDecline={() => {
             setShowMediaConsent(false);
             speak(
-              isArabic ? 'تمام، المايكروفون مش هيشتغل. تقدر توافق في أي وقت.' : 'Okay. The microphone will stay off. You can agree anytime.',
+              isArabic ? 'تمام، المايكروفون مش هيشتغل. تقدر توافق في أي وقت.' : L('Okay. The microphone will stay off. You can agree anytime.'),
               isArabic ? 'Arabic' : 'English',
               { rate: speechRate }
             );
@@ -293,19 +294,19 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
       {/* Fixed voice dock: a built-in row at the bottom of the layout (not a floating overlay) */}
       <div
         role="region"
-        aria-label={isArabic ? 'التحكم الصوتي' : 'Voice control'}
+        aria-label={isArabic ? 'التحكم الصوتي' : L('Voice control')}
         data-voice-dock
         className="shrink-0 w-full flex items-center justify-end gap-3 px-4 max-md:ps-[68px] py-2 bg-[#0B1F3A] border-t border-[#24476F]"
       >
         <span className="text-sm flex-1 text-start" style={{ color: "#E2E8F0" }} aria-hidden="true">
-          {isArabic ? 'اضغط مطولا واتكلم، أو اضغط مرة للبدء ومرة للإيقاف' : 'Hold to talk, or tap once to start and once to stop'}
+          {isArabic ? 'اضغط مطولا واتكلم، أو اضغط مرة للبدء ومرة للإيقاف' : L('Hold to talk, or tap once to start and once to stop')}
         </span>
       <button
         type="button"
         aria-label={
           isArabic
             ? 'زر التحكم الصوتي. اضغط مطولا واتكلم، أو اضغط مرة للبدء ومرة للإيقاف. ثلاث ضغطات سريعة للطوارئ.'
-            : 'Voice control button. Press and hold to talk, or tap once to start and once to stop. Triple tap for emergency.'
+            : L('Voice control button. Press and hold to talk, or tap once to start and once to stop. Triple tap for emergency.')
         }
         aria-pressed={latched || voice.status === 'listening'}
         onClick={handleClick}
@@ -326,9 +327,9 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
         <Mic className="w-6 h-6" aria-hidden="true" />
         <span className="sr-only" aria-live="polite">
           {voice.status === 'listening'
-            ? (isArabic ? 'بسمعك دلوقتي' : 'Listening now')
+            ? (isArabic ? 'بسمعك دلوقتي' : L('Listening now'))
             : voice.status === 'processing'
-            ? (isArabic ? 'بفهم الأمر' : 'Understanding')
+            ? (isArabic ? 'بفهم الأمر' : L('Understanding'))
             : ''}
         </span>
       </button>
@@ -339,7 +340,7 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
         <div
           role="alertdialog"
           aria-modal="true"
-          aria-label={isArabic ? 'وضع الطوارئ' : 'Emergency mode'}
+          aria-label={isArabic ? 'وضع الطوارئ' : L('Emergency mode')}
           className="fixed inset-0 z-[80] flex items-center justify-center bg-red-950/95 p-6"
         >
           <div className="w-full max-w-md flex flex-col items-center gap-8 text-center text-white">
@@ -356,34 +357,34 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
                   autoFocus
                   onClick={() => {
                     sos.cancelEmergencySOS();
-                    speakSafe(isArabic ? 'اتلغت الاستغاثة' : 'SOS cancelled');
+                    speakSafe(isArabic ? 'اتلغت الاستغاثة' : L('SOS cancelled'));
                   }}
                   className="w-full min-h-[96px] rounded-3xl bg-white text-red-900 text-3xl font-black shadow-xl active:scale-95"
                 >
-                  {isArabic ? 'إلغاء — أنا بخير' : 'Cancel — I am okay'}
+                  {isArabic ? 'إلغاء — أنا بخير' : L('Cancel — I am okay')}
                 </button>
               </>
             ) : sos.sosDispatchStatus === 'sending' ? (
               <p className="text-2xl font-bold" aria-live="assertive">
-                {isArabic ? 'جاري إرسال الاستغاثة بموقعك...' : 'Sending SOS with your location...'}
+                {isArabic ? 'جاري إرسال الاستغاثة بموقعك...' : L('Sending SOS with your location...')}
               </p>
             ) : sos.sosDispatchStatus === 'confirmed' ? (
               <>
                 <p className="text-2xl font-bold text-emerald-300" aria-live="assertive">
-                  {isArabic ? 'وصلت الاستغاثة. المساعدة في الطريق.' : 'SOS received. Help is on the way.'}
+                  {isArabic ? 'وصلت الاستغاثة. المساعدة في الطريق.' : L('SOS received. Help is on the way.')}
                 </p>
                 <button
                   type="button"
                   onClick={sos.cancelEmergencySOS}
                   className="w-full min-h-[80px] rounded-3xl bg-white/10 border-2 border-white/40 text-2xl font-bold active:scale-95"
                 >
-                  {isArabic ? 'إغلاق' : 'Close'}
+                  {isArabic ? 'إغلاق' : L('Close')}
                 </button>
               </>
             ) : (
               <>
                 <p className="text-2xl font-bold text-amber-300" aria-live="assertive">
-                  {isArabic ? 'الإرسال التلقائي فشل. اتصل مباشرة.' : 'Automatic sending failed. Call directly.'}
+                  {isArabic ? 'الإرسال التلقائي فشل. اتصل مباشرة.' : L('Automatic sending failed. Call directly.')}
                 </p>
                 {primaryContact && (
                   <button
@@ -402,7 +403,7 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
                 >
                   <span className="flex items-center justify-center gap-2">
                     <X className="w-6 h-6" aria-hidden="true" />
-                    {isArabic ? 'إغلاق' : 'Close'}
+                    {isArabic ? 'إغلاق' : L('Close')}
                   </span>
                 </button>
               </>

@@ -6,6 +6,7 @@
  * powers the "read selected region aloud" feature.
  */
 
+import { isFrenchActive } from "./translations.js";
 import { extractTtsSignals } from '../accessibility/accessibilitySignals.js';
 
 export type TtsSignalListener = (signal: any) => void;
@@ -160,6 +161,10 @@ export function buildUtterance(
 ): SpeechSynthesisUtterance {
   const clean = cleanForSpeech(text);
   const utterance = new SpeechSynthesisUtterance(clean);
+  // When the app UI is French, "English" means the UI language: speak it in French.
+  if (isFrenchActive() && (!language || language === "English" || language === "en" || language === "en-US")) {
+    language = "French";
+  }
   
   const isExplicitEnglish = language === "English" || language === "en" || language === "en-US";
   const isExplicitFrench = language === "French" || language === "fr" || language === "fr-FR";

@@ -54,7 +54,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { isArabicLocale } from '../lib/translations';
+import { isArabicLocale, L } from '../lib/translations';
 import {
   ProductSectionId,
   getProductSection,
@@ -121,14 +121,14 @@ export default function SectionLandingView({
     return (
       <div className={`p-8 text-center space-y-4 ${isDarkMode ? 'bg-[#0A2342] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'}`}>
         <p className="text-sm text-slate-400">
-          {isAr ? 'القسم المطلوب غير موجود.' : 'Section not found.'}
+          {isAr ? 'القسم المطلوب غير موجود.' : L('Section not found.')}
         </p>
         <button
           type="button"
           onClick={onNavigateBack}
           className="px-5 py-2.5 bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white rounded-xl text-xs font-bold transition-all shadow-md"
         >
-          {isAr ? 'الرجوع إلى لوحة التحكم' : 'Return to Dashboard Hub'}
+          {isAr ? 'الرجوع إلى لوحة التحكم' : L('Return to Dashboard Hub')}
         </button>
       </div>
     );
@@ -409,7 +409,7 @@ export default function SectionLandingView({
     >
       {/* ── BREADCRUMB NAVIGATION & ACTIONS ── */}
       <nav
-        aria-label={isAr ? 'مسار التنقل التفصيلي' : 'Breadcrumb navigation'}
+        aria-label={isAr ? 'مسار التنقل التفصيلي' : L('Breadcrumb navigation')}
         className="hidden"
       >
         <div className="flex items-center gap-2 text-slate-400 font-medium">
@@ -423,7 +423,7 @@ export default function SectionLandingView({
             }`}
           >
             {isAr ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
-            <span>{isAr ? 'الرئيسية' : 'Home'}</span>
+            <span>{isAr ? 'الرئيسية' : L('Home')}</span>
           </button>
 
           <span className="text-slate-600">/</span>
@@ -447,10 +447,10 @@ export default function SectionLandingView({
               : 'bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:border-rafiqi-primary'
           }`}
           aria-expanded={activeHelpModal}
-          aria-label={isAr ? 'عرض إرشادات لوحة المفاتيح والإتاحة' : 'Toggle accessibility & keyboard tips'}
+          aria-label={isAr ? 'عرض إرشادات لوحة المفاتيح والإتاحة' : L('Toggle accessibility & keyboard tips')}
         >
           <HelpCircle className="w-3.5 h-3.5 text-rafiqi-primary" />
-          <span>{isAr ? 'إرشادات الاستخدام الميسر' : 'Accessibility Tips'}</span>
+          <span>{isAr ? 'إرشادات الاستخدام الميسر' : L('Accessibility Tips')}</span>
         </button>
       </nav>
 
@@ -464,7 +464,7 @@ export default function SectionLandingView({
             type="button"
             onClick={onNavigateBack}
             data-testid="section-back"
-            aria-label={isAr ? 'رجوع' : 'Back'}
+            aria-label={isAr ? 'رجوع' : L('Back')}
             className={`w-11 h-11 shrink-0 rounded-xl border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary ${
               isDarkMode ? 'bg-[#112C4F] border-[#24476F] text-white' : 'bg-white border-slate-300 text-slate-800'
             }`}
@@ -494,17 +494,17 @@ export default function SectionLandingView({
               <div className="w-10 h-10 rounded-xl bg-rafiqi-primary/20 border border-rafiqi-primary/30 flex items-center justify-center text-rafiqi-primary dark:text-[#4B9FE1] shrink-0 shadow-sm">
                 <SectionIcon className="w-6 h-6" />
               </div>
-              <span>{isAr ? section.titleAr : section.titleEn}</span>
+              <span>{isAr ? section.titleAr : L(section.titleEn)}</span>
             </h1>
 
             {/* Short Explanation */}
             <p className={`hidden text-sm sm:text-base leading-snug font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
-              {isAr ? section.shortExplanationAr : section.shortExplanationEn}
+              {isAr ? section.shortExplanationAr : L(section.shortExplanationEn)}
             </p>
 
             {/* Detailed Purpose */}
             <p className={`hidden text-xs leading-relaxed max-w-2xl line-clamp-2 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-              {isAr ? section.detailedPurposeAr : section.detailedPurposeEn}
+              {isAr ? section.detailedPurposeAr : L(section.detailedPurposeEn)}
             </p>
           </div>
 
@@ -513,7 +513,7 @@ export default function SectionLandingView({
             onClick={() => setActiveHelpModal(!activeHelpModal)}
             data-testid="section-info-button"
             aria-expanded={activeHelpModal}
-            aria-label={isAr ? 'معلومات وإرشادات عن هذا القسم' : 'Notes and tips about this section'}
+            aria-label={isAr ? 'معلومات وإرشادات عن هذا القسم' : L('Notes and tips about this section')}
             className={`w-11 h-11 shrink-0 rounded-full border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary text-rafiqi-primary ${
               isDarkMode ? 'bg-[#112C4F] border-[#24476F]' : 'bg-white border-slate-300'
             }`}
@@ -527,17 +527,17 @@ export default function SectionLandingView({
               <button
                 type="button"
                 onClick={() => onSelectFeature(primaryFeature)}
-                aria-label={`${isAr ? 'تشغيل الميزة الأساسية للقسم:' : 'Launch primary feature:'} ${
-                  isAr ? primaryFeature.titleAr : primaryFeature.titleEn
+                aria-label={`${isAr ? 'تشغيل الميزة الأساسية للقسم:' : L('Launch primary feature:')} ${
+                  isAr ? primaryFeature.titleAr : L(primaryFeature.titleEn)
                 }`}
                 className="w-full max-w-full min-h-[52px] px-4 py-2.5 rounded-xl bg-rafiqi-primary hover:bg-rafiqi-primary-dark active:scale-[0.98] text-white font-black text-sm shadow-lg shadow-rafiqi-primary/30 flex items-center justify-between gap-3 cursor-pointer transition-all duration-150 focus-visible:ring-4 focus-visible:ring-rafiqi-primary/50"
               >
                 <div className="text-start min-w-0">
                   <div className="text-xs font-medium text-blue-200 uppercase tracking-wider">
-                    {isAr ? 'الميزة الأساسية' : 'Primary Quick Start'}
+                    {isAr ? 'الميزة الأساسية' : L('Primary Quick Start')}
                   </div>
                   <div className="text-sm font-bold line-clamp-2 break-words">
-                    {isAr ? primaryFeature.titleAr : primaryFeature.titleEn}
+                    {isAr ? primaryFeature.titleAr : L(primaryFeature.titleEn)}
                   </div>
                 </div>
                 <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
@@ -550,7 +550,7 @@ export default function SectionLandingView({
               </button>
 
               <p className="hidden lg:block text-xs text-center text-slate-400">
-                {isAr ? 'اضغط Enter أو المس لتشغيل الأداة فوراً' : 'Press Enter or click to launch instantly'}
+                {isAr ? 'اضغط Enter أو المس لتشغيل الأداة فوراً' : L('Press Enter or click to launch instantly')}
               </p>
             </div>
           )}
@@ -561,7 +561,7 @@ export default function SectionLandingView({
       <div className={activeHelpModal ? 'space-y-3' : 'hidden'} data-testid="section-info-panel">
       {sectionId === 'see_understand' && (
         <section
-          aria-label={isAr ? 'تنبيه إرشادات الكاميرا الحية' : 'Live Camera Guidance'}
+          aria-label={isAr ? 'تنبيه إرشادات الكاميرا الحية' : L('Live Camera Guidance')}
           className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#102035] border-[#1769AA]/40 text-blue-100'
@@ -573,12 +573,12 @@ export default function SectionLandingView({
           </div>
           <div className="space-y-1 text-start">
             <h2 className="text-xs sm:text-sm font-bold">
-              {isAr ? 'المساعد البصري الذكي: توجيه فوري للمشهد بدون هلوسة' : 'AI Visual Companion: Real-Time Hallucination-Free Vision'}
+              {isAr ? 'المساعد البصري الذكي: توجيه فوري للمشهد بدون هلوسة' : L('AI Visual Companion: Real-Time Hallucination-Free Vision')}
             </h2>
             <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'يعتمد النظام على تحليل الإطارات الحية للكاميرا بنظام ساعة الاتجاهات لتحديد العوائق والمقتنيات بدقة وأمانة، مع الاعتراف الفوري عند عدم وضوح الرؤية.'
-                : 'Operates on live camera frame analysis with directional clock coordinates. Unambiguously reports optical ambiguity and low certainty without fabricating surroundings.'}
+                : L('Operates on live camera frame analysis with directional clock coordinates. Unambiguously reports optical ambiguity and low certainty without fabricating surroundings.')}
             </p>
           </div>
         </section>
@@ -586,7 +586,7 @@ export default function SectionLandingView({
 
       {sectionId === 'read_learn' && (
         <section
-          aria-label={isAr ? 'إجراءات التعلم السريعة' : 'Quick Learning Actions'}
+          aria-label={isAr ? 'إجراءات التعلم السريعة' : L('Quick Learning Actions')}
           className={`p-3 rounded-xl border ${
             isDarkMode ? 'bg-[#112C4F] border-[#24476F]' : 'bg-white border-slate-200'
           }`}
@@ -608,8 +608,8 @@ export default function SectionLandingView({
                 <Play className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-bold">{isAr ? 'استئناف القراءة' : 'Resume Reading'}</div>
-                <div className="text-xs text-slate-400">{isAr ? 'متابعة الكتاب الحالي' : 'Continue current book'}</div>
+                <div className="text-xs font-bold">{isAr ? 'استئناف القراءة' : L('Resume Reading')}</div>
+                <div className="text-xs text-slate-400">{isAr ? 'متابعة الكتاب الحالي' : L('Continue current book')}</div>
               </div>
             </button>
 
@@ -629,8 +629,8 @@ export default function SectionLandingView({
                 <Upload className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-bold">{isAr ? 'رفع محاضرة صوتية' : 'Upload Lecture'}</div>
-                <div className="text-xs text-slate-400">{isAr ? 'تفريغ وتلخيص ذكي' : 'Transcribe & summarize'}</div>
+                <div className="text-xs font-bold">{isAr ? 'رفع محاضرة صوتية' : L('Upload Lecture')}</div>
+                <div className="text-xs text-slate-400">{isAr ? 'تفريغ وتلخيص ذكي' : L('Transcribe & summarize')}</div>
               </div>
             </button>
 
@@ -650,8 +650,8 @@ export default function SectionLandingView({
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-bold">{isAr ? 'مواصلة التعلّم' : 'Continue Learning'}</div>
-                <div className="text-xs text-slate-400">{isAr ? 'معلم الذكاء الاصطناعي' : 'Adaptive AI tutor'}</div>
+                <div className="text-xs font-bold">{isAr ? 'مواصلة التعلّم' : L('Continue Learning')}</div>
+                <div className="text-xs text-slate-400">{isAr ? 'معلم الذكاء الاصطناعي' : L('Adaptive AI tutor')}</div>
               </div>
             </button>
           </div>
@@ -660,7 +660,7 @@ export default function SectionLandingView({
 
       {sectionId === 'work_create' && (
         <section
-          aria-label={isAr ? 'ضمان أمانة النص الأصلي' : 'Verbatim Source Text Preservation Guarantee'}
+          aria-label={isAr ? 'ضمان أمانة النص الأصلي' : L('Verbatim Source Text Preservation Guarantee')}
           className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#0F231D] border-emerald-500/40 text-emerald-100'
@@ -672,12 +672,12 @@ export default function SectionLandingView({
           </div>
           <div className="space-y-1 text-start">
             <h2 className="text-sm font-bold">
-              {isAr ? 'ضمان أمانة النص الأصلي والتنسيق الحرفي' : 'Source Text Preservation Guarantee'}
+              {isAr ? 'ضمان أمانة النص الأصلي والتنسيق الحرفي' : L('Source Text Preservation Guarantee')}
             </h2>
             <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'في استوديو تنسيق الكتب والمستندات: عند طلب التنسيق فقط، يلتزم رفيقي بالحفاظ على النص الأصلي حرفياً دون أي تعديل أو إعادة صياغة أو حذف.'
-                : 'In Word Book Formatting Studio: when formatting only is requested, Rafiqi guarantees the exact source text is preserved verbatim without alteration or omission.'}
+                : L('In Word Book Formatting Studio: when formatting only is requested, Rafiqi guarantees the exact source text is preserved verbatim without alteration or omission.')}
             </p>
           </div>
         </section>
@@ -685,7 +685,7 @@ export default function SectionLandingView({
 
       {sectionId === 'move_explore' && (
         <section
-          aria-label={isAr ? 'تنبيه أمان الحركة والملاحة' : 'Critical Mobility and Road Safety Notice'}
+          aria-label={isAr ? 'تنبيه أمان الحركة والملاحة' : L('Critical Mobility and Road Safety Notice')}
           className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#29160F] border-amber-500/40 text-amber-100'
@@ -697,12 +697,12 @@ export default function SectionLandingView({
           </div>
           <div className="space-y-1 text-start">
             <h2 className="text-sm font-bold">
-              {isAr ? 'تنبيه أمان وإخلاء مسؤولية الحركة في الطرقات' : 'Road Safety Notice: Does Not Replace Mobility Aids'}
+              {isAr ? 'تنبيه أمان وإخلاء مسؤولية الحركة في الطرقات' : L('Road Safety Notice: Does Not Replace Mobility Aids')}
             </h2>
             <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'أدوات الاستكشاف تقدم توجيهاً نوعياً للمحيط والمداخل والمعالم، ولكنها لا تضمن السلامة المطلقة في الطرقات ولا تحل بديلاً عن العصا البيضاء أو كلب الإرشاد أو الانتباه الشخصي.'
-                : 'Rafiqi orientation tools provide qualitative spatial cues and entrance descriptions, but never guarantee road safety or replace a white cane, guide dog, or physical mobility aids.'}
+                : L('Rafiqi orientation tools provide qualitative spatial cues and entrance descriptions, but never guarantee road safety or replace a white cane, guide dog, or physical mobility aids.')}
             </p>
           </div>
         </section>
@@ -710,7 +710,7 @@ export default function SectionLandingView({
 
       {sectionId === 'communicate' && (
         <section
-          aria-label={isAr ? 'حدود لغة الإشارة المعتمدة' : 'Verified Sign Language Boundary'}
+          aria-label={isAr ? 'حدود لغة الإشارة المعتمدة' : L('Verified Sign Language Boundary')}
           className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#151D2A] border-[#24476F] text-slate-200'
@@ -722,12 +722,12 @@ export default function SectionLandingView({
           </div>
           <div className="space-y-1 text-start">
             <h2 className="text-sm font-bold">
-              {isAr ? 'منظومة السمع والتعبير: اعتماد القاموس الإشاري الموثق' : 'Verified Egyptian Sign Language & Honest Validation Boundary'}
+              {isAr ? 'منظومة السمع والتعبير: اعتماد القاموس الإشاري الموثق' : L('Verified Egyptian Sign Language & Honest Validation Boundary')}
             </h2>
             <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'استوديو لغة الإشارة يعتمد على القاموس المنهجي المعتمد. لا ندعي اكتمال الترجمة الإشارية الحرة غير الموثقة، ونوضح بدقة الحدود التقنية الحالية.'
-                : 'Sign Language features are powered by verified educational dictionaries. We do not claim complete or unvalidated open translation without verified data provenance.'}
+                : L('Sign Language features are powered by verified educational dictionaries. We do not claim complete or unvalidated open translation without verified data provenance.')}
             </p>
           </div>
         </section>
@@ -735,7 +735,7 @@ export default function SectionLandingView({
 
       {sectionId === 'personalize' && (
         <section
-          aria-label={isAr ? 'إتاحة شاملة دون شروط إفصاح' : 'Universal Accessibility Guarantee'}
+          aria-label={isAr ? 'إتاحة شاملة دون شروط إفصاح' : L('Universal Accessibility Guarantee')}
           className={`p-3 rounded-xl border flex items-start gap-3 ${
             isDarkMode
               ? 'bg-[#142338] border-rafiqi-primary/40 text-blue-100'
@@ -747,12 +747,12 @@ export default function SectionLandingView({
           </div>
           <div className="space-y-1 text-start">
             <h2 className="text-sm font-bold">
-              {isAr ? 'إتاحة شاملة ومفتوحة لجميع المستخدمين بدون إفصاح طبي' : 'Universal Accessibility: No Disability Disclosure Required'}
+              {isAr ? 'إتاحة شاملة ومفتوحة لجميع المستخدمين بدون إفصاح طبي' : L('Universal Accessibility: No Disability Disclosure Required')}
             </h2>
             <p className="text-xs leading-snug opacity-90 line-clamp-2">
               {isAr
                 ? 'جميع أدوات التيسير وجواز الإتاحة متاحة لك بحرية تامة دون اشتراط تقديم أي تقارير طبية أو تصنيف إعاقة مسبق.'
-                : 'All accessibility tools and customization features are freely accessible to every user without requiring any medical disclosure or disability categorization.'}
+                : L('All accessibility tools and customization features are freely accessible to every user without requiring any medical disclosure or disability categorization.')}
             </p>
           </div>
         </section>
@@ -761,11 +761,11 @@ export default function SectionLandingView({
       </div>
 
       {/* ── 2. FEATURE GROUPS WITH DISTINCTIVE CLUSTERS ── */}
-      <section className="space-y-3" aria-label={isAr ? 'مجموعات ميزات القسم' : 'Feature Groups'}>
+      <section className="space-y-3" aria-label={isAr ? 'مجموعات ميزات القسم' : L('Feature Groups')}>
         {useTabs && (
           <div
             role="tablist"
-            aria-label={isAr ? 'مجموعات الأدوات' : 'Tool groups'}
+            aria-label={isAr ? 'مجموعات الأدوات' : L('Tool groups')}
             data-testid="section-group-tabs"
             className="flex flex-wrap gap-2"
           >
@@ -788,7 +788,7 @@ export default function SectionLandingView({
                   }`}
                 >
                   <TabIcon className="w-4 h-4 shrink-0" aria-hidden="true" />
-                  <span className="line-clamp-2 break-words">{isAr ? g.titleAr : g.titleEn}</span>
+                  <span className="line-clamp-2 break-words">{isAr ? g.titleAr : L(g.titleEn)}</span>
                   <span className="opacity-70 text-xs shrink-0">{g.count}</span>
                 </button>
               );
@@ -812,10 +812,10 @@ export default function SectionLandingView({
                   </div>
                   <div>
                     <h2 className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-                      {isAr ? (GROUP_SHORT_NAMES[group.id]?.[1] ?? group.titleAr) : (GROUP_SHORT_NAMES[group.id]?.[0] ?? group.titleEn)}
+                      {isAr ? (GROUP_SHORT_NAMES[group.id]?.[1] ?? group.titleAr) : L(GROUP_SHORT_NAMES[group.id]?.[0] ?? group.titleEn)}
                     </h2>
                     <p className={`hidden text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                      {isAr ? group.descAr : group.descEn}
+                      {isAr ? group.descAr : L(group.descEn)}
                     </p>
                   </div>
                 </div>
@@ -843,8 +843,8 @@ export default function SectionLandingView({
                           onSelectFeature(feature);
                         }
                       }}
-                      aria-label={`${isAr ? feature.titleAr : feature.titleEn} — ${
-                        isAr ? feature.statusLabelAr : feature.statusLabelEn
+                      aria-label={`${isAr ? feature.titleAr : L(feature.titleEn)} — ${
+                        isAr ? feature.statusLabelAr : L(feature.statusLabelEn)
                       }`}
                       className={`group relative flex flex-col items-center justify-center text-center min-h-[96px] p-3 rounded-xl border min-w-0 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-primary ${
                         feature.id === primaryFeature?.id
@@ -876,7 +876,7 @@ export default function SectionLandingView({
                             }`}
                           >
                             {isReady && <CheckCircle2 className="w-3 h-3" />}
-                            <span>{isAr ? feature.statusLabelAr : feature.statusLabelEn}</span>
+                            <span>{isAr ? feature.statusLabelAr : L(feature.statusLabelEn)}</span>
                           </span>
                         </div>
 
@@ -890,7 +890,7 @@ export default function SectionLandingView({
                               : 'text-slate-900 group-hover:text-rafiqi-primary'
                           }`}
                         >
-                          {isAr ? (FEATURE_SHORT_NAMES[feature.id]?.[1] ?? feature.titleAr) : (FEATURE_SHORT_NAMES[feature.id]?.[0] ?? feature.titleEn)}
+                          {isAr ? (FEATURE_SHORT_NAMES[feature.id]?.[1] ?? feature.titleAr) : L(FEATURE_SHORT_NAMES[feature.id]?.[0] ?? feature.titleEn)}
                         </h3>
 
                         {/* Description */}
@@ -899,7 +899,7 @@ export default function SectionLandingView({
                             isDarkMode ? 'text-slate-400' : 'text-slate-600'
                           }`}
                         >
-                          {isAr ? feature.descAr : feature.descEn}
+                          {isAr ? feature.descAr : L(feature.descEn)}
                         </p>
 
                         {/* Tags */}
@@ -921,7 +921,7 @@ export default function SectionLandingView({
 
                       {/* Bottom Action Hint */}
                       <div className="hidden pt-4 mt-4 border-t border-slate-200 dark:border-[#24476F] items-center justify-between text-xs font-bold text-rafiqi-primary dark:text-[#4B9FE1]">
-                        <span>{isAr ? 'فتح الأداة مباشرة' : 'Launch Feature'}</span>
+                        <span>{isAr ? 'فتح الأداة مباشرة' : L('Launch Feature')}</span>
                         <ChevronRight
                           className={`w-4 h-4 transition-transform ${
                             isAr ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'
@@ -948,7 +948,7 @@ export default function SectionLandingView({
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-rafiqi-primary dark:text-[#4B9FE1]" />
             <h2 id="recent-activity-heading" className="text-sm font-bold">
-              {isAr ? 'النشاط الأخير في هذا القسم' : 'Recent Section Activity'}
+              {isAr ? 'النشاط الأخير في هذا القسم' : L('Recent Section Activity')}
             </h2>
           </div>
           <span className="text-xs text-slate-400">
@@ -958,7 +958,7 @@ export default function SectionLandingView({
                 : `${recentItems.length} recorded items`
               : isAr
               ? 'سجل نظيف'
-              : 'No activity recorded'}
+              : L('No activity recorded')}
           </span>
         </div>
 
@@ -982,27 +982,27 @@ export default function SectionLandingView({
               {sectionId === 'see_understand' &&
                 (isAr
                   ? 'لا توجد عمليات فحص بصري سابقة. ابدأ بتوجيه الكاميرا نحو أي مشهد أو مستند للبدء.'
-                  : 'No visual scans yet. Point your camera at any object or printed text to get started.')}
+                  : L('No visual scans yet. Point your camera at any object or printed text to get started.'))}
               {sectionId === 'read_learn' &&
                 (isAr
                   ? 'لا توجد كتب أو تسجيلات مفتوحة حالياً. ارفع محاضرة صوتية أو اختر كتاباً رقمياً للبدء.'
-                  : 'No active documents. Upload an audio lecture or open an educational textbook to begin.')}
+                  : L('No active documents. Upload an audio lecture or open an educational textbook to begin.'))}
               {sectionId === 'work_create' &&
                 (isAr
                   ? 'لا توجد مستندات جاري العمل عليها. ابدأ بإملاء مستند جديد أو فحص تنسيق ملف وورد.'
-                  : 'No working documents. Start voice dictation or inspect Word book formatting now.')}
+                  : L('No working documents. Start voice dictation or inspect Word book formatting now.'))}
               {sectionId === 'move_explore' &&
                 (isAr
                   ? 'لا توجد أماكن أو معالم مسجلة مؤخراً. استكشف دليل الأماكن الميسرة أو ابدأ استكشاف المحيط.'
-                  : 'No recent places explored. Browse verified accessible amenities or start room orientation.')}
+                  : L('No recent places explored. Browse verified accessible amenities or start room orientation.'))}
               {sectionId === 'communicate' &&
                 (isAr
                   ? 'لا توجد محادثات نشطة. ابدأ جلسة تفريغ فوري أو استخدم لوحة التواصل الرمزي AAC.'
-                  : 'No recent messages. Start a live caption session or open an AAC symbol board.')}
+                  : L('No recent messages. Start a live caption session or open an AAC symbol board.'))}
               {sectionId === 'personalize' &&
                 (isAr
                   ? 'إعدادات التيسير وجواز الوصول محدثة وتعمل بكفاءة. يمكنك تخصيص نبرة الصوت والخط في أي وقت.'
-                  : 'Preferences are up to date. You can fine-tune speech rate, contrast, and shortcuts anytime.')}
+                  : L('Preferences are up to date. You can fine-tune speech rate, contrast, and shortcuts anytime.'))}
             </p>
             {primaryFeature && (
               <button
@@ -1010,7 +1010,7 @@ export default function SectionLandingView({
                 onClick={() => onSelectFeature(primaryFeature)}
                 className="px-4 py-2 bg-rafiqi-primary/15 hover:bg-rafiqi-primary/25 text-rafiqi-primary dark:text-[#4B9FE1] rounded-xl text-xs font-bold border border-rafiqi-primary/30 transition-all cursor-pointer"
               >
-                {isAr ? 'بدء النشاط الأول الآن' : 'Start First Session'}
+                {isAr ? 'بدء النشاط الأول الآن' : L('Start First Session')}
               </button>
             )}
           </div>
@@ -1021,7 +1021,7 @@ export default function SectionLandingView({
       {activeHelpModal && (
       <section
         data-testid="section-quick-tips"
-        aria-label={isAr ? 'إرشادات الوصول السريع والتنقل' : 'Accessibility and Keyboard Tips'}
+        aria-label={isAr ? 'إرشادات الوصول السريع والتنقل' : L('Accessibility and Keyboard Tips')}
         className={`p-5 rounded-2xl border space-y-2.5 transition-all ${
           isDarkMode ? 'bg-[#112C4F] border-[#24476F]' : 'bg-white border-slate-200'
         }`}
@@ -1029,14 +1029,14 @@ export default function SectionLandingView({
         <div className="flex items-center gap-2 text-rafiqi-primary dark:text-[#4B9FE1]">
           <Info className="w-4 h-4 shrink-0" />
           <h3 className={`text-xs font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-            {isAr ? 'إرشادات الوصول السريع والتنقل الميسر' : 'Accessibility & Keyboard Shortcuts'}
+            {isAr ? 'إرشادات الوصول السريع والتنقل الميسر' : L('Accessibility & Keyboard Shortcuts')}
           </h3>
         </div>
 
         <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
           {isAr
             ? 'يمكنك التنقل بين هذه الأدوات باستخدام لوحة المفاتيح عبر زر Tab والتنقل العكسي بـ Shift+Tab والضغط على Enter لتشغيل الأداة مباشرة. تدعم جميع الأدوات التوجيه الصوتي وتكبير الخط وقارئات الشاشة (NVDA / TalkBack / VoiceOver).'
-            : 'Navigate between features using Tab, reverse with Shift+Tab, and press Enter to launch. All tools support screen readers (NVDA, TalkBack, VoiceOver), spoken prompts, high-contrast themes, and dynamic font scaling.'}
+            : L('Navigate between features using Tab, reverse with Shift+Tab, and press Enter to launch. All tools support screen readers (NVDA, TalkBack, VoiceOver), spoken prompts, high-contrast themes, and dynamic font scaling.')}
         </p>
       </section>
       )}

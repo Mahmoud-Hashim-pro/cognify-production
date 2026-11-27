@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { L, isFrenchActive } from '../lib/translations';
 import { parseVoiceCommand, normalizeArabic, VoiceIntent } from '../lib/voiceCommands';
 import { speak, cancelSpeech } from '../lib/tts';
 import { generateAdaptiveResponse } from '../services/gemini';
@@ -44,7 +45,7 @@ export function useGlobalVoiceControl({
   const supported = typeof window !== 'undefined' && !!getSpeechRecognitionCtor();
 
   const speakShort = useCallback((ar: string, en: string) => {
-    speak(isArabicRef.current ? ar : en, isArabicRef.current ? 'Arabic' : 'English', {
+    speak(isArabicRef.current ? ar : L(en), isArabicRef.current ? 'Arabic' : 'English', {
       rate: speechRateRef.current,
     });
   }, []);
@@ -137,7 +138,7 @@ export function useGlobalVoiceControl({
     cancelSpeech();
     intentionalStopRef.current = false;
     const rec = new Ctor();
-    rec.lang = isArabicRef.current ? 'ar-EG' : 'en-US';
+    rec.lang = isArabicRef.current ? 'ar-EG' : isFrenchActive() ? 'fr-FR' : 'en-US';
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     rec.continuous = false;

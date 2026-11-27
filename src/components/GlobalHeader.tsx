@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { ProductSectionId, getProductSection, PRODUCT_SECTIONS } from '../lib/sections';
-import { isArabicLocale, localize } from '../lib/translations';
+import { isArabicLocale, localize, L } from '../lib/translations';
 import { ThemeSelector, ThemeMode } from './ui/ThemeSelector';
 import { logout } from '../lib/firebase';
 
@@ -55,7 +55,8 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   onLogout,
 }) => {
   const isAr = isArabicLocale(profile.language);
-  const t = (en: string, ar: string) => (isAr ? ar : en);
+  const isFr = profile.language === 'French';
+  const t = (en: string, ar: string) => (isAr ? ar : L(en));
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -78,8 +79,8 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         if (score > 0) {
           out.push({
             id: f.id,
-            title: isAr ? f.titleAr : f.titleEn,
-            section: isAr ? section.titleAr : section.titleEn,
+            title: isAr ? f.titleAr : L(f.titleEn),
+            section: isAr ? section.titleAr : L(section.titleEn),
             targetView: f.targetView,
             targetTab: f.targetTab || f.targetTool,
             score,
@@ -402,7 +403,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                     : isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'
                 }`}
               >
-                <span className="truncate">{sec.numericOrder}. {isAr ? sec.titleAr : sec.titleEn}</span>
+                <span className="truncate">{sec.numericOrder}. {isAr ? sec.titleAr : L(sec.titleEn)}</span>
                 <span className="text-xs opacity-60 shrink-0">{sec.features.length}</span>
               </button>
             ))}
@@ -540,14 +541,26 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           <button
             type="button"
             onClick={() => handleLanguageChange('English')}
-            aria-pressed={!isAr}
+            aria-pressed={!isAr && !isFr}
             className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
-              !isAr
+              !isAr && !isFr
                 ? 'bg-[#1769AA] text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             EN
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLanguageChange('French')}
+            aria-pressed={isFr}
+            className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+              isFr
+                ? 'bg-[#1769AA] text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            FR
           </button>
         </div>
 
@@ -659,6 +672,24 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1]">
                   {profile.accessibilityMode || t('General Access', 'وصول شامل')}
                 </span>
+              </div>
+
+              {/* Language (phone: the header switcher is hidden) */}
+              <div role="group" aria-label={t('Language Selector', 'اختيار اللغة')} className="sm:hidden flex items-center gap-1 px-2 pb-2 border-b border-slate-200 dark:border-[#24476F] mb-1">
+                {([['Arabic', 'عربي'], ['English', 'EN'], ['French', 'FR']] as const).map(([code, label]) => {
+                  const active = code === 'Arabic' ? isAr : code === 'French' ? isFr : !isAr && !isFr;
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => { handleLanguageChange(code); setIsProfileMenuOpen(false); }}
+                      aria-pressed={active}
+                      className={`flex-1 min-h-[40px] rounded-xl text-xs font-bold cursor-pointer ${active ? 'bg-[#1769AA] text-white' : 'text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#24476F]'}`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Menu items */}

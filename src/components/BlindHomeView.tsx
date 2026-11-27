@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { L } from '../lib/translations';
 import { Camera, BookOpen, Footprints, Siren } from 'lucide-react';
 import { UserProfile } from '../types';
 import { AppView } from '../lib/access';
@@ -108,12 +109,12 @@ const BlindHomeView: React.FC<BlindHomeViewProps> = ({ profile, isArabic, onNavi
       <div className="mx-auto w-full max-w-xl px-5 py-8 flex flex-col gap-6 min-h-full">
         <header className="text-center space-y-2">
           <h1 className="text-4xl font-black tracking-tight">
-            {isArabic ? 'رفيقي معاك' : 'Rafiqi is with you'}
+            {isArabic ? 'رفيقي معاك' : L('Rafiqi is with you')}
           </h1>
           <p className="text-xl text-slate-300" aria-live="polite">
             {isArabic
               ? 'دوس مطولا على زر الميكروفون الأخضر تحت واتكلم، أو اختار زر من الأربعة.'
-              : 'Press and hold the green microphone button below and talk, or pick one of the four buttons.'}
+              : L('Press and hold the green microphone button below and talk, or pick one of the four buttons.')}
           </p>
         </header>
 
@@ -123,13 +124,13 @@ const BlindHomeView: React.FC<BlindHomeViewProps> = ({ profile, isArabic, onNavi
               key={b.key}
               type="button"
               onClick={b.onClick}
-              aria-label={`${isArabic ? b.labelAr : b.labelEn}. ${isArabic ? b.hintAr : b.hintEn}`}
+              aria-label={`${isArabic ? b.labelAr : L(b.labelEn)}. ${isArabic ? b.hintAr : L(b.hintEn)}`}
               className={`${b.className} w-full min-h-[120px] rounded-3xl text-white flex items-center gap-5 px-6 py-5 shadow-xl active:scale-[0.98] transition focus:outline-none focus-visible:ring-8`}
             >
               {b.icon}
               <span className="flex flex-col items-start text-start">
-                <span className="text-3xl font-black leading-tight">{isArabic ? b.labelAr : b.labelEn}</span>
-                <span className="text-lg text-white/85">{isArabic ? b.hintAr : b.hintEn}</span>
+                <span className="text-3xl font-black leading-tight">{isArabic ? b.labelAr : L(b.labelEn)}</span>
+                <span className="text-lg text-white/85">{isArabic ? b.hintAr : L(b.hintEn)}</span>
               </span>
             </button>
           ))}
@@ -138,7 +139,7 @@ const BlindHomeView: React.FC<BlindHomeViewProps> = ({ profile, isArabic, onNavi
         <p className="text-center text-lg text-slate-400">
           {isArabic
             ? 'وللطوارئ كمان: هز الموبايل بقوة، أو دوس على زر الميكروفون 3 مرات بسرعة، أو قول ساعدوني.'
-            : 'For emergencies you can also: shake the phone hard, triple-tap the microphone button, or say help me.'}
+            : L('For emergencies you can also: shake the phone hard, triple-tap the microphone button, or say help me.')}
         </p>
       </div>
     </div>

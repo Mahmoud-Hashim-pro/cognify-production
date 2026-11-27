@@ -17,7 +17,7 @@ import { Loader2, Settings, Layers, Menu, Moon, Sun, AlertCircle, RefreshCw, Mai
 import { toast, ToastContainer } from "./components/Toast";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
-import { isRTL, isArabicLocale, getTranslation, localize } from "./lib/translations";
+import { isRTL, isArabicLocale, getTranslation, localize, setActiveUiLanguage } from "./lib/translations";
 import { applySeoMetadata } from "./lib/seoEngine";
 import { canAccessSection } from "./lib/academics";
 import { canAccessView, homeViewFor, isAccessibilityUser, AppView } from "./lib/access";
@@ -293,6 +293,7 @@ export default function App() {
     ? { ...profile, memory: memoryState || undefined }
     : null;
 
+  setActiveUiLanguage(profile?.language);
   const direction = isRTL(profile?.language) ? 'rtl' : 'ltr';
 
   // Keep the document root's dir/lang in sync so screen readers pronounce correctly

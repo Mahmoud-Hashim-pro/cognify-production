@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { L } from '../lib/translations';
 import { createPortal } from 'react-dom';
 import HeaderMenu from './HeaderMenu';
 import { ProductSectionId, SectionFeatureItem, getProductSection, getSectionIconComponent } from '../lib/sections';
@@ -59,7 +60,7 @@ export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, 
     const items = buttons.map((f) => {
       const Icon = getSectionIconComponent(f.iconName);
       const short = FEATURE_SHORT_NAMES[f.id];
-      const label = short ? (isAr ? short[1] : short[0]) : (isAr ? f.titleAr : f.titleEn);
+      const label = short ? (isAr ? short[1] : L(short[0])) : (isAr ? f.titleAr : L(f.titleEn));
       return { key: f.id, label, icon: <Icon className="w-4 h-4 shrink-0" />, active: isActive(f), onSelect: () => onSelect(f) };
     });
     const current = items.find((i) => i.active);
@@ -67,7 +68,7 @@ export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, 
       <HeaderMenu
         testId="section-tool-bar"
         items={items}
-        label={current?.label || (isAr ? section.titleAr : section.titleEn)}
+        label={current?.label || (isAr ? section.titleAr : L(section.titleEn))}
         ariaLabel={isAr ? `أدوات ${section.titleAr}` : `${section.titleEn} tools`}
         isDarkMode={isDarkMode}
         align="start"
@@ -77,7 +78,7 @@ export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, 
   }
   return (
     <nav
-      aria-label={isAr ? section.titleAr : section.titleEn}
+      aria-label={isAr ? section.titleAr : L(section.titleEn)}
       data-testid="section-tool-bar"
       className={`shrink-0 w-full border-b px-3 py-2 ${isDarkMode ? 'bg-[#0A2342] border-[#24476F]' : 'bg-[#F5F9FD] border-slate-200'}`}
     >
@@ -85,7 +86,7 @@ export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, 
         {buttons.map((f) => {
           const Icon = getSectionIconComponent(f.iconName);
           const short = FEATURE_SHORT_NAMES[f.id];
-          const label = short ? (isAr ? short[1] : short[0]) : (isAr ? f.titleAr : f.titleEn);
+          const label = short ? (isAr ? short[1] : L(short[0])) : (isAr ? f.titleAr : L(f.titleEn));
           const active = isActive(f);
           return (
             <button
@@ -93,7 +94,7 @@ export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, 
               type="button"
               role="tab"
               aria-selected={active}
-              aria-label={isAr ? f.titleAr : f.titleEn}
+              aria-label={isAr ? f.titleAr : L(f.titleEn)}
               onClick={() => onSelect(f)}
               className={`shrink-0 min-h-[44px] px-3.5 rounded-xl border text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-colors ${
                 active

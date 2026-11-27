@@ -11,7 +11,7 @@ import {
   getSectionIconComponent,
   SectionFeatureItem 
 } from '../lib/sections';
-import { isArabicLocale, localize } from '../lib/translations';
+import { isArabicLocale, localize, L, isFrenchActive } from '../lib/translations';
 import { 
   Eye, 
   BookOpen, 
@@ -57,21 +57,21 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   isDarkMode,
 }) => {
   const isAr = isArabicLocale(profile.language);
-  const t = (en: string, ar: string) => (isAr ? ar : en);
+  const t = (en: string, ar: string) => (isAr ? ar : L(en));
 
   const [searchQuery, setSearchQuery] = useState('');
 
   // 1. Time-of-day personalized greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    const name = profile.name || profile.email?.split('@')[0] || (isAr ? 'صديقي' : 'Friend');
+    const name = profile.name || profile.email?.split('@')[0] || (isAr ? 'صديقي' : isFrenchActive() ? 'ami' : 'Friend');
     if (hour < 12) {
-      return isAr ? `صباح الخير، ${name}` : `Good morning, ${name}`;
+      return isAr ? `صباح الخير، ${name}` : isFrenchActive() ? `Bonjour, ${name}` : `Good morning, ${name}`;
     }
     if (hour < 18) {
-      return isAr ? `مساء الخير، ${name}` : `Good afternoon, ${name}`;
+      return isAr ? `مساء الخير، ${name}` : isFrenchActive() ? `Bon après-midi, ${name}` : `Good afternoon, ${name}`;
     }
-    return isAr ? `مساء الخير، ${name}` : `Good evening, ${name}`;
+    return isAr ? `مساء الخير، ${name}` : isFrenchActive() ? `Bonsoir, ${name}` : `Good evening, ${name}`;
   }, [profile.name, profile.email, isAr]);
 
   // 2. Read actual recent reading history (Zero fake data)
@@ -175,7 +175,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     }> = [];
 
     PRODUCT_SECTIONS.forEach((sec) => {
-      const secTitle = isAr ? sec.titleAr : sec.titleEn;
+      const secTitle = isAr ? sec.titleAr : L(sec.titleEn);
       const secMatch = 
         sec.titleEn.toLowerCase().includes(q) ||
         sec.titleAr.toLowerCase().includes(q) ||
@@ -188,7 +188,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           sectionId: sec.id,
           sectionTitle: secTitle,
           title: secTitle,
-          desc: isAr ? sec.shortExplanationAr : sec.shortExplanationEn,
+          desc: isAr ? sec.shortExplanationAr : L(sec.shortExplanationEn),
           iconName: sec.iconName,
         });
       }
@@ -202,8 +202,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             type: 'feature',
             sectionId: sec.id,
             sectionTitle: secTitle,
-            title: isAr ? feat.titleAr : feat.titleEn,
-            desc: isAr ? feat.descAr : feat.descEn,
+            title: isAr ? feat.titleAr : L(feat.titleEn),
+            desc: isAr ? feat.descAr : L(feat.descEn),
             iconName: feat.iconName,
             targetTab: feat.targetTab,
             targetView: feat.targetView,
@@ -583,7 +583,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                     ? 'bg-[#112C4F] border-[#24476F] hover:border-[#1769AA]' 
                     : 'bg-white border-slate-200 hover:border-[#1769AA]'
                 } hover:-translate-y-0.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] min-h-[64px]`}
-                aria-label={isAr ? sec.titleAr : sec.titleEn}
+                aria-label={isAr ? sec.titleAr : L(sec.titleEn)}
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -591,7 +591,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       {t(`Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
                     </span>
                     <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-semibold">
-                      {t(`${sec.features.length} tools`, `${sec.features.length} أدوات`)}
+                      {(isFrenchActive() && !isAr ? `${sec.features.length} outils` : t(`${sec.features.length} tools`, `${sec.features.length} أدوات`))}
                     </span>
                   </div>
 
@@ -601,16 +601,16 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors line-clamp-2 break-words">
-                        {isAr ? sec.titleAr : sec.titleEn}
+                        {isAr ? sec.titleAr : L(sec.titleEn)}
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-[#94A3B8] hidden">
-                        {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
+                        {isAr ? sec.shortExplanationAr : L(sec.shortExplanationEn)}
                       </p>
                     </div>
                   </div>
 
                   <p className="hidden text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed line-clamp-2">
-                    {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
+                    {isAr ? sec.shortExplanationAr : L(sec.shortExplanationEn)}
                   </p>
                 </div>
 
