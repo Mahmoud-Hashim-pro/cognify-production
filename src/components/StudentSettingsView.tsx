@@ -2020,6 +2020,7 @@ export default function StudentSettingsView({
           )}
         </div>
 
+        <p className="text-center text-xs text-slate-500 dark:text-[#94A3B8] select-text" data-testid="build-stamp">Build {typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : "local"}</p>
       </div>
 
       {/* Confirmation Modal for Resetting Defaults */}
