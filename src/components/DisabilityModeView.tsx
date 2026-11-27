@@ -1028,7 +1028,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               <span className="text-lg font-black tracking-tight text-slate-900 dark:text-[#F8FAFC] leading-none group-hover:text-[#1769AA] group-hover:dark:text-[#4B9FE1] transition-colors">
                 Rafiqi
               </span>
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1] border border-[#1769AA]/50 uppercase tracking-wider">
+              <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1] border border-[#1769AA]/50 uppercase tracking-wider">
                 A11y
               </span>
             </div>
@@ -1066,7 +1066,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     handleSelectTab(suite.id);
                   }
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                   isSelected
                     ? 'bg-[#1769AA] text-white shadow-md font-black'
                     : 'text-slate-500 dark:text-[#94A3B8] hover:text-white hover:bg-white hover:dark:bg-[#131E2E]'
@@ -1181,7 +1181,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
             {/* The Six Official Product Sections */}
             <div className="pt-3 pb-1 px-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
                 {isAr ? 'الأقسام الرسمية (٦)' : 'Official Sections (6)'}
               </p>
             </div>
@@ -1216,7 +1216,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
             {/* Essential Tools & Settings */}
             <div className="pt-3 pb-1 px-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
                 {isAr ? 'أدوات وإعدادات' : 'Tools & Settings'}
               </p>
             </div>
@@ -1277,7 +1277,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   <Database className="w-4 h-4" />
                   <span>{localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
                 </div>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                <span className={`text-xs px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
                   activeTab === 'admin' ? 'bg-[#F5F9FD] dark:bg-[#061A33] text-[#1769AA] dark:text-[#4B9FE1]' : 'bg-[#1769AA]/20 text-[#1769AA] dark:text-[#4B9FE1]'
                 }`}>
                   {localize(profile.language, 'Admin', 'مشرف')}
@@ -1296,7 +1296,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 {localize(profile.language, 'Accessibility First', 'الإتاحة أولاً')}
               </h4>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">
               {localize(
                 profile.language,
                 'Rafiqi supports comprehensive assistive technologies with full accessibility for all.',
@@ -1313,7 +1313,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC] truncate">{profile.name || 'User'}</p>
-                <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] truncate">{profile.email || ''}</p>
+                <p className="text-xs text-slate-500 dark:text-[#94A3B8] truncate">{profile.email || ''}</p>
               </div>
             </div>
             <button
@@ -1410,7 +1410,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                     {/* The Six Official Product Sections */}
                     <div className="pt-3 pb-1 px-3">
-                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
+                      <p className="text-xs font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
                         {isAr ? 'الأقسام الرسمية (٦)' : 'Official Sections (6)'}
                       </p>
                     </div>
@@ -1448,7 +1448,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                     {/* Essential Tools & Settings */}
                     <div className="pt-3 pb-1 px-3">
-                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
+                      <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
                         {isAr ? 'أدوات وإعدادات' : 'Tools & Settings'}
                       </p>
                     </div>
@@ -1512,7 +1512,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           <Database className="w-4 h-4" />
                           <span>{localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
                         </div>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                        <span className={`text-xs px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
                           activeTab === 'admin' ? 'bg-[#F5F9FD] dark:bg-[#061A33] text-[#1769AA] dark:text-[#4B9FE1]' : 'bg-[#1769AA]/20 text-[#1769AA] dark:text-[#4B9FE1]'
                         }`}>
                           {localize(profile.language, 'Admin', 'مشرف')}
@@ -1530,7 +1530,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       {localize(profile.language, 'Accessibility First', 'الإتاحة أولاً')}
                     </h4>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-relaxed">
+                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">
                     {localize(
                       profile.language,
                       'Designed for every learner with high contrast and assistive navigation.',
@@ -1547,7 +1547,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC] truncate">{profile.name || 'User'}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] truncate">{profile.email || ''}</p>
+                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] truncate">{profile.email || ''}</p>
                     </div>
                   </div>
                   <button
@@ -1747,10 +1747,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           >
                             <div className="space-y-2.5">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-[#131E2E] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
+                                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-[#131E2E] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
                                   {localize(profile.language, `Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
                                 </span>
-                                <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] font-semibold">
+                                <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-semibold">
                                   {localize(profile.language, `${sec.features.length} tools`, `${sec.features.length} أدوات`)}
                                 </span>
                               </div>
@@ -1799,7 +1799,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             className="p-4 rounded-2xl bg-slate-100 dark:bg-[#1A283D] border border-slate-200 dark:border-[#22354E] hover:border-[#1769AA]/60 transition-all flex flex-col justify-between gap-3 text-start shadow-sm"
                           >
                             <div>
-                              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-[#94A3B8] mb-1">
+                              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
                                 <span className="px-2 py-0.5 rounded bg-white dark:bg-[#131E2E] text-[#1769AA] dark:text-[#4B9FE1] font-bold border border-slate-200 dark:border-[#22354E]">
                                   {item.fileType.toUpperCase()}
                                 </span>
@@ -1837,7 +1837,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             className="p-4 rounded-2xl bg-slate-100 dark:bg-[#1A283D] border border-slate-200 dark:border-[#22354E] hover:border-[#1769AA]/60 transition-all flex flex-col justify-between gap-3 text-start shadow-sm"
                           >
                             <div>
-                              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-[#94A3B8] mb-1">
+                              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
                                 <span className="px-2 py-0.5 rounded bg-white dark:bg-[#131E2E] text-[#1769AA] dark:text-[#4B9FE1] font-bold border border-slate-200 dark:border-[#22354E]">
                                   {docItem.template}
                                 </span>
@@ -1876,7 +1876,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             <h4 className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC]">
                               {localize(profile.language, 'No recent reading sessions yet', 'لا توجد جلسات قراءة أو مستندات نشطة حتى الآن')}
                             </h4>
-                            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">
+                            <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5">
                               {localize(
                                 profile.language,
                                 'Start reading an EPUB/PDF book, transcribe a lecture, or scan a document with your camera.',
@@ -2022,7 +2022,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             'Search for tools (e.g. camera, currency, speech, study)...',
                             'ابحث عن الأدوات (مثال: كاميرا، عملات، تفريغ، مذاكرة)...'
                           )}
-                          className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-2xl py-3 ps-11 pe-10 text-sm text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-500/60 placeholder:dark:text-[#94A3B8]/60 outline-none focus:border-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/20 transition-all shadow-inner"
+                          className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-2xl py-3 ps-11 pe-10 text-sm text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-500/60 placeholder:dark:text-[#94A3B8]/60 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/20 transition-all shadow-inner"
                         />
                         {searchQuery && (
                           <button
@@ -2041,7 +2041,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         <select
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value as DashboardCategory)}
-                          className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-2xl py-3 px-4 text-xs font-bold text-slate-900 dark:text-[#F8FAFC] outline-none"
+                          className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-2xl py-3 px-4 text-xs font-bold text-slate-900 dark:text-[#F8FAFC] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                         >
                           {DASHBOARD_CATEGORIES.map((cat) => (
                             <option key={cat.id} value={cat.id}>
@@ -2082,7 +2082,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             <cat.icon className="w-3.5 h-3.5 shrink-0" />
                             <span>{localize(profile.language, cat.titleEn, cat.titleAr)}</span>
                             <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                                 isSelected
                                   ? 'bg-slate-100 dark:bg-[#1A283D] text-[#1769AA] dark:text-[#4B9FE1]'
                                   : 'bg-slate-100 dark:bg-[#1A283D] text-slate-500/80 dark:text-[#94A3B8]/80'
@@ -2141,10 +2141,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                               {/* Bottom: Category Tag Badge & Action Hint */}
                               <div className="pt-4 mt-2 border-t border-slate-200 dark:border-[#22354E]/60 flex flex-wrap items-center justify-between gap-2">
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-[#1769AA] dark:text-[#4B9FE1]">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-[#1769AA] dark:text-[#4B9FE1]">
                                   {localize(profile.language, card.categoryLabelEn, card.categoryLabelAr)}
                                 </span>
-                                <span className="text-[11px] font-medium text-slate-500/70 dark:text-[#94A3B8]/70 group-hover:text-slate-900 group-hover:dark:text-[#F8FAFC] transition-colors">
+                                <span className="text-xs font-medium text-slate-500/70 dark:text-[#94A3B8]/70 group-hover:text-slate-900 group-hover:dark:text-[#F8FAFC] transition-colors">
                                   {localize(profile.language, 'Open Tool', 'فتح الأداة')}
                                 </span>
                               </div>
@@ -2235,7 +2235,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8] flex items-center gap-1.5">
                             <BookOpen className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                             <span>{localize(profile.language, 'Saved Educational Documents', 'الكتب والمستندات المحفوظة')}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1A283D] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1A283D] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
                               {recentDocs.length}
                             </span>
                           </h3>
@@ -2262,10 +2262,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               >
                                 <div>
                                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white dark:bg-[#131E2E] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
+                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-white dark:bg-[#131E2E] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
                                       {docItem.template}
                                     </span>
-                                    <span className="text-[10px] text-slate-500/70 dark:text-[#94A3B8]/70 font-medium">
+                                    <span className="text-xs text-slate-500/70 dark:text-[#94A3B8]/70 font-medium">
                                       {new Date(docItem.updatedAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
                                     </span>
                                   </div>
@@ -2317,7 +2317,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8] flex items-center gap-1.5">
                             <ScanLine className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                             <span>{localize(profile.language, 'Recent Scans & Toolkit Activity', 'المسح الضوئي والنشاط الأخير')}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1A283D] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1A283D] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#22354E]">
                               {recentActivities.length}
                             </span>
                           </h3>
@@ -2344,10 +2344,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               >
                                 <div>
                                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white dark:bg-[#131E2E] text-slate-500 dark:text-[#94A3B8] border border-slate-200 dark:border-[#22354E]">
+                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-white dark:bg-[#131E2E] text-slate-500 dark:text-[#94A3B8] border border-slate-200 dark:border-[#22354E]">
                                       {act.type}
                                     </span>
-                                    <span className="text-[10px] text-slate-500/70 dark:text-[#94A3B8]/70 font-medium">
+                                    <span className="text-xs text-slate-500/70 dark:text-[#94A3B8]/70 font-medium">
                                       {new Date(act.timestamp).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                   </div>

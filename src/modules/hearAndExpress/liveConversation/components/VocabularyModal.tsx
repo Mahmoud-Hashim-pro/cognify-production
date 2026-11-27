@@ -83,7 +83,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
                 value={original}
                 onChange={(e) => setOriginal(e.target.value)}
                 placeholder={isAr ? 'مثال: رفيق' : 'e.g., Rafik'}
-                className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus:border-[#12CFE0]"
+                className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
               />
             </div>
             <div>
@@ -96,7 +96,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
                 value={replacement}
                 onChange={(e) => setReplacement(e.target.value)}
                 placeholder={isAr ? 'مثال: رفيقي' : 'e.g., Rafiqi'}
-                className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus:border-[#12CFE0]"
+                className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
               />
             </div>
           </div>
@@ -109,7 +109,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder={isAr ? 'مثال: اسم التطبيق' : 'e.g., App Name'}
-              className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus:border-[#12CFE0]"
+              className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
             />
           </div>
           <button
@@ -141,7 +141,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
                     <span className="line-through text-rose-300 font-mono">{item.originalPhrase}</span>
                     <span className="text-[#12CFE0]">➔</span>
                     <span className="font-extrabold text-emerald-300">{item.replacementPhrase}</span>
-                    {item.note && <span className="text-[10px] text-[#A9BDD3] bg-[#071B33] px-1.5 py-0.5 rounded">({item.note})</span>}
+                    {item.note && <span className="text-xs text-[#A9BDD3] bg-[#071B33] px-1.5 py-0.5 rounded">({item.note})</span>}
                   </div>
                   <button
                     onClick={() => onRemoveItem(item.id)}

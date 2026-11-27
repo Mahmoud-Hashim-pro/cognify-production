@@ -151,7 +151,7 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
               value={targetCourse}
               onChange={(e) => setTargetCourse(e.target.value)}
               placeholder={isAr ? 'مثال: فيزياء كهربية، مبادئ الإدارة...' : 'e.g. Physics II, Microeconomics...'}
-              className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-all"
+              className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C] transition-all"
             />
           </div>
 
@@ -165,16 +165,16 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
               {topics.map((t, idx) => (
                 <div key={t.id} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#0E0610] border border-[#4A1224]/60 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-md bg-slate-800 text-slate-400 font-mono font-bold flex items-center justify-center text-[10px]">
+                    <span className="w-5 h-5 rounded-md bg-slate-800 text-slate-400 font-mono font-bold flex items-center justify-center text-xs">
                       {idx + 1}
                     </span>
                     <span className="font-bold text-slate-200">{t.title}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
                       {isAr ? `صعوبة ${t.difficulty}/5` : `Diff: ${t.difficulty}/5`}
                     </span>
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <span className="text-xs font-bold text-slate-400">
                       {t.estimatedHours} {isAr ? 'ساعات' : 'hrs'}
                     </span>
                     <button
@@ -195,13 +195,13 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
                 value={newTopicTitle}
                 onChange={(e) => setNewTopicTitle(e.target.value)}
                 placeholder={isAr ? 'اسم الشابتر أو الموضوع الجديد...' : 'New chapter or topic title...'}
-                className="flex-1 bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E5A93C]"
+                className="flex-1 bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]"
               />
               <div className="flex gap-2 items-center">
                 <select
                   value={newDifficulty}
                   onChange={(e) => setNewDifficulty(Number(e.target.value) as any)}
-                  className="bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-2.5 py-2 text-xs text-slate-300 focus:outline-none"
+                  className="bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <option value={1}>{isAr ? 'صعوبة 1 (سهل)' : 'Diff 1 (Easy)'}</option>
                   <option value={2}>{isAr ? 'صعوبة 2' : 'Diff 2'}</option>
@@ -212,7 +212,7 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
                 <select
                   value={newHours}
                   onChange={(e) => setNewHours(Number(e.target.value))}
-                  className="bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-2.5 py-2 text-xs text-slate-300 focus:outline-none"
+                  className="bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <option value={1}>1 {isAr ? 'ساعة' : 'hr'}</option>
                   <option value={2}>2 {isAr ? 'ساعتان' : 'hrs'}</option>
@@ -353,10 +353,10 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
                   }`}>
                     {isToday ? (isAr ? 'اليوم' : 'Today') : formattedTitle}
                   </span>
-                  <span className="text-[11px] font-mono text-slate-500">{dateStr}</span>
+                  <span className="text-xs font-mono text-slate-500">{dateStr}</span>
                 </div>
 
-                <div className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                <div className="text-xs font-bold text-slate-400 flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-slate-500" />
                   <span>
                     {slots.reduce((s, x) => s + x.hours, 0)} {isAr ? 'ساعات مذاكرة' : 'study hrs'}
@@ -400,14 +400,14 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
                           {slot.topicTitle}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] text-slate-400 font-medium">{slot.course}</span>
+                          <span className="text-xs text-slate-400 font-medium">{slot.course}</span>
                           {isReview && (
-                            <span className="text-[9px] font-black uppercase tracking-wider text-indigo-300 bg-[#4A1224]/50 px-1.5 py-0.5 rounded border border-[#E5A93C]/30">
+                            <span className="text-xs font-black uppercase tracking-wider text-indigo-300 bg-[#4A1224]/50 px-1.5 py-0.5 rounded border border-[#E5A93C]/30">
                               {isAr ? 'تكرار متباعد (Spaced Rep)' : 'Spaced Rep'}
                             </span>
                           )}
                           {isMock && (
-                            <span className="text-[9px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-1.5 py-0.5 rounded border border-rose-500/30">
+                            <span className="text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-1.5 py-0.5 rounded border border-rose-500/30">
                               {isAr ? 'محاكاة امتحان' : 'Mock Exam'}
                             </span>
                           )}
@@ -415,7 +415,7 @@ export default function DynamicScheduleView({ profile, isAr }: DynamicScheduleVi
                       </div>
 
                       <div className="shrink-0 text-end">
-                        <span className="text-[11px] font-mono font-bold text-slate-400 bg-[#150917] px-2 py-1 rounded-lg border border-[#4A1224]/60">
+                        <span className="text-xs font-mono font-bold text-slate-400 bg-[#150917] px-2 py-1 rounded-lg border border-[#4A1224]/60">
                           {slot.hours} {isAr ? 'س' : 'h'}
                         </span>
                       </div>

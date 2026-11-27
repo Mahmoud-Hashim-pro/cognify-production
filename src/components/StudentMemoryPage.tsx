@@ -132,7 +132,7 @@ export default function StudentMemoryPage({
             <div>
               <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
                 {localize(profile.language, 'Rafiqi Memory', 'ذاكرة رفيقي')}
-                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+                <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
                   Phase 2
                 </span>
               </h1>
@@ -223,7 +223,7 @@ export default function StudentMemoryPage({
             <div>
               <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
                 {localize(profile.language, 'Rafiqi Memory', 'ذاكرة رفيقي')}
-                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+                <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
                   Phase 2
                 </span>
               </h1>
@@ -429,11 +429,11 @@ export default function StudentMemoryPage({
           <div>
             <h1 className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
               {localize(profile.language, 'Rafiqi Memory', 'ذاكرة رفيقي')}
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
+              <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#4A1224]/40 text-[#E5A93C] border border-[#E5A93C]/30">
                 Phase 2
               </span>
               {loading && (
-                <span className="text-[11px] font-bold text-[#E5A93C] flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4A1224]/50 border border-[#E5A93C]/40 animate-pulse">
+                <span className="text-xs font-bold text-[#E5A93C] flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4A1224]/50 border border-[#E5A93C]/40 animate-pulse">
                   <RefreshCw className="w-3 h-3 animate-spin" />
                   {localize(profile.language, 'Syncing...', 'مزامنة...')}
                 </span>
@@ -522,7 +522,7 @@ export default function StudentMemoryPage({
             value={safeMemory.preferredLanguage || 'English'}
             onChange={(e) => handleLanguageChange(e.target.value)}
             disabled={!safeMemory.enabled}
-            className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white text-xs font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white text-xs font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {languageOptions.map((lang) => (
               <option key={lang} value={lang} className="bg-[#150917] text-white">
@@ -542,7 +542,7 @@ export default function StudentMemoryPage({
             value={safeMemory.explanationStyle || 'Practical examples first'}
             onChange={(e) => handleStyleChange(e.target.value)}
             disabled={!safeMemory.enabled}
-            className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white text-xs font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white text-xs font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {styleOptions.map((style) => (
               <option key={style} value={style} className="bg-[#150917] text-white">
@@ -610,7 +610,7 @@ export default function StudentMemoryPage({
               'Add a learning goal (e.g. Master Calculus Integration)...',
               'أضف هدف تعلم (مثال: إتقان التفاضل والتكامل)...'
             )}
-            className="flex-1 px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs text-white placeholder-slate-500 font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none"
+            className="flex-1 px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs text-white placeholder-slate-500 font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
           />
           <button
             type="submit"
@@ -680,7 +680,7 @@ export default function StudentMemoryPage({
               'Add a preference (e.g. Prefers bulleted summary at the end)...',
               'أضف تفضيل (مثال: يفضل ملخص نقاط في النهاية)...'
             )}
-            className="flex-1 px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs text-white placeholder-slate-500 font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none"
+            className="flex-1 px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs text-white placeholder-slate-500 font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
           />
           <button
             type="submit"
@@ -700,7 +700,7 @@ export default function StudentMemoryPage({
             <UserCheck className="w-5 h-5 text-emerald-400" />
             <h3 className="font-black text-white text-base flex items-center gap-2">
               {localize(profile.language, 'Explicitly Confirmed Information', 'المعلومات المؤكدة صراحة')}
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                 {localize(profile.language, 'Confirmed by You', 'مؤكدة من قبلك')}
               </span>
             </h3>
@@ -756,7 +756,7 @@ export default function StudentMemoryPage({
               'Add confirmed fact (e.g. Preparing for Senior Physics Final)...',
               'أضف حقيقة مؤكدة (مثال: يستعد للامتحان النهائي في الفيزياء)...'
             )}
-            className="flex-1 px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs text-white placeholder-slate-500 font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none"
+            className="flex-1 px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-xs text-white placeholder-slate-500 font-semibold focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
           />
           <button
             type="submit"

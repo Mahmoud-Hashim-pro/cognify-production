@@ -62,11 +62,11 @@ export default function ChatErgonomicsBar({
           title={localize(language, 'Decrease font size (A-)', 'تصغير حجم الخط (A-)')}
           aria-label="Decrease font size"
         >
-          <span className="text-[11px] font-black leading-none px-1">A-</span>
+          <span className="text-xs font-black leading-none px-1">A-</span>
         </button>
 
         <span
-          className="px-1.5 text-[10px] font-bold text-[#4B9FE1] font-mono select-none"
+          className="px-1.5 text-xs font-bold text-[#4B9FE1] font-mono select-none"
           title={localize(language, scaleLabels[fontScale].en, scaleLabels[fontScale].ar)}
         >
           {fontScale === 'sm' ? '85%' : fontScale === 'base' ? '100%' : fontScale === 'lg' ? '115%' : '130%'}
@@ -80,7 +80,7 @@ export default function ChatErgonomicsBar({
           title={localize(language, 'Increase font size (A+)', 'تكبير حجم الخط (A+)')}
           aria-label="Increase font size"
         >
-          <span className="text-[11px] font-black leading-none px-1">A+</span>
+          <span className="text-xs font-black leading-none px-1">A+</span>
         </button>
       </div>
 
@@ -100,7 +100,7 @@ export default function ChatErgonomicsBar({
         )}
       >
         <Eye className={`w-3.5 h-3.5 ${isEyeComfort ? 'text-[#4B9FE1] fill-[#E5A93C]/20' : 'text-slate-400'}`} />
-        <span className="hidden md:inline text-[10px]">
+        <span className="hidden md:inline text-xs">
           {isEyeComfort
             ? localize(language, 'Warm Hue', 'قراءة دافئة')
             : localize(language, 'Comfort', 'راحة العين')}
@@ -131,7 +131,7 @@ export default function ChatErgonomicsBar({
       >
         <Bookmark className={`w-3.5 h-3.5 ${bookmarksCount > 0 ? 'fill-[#E5A93C] text-[#4B9FE1]' : 'text-slate-400'}`} />
         {bookmarksCount > 0 && (
-          <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-[#E5A93C]/20 text-[#4B9FE1]">
+          <span className="text-xs font-mono px-1 py-0.2 rounded-full bg-[#E5A93C]/20 text-[#4B9FE1]">
             {bookmarksCount}
           </span>
         )}

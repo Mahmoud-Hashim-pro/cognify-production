@@ -81,7 +81,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               isInvalid
                 ? 'border-cognify-error-text-light dark:border-cognify-error-text-dark focus:ring-cognify-error-text-light dark:focus:ring-cognify-error-text-dark'
                 : 'border-cognify-border-light dark:border-cognify-border-dark hover:border-rafiqi-primary/50 dark:hover:border-rafiqi-primary/50 focus:border-rafiqi-primary dark:focus:border-rafiqi-primary',
-              'outline-none focus:ring-2 focus:ring-cognify-focus focus:ring-offset-2 focus:ring-offset-cognify-surface-light dark:focus:ring-offset-cognify-bg-dark',
+              'outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-cognify-focus focus:ring-offset-2 focus:ring-offset-cognify-surface-light dark:focus:ring-offset-cognify-bg-dark',
               'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-900',
               className
             )}

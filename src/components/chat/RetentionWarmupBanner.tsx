@@ -114,10 +114,10 @@ export default function RetentionWarmupBanner({
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#4B9FE1]">
+            <span className="text-xs font-black uppercase tracking-wider text-[#4B9FE1]">
               {isAr ? 'إنعاش الذاكرة التباعدية (SM-2)' : isFr ? 'Rappel Espacé Actif (SM-2)' : 'Spaced Retention Due (SM-2)'}
             </span>
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-md border ${
               primeConcept.riskLevel === 'high'
                 ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 animate-pulse'
                 : 'bg-amber-500/20 border-amber-500/40 text-amber-300'

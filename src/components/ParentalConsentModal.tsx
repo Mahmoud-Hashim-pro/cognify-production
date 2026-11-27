@@ -191,7 +191,7 @@ export default function ParentalConsentModal({
                 <h2 id="consent-title" className="text-base sm:text-lg font-black text-white">
                   {isAr ? 'بوابة موافقة ولي الأمر الرسمية' : 'Parental & Guardian Consent Gate'}
                 </h2>
-                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
+                <span className="text-xs font-mono uppercase px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
                   COPPA / GDPR-K
                 </span>
               </div>
@@ -231,7 +231,7 @@ export default function ParentalConsentModal({
           {/* Guardian Identity Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="parent-full-name" className="block text-[11px] font-semibold text-slate-300 mb-1">
+              <label htmlFor="parent-full-name" className="block text-xs font-semibold text-slate-300 mb-1">
                 {isAr ? 'اسم ولي الأمر / الوصي الكامل *' : 'Parent / Guardian Full Name *'}
               </label>
               <input
@@ -245,7 +245,7 @@ export default function ParentalConsentModal({
               />
             </div>
             <div>
-              <label htmlFor="parent-verified-email" className="block text-[11px] font-semibold text-slate-300 mb-1">
+              <label htmlFor="parent-verified-email" className="block text-xs font-semibold text-slate-300 mb-1">
                 {isAr ? 'البريد الإلكتروني لولي الأمر *' : 'Parent Verified Email *'}
               </label>
               <input
@@ -261,7 +261,7 @@ export default function ParentalConsentModal({
           </div>
 
           <div>
-            <span id="relationship-group-label" className="block text-[11px] font-semibold text-slate-300 mb-1">
+            <span id="relationship-group-label" className="block text-xs font-semibold text-slate-300 mb-1">
               {isAr ? 'الصفة القانونية / صلة القرابة' : 'Legal Relationship'}
             </span>
             <div role="radiogroup" aria-labelledby="relationship-group-label" className="grid grid-cols-3 gap-2">
@@ -290,7 +290,7 @@ export default function ParentalConsentModal({
 
           {/* Scopes Selection */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-300 mb-2">
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
               {isAr ? 'صلاحيات الحساسات المعتمدة من ولي الأمر:' : 'Authorized Sensor Permissions:'}
             </label>
             <div className="space-y-2">
@@ -371,7 +371,7 @@ export default function ParentalConsentModal({
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
                 className="mt-0.5 rounded text-amber-500 focus:ring-0 bg-[#080409] border-[#4A1224]"
               />
-              <span className="text-[11px] text-amber-100/90 leading-relaxed">
+              <span className="text-xs text-amber-100/90 leading-relaxed">
                 {isAr
                   ? 'أقر بصفتي ولي الأمر/الوصي القانوني بموافقتي الصريحة والمستنيرة على استخدام الطالب للأدوات المحددة، وعلمي بأن البيانات الحيوية لا تُخزن ولا تُشارك مع أي طرف خارجي.'
                   : 'I confirm that as parent/guardian, I provide informed verifiable consent for the child to use the authorized assistive tools, understanding that biometric sensor data remains strictly local.'}

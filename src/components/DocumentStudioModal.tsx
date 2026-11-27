@@ -1546,7 +1546,7 @@ ${currentDoc.summary}
               >
                 <History className="w-4 h-4" aria-hidden="true" />
                 <span>{companionLang === 'ar' ? 'سجل المحفوظات' : 'Doc History'}</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300">
+                <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-xs text-slate-300">
                   {docHistory.length}
                 </span>
               </button>
@@ -1561,7 +1561,7 @@ ${currentDoc.summary}
                   id="doc-panel-pdf"
                   aria-labelledby="doc-tab-pdf"
                   tabIndex={0}
-                  className="space-y-5 focus:outline-none"
+                  className="space-y-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   {/* Upload Card */}
                   <div className="border-2 border-dashed border-cognify-focus/30 hover:border-indigo-400 rounded-3xl p-6 sm:p-8 bg-cognify-bg-dark/40 text-center transition-all">
@@ -1611,7 +1611,7 @@ ${currentDoc.summary}
                           <p className="font-bold text-white">
                             {companionLang === 'ar' ? 'تعذر استخراج محتوى الملف الأخير:' : 'Failed to process previous file:'}
                           </p>
-                          <p className="text-[11px] text-red-300 font-mono">{lastFailedFile.name} ({formatBytes(lastFailedFile.size)})</p>
+                          <p className="text-xs text-red-300 font-mono">{lastFailedFile.name} ({formatBytes(lastFailedFile.size)})</p>
                         </div>
                       </div>
                       <button
@@ -1642,7 +1642,7 @@ ${currentDoc.summary}
                       <div className="flex items-center justify-between gap-3 border-b border-cognify-border-dark/60 pb-4 flex-wrap">
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-lg bg-indigo-600/30 text-indigo-300 font-mono text-[10px] uppercase font-bold">
+                            <span className="px-2 py-0.5 rounded-lg bg-indigo-600/30 text-indigo-300 font-mono text-xs uppercase font-bold">
                               {currentDoc.sourceType}
                             </span>
                             <h4 className="font-black text-base sm:text-lg text-white">
@@ -1650,26 +1650,26 @@ ${currentDoc.summary}
                             </h4>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-xs text-slate-400">
                               {new Date(currentDoc.createdAt).toLocaleString(companionLang === 'ar' ? 'ar-EG' : 'en-US')}
                             </span>
                             {extractedDocMeta?.pageCount && (
-                              <span className="px-2 py-0.5 rounded-md bg-blue-900/40 border border-blue-500/30 text-blue-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-blue-900/40 border border-blue-500/30 text-blue-300 text-xs font-bold">
                                 📄 {companionLang === 'ar' ? `${extractedDocMeta.pageCount} صفحات` : `${extractedDocMeta.pageCount} Pages`}
                               </span>
                             )}
                             {extractedDocMeta?.wordCount && (
-                              <span className="px-2 py-0.5 rounded-md bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
                                 📝 {companionLang === 'ar' ? `${extractedDocMeta.wordCount} كلمة` : `${extractedDocMeta.wordCount} Words`}
                               </span>
                             )}
                             {extractedDocMeta?.hasTables && (
-                              <span className="px-2 py-0.5 rounded-md bg-purple-900/40 border border-purple-500/30 text-purple-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-purple-900/40 border border-purple-500/30 text-purple-300 text-xs font-bold">
                                 📊 {companionLang === 'ar' ? 'جداول منظمة' : 'Tables'}
                               </span>
                             )}
                             {extractedDocMeta?.isScanned && extractedDocMeta?.needsOcr && (
-                              <span className="px-2 py-0.5 rounded-md bg-amber-900/50 border border-amber-500/40 text-amber-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-amber-900/50 border border-amber-500/40 text-amber-300 text-xs font-bold">
                                 ⚠️ {companionLang === 'ar' ? 'مستند ممسوح ضوئياً (OCR نشط)' : 'Scanned Doc (OCR Active)'}
                               </span>
                             )}
@@ -1715,7 +1715,7 @@ ${currentDoc.summary}
                               <HelpCircle className="w-3.5 h-3.5" />
                               <span>{companionLang === 'ar' ? 'بنك الأسئلة' : 'Quiz'}</span>
                               {docQuiz.length > 0 && (
-                                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/40 text-[10px] text-white">
+                                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/40 text-xs text-white">
                                   {docQuiz.length}
                                 </span>
                               )}
@@ -1736,7 +1736,7 @@ ${currentDoc.summary}
                               <Sparkles className="w-3.5 h-3.5" />
                               <span>{companionLang === 'ar' ? 'فلاش كاردز' : 'Flashcards'}</span>
                               {docFlashcards.length > 0 && (
-                                <span className="px-1.5 py-0.2 rounded-full bg-purple-500/40 text-[10px] text-white">
+                                <span className="px-1.5 py-0.2 rounded-full bg-purple-500/40 text-xs text-white">
                                   {docFlashcards.length}
                                 </span>
                               )}
@@ -1908,13 +1908,13 @@ ${currentDoc.summary}
                           >
                             <FastForward className="w-4 h-4" />
                           </button>
-                          <span className="text-slate-400 font-mono text-[11px] ml-2">
+                          <span className="text-slate-400 font-mono text-xs ml-2">
                             {companionLang === 'ar' ? `فقرة ${currentParagraphIdx + 1} من ${paragraphs.length || 1}` : `Paragraph ${currentParagraphIdx + 1} / ${paragraphs.length || 1}`}
                           </span>
                         </div>
 
                         {/* Playback Speed selector */}
-                        <div className="flex items-center gap-1.5 bg-cognify-bg-dark p-1 rounded-xl border border-cognify-border-dark/60 text-[11px]">
+                        <div className="flex items-center gap-1.5 bg-cognify-bg-dark p-1 rounded-xl border border-cognify-border-dark/60 text-xs">
                           <span className="text-slate-500 px-1">⚡ {companionLang === 'ar' ? 'السرعة:' : 'Speed:'}</span>
                           {[0.8, 1.0, 1.25, 1.5].map((rate) => (
                             <button
@@ -2116,13 +2116,13 @@ ${currentDoc.summary}
                                         : 'bg-cognify-bg-dark border-cognify-border-dark/60 text-slate-200 hover:border-cognify-border-dark/50'
                                     }`}
                                   >
-                                    <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 block mb-1">
+                                    <span className="text-xs uppercase tracking-wider font-bold text-slate-400 block mb-1">
                                       {card.flipped ? (companionLang === 'ar' ? '💡 الحل / المفهوم' : 'Answer / Concept') : (companionLang === 'ar' ? `بطاقة ${cIdx + 1} (اضغط للقلب والحل)` : `Card ${cIdx + 1} (Tap to Flip)`)}
                                     </span>
                                     <p className="font-bold text-sm sm:text-base my-auto leading-relaxed">
                                       {card.flipped ? card.back : card.front}
                                     </p>
-                                    <span className="text-[10px] text-slate-500 text-left mt-2 font-mono">
+                                    <span className="text-xs text-slate-500 text-left mt-2 font-mono">
                                       {card.flipped ? '🔊 منطوق' : '🔄 اضغط للاستماع للحل'}
                                     </span>
                                   </div>
@@ -2155,7 +2155,7 @@ ${currentDoc.summary}
                                   : 'bg-cognify-surface-dark border border-cognify-border-dark/60 text-slate-200 ml-auto max-w-[85%]'
                               }`}
                             >
-                              <span className="font-bold text-[10px] text-slate-400 block mb-0.5">
+                              <span className="font-bold text-xs text-slate-400 block mb-0.5">
                                 {msg.role === 'user'
                                   ? (companionLang === 'ar' ? 'أنت' : 'You')
                                   : (companionLang === 'ar' ? 'المعلم الذكي' : 'Rafiqi Tutor')}
@@ -2180,7 +2180,7 @@ ${currentDoc.summary}
                                 ? 'مثلاً: ما هي أهم معادلة في المحاضرة؟ أو اشرح لي النقطة الثانية...'
                                 : 'Ask anything about this document...'
                             }
-                            className="flex-1 px-4 py-2.5 rounded-xl border border-cognify-border-dark/50 bg-cognify-bg-dark text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="flex-1 px-4 py-2.5 rounded-xl border border-cognify-border-dark/50 bg-cognify-bg-dark text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-indigo-500"
                           />
                           <button
                             type="button"
@@ -2210,7 +2210,7 @@ ${currentDoc.summary}
                   id="doc-panel-audio-rec"
                   aria-labelledby="doc-tab-audio-rec"
                   tabIndex={0}
-                  className="space-y-6 focus:outline-none"
+                  className="space-y-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   {/* Audio Lecture Header */}
                   <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-3 flex-wrap gap-2">
@@ -2270,7 +2270,7 @@ ${currentDoc.summary}
                             <span className="font-black text-sm text-white">
                               {companionLang === 'ar' ? 'رفع ملف محاضرة صوتية' : 'Upload Audio Lecture File'}
                             </span>
-                            <span className="text-[11px] text-slate-400 max-w-xs">
+                            <span className="text-xs text-slate-400 max-w-xs">
                               {companionLang === 'ar'
                                 ? 'يدعم MP3, WAV, M4A, WEBM, OGG, FLAC (حتى 3.2 ميجابايت للنقل المباشر، أو سجّل بالميكروفون)'
                                 : companionLang === 'fr'
@@ -2314,7 +2314,7 @@ ${currentDoc.summary}
                               {(audioRecordDuration % 60).toString().padStart(2, '0')}
                             </span>
                           ) : (
-                            <span className="text-[11px] text-slate-400 max-w-xs">
+                            <span className="text-xs text-slate-400 max-w-xs">
                               {companionLang === 'ar' ? 'تسجيل مباشر من الميكروفون داخل قاعة المحاضرات' : 'Direct microphone recording inside lecture room'}
                             </span>
                           )}
@@ -2357,7 +2357,7 @@ ${currentDoc.summary}
                           aria-valuemax={100}
                         />
                       </div>
-                      <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                      <div className="flex justify-between text-xs font-mono text-slate-400">
                         <span>{formatBytes(audioLectureState.file?.size || 0)}</span>
                         <span className="font-bold text-indigo-300">{audioLectureState.progressPct}%</span>
                       </div>
@@ -2437,7 +2437,7 @@ ${currentDoc.summary}
                               <h5 className="font-black text-sm text-white truncate max-w-xs sm:max-w-md">
                                 {audioLectureState.file?.name}
                               </h5>
-                              <span className="text-[11px] font-mono text-slate-400">
+                              <span className="text-xs font-mono text-slate-400">
                                 {formatBytes(audioLectureState.file?.size || 0)} &bull; {audioLectureState.segments.length} {companionLang === 'ar' ? 'فقرة زمنية' : 'segments'}
                               </span>
                             </div>
@@ -2471,7 +2471,7 @@ ${currentDoc.summary}
                             className="w-full accent-indigo-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
                             aria-label="Seek audio lecture"
                           />
-                          <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                          <div className="flex justify-between text-xs font-mono text-slate-400">
                             <span>
                               {Math.floor(audioCurrentTime / 60)}:
                               {String(Math.floor(audioCurrentTime % 60)).padStart(2, '0')}
@@ -2546,7 +2546,7 @@ ${currentDoc.summary}
                                   <button
                                     type="button"
                                     onClick={() => handleSeekAudio(seg.seconds)}
-                                    className="px-2 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-800 text-indigo-300 font-mono text-[11px] font-bold whitespace-nowrap border border-indigo-500/40 flex-shrink-0 active:scale-95"
+                                    className="px-2 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-800 text-indigo-300 font-mono text-xs font-bold whitespace-nowrap border border-indigo-500/40 flex-shrink-0 active:scale-95"
                                     aria-label={`${companionLang === 'ar' ? 'انتقل إلى الدقيقة' : 'Seek to'} ${seg.timestamp}`}
                                   >
                                     ▶ [{seg.timestamp}]
@@ -2694,7 +2694,7 @@ ${currentDoc.summary}
                   id="doc-panel-speech-to-text"
                   aria-labelledby="doc-tab-speech-to-text"
                   tabIndex={0}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 focus:outline-none"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   {/* Panel A: Speech to Text (Voice Dictation) */}
                   <div className="p-4 sm:p-5 rounded-3xl bg-cognify-bg-dark/70 border border-cognify-border-dark/60 space-y-3 flex flex-col">
@@ -2729,7 +2729,7 @@ ${currentDoc.summary}
                           ? 'اضغط على "تحدث الآن" وابدأ الكلام، وسيتم كتابة كل ما تقوله بدقة هنا...'
                           : 'Click "Dictate" and start speaking. Your speech will appear here...'
                       }
-                      className="w-full flex-1 p-3 rounded-2xl bg-cognify-surface-dark border border-cognify-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed resize-none"
+                      className="w-full flex-1 p-3 rounded-2xl bg-cognify-surface-dark border border-cognify-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-emerald-500 leading-relaxed resize-none"
                     />
 
                     <div className="flex gap-2 flex-wrap">
@@ -2787,7 +2787,7 @@ ${currentDoc.summary}
                           ? 'الصق أو اكتب أي نص هنا لسماعه فوراً بصوت طبيعي واضح...'
                           : 'Paste or type any text here to hear it read aloud...'
                       }
-                      className="w-full flex-1 p-3 rounded-2xl bg-cognify-surface-dark border border-cognify-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed resize-none"
+                      className="w-full flex-1 p-3 rounded-2xl bg-cognify-surface-dark border border-cognify-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-blue-500 leading-relaxed resize-none"
                     />
 
                     <div className="flex gap-2">
@@ -2834,7 +2834,7 @@ ${currentDoc.summary}
                   id="doc-panel-history"
                   aria-labelledby="doc-tab-history"
                   tabIndex={0}
-                  className="space-y-3 focus:outline-none"
+                  className="space-y-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-cognify-border-dark/60">
                     <span>{companionLang === 'ar' ? 'المستندات والمحاضرات التي تم تلخيصها سابقاً' : 'Previously Summarized Documents'}</span>
@@ -2863,7 +2863,7 @@ ${currentDoc.summary}
                       >
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-md bg-indigo-600/30 text-indigo-300 font-mono text-[10px] uppercase font-bold">
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-600/30 text-indigo-300 font-mono text-xs uppercase font-bold">
                               {item.sourceType}
                             </span>
                             <h5 className="font-bold text-sm text-white truncate">{item.title}</h5>
@@ -2871,7 +2871,7 @@ ${currentDoc.summary}
                           <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                             {item.summary}
                           </p>
-                          <span className="text-[10px] text-slate-500 block">
+                          <span className="text-xs text-slate-500 block">
                             {new Date(item.createdAt).toLocaleDateString(companionLang === 'ar' ? 'ar-EG' : 'en-US')}
                           </span>
                         </div>

@@ -384,11 +384,11 @@ export default function CrossDisabilityOrchestrator({
               <div>
                 <h1 className="text-sm sm:text-base font-black text-white leading-tight flex items-center gap-2">
                   <span>{isAr ? 'المنسق الشامل للتواصل بين الإعاقات' : 'Universal Cross-Disability Sensory Mesh'}</span>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#4A1224]/50 text-[#E5A93C] border border-[#E5A93C]/30">
+                  <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#4A1224]/50 text-[#E5A93C] border border-[#E5A93C]/30">
                     P2P Neural Relay
                   </span>
                 </h1>
-                <p className="text-[11px] text-slate-400 hidden sm:block">
+                <p className="text-xs text-slate-400 hidden sm:block">
                   {isAr 
                     ? 'جسر التخاطب بين الكفيف والأصم، مصفوفة مورس اللمسية، واستغاثة طوارئ الحواس'
                     : 'Bilateral blind-deaf bridge, deaf-blind tactile morse matrix, and omni-sensory emergency beacon'}
@@ -484,7 +484,7 @@ export default function CrossDisabilityOrchestrator({
                     <h3 className="text-xs sm:text-sm font-black text-white">
                       {isAr ? 'جسر الترجمة الفورية المباشر بين الكفيف والأصم (Peer-to-Peer)' : 'Direct Peer-to-Peer Blind & Deaf Sensory Translator'}
                     </h3>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-xs text-slate-400">
                       {isAr 
                         ? 'كلام الكفيف يتحول مباشرة لأفاتار إشارة 3D، وكتابة أو إشارات الأصم تُنطق صوتياً في أذن الكفيف.'
                         : 'Blind speech transforms to 3D Sign & text; Deaf signs/text speak out loud naturally.'}
@@ -493,7 +493,7 @@ export default function CrossDisabilityOrchestrator({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5">
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     <span>{isAr ? 'القناة التبادلية متصلة' : 'Bilateral Mesh Active'}</span>
                   </span>
@@ -513,7 +513,7 @@ export default function CrossDisabilityOrchestrator({
                           {isAr ? 'الطرف الكفيف يتحدث (صوت ➔ إشارة ونصوص)' : 'Blind Peer Speaks (Voice ➔ Signs & Text)'}
                         </h4>
                       </div>
-                      <span className="text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md">
+                      <span className="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md">
                         Voice ➔ 3D
                       </span>
                     </div>
@@ -529,7 +529,7 @@ export default function CrossDisabilityOrchestrator({
                       </React.Suspense>
 
                       {blindSpeaking && (
-                        <div className="absolute top-2 left-2 bg-emerald-600 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                        <div className="absolute top-2 left-2 bg-emerald-600 text-slate-950 font-black text-xs px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
                           <span className="w-2 h-2 rounded-full bg-white animate-ping" />
                           <span>{isAr ? 'الكفيف يتحدث الآن...' : 'Blind peer is speaking...'}</span>
                         </div>
@@ -538,7 +538,7 @@ export default function CrossDisabilityOrchestrator({
 
                     {/* Transcript Card for Deaf Peer */}
                     <div className="p-3 bg-[#150917] border border-[#4A1224]/60 rounded-xl">
-                      <span className="text-[10px] text-slate-400 font-bold block mb-1">
+                      <span className="text-xs text-slate-400 font-bold block mb-1">
                         {isAr ? 'النص المقروء للأصم:' : 'Real-Time Text for Deaf Peer:'}
                       </span>
                       <p className="text-xs sm:text-sm font-black text-[#E5A93C] break-words leading-relaxed">
@@ -571,14 +571,14 @@ export default function CrossDisabilityOrchestrator({
                           {isAr ? 'الطرف الأصم يرسل (إشارة ونصوص ➔ صوت في أذن الكفيف)' : 'Deaf Peer Sends (Signs/Text ➔ Audio to Blind)'}
                         </h4>
                       </div>
-                      <span className="text-[10px] font-mono font-bold bg-[#4A1224]/50 text-[#E5A93C] px-2 py-0.5 rounded-md">
+                      <span className="text-xs font-mono font-bold bg-[#4A1224]/50 text-[#E5A93C] px-2 py-0.5 rounded-md">
                         Text ➔ Voice
                       </span>
                     </div>
 
                     {/* Quick AAC Collaboration Presets */}
                     <div className="mb-3">
-                      <span className="text-[10px] font-bold text-slate-400 block mb-1.5">
+                      <span className="text-xs font-bold text-slate-400 block mb-1.5">
                         ⚡ {isAr ? 'عبارات سريعة بنقرة واحدة (تُنطق فوراً للكفيف):' : 'Instant Spoken Relay Phrases:'}
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
@@ -597,7 +597,7 @@ export default function CrossDisabilityOrchestrator({
 
                     {/* Custom Textarea for Deaf Peer */}
                     <div className="flex flex-col mb-3">
-                      <label className="text-[10px] font-bold text-slate-400 mb-1">
+                      <label className="text-xs font-bold text-slate-400 mb-1">
                         {isAr ? 'اكتب رسالتك وسيقوم النظام بنطقها صوتياً فوراً للكفيف:' : 'Type message to speak aloud to blind peer:'}
                       </label>
                       <textarea
@@ -610,14 +610,14 @@ export default function CrossDisabilityOrchestrator({
                           }
                         }}
                         placeholder={isAr ? 'اكتب هنا واضغط Enter أو زر الإرسال...' : 'Type and press Enter or Send...'}
-                        className="w-full min-h-[90px] p-3 bg-[#150917] border border-[#4A1224]/60 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#E5A93C]/30 text-slate-100 font-medium text-xs sm:text-sm"
+                        className="w-full min-h-[90px] p-3 bg-[#150917] border border-[#4A1224]/60 rounded-xl resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#E5A93C]/30 text-slate-100 font-medium text-xs sm:text-sm"
                       />
                     </div>
 
                     {/* Last spoken to blind preview */}
                     {deafSpokenMessage && (
                       <div className="p-2.5 rounded-xl bg-[#2D0B16] border border-[#E5A93C]/30 text-xs">
-                        <span className="text-[10px] text-[#E5A93C] font-bold block mb-0.5">
+                        <span className="text-xs text-[#E5A93C] font-bold block mb-0.5">
                           {isAr ? 'آخر كلام تم نطقه للكفيف:' : 'Last spoken to blind peer:'}
                         </span>
                         <p className="text-slate-200 font-bold">{deafSpokenMessage}</p>
@@ -690,7 +690,7 @@ export default function CrossDisabilityOrchestrator({
                     defaultValue={isAr ? 'مرحبا' : 'HELLO'}
                     id="morse-test-input"
                     aria-label={isAr ? 'نص اختبار الاهتزازات اللمسية ومورس' : 'Tactile vibration and Morse test text'}
-                    className="flex-1 px-3 py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-xs sm:text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#E5A93C]/30"
+                    className="flex-1 px-3 py-2 rounded-xl bg-[#150917] border border-[#4A1224]/60 text-xs sm:text-sm font-bold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#E5A93C]/30"
                   />
                   <button
                     onClick={() => {
@@ -706,7 +706,7 @@ export default function CrossDisabilityOrchestrator({
 
                 {currentVibratingLetter && (
                   <div className="mt-3 p-2 bg-[#150917] border border-[#E5A93C]/40 rounded-xl text-center">
-                    <span className="text-[10px] text-slate-400 block mb-0.5">{isAr ? 'شفرة النبض الحالية:' : 'Active Pulse Code:'}</span>
+                    <span className="text-xs text-slate-400 block mb-0.5">{isAr ? 'شفرة النبض الحالية:' : 'Active Pulse Code:'}</span>
                     <span className="font-mono text-base font-black text-[#E5A93C] tracking-widest">{currentVibratingLetter}</span>
                   </div>
                 )}
@@ -719,7 +719,7 @@ export default function CrossDisabilityOrchestrator({
                     <h4 className="text-xs font-black text-white">
                       {isAr ? 'لوحة إدخال مورس اللمسية (للمكفوفين-الصم):' : 'Tactile 2-Paddle Input Keyboard:'}
                     </h4>
-                    <span className="text-[10px] font-mono text-slate-400">
+                    <span className="text-xs font-mono text-slate-400">
                       Dot: 100ms | Dash: 300ms
                     </span>
                   </div>
@@ -727,13 +727,13 @@ export default function CrossDisabilityOrchestrator({
                   {/* Buffer Displays */}
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <div className="p-3 rounded-xl bg-[#150917] border border-[#4A1224]/60 min-h-[48px]">
-                      <span className="text-[10px] text-slate-500 block">{isAr ? 'الحرف الجاري تركيبه:' : 'Current Morse Buffer:'}</span>
+                      <span className="text-xs text-slate-500 block">{isAr ? 'الحرف الجاري تركيبه:' : 'Current Morse Buffer:'}</span>
                       <span className="text-base font-mono font-black text-amber-400 tracking-widest">
                         {morseInputSequence || '---'}
                       </span>
                     </div>
                     <div className="p-3 rounded-xl bg-[#150917] border border-[#4A1224]/60 min-h-[48px]">
-                      <span className="text-[10px] text-slate-500 block">{isAr ? 'الجملة المتراكمة:' : 'Decoded Words:'}</span>
+                      <span className="text-xs text-slate-500 block">{isAr ? 'الجملة المتراكمة:' : 'Decoded Words:'}</span>
                       <span className="text-base font-bold text-emerald-400 truncate block">
                         {decodedMorseText || (isAr ? 'لا توجد كلمات بعد' : 'No text yet')}
                       </span>
@@ -752,7 +752,7 @@ export default function CrossDisabilityOrchestrator({
                       •
                     </span>
                     <span className="text-sm sm:text-base font-black">{isAr ? 'نقطة (Dot)' : 'DOT (•)'}</span>
-                    <span className="text-[10px] text-[#E5A93C]/70">100ms Pulse</span>
+                    <span className="text-xs text-[#E5A93C]/70">100ms Pulse</span>
                   </button>
 
                   {/* Right Paddle: DASH */}
@@ -764,7 +764,7 @@ export default function CrossDisabilityOrchestrator({
                       —
                     </span>
                     <span className="text-sm sm:text-base font-black">{isAr ? 'شرطة (Dash)' : 'DASH (—)'}</span>
-                    <span className="text-[10px] text-[#E5A93C]/70">300ms Pulse</span>
+                    <span className="text-xs text-[#E5A93C]/70">300ms Pulse</span>
                   </button>
                 </div>
 
@@ -860,7 +860,7 @@ export default function CrossDisabilityOrchestrator({
                         : 'High-frequency red and white strobe lighting for visual emergency awareness.'}
                     </p>
                   </div>
-                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-full text-center ${
+                  <span className={`text-xs font-black px-2.5 py-1 rounded-full text-center ${
                     isSosActive ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 animate-pulse' : 'bg-[#150917] text-slate-500'
                   }`}>
                     {isSosActive ? 'ACTIVE STROBE' : 'STANDBY'}
@@ -880,7 +880,7 @@ export default function CrossDisabilityOrchestrator({
                         : 'Repeated synthesized vocal distress beacon broadcasting GPS coordinates.'}
                     </p>
                   </div>
-                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-full text-center ${
+                  <span className={`text-xs font-black px-2.5 py-1 rounded-full text-center ${
                     isSosActive ? 'bg-emerald-500 text-slate-950 animate-pulse' : 'bg-[#150917] text-slate-500'
                   }`}>
                     {isSosActive ? 'BROADCASTING AUDIO' : 'STANDBY'}
@@ -900,7 +900,7 @@ export default function CrossDisabilityOrchestrator({
                         : 'Continuous international SOS Morse vibration pattern on mobile hardware.'}
                     </p>
                   </div>
-                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-full text-center ${
+                  <span className={`text-xs font-black px-2.5 py-1 rounded-full text-center ${
                     isSosActive ? 'bg-purple-500 text-slate-950 animate-pulse' : 'bg-[#150917] text-slate-500'
                   }`}>
                     {isSosActive ? 'HAPTIC ACTIVE' : 'STANDBY'}

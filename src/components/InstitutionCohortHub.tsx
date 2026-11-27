@@ -239,7 +239,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   value={selectedOrg}
                   onChange={(e) => setSelectedOrg(e.target.value.trim())}
                   placeholder={L('All / Code', 'الكل / كود')}
-                  className="bg-transparent border-none outline-none font-bold text-white w-24 placeholder:text-slate-600 text-xs"
+                  className="bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] font-bold text-white w-24 placeholder:text-slate-600 text-xs"
                 />
               </div>
             )}
@@ -280,7 +280,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   <div className="text-2xl font-black text-white tabular-nums leading-none">
                     {stats.totalStudents}
                   </div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1.5">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1.5">
                     {L('Enrolled Students', 'الطلاب المسجلون')}
                   </div>
                 </div>
@@ -295,10 +295,10 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   <div className="text-2xl font-black text-white tabular-nums leading-none">
                     {stats.activeRate}%
                   </div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1.5">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1.5">
                     {L('Active Learners (7d)', 'المتعلمون النشطون (٧ أيام)')}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                  <div className="text-xs text-slate-500 font-semibold mt-0.5">
                     {stats.activeStudents} {L('of', 'من')} {stats.totalStudents} {L('active', 'نشط')}
                   </div>
                 </div>
@@ -313,10 +313,10 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   <div className="text-2xl font-black text-white tabular-nums leading-none">
                     {stats.accessibilityAdoptionRate}%
                   </div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1.5">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1.5">
                     {L('Accessibility Adoption', 'اعتماد الإتاحة والشمول')}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                  <div className="text-xs text-slate-500 font-semibold mt-0.5">
                     {stats.totalStudents - stats.accessibilityModeBreakdown.None} {L('assisted students', 'طالب مستفيد')}
                   </div>
                 </div>
@@ -331,11 +331,11 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                   <div className="text-2xl font-black text-white tabular-nums leading-none">
                     {Math.round(stats.averagePoints)}
                   </div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1.5">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1.5">
                     {L('Avg Mastery Points', 'متوسط نقاط الإتقان')}
                   </div>
                   {stats.aggregatedPointRange && (
-                    <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                    <div className="text-xs text-slate-500 font-semibold mt-0.5">
                       {L('Range:', 'المجال:')} {stats.aggregatedPointRange.min} - {stats.aggregatedPointRange.max}
                     </div>
                   )}
@@ -381,7 +381,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                       {L('Cognitive Level Breakdown', 'توزيع المستويات الإدراكية')}
                     </h3>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">
+                  <span className="text-xs font-bold text-slate-500 uppercase">
                     {stats.totalStudents} {L('Students', 'طلاب')}
                   </span>
                 </div>
@@ -445,7 +445,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                       {L('Accessibility Accommodations', 'تسهيلات الإتاحة المستخدمة')}
                     </h3>
                   </div>
-                  <span className="text-[10px] font-bold text-[#E5A93C] uppercase">
+                  <span className="text-xs font-bold text-[#E5A93C] uppercase">
                     {stats.accessibilityAdoptionRate}% {L('Adopted', 'مُفعّل')}
                   </span>
                 </div>
@@ -495,7 +495,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                             <div className="text-xs font-bold text-slate-200">
                               {L(titleEn, titleAr)}
                             </div>
-                            <div className="text-[10px] text-slate-500 font-semibold">{pct}%</div>
+                            <div className="text-xs text-slate-500 font-semibold">{pct}%</div>
                           </div>
                         </div>
                         <span className="text-sm font-black text-white tabular-nums">
@@ -533,7 +533,7 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                 <div className="overflow-x-auto">
                   <table className="w-full text-start border-collapse text-xs">
                     <thead>
-                      <tr className="bg-[#080409] text-[10px] uppercase font-black tracking-wider text-slate-400 border-b border-[#4A1224]/60">
+                      <tr className="bg-[#080409] text-xs uppercase font-black tracking-wider text-slate-400 border-b border-[#4A1224]/60">
                         <th className="p-3.5 text-start">{L('Student', 'الطالب')}</th>
                         <th className="p-3.5 text-start">{L('Masked Email', 'البريد المقنّع')}</th>
                         <th className="p-3.5 text-start">{L('Cognitive Level', 'المستوى الإدراكي')}</th>
@@ -548,9 +548,9 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                       {stats.students.map((student) => (
                         <tr key={student.uid} className="hover:bg-[#150917]/80 transition-colors">
                           <td className="p-3.5 font-bold text-white">{student.name}</td>
-                          <td className="p-3.5 font-mono text-[11px] text-slate-400">{student.emailMasked}</td>
+                          <td className="p-3.5 font-mono text-xs text-slate-400">{student.emailMasked}</td>
                           <td className="p-3.5">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C]">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-black uppercase bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C]">
                               {student.cognitiveLevel}
                             </span>
                           </td>
@@ -561,17 +561,17 @@ export default function InstitutionCohortHub({ profile, onMenuClick, onNavigateB
                           </td>
                           <td className="p-3.5">
                             {student.isActive ? (
-                              <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-400">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase text-emerald-400">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400" />
                                 {L('Active', 'نشط')}
                               </span>
                             ) : (
-                              <span className="text-[10px] font-black uppercase text-slate-600">
+                              <span className="text-xs font-black uppercase text-slate-600">
                                 {L('Idle', 'غير نشط')}
                               </span>
                             )}
                           </td>
-                          <td className="p-3.5 text-end text-slate-400 text-[11px]">
+                          <td className="p-3.5 text-end text-slate-400 text-xs">
                             {student.lastActiveIso ? student.lastActiveIso.split('T')[0] : L('Never', 'لم يبدأ')}
                           </td>
                         </tr>

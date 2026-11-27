@@ -980,7 +980,7 @@ export default function StudentSettingsView({
                           <span>English (LTR)</span>
                         </button>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-[#A9C4DD]/80">
+                      <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
                         {localize(
                           profile.language,
                           'Drafts and transcribed lectures are preserved when changing interface language.',
@@ -1089,7 +1089,7 @@ export default function StudentSettingsView({
                           placeholder="AIzaSy..."
                           autoComplete="off"
                           spellCheck="false"
-                          className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] font-mono focus:outline-none focus:border-[#1769AA] placeholder:text-slate-400 dark:placeholder:text-[#A9C4DD]/40 pe-11"
+                          className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] font-mono focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA] placeholder:text-slate-400 dark:placeholder:text-[#A9C4DD]/40 pe-11"
                         />
                         <button
                           type="button"
@@ -1103,8 +1103,8 @@ export default function StudentSettingsView({
                       <p className="text-xs text-slate-600 dark:text-[#A9C4DD] leading-relaxed">
                         {localize(
                           profile.language,
-                          'Your key is encrypted and stored locally in your browser. It is never transmitted to any third-party server.',
-                          'يتم تشفير المفتاح وحفظه محلياً في متصفحك فقط. لن يتم إرساله لأي خوادم خارجية.'
+                          'Your key is encrypted and kept only in this browser tab session. It is deleted when you close the tab, and it is sent only to the AI provider you chose, never to any other server.',
+                          'مفتاحك مشفر ومحفوظ في جلسة هذا التبويب فقط. بيتمسح لما تقفل التبويب، ولا يُرسل إلا لمزوّد الذكاء الاصطناعي اللي اخترته، ولا لأي خادم آخر.'
                         )}
                       </p>
                     </div>
@@ -1197,7 +1197,7 @@ export default function StudentSettingsView({
                   <select
                     value={speechLanguage}
                     onChange={(e) => setSpeechLanguage(e.target.value as SpeechLanguage)}
-                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
                     <option value="ar-SA">العربية الفصحى (ar-SA)</option>
                     <option value="ar-EG">اللهجة المصرية (ar-EG)</option>
@@ -1214,7 +1214,7 @@ export default function StudentSettingsView({
                   <select
                     value={voiceSelection}
                     onChange={(e) => setVoiceSelection(e.target.value)}
-                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
                     <option value="default">{isAr ? 'الصوت الافتراضي للمنظومة' : 'System Default Voice'}</option>
                     {availableVoices.map((v, i) => (
@@ -1241,7 +1241,7 @@ export default function StudentSettingsView({
                     onChange={(e) => setAudioSpeed(parseFloat(e.target.value))}
                     className="w-full accent-[#1769AA] cursor-pointer"
                   />
-                  <div className="flex justify-between text-[11px] text-slate-600 dark:text-[#A9C4DD]">
+                  <div className="flex justify-between text-xs text-slate-600 dark:text-[#A9C4DD]">
                     <span>0.5x ({isAr ? 'بطيء' : 'Slow'})</span>
                     <span>1.0x ({isAr ? 'طبيعي' : 'Normal'})</span>
                     <span>2.0x ({isAr ? 'سريع' : 'Fast'})</span>
@@ -1264,7 +1264,7 @@ export default function StudentSettingsView({
                     onChange={(e) => setAudioPitch(parseFloat(e.target.value))}
                     className="w-full accent-[#1769AA] cursor-pointer"
                   />
-                  <p className="text-[11px] text-slate-500 dark:text-[#A9C4DD]/80">
+                  <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
                     {explainUnsupportedVoiceSetting('pitch', isAr ? 'Arabic' : 'English')}
                   </p>
                 </div>
@@ -1286,7 +1286,7 @@ export default function StudentSettingsView({
                       <span className="text-xs font-bold text-slate-900 dark:text-[#F4F7FB] block">
                         {localize(profile.language, 'Pronounce Arabic Tashkeel Marks', 'نطق علامات التشكيل وحركات الإعراب')}
                       </span>
-                      <span className="text-[11px] text-slate-600 dark:text-[#A9C4DD]">
+                      <span className="text-xs text-slate-600 dark:text-[#A9C4DD]">
                         {localize(profile.language, 'Helpful for academic textbooks and classical Arabic recitation', 'مفيد للكتب التعليمية ودقة التلاوة')}
                       </span>
                     </div>
@@ -1301,7 +1301,7 @@ export default function StudentSettingsView({
                   <select
                     value={numeralPronunciation}
                     onChange={(e) => setNumeralPronunciation(e.target.value as NumeralPronunciation)}
-                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
                     <option value="arabic_words">{isAr ? 'ألفاظ عربية كاملة (مثال: خمسة وعشرون)' : 'Full Number in Words (e.g. Twenty Five)'}</option>
                     <option value="individual_digits">{isAr ? 'أرقام منفصلة خانة بخانة (مثال: اثنان خمسة)' : 'Individual Digits (e.g. Two Five)'}</option>
@@ -1357,7 +1357,7 @@ export default function StudentSettingsView({
                       }`}
                     >
                       <span className="block font-black">{isAr ? 'موجز وسريع' : 'Concise'}</span>
-                      <span className="text-[11px] opacity-80 mt-1 block">
+                      <span className="text-xs opacity-80 mt-1 block">
                         {isAr ? 'يركز على العناصر الأساسية والعوائق فوراً' : 'Focuses on critical items and obstacles fast'}
                       </span>
                     </button>
@@ -1372,7 +1372,7 @@ export default function StudentSettingsView({
                       }`}
                     >
                       <span className="block font-black">{isAr ? 'مفصل شامل' : 'Detailed'}</span>
-                      <span className="text-[11px] opacity-80 mt-1 block">
+                      <span className="text-xs opacity-80 mt-1 block">
                         {isAr ? 'يصف الألوان، الإضاءة، العلاقات المكانية والأبعاد' : 'Includes colors, lighting, spatial relations, bounds'}
                       </span>
                     </button>
@@ -1387,7 +1387,7 @@ export default function StudentSettingsView({
                   <select
                     value={descLanguage}
                     onChange={(e) => setDescLanguage(e.target.value as any)}
-                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
                     <option value="Arabic">{isAr ? 'العربية الفصحى المبسطة' : 'Simplified Modern Standard Arabic'}</option>
                     <option value="Egyptian Ammiya">{isAr ? 'العامية المصرية الودودة' : 'Friendly Egyptian Arabic (Ammiya)'}</option>
@@ -1403,7 +1403,7 @@ export default function StudentSettingsView({
                   <select
                     value={preferredCurrency}
                     onChange={(e) => setPreferredCurrency(e.target.value as PreferredCurrency)}
-                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                    className="w-full bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   >
                     <option value="EGP">{isAr ? 'الجنيه المصري (EGP)' : 'Egyptian Pound (EGP)'}</option>
                     <option value="SAR">{isAr ? 'الريال السعودي (SAR)' : 'Saudi Riyal (SAR)'}</option>
@@ -1411,7 +1411,7 @@ export default function StudentSettingsView({
                     <option value="USD">{isAr ? 'الدولار الأمريكي (USD)' : 'US Dollar (USD)'}</option>
                     <option value="EUR">{isAr ? 'اليورو (EUR)' : 'Euro (EUR)'}</option>
                   </select>
-                  <p className="text-[11px] text-slate-500 dark:text-[#A9C4DD]/80">
+                  <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
                     {isAr 
                       ? `مثال النطق الصوتي: ${formatCurrencySpoken(100, preferredCurrency, 'Arabic')}` 
                       : `Spoken sample: ${formatCurrencySpoken(100, preferredCurrency, 'English')}`}
@@ -1447,7 +1447,7 @@ export default function StudentSettingsView({
                       <span>{isAr ? 'القدم والبوصة (إمبراطوري)' : 'Feet & Inches (Imperial)'}</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-[#A9C4DD]/80">
+                  <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
                     {isAr 
                       ? `مثال المسافة: ${formatMeasurementSpoken(2.5, 'distance', measurementUnits, 'Arabic')}`
                       : `Distance sample: ${formatMeasurementSpoken(2.5, 'distance', measurementUnits, 'English')}`}
@@ -1507,10 +1507,10 @@ export default function StudentSettingsView({
                     value={personalVoiceCommandPhrase}
                     onChange={(e) => setPersonalVoiceCommandPhrase(e.target.value)}
                     placeholder={isAr ? 'مثال: رفيقي استمع' : 'e.g. Rafiqi Listen'}
-                    className="flex-1 bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                    className="flex-1 bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-[#A9C4DD]/80">
+                <p className="text-xs text-slate-500 dark:text-[#A9C4DD]/80">
                   {localize(
                     profile.language,
                     'Say this phrase while using voice document creation or scene questions to wake Rafiqi.',
@@ -1549,7 +1549,7 @@ export default function StudentSettingsView({
                             {isAr ? sc.descriptionAr : sc.descriptionEn}
                           </td>
                           <td className="p-3">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#1769AA]/15 border border-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1]">
+                            <span className="px-2 py-0.5 rounded text-xs font-bold uppercase bg-[#1769AA]/15 border border-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1]">
                               {sc.category}
                             </span>
                           </td>
@@ -1627,7 +1627,7 @@ export default function StudentSettingsView({
                   <span className="text-xs font-bold text-slate-900 dark:text-[#F4F7FB] block">
                     {localize(profile.language, 'Track Reading Bookmarks & Lecture Timestamps', 'تسجيل مواضع التوقف في الكتب والمحاضرات')}
                   </span>
-                  <span className="text-[11px] text-slate-600 dark:text-[#A9C4DD]">
+                  <span className="text-xs text-slate-600 dark:text-[#A9C4DD]">
                     {localize(profile.language, 'Allows you to resume listening from where you left off', 'يتيح استئناف الاستماع والقراءة مباشرة من النقطة التي توقفت عندها')}
                   </span>
                 </div>
@@ -1665,7 +1665,7 @@ export default function StudentSettingsView({
                             </h4>
                           </div>
 
-                          <div className="flex items-center gap-3 text-[11px] text-slate-600 dark:text-[#A9C4DD]">
+                          <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-[#A9C4DD]">
                             <span>
                               {item.type === 'audio_lecture' 
                                 ? (isAr ? `توقف عند الدقيقة ${Math.floor(item.lastPosition / 60)}` : `At minute ${Math.floor(item.lastPosition / 60)}`)
@@ -1768,7 +1768,7 @@ export default function StudentSettingsView({
                     <span className="text-xs font-bold text-slate-900 dark:text-[#F4F7FB] block">
                       {localize(profile.language, 'Enable Assistant Memory (Opt-in)', 'تفعيل ذاكرة المساعد (اختياري)')}
                     </span>
-                    <span className="text-[11px] text-slate-600 dark:text-[#A9C4DD]">
+                    <span className="text-xs text-slate-600 dark:text-[#A9C4DD]">
                       {localize(profile.language, 'Remembers your custom room landmarks and study habits', 'يتذكر معالم غرفتك المحددة وعاداتك الدراسية')}
                     </span>
                   </div>
@@ -1786,7 +1786,7 @@ export default function StudentSettingsView({
                     <span className="text-xs font-bold text-slate-900 dark:text-[#F4F7FB] block">
                       {localize(profile.language, 'Pause Memory Recording', 'إيقاف مؤقت لحفظ الذاكرة')}
                     </span>
-                    <span className="text-[11px] text-slate-600 dark:text-[#A9C4DD]">
+                    <span className="text-xs text-slate-600 dark:text-[#A9C4DD]">
                       {localize(profile.language, 'Temporarily prevent Rafiqi from adding new notes', 'يمنع رفيقي مؤقتاً من إضافة أي ملاحظات جديدة')}
                     </span>
                   </div>
@@ -1804,7 +1804,7 @@ export default function StudentSettingsView({
                     <select
                       value={newMemoryCategory}
                       onChange={(e) => setNewMemoryCategory(e.target.value as any)}
-                      className="bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                      className="bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                     >
                       <option value="topic_interest">{isAr ? 'اهتمامات دراسية' : 'Topic Interest'}</option>
                       <option value="room_landmark">{isAr ? 'معلم مكاني بالغرفة' : 'Room Landmark'}</option>
@@ -1821,7 +1821,7 @@ export default function StudentSettingsView({
                         setMemoryValidationError(null);
                       }}
                       placeholder={isAr ? 'اكتب ملاحظة (مثال: مفاتيح الخزانة في الدرج العلوي)' : 'Write a note (e.g. Desk is near window)'}
-                      className="sm:col-span-2 bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus:border-[#1769AA]"
+                      className="sm:col-span-2 bg-white dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                     />
                   </div>
 
@@ -1868,10 +1868,10 @@ export default function StudentSettingsView({
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#1769AA]/15 border border-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1]">
+                            <span className="px-2 py-0.5 rounded text-xs font-bold uppercase bg-[#1769AA]/15 border border-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1]">
                               {mem.category}
                             </span>
-                            <span className="text-[11px] text-slate-600 dark:text-[#A9C4DD]">
+                            <span className="text-xs text-slate-600 dark:text-[#A9C4DD]">
                               {new Date(mem.timestamp).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
                             </span>
                           </div>
@@ -1953,12 +1953,12 @@ export default function StudentSettingsView({
                         </td>
                         <td className="p-3">
                           {cap.worksOffline ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                               <Check className="w-3 h-3" />
                               <span>{isAr ? 'يعمل دون إنترنت' : 'Works Offline'}</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD]">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-[#082344] border border-slate-200 dark:border-[#16395E] text-slate-600 dark:text-[#A9C4DD]">
                               <span>{isAr ? 'يتطلب اتصال سحابي' : 'Requires Cloud'}</span>
                             </span>
                           )}
@@ -1984,7 +1984,7 @@ export default function StudentSettingsView({
                 <h4 className="text-xs font-bold text-slate-900 dark:text-[#F4F7FB]">
                   {localize(profile.language, 'Saving changes...', 'جارٍ حفظ التغييرات...')}
                 </h4>
-                <p className="text-[11px] text-slate-600 dark:text-[#A9C4DD] mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-[#A9C4DD] mt-0.5">
                   {localize(profile.language, 'Synchronizing preferences with profile', 'مزامنة التفضيلات مع ملفك الشخصي')}
                 </p>
               </div>
@@ -1998,7 +1998,7 @@ export default function StudentSettingsView({
                 <h4 className="text-xs font-bold text-slate-900 dark:text-[#F4F7FB]">
                   {localize(profile.language, 'Settings saved successfully', 'تم حفظ الإعدادات بنجاح')}
                 </h4>
-                <p className="text-[11px] text-slate-600 dark:text-[#A9C4DD] mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-[#A9C4DD] mt-0.5">
                   {localize(profile.language, `Last saved: ${lastSavedStr}`, `آخر حفظ: ${lastSavedStr}`)}
                 </p>
               </div>
@@ -2012,7 +2012,7 @@ export default function StudentSettingsView({
                 <h4 className="text-xs font-bold text-rose-300">
                   {localize(profile.language, 'Could not save settings. Please try again.', 'تعذّر حفظ الإعدادات. حاول مرة أخرى.')}
                 </h4>
-                <p className="text-[11px] text-rose-400/80 mt-0.5">
+                <p className="text-xs text-rose-400/80 mt-0.5">
                   {localize(profile.language, 'Check your connection or storage permissions.', 'تحقق من اتصال الشبكة وصلاحيات التخزين.')}
                 </p>
               </div>

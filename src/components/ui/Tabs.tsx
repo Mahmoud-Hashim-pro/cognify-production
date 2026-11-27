@@ -102,7 +102,7 @@ export const Tabs: React.FC<TabsProps> = ({
             onClick={() => handleSelect(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
             className={cn(
-              'min-h-[48px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 inline-flex items-center gap-2 cursor-pointer outline-none whitespace-nowrap',
+              'min-h-[48px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 inline-flex items-center gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] whitespace-nowrap',
               'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2',
               tab.disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
               variant === 'pills' && [

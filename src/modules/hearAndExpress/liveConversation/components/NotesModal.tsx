@@ -83,7 +83,7 @@ export const NotesModal: React.FC<NotesModalProps> = ({
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               placeholder={isAr ? 'اكتب ملاحظة أو نقطة مهمة…' : 'Type a note or reminder…'}
-              className="flex-1 bg-[#102D4D] border border-[#12CFE0]/30 rounded-xl px-3.5 py-2.5 text-sm text-[#F4F7FB] focus:outline-none focus:border-[#12CFE0]"
+              className="flex-1 bg-[#102D4D] border border-[#12CFE0]/30 rounded-xl px-3.5 py-2.5 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
             />
             <button
               type="submit"
@@ -125,7 +125,7 @@ export const NotesModal: React.FC<NotesModalProps> = ({
                   className="flex items-start justify-between p-3 bg-[#102D4D] border border-white/10 rounded-xl text-xs gap-3"
                 >
                   <div>
-                    <span className="text-[10px] text-[#12CFE0] font-mono block mb-1">
+                    <span className="text-xs text-[#12CFE0] font-mono block mb-1">
                       {new Date(n.timestamp).toLocaleTimeString()}
                     </span>
                     <p className="text-[#F4F7FB] font-medium leading-relaxed">{n.text}</p>

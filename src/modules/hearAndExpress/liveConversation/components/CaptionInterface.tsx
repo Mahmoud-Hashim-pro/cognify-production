@@ -343,7 +343,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             }}
             disabled={recognitionState === 'listening'}
             aria-label={isAr ? 'اختيار لغة التعرف' : 'Select recognition language'}
-            className="bg-[#102D4D] border border-inherit/30 text-xs font-bold rounded-xl px-3 py-2 text-[#F4F7FB] min-h-[44px] focus:outline-none focus:border-[#12CFE0]"
+            className="bg-[#102D4D] border border-inherit/30 text-xs font-bold rounded-xl px-3 py-2 text-[#F4F7FB] min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
           >
             <option value="Arabic">العربية الفصحى (ar-SA)</option>
             <option value="Egyptian Ammiya">العامية المصرية (ar-EG)</option>
@@ -352,7 +352,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
 
           {/* Privacy badge */}
           <div
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-bold text-emerald-400"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400"
             title={isAr ? 'لا يتم تخزين أي صوت خام على الخوادم' : 'Raw audio is never recorded or stored'}
           >
             <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -483,7 +483,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={isAr ? 'بحث في نصوص المحادثة (Alt+S)…' : 'Search transcript (Alt+S)…'}
-            className="w-full bg-[#102D4D]/70 border border-inherit/20 rounded-xl pl-9 pr-3 py-1.5 text-xs text-inherit placeholder:text-inherit/40 focus:outline-none focus:border-[#12CFE0]"
+            className="w-full bg-[#102D4D]/70 border border-inherit/20 rounded-xl pl-9 pr-3 py-1.5 text-xs text-inherit placeholder:text-inherit/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
           />
           {searchQuery && (
             <button
@@ -519,7 +519,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           <AlertCircle className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" aria-hidden="true" />
           <div className="flex-1">
             <p className="font-bold">{isAr ? activeError.messageAr : activeError.messageEn}</p>
-            <p className="text-[11px] text-rose-300/80 mt-0.5">
+            <p className="text-xs text-rose-300/80 mt-0.5">
               {isAr ? activeError.suggestedActionAr : activeError.suggestedActionEn}
             </p>
           </div>
@@ -575,18 +575,18 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                   </span>
                 )}
                 {visualSettings.showTimestamps && (
-                  <span className="text-[11px] font-mono opacity-60">
+                  <span className="text-xs font-mono opacity-60">
                     {new Date(seg.timestamp).toLocaleTimeString()}
                   </span>
                 )}
                 {seg.isEdited && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-inherit/50 border border-inherit/20 text-[#12CFE0]">
+                  <span className="text-xs px-1.5 py-0.2 rounded bg-inherit/50 border border-inherit/20 text-[#12CFE0]">
                     {isAr ? 'معدل' : 'edited'}
                   </span>
                 )}
                 {seg.isLowConfidence && (
                   <span
-                    className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300"
+                    className="text-xs px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300"
                     title={isAr ? 'دقة السمع منخفضة (يرجى التحقق)' : 'Low audio confidence'}
                   >
                     {isAr ? 'صوت غير واضح' : 'low confidence'}
@@ -640,7 +640,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                   type="text"
                   value={editingText}
                   onChange={(e) => setEditingText(e.target.value)}
-                  className="w-full bg-[#071B33] border border-[#12CFE0] rounded-xl p-2.5 text-sm text-white focus:outline-none"
+                  className="w-full bg-[#071B33] border border-[#12CFE0] rounded-xl p-2.5 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   autoFocus
                 />
                 <div className="flex justify-end gap-2 text-xs">
@@ -670,7 +670,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             dir={ConversationEngine.detectDirection(interimText, selectedDialect)}
             className={`p-3.5 sm:p-4 rounded-2xl italic ${themeStyle.interimBg}`}
           >
-            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase mb-1 opacity-80">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase mb-1 opacity-80">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <span>{isAr ? 'جاري الاستماع الآن…' : 'Listening now…'}</span>
             </div>

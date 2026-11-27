@@ -84,8 +84,9 @@ In the client-side single-page app, memory stores (`userSpatialCache`, `managerC
 1. **Server-Side Isolation by Default**:
    - Cognify production AI queries execute through secure `/api/gemini/*` endpoints using server environment variables. API tokens are never sent to the browser.
 2. **Web Crypto API AES-GCM for Client Secrets**:
-   - For user-supplied Bring-Your-Own-Key (BYOK) configurations, Cognify uses the standard browser **Web Crypto API AES-GCM** (256-bit key derived with PBKDF2) for async encryption and integrity protection in local storage.
+   - For user-supplied Bring-Your-Own-Key (BYOK) configurations, Cognify uses the standard browser **Web Crypto API AES-GCM** (256-bit key derived with PBKDF2) for async encryption and integrity protection. **BYOK keys are stored only in `sessionStorage`: they exist for the current browser tab session, are never persisted in `localStorage`, and are deleted when the tab closes.** Older versions stored them in local storage; a built-in migration moves any legacy copy to session storage and deletes the persisted one.
    - Synchronous reads utilize a client-side stream obfuscation cipher with randomized per-device salt to prevent plain-text memory inspection and shoulder-surfing.
+   - **Honest boundary**: browser storage encryption protects against casual inspection and cross-device dumps, not against malware or a compromised browser on the same device. Users who need stronger guarantees should use the default server-side mode, where keys never reach the browser at all.
 
 ---
 
@@ -96,3 +97,30 @@ In the client-side single-page app, memory stores (`userSpatialCache`, `managerC
 3. **Ephemeral media**: camera frames and microphone audio are never written to our disk or database (see the taxonomy table); browser speech-recognition vendors (Google/Apple) and the Gemini API have their own retention, disclosed in Section 1.
 4. **Informed media consent**: before the first camera or microphone use, a one-time consent screen (also read aloud for blind users) explains exactly what is sent where and what is stored. Consent is recorded with the date and policy version in the user profile (`mediaConsent`); guests keep it in device-local storage. A material change to the consent text bumps the version and re-asks everyone.
 5. **Caregiver numbers**: a caregiver's phone number is the caregiver's personal data. It is saved only after an explicit in-app confirmation that the caregiver agreed, is used solely for emergency SOS alerts, and can be deleted anytime.
+
+---
+
+## 7. Third-Party Network Services (Complete Disclosure)
+
+Every external service the app contacts, directly from the browser or from our serverless API:
+
+| Service | Endpoint(s) | What is sent | When |
+|---|---|---|---|
+| **Google Gemini API** | `generativelanguage.googleapis.com` | Chat prompts, attached files, camera frames for scene analysis | Every AI answer (server-side by default) |
+| **Groq** | `api.groq.com` | Chat prompts | Only when the user selects Groq (BYOK or configured provider) |
+| **OpenAI** | `api.openai.com` | Chat prompts | Only when selected as provider |
+| **NVIDIA NIM** | `integrate.api.nvidia.com` | Chat prompts | Only when selected as provider |
+| **xAI** | `api.x.ai` | Chat prompts | Only when selected as provider |
+| **OpenRouter** | `openrouter.ai` | Chat prompts | Only when selected as provider |
+| **Firebase (Google)** | `firestore.googleapis.com`, `securetoken.google.com`, `googleapis.com` | Auth tokens, profile and learning data reads/writes | Continuous (account data) |
+| **api.ipify.org** | `api.ipify.org?format=json` | Nothing beyond the request itself; the service sees the user's public IP | Only when the security audit needs the user's own public IP as a fallback lookup (used for login/security diagnostics; the IP is shown to the user and may be stored in `/securityAudits`) |
+| **api.country.is** | `api.country.is` | Nothing beyond the request; the service sees the user's public IP | Country detection for regional fallbacks |
+| **Pollinations** | `image.pollinations.ai` | Image generation prompt text | Only when the user generates an image |
+| **Unsplash** | `images.unsplash.com` | None (image fetch) | Illustrative images in content |
+| **jsDelivr CDN** | `cdn.jsdelivr.net` | None (static asset/model fetch) | Loading ML model assets (e.g. MediaPipe) |
+| **OpenStreetMap / OSRM / Waze / Google Maps** | `openstreetmap.org`, `router.project-osrm.org`, `maps.google.com`, `waze.com` | Coordinates only, and only when the user taps a navigation link | Blind navigation directions |
+| **Google Translate** | `translate.google.com` | Page URL | Only if the user opens the translate link |
+| **WhatsApp** | `wa.me` | Prefilled SOS text | Only when the user sends an SOS to their caregiver |
+| **Browser speech recognition** | (browser vendor: Google on Chrome/Android, Apple on Safari) | Microphone audio for transcription | Only while voice input is active; governed by the browser vendor's policy |
+
+No analytics trackers, advertising SDKs, or fingerprinting services are embedded.

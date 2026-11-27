@@ -196,7 +196,7 @@ No markdown outside JSON.`;
             value={lectureTitle}
             onChange={(e) => setLectureTitle(e.target.value)}
             placeholder={isAr ? 'عنوان المحاضرة أو رقم الشابتر (اختياري)...' : 'Lecture title or chapter number (optional)...'}
-            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500"
+            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500"
           />
 
           <textarea
@@ -204,11 +204,11 @@ No markdown outside JSON.`;
             onChange={(e) => setContentInput(e.target.value)}
             rows={5}
             placeholder={isAr ? 'الصق هنا نص المحاضرة، نصوص السلايدات، أو تلخيص الدكتور في القاعة...' : 'Paste lecture text, slide bullet points, or professor notes here...'}
-            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 leading-relaxed font-sans"
+            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500 leading-relaxed font-sans"
           />
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <span className="text-[11px] text-slate-500 font-mono">
+            <span className="text-xs text-slate-500 font-mono">
               {contentInput.length} {isAr ? 'حرف مسجل' : 'chars'}
             </span>
 
@@ -283,7 +283,7 @@ No markdown outside JSON.`;
             <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl space-y-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 bg-[#E5A93C]/10 border border-purple-500/30 px-3 py-1 rounded-xl">
+                  <span className="text-xs font-black uppercase tracking-wider text-purple-400 bg-[#E5A93C]/10 border border-purple-500/30 px-3 py-1 rounded-xl">
                     {isAr ? 'كبسولة الزبدة والخلاصة المفيدة' : 'The Distilled Bottom Line'}
                   </span>
                   <h3 className="text-xl font-black text-white pt-2">{digest.title}</h3>
@@ -315,7 +315,7 @@ No markdown outside JSON.`;
                         key={idx}
                         className="p-4 rounded-2xl bg-[#150917] border border-[#4A1224]/60 font-mono text-xs text-[#E5A93C] flex items-center gap-3"
                       >
-                        <span className="w-5 h-5 rounded-md bg-[#4A1224]/40 border border-[#E5A93C]/30 text-[#E5A93C] flex items-center justify-center text-[10px] shrink-0 font-sans font-bold">
+                        <span className="w-5 h-5 rounded-md bg-[#4A1224]/40 border border-[#E5A93C]/30 text-[#E5A93C] flex items-center justify-center text-xs shrink-0 font-sans font-bold">
                           {idx + 1}
                         </span>
                         <span className="flex-1 font-semibold">{item}</span>
@@ -360,12 +360,12 @@ No markdown outside JSON.`;
                       <span className="w-6 h-6 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 font-bold text-xs flex items-center justify-center font-mono">
                         Q{idx + 1}
                       </span>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-[#150917] border border-[#4A1224]/60 px-2.5 py-0.5 rounded-md">
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-400 bg-[#150917] border border-[#4A1224]/60 px-2.5 py-0.5 rounded-md">
                         {pq.type.toUpperCase()}
                       </span>
                     </div>
 
-                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 rounded-md">
+                    <span className="text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/10 border border-rose-500/30 px-2.5 py-0.5 rounded-md">
                       {isAr ? 'احتمالية ورود عالية في الامتحان' : 'High Exam Probability'}
                     </span>
                   </div>
@@ -375,7 +375,7 @@ No markdown outside JSON.`;
                   </div>
 
                   <div className="p-4 rounded-2xl bg-[#150917] border border-[#4A1224]/60 text-xs text-slate-300 space-y-1.5">
-                    <div className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">
+                    <div className="text-xs font-black uppercase text-emerald-400 tracking-wider">
                       {isAr ? 'الإجابة النموذجية ومعايير الدرجة النهائية:' : 'Model Solution & Rubric Targets:'}
                     </div>
                     <div className="leading-relaxed font-sans">{pq.expectedAnswer}</div>
@@ -389,7 +389,7 @@ No markdown outside JSON.`;
           {activeTab === 'mindmap' && (
             <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl space-y-6">
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#E5A93C] bg-[#4A1224]/25 border border-[#E5A93C]/30 px-3 py-1 rounded-xl">
+                <span className="text-xs font-black uppercase tracking-wider text-[#E5A93C] bg-[#4A1224]/25 border border-[#E5A93C]/30 px-3 py-1 rounded-xl">
                   {isAr ? 'خريطة الربط المفاهيمي' : 'Interactive Concept Graph'}
                 </span>
                 <h3 className="text-lg font-black text-white pt-1">
@@ -408,7 +408,7 @@ No markdown outside JSON.`;
                         : 'bg-[#150917] border-[#4A1224]/60 hover:border-[#831843]/70'
                     }`}
                   >
-                    <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1">
                       {node.category}
                     </div>
                     <div className="text-sm font-bold text-white mb-3">
@@ -417,14 +417,14 @@ No markdown outside JSON.`;
 
                     {node.connections.length > 0 && (
                       <div className="space-y-1.5 pt-2 border-t border-[#4A1224]/60">
-                        <div className="text-[10px] text-slate-500 font-bold uppercase">
+                        <div className="text-xs text-slate-500 font-bold uppercase">
                           {isAr ? 'يرتبط بـ:' : 'Connects to:'}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {node.connections.map((conn, cIdx) => (
                             <span
                               key={cIdx}
-                              className="text-[10px] text-slate-300 bg-[#150917] border border-[#4A1224]/60 px-2 py-0.5 rounded-lg"
+                              className="text-xs text-slate-300 bg-[#150917] border border-[#4A1224]/60 px-2 py-0.5 rounded-lg"
                             >
                               {conn}
                             </span>

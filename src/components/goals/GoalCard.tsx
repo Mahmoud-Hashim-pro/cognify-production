@@ -76,7 +76,7 @@ export default function GoalCard({ goal, uid, onEdit, onDelete, language }: Goal
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h3 className="text-sm font-black text-white truncate">{localGoal.title}</h3>
                 {overdue && (
-                  <span className="flex items-center gap-1 text-[10px] font-black text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 rounded-full">
+                  <span className="flex items-center gap-1 text-xs font-black text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 rounded-full">
                     <AlertTriangle className="w-3 h-3" />
                     {isArabic ? 'متأخر' : 'Overdue'}
                   </span>
@@ -115,7 +115,7 @@ export default function GoalCard({ goal, uid, onEdit, onDelete, language }: Goal
 
         {/* Progress bar */}
         <div className="mt-4 space-y-1.5">
-          <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+          <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-[#E5A93C]/80">
             <span>{isArabic ? 'التقدم' : 'Progress'}</span>
             <span className="font-mono text-[#E5A93C] font-bold">{localGoal.progress}%</span>
           </div>
@@ -137,20 +137,20 @@ export default function GoalCard({ goal, uid, onEdit, onDelete, language }: Goal
 
         {/* Meta row */}
         <div className="flex flex-wrap items-center gap-2 mt-4">
-          <span className={`text-[10px] font-black border px-2.5 py-1 rounded-full uppercase tracking-widest ${pri.color}`}>
+          <span className={`text-xs font-black border px-2.5 py-1 rounded-full uppercase tracking-widest ${pri.color}`}>
             {isArabic
               ? localGoal.priority === 'low' ? 'منخفض' : localGoal.priority === 'medium' ? 'متوسط' : 'عالي'
               : pri.label}
           </span>
 
           {localGoal.milestones.length > 0 && (
-            <span className="text-[10px] font-bold text-slate-300 bg-[#150917] border border-[#4A1224]/50 px-2.5 py-1 rounded-full">
+            <span className="text-xs font-bold text-slate-300 bg-[#150917] border border-[#4A1224]/50 px-2.5 py-1 rounded-full">
               {localGoal.milestones.filter((m) => m.completed).length} / {localGoal.milestones.length}{' '}
               {isArabic ? 'خطوات' : 'milestones'}
             </span>
           )}
 
-          <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-[#E5A93C]/90 ms-auto">
+          <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#E5A93C]/90 ms-auto">
             <Calendar className="w-3.5 h-3.5 text-[#E5A93C]" />
             {parseGoalLocalDate(localGoal.deadline).toLocaleDateString(
               isArabic ? 'ar-EG' : 'en-GB',
@@ -172,7 +172,7 @@ export default function GoalCard({ goal, uid, onEdit, onDelete, language }: Goal
             className="overflow-hidden"
           >
             <div className="px-6 pb-6 pt-0 border-t border-[#4A1224]/50 bg-[#080409]/60">
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C] mt-4 mb-3">
+              <p className="text-xs font-black uppercase tracking-widest text-[#E5A93C] mt-4 mb-3">
                 {isArabic ? 'الخطوات' : 'Milestones'}
               </p>
               {localGoal.milestones.length === 0 ? (

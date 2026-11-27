@@ -519,7 +519,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <h1 className={`font-black text-sm sm:text-base leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                 {t('Caregiver & Specialist Command Hub', 'لوحة تحكم المرافق والمختص الطبي', 'Centre Accompagnant & Spécialiste')}
               </h1>
-              <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+              <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {t('Telemetry, safety controls, sensory pattern analytics and clinical insights', 'متابعة المؤشرات الحيوية، التحليل السريري للأنماط الحسية، تجربة الطوارئ وجواز الوصول')}
               </p>
             </div>
@@ -566,7 +566,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               >
                 <div className="min-w-0">
                   <div className="font-bold text-sm text-white truncate">{req.parentName}</div>
-                  <div className="text-[11px] text-slate-400 truncate">
+                  <div className="text-xs text-slate-400 truncate">
                     {t(
                       'wants to view your progress and accessibility settings',
                       'عايز يشوف تقدمك وإعدادات الوصول الميسر بتاعتك',
@@ -604,7 +604,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                   {t('Linked caregivers & specialists', 'المرافقين والمختصين المرتبطين', 'Accompagnants et spécialistes liés')}
                 </span>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              <span className="px-2.5 py-1 rounded-full text-xs font-black bg-amber-500/15 text-amber-300 border border-amber-500/30">
                 {linkedCaregivers.length}
               </span>
             </div>
@@ -615,7 +615,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               >
                 <div className="min-w-0">
                   <div className="font-bold text-sm text-white truncate">{c.name}</div>
-                  <div className="text-[11px] text-slate-400 truncate">
+                  <div className="text-xs text-slate-400 truncate">
                     {c.email}
                     {c.uid === profile.linkedParentUid ? ` · ${t('Primary', 'أساسي', 'Principal')}` : ''}
                   </div>
@@ -639,7 +639,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <Eye className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Visual Memories', 'ذاكرة الأشخاص والأشياء')}</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">{t('Visual Memories', 'ذاكرة الأشخاص والأشياء')}</div>
               <div className="text-xl font-black text-white">{profile.visionMemories?.length || 0} {t('Items', 'عنصر')}</div>
             </div>
           </div>
@@ -650,10 +650,10 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <Activity className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Sensory State', 'الحالة والضغط الحسي')}</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">{t('Sensory State', 'الحالة والضغط الحسي')}</div>
               <div className="text-base font-black text-white flex items-center gap-1.5">
                 <span>{latestSensory ? `${latestSensory.intensity}/5` : 'هادئ'}</span>
-                <span className="text-[10px] text-purple-300 font-normal truncate">
+                <span className="text-xs text-purple-300 font-normal truncate">
                   ({latestSensory ? latestSensory.level : 'Calm'})
                 </span>
               </div>
@@ -666,7 +666,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <Phone className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Emergency Contacts', 'أرقام الطوارئ')}</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">{t('Emergency Contacts', 'أرقام الطوارئ')}</div>
               <div className="text-xl font-black text-white">{contacts.length} {t('Saved', 'مسجل')}</div>
             </div>
           </div>
@@ -682,7 +682,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <div>
                 <h3 className="font-black text-base text-white flex items-center gap-2">
                   <span>{t('Clinical Sensory & Meltdown Analytics (ABA / OT)', 'التحليل السريري للأنماط ونوبات الضغط الحسي (ABA / OT)')}</span>
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 font-normal">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 font-normal">
                     {patternAnalysis.totalMeltdowns} {t('Episodes Tracked', 'نوبة مرصودة')}
                   </span>
                 </h3>
@@ -727,7 +727,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             <div className="p-4 rounded-2xl bg-[#111622] border border-[#4A1224]/60 space-y-3">
               <h4 className="font-bold text-xs text-slate-300 flex items-center justify-between">
                 <span>{t('Meltdown Time-of-Day Distribution:', 'توزيع النوبات خلال ساعات اليوم:')}</span>
-                <span className="text-[10px] text-slate-400 font-normal">{patternAnalysis.totalMeltdowns} {t('Total', 'إجمالي')}</span>
+                <span className="text-xs text-slate-400 font-normal">{patternAnalysis.totalMeltdowns} {t('Total', 'إجمالي')}</span>
               </h4>
 
               <div className="space-y-2 text-xs">
@@ -740,7 +740,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                   const pct = patternAnalysis.totalMeltdowns > 0 ? Math.round((item.count / patternAnalysis.totalMeltdowns) * 100) : 0;
                   return (
                     <div key={idx} className="space-y-1">
-                      <div className="flex justify-between text-[11px] text-slate-400">
+                      <div className="flex justify-between text-xs text-slate-400">
                         <span>{item.label}</span>
                         <span className="font-mono font-bold text-slate-200">{item.count} ({pct}%)</span>
                       </div>
@@ -757,7 +757,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             <div className="p-4 rounded-2xl bg-[#111622] border border-[#4A1224]/60 space-y-3">
               <h4 className="font-bold text-xs text-slate-300 flex items-center justify-between">
                 <span>{t('Most Frequent Sensory Triggers:', 'أبرز المثيرات الحسية المتكررة:')}</span>
-                <span className="text-[10px] text-slate-400 font-normal">{patternAnalysis.topTriggers.length} {t('Identified', 'محددة')}</span>
+                <span className="text-xs text-slate-400 font-normal">{patternAnalysis.topTriggers.length} {t('Identified', 'محددة')}</span>
               </h4>
 
               {patternAnalysis.topTriggers.length === 0 ? (
@@ -768,7 +768,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 <div className="space-y-2 text-xs">
                   {patternAnalysis.topTriggers.map((tr, idx) => (
                     <div key={idx} className="space-y-1">
-                      <div className="flex justify-between text-[11px] text-slate-300">
+                      <div className="flex justify-between text-xs text-slate-300">
                         <span className="truncate">{tr.trigger}</span>
                         <span className="font-mono font-bold text-rose-300 shrink-0">{tr.count}x ({tr.percentage}%)</span>
                       </div>
@@ -808,7 +808,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
 
           {/* Registered Emergency Contacts List */}
-          <p className="text-[11px] leading-relaxed text-slate-400 bg-[#111622] border border-[#4A1224]/40 rounded-xl p-3">
+          <p className="text-xs leading-relaxed text-slate-400 bg-[#111622] border border-[#4A1224]/40 rounded-xl p-3">
             {t(
               'A caregiver\'s number is their personal data: in an emergency, their number and your location are sent to them. Only save a number after the person agrees, and you can delete it anytime.',
               'رقم المرافق بيانات شخصية بتاعته: وقت الطوارئ رقمه وموقعك بيتبعتوا له. سجّل الرقم بس بعد ما يوافق، وتقدر تمسحه في أي وقت.'
@@ -820,9 +820,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 <div>
                   <div className="font-bold text-xs text-white flex items-center gap-1.5">
                     <span>{isAr ? (c.nameAr || c.nameEn) : c.nameEn}</span>
-                    {c.isPrimaryEmergency && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-rose-900 text-rose-300 font-bold">{t('Primary', 'أساسي')}</span>}
+                    {c.isPrimaryEmergency && <span className="text-xs px-1.5 py-0.5 rounded-full bg-rose-900 text-rose-300 font-bold">{t('Primary', 'أساسي')}</span>}
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{c.phone || t('No number', 'بدون رقم')}</div>
+                  <div className="text-xs text-slate-400 font-mono mt-0.5">{c.phone || t('No number', 'بدون رقم')}</div>
                 </div>
                 <div className="flex items-center gap-1.5">
                 <button
@@ -900,10 +900,10 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 value={editingPhone}
                 onChange={(e) => setEditingPhone(e.target.value)}
                 placeholder="+2010XXXXXXXX"
-                className="mt-1.5 w-full min-h-[44px] rounded-xl bg-[#111622] border border-[#4A1224]/60 px-3 py-2 text-white font-mono text-sm outline-none focus:border-rose-400"
+                className="mt-1.5 w-full min-h-[44px] rounded-xl bg-[#111622] border border-[#4A1224]/60 px-3 py-2 text-white font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-rose-400"
               />
             </label>
-            <p className="text-[11px] leading-relaxed text-slate-400">
+            <p className="text-xs leading-relaxed text-slate-400">
               {t(
                 'In an emergency, Rafiqi sends this number an alert with your location. Their number is their personal data, so only save it if they agreed. You can delete it anytime.',
                 'وقت الطوارئ، رفيقي بيبعت للرقم ده تنبيه فيه موقعك. الرقم ده بيانات شخصية بتاعته، فمتسجلوش غير لو هو موافق. وتقدر تمسحه في أي وقت.'

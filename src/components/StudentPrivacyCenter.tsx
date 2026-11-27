@@ -336,7 +336,7 @@ export default function StudentPrivacyCenter({
             <Database className="w-4 h-4 text-teal-400" />
             <span>{L('Active Memory Items & Provenance', 'عناصر الذاكرة النشطة ومصدر البيانات')}</span>
           </div>
-          <span className="text-[11px] text-slate-400 font-semibold">
+          <span className="text-xs text-slate-400 font-semibold">
             {L('Source Provenance: Explicit vs. Inferred', 'سجل المصدر: مدخل يدوي مقابل استنتاج')}
           </span>
         </div>
@@ -352,7 +352,7 @@ export default function StudentPrivacyCenter({
                   <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
                   <span>{fact}</span>
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-teal-500/15 text-teal-300 border border-teal-500/30">
+                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-teal-500/15 text-teal-300 border border-teal-500/30">
                   {L('User Confirmed', 'مؤكد من الطالب')}
                 </span>
               </div>
@@ -416,7 +416,7 @@ export default function StudentPrivacyCenter({
             </p>
 
             <div className="space-y-1.5 pt-2">
-              <label htmlFor="confirm-account-deletion" className="text-[11px] font-bold text-slate-400">
+              <label htmlFor="confirm-account-deletion" className="text-xs font-bold text-slate-400">
                 {L(
                   `Type "${profile.email || 'DELETE'}" to confirm permanent erasure:`,
                   `اكتب "${profile.email || 'DELETE'}" لتأكيد الحذف النهائي:`
@@ -427,7 +427,7 @@ export default function StudentPrivacyCenter({
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder={profile.email || 'DELETE'}
-                className="w-full px-3.5 py-2.5 bg-[#080409] border border-[#4A1224]/50 rounded-xl text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-rose-500"
+                className="w-full px-3.5 py-2.5 bg-[#080409] border border-[#4A1224]/50 rounded-xl text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-rose-500"
               />
             </div>
 

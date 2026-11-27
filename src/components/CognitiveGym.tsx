@@ -1016,7 +1016,7 @@ export default function CognitiveGym({
                     'e.g. Write essay intro, solve physics sheet, study chapter 3...',
                     'مثال: كتابة مقدمة البحث، حل شيت الفيزيا، مذاكرة شابتر 3...'
                   )}
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-amber-500 transition-colors"
                 />
                 <button
                   onClick={handleSliceTask}
@@ -1430,7 +1430,7 @@ export default function CognitiveGym({
                     <h5 className="text-xs font-bold text-slate-300">
                       {localize(profile.language, 'Exploratory Cognitive Style Preview', 'الاستكشاف الإدراكي لنمط التفكير')}
                     </h5>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-xs text-slate-500">
                       {localize(profile.language, 'Informal educational quiz to calibrate AI tutoring style.', 'نشاط استكشافي غير إكلينيكي لتخصيص أسلوب الشرح.')}
                     </p>
                   </div>

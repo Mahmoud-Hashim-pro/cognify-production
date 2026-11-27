@@ -485,7 +485,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 : 'Click symbols to construct sentence, or type directly here...'
             }
             aria-label={isArabic ? 'نص الرسالة للتعديل والنطق' : 'Message text to speak'}
-            className={`flex-1 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none ${getTextSizeClass()}`}
+            className={`flex-1 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] resize-none ${getTextSizeClass()}`}
           />
 
           {/* Large Speak Button */}
@@ -583,7 +583,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 {/* Main Card Click: Add to sentence */}
                 <button
                   onClick={() => handleSelectSymbol(sym)}
-                  className="w-full flex flex-col items-center gap-2 py-2 focus:outline-none"
+                  className="w-full flex flex-col items-center gap-2 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   aria-label={isArabic ? `إضافة ${sym.labelAr}` : `Add ${sym.labelEn}`}
                 >
                   <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
@@ -593,7 +593,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                     <div className="font-bold text-sm sm:text-base leading-tight">
                       {isArabic ? sym.labelAr : sym.labelEn}
                     </div>
-                    <div className="text-[11px] opacity-60 mt-0.5 line-clamp-1">
+                    <div className="text-xs opacity-60 mt-0.5 line-clamp-1">
                       {isArabic ? sym.labelEn : sym.labelAr}
                     </div>
                   </div>

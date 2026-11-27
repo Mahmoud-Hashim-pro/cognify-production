@@ -100,7 +100,7 @@ export const Toggle: React.FC<ToggleProps> = ({
         }}
         onKeyDown={handleKeyDown}
         className={cn(
-          'relative inline-flex shrink-0 items-center rounded-full transition-colors duration-200 cursor-pointer outline-none',
+          'relative inline-flex shrink-0 items-center rounded-full transition-colors duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]',
           'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark',
           'motion-reduce:transition-none',
           isSm ? 'w-10 h-6' : 'w-12 h-7',

@@ -459,7 +459,7 @@ export default function SectionLandingView({
                 </span>
               </span>
 
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-2 py-0.5 rounded bg-black/10 dark:bg-white/5">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 py-0.5 rounded bg-black/10 dark:bg-white/5">
                 {section.id.replace('_', ' ')}
               </span>
             </div>
@@ -500,7 +500,7 @@ export default function SectionLandingView({
                 className="w-full lg:min-w-[280px] px-8 py-5 rounded-2xl bg-rafiqi-primary hover:bg-rafiqi-primary-dark active:scale-[0.98] text-white font-black text-base shadow-xl shadow-rafiqi-primary/30 flex items-center justify-between gap-4 cursor-pointer transition-all duration-150 focus-visible:ring-4 focus-visible:ring-rafiqi-primary/50"
               >
                 <div className="text-start">
-                  <div className="text-[11px] font-medium text-blue-200 uppercase tracking-wider">
+                  <div className="text-xs font-medium text-blue-200 uppercase tracking-wider">
                     {isAr ? 'الميزة الأساسية' : 'Primary Quick Start'}
                   </div>
                   <div className="text-base font-bold line-clamp-1">
@@ -516,7 +516,7 @@ export default function SectionLandingView({
                 </div>
               </button>
 
-              <p className="text-[11px] text-center text-slate-400">
+              <p className="text-xs text-center text-slate-400">
                 {isAr ? 'اضغط Enter أو المس لتشغيل الأداة فوراً' : 'Press Enter or click to launch instantly'}
               </p>
             </div>
@@ -575,7 +575,7 @@ export default function SectionLandingView({
               </div>
               <div>
                 <div className="text-xs font-bold">{isAr ? 'استئناف القراءة' : 'Resume Reading'}</div>
-                <div className="text-[10px] text-slate-400">{isAr ? 'متابعة الكتاب الحالي' : 'Continue current book'}</div>
+                <div className="text-xs text-slate-400">{isAr ? 'متابعة الكتاب الحالي' : 'Continue current book'}</div>
               </div>
             </button>
 
@@ -596,7 +596,7 @@ export default function SectionLandingView({
               </div>
               <div>
                 <div className="text-xs font-bold">{isAr ? 'رفع محاضرة صوتية' : 'Upload Lecture'}</div>
-                <div className="text-[10px] text-slate-400">{isAr ? 'تفريغ وتلخيص ذكي' : 'Transcribe & summarize'}</div>
+                <div className="text-xs text-slate-400">{isAr ? 'تفريغ وتلخيص ذكي' : 'Transcribe & summarize'}</div>
               </div>
             </button>
 
@@ -617,7 +617,7 @@ export default function SectionLandingView({
               </div>
               <div>
                 <div className="text-xs font-bold">{isAr ? 'مواصلة التعلّم' : 'Continue Learning'}</div>
-                <div className="text-[10px] text-slate-400">{isAr ? 'معلم الذكاء الاصطناعي' : 'Adaptive AI tutor'}</div>
+                <div className="text-xs text-slate-400">{isAr ? 'معلم الذكاء الاصطناعي' : 'Adaptive AI tutor'}</div>
               </div>
             </button>
           </div>
@@ -797,7 +797,7 @@ export default function SectionLandingView({
 
                           {/* Status Badge */}
                           <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                               isReady
                                 ? 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30'
                                 : 'bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30'
@@ -833,7 +833,7 @@ export default function SectionLandingView({
                           {(isAr ? feature.tagsAr : feature.tagsEn).map((tag, tIdx) => (
                             <span
                               key={tIdx}
-                              className={`px-2 py-0.5 rounded-md text-[10px] border ${
+                              className={`px-2 py-0.5 rounded-md text-xs border ${
                                 isDarkMode
                                   ? 'bg-[#131E2E] text-slate-400 border-[#22354E]'
                                   : 'bg-slate-100 text-slate-600 border-slate-200'
@@ -877,7 +877,7 @@ export default function SectionLandingView({
               {isAr ? 'النشاط الأخير في هذا القسم' : 'Recent Section Activity'}
             </h2>
           </div>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-xs text-slate-400">
             {recentItems.length > 0
               ? isAr
                 ? `${recentItems.length} سجلات نشطة`
@@ -898,7 +898,7 @@ export default function SectionLandingView({
                 }`}
               >
                 <div className="text-xs font-bold truncate mb-1">{item.label}</div>
-                <div className="text-[10px] text-slate-400">{item.timestamp}</div>
+                <div className="text-xs text-slate-400">{item.timestamp}</div>
               </div>
             ))}
           </div>

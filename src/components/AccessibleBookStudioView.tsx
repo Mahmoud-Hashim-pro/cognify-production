@@ -444,7 +444,7 @@ export default function AccessibleBookStudioView({
             <h1 className="font-black text-sm sm:text-base leading-tight truncate">
               {localize(profile?.language, 'Accessible Book & Document Studio', 'استوديو الكتب والمستندات التعليمية الميسرة')}
             </h1>
-            <p className="text-[10px] sm:text-xs text-stone-500 dark:text-stone-400 leading-snug">
+            <p className="text-xs sm:text-xs text-stone-500 dark:text-stone-400 leading-snug">
               {localize(
                 profile?.language,
                 'Transform rough educational notes into structured Word (.docx) & PDF documents',
@@ -541,7 +541,7 @@ export default function AccessibleBookStudioView({
                 type="button"
                 onClick={() => setActiveStep(item.step)}
                 aria-current={isActive ? 'step' : undefined}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none shrink-0 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shrink-0 ${
                   isActive
                     ? 'bg-teal-700 text-white shadow-sm font-black'
                     : isDarkMode
@@ -557,7 +557,7 @@ export default function AccessibleBookStudioView({
         </div>
 
         {/* Quick Word & Question Counter Badge */}
-        <div className="hidden sm:flex items-center gap-2 text-[11px] text-stone-500 dark:text-stone-400 font-bold shrink-0 ms-auto">
+        <div className="hidden sm:flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 font-bold shrink-0 ms-auto">
           <span>{stats.words} {isArLocale ? 'كلمة' : 'words'}</span>
           <span>•</span>
           <span>{stats.questionsCount} {isArLocale ? 'سؤال مكتشف' : 'questions'}</span>
@@ -608,7 +608,7 @@ export default function AccessibleBookStudioView({
                     <div className="font-bold text-xs sm:text-sm truncate">
                       {isArLocale ? 'رفع ملف Word أو TXT' : 'Upload DOCX or TXT'}
                     </div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
+                    <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
                       {isArLocale ? 'استيراد فوري واستخراج النصوص' : 'Instant pure extraction'}
                     </div>
                   </div>
@@ -630,7 +630,7 @@ export default function AccessibleBookStudioView({
                     <div className="font-bold text-xs sm:text-sm truncate">
                       {isArLocale ? 'استيراد من قارئ المستندات' : 'Import from File Reader'}
                     </div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
+                    <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
                       {isArLocale ? 'المحاضرات أو النصوص المستخرجة' : 'Lecture notes or PDF scans'}
                     </div>
                   </div>
@@ -648,7 +648,7 @@ export default function AccessibleBookStudioView({
                     <div className="font-bold text-xs sm:text-sm truncate">
                       {isArLocale ? 'حفظ الأصول وإمكانية التراجع' : 'Non-destructive Formatting'}
                     </div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400 truncate">
+                    <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
                       {isArLocale ? 'النص الأصلي محفوظ ومحمي دائماً' : 'Original text is never altered'}
                     </div>
                   </div>
@@ -668,14 +668,14 @@ export default function AccessibleBookStudioView({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'عنوان الكتاب أو المستند *' : 'Document Title *'}
                     </label>
                     <input
                       type="text"
                       id="book-meta-title" aria-label={isArLocale ? 'عنوان الكتاب أو المستند' : 'Document Title'} value={metadata.title}
                       onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus:border-teal-600 transition-colors ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                       placeholder={isArLocale ? 'مثال: كتاب الفيزياء الحيوية' : 'e.g. Biophysics Lecture Notes'}
@@ -683,14 +683,14 @@ export default function AccessibleBookStudioView({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'العنوان الفرعي أو الوحدة' : 'Subtitle or Unit'}
                     </label>
                     <input
                       type="text"
                       id="book-meta-subtitle" aria-label={isArLocale ? 'العنوان الفرعي أو الوحدة' : 'Subtitle or Unit'} value={metadata.subtitle || ''}
                       onChange={(e) => setMetadata({ ...metadata, subtitle: e.target.value })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                       placeholder={isArLocale ? 'مثال: الوحدة الأولى: الميكانيكا' : 'e.g. Unit 1: Mechanics'}
@@ -698,55 +698,55 @@ export default function AccessibleBookStudioView({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'المؤلف / المعلم' : 'Author / Teacher'}
                     </label>
                     <input
                       type="text"
                       id="book-meta-author" aria-label={isArLocale ? 'المؤلف أو المعلم' : 'Author or Teacher'} value={metadata.author}
                       onChange={(e) => setMetadata({ ...metadata, author: e.target.value })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'المادة التخصصية' : 'Subject'}
                     </label>
                     <input
                       type="text"
                       id="book-meta-subject" aria-label={isArLocale ? 'المادة التخصصية' : 'Subject'} value={metadata.subject}
                       onChange={(e) => setMetadata({ ...metadata, subject: e.target.value })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'المرحلة / الصف الدراسي' : 'Grade / Educational Level'}
                     </label>
                     <input
                       type="text"
                       id="book-meta-grade" aria-label={isArLocale ? 'المرحلة أو الصف الدراسي' : 'Grade or Educational Level'} value={metadata.gradeLevel}
                       onChange={(e) => setMetadata({ ...metadata, gradeLevel: e.target.value })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus:border-teal-600 transition-colors ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'لغة المحتوى والتنسيق' : 'Content Language'}
                     </label>
                     <select
                       value={metadata.language}
                       onChange={(e) => setMetadata({ ...metadata, language: e.target.value as StudioLanguage })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus:border-teal-600 transition-colors cursor-pointer ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
@@ -782,7 +782,7 @@ export default function AccessibleBookStudioView({
                     <FileText className="w-4 h-4" />
                     <span>{isArLocale ? 'محرر المحتوى والنصوص التعليمية' : 'Educational Content Source'}</span>
                   </div>
-                  <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                  <span className="text-xs text-stone-500 dark:text-stone-400">
                     {stats.words} {isArLocale ? 'كلمة' : 'words'} • {stats.paras} {isArLocale ? 'فقرة' : 'paragraphs'}
                   </span>
                 </div>
@@ -791,7 +791,7 @@ export default function AccessibleBookStudioView({
                   value={rawContent}
                   onChange={(e) => setRawContent(e.target.value)}
                   rows={14}
-                  className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed font-sans outline-none focus:border-teal-600 transition-colors custom-scrollbar ${
+                  className={`w-full p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed font-sans outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors custom-scrollbar ${
                     isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                   }`}
                   placeholder={
@@ -802,7 +802,7 @@ export default function AccessibleBookStudioView({
                 />
 
                 <div className="flex items-center justify-between pt-2">
-                  <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                  <span className="text-xs text-stone-500 dark:text-stone-400">
                     {isArLocale
                       ? 'يمكنك الانتقال للخطوة التالية لاختيار القالب والتحكم بالهيكل الأكاديمي'
                       : 'Proceed to Step 2 to select templates and formatting presets'}
@@ -853,7 +853,7 @@ export default function AccessibleBookStudioView({
                       key={tmplKey}
                       type="button"
                       onClick={() => handleSelectTemplate(tmplKey)}
-                      className={`p-4 rounded-2xl border text-start flex flex-col justify-between transition-all active:scale-95 cursor-pointer outline-none ${
+                      className={`p-4 rounded-2xl border text-start flex flex-col justify-between transition-all active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                         isSelected
                           ? 'border-teal-600 bg-teal-50 dark:bg-teal-950/60 ring-2 ring-teal-600 shadow-md'
                           : isDarkMode
@@ -873,12 +873,12 @@ export default function AccessibleBookStudioView({
                         <h3 className={`font-bold text-xs sm:text-sm ${isSelected ? 'text-teal-900 dark:text-teal-200' : ''}`}>
                           {isArLocale ? preset.labelAr : preset.labelEn}
                         </h3>
-                        <p className="text-[10px] text-stone-500 dark:text-stone-400 leading-relaxed">
+                        <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
                           {isArLocale ? preset.descriptionAr : preset.descriptionEn}
                         </p>
                       </div>
 
-                      <div className="pt-3 border-t border-stone-200 dark:border-stone-800/80 mt-3 flex items-center justify-between text-[9px] text-stone-400 font-bold">
+                      <div className="pt-3 border-t border-stone-200 dark:border-stone-800/80 mt-3 flex items-center justify-between text-xs text-stone-400 font-bold">
                         <span>{preset.defaultCover ? (isArLocale ? '✓ غلاف' : '✓ Cover') : (isArLocale ? 'ترويسة' : 'Header')}</span>
                         <span>{preset.defaultToc ? (isArLocale ? '✓ فهرس' : '✓ TOC') : ''}</span>
                         <span>{preset.defaultAnswerStyle !== 'none' ? (isArLocale ? '✓ مساحات حل' : '✓ Answers') : ''}</span>
@@ -903,13 +903,13 @@ export default function AccessibleBookStudioView({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Answer Space Style */}
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'نمط مساحات الإجابة للأسئلة' : 'Answer Space Style'}
                     </label>
                     <select
                       value={metadata.answerSpaceStyle}
                       onChange={(e) => setMetadata({ ...metadata, answerSpaceStyle: e.target.value as AnswerSpaceStyle })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus:border-teal-600 transition-colors cursor-pointer ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
@@ -922,13 +922,13 @@ export default function AccessibleBookStudioView({
 
                   {/* Typography Font */}
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'خط العناوين والنصوص' : 'Typography Font'}
                     </label>
                     <select
                       value={metadata.fontFamily}
                       onChange={(e) => setMetadata({ ...metadata, fontFamily: e.target.value })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus:border-teal-600 transition-colors cursor-pointer ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
@@ -942,13 +942,13 @@ export default function AccessibleBookStudioView({
 
                   {/* Font Size Scaling (Low Vision Accommodation) */}
                   <div>
-                    <label className="block text-[11px] font-bold text-stone-500 dark:text-stone-400 mb-1">
+                    <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
                       {isArLocale ? 'مقياس حجم الخط (لتيسير القراءة)' : 'Font Size Scale (Low-Vision)'}
                     </label>
                     <select
                       value={metadata.fontSizeScale}
                       onChange={(e) => setMetadata({ ...metadata, fontSizeScale: e.target.value as any })}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus:border-teal-600 transition-colors cursor-pointer ${
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors cursor-pointer ${
                         isDarkMode ? 'bg-cognify-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
@@ -1068,7 +1068,7 @@ export default function AccessibleBookStudioView({
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-stone-200 dark:border-stone-800 pb-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                          <span className={`text-xs font-black px-2 py-0.5 rounded-md ${
                             sec.level === 1
                               ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
                               : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
@@ -1078,7 +1078,7 @@ export default function AccessibleBookStudioView({
                           <h3 className="font-bold text-xs sm:text-sm truncate">{sec.title}</h3>
                         </div>
 
-                        <span className="text-[10px] text-stone-400 shrink-0">
+                        <span className="text-xs text-stone-400 shrink-0">
                           {sec.questions?.length || 0} {isArLocale ? 'أسئلة' : 'questions'}
                         </span>
                       </div>
@@ -1091,7 +1091,7 @@ export default function AccessibleBookStudioView({
                       {/* Questions List for this Section */}
                       {sec.questions && sec.questions.length > 0 && (
                         <div data-testid="exercise-formatting" className="space-y-2.5 pt-2">
-                          <h4 className="text-[11px] font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
+                          <h4 className="text-xs font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
                             <HelpCircle className="w-3.5 h-3.5" />
                             <span>{isArLocale ? 'الأسئلة والتمارين المكتشفة بهذا القسم:' : 'Recognized Questions in this section:'}</span>
                           </h4>
@@ -1122,7 +1122,7 @@ export default function AccessibleBookStudioView({
                                         }))
                                       );
                                     }}
-                                    className={`px-2 py-1 rounded-lg border text-[10px] font-bold outline-none cursor-pointer ${
+                                    className={`px-2 py-1 rounded-lg border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] cursor-pointer ${
                                       isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-stone-200' : 'bg-white border-stone-300 text-stone-800'
                                     }`}
                                   >
@@ -1135,7 +1135,7 @@ export default function AccessibleBookStudioView({
                                   </select>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-[10px]">
+                                <div className="flex items-center gap-2 text-xs">
                                   <span className="text-stone-400">{isArLocale ? 'الدرجات:' : 'Marks:'}</span>
                                   <input
                       type="number"
@@ -1154,7 +1154,7 @@ export default function AccessibleBookStudioView({
                                         }))
                                       );
                                     }}
-                                    className={`w-12 px-1.5 py-0.5 rounded border text-center font-bold outline-none ${
+                                    className={`w-12 px-1.5 py-0.5 rounded border text-center font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                                       isDarkMode ? 'bg-cognify-surface-dark border-stone-700 text-white' : 'bg-white border-stone-300 text-stone-900'
                                     }`}
                                   />
@@ -1168,7 +1168,7 @@ export default function AccessibleBookStudioView({
 
                               {/* MCQ Options Display */}
                               {q.type === 'mcq' && q.options && q.options.length > 0 && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-[11px] text-stone-600 dark:text-stone-400">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-xs text-stone-600 dark:text-stone-400">
                                   {q.options.map((opt, oIdx) => (
                                     <div key={oIdx} className="truncate">
                                       [   ] {opt}
@@ -1179,7 +1179,7 @@ export default function AccessibleBookStudioView({
 
                               {/* Model Answer preview if present */}
                               {q.correctAnswer && (
-                                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold pt-1">
+                                <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold pt-1">
                                   {isArLocale ? `الإجابة المسجلة: ${q.correctAnswer}` : `Answer Key: ${q.correctAnswer}`}
                                 </div>
                               )}
@@ -1234,7 +1234,7 @@ export default function AccessibleBookStudioView({
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <span className="text-[11px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-wider">
+                    <span className="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-wider">
                       {isArLocale ? 'جاهز للتصدير الأكاديمي' : 'Ready for Academic Export'}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-black tracking-tight">{metadata.title}</h2>
@@ -1276,19 +1276,19 @@ export default function AccessibleBookStudioView({
                 {/* Document Properties Review Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 mt-6 border-t border-stone-200 dark:border-stone-800 text-xs">
                   <div>
-                    <span className="text-stone-400 block text-[10px]">{isArLocale ? 'نوع القالب:' : 'Template:'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'نوع القالب:' : 'Template:'}</span>
                     <span className="font-bold">{TEMPLATE_PRESETS[metadata.template].labelAr}</span>
                   </div>
                   <div>
-                    <span className="text-stone-400 block text-[10px]">{isArLocale ? 'الأبواب والأقسام:' : 'Sections:'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'الأبواب والأقسام:' : 'Sections:'}</span>
                     <span className="font-bold">{stats.sectionsCount} {isArLocale ? 'أقسام' : 'sections'}</span>
                   </div>
                   <div>
-                    <span className="text-stone-400 block text-[10px]">{isArLocale ? 'بنك الأسئلة:' : 'Questions:'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'بنك الأسئلة:' : 'Questions:'}</span>
                     <span className="font-bold">{stats.questionsCount} {isArLocale ? 'سؤال' : 'questions'}</span>
                   </div>
                   <div>
-                    <span className="text-stone-400 block text-[10px]">{isArLocale ? 'مساحات الحل:' : 'Answer Spaces:'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'مساحات الحل:' : 'Answer Spaces:'}</span>
                     <span className="font-bold">
                       {metadata.answerSpaceStyle === 'dots'
                         ? isArLocale ? 'نقاط' : 'Dots'
@@ -1314,7 +1314,7 @@ export default function AccessibleBookStudioView({
                     <Eye className="w-4 h-4" />
                     <span>{isArLocale ? 'مراجعة هيكل المستند والمحتوى الفعلي' : 'Document Content Inspector'}</span>
                   </div>
-                  <span className="text-[10px] text-stone-400">
+                  <span className="text-xs text-stone-400">
                     {isArLocale ? 'قراءة متسقة بالكامل لقارئات الشاشة (Screen Readers)' : 'Accessible reading order verified'}
                   </span>
                 </div>
@@ -1336,11 +1336,11 @@ export default function AccessibleBookStudioView({
                       ))}
                       {sec.questions && sec.questions.length > 0 && (
                         <div className="p-2.5 rounded-xl bg-teal-500/5 border border-teal-500/20 space-y-1 my-2">
-                          <span className="font-bold text-[10px] text-teal-600 dark:text-teal-400 uppercase">
+                          <span className="font-bold text-xs text-teal-600 dark:text-teal-400 uppercase">
                             {isArLocale ? `[ ${sec.questions.length} أسئلة مصنفة في هذا الباب ]` : `[ ${sec.questions.length} Questions ]`}
                           </span>
                           {sec.questions.map((q, qIndex) => (
-                            <div key={qIndex} className="text-[11px] font-medium">
+                            <div key={qIndex} className="text-xs font-medium">
                               • <b>{isArLocale ? `س ${qIndex + 1}:` : `Q ${qIndex + 1}:`}</b> {q.prompt}
                             </div>
                           ))}
@@ -1421,7 +1421,7 @@ export default function AccessibleBookStudioView({
                   >
                     <div className="min-w-0">
                       <h4 className="font-bold text-xs sm:text-sm truncate">{item.title}</h4>
-                      <p className="text-[10px] text-stone-400">
+                      <p className="text-xs text-stone-400">
                         {TEMPLATE_PRESETS[item.template]?.labelAr || item.template} • {item.wordCount} {isArLocale ? 'كلمة' : 'words'} • {item.questionsCount} {isArLocale ? 'سؤال' : 'questions'}
                       </p>
                     </div>

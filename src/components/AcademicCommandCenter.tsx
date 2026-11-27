@@ -46,7 +46,7 @@ function MetricTile({ label, value, suffix, state, accent, icon }: {
         )}
       </div>
       {state !== 'ok' && (
-        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 mt-1.5 inline-block">
+        <span className="text-xs font-bold uppercase tracking-wider text-amber-400 mt-1.5 inline-block">
           {state === 'calibrating' ? 'Calibrating' : 'No data yet'}
         </span>
       )}
@@ -125,15 +125,15 @@ export default function AcademicCommandCenter({ input, isAr, language }: { input
 
       <div className="grid md:grid-cols-3 gap-3 mt-3.5">
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
-          <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-1">{t('Biggest Strength', 'أكبر نقطة قوة')}</div>
+          <div className="text-xs font-black uppercase tracking-widest text-emerald-400 mb-1">{t('Biggest Strength', 'أكبر نقطة قوة')}</div>
           <div className="text-sm font-bold text-slate-100">{strength?.label ?? t('Keep building', 'استمر')}</div>
         </div>
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
-          <div className="text-[10px] font-black uppercase tracking-widest text-amber-400 mb-1">{t('Focus Area', 'مجال التركيز')}</div>
+          <div className="text-xs font-black uppercase tracking-widest text-amber-400 mb-1">{t('Focus Area', 'مجال التركيز')}</div>
           <div className="text-sm font-bold text-slate-100">{weakness?.label ?? t('Balanced', 'متوازن')}</div>
         </div>
         <div className="bg-[#150917]/90 border border-[#4A1224]/60 rounded-2xl p-4">
-          <div className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C] mb-1">{t('Next Critical Action', 'الخطوة التالية')}</div>
+          <div className="text-xs font-black uppercase tracking-widest text-[#E5A93C] mb-1">{t('Next Critical Action', 'الخطوة التالية')}</div>
           <div className="text-sm font-bold text-slate-100">
             {nextAction ? `${t('Study', 'ذاكر')} ${nextAction.label}` : (health.improvementActions[0] ?? t('Keep going', 'استمر'))}
           </div>
@@ -155,7 +155,7 @@ export default function AcademicCommandCenter({ input, isAr, language }: { input
             <div key={title} className="bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 shadow-inner">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-black uppercase tracking-widest text-slate-200">{title}</span>
-                <span className="text-[10px] font-mono font-bold text-[#E5A93C]">{t('confidence', 'الثقة')} {Math.round(m.confidence * 100)}%</span>
+                <span className="text-xs font-mono font-bold text-[#E5A93C]">{t('confidence', 'الثقة')} {Math.round(m.confidence * 100)}%</span>
               </div>
               <ul className="space-y-1.5 mb-2.5">
                 {m.topFactors.map((f, i) => (

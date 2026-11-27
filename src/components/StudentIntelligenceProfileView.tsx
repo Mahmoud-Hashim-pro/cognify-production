@@ -203,7 +203,7 @@ export default function StudentIntelligenceProfileView({
                     'الملف المعرفي الذكي'
                   )}
                 </h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#4A1224]/30 border border-[#E5A93C]/30 text-[#E5A93C]">
+                <span className="px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#4A1224]/30 border border-[#E5A93C]/30 text-[#E5A93C]">
                   {learningProfile.isAssessed
                     ? `${learningProfile.overallMasteryPercentage}% ${localize(profile.language, 'Mastery', 'إتقان')}`
                     : localize(profile.language, 'Not Assessed Yet', 'لم يبدأ التقييم بعد')}
@@ -240,7 +240,7 @@ export default function StudentIntelligenceProfileView({
         {/* Quick Stats Overview Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-4 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 backdrop-blur-xl shadow-xl">
-            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
               {localize(profile.language, 'Mastered Concepts', 'المفاهيم المتقنة')}
             </div>
             <div className="text-2xl font-bold text-emerald-400">
@@ -252,7 +252,7 @@ export default function StudentIntelligenceProfileView({
           </div>
 
           <div className="p-4 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 backdrop-blur-xl shadow-xl">
-            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
               {localize(profile.language, 'Under Practice', 'قيد التدريب')}
             </div>
             <div className="text-2xl font-bold text-[#E5A93C]">
@@ -261,7 +261,7 @@ export default function StudentIntelligenceProfileView({
           </div>
 
           <div className="p-4 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 backdrop-blur-xl shadow-xl">
-            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
               {localize(profile.language, 'Retention Reviews Due', 'مراجعات التثبيت المستحقة')}
             </div>
             <div className="text-2xl font-bold text-amber-400">
@@ -270,7 +270,7 @@ export default function StudentIntelligenceProfileView({
           </div>
 
           <div className="p-4 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 backdrop-blur-xl shadow-xl">
-            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
               {localize(profile.language, 'Overall Confidence', 'معدل الثقة العام')}
             </div>
             <div className="text-2xl font-bold text-[#E5A93C]">
@@ -351,7 +351,7 @@ export default function StudentIntelligenceProfileView({
 
               <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0">
                 <div className="p-3 rounded-2xl bg-[#0E0610]/90 border border-[#4A1224]/60">
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">
+                  <div className="text-xs text-slate-400 uppercase tracking-wider mb-0.5">
                     {localize(profile.language, 'Adaptive Strategy', 'الاستراتيجية الموجهة')}
                   </div>
                   <div className="text-xs font-semibold text-[#E5A93C] flex items-center gap-1.5">
@@ -404,7 +404,7 @@ export default function StudentIntelligenceProfileView({
                   <h2 className="text-base font-bold text-white">
                     {localize(profile.language, 'Strengths & Mastered Concepts', 'مكامن القوة والمفاهيم المتقنة')}
                   </h2>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-xs text-slate-400">
                     {localize(profile.language, 'High accuracy, fluent velocity, and low cognitive strain', 'دقة عالية، سرعة استجابة وعبء إدراكي منخفض')}
                   </p>
                 </div>
@@ -420,7 +420,7 @@ export default function StudentIntelligenceProfileView({
                 <div className="text-xs font-semibold text-slate-300">
                   {localize(profile.language, 'Calibrating Strengths', 'جاري تحديد مكامن القوة')}
                 </div>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   {localize(
                     profile.language,
                     'Concepts with >= 75% accuracy and consistent streaks will appear here as your verified strengths.',
@@ -442,7 +442,7 @@ export default function StudentIntelligenceProfileView({
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
                           <ShieldCheck className="w-3 h-3 text-emerald-400" />
                           <span>{localize(profile.language, 'Low Strain', 'استيعاب سلس')}</span>
                         </span>
@@ -460,7 +460,7 @@ export default function StudentIntelligenceProfileView({
                       />
                     </div>
 
-                    <div className="pt-1 flex items-center justify-between text-[10px] text-slate-400">
+                    <div className="pt-1 flex items-center justify-between text-xs text-slate-400">
                       <span>
                         {localize(profile.language, 'Confidence', 'مستوى الثقة')}: <strong className="text-slate-200">{item.confidencePercentage}%</strong>
                       </span>
@@ -485,7 +485,7 @@ export default function StudentIntelligenceProfileView({
                   <h2 className="text-base font-bold text-white">
                     {localize(profile.language, 'Current Difficulties & Focus Areas', 'الصعوبات الحالية وإشارات الإجهاد')}
                   </h2>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-xs text-slate-400">
                     {localize(profile.language, 'Active struggle signals, latency strain, and remediation targets', 'مؤشرات العبء المعرفي والتعثر وأهداف التدخل التكيفي')}
                   </p>
                 </div>
@@ -501,7 +501,7 @@ export default function StudentIntelligenceProfileView({
                 <div className="text-xs font-semibold text-slate-200">
                   {localize(profile.language, 'No Active Struggle Detected', 'لا توجد صعوبات معرفية نشطة')}
                 </div>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   {localize(
                     profile.language,
                     'All actively practiced concepts have satisfied fluency thresholds. Great momentum!',
@@ -524,7 +524,7 @@ export default function StudentIntelligenceProfileView({
                       </div>
                       <div className="flex items-center gap-1.5">
                         {item.commonError && (
-                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300">
+                          <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300">
                             {item.commonError}
                           </span>
                         )}
@@ -542,7 +542,7 @@ export default function StudentIntelligenceProfileView({
                       />
                     </div>
 
-                    <div className="pt-1 flex items-center justify-between text-[10px] text-slate-400">
+                    <div className="pt-1 flex items-center justify-between text-xs text-slate-400">
                       <span className="flex items-center gap-1 text-amber-300/90">
                         <AlertTriangle className="w-3 h-3 text-amber-400" />
                         {localize(
@@ -579,7 +579,7 @@ export default function StudentIntelligenceProfileView({
                     'الأخطاء الشائعة المتكررة وطرق علاجها'
                   )}
                 </h2>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   {localize(
                     profile.language,
                     'Observed cognitive error patterns with actionable guidance to prevent recurring friction',
@@ -599,7 +599,7 @@ export default function StudentIntelligenceProfileView({
               <div className="text-xs font-semibold text-slate-200">
                 {localize(profile.language, 'Clean Execution History', 'سجل أخطاء نظيف ومثالي')}
               </div>
-              <p className="text-[11px] text-slate-400 max-w-md mx-auto">
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
                 {localize(
                   profile.language,
                   'No recurring mistake patterns (like null dereferencing or boundary errors) have been recorded yet. As you solve exercises, Rafiqi will automatically synthesize patterns here.',
@@ -621,7 +621,7 @@ export default function StudentIntelligenceProfileView({
                           {isAr ? mistake.nameAr : mistake.nameEn}
                         </div>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 shrink-0">
                         {mistake.count} {localize(profile.language, 'times', 'مرات')}
                       </span>
                     </div>
@@ -632,13 +632,13 @@ export default function StudentIntelligenceProfileView({
 
                     {mistake.conceptsInvolved.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                        <span className="text-[10px] text-slate-400 font-medium">
+                        <span className="text-xs text-slate-400 font-medium">
                           {localize(profile.language, 'Seen in:', 'ظهر في:')}
                         </span>
                         {mistake.conceptsInvolved.map((cid) => (
                           <span
                             key={cid}
-                            className="px-2 py-0.5 rounded-lg bg-slate-800 text-[10px] text-slate-300 font-medium capitalize"
+                            className="px-2 py-0.5 rounded-lg bg-slate-800 text-xs text-slate-300 font-medium capitalize"
                           >
                             {cid.replace(/_/g, ' ')}
                           </span>
@@ -649,11 +649,11 @@ export default function StudentIntelligenceProfileView({
 
                   {/* Actionable Remediation Tip Callout */}
                   <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-400/40 via-indigo-950/30 to-slate-900/60 border border-[#E5A93C]/30 space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#E5A93C]">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#E5A93C]">
                       <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                       <span>{localize(profile.language, 'Actionable Remediation Tip', 'نصيحة العلاج والوقاية')}</span>
                     </div>
-                    <p className="text-xs text-slate-200 leading-relaxed font-mono text-[11px]">
+                    <p className="text-xs text-slate-200 leading-relaxed font-mono text-xs">
                       {isAr ? mistake.remediationTipAr : mistake.remediationTipEn}
                     </p>
                   </div>
@@ -726,7 +726,7 @@ export default function StudentIntelligenceProfileView({
                         </div>
                       </div>
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${statusBadgeColor}`}
+                        className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border ${statusBadgeColor}`}
                       >
                         {isMastered
                           ? localize(profile.language, 'Mastered', 'متقن')
@@ -753,7 +753,7 @@ export default function StudentIntelligenceProfileView({
                     </div>
 
                     {/* Secondary Metrics */}
-                    <div className="pt-2 border-t border-[#4A1224]/50 flex items-center justify-between text-[11px] text-slate-400">
+                    <div className="pt-2 border-t border-[#4A1224]/50 flex items-center justify-between text-xs text-slate-400">
                       <span>
                         {localize(profile.language, 'Confidence', 'الثقة')}:{' '}
                         <strong className="text-slate-200">{item.confidencePercentage}%</strong>
@@ -808,7 +808,7 @@ export default function StudentIntelligenceProfileView({
                       </div>
 
                       {item.isCalibrating ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#150917]/80 border border-[#4A1224]/50 text-slate-400">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#150917]/80 border border-[#4A1224]/50 text-slate-400">
                           {localize(
                             profile.language,
                             `Calibrating (${item.attemptsCount}/3)`,
@@ -816,11 +816,11 @@ export default function StudentIntelligenceProfileView({
                           )}
                         </span>
                       ) : item.isOptimal ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                           {localize(profile.language, 'Optimal Strategy', 'الاستراتيجية المثلى')}
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 border border-[#4A1224]/60 text-indigo-300">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 border border-[#4A1224]/60 text-indigo-300">
                           #{idx + 1}
                         </span>
                       )}
@@ -837,7 +837,7 @@ export default function StudentIntelligenceProfileView({
                   {/* Score Progress */}
                   <div className="space-y-1.5 pt-2 border-t border-[#4A1224]/50">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-slate-400 text-[11px]">
+                      <span className="text-slate-400 text-xs">
                         {localize(profile.language, 'Strategy Efficacy', 'فاعلية الاستراتيجية')}
                       </span>
                       <span className="text-slate-200">{item.scorePercentage}%</span>
@@ -848,7 +848,7 @@ export default function StudentIntelligenceProfileView({
                         style={{ width: `${Math.min(100, Math.max(0, item.scorePercentage))}%` }}
                       />
                     </div>
-                    <div className="text-[10px] text-slate-400 mt-1 flex justify-between items-center">
+                    <div className="text-xs text-slate-400 mt-1 flex justify-between items-center">
                       <span>{isAr ? item.sampleSizeNoteAr : item.sampleSizeNoteEn}</span>
                     </div>
                   </div>
@@ -868,7 +868,7 @@ export default function StudentIntelligenceProfileView({
                   'التعلم التكيفي المخصص لك'
                 )}
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 {isAr
                   ? 'يتكيف رفيقي تلقائيًا مع أسلوب التعلم الذي يناسبك في كل موضوع لضمان فهم المفاهيم بأسرع وقت وأعلى دقة.'
                   : 'Rafiqi automatically adapts its explanation style to whatever helps you understand each subject best.'}
@@ -907,7 +907,7 @@ export default function StudentIntelligenceProfileView({
                     'جميع المفاهيم مثبتة ومستقرة'
                   )}
                 </div>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   {localize(
                     profile.language,
                     'No spaced reviews are overdue today. Great consistency!',
@@ -926,11 +926,11 @@ export default function StudentIntelligenceProfileView({
                       <div className="text-xs font-bold text-slate-200">
                         {isAr ? alert.conceptNameAr : alert.conceptNameEn}
                       </div>
-                      <div className="text-[10px] text-amber-400">
+                      <div className="text-xs text-amber-400">
                         {isAr ? alert.messageAr : alert.messageEn}
                       </div>
                     </div>
-                    <span className="px-2 py-1 rounded-lg text-[10px] font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300">
+                    <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300">
                       {alert.riskLevel.toUpperCase()}
                     </span>
                   </div>
@@ -962,7 +962,7 @@ export default function StudentIntelligenceProfileView({
                     'جاري تسجيل التطور الأخير'
                   )}
                 </div>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   {localize(
                     profile.language,
                     'As you complete practice questions, recent improvement deltas will appear here.',
@@ -981,7 +981,7 @@ export default function StudentIntelligenceProfileView({
                       <div className="text-xs font-bold text-slate-200">
                         {isAr ? gain.conceptNameAr : gain.conceptNameEn}
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-xs text-slate-400">
                         {isAr ? gain.headlineAr : gain.headlineEn}
                       </div>
                     </div>

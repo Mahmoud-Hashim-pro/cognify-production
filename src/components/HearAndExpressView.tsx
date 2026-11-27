@@ -350,7 +350,7 @@ export default function HearAndExpressView({
               <Ear className="w-5 h-5 text-[#4B9FE1]" />
               <span>{isAr ? 'السمع والتعبير (Hear & Express)' : 'Hear & Express Communication'}</span>
             </h1>
-            <p className="text-[11px] text-[#94A3B8]">
+            <p className="text-xs text-[#94A3B8]">
               {isAr ? 'القسم 5: التواصل والتعبير — شامل الصم وغير الناطقين' : 'Section 5: Communicate — Multi-sensory'}
             </p>
           </div>
@@ -360,7 +360,7 @@ export default function HearAndExpressView({
         <div className="flex items-center gap-2">
           <div
             data-testid="communication-state-indicator"
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#09101A] border border-[#22354E] text-[11px] font-bold"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#09101A] border border-[#22354E] text-xs font-bold"
           >
             <span
               className={`w-2 h-2 rounded-full ${
@@ -599,7 +599,7 @@ export default function HearAndExpressView({
                       ? 'اكتب هنا ما تريد أن ينطقه رفيقي نيابة عنك...'
                       : 'Type here what you want Rafiqi to say for you...'
                   }
-                  className="flex-1 p-3.5 rounded-2xl bg-[#09101A] border border-[#22354E] text-sm text-white placeholder:text-[#94A3B8]/60 outline-none focus:border-[#1769AA]"
+                  className="flex-1 p-3.5 rounded-2xl bg-[#09101A] border border-[#22354E] text-sm text-white placeholder:text-[#94A3B8]/60 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -761,7 +761,7 @@ export default function HearAndExpressView({
                   <h3 className="text-xs font-bold text-white">
                     {isAr ? 'اختبار منارة التنبيه الآن' : 'Test Alert Beacon Now'}
                   </h3>
-                  <p className="text-[11px] text-[#94A3B8]">
+                  <p className="text-xs text-[#94A3B8]">
                     {isAr ? 'سيومض ضوء أصفر ذهبي على الشاشة مع اهتزاز الجهاز.' : 'Flashes a golden banner and triggers device vibration.'}
                   </p>
                 </div>

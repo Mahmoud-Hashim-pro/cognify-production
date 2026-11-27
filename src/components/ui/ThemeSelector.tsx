@@ -97,7 +97,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               aria-pressed={isSelected}
               title={isAr ? opt.labelAr : opt.labelEn}
               className={cn(
-                'min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none select-none',
+                'min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] select-none',
                 'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2',
                 isSelected
                   ? 'bg-rafiqi-primary text-white shadow-xs font-bold'
@@ -132,7 +132,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
             aria-checked={isSelected}
             onClick={() => handleSelect(opt.id)}
             className={cn(
-              'min-h-[48px] px-3 py-2 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer outline-none',
+              'min-h-[48px] px-3 py-2 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]',
               'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#131E2E]',
               isSelected
                 ? 'bg-rafiqi-primary text-white shadow-sm font-bold scale-[1.02]'

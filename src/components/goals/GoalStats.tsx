@@ -72,7 +72,7 @@ export default function GoalStats({ goals, language }: GoalStatsProps) {
           </div>
           <div>
             <div className={`text-3xl font-black font-mono tracking-tight ${card.color}`}>{card.value}</div>
-            <div className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80 mt-1">
+            <div className="text-xs font-black uppercase tracking-widest text-[#E5A93C]/80 mt-1">
               {card.label}
             </div>
           </div>

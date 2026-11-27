@@ -593,7 +593,7 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={isAr ? 'بحث عن طالب في المصفوفة...' : 'Search student in heatmap...'}
-                  className="w-full pl-10 pr-4 py-2 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 transition"
+                  className="w-full pl-10 pr-4 py-2 rounded-2xl bg-[#0E0610]/95 border border-[#4A1224]/60 text-sm text-white placeholder-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-indigo-500/60 transition"
                 />
               </div>
 
@@ -663,7 +663,7 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                         return (
                           <th key={cId} className="p-4 font-bold text-slate-300 text-center min-w-[130px]">
                             <div className="truncate font-semibold">{summ?.conceptTitleEn || cId}</div>
-                            <div className="text-[10px] font-normal text-slate-400 mt-0.5 flex items-center justify-center gap-1.5">
+                            <div className="text-xs font-normal text-slate-400 mt-0.5 flex items-center justify-center gap-1.5">
                               <span className={`px-1.5 py-0.5 rounded-md font-bold ${
                                 summ?.colorTier === 'green' ? 'bg-emerald-500/20 text-emerald-300' :
                                 summ?.colorTier === 'yellow' ? 'bg-amber-500/20 text-amber-300' :
@@ -691,7 +691,7 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                           <tr key={student.studentUid} className="hover:bg-slate-800/30 transition">
                             <td className="p-4 font-medium text-slate-200 sticky left-0 bg-[#0E0610]/95 z-10">
                               <div className="font-semibold text-white">{student.studentName}</div>
-                              <div className="text-[10px] text-slate-500 font-mono">{student.studentUid}</div>
+                              <div className="text-xs text-slate-500 font-mono">{student.studentUid}</div>
                             </td>
                             {dashboardData.heatmap!.concepts.map((cId) => {
                               const cell = dashboardData.heatmap!.cells.find(
@@ -833,11 +833,11 @@ export const TeacherIntelligenceView: React.FC<TeacherIntelligenceViewProps> = (
                         {eff.strategy.replace('_', ' ')}
                       </span>
                       {eff.isCalibrated ? (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                           {isAr ? 'مُعاير ومؤكد' : 'Calibrated'}
                         </span>
                       ) : (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
                           {isAr ? 'عينة غير كافية' : 'N < 3'}
                         </span>
                       )}

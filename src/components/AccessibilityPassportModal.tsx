@@ -219,7 +219,7 @@ export default function AccessibilityPassportModal({
             <div>
               <h2 id="passport-modal-title" className="font-black text-base sm:text-lg flex items-center gap-2">
                 <span>{t('Universal Accessibility Passport', 'جواز السفر الميسر الشامل', 'Passeport Universel d\'Accessibilité')}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-500/40 text-indigo-300 font-bold">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-500/40 text-indigo-300 font-bold">
                   v2.0
                 </span>
               </h2>

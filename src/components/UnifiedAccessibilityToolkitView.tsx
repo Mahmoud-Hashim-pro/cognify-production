@@ -433,7 +433,7 @@ export default function UnifiedAccessibilityToolkitView({
               <h1 className="text-sm sm:text-base font-black leading-tight">
                 {localize(profile.language, 'Integrated Accessibility Toolkit', 'منظومة الوصول المتكاملة والمساعد البصري')}
               </h1>
-              <p className="text-[11px] text-stone-400">
+              <p className="text-xs text-stone-400">
                 {localize(profile.language, 'Unified Vision, Document Scanner, PDF Assistant & Sticker Explainer', 'الرؤية، الماسح الضوئي، ومساعد المستندات وشرح الملصقات')}
               </p>
             </div>
@@ -539,7 +539,7 @@ export default function UnifiedAccessibilityToolkitView({
                     onClick={() => {
                       window.location.hash = '#disability/vision/scene';
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 min-h-[44px]"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 min-h-[44px]"
                     aria-label={localize(profile.language, 'Launch full camera vision companion', 'فتح المساعد البصري الكامل بالكاميرا')}
                   >
                     <Eye className="w-4 h-4" />
@@ -632,7 +632,7 @@ export default function UnifiedAccessibilityToolkitView({
                             <span className="p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
                               <ToolIcon className="w-5 h-5" />
                             </span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400">
                               {tool.badge}
                             </span>
                           </div>
@@ -648,7 +648,7 @@ export default function UnifiedAccessibilityToolkitView({
                           onClick={() => {
                             window.location.hash = `#disability/vision/${tool.id}`;
                           }}
-                          className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-teal-600/15 hover:bg-teal-600 hover:text-white text-teal-600 dark:text-teal-400 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 min-h-[44px]"
+                          className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-teal-600/15 hover:bg-teal-600 hover:text-white text-teal-600 dark:text-teal-400 text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-teal-400 min-h-[44px]"
                           aria-label={localize(profile.language, tool.btnEn, tool.btnAr)}
                         >
                           <Camera className="w-4 h-4" />
@@ -942,7 +942,7 @@ export default function UnifiedAccessibilityToolkitView({
                           className="relative rounded-2xl overflow-hidden border border-stone-700 group bg-black/40"
                         >
                           <img src={p.thumbnailUrl} alt={`Page ${idx + 1}`} className="w-full h-32 object-cover" />
-                          <div className="absolute top-2 start-2 px-2 py-0.5 rounded-md bg-black/80 text-white text-[10px] font-bold">
+                          <div className="absolute top-2 start-2 px-2 py-0.5 rounded-md bg-black/80 text-white text-xs font-bold">
                             #{idx + 1}
                           </div>
                           <button
@@ -992,7 +992,7 @@ export default function UnifiedAccessibilityToolkitView({
                             'Ask any question (e.g. "What is the passing grade according to page 2?")...',
                             'اطرح سؤالاً عن المستند (مثال: ما هي شروط النجاح وفقاً للصفحة 2؟)...'
                           )}
-                          className={`flex-1 px-4 py-2.5 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-indigo-500 ${
+                          className={`flex-1 px-4 py-2.5 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-indigo-500 ${
                             isDarkMode ? 'bg-[#121B1E] border-stone-700 text-white' : 'bg-white border-stone-300 text-stone-900'
                           }`}
                         />
@@ -1015,7 +1015,7 @@ export default function UnifiedAccessibilityToolkitView({
                               "{evidenceResult.evidenceQuote}"
                             </blockquote>
                           )}
-                          <div className="flex items-center gap-3 text-[11px] text-stone-400">
+                          <div className="flex items-center gap-3 text-xs text-stone-400">
                             <span>
                               {localize(profile.language, 'Page', 'الصفحة')}: <strong className="text-indigo-400">{evidenceResult.pageNumber}</strong>
                             </span>
@@ -1190,11 +1190,11 @@ export default function UnifiedAccessibilityToolkitView({
                       >
                         <div className="space-y-1 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-400 text-[10px] font-bold uppercase">
+                            <span className="px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-400 text-xs font-bold uppercase">
                               {item.type}
                             </span>
                             <h4 className="text-xs sm:text-sm font-bold text-white">{item.title}</h4>
-                            <span className="text-[10px] text-stone-400">
+                            <span className="text-xs text-stone-400">
                               {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>

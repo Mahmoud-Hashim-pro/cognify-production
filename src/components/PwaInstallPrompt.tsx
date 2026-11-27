@@ -162,13 +162,13 @@ export default function PwaInstallPrompt({ language }: PwaInstallPromptProps) {
           {isIosDevice ? (
             <div className="mt-3.5 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 text-xs text-slate-200">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-black flex items-center justify-center shrink-0">1</span>
+                <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black flex items-center justify-center shrink-0">1</span>
                 <span className="flex items-center gap-1">
                   {L('Tap Safari Share button', 'اضغط زر المشاركة في سفاري')} <Share2 className="w-3.5 h-3.5 text-rose-400 inline" />
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-black flex items-center justify-center shrink-0">2</span>
+                <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black flex items-center justify-center shrink-0">2</span>
                 <span className="flex items-center gap-1">
                   {L('Select "Add to Home Screen"', 'اختر "إضافة إلى الشاشة الرئيسية"')} <PlusSquare className="w-3.5 h-3.5 text-rose-400 inline" />
                 </span>

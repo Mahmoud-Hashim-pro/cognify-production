@@ -308,7 +308,7 @@ export default function Sidebar({
         {/* ── 1. MAIN (HOME ONLY) ── */}
         <div className="flex flex-col gap-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
               {t('Main', 'الرئيسية')}
             </div>
           )}
@@ -327,9 +327,9 @@ export default function Sidebar({
         {/* ── 2. OFFICIAL SECTIONS (EXACTLY SIX) ── */}
         <div className="pt-2 pb-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase flex items-center justify-between`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase flex items-center justify-between`}>
               <span>{t('Official Sections', 'أقسام رفيقي الستة')}</span>
-              <span className="text-[10px] font-mono text-[#1769AA] dark:text-[#4B9FE1] font-bold">1–6</span>
+              <span className="text-xs font-mono text-[#1769AA] dark:text-[#4B9FE1] font-bold">1–6</span>
             </div>
           )}
 
@@ -360,7 +360,7 @@ export default function Sidebar({
         {/* ── 3. WORKSPACE (MY PROGRESS & RECENTS) ── */}
         <div className="pt-2 pb-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
               {t('Workspace', 'مساحة العمل')}
             </div>
           )}
@@ -385,7 +385,7 @@ export default function Sidebar({
         {/* ── 4. SUPPORT & SYSTEM (HELP, SETTINGS, ADMIN) ── */}
         <div className="pt-2 pb-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
               {t('Support & System', 'الدعم والنظام')}
             </div>
           )}
@@ -422,7 +422,7 @@ export default function Sidebar({
                 {!isCollapsed && (
                   <>
                     <span className="truncate">{t('Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
-                    <span className={`ms-auto text-[9px] font-bold ${isDarkMode ? 'text-amber-300 bg-amber-950/40 border-amber-800' : 'text-amber-800 bg-amber-50 border-amber-300'} border px-1.5 py-0.5 rounded`}>
+                    <span className={`ms-auto text-xs font-bold ${isDarkMode ? 'text-amber-300 bg-amber-950/40 border-amber-800' : 'text-amber-800 bg-amber-50 border-amber-300'} border px-1.5 py-0.5 rounded`}>
                       {t('Admin', 'مشرف')}
                     </span>
                   </>
@@ -436,7 +436,7 @@ export default function Sidebar({
         {!isCollapsed && (profile.chatThreads?.length || 0) > 0 && (
           <div className="pt-2">
             <div className="flex items-center justify-between px-3 pb-1">
-              <span className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider uppercase`}>
+              <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider uppercase`}>
                 {getTranslation(profile.language, 'chatHistory')}
               </span>
               <button
@@ -451,7 +451,7 @@ export default function Sidebar({
                   }
                 }}
                 aria-label={t('Clear all chats', 'مسح جميع المحادثات')}
-                className="text-[10px] font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-1 focus-visible:ring-rose-400 focus:outline-none rounded"
+                className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-1 focus-visible:ring-rose-400 focus:outline-none rounded"
                 title="Clear all chats"
               >
                 {getTranslation(profile.language, 'clearAll')}
@@ -472,7 +472,7 @@ export default function Sidebar({
                     aria-current={active ? 'true' : undefined}
                   >
                     <span className={`text-xs font-semibold truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-200' : 'text-slate-900'}`}>{th.title}</span>
-                    <span className={`text-[10px] truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{th.lastMessageSnippet || t('No messages yet', 'لا توجد رسائل بعد')}</span>
+                    <span className={`text-xs truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{th.lastMessageSnippet || t('No messages yet', 'لا توجد رسائل بعد')}</span>
                   </button>
                   <button
                     type="button"
@@ -530,7 +530,7 @@ export default function Sidebar({
                 <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'} truncate`}>
                   {profile.name || profile.email?.split('@')[0] || 'User'}
                 </div>
-                <div className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'} truncate`}>
+                <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'} truncate`}>
                   {(() => {
                     const raw = profile.disabilityType || profile.accessibilityMode || '';
                     if (!raw || raw === 'None') return t('Assistive Learning', 'التعلم الميسر');

@@ -146,7 +146,7 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
               <div>
                 <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
                   <span>{t('Trust & Transparency Portal', 'بوابة الشفافية والتدقيق المعتمد')}</span>
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
                     {t('Audited v11.0', 'مدقق ومعتمد')}
                   </span>
                 </h2>
@@ -159,19 +159,19 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
             <div className="p-3.5 rounded-2xl bg-cognify-bg-dark/95 border border-cognify-border-dark/60 text-start">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('Automated Test Suite', 'حزمة الاختبارات الآلية')}</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('Automated Test Suite', 'حزمة الاختبارات الآلية')}</span>
               <span className="text-lg font-black text-cognify-focus block mt-1">3,546+ Tests</span>
-              <span className="text-[11px] text-emerald-400 font-semibold block mt-0.5">100% Invariants Passing</span>
+              <span className="text-xs text-emerald-400 font-semibold block mt-0.5">100% Invariants Passing</span>
             </div>
             <div className="p-3.5 rounded-2xl bg-cognify-bg-dark/95 border border-cognify-border-dark/60 text-start">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('Adversarial Defense', 'صد الهجمات والاختراق')}</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('Adversarial Defense', 'صد الهجمات والاختراق')}</span>
               <span className="text-lg font-black text-purple-400 block mt-1">42 / 42 Threats</span>
-              <span className="text-[11px] text-purple-300 font-semibold block mt-0.5">100% Defense Rate</span>
+              <span className="text-xs text-purple-300 font-semibold block mt-0.5">100% Defense Rate</span>
             </div>
             <div className="p-3.5 rounded-2xl bg-cognify-bg-dark/95 border border-cognify-border-dark/60 text-start">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('Zero-Knowledge Privacy', 'الخصوصية الصفرية')}</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('Zero-Knowledge Privacy', 'الخصوصية الصفرية')}</span>
               <span className="text-lg font-black text-emerald-400 block mt-1">0% Retention</span>
-              <span className="text-[11px] text-slate-400 font-semibold block mt-0.5">No video/audio saved to disk</span>
+              <span className="text-xs text-slate-400 font-semibold block mt-0.5">No video/audio saved to disk</span>
             </div>
           </div>
 

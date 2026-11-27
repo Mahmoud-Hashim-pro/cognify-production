@@ -121,14 +121,14 @@ export const AlertNotificationModal: React.FC<AlertNotificationModalProps> = ({
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
           <button
             onClick={() => onDismiss(alert.id)}
-            className="flex-1 py-3 px-6 rounded-2xl font-bold text-base text-white bg-red-600 hover:bg-red-700 active:scale-95 transition-all shadow-lg focus:outline-none focus:ring-4 focus:ring-red-400"
+            className="flex-1 py-3 px-6 rounded-2xl font-bold text-base text-white bg-red-600 hover:bg-red-700 active:scale-95 transition-all shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-4 focus:ring-red-400"
           >
             {isArabic ? 'إلغاء التنبيه (فهمت)' : 'Dismiss Alert (Understood)'}
           </button>
 
           <button
             onClick={() => onSnooze(alert, 15)}
-            className="py-3 px-5 rounded-2xl font-medium text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="py-3 px-5 rounded-2xl font-medium text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-slate-400"
           >
             {isArabic ? 'إيقاف مؤقت 15 دقيقة' : 'Snooze (15m)'}
           </button>

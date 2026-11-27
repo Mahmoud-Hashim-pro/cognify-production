@@ -186,7 +186,7 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
             {/* CGPA summary */}
             <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 text-white rounded-3xl p-6 flex flex-col justify-center items-center shadow-2xl backdrop-blur-xl relative overflow-hidden group ring-1 ring-[#E5A93C]/10">
               <div className="absolute -top-16 -right-16 w-32 h-32 bg-[#E5A93C]/10 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{t('Cumulative GPA', 'المعدل التراكمي')}</span>
+              <span className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">{t('Cumulative GPA', 'المعدل التراكمي')}</span>
               <span className="text-6xl font-black mt-3 text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-[#E5A93C] to-rose-400 drop-shadow-sm font-mono">{cgpa.toFixed(2)}</span>
               <span className="text-xs text-slate-400 mt-2 font-medium">{creditsTotal} {t('credit hours', 'ساعة معتمدة')} · {courses.length} {t('courses', 'مادة')}</span>
             </div>
@@ -198,29 +198,29 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
               </h2>
               <div className="flex flex-wrap items-end gap-3.5">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">{t('Course', 'المادة')}</span>
+                  <span className="text-xs font-bold uppercase text-slate-400">{t('Course', 'المادة')}</span>
                   <select
                     value={whatIfCourse}
                     onChange={(e) => setWhatIfCourse(e.target.value)}
-                    className="bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all cursor-pointer"
+                    className="bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all cursor-pointer"
                   >
                     <option value="" className="bg-[#150917] text-white">{t('New hypothetical course', 'مادة افتراضية جديدة')}</option>
                     {courses.map((c) => <option key={c.id} value={c.id} className="bg-[#150917] text-white">{c.name}</option>)}
                   </select>
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">{t('Grade', 'الدرجة')}</span>
+                  <span className="text-xs font-bold uppercase text-slate-400">{t('Grade', 'الدرجة')}</span>
                   <select
                     dir="ltr"
                     value={whatIfGrade}
                     onChange={(e) => setWhatIfGrade(e.target.value)}
-                    className="bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all cursor-pointer font-mono"
+                    className="bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all cursor-pointer font-mono"
                   >
                     {GRADE_OPTIONS.map((g) => <option key={g} value={g} className="bg-[#150917] text-white">{g}</option>)}
                   </select>
                 </label>
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">{t('Projected CGPA', 'المعدل المتوقّع')}</span>
+                  <span className="text-xs font-bold uppercase text-slate-400">{t('Projected CGPA', 'المعدل المتوقّع')}</span>
                   <div className="px-5 py-2.5 rounded-2xl bg-[#4A1224]/40 border border-[#E5A93C]/40 text-[#E5A93C] font-black text-lg min-w-[90px] text-center font-mono shadow-sm">
                     {projected !== null ? projected.toFixed(2) : '—'}
                   </div>
@@ -245,14 +245,14 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t('Course name (e.g. CS101)', 'اسم المادة (مثلاً خوارزميات)')}
                 aria-label={t('Course name', 'اسم المادة')}
-                className="flex-1 min-w-[180px] bg-[#150917]/80 border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all"
+                className="flex-1 min-w-[180px] bg-[#150917]/80 border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all"
               />
               <input
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
                 placeholder={t('Semester', 'الترم')}
                 aria-label={t('Semester', 'الترم الدراسي')}
-                className="w-36 bg-[#150917]/80 border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all"
+                className="w-36 bg-[#150917]/80 border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all"
               />
               <input
                 type="number"
@@ -260,14 +260,14 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                 max={12}
                 value={credits}
                 onChange={(e) => setCredits(e.target.value)}
-                className="w-24 bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all font-mono"
+                className="w-24 bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all font-mono"
                 title={t('Credits', 'الساعات')}
               />
               <select
                 dir="ltr"
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
-                className="w-24 bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all cursor-pointer font-mono"
+                className="w-24 bg-[#150917]/80 border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/30 transition-all cursor-pointer font-mono"
               >
                 {GRADE_OPTIONS.map((g) => <option key={g} value={g} className="bg-[#150917] text-white">{g}</option>)}
               </select>
@@ -339,19 +339,19 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-[#150917]/80 border border-[#4A1224]/60">
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+              <span className="text-xs font-bold uppercase text-slate-400 block mb-1">
                 {isAr ? 'المعدل الحالي (CGPA)' : 'Current CGPA'}
               </span>
               <div className="font-mono text-2xl font-black text-white">{cgpa.toFixed(2)}</div>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+              <span className="text-xs font-bold uppercase text-slate-400 block mb-1">
                 {isAr ? 'الساعات المنجزة' : 'Completed Credits'}
               </span>
               <div className="font-mono text-2xl font-black text-slate-300">{creditsTotal} {isAr ? 'ساعة' : 'hrs'}</div>
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase text-[#E5A93C] block mb-1">
+              <label className="text-xs font-bold uppercase text-[#E5A93C] block mb-1">
                 {isAr ? 'المعدل المستهدف *' : 'Target CGPA *'}
               </label>
               <input
@@ -362,11 +362,11 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                 value={targetGpaInput}
                 onChange={(e) => setTargetGpaInput(e.target.value)}
                 aria-label={isAr ? 'المعدل التراكمي المستهدف' : 'Target CGPA'}
-                className="w-full bg-[#0E0610] border border-[#E5A93C]/40 rounded-xl px-3 py-1.5 text-sm font-mono text-[#E5A93C] font-bold focus:outline-none"
+                className="w-full bg-[#0E0610] border border-[#E5A93C]/40 rounded-xl px-3 py-1.5 text-sm font-mono text-[#E5A93C] font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+              <label className="text-xs font-bold uppercase text-slate-400 block mb-1">
                 {isAr ? 'ساعات الفصل القادم' : 'Planned Credits'}
               </label>
               <input
@@ -376,7 +376,7 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                 value={plannedCreditsInput}
                 onChange={(e) => setPlannedCreditsInput(e.target.value)}
                 aria-label={isAr ? 'ساعات الفصل القادم' : 'Planned Credits'}
-                className="w-full bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-3 py-1.5 text-sm font-mono text-white font-bold focus:outline-none"
+                className="w-full bg-[#0E0610] border border-[#4A1224]/60 rounded-xl px-3 py-1.5 text-sm font-mono text-white font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               />
             </div>
           </div>
@@ -421,7 +421,7 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
                     <div key={idx} className="p-4 rounded-2xl bg-[#150917]/80 border border-[#4A1224]/60 flex items-center justify-between gap-3">
                       <div>
                         <span className="text-sm font-black text-white block">{dist.description}</span>
-                        <span className="text-[11px] text-slate-400">{dist.credits} {isAr ? 'ساعات معتمدة' : 'credit hours'}</span>
+                        <span className="text-xs text-slate-400">{dist.credits} {isAr ? 'ساعات معتمدة' : 'credit hours'}</span>
                       </div>
                       <span className="font-mono text-lg font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-xl border border-emerald-500/20">
                         {dist.grade}
@@ -434,7 +434,7 @@ export default function GpaCalculator({ profile, onMenuClick, onNavigateBack }: 
 
             {/* Strategic Advice */}
             <div className="p-4 rounded-2xl bg-[#2D0B16]/50 border border-[#4A1224]/70 text-xs text-slate-200 leading-relaxed">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#E5A93C] block mb-1">
+              <span className="text-xs font-black uppercase tracking-wider text-[#E5A93C] block mb-1">
                 {isAr ? 'النصيحة الأكاديمية الاستراتيجية:' : 'Strategic Academic Guidance:'}
               </span>
               {reverseGpaPlan.strategicAdvice}

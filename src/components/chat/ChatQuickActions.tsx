@@ -83,7 +83,7 @@ export default function ChatQuickActions({
             type="button"
             disabled={disabled}
             onClick={act.onClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0A203A] hover:bg-[#0D4564] border border-[#22354E] hover:border-[#1685B5] text-[#B7C8DA] hover:text-[#F4F7FB] text-[11px] font-bold tracking-wide transition-all shrink-0 active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0A203A] hover:bg-[#0D4564] border border-[#22354E] hover:border-[#1685B5] text-[#B7C8DA] hover:text-[#F4F7FB] text-xs font-bold tracking-wide transition-all shrink-0 active:scale-95 disabled:opacity-50"
           >
             {act.icon}
             <span>{act.label}</span>

@@ -401,7 +401,7 @@ export default function StudentCockpitHub({
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {/* Font Scale Toggle */}
           <div className="flex items-center gap-1 border-e pe-2 border-stone-200 dark:border-stone-800">
-            <span className="text-[11px] font-bold text-stone-600 dark:text-stone-300 flex items-center gap-1">
+            <span className="text-xs font-bold text-stone-600 dark:text-stone-300 flex items-center gap-1">
               <Type className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               <span className="hidden sm:inline">{t('Text', 'الخط', 'Texte')}</span>
             </span>
@@ -533,7 +533,7 @@ export default function StudentCockpitHub({
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-800/60">
                 Rafiqi · {t('Personal Learning Space', 'مساحتك التعليمية الشخصية', 'Espace d\'apprentissage personnel')}
               </span>
               <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
@@ -568,7 +568,7 @@ export default function StudentCockpitHub({
                 <Flame className="w-4 h-4 text-amber-500" />
                 <span className="text-lg font-black">{streakDays}</span>
               </div>
-              <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block">
+              <span className="text-xs font-bold text-stone-600 dark:text-stone-400 block">
                 {t('Days Active', 'أيام مستمرة', 'Jours d\'activité')}
               </span>
             </div>
@@ -580,7 +580,7 @@ export default function StudentCockpitHub({
                 <CheckCircle2 className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                 <span className="text-lg font-black">{retentionState.mastered.length + 4}</span>
               </div>
-              <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400 block">
+              <span className="text-xs font-bold text-stone-600 dark:text-stone-400 block">
                 {t('Mastered', 'مفاهيم مثبتة', 'Maîtrisés')}
               </span>
             </div>
@@ -653,12 +653,12 @@ export default function StudentCockpitHub({
               <Sliders className="w-3.5 h-3.5" />
               <span>{t('How do you prefer to understand concepts?', 'كيف تفضل أن نشرح لك المفاهيم؟', 'Comment préférez-vous apprendre ?')}</span>
             </h3>
-            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
               {t('Select any mode below to immediately adjust the AI explanation tone and format.', 'اختر أي أسلوب ليقوم المرشد الذكي بتكييف لغته فورياً بما يوافق راحتك.', 'Sélectionnez un style pour adapter instantanément le tuteur.')}
             </p>
           </div>
 
-          <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 hidden sm:inline">
+          <span className="text-xs font-bold text-stone-500 dark:text-stone-400 hidden sm:inline">
             {t('5 Adaptive Styles', '٥ أساليب ملموسة', '5 styles adaptatifs')}
           </span>
         </div>
@@ -700,12 +700,12 @@ export default function StudentCockpitHub({
                       {label}
                     </span>
                     {isSelected && (
-                      <span className="w-4 h-4 rounded-full bg-teal-700 text-white flex items-center justify-center text-[10px] shrink-0">
+                      <span className="w-4 h-4 rounded-full bg-teal-700 text-white flex items-center justify-center text-xs shrink-0">
                         ✓
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-normal">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-normal">
                     {desc}
                   </p>
                 </div>
@@ -729,12 +729,12 @@ export default function StudentCockpitHub({
               <Sparkles className="w-3.5 h-3.5" />
               <span>{t('Comprehensive Assistive Ecosystem', 'أدوات المساندة الشاملة المتاحة', 'Outils d\'accessibilité')}</span>
             </h3>
-            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
               {t('Autonomy-focused tools designed for visual, hearing, cognitive, and accommodation needs.', 'أدوات تعزز استقلاليتك وتلبي الاحتياجات البصرية والسمعية والمعرفية والترتيبات الأكاديمية.', 'Outils pour votre autonomie visuelle, auditive et cognitive.')}
             </p>
           </div>
 
-          <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 hidden sm:inline">
+          <span className="text-xs font-bold text-stone-500 dark:text-stone-400 hidden sm:inline">
             {t('Instant 1-Click Launch', 'دخول مباشر بنقرة واحدة', 'Accès direct')}
           </span>
         </div>
@@ -758,7 +758,7 @@ export default function StudentCockpitHub({
               <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
                 {t('AI Vision Companion', 'الرفيق البصري الذكي', 'Compagnon Visuel')}
               </h4>
-              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                 {t(
                   'Currency reader, clothes color matching, face memory, document reader, and haptic cane vibration.',
                   'قارئ العملات الورقية، فحص ألوان الملابس، حفظ وجوه الأشخاص، قراءة المستندات، والنبضات اللمسية بالاهتزاز.',
@@ -766,7 +766,7 @@ export default function StudentCockpitHub({
                 )}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-400">
               <span>{t('Open Companion', 'تشغيل الرفيق', 'Ouvrir')}</span>
               <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
             </div>
@@ -789,7 +789,7 @@ export default function StudentCockpitHub({
               <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
                 {t('Unified Hearing Center', 'المركز السمعي الموحد', 'Centre Auditif')}
               </h4>
-              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                 {t(
                   'Live speech-to-text captions, instant voice speaker, express AAC cards, and hazard sound sentinel.',
                   'تفريغ فوري لكلام المتحدث، نطق صوتي للغرفة، بطاقات تواصل ميسرة، ومستشعر أصوات مرتفعة ووميض.',
@@ -797,7 +797,7 @@ export default function StudentCockpitHub({
                 )}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-400">
               <span>{t('Open Center', 'تشغيل المركز', 'Ouvrir')}</span>
               <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
             </div>
@@ -820,7 +820,7 @@ export default function StudentCockpitHub({
               <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
                 {t('Accessible AI Tutor', 'المرشد التعليمي الذكي', 'Tuteur IA Accessible')}
               </h4>
-              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                 {t(
                   'Adaptive pedagogical pace, worked examples, simplified text, visual analogies, and screen-reader support.',
                   'معلم ذكي يتكيف مع استيعابك، يقدم أمثلة عملية وشرحاً متدرجاً، ويدعم قارئات الشاشة تماماً.',
@@ -828,7 +828,7 @@ export default function StudentCockpitHub({
                 )}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-400">
               <span>{t('Launch Tutor', 'بدء الحوار', 'Démarrer')}</span>
               <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
             </div>
@@ -851,7 +851,7 @@ export default function StudentCockpitHub({
               <h4 className="text-sm font-black text-stone-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
                 {t('Accommodation Passport', 'جواز السفر الميسر', 'Passeport d\'accessibilité')}
               </h4>
-              <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
                 {t(
                   'Portable record of academic exam arrangements, sensory accommodations, and verification QR code.',
                   'ملفك الشخصي الموحد لتسهيلات الامتحانات، تفضيلات الراحة الحسية، ورمز التحقق للمؤسسات التعليمية.',
@@ -859,7 +859,7 @@ export default function StudentCockpitHub({
                 )}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-400">
               <span>{t('View Passport', 'عرض الجواز', 'Voir')}</span>
               <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
             </div>
@@ -928,7 +928,7 @@ export default function StudentCockpitHub({
             )}
 
             {/* Gentle Progress Note */}
-            <div className="pt-2 flex items-center gap-2 text-[11px] text-stone-500 dark:text-stone-400">
+            <div className="pt-2 flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
               <span className="font-bold text-teal-700 dark:text-teal-400">● {t('Steady progress', 'تقدم هادئ وثابت', 'Rythme serein')}</span>
               <span>·</span>
               <span>{t('Focus on comprehension over speed', 'الأولوية للفهم والراحة، لا للسرعة', 'Priorité à la compréhension')}</span>
@@ -1000,7 +1000,7 @@ export default function StudentCockpitHub({
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-teal-700 dark:text-teal-400 block mb-1">
+                <span className="text-xs font-bold text-teal-700 dark:text-teal-400 block mb-1">
                   {reviewQuestion.conceptTitle}
                 </span>
                 <p className="text-sm font-black leading-relaxed">

@@ -91,7 +91,7 @@ export default function MilestoneList({
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addMilestone())}
             placeholder={isArabic ? 'أضف خطوة جديدة...' : 'Add a milestone...'}
-            className="flex-1 text-xs bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-2.5 outline-none focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/20 text-white placeholder:text-slate-500 font-medium"
+            className="flex-1 text-xs bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/20 text-white placeholder:text-slate-500 font-medium"
           />
           <button
             type="button"

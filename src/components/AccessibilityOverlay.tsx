@@ -821,11 +821,11 @@ export default function AccessibilityOverlay({
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[9px] font-black uppercase text-primary tracking-widest">
+                    <span className="text-xs font-black uppercase text-primary tracking-widest">
                       {localize(profile.language, "Fingerspelling", "تهجئة بالأصابع")}
                     </span>
                     {liveLetter && (
-                      <span className="text-[9px] font-mono font-bold text-faint">
+                      <span className="text-xs font-mono font-bold text-faint">
                         {liveLetter}
                       </span>
                     )}
@@ -835,7 +835,7 @@ export default function AccessibilityOverlay({
                       onClick={() => setTranscription((p) => p.slice(0, -1))}
                       disabled={!transcription}
                       title={localize(profile.language, "Backspace", "مسح حرف")}
-                      className="px-2 py-1 bg-surface-3 text-text-muted text-[9px] font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
+                      className="px-2 py-1 bg-surface-3 text-text-muted text-xs font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
                     >
                       ⌫
                     </button>
@@ -844,7 +844,7 @@ export default function AccessibilityOverlay({
                         setTranscription("");
                       }}
                       disabled={!transcription}
-                      className="px-2 py-1 bg-surface-3 text-text-muted text-[9px] font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
+                      className="px-2 py-1 bg-surface-3 text-text-muted text-xs font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
                     >
                       {localize(profile.language, "Clear", "مسح")}
                     </button>
@@ -852,7 +852,7 @@ export default function AccessibilityOverlay({
                       onClick={interpretWithAI}
                       disabled={!isVisionActive || isVisionAnalyzing}
                       title={localize(profile.language, "Interpret a full word/gesture with AI", "ترجمة كلمة/إشارة كاملة بالذكاء الاصطناعي")}
-                      className="px-2 py-1 bg-primary text-white text-[9px] font-black uppercase rounded-lg hover:bg-primary disabled:opacity-40 flex items-center gap-1"
+                      className="px-2 py-1 bg-primary text-white text-xs font-black uppercase rounded-lg hover:bg-primary disabled:opacity-40 flex items-center gap-1"
                     >
                       {isVisionAnalyzing ? (
                         <RefreshCw className="w-3 h-3 animate-spin" />
@@ -868,7 +868,7 @@ export default function AccessibilityOverlay({
                         setTranscription("");
                       }}
                       disabled={!transcription.trim()}
-                      className="px-2 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase rounded-lg hover:bg-emerald-600 disabled:opacity-40"
+                      className="px-2 py-1 bg-emerald-500 text-white text-xs font-black uppercase rounded-lg hover:bg-emerald-600 disabled:opacity-40"
                     >
                       {localize(profile.language, "Send", "إرسال")}
                     </button>
@@ -935,7 +935,7 @@ export default function AccessibilityOverlay({
               {isVisionActive && (
                 <div className="absolute top-4 right-4 z-20 flex gap-2">
                   {isVisionAnalyzing && (
-                    <div className="bg-accent text-black text-[8px] font-black uppercase px-2 py-1 rounded-full animate-bounce">
+                    <div className="bg-accent text-black text-xs font-black uppercase px-2 py-1 rounded-full animate-bounce">
                       Analyzing...
                     </div>
                   )}
@@ -962,7 +962,7 @@ export default function AccessibilityOverlay({
 
               {isVisionActive && (
                 <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
-                  <div className="px-3 py-1 bg-primary/90 text-white text-[9px] font-black uppercase tracking-widest rounded-full flex items-center gap-2">
+                  <div className="px-3 py-1 bg-primary/90 text-white text-xs font-black uppercase tracking-widest rounded-full flex items-center gap-2">
                     <RefreshCw className="w-3 h-3 animate-spin" />{" "}
                     {visionStatus}
                   </div>

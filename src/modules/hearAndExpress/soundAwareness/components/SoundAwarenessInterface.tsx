@@ -189,7 +189,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
 
           <button
             onClick={handleToggleListening}
-            className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg focus:outline-none focus:ring-4 ${
+            className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-4 ${
               isListening
                 ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500/50'
                 : 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500/50'
@@ -352,7 +352,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                         {isArabic ? cat.nameAr : cat.nameEn}
                       </span>
                       {isSnoozed && (
-                        <span className="text-[10px] text-amber-400 font-semibold">
+                        <span className="text-xs text-amber-400 font-semibold">
                           {isArabic ? 'موقوف مؤقتاً' : 'Snoozed'}
                         </span>
                       )}
@@ -360,7 +360,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                   </div>
 
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                    className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                       cat.modelStatus === 'active_verified'
                         ? 'bg-emerald-500/20 text-emerald-300'
                         : cat.modelStatus === 'user_configured'
@@ -382,7 +382,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                   </span>
                 </div>
 
-                <p className="text-[11px] text-slate-400 line-clamp-2">
+                <p className="text-xs text-slate-400 line-clamp-2">
                   {isArabic ? cat.descriptionAr : cat.descriptionEn}
                 </p>
               </div>

@@ -377,9 +377,14 @@ export async function secureSaveKey(provider: string, rawKey: string): Promise<v
   inMemoryKeyCache.set(keyName, trimmed);
 
   try {
+    // BYOK keys live in sessionStorage only: they vanish when the tab closes
+    // and never persist to disk beyond the current browsing session.
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(keyName, encrypted);
+    }
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(keyName, encrypted);
-      // Clean up any legacy secondary key
+      // Clean up any persisted copies from older versions or legacy keys
+      localStorage.removeItem(keyName);
       if (provider === 'gemini') localStorage.removeItem('gemini_api_key');
       if (provider === 'groq') localStorage.removeItem('groq_api_key');
     }
@@ -400,15 +405,25 @@ export function secureLoadKeySync(provider: string): string {
     return inMemoryKeyCache.get(keyName) || '';
   }
 
-  // 2. Read from localStorage
+  // 2. Read from sessionStorage; migrate any older localStorage copy and remove it
   let rawValue = '';
+  let migratedFromLocal = false;
   try {
-    if (typeof localStorage !== 'undefined') {
+    if (typeof sessionStorage !== 'undefined') {
+      rawValue = sessionStorage.getItem(keyName) || '';
+    }
+    if (!rawValue && typeof localStorage !== 'undefined') {
       rawValue = localStorage.getItem(keyName) || '';
       if (!rawValue && provider === 'gemini') {
         rawValue = localStorage.getItem('gemini_api_key') || '';
       } else if (!rawValue && provider === 'groq') {
         rawValue = localStorage.getItem('groq_api_key') || '';
+      }
+      migratedFromLocal = !!rawValue;
+      if (migratedFromLocal) {
+        localStorage.removeItem(keyName);
+        if (provider === 'gemini') localStorage.removeItem('gemini_api_key');
+        if (provider === 'groq') localStorage.removeItem('groq_api_key');
       }
     }
   } catch {
@@ -421,8 +436,10 @@ export function secureLoadKeySync(provider: string): string {
   if (!isEncryptedSecret(rawValue)) {
     inMemoryKeyCache.set(keyName, rawValue);
     try {
-      if (typeof localStorage !== 'undefined') {
-        const enc = encryptSecretSync(rawValue);
+      const enc = encryptSecretSync(rawValue);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(keyName, enc);
+      } else if (typeof localStorage !== 'undefined' && !migratedFromLocal) {
         localStorage.setItem(keyName, enc);
       }
     } catch {}
@@ -452,6 +469,9 @@ export function secureRemoveKey(provider: string): void {
   inMemoryKeyCache.delete(keyName);
 
   try {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem(keyName);
+    }
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(keyName);
       if (provider === 'gemini') localStorage.removeItem('gemini_api_key');
@@ -467,13 +487,28 @@ export function secureRemoveKey(provider: string): void {
 export async function autoMigrateStorageKeys(): Promise<void> {
   if (typeof localStorage === 'undefined') return;
 
-  const keysToProtect = [
+  // BYOK keys must leave localStorage entirely: move them (encrypted) to sessionStorage.
+  const byokKeys = [
     'cognify_gemini_api_key',
     'cognify_groq_api_key',
     'gemini_api_key',
     'groq_api_key',
-    'cognify_parent_pin',
   ];
+
+  for (const k of byokKeys) {
+    try {
+      const val = localStorage.getItem(k);
+      if (!val) continue;
+      const encrypted = isEncryptedSecret(val) ? val : encryptSecretSync(val);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(k, encrypted);
+      }
+      localStorage.removeItem(k);
+    } catch {}
+  }
+
+  // Non-BYOK local secrets keep their persistence but are encrypted in place.
+  const keysToProtect = ['cognify_parent_pin'];
 
   for (const k of keysToProtect) {
     try {

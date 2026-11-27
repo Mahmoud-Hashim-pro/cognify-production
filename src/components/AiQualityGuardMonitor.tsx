@@ -145,11 +145,11 @@ export const AiQualityGuardMonitor: React.FC<AiQualityGuardMonitorProps> = ({
                 value={inputText}
                 onChange={e => setInputText(e.target.value)}
                 placeholder="Paste raw AI generated response or prompt here..."
-                className="w-full p-4 bg-[#080409] border border-[#4A1224]/60 rounded-2xl text-xs font-mono text-slate-200 focus:border-[#E5A93C]/40 transition outline-none resize-none leading-relaxed"
+                className="w-full p-4 bg-[#080409] border border-[#4A1224]/60 rounded-2xl text-xs font-mono text-slate-200 focus:border-[#E5A93C]/40 transition outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] resize-none leading-relaxed"
               />
             </div>
 
-            <div className="text-[11px] text-slate-500 flex justify-between">
+            <div className="text-xs text-slate-500 flex justify-between">
               <span>Chars: {inputText.length}</span>
               <span>Tokens approx: {Math.round(inputText.length / 4)}</span>
             </div>
@@ -163,7 +163,7 @@ export const AiQualityGuardMonitor: React.FC<AiQualityGuardMonitorProps> = ({
                   <Sparkles className="w-4 h-4 text-emerald-400" />
                   Sanitized & Repaired Output
                 </h3>
-                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
                   Self-Healed
                 </span>
               </div>
@@ -201,9 +201,9 @@ export const AiQualityGuardMonitor: React.FC<AiQualityGuardMonitorProps> = ({
             ) : (
               <div className="space-y-2 pt-1">
                 {guardResult.repairs.map((r, i) => (
-                  <div key={i} className="p-2.5 bg-[#080409] rounded-xl border border-[#4A1224]/60 text-[11px] space-y-1">
+                  <div key={i} className="p-2.5 bg-[#080409] rounded-xl border border-[#4A1224]/60 text-xs space-y-1">
                     <span className="text-emerald-400 font-bold block">{r.description}</span>
-                    <span className="text-slate-400 font-mono text-[10px] block truncate">{r.repairedSnippet}</span>
+                    <span className="text-slate-400 font-mono text-xs block truncate">{r.repairedSnippet}</span>
                   </div>
                 ))}
               </div>

@@ -235,7 +235,7 @@ export default function IqAssessmentModal({
             <div>
               <h2 id="iq-assessment-modal-title" className="font-black text-white text-base flex items-center gap-2.5 tracking-tight">
                 {localize(profile.language, 'Cognitive Style Preview', 'استكشاف الأسلوب المعرفي والتعليمي')}
-                <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
                   Adaptive
                 </span>
               </h2>
@@ -311,7 +311,7 @@ export default function IqAssessmentModal({
                     <Layers className="w-4 h-4" />
                     {localize(profile.language, 'Fluid Reasoning (Gf)', 'الاستدلال المرن (Gf)')}
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
                     {localize(
                       profile.language,
                       'Abstract pattern completions and matrix transformations without language bias.',
@@ -325,7 +325,7 @@ export default function IqAssessmentModal({
                     <BarChart3 className="w-4 h-4" />
                     {localize(profile.language, 'Quantitative Logic (Gq)', 'المنطق الرياضي (Gq)')}
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
                     {localize(
                       profile.language,
                       'Syllogisms, transitive orderings, and relational deductive logic.',
@@ -339,7 +339,7 @@ export default function IqAssessmentModal({
                     <Brain className="w-4 h-4" />
                     {localize(profile.language, 'Working Memory (Gwm)', 'الذاكرة العاملة (Gwm)')}
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
                     {localize(
                       profile.language,
                       'Holding and manipulating spatial coordinates and reverse sequences.',
@@ -353,7 +353,7 @@ export default function IqAssessmentModal({
                     <Zap className="w-4 h-4" />
                     {localize(profile.language, 'Processing Speed (Gs)', 'سرعة المعالجة (Gs)')}
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
                     {localize(
                       profile.language,
                       'Perceptual comparison and rapid odd-one-out discrimination under time limits.',
@@ -406,7 +406,7 @@ export default function IqAssessmentModal({
                   <span className="font-bold text-white">
                     {localize(profile.language, `Question ${currentIdx + 1} of ${IQ_QUESTION_BATTERY.length}`, `السؤال ${currentIdx + 1} من ${IQ_QUESTION_BATTERY.length}`)}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-lg bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] font-bold text-[10px]">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-[#4A1224]/30 border border-[#E5A93C]/20 text-[#E5A93C] font-bold text-xs">
                     {currentQ.domain}
                   </span>
                 </div>
@@ -474,7 +474,7 @@ export default function IqAssessmentModal({
                       }`}
                     >
                       <div
-                        className={`w-5 h-5 rounded-full border flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                        className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs font-bold shrink-0 ${
                           isSelected ? 'border-[#E5A93C] bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-900' : 'border-[#4A1224]/50 bg-slate-800/40 text-transparent'
                         }`}
                       >
@@ -546,28 +546,28 @@ export default function IqAssessmentModal({
               {/* 4 Domain Sub-Scores */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-start">
                 <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60">
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gf Fluid</div>
+                  <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Gf Fluid</div>
                   <div className="text-xl font-black text-white font-mono mt-1">
                     {assessmentResult.domainScores.fluidReasoning}%
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60">
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gq Logic</div>
+                  <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Gq Logic</div>
                   <div className="text-xl font-black text-[#E5A93C] font-mono mt-1">
                     {assessmentResult.domainScores.quantitativeLogic}%
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60">
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gwm Memory</div>
+                  <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Gwm Memory</div>
                   <div className="text-xl font-black text-violet-400 font-mono mt-1">
                     {assessmentResult.domainScores.workingMemory}%
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#080409] border border-[#4A1224]/60">
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gs Speed</div>
+                  <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Gs Speed</div>
                   <div className="text-xl font-black text-amber-400 font-mono mt-1">
                     {assessmentResult.domainScores.processingSpeed}%
                   </div>

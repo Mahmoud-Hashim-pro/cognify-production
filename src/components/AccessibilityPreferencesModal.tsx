@@ -130,7 +130,7 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
             <div className="text-xs font-bold text-emerald-300">
               {isAr ? 'حاجز الخصوصية والكرامة الإنسانية (Non-Diagnosis Guard)' : 'Privacy & Dignity Guarantee'}
             </div>
-            <p className="text-[11px] text-emerald-200/80 leading-relaxed">
+            <p className="text-xs text-emerald-200/80 leading-relaxed">
               {isAr
                 ? 'يتعلم رفيقي أسلوب التواصل والتفاعل الوظيفي فقط (مثل طول الرد وسرعة التصفح)، ولا يقوم أبدًا بتشخيص أو تصنيف أو تخزين أي حالات أو مسميات طبية.'
                 : 'Rafiqi adapts strictly to observable communication habits (response length, listening preferences) and never infers, assigns, or stores medical diagnostic labels.'}
@@ -145,7 +145,7 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
               <Sparkles className="w-4 h-4 text-[#E5A93C]" aria-hidden="true" />
               <span>{isAr ? 'التكيّف التلقائي الذكي' : 'Smart Auto-Adaptation'}</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               {isAr
                 ? 'السماح للنظام بضبط أسلوب التواصل تلقائياً بناءً على سرعة القراءة والاستماع.'
                 : 'Allow Rafiqi to adjust communication style based on your pace and reading habits.'}
@@ -183,7 +183,7 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
               type="button"
               aria-pressed={Boolean(locks.preferredResponseLength)}
               onClick={() => handleToggleLock('preferredResponseLength')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all border focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all border focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
                 locks.preferredResponseLength
                   ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
                   : 'bg-slate-800 text-slate-500 border-[#4A1224]/50'
@@ -231,7 +231,7 @@ export const AccessibilityPreferencesModal: React.FC<AccessibilityPreferencesMod
               type="button"
               aria-pressed={Boolean(locks.preferredModality)}
               onClick={() => handleToggleLock('preferredModality')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all border focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all border focus-visible:ring-2 focus-visible:ring-indigo-400 focus:outline-none ${
                 locks.preferredModality
                   ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
                   : 'bg-slate-800 text-slate-500 border-[#4A1224]/50'

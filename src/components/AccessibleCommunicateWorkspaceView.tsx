@@ -284,11 +284,11 @@ export default function AccessibleCommunicateWorkspaceView({
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
+              <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
                 {localize(profile.language, 'Section 5 · Communication', 'القسم 5 · التواصل والتعبير')}
               </span>
               {session.state === 'connected' && (
-                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-600/30 text-red-400 border border-red-500 animate-pulse">
+                <span className="flex items-center gap-1 text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-600/30 text-red-400 border border-red-500 animate-pulse">
                   <span className="w-2 h-2 rounded-full bg-red-500" />
                   {localize(profile.language, 'Live Stream Active', 'بث حي نشط')}
                 </span>
@@ -489,7 +489,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         <Users className="w-5 h-5 text-[#4B9FE1]" />
                         <div>
                           <h4 className="text-xs font-bold">{localize(profile.language, 'Trusted Contact (Family / Guide)', 'مرافق موثوق (الأسرة / صديق)')}</h4>
-                          <p className="text-[11px] text-[#94A3B8]">{localize(profile.language, 'Direct connection with a known person', 'اتصال مباشر بشخص تعرفه ومعتمد في حسابك')}</p>
+                          <p className="text-xs text-[#94A3B8]">{localize(profile.language, 'Direct connection with a known person', 'اتصال مباشر بشخص تعرفه ومعتمد في حسابك')}</p>
                         </div>
                       </button>
 
@@ -505,7 +505,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         <ShieldCheck className="w-5 h-5 text-[#4B9FE1]" />
                         <div>
                           <h4 className="text-xs font-bold">{localize(profile.language, 'Verified Volunteer Network', 'شبكة المتطوعين المعتمدة')}</h4>
-                          <p className="text-[11px] text-[#94A3B8]">{localize(profile.language, 'Vetted assistance partner network', 'شبكة متطوعين مدربة ومسجلة رسمياً')}</p>
+                          <p className="text-xs text-[#94A3B8]">{localize(profile.language, 'Vetted assistance partner network', 'شبكة متطوعين مدربة ومسجلة رسمياً')}</p>
                         </div>
                       </button>
                     </div>
@@ -594,7 +594,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   value={handwritingInput}
                   onChange={(e) => setHandwritingInput(e.target.value)}
                   rows={3}
-                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-sm text-[#F8FAFC] focus:border-[#1769AA] focus:ring-1 focus:ring-[#1769AA] outline-none"
+                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-sm text-[#F8FAFC] focus:border-[#1769AA] focus:ring-1 focus:ring-[#1769AA] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -728,7 +728,7 @@ export default function AccessibleCommunicateWorkspaceView({
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-bold text-[#F8FAFC]">{field.labelAr}</span>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                              className={`text-xs font-bold px-2 py-0.5 rounded-md ${
                                 field.isRequired
                                   ? 'bg-red-500/20 text-red-300 border border-red-500/30'
                                   : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
@@ -939,7 +939,7 @@ export default function AccessibleCommunicateWorkspaceView({
                       value={replyDraft.draftText}
                       onChange={(e) => setReplyDraft({ ...replyDraft, draftText: e.target.value })}
                       rows={3}
-                      className="w-full p-4 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC] leading-relaxed outline-none"
+                      className="w-full p-4 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC] leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                     />
 
                     {/* Strict review-before-send disclaimer */}
@@ -1027,7 +1027,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   value={paymentOcrText}
                   onChange={(e) => setPaymentOcrText(e.target.value)}
                   rows={2}
-                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-xs text-[#F8FAFC] outline-none"
+                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-xs text-[#F8FAFC] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -1048,21 +1048,21 @@ export default function AccessibleCommunicateWorkspaceView({
                 <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-3.5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
-                      <span className="text-[10px] font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Service Provider', 'جهة الخدمة')}</span>
+                      <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Service Provider', 'جهة الخدمة')}</span>
                       <p className="text-sm font-bold text-[#4B9FE1] mt-0.5">
                         {paymentResult.paymentProviderDetected?.toUpperCase() || 'إشعار عام'}
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
-                      <span className="text-[10px] font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Reference Code', 'رقم الكود / المرجع')}</span>
+                      <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Reference Code', 'رقم الكود / المرجع')}</span>
                       <p className="text-sm font-bold text-[#F8FAFC] mt-0.5">
                         {paymentResult.referenceNumber || 'غير مذكور'}
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
-                      <span className="text-[10px] font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Amount Due', 'المبلغ المطلوب')}</span>
+                      <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Amount Due', 'المبلغ المطلوب')}</span>
                       <p className="text-sm font-bold text-emerald-400 mt-0.5">
                         {paymentResult.dueAmount || 'غير محدد'}
                       </p>

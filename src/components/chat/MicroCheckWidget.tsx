@@ -101,12 +101,12 @@ export default function MicroCheckWidget({
       <div className="flex items-center justify-between gap-3 mb-3 border-b border-[0D2542]/50 pb-3 relative z-10">
         <div className="flex items-center gap-2 text-[0A96A5]">
           <Brain className="w-4 h-4 text-[0A96A5] animate-pulse" />
-          <span className="text-[11px] font-black uppercase tracking-wider">
+          <span className="text-xs font-black uppercase tracking-wider">
             {isAr ? 'فحص سريع للفهم (1-Click Check)' : isFr ? 'Vérification Rapide (1-Clic)' : 'Quick Comprehension Check (1-Click)'}
           </span>
         </div>
         {conceptDisplayName && (
-          <span className="text-[10px] font-semibold px-2.5 py-1 rounded-xl bg-[0D2542]/40 border border-[0A96A5]/30 text-[0A96A5]">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-xl bg-[0D2542]/40 border border-[0A96A5]/30 text-[0A96A5]">
             {conceptDisplayName}
           </span>
         )}
@@ -170,7 +170,7 @@ export default function MicroCheckWidget({
           {/* Prerequisite Interleaving Button if missed */}
           {!isCorrect && prerequisiteGap && (
             <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-              <div className="text-[11px] leading-snug">
+              <div className="text-xs leading-snug">
                 <strong className="block text-amber-300 font-bold mb-0.5">
                   {isAr ? 'فجوة في المتطلب السابق الموصى به:' : isFr ? 'Prérequis Recommandé Manquant :' : 'Prerequisite Gap Detected:'}
                 </strong>
@@ -190,7 +190,7 @@ export default function MicroCheckWidget({
                       isAr ? prerequisiteGap.nameAr : prerequisiteGap.nameEn
                     )
                   }
-                  className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold shrink-0 flex items-center gap-1.5 transition-all shadow-md active:scale-95"
+                  className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all shadow-md active:scale-95"
                 >
                   <span>{isAr ? 'مراجعة المتطلب أولاً' : isFr ? 'Réviser d’abord' : 'Review Prerequisite First'}</span>
                   {isAr ? <ArrowLeft className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}

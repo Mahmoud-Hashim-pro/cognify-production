@@ -20,8 +20,8 @@ const markSizeMap: Record<BrandLogoSize, string> = {
 };
 
 const textSizeMap: Record<BrandLogoSize, { title: string; badge: string; subtitle: string }> = {
-  sm: { title: 'text-base font-bold', badge: 'text-[9px] px-1.5 py-0.2', subtitle: 'text-[10px]' },
-  md: { title: 'text-lg font-black', badge: 'text-[10px] px-1.5 py-0.5', subtitle: 'text-xs' },
+  sm: { title: 'text-base font-bold', badge: 'text-xs px-1.5 py-0.2', subtitle: 'text-xs' },
+  md: { title: 'text-lg font-black', badge: 'text-xs px-1.5 py-0.5', subtitle: 'text-xs' },
   lg: { title: 'text-xl font-black', badge: 'text-xs px-2 py-0.5', subtitle: 'text-xs' },
   xl: { title: 'text-3xl font-black', badge: 'text-xs px-2.5 py-1', subtitle: 'text-sm' },
 };

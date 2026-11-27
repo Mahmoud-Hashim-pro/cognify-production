@@ -86,7 +86,7 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
               <h3 id="visual-comfort-title" className="font-black text-sm sm:text-base text-white">
                 {t('Visual Comfort & Dyslexia Suite', 'أدوات الراحة البصرية وتيسير القراءة (Dyslexia)', 'Confort Visuel')}
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-xs text-slate-400">
                 {t('Universal tools for dyslexia, visual fatigue & contrast', 'أدوات عامة لتخفيف الإجهاد البصري وتحسين القراءة لكافة المستخدمين')}
               </p>
             </div>
@@ -117,7 +117,7 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
           >
             <div>
               <div className="font-bold text-xs text-white">{t('Dyslexia-Friendly Font', 'خط عالي التباين وواسع (Dyslexia)')}</div>
-              <div className="text-[10px] text-slate-400">{t('Increases letter and word spacing', 'يوسع المسافات بين الحروف لمنع تداخل الكلمات')}</div>
+              <div className="text-xs text-slate-400">{t('Increases letter and word spacing', 'يوسع المسافات بين الحروف لمنع تداخل الكلمات')}</div>
             </div>
             <span className="text-2xl" aria-hidden="true">🔤</span>
           </button>
@@ -136,7 +136,7 @@ export default function VisualComfortModal({ isOpen, onClose, language = 'Arabic
           >
             <div>
               <div className="font-bold text-xs text-white">{t('Guided Reading Ruler', 'مسطرة القراءة المضيئة')}</div>
-              <div className="text-[10px] text-slate-400">{t('Focuses on one line at a time', 'تظليل السطر المقروء وتتبع حركة المؤشر')}</div>
+              <div className="text-xs text-slate-400">{t('Focuses on one line at a time', 'تظليل السطر المقروء وتتبع حركة المؤشر')}</div>
             </div>
             <span className="text-2xl" aria-hidden="true">📏</span>
           </button>

@@ -197,7 +197,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
             role="tab"
             aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`px-4 py-2 rounded-xl font-bold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            className={`px-4 py-2 rounded-xl font-bold transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-indigo-500 ${
               activeTab === tab.key
                 ? 'bg-indigo-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -221,7 +221,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={isArabic ? 'ابحث في القاموس الإشاري المعتمد (مثال: سلام، مستشفى، ماء)...' : 'Search verified dictionary...'}
-                className="w-full bg-slate-950 border border-slate-700/80 rounded-2xl py-3 ps-12 pe-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-500"
+                className="w-full bg-slate-950 border border-slate-700/80 rounded-2xl py-3 ps-12 pe-4 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-indigo-500 placeholder-slate-500"
               />
             </div>
 
@@ -289,7 +289,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-800 text-xs text-slate-400 flex items-center justify-between">
                   <span className="flex items-center gap-1 text-emerald-400">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     {isArabic ? 'موثق رسمياً' : 'Verified'}
@@ -552,7 +552,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 />
 
                 {/* Demonstration Mode Badge */}
-                <div className="absolute top-3 start-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-sm text-[11px] font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                <div className="absolute top-3 start-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-sm text-xs font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
                   <Video className="w-3.5 h-3.5" />
                   <span>{isArabic ? 'عرض فيديو حقيقي معتمد' : 'Verified Video Demonstration'}</span>
                 </div>

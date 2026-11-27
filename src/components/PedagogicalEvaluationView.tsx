@@ -216,7 +216,7 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                       {w.window} Window
                     </span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border uppercase ${tierColor}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border uppercase ${tierColor}`}>
                       {w.gainTier} Gain
                     </span>
                   </div>
@@ -319,13 +319,13 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-xs pt-2">
                   <div className="p-2.5 bg-[#080409] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-slate-500 block text-[10px]">Pre &rarr; Post Mean</span>
+                    <span className="text-slate-500 block text-xs">Pre &rarr; Post Mean</span>
                     <span className="text-white font-mono font-semibold">
                       {activeExp.statsA.meanPre}% &rarr; {activeExp.statsA.meanPost}%
                     </span>
                   </div>
                   <div className="p-2.5 bg-[#080409] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-slate-500 block text-[10px]">Hake Mean Gain (g)</span>
+                    <span className="text-slate-500 block text-xs">Hake Mean Gain (g)</span>
                     <span className="text-[#E5A93C] font-mono font-bold">
                       {activeExp.statsA.meanGain.toFixed(3)}
                     </span>
@@ -355,13 +355,13 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-xs pt-2">
                   <div className="p-2.5 bg-[#080409] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-slate-500 block text-[10px]">Pre &rarr; Post Mean</span>
+                    <span className="text-slate-500 block text-xs">Pre &rarr; Post Mean</span>
                     <span className="text-white font-mono font-semibold">
                       {activeExp.statsB.meanPre}% &rarr; {activeExp.statsB.meanPost}%
                     </span>
                   </div>
                   <div className="p-2.5 bg-[#080409] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-slate-500 block text-[10px]">Hake Mean Gain (g)</span>
+                    <span className="text-slate-500 block text-xs">Hake Mean Gain (g)</span>
                     <span className="text-emerald-400 font-mono font-bold">
                       {activeExp.statsB.meanGain.toFixed(3)}
                     </span>
@@ -446,7 +446,7 @@ export const PedagogicalEvaluationView: React.FC<PedagogicalEvaluationViewProps>
 
             <div className="p-3.5 bg-[#080409] border border-[#4A1224]/60 rounded-2xl flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Calculated Gain</span>
+                <span className="text-xs text-slate-500 uppercase font-bold block">Calculated Gain</span>
                 <span className="text-xl font-bold font-mono text-[#E5A93C]">g = {sandboxGain.toFixed(3)}</span>
               </div>
               <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase border ${

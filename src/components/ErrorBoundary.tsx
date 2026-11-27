@@ -124,7 +124,7 @@ class ErrorBoundary extends Component<Props, State> {
                 Update & Reload
               </button>
 
-              <p className="mt-6 text-[10px] text-slate-500 tracking-wide font-mono">
+              <p className="mt-6 text-xs text-slate-500 tracking-wide font-mono">
                 Auto-update standby
               </p>
             </div>
@@ -159,7 +159,7 @@ class ErrorBoundary extends Component<Props, State> {
             <div className="mt-5 text-xs text-rose-300 tracking-wide font-mono bg-[#080409]/80 p-3 rounded-xl border border-rose-500/20 text-left select-all" dir="ltr">
               <div className="font-bold text-rose-400">Ref: {this.state.error?.name || "APP_ERROR"}: {this.state.error?.message}</div>
               {this.state.error?.stack && (
-                <div className="mt-2 text-[10px] text-slate-400 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                <div className="mt-2 text-xs text-slate-400 whitespace-pre-wrap max-h-24 overflow-y-auto">
                   {this.state.error.stack.split('\n').slice(0, 3).join('\n')}
                 </div>
               )}

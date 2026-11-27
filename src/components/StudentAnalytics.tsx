@@ -85,7 +85,7 @@ export default function StudentAnalytics({ profile, onMenuClick, onNavigateBack 
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${tone}`}>{icon}</div>
       <div>
         <div className="text-2xl font-black text-white font-mono tracking-tight">{value}</div>
-        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-0.5">{label}</div>
+        <div className="text-xs font-black uppercase tracking-widest text-slate-400 mt-0.5">{label}</div>
       </div>
     </div>
   );
@@ -234,12 +234,12 @@ export default function StudentAnalytics({ profile, onMenuClick, onNavigateBack 
                   {upcomingEvents.map((e) => (
                     <div key={e.id} className="flex items-center gap-3 p-3 rounded-2xl bg-[#150917] border border-[#4A1224]/60 hover:border-[#831843]/80 transition-all">
                       <div className="text-center shrink-0 w-10 p-1 rounded-xl bg-[#150917] border border-[#4A1224]/60">
-                        <div className="text-[9px] font-black text-[#E5A93C] uppercase">{new Date(e.date + 'T00:00:00').toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { month: 'short' })}</div>
+                        <div className="text-xs font-black text-[#E5A93C] uppercase">{new Date(e.date + 'T00:00:00').toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { month: 'short' })}</div>
                         <div className="text-base font-black text-white leading-none mt-0.5">{new Date(e.date + 'T00:00:00').getDate()}</div>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-bold text-white text-sm truncate">{e.title}</div>
-                        {e.time && <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono mt-0.5"><Clock className="w-3 h-3 text-slate-500" />{e.time}</div>}
+                        {e.time && <div className="flex items-center gap-1 text-xs text-slate-400 font-mono mt-0.5"><Clock className="w-3 h-3 text-slate-500" />{e.time}</div>}
                       </div>
                     </div>
                   ))}
@@ -288,7 +288,7 @@ export default function StudentAnalytics({ profile, onMenuClick, onNavigateBack 
                   return (
                     <div key={g.id} className="flex items-center justify-between gap-3 p-3.5 bg-[#150917] border border-[#4A1224]/60 rounded-2xl">
                       <span className="text-sm font-bold text-slate-200 truncate">{g.title}</span>
-                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-xl border ${d < 0 ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : d <= 3 ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-slate-800 text-slate-300 border-[#4A1224]/60'}`}>
+                      <span className={`text-xs font-black px-2.5 py-1 rounded-xl border ${d < 0 ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : d <= 3 ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-slate-800 text-slate-300 border-[#4A1224]/60'}`}>
                         {d < 0 ? t('overdue', 'متأخر') : `${d} ${t('days', 'يوم')}`}
                       </span>
                     </div>

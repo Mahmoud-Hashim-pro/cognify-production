@@ -140,7 +140,7 @@ export const UnifiedTwoWayCommunicationView: React.FC<UnifiedTwoWayCommunication
     switch (msg.provenance) {
       case 'original_transcript':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
             <Mic className="w-3 h-3 text-blue-500" />
             {isArabic ? 'نص أصلي منقول' : 'Original Transcript'}
             {msg.isUncertain && (
@@ -152,35 +152,35 @@ export const UnifiedTwoWayCommunicationView: React.FC<UnifiedTwoWayCommunication
         );
       case 'user_edited_transcript':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             <Edit2 className="w-3 h-3" />
             {isArabic ? 'معدل بواسطة المستخدم' : 'User Edited'}
           </span>
         );
       case 'ai_generated_summary':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
             <Sparkles className="w-3 h-3" />
             {isArabic ? 'ملخص آلي منفصل' : 'AI Summary'}
           </span>
         );
       case 'recognized_sign':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
             <BookOpen className="w-3 h-3" />
             {isArabic ? 'إشارة معتمدة' : 'Recognized Sign'}
           </span>
         );
       case 'aac_composed':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
             <Layers className="w-3 h-3" />
             {isArabic ? 'تأليف لوحة AAC' : 'AAC Composed'}
           </span>
         );
       case 'ambient_sound_alert':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 font-bold animate-pulse">
+          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 font-bold animate-pulse">
             <Bell className="w-3 h-3" />
             {isArabic ? 'تنبيه صوتي بيئي' : 'Ambient Alert'}
           </span>
@@ -362,11 +362,11 @@ export const UnifiedTwoWayCommunicationView: React.FC<UnifiedTwoWayCommunication
                   }`}
                 >
                   {/* Provenance Badge & Timestamp Bar */}
-                  <div className="flex items-center justify-between gap-3 mb-1.5 text-[10px] opacity-80">
+                  <div className="flex items-center justify-between gap-3 mb-1.5 text-xs opacity-80">
                     <div className="flex items-center gap-1.5">
                       {renderProvenanceBadge(msg)}
                       {msg.status === 'edited' && (
-                        <span className="text-[10px] italic">
+                        <span className="text-xs italic">
                           ({isArabic ? 'معدل' : 'edited'})
                         </span>
                       )}
@@ -511,7 +511,7 @@ export const UnifiedTwoWayCommunicationView: React.FC<UnifiedTwoWayCommunication
                 ? 'اكتب رسالتك هنا للتواصل المباشر مع الطرف الآخر...'
                 : 'Type your message to communicate...'
             }
-            className="flex-1 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="flex-1 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
           />
 
           <button
@@ -594,10 +594,10 @@ export const UnifiedTwoWayCommunicationView: React.FC<UnifiedTwoWayCommunication
                     <div className="font-bold mb-1 text-indigo-700 dark:text-indigo-300">
                       {note.userNotesAr || (isArabic ? 'ملاحظة محادثة' : 'Conversation Note')}
                     </div>
-                    <pre className="text-[11px] whitespace-pre-wrap font-sans opacity-80 mb-2">
+                    <pre className="text-xs whitespace-pre-wrap font-sans opacity-80 mb-2">
                       {note.rawContent}
                     </pre>
-                    <div className="flex justify-between items-center text-[10px] opacity-60 border-t pt-1.5">
+                    <div className="flex justify-between items-center text-xs opacity-60 border-t pt-1.5">
                       <span>{new Date(note.createdAt).toLocaleString()}</span>
                       <button
                         onClick={() => {

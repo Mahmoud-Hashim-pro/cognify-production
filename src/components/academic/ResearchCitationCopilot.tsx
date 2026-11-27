@@ -277,7 +277,7 @@ Provide an honest, constructive 3-point diagnostic:
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={isAr ? 'مثال: Attention Is All You Need' : 'e.g. Attention Is All You Need'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-amber-500"
               />
             </div>
 
@@ -290,7 +290,7 @@ Provide an honest, constructive 3-point diagnostic:
                 value={authors}
                 onChange={(e) => setAuthors(e.target.value)}
                 placeholder={isAr ? 'مثال: Vaswani, A., Shazeer, N., Parmar, N.' : 'e.g. Vaswani, A., Shazeer, N.'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-amber-500"
               />
             </div>
 
@@ -303,7 +303,7 @@ Provide an honest, constructive 3-point diagnostic:
                 value={publisherOrJournal}
                 onChange={(e) => setPublisherOrJournal(e.target.value)}
                 placeholder={isAr ? 'مثال: NeurIPS Proceedings / Nature' : 'e.g. NeurIPS / Nature / IEEE Trans.'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-amber-500"
               />
             </div>
 
@@ -318,7 +318,7 @@ Provide an honest, constructive 3-point diagnostic:
                   onChange={(e) => setYear(e.target.value)}
                   placeholder="2024"
                   aria-label={isAr ? 'سنة النشر' : 'Year'}
-                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none font-mono"
+                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] font-mono"
                 />
               </div>
               <div>
@@ -330,7 +330,7 @@ Provide an honest, constructive 3-point diagnostic:
                   value={volume}
                   onChange={(e) => setVolume(e.target.value)}
                   placeholder="30"
-                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none font-mono"
+                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] font-mono"
                 />
               </div>
               <div>
@@ -342,7 +342,7 @@ Provide an honest, constructive 3-point diagnostic:
                   value={pages}
                   onChange={(e) => setPages(e.target.value)}
                   placeholder="6000-6010"
-                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none font-mono"
+                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] font-mono"
                 />
               </div>
             </div>
@@ -356,7 +356,7 @@ Provide an honest, constructive 3-point diagnostic:
                 value={urlOrDoi}
                 onChange={(e) => setUrlOrDoi(e.target.value)}
                 placeholder="10.48550/arXiv.1706.03762"
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none font-mono"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] font-mono"
               />
             </div>
           </div>
@@ -366,12 +366,12 @@ Provide an honest, constructive 3-point diagnostic:
             {/* Full Reference */}
             <div className="bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+                <span className="text-xs font-black uppercase tracking-wider text-amber-400">
                   {isAr ? `التوثيق في قائمة المراجع (${activeStyle.toUpperCase()} Bibliography):` : `${activeStyle.toUpperCase()} Reference List Item:`}
                 </span>
                 <button
                   onClick={() => copyText(activeFormattedCitation, 'full')}
-                  className="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-white transition-colors"
+                  className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-white transition-colors"
                 >
                   {copiedItem === 'full' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   {isAr ? 'نسخ المرجع' : 'Copy'}
@@ -385,12 +385,12 @@ Provide an honest, constructive 3-point diagnostic:
             {/* In-text Citation */}
             <div className="bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#E5A93C]">
+                <span className="text-xs font-black uppercase tracking-wider text-[#E5A93C]">
                   {isAr ? 'التوثيق داخل المتن (In-Text Citation):' : 'In-Text Citation (Within Paragraph):'}
                 </span>
                 <button
                   onClick={() => copyText(inTextCitation, 'intext')}
-                  className="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-white transition-colors"
+                  className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-white transition-colors"
                 >
                   {copiedItem === 'intext' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   {isAr ? 'نسخ التوثيق' : 'Copy'}
@@ -421,7 +421,7 @@ Provide an honest, constructive 3-point diagnostic:
             onChange={(e) => setRawDraft(e.target.value)}
             rows={5}
             placeholder={isAr ? 'الصق فقرتك المكتوبة هنا وسنقوم بترقيتها وصقل مصطلحاتها...' : 'Paste your rough paragraph or section draft here...'}
-            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed font-sans"
+            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-amber-500 leading-relaxed font-sans"
           />
 
           <div className="flex justify-end">
@@ -447,12 +447,12 @@ Provide an honest, constructive 3-point diagnostic:
           {polishedResult && (
             <div className="pt-4 border-t border-[#4A1224]/60 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
                   {isAr ? 'الصياغة الأكاديمية الرصينة المقترحة:' : 'Refined Academic Version:'}
                 </span>
                 <button
                   onClick={() => copyText(polishedResult, 'polished')}
-                  className="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-white"
+                  className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-white"
                 >
                   {copiedItem === 'polished' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   {isAr ? 'نسخ النص المصقول' : 'Copy'}
@@ -484,7 +484,7 @@ Provide an honest, constructive 3-point diagnostic:
             onChange={(e) => setOriginalityInput(e.target.value)}
             rows={5}
             placeholder={isAr ? 'الصق الفقرة التي أعدت صياغتها لفحص سلامتها وتوثيقها...' : 'Paste your rewritten paragraph to assess originality and attribution...'}
-            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed font-sans"
+            className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-amber-500 leading-relaxed font-sans"
           />
 
           <div className="flex justify-end">
@@ -509,7 +509,7 @@ Provide an honest, constructive 3-point diagnostic:
 
           {originalityFeedback && (
             <div className="pt-4 border-t border-[#4A1224]/60 space-y-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#E5A93C]">
+              <span className="text-xs font-black uppercase tracking-wider text-[#E5A93C]">
                 {isAr ? 'تقرير تشخيص الأصالة والتوصيات الأكاديمية:' : 'Originality Report & Advice:'}
               </span>
               <div className="p-4 rounded-2xl bg-[#150917] border border-[#4A1224]/60 text-xs text-slate-200 whitespace-pre-line leading-relaxed">

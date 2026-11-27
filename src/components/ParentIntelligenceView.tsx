@@ -248,12 +248,12 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
             </button>
 
             {isDemoMode ? (
-              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-purple-500/10 text-purple-300 border border-purple-500/20 flex items-center gap-1.5">
+              <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-purple-500/10 text-purple-300 border border-purple-500/20 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-purple-400" />
                 <span>{isAr ? 'عرض إرشادي توضيحي' : 'Preview Overview'}</span>
               </span>
             ) : (
-              <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 flex items-center gap-1.5">
+              <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>{isAr ? 'بيانات دراسية نشطة' : 'Active Study Progress'}</span>
               </span>
@@ -284,7 +284,7 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                 {isAr ? 'درع الخصوصية والأمان النفسي مفعل 100%' : 'Zero-Chat-Snooping Privacy Shield Active'}
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
                 {isAr ? 'حماية مشددة' : 'Strict Protection'}
               </span>
             </div>
@@ -436,7 +436,7 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
                             <Award className="w-5 h-5" />
                           </div>
                           <div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                               {isResilience ? (isAr ? 'تخطي التحدي بنجاح' : 'Overcoming Challenge') : isLeap ? (isAr ? 'قفزة إتقان' : 'Mastery Leap') : (isAr ? 'إنجاز تعليمي' : 'Milestone')}
                             </span>
                             <h3 className="text-lg font-bold text-white">
@@ -538,7 +538,7 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
                 </p>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="child-uid-input" className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <label htmlFor="child-uid-input" className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                     {isAr ? 'معرف الطالب (Student UID / Code)' : 'Student UID / Code'}
                   </label>
                   <input
@@ -548,7 +548,7 @@ export const ParentIntelligenceView: React.FC<ParentIntelligenceViewProps> = ({
                     value={childIdInput}
                     onChange={(e) => setChildIdInput(e.target.value)}
                     placeholder="e.g. std_usr_998124 or student email"
-                    className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white placeholder-slate-600 text-xs focus:outline-none focus:border-purple-500/50"
+                    className="w-full px-4 py-3 rounded-2xl bg-[#080409] border border-[#4A1224]/60 text-white placeholder-slate-600 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500/50"
                   />
                 </div>
               </div>

@@ -382,7 +382,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                 <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
                   {isRtl ? 'رفيقى' : 'Rafiqi'}
                 </span>
-                <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] font-bold text-[9px] uppercase">
+                <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
                   A11y
                 </span>
               </div>
@@ -397,11 +397,11 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                   <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
                     {isRtl ? 'رفيقى' : 'Rafiqi'}
                   </span>
-                  <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] font-bold text-[9px] uppercase">
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
                     A11y
                   </span>
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] leading-tight">
+                <span className="text-xs sm:text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] leading-tight">
                   {t('Your phone sees the world for you.', 'موبايلك يشوفلك الدنيا.')}
                 </span>
               </div>
@@ -546,7 +546,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                 </div>
               </div>
@@ -598,7 +598,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                 </div>
               </div>
@@ -620,7 +620,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                     placeholder={t('Enter password (min 8 chars)', 'أدخل كلمة المرور (8 خانات على الأقل)')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                   <button
                     type="button"
@@ -652,7 +652,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                       placeholder={t('Re-enter your password', 'أعد إدخال كلمة المرور للتأكيد')}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                      className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                     />
                   </div>
                 </div>
@@ -686,7 +686,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               {error && (
                 <div role="alert" className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />
-                  <span className="text-[11px] leading-tight line-clamp-2">{error}</span>
+                  <span className="text-xs leading-tight line-clamp-2">{error}</span>
                 </div>
               )}
 
@@ -709,7 +709,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               {/* "or" Divider */}
               <div className="relative flex items-center justify-center my-3">
                 <div className="border-t border-slate-200 dark:border-[#22354E] w-full" />
-                <span className="bg-white dark:bg-[#131E2E] px-3 text-[10px] sm:text-[11px] font-bold text-slate-400 dark:text-[#94A3B8] uppercase tracking-wider">
+                <span className="bg-white dark:bg-[#131E2E] px-3 text-xs sm:text-xs font-bold text-slate-400 dark:text-[#94A3B8] uppercase tracking-wider">
                   {t('or', 'أو')}
                 </span>
               </div>
@@ -730,7 +730,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                   type="button"
                   onClick={handleGoogleRedirectAuth}
                   disabled={loading}
-                  className="w-full py-1 text-center text-[11px] text-amber-600 dark:text-amber-300 hover:underline font-semibold cursor-pointer"
+                  className="w-full py-1 text-center text-xs text-amber-600 dark:text-amber-300 hover:underline font-semibold cursor-pointer"
                 >
                   {t('Direct Google Sign-In (No Pop-ups)', 'تسجيل جوجل المباشر (بدون نوافذ منبثقة)')}
                 </button>
@@ -768,12 +768,12 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
 
       {/* ── FOOTER: Universal Accessibility Assurance ── */}
       <footer className="max-w-5xl mx-auto w-full z-10 py-2 text-center px-2">
-        <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-[#131E2E]/80 border border-slate-200 dark:border-[#22354E] text-[10px] sm:text-[11px] text-slate-500 dark:text-[#94A3B8] shadow-xs max-w-full">
+        <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-[#131E2E]/80 border border-slate-200 dark:border-[#22354E] text-xs sm:text-xs text-slate-500 dark:text-[#94A3B8] shadow-xs max-w-full">
           <Accessibility className="w-3.5 h-3.5 text-[#1769AA] shrink-0" aria-hidden="true" />
           <span className="truncate sm:whitespace-normal">
             {t(
-              'Rafiqi Universal Access: WCAG 2.1 AAA high-contrast and screen-reader ready.',
-              'رفيقى للإتاحة الشاملة: تباين فائق WCAG 2.1 AAA ومتوافق مع قارئات الشاشة.'
+              'Rafiqi Universal Access: built toward WCAG 2.2 AA conformance and screen-reader ready.',
+              'رفيقى للإتاحة الشاملة: بنسعى للتوافق مع WCAG 2.2 AA ومتوافق مع قارئات الشاشة.'
             )}
           </span>
         </div>

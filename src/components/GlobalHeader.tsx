@@ -312,7 +312,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             <span className="text-base font-black tracking-tight text-slate-900 dark:text-white leading-none">
               Rafiqi
             </span>
-            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] border border-[#1769AA]/30 uppercase">
+            <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] border border-[#1769AA]/30 uppercase">
               A11y
             </span>
           </div>
@@ -374,11 +374,11 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               isDarkMode 
                 ? 'bg-[#131E2E] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                 : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'
-            } transition-all outline-none focus:ring-2 focus:ring-[#1769AA]/30`}
+            } transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/30`}
             aria-label={t('Global search', 'البحث العام في رفيقي')}
           />
           <div className="absolute inset-y-0 end-0 pe-2.5 flex items-center pointer-events-none">
-            <kbd className="hidden lg:inline px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-200 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700">
+            <kbd className="hidden lg:inline px-1.5 py-0.5 text-xs font-mono text-slate-400 bg-slate-200 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700">
               ⌘K
             </kbd>
           </div>
@@ -394,7 +394,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               }`}
             >
               {searchResults.length === 0 ? (
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center py-4 px-3">
+                <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-4 px-3">
                   {t('No tools match your search.', 'مفيش أدوات مطابقة لبحثك.')}
                 </p>
               ) : (
@@ -410,7 +410,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                     }`}
                   >
                     <span className="text-xs font-bold leading-tight">{r.title}</span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">{r.section}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{r.section}</span>
                   </button>
                 ))
               )}
@@ -492,7 +492,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                 <span className="text-xs font-bold text-slate-900 dark:text-white">
                   {t('Functional Notifications', 'الإشعارات والتنبيهات')}
                 </span>
-                <span className="text-[10px] text-slate-500 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   {functionalNotifications.length > 0
                     ? `${functionalNotifications.length} ${t('active', 'نشط')}`
                     : t('none', 'لا يوجد')}
@@ -501,7 +501,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
               <div className="space-y-1.5">
                 {functionalNotifications.length === 0 && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center py-3">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-3">
                     {t('No notifications right now.', 'مفيش إشعارات دلوقتي.')}
                   </p>
                 )}
@@ -510,7 +510,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
                     <notif.icon className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1] shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold leading-tight">{notif.title}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{notif.desc}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{notif.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -557,8 +557,8 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               {/* User info chip */}
               <div className="p-2.5 pb-2 border-b border-slate-200 dark:border-[#22354E] mb-1">
                 <p className="text-xs font-black truncate">{profile.name || 'User'}</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{profile.email || 'user@rafiqi.app'}</p>
-                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1]">
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{profile.email || 'user@rafiqi.app'}</p>
+                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1]">
                   {profile.accessibilityMode || t('General Access', 'وصول شامل')}
                 </span>
               </div>

@@ -73,7 +73,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       className={cn(
         'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-sans select-none',
         config.containerClass,
-        size === 'sm' && 'text-[11px] px-2 py-0.5',
+        size === 'sm' && 'text-xs px-2 py-0.5',
         className
       )}
       {...props}

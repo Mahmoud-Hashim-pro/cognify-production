@@ -449,7 +449,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     onChange={e => setEpsilon(Number(e.target.value))}
                     className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                  <div className="flex justify-between text-xs text-slate-500 mt-1">
                     <span>0.1 (High Anonymity / Strong Noise)</span>
                     <span>2.0 (High Precision / Low Noise)</span>
                   </div>
@@ -468,17 +468,17 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
               {lastPerturbation && (
                 <div className="p-4 bg-[#080409] border border-[#E5A93C]/30 rounded-2xl grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <span className="text-[11px] text-slate-400 uppercase font-bold block">Raw True Value</span>
+                    <span className="text-xs text-slate-400 uppercase font-bold block">Raw True Value</span>
                     <span className="text-xl font-bold font-mono text-slate-200">{testMetric}%</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#E5A93C] uppercase font-bold block">Laplace Noise</span>
+                    <span className="text-xs text-[#E5A93C] uppercase font-bold block">Laplace Noise</span>
                     <span className={`text-xl font-bold font-mono ${lastPerturbation.noise >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
                       {lastPerturbation.noise > 0 ? `+${lastPerturbation.noise}` : lastPerturbation.noise}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-emerald-400 uppercase font-bold block">DP Published Value</span>
+                    <span className="text-xs text-emerald-400 uppercase font-bold block">DP Published Value</span>
                     <span className="text-xl font-bold font-mono text-white">{lastPerturbation.perturbed}%</span>
                   </div>
                 </div>
@@ -518,7 +518,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     />
                   </div>
 
-                  <div className="text-[11px] text-slate-400 space-y-1">
+                  <div className="text-xs text-slate-400 space-y-1">
                     <div className="flex justify-between">
                       <span>Consumed Budget:</span>
                       <span className="font-mono text-white">{dpBudget.consumedBudget.toFixed(2)} ε</span>
@@ -658,21 +658,21 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Profile Wiped</span>
+                    <span className="text-xs text-slate-400 block font-bold">Profile Wiped</span>
                     <span className="text-sm font-bold text-emerald-400">
                       {erasureManifest.recordsWiped.profileState ? 'Yes' : 'No'}
                     </span>
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Events Redacted</span>
+                    <span className="text-xs text-slate-400 block font-bold">Events Redacted</span>
                     <span className="text-sm font-bold text-emerald-400">{erasureManifest.recordsWiped.learningEventsRedacted}</span>
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Spatial Memories</span>
+                    <span className="text-xs text-slate-400 block font-bold">Spatial Memories</span>
                     <span className="text-sm font-bold text-emerald-400">{erasureManifest.recordsWiped.spatialMemoriesWiped}</span>
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Presence Cleaned</span>
+                    <span className="text-xs text-slate-400 block font-bold">Presence Cleaned</span>
                     <span className="text-sm font-bold text-emerald-400">
                       {erasureManifest.recordsWiped.presenceCleaned ? 'Yes' : 'No'}
                     </span>
@@ -680,7 +680,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 </div>
 
                 <div className="pt-2 border-t border-[#4A1224]/60">
-                  <span className="text-[11px] text-slate-400 block font-semibold">Cryptographic Erasure Receipt Hash</span>
+                  <span className="text-xs text-slate-400 block font-semibold">Cryptographic Erasure Receipt Hash</span>
                   <span className="text-xs font-mono text-[#E5A93C] break-all">{erasureManifest.receiptHash}</span>
                 </div>
               </div>
@@ -761,12 +761,12 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                       </span>
                       <span className="text-slate-400 font-mono">actor: {entry.actorUid}</span>
                     </div>
-                    <span className="text-slate-500 font-mono text-[11px]">
+                    <span className="text-slate-500 font-mono text-xs">
                       {new Date(entry.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
                     <div className="truncate">
                       <span className="text-slate-500">prevHash: </span>
                       <span className="text-slate-400">{entry.prevHash.slice(0, 24)}...</span>

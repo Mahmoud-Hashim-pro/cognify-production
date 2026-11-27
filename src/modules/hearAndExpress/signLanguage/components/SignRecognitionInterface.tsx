@@ -248,10 +248,10 @@ export const SignRecognitionInterface: React.FC<SignRecognitionInterfaceProps> =
             {/* Visual Signing Space Envelope Overlay */}
             {isCameraActive && (
               <div className="absolute inset-4 border-2 border-dashed border-indigo-400/40 rounded-2xl pointer-events-none flex flex-col justify-between p-3">
-                <span className="text-[10px] text-indigo-300 bg-black/60 px-2 py-0.5 rounded-full w-max">
+                <span className="text-xs text-indigo-300 bg-black/60 px-2 py-0.5 rounded-full w-max">
                   {isArabic ? 'مساحة ملامح الوجه وحركة اليدين' : 'Face & Upper Body Signing Envelope'}
                 </span>
-                <span className="text-[10px] text-slate-400 bg-black/60 px-2 py-0.5 rounded-full w-max self-end">
+                <span className="text-xs text-slate-400 bg-black/60 px-2 py-0.5 rounded-full w-max self-end">
                   720p / 30fps
                 </span>
               </div>
@@ -332,7 +332,7 @@ export const SignRecognitionInterface: React.FC<SignRecognitionInterfaceProps> =
                 <span>4. {isArabic ? 'نموذج الشبكة العصبية المدربة' : 'Trained Sequence Transformer'}</span>
                 <AlertCircle className="w-4 h-4 text-amber-400" />
               </div>
-              <p className="text-amber-200/90 text-[11px]">
+              <p className="text-amber-200/90 text-xs">
                 {isArabic
                   ? 'معلق امتثالاً للبوابة: لا يتم تدريب النماذج إلا بعد اكتمال تجميع البيانات الميدانية متعددة الإشاريين.'
                   : 'Pending Gate Satisfaction: Neural models will be trained only upon multi-signer empirical corpus completion.'}
@@ -401,14 +401,14 @@ export const SignRecognitionInterface: React.FC<SignRecognitionInterfaceProps> =
             >
               <div className="flex items-center justify-between">
                 <span className="text-base font-bold text-white">{entry.arabicGloss}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-500/20 text-indigo-300">
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-indigo-500/20 text-indigo-300">
                   {entry.category}
                 </span>
               </div>
 
               <p className="text-xs text-slate-300">{entry.arabicMeaning}</p>
 
-              <div className="pt-2 border-t border-slate-700/40 text-[11px] text-slate-400 space-y-1">
+              <div className="pt-2 border-t border-slate-700/40 text-xs text-slate-400 space-y-1">
                 <div>
                   <strong className="text-slate-300">{isArabic ? 'الحركة:' : 'Movement:'}</strong>{' '}
                   {entry.movementDescription}

@@ -67,7 +67,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // Base colors
               'bg-cognify-surface-light dark:bg-cognify-surface-dark border text-cognify-text-primary dark:text-cognify-text-dark-primary placeholder:text-cognify-text-secondary dark:placeholder:text-cognify-text-dark-secondary',
               // Focus state: high contrast gold
-              'outline-none focus:ring-2 focus:ring-cognify-focus focus:border-transparent',
+              'outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-cognify-focus focus:border-transparent',
               // Normal vs Error border
               isInvalid
                 ? 'border-cognify-error-text-light focus:ring-cognify-error-text-light dark:border-cognify-error-text-dark dark:focus:ring-cognify-error-text-dark'

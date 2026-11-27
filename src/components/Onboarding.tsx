@@ -214,7 +214,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               }`}
             >
               <span>اللهجة المصرية (Egyptian Arabic)</span>
-              <span className="text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">شروحات وأوصاف مبسطة ودارجة</span>
+              <span className="text-xs font-normal text-slate-500 dark:text-[#94A3B8]">شروحات وأوصاف مبسطة ودارجة</span>
             </button>
             <button
               type="button"
@@ -226,7 +226,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               }`}
             >
               <span>الفصحى المعاصرة (Modern Standard)</span>
-              <span className="text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">لغة رسمية وأكاديمية دقيقة</span>
+              <span className="text-xs font-normal text-slate-500 dark:text-[#94A3B8]">لغة رسمية وأكاديمية دقيقة</span>
             </button>
           </div>
         </div>
@@ -255,7 +255,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             <span>{t('Test Voice', 'تجربة الصوت')}</span>
           </button>
         </div>
-        <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-relaxed">
+        <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">
           {t(
             'Rafiqi vocalizes visual scenes, reads books, and announces actions in your preferred dialect.',
             'يقوم رفيقي بنطق أوصاف المشاهد وقراءة الكتب والمستندات وإعلان التنبيهات بلهجتك وصوتك المفضل.'
@@ -318,7 +318,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-slate-900 dark:text-white block">
             {t('High Contrast Mode (WCAG AAA)', 'وضع التباين العالي الفائق')}
           </span>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
             {t('Enhances text borders and outlines for maximum readability.', 'يبرز حواف النصوص والعناصر لضمان أقصى وضوح بصري.')}
           </span>
         </div>
@@ -344,7 +344,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             <Type className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
             <span>{t('Text Size Scale', 'حجم الخط في المنصة')}</span>
           </label>
-          <span className="text-[11px] font-bold text-[#1769AA] dark:text-[#4B9FE1] capitalize">
+          <span className="text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] capitalize">
             {fontSizeScale}
           </span>
         </div>
@@ -374,7 +374,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-slate-900 dark:text-white block">
             {t('Reduce Motion & Animations', 'تقليل الحركة والانتقالات')}
           </span>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
             {t('Simplifies page transitions for vestibular and sensory comfort.', 'يلغي المؤثرات الحركية السريعة لراحة الحواس.')}
           </span>
         </div>
@@ -498,7 +498,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-slate-900 dark:text-white block">
             {t('Auto-Read Screen Descriptions', 'القراءة الصوتية التلقائية للمشاهد')}
           </span>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
             {t('Automatically vocalizes visual summaries upon capture.', 'ينطق ملخص الكاميرا والمستندات تلقائياً عند الالتقاط.')}
           </span>
         </div>
@@ -568,7 +568,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-emerald-800 dark:text-emerald-200 block">
             {t('Universal Access & Privacy Guarantee', 'ضمان الخصوصية والإتاحة الشاملة')}
           </span>
-          <span className="text-[11px] text-emerald-900/80 dark:text-emerald-200/80 block leading-relaxed">
+          <span className="text-xs text-emerald-900/80 dark:text-emerald-200/80 block leading-relaxed">
             {t(
               'You are never required to disclose a disability. All features are always available and can be customized at any time in Settings.',
               'لست ملزماً بالإفصاح عن أي حالة صحية. جميع أقسام رفيقي الستة متاحة بالكامل وتستطيع تغيير اختياراتك متى شئت.'
@@ -637,7 +637,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
                 </div>
                 {isSelected && <CheckCircle className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />}
               </div>
-              <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] leading-tight ps-9">
+              <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-tight ps-9">
                 {t(profileOpt.descEn, profileOpt.descAr)}
               </p>
             </button>
@@ -731,7 +731,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
       </div>
 
       {/* Note about editing in Section 6 */}
-      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-start flex items-center gap-2.5 text-[11px] text-blue-800 dark:text-blue-200">
+      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-start flex items-center gap-2.5 text-xs text-blue-800 dark:text-blue-200">
         <Info className="w-4 h-4 shrink-0 text-[#1769AA] dark:text-[#4B9FE1]" />
         <span>{t('You can change any of these settings anytime from Section 6 (Personalize).', 'يمكنك تغيير أي من هذه الإعدادات لاحقاً في أي وقت من قسم التخصيص.')}</span>
       </div>
@@ -792,7 +792,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-black text-slate-900 dark:text-white">
             {isRtl ? 'رفيقي' : 'Rafiqi'}
           </span>
-          <span className="text-[10px] text-slate-400 dark:text-[#94A3B8]">
+          <span className="text-xs text-slate-400 dark:text-[#94A3B8]">
             {t('Onboarding', 'إعداد البداية')}
           </span>
         </div>
@@ -839,7 +839,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
                 >
                   {step > s.id ? <Check className="w-4 h-4" /> : s.id}
                 </button>
-                <span className={`text-[10px] font-bold mt-1.5 whitespace-nowrap transition-colors ${
+                <span className={`text-xs font-bold mt-1.5 whitespace-nowrap transition-colors ${
                   step >= s.id ? 'text-[#1769AA] dark:text-[#4B9FE1]' : 'text-slate-400'
                 }`}>
                   {s.label}
@@ -867,7 +867,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
       </div>
 
       {/* Footer Branding Note */}
-      <div className="text-[11px] text-slate-400 dark:text-[#94A3B8] font-mono tracking-widest uppercase pb-4">
+      <div className="text-xs text-slate-400 dark:text-[#94A3B8] font-mono tracking-widest uppercase pb-4">
         Rafiqi · Universal Accessibility
       </div>
     </div>

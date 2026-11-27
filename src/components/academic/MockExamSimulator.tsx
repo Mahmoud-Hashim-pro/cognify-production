@@ -288,7 +288,7 @@ Respond with ONLY valid JSON strictly matching this schema:
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
                 placeholder={isAr ? 'مثال: خوارزميات وهياكل بيانات، كيمياء حيوية...' : 'e.g. Data Structures, Macroeconomics...'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-indigo-500 transition-all"
               />
             </div>
             <div>
@@ -300,7 +300,7 @@ Respond with ONLY valid JSON strictly matching this schema:
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder={isAr ? 'مثال: Binary Search Trees & AVL Balances' : 'e.g. Binary Search Trees & AVL Balances'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-indigo-500 transition-all"
               />
             </div>
           </div>
@@ -422,7 +422,7 @@ Respond with ONLY valid JSON strictly matching this schema:
             <span className="text-xs text-slate-400 font-bold">
               ({currQ.points} {isAr ? 'درجة' : 'pts'})
             </span>
-            <span className="text-[11px] font-black uppercase text-[#E5A93C] bg-[#831843]/20 border border-[#E5A93C]/20 px-2.5 py-0.5 rounded-lg">
+            <span className="text-xs font-black uppercase text-[#E5A93C] bg-[#831843]/20 border border-[#E5A93C]/20 px-2.5 py-0.5 rounded-lg">
               {currQ.type.toUpperCase()}
             </span>
           </div>
@@ -487,7 +487,7 @@ Respond with ONLY valid JSON strictly matching this schema:
                 onChange={(e) => setAnswers({ ...answers, [currQ.id]: e.target.value })}
                 rows={5}
                 placeholder={isAr ? 'اكتب شرحك هنا وسيقوم المصحح الذكي بتقييم الكلمات المفتاحية والمفاهيم...' : 'Type your explanation here. The AI grader will evaluate your key concepts and logic...'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 leading-relaxed font-sans"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-indigo-500 leading-relaxed font-sans"
               />
             </div>
           )}
@@ -556,15 +556,15 @@ Respond with ONLY valid JSON strictly matching this schema:
 
             <div className="flex items-center gap-4">
               <div className="bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-center min-w-[110px]">
-                <div className="text-[10px] uppercase font-bold text-slate-400">{isAr ? 'الدرجة' : 'Score'}</div>
+                <div className="text-xs uppercase font-bold text-slate-400">{isAr ? 'الدرجة' : 'Score'}</div>
                 <div className="font-mono text-3xl font-black text-emerald-400">
                   {submission.totalScore}<span className="text-sm text-slate-500">/{submission.maxPossibleScore}</span>
                 </div>
-                <div className="text-[10px] font-bold text-slate-500">{submission.percentage}%</div>
+                <div className="text-xs font-bold text-slate-500">{submission.percentage}%</div>
               </div>
 
               <div className="bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4 text-center min-w-[110px]">
-                <div className="text-[10px] uppercase font-bold text-slate-400">{isAr ? 'المعدل المعادل' : 'GPA Equiv'}</div>
+                <div className="text-xs uppercase font-bold text-slate-400">{isAr ? 'المعدل المعادل' : 'GPA Equiv'}</div>
                 <div className="font-mono text-2xl font-black text-[#E5A93C]">
                   {submission.gpaEquivalent}
                 </div>
@@ -618,7 +618,7 @@ Respond with ONLY valid JSON strictly matching this schema:
 
                 {/* Student Answer */}
                 <div className="bg-[#150917] rounded-xl p-3 border border-[#4A1224]/50 text-xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
                     {isAr ? 'إجابتك المسجلة:' : 'Your Answer:'}
                   </div>
                   <div className="text-slate-300 font-sans">{res.studentAnswer}</div>
@@ -628,7 +628,7 @@ Respond with ONLY valid JSON strictly matching this schema:
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                   {res.strengths?.length > 0 && (
                     <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3">
-                      <div className="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1.5 mb-1.5">
+                      <div className="text-xs font-bold uppercase text-emerald-400 flex items-center gap-1.5 mb-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         {isAr ? 'نقاط القوة المستوفاة في الروبرك:' : 'Rubric Strengths Demonstrated:'}
                       </div>
@@ -642,7 +642,7 @@ Respond with ONLY valid JSON strictly matching this schema:
 
                   {res.missedKeywords?.length > 0 && (
                     <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3">
-                      <div className="text-[10px] font-bold uppercase text-amber-400 flex items-center gap-1.5 mb-1.5">
+                      <div className="text-xs font-bold uppercase text-amber-400 flex items-center gap-1.5 mb-1.5">
                         <AlertCircle className="w-3.5 h-3.5" />
                         {isAr ? 'الكلمات المفتاحية الناقصة (للفل مارك):' : 'Missed Concepts / Keywords:'}
                       </div>
@@ -657,7 +657,7 @@ Respond with ONLY valid JSON strictly matching this schema:
 
                 {/* Model Answer */}
                 <div className="bg-[#4A1224]/25 border border-indigo-500/20 rounded-xl p-3 text-xs">
-                  <div className="text-[10px] font-bold uppercase text-[#E5A93C] flex items-center gap-1.5 mb-1">
+                  <div className="text-xs font-bold uppercase text-[#E5A93C] flex items-center gap-1.5 mb-1">
                     <Sparkles className="w-3.5 h-3.5" />
                     {isAr ? 'الإجابة النموذجية الكاملة (Model Answer):' : 'Full Model Answer:'}
                   </div>

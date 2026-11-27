@@ -765,8 +765,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       low: { color: 'text-red-400 bg-red-500/10 border-red-500/20', label: 'Unclear', icon: '●○○' },
     }[level];
     return (
-      <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${config.color}`}>
-        <span className="font-mono text-[8px]">{config.icon}</span>
+      <span className={`inline-flex items-center gap-1 text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${config.color}`}>
+        <span className="font-mono text-xs">{config.icon}</span>
         {config.label}
       </span>
     );
@@ -797,7 +797,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             {/* Continuous Listen */}
             <button
               onClick={() => { setActiveMode('listen'); if (isRecordingEuphonia) stopEuphoniaRecord(); }}
-              className={`text-[10px] md:text-[11px] font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`text-xs md:text-xs font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'listen'
                   ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
                   : 'border-transparent text-neutral-400 hover:text-white hover:bg-bg-card/5'
@@ -810,7 +810,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             {/* Euphonia Direct Audio */}
             <button
               onClick={() => { setActiveMode('euphonia'); if (isListening) recognitionRef.current?.stop(); }}
-              className={`text-[10px] md:text-[11px] font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`text-xs md:text-xs font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'euphonia'
                   ? 'border-purple-500/40 bg-purple-500/10 text-purple-400'
                   : 'border-transparent text-neutral-400 hover:text-white hover:bg-bg-card/5'
@@ -823,7 +823,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             {/* Calibration */}
             <button
               onClick={() => setActiveMode('calibrate')}
-              className={`text-[10px] md:text-[11px] font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`text-xs md:text-xs font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'calibrate'
                   ? 'border-sky-500/40 bg-sky-500/10 text-sky-400'
                   : 'border-transparent text-neutral-400 hover:text-white hover:bg-bg-card/5'
@@ -847,7 +847,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                   key={code}
                   onClick={() => setActiveLang(code)}
                   title={title}
-                  className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
+                  className={`text-xs font-bold px-2 py-1 rounded-lg transition-all ${
                     activeLang === code
                       ? 'bg-primary text-white shadow-sm font-black'
                       : 'text-neutral-400 hover:text-white'
@@ -862,7 +862,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             <button
               onClick={() => setRepeatModeOn(prev => !prev)}
               title="Repeat Mode: AI speaks back what it hears in a clear voice"
-              className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider py-1.5 px-3 border rounded-xl transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 text-xs font-black uppercase tracking-wider py-1.5 px-3 border rounded-xl transition-all cursor-pointer ${
                 repeatModeOn
                   ? 'border-orange-500/40 bg-orange-500/10 text-orange-400'
                   : 'border-white/10 text-neutral-500 hover:text-white hover:bg-bg-card/5'
@@ -875,7 +875,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             {/* Live status dot */}
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-neutral-600'}`} />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 hidden sm:block">
+              <span className="text-xs font-bold uppercase tracking-widest text-neutral-400 hidden sm:block">
                 {isCalibrationRecording
                   ? (isAr ? 'جاري التسجيل…' : 'Recording…')
                   : isRecordingEuphonia
@@ -899,12 +899,12 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
         {/* ── Speech Profile Selector (compact pill row) ── */}
         <div className="px-4 py-2.5 border-b border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 whitespace-nowrap">{isAr ? 'الملف:' : 'Profile:'}</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-neutral-500 whitespace-nowrap">{isAr ? 'الملف:' : 'Profile:'}</span>
           {(['Standard', 'Dysarthria', 'Stutter', 'Aphasia', 'Kanevsky'] as const).map(p => (
             <button
               key={p}
               onClick={() => setSpeechProfile(p)}
-              className={`text-[10px] font-bold px-3 py-1 rounded-full border whitespace-nowrap transition-all cursor-pointer ${
+              className={`text-xs font-bold px-3 py-1 rounded-full border whitespace-nowrap transition-all cursor-pointer ${
                 speechProfile === p
                   ? 'border-purple-500/50 bg-purple-500/15 text-purple-300'
                   : 'border-white/10 text-neutral-500 hover:text-white hover:border-white/20'
@@ -973,7 +973,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                             if (e.key === 'Enter') saveEditSegment(seg);
                             if (e.key === 'Escape') setEditingId(null);
                           }}
-                          className="flex-1 bg-neutral-800 border border-emerald-500/40 rounded-xl px-3 py-2 text-lg md:text-xl font-bold text-white outline-none focus:border-emerald-500"
+                          className="flex-1 bg-neutral-800 border border-emerald-500/40 rounded-xl px-3 py-2 text-lg md:text-xl font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-emerald-500"
                         />
                         <button
                           onClick={() => saveEditSegment(seg)}
@@ -1001,22 +1001,22 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                       <div className="flex items-center gap-2 flex-wrap">
                         <ConfidenceBadge level={seg.confidence} />
                         {typeof seg.confidencePct === 'number' && (
-                          <span className="text-[10px] font-mono font-bold text-neutral-500">
+                          <span className="text-xs font-mono font-bold text-neutral-500">
                             {seg.confidencePct}%
                           </span>
                         )}
                         {seg.intent && (
-                          <span className="text-[10px] font-bold text-neutral-400 bg-bg-card/5 border border-white/10 px-2 py-0.5 rounded-full">
+                          <span className="text-xs font-bold text-neutral-400 bg-bg-card/5 border border-white/10 px-2 py-0.5 rounded-full">
                             {seg.intent}
                           </span>
                         )}
-                        <span className="text-[10px] text-neutral-600 font-mono">{seg.timestamp}</span>
+                        <span className="text-xs text-neutral-600 font-mono">{seg.timestamp}</span>
                       </div>
 
                       <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         {/* Show raw if different */}
                         {seg.raw !== seg.decoded && (
-                          <span className="text-[10px] text-neutral-600 italic truncate max-w-[140px]">
+                          <span className="text-xs text-neutral-600 italic truncate max-w-[140px]">
                             heard: "{seg.raw}"
                           </span>
                         )}
@@ -1047,7 +1047,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     {/* Alternative interpretations for uncertain words */}
                     {editingId !== seg.id && seg.alternatives && seg.alternatives.length > 0 && (
                       <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] text-amber-400/90 font-bold uppercase tracking-wider">
+                        <span className="text-xs text-amber-400/90 font-bold uppercase tracking-wider">
                           {seg.clarificationPrompt || (isAr ? 'هل تقصد:' : 'Did you mean:')}
                         </span>
                         {seg.alternatives.map((alt, i) => (
@@ -1160,7 +1160,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               </div>
 
               <div className="flex items-center gap-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-white/40">
                   {activeMode === 'listen'
                     ? (isListening ? (isAr ? 'اضغط للإيقاف' : 'Tap to stop') : (isAr ? 'اضغط للاستماع' : 'Tap to listen'))
                     : (isRecordingEuphonia
@@ -1173,7 +1173,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                 {segments.length > 0 && (
                   <button
                     onClick={() => setSegments([])}
-                    className="text-[10px] text-neutral-600 hover:text-red-400 font-bold uppercase tracking-wider"
+                    className="text-xs text-neutral-600 hover:text-red-400 font-bold uppercase tracking-wider"
                   >
                     Clear
                   </button>
@@ -1219,14 +1219,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                       animate={{ width: `${(calibrationIndex / calibrationPhrases.length) * 100}%` }}
                     />
                   </div>
-                  <p className="text-[10px] text-neutral-500">
+                  <p className="text-xs text-neutral-500">
                     Read each phrase aloud naturally — exactly as you speak. AI will learn your unique patterns.
                   </p>
                 </div>
 
                 {/* Current phrase */}
                 <div className="bg-sky-500/5 border border-sky-500/20 rounded-2xl p-6 text-center space-y-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-500">{isAr ? 'قول العبارة دي' : 'Say this phrase'}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-sky-500">{isAr ? 'قول العبارة دي' : 'Say this phrase'}</span>
                   <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
                     "{calibrationPhrases[calibrationIndex]?.text}"
                   </h2>
@@ -1269,7 +1269,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                       phrase.recorded ? 'border-emerald-500/15 bg-emerald-500/5' :
                       'border-white/5 opacity-40'
                     }`}>
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-black ${
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black ${
                         phrase.recorded ? 'bg-emerald-500/20 text-emerald-400' :
                         idx === calibrationIndex ? 'bg-sky-500/20 text-sky-400' :
                         'bg-bg-card/5 text-neutral-600'
@@ -1302,7 +1302,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             <Volume2 className="w-5 h-5 text-purple-400" aria-hidden="true" />
             <div>
               <h3 className="text-sm font-bold text-white">{isAr ? 'مساعد الكلام الصوتي' : 'Vocal Speech Assistant'}</h3>
-              <p className="text-[11px] text-neutral-500">{isAr ? 'اضغط أي كارت لنطقه بصوت عالي' : 'Tap any card to speak it aloud'}</p>
+              <p className="text-xs text-neutral-500">{isAr ? 'اضغط أي كارت لنطقه بصوت عالي' : 'Tap any card to speak it aloud'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1344,11 +1344,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                 <input type="range" min="1000" max="6500" step="500" aria-label="Silence threshold" aria-valuetext={`${(pauseThreshold / 1000).toFixed(1)}s`} value={pauseThreshold}
                   onChange={e => setPauseThreshold(Number(e.target.value))}
                   className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
-                <p className="text-[10px] text-neutral-600">Extend for stutters/blocks</p>
+                <p className="text-xs text-neutral-600">Extend for stutters/blocks</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">{isAr ? 'سرعة الصوت' : 'Voice Rate'}</span>
                     <span className="text-purple-400 font-mono">{speechRate.toFixed(1)}x</span>
                   </div>
@@ -1357,7 +1357,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500" />
                 </div>
                 <div className="space-y-1.5">
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">{isAr ? 'طبقة الصوت' : 'Voice Pitch'}</span>
                     <span className="text-purple-400 font-mono">{speechPitch.toFixed(1)}</span>
                   </div>
@@ -1380,7 +1380,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               onChange={e => setCustomText(e.target.value)}
               placeholder={isAr ? "اكتب شيئاً لنطقه بالصوت…" : "Type a sentence to speak aloud…"}
               dir={dir}
-              className="w-full text-sm bg-neutral-950 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-purple-500/50 text-white placeholder-neutral-600 resize-none h-16"
+              className="w-full text-sm bg-neutral-950 border border-white/10 rounded-xl p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500/50 text-white placeholder-neutral-600 resize-none h-16"
             />
             <div className="flex items-center gap-2 justify-end flex-wrap">
               {customText.trim() && (
@@ -1413,7 +1413,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                 </div>
                 <button onClick={() => fetchSmartReplies(segments[segments.length - 1]?.decoded || 'Hello')}
                   disabled={isGeneratingReplies}
-                  className="p-1 text-[10px] uppercase font-black text-neutral-500 hover:text-white bg-bg-card/5 rounded-md hover:bg-bg-card/10 disabled:opacity-40">
+                  className="p-1 text-xs uppercase font-black text-neutral-500 hover:text-white bg-bg-card/5 rounded-md hover:bg-bg-card/10 disabled:opacity-40">
                   <RefreshCw className={`w-3 h-3 ${isGeneratingReplies ? 'animate-spin' : ''}`} />
                 </button>
               </div>
@@ -1443,7 +1443,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             <div className="flex flex-wrap gap-1 p-1 bg-neutral-950 rounded-xl border border-white/5">
               {(['essentials', 'needs', 'social', 'favorites', 'emergencies'] as const).map(cat => (
                 <button key={cat} onClick={() => setActiveTab(cat)}
-                  className={`text-[10px] py-1.5 px-2.5 rounded-lg font-bold transition-all flex-1 text-center truncate cursor-pointer ${
+                  className={`text-xs py-1.5 px-2.5 rounded-lg font-bold transition-all flex-1 text-center truncate cursor-pointer ${
                     activeTab === cat ? 'bg-neutral-800 text-white shadow' : 'text-neutral-500 hover:text-white'
                   }`}>
                   {cat === 'essentials' ? 'Basics' : cat === 'favorites' ? 'My Phrases' : cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -1482,7 +1482,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                 );
               })}
               {activeTab === 'favorites' && favorites.length === 0 && (
-                <div className="col-span-2 text-center py-6 text-[11px] text-neutral-600 italic">
+                <div className="col-span-2 text-center py-6 text-xs text-neutral-600 italic">
                   Type a sentence above and tap "Save" to add your own phrases here
                 </div>
               )}
@@ -1501,7 +1501,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-purple-400" />
                 <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">{isAr ? 'قاموس الأنماط الصوتية' : 'Phoneme Pattern Dictionary'}</span>
-                <span className="text-[10px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 rounded-full font-black">
+                <span className="text-xs text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 rounded-full font-black">
                   {euphoniaPatterns.length}
                 </span>
               </div>
@@ -1510,21 +1510,21 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
             {showPatternsPanel && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-3 overflow-hidden">
-                <p className="text-[10px] text-neutral-500 leading-relaxed">
+                <p className="text-xs text-neutral-500 leading-relaxed">
                   Map what standard speech-to-text hears you say → what you actually mean. Matched instantly, no AI call needed.
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[10px] text-neutral-500 block mb-1">STT hears:</span>
+                    <span className="text-xs text-neutral-500 block mb-1">STT hears:</span>
                     <input type="text" placeholder="e.g. wa wa" value={newPattern}
                       onChange={e => setNewPattern(e.target.value)}
-                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus:border-purple-500 placeholder-neutral-700" />
+                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500 placeholder-neutral-700" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-neutral-500 block mb-1">You mean:</span>
+                    <span className="text-xs text-neutral-500 block mb-1">You mean:</span>
                     <input type="text" placeholder="e.g. I need water" value={newTranslation}
                       onChange={e => setNewTranslation(e.target.value)}
-                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus:border-purple-500 placeholder-neutral-700" />
+                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500 placeholder-neutral-700" />
                   </div>
                 </div>
                 <button
@@ -1534,13 +1534,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     setNewPattern(''); setNewTranslation('');
                   }}
                   disabled={!newPattern.trim() || !newTranslation.trim()}
-                  className="w-full text-[11px] font-bold text-white bg-purple-600 disabled:opacity-40 hover:bg-purple-500 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all">
+                  className="w-full text-xs font-bold text-white bg-purple-600 disabled:opacity-40 hover:bg-purple-500 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all">
                   <Plus className="w-3.5 h-3.5" /> Add Pattern
                 </button>
                 <div className="space-y-1 max-h-40 overflow-y-auto">
                   {euphoniaPatterns.map(pat => (
                     <div key={pat.id} className="flex items-center justify-between bg-neutral-950/80 p-2 border border-white/5 rounded-xl group/p">
-                      <div className="text-[11px] flex items-center gap-2 flex-1 min-w-0">
+                      <div className="text-xs flex items-center gap-2 flex-1 min-w-0">
                         <span className="text-purple-300 font-mono truncate">"{pat.phrase}"</span>
                         <span className="text-neutral-600 flex-shrink-0">→</span>
                         <span className="text-emerald-400 font-semibold truncate">{pat.translation}</span>
@@ -1569,7 +1569,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                   <History className="w-3.5 h-3.5" />
                   <span className="text-xs font-bold uppercase tracking-wider">{isAr ? 'العبارات الأخيرة' : 'Recent Phrases'}</span>
                 </div>
-                <button onClick={() => setSpeechHistory([])} className="text-[10px] text-neutral-600 hover:text-rose-400 flex items-center gap-1">
+                <button onClick={() => setSpeechHistory([])} className="text-xs text-neutral-600 hover:text-rose-400 flex items-center gap-1">
                   <Trash2 className="w-3 h-3" /> Clear
                 </button>
               </div>
@@ -1586,7 +1586,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
           )}
         </div>
 
-        <div className="p-3 border-t border-white/5 text-center text-[10px] text-neutral-600 flex items-center justify-center gap-1.5">
+        <div className="p-3 border-t border-white/5 text-center text-xs text-neutral-600 flex items-center justify-center gap-1.5">
           <span>{isAr ? 'صُنع من أجل الاستقلالية والشمول' : 'Built for independence & inclusion'}</span>
           <Heart className="w-2.5 h-2.5 text-rose-500/60 animate-pulse" />
         </div>

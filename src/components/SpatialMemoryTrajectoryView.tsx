@@ -89,7 +89,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono">
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
           <ShieldCheck className="w-3 h-3" />
           <span>{isAr ? 'عزل تام للمستخدم' : 'Isolated User State'}</span>
         </div>
@@ -120,7 +120,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                 >
                   <MapPin className="w-3 h-3" />
                   <span>{isAr ? cand.labelAr : cand.labelEn}</span>
-                  <span className="text-[10px] opacity-75">
+                  <span className="text-xs opacity-75">
                     ({isAr ? cand.roomAr : cand.roomEn})
                   </span>
                 </button>
@@ -139,11 +139,11 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                 <span className="text-sm font-black text-white">
                   {isAr ? currentObj.labelAr : currentObj.labelEn}
                 </span>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-slate-800 text-slate-300 border border-[#4A1224]/50">
+                <span className="px-2 py-0.5 rounded-md text-xs font-mono bg-slate-800 text-slate-300 border border-[#4A1224]/50">
                   {Math.round(currentObj.confidence * 100)}% {isAr ? 'دقة' : 'confidence'}
                 </span>
                 {currentObj.correctionsCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-[#4A1224]/40 text-[#E5A93C] border border-[#4A1224]/60">
+                  <span className="px-2 py-0.5 rounded-md text-xs font-mono bg-[#4A1224]/40 text-[#E5A93C] border border-[#4A1224]/60">
                     {isAr ? `مصحح ${currentObj.correctionsCount}x` : `Corrected ${currentObj.correctionsCount}x`}
                   </span>
                 )}
@@ -181,14 +181,14 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                   placeholder={isAr ? 'الغرفة (مثال: غرفة المعيشة)' : 'Room (e.g. Living Room)'}
                   value={correctedRoom}
                   onChange={(e) => setCorrectedRoom(e.target.value)}
-                  className="px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224]/50 text-xs text-white focus:outline-none focus:border-[#E5A93C]"
+                  className="px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224]/50 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]"
                 />
                 <input
                   type="text"
                   placeholder={isAr ? 'السطح (مثال: ترابيزة القهوة)' : 'Surface (e.g. Coffee Table)'}
                   value={correctedSurface}
                   onChange={(e) => setCorrectedSurface(e.target.value)}
-                  className="px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224]/50 text-xs text-white focus:outline-none focus:border-[#E5A93C]"
+                  className="px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224]/50 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-1">
@@ -236,7 +236,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                         <span className="text-slate-400">
                           {isAr ? `في ${obs.roomAr}` : `in ${obs.roomEn}`}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-500">
+                        <span className="text-xs font-mono text-slate-500">
                           {new Date(obs.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>

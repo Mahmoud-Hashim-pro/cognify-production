@@ -2043,7 +2043,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               data-testid="detail-level-selector"
               role="group"
               aria-label={t('Speech detail level', 'مستوى تفصيل الوصف')}
-              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-[11px]"
+              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-xs"
             >
               <button
                 type="button"
@@ -2082,7 +2082,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               data-testid="speech-rate-selector"
               role="group"
               aria-label={t('Speech playback speed', 'سرعة نطق الصوت')}
-              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-[11px]"
+              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-xs"
             >
               {[0.75, 1.0, 1.25, 1.5].map((rate) => (
                 <button
@@ -2103,7 +2103,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             <div
               role="group"
               aria-label={t('Assistant language', 'لغة المساعد')}
-              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-[11px]"
+              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-xs"
             >
               {(['ar', 'en', 'fr'] as const).map((lang) => (
                 <button
@@ -2196,7 +2196,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <SlidersHorizontal className="w-4 h-4" />
               <span>{t('Select Visual Tool', 'اختر أداة الرؤية المتخصصة', 'Choisir l\'outil visuel')}</span>
             </div>
-            <span className="text-[11px] text-[#B9CDE3]/70 hidden sm:inline">
+            <span className="text-xs text-[#B9CDE3]/70 hidden sm:inline">
               {t('Shortcuts: C = Cash, T = OCR, S = Stop voice, V = Scene, O = Item Finder, P = Face', 'اختصارات لوحة المفاتيح: C = نقود، T = نص، S = إيقاف الصوت، V = مشهد، O = أشياء، P = وجوه')}
             </span>
           </div>
@@ -2233,13 +2233,13 @@ Examine what is visible in front of the camera right now with utmost precision:
                     >
                       <ToolIcon className="w-4 h-4" />
                     </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#1769AA] border border-[#07558A]/80">
+                    <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#1769AA] border border-[#07558A]/80">
                       {tool.keyboardShortcut}
                     </span>
                   </div>
                   <div>
                     <h3 className="text-xs font-bold leading-tight truncate">{title}</h3>
-                    <p className="text-[10px] text-[#B9CDE3]/70 truncate">{badge}</p>
+                    <p className="text-xs text-[#B9CDE3]/70 truncate">{badge}</p>
                   </div>
                 </button>
               );
@@ -2268,7 +2268,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     'e.g. Keys, wallet, glasses, phone, medication bottle...',
                     'مثال: المفاتيح، المحفظة، النظارة، الهاتف، علبة الدواء...'
                   )}
-                  className="w-full ps-9 pe-4 py-2.5 rounded-2xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#1769AA] placeholder:text-[#B9CDE3]/50"
+                  className="w-full ps-9 pe-4 py-2.5 rounded-2xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA] placeholder:text-[#B9CDE3]/50"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       describeScene(companionLang);
@@ -2285,7 +2285,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 {t('Search Scene', 'ابحث في المشهد')}
               </button>
             </div>
-            <p className="text-[11px] text-[#B9CDE3]/70">
+            <p className="text-xs text-[#B9CDE3]/70">
               {t(
                 'Point the camera slowly around the room. The assistant will guide you using clock positions (e.g. at 2 o\'clock).',
                 'حرّك الكاميرا ببطء في الغرفة. سيخبرك المساعد بموقع الغرض بساعة الحائط (مثال: عند الساعة الثانية).'
@@ -2966,7 +2966,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               {lastDescription && (
                 <span
                   data-testid="observation-source-badge"
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                     observationType === 'live'
                       ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
                       : observationType === 'uploaded'
@@ -2991,7 +2991,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             </div>
 
             {observationTimestamp && (
-              <span className="text-[11px] text-[#B9CDE3]/70 font-medium">
+              <span className="text-xs text-[#B9CDE3]/70 font-medium">
                 {new Date(observationTimestamp).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -3170,7 +3170,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   </div>
                   {currentBarcodeResult.visibleLabelText && (
                     <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50 text-xs">
-                      <span className="text-[#B9CDE3] block text-[10px] font-bold pb-1">
+                      <span className="text-[#B9CDE3] block text-xs font-bold pb-1">
                         {t('Visible Label Text (OCR):', 'النص المقروء من الملصق:')}
                       </span>
                       <p className="text-[#F5F8FF] leading-relaxed select-text">
@@ -3180,13 +3180,13 @@ Examine what is visible in front of the camera right now with utmost precision:
                   )}
                   {currentBarcodeResult.interpretation && (
                     <div className="text-xs text-[#B9CDE3] pt-1">
-                      <span className="text-[10px] text-[#1769AA] font-bold block">
+                      <span className="text-xs text-[#1769AA] font-bold block">
                         {t('AI Product Interpretation:', 'البيان التقديري للمنتج:')}
                       </span>
                       <p className="text-[#F5F8FF]/90">{currentBarcodeResult.interpretation}</p>
                     </div>
                   )}
-                  <div className="p-2.5 rounded-xl bg-[#082344]/60 border border-[#07558A]/40 text-[11px] text-[#B9CDE3] flex items-start gap-2">
+                  <div className="p-2.5 rounded-xl bg-[#082344]/60 border border-[#07558A]/40 text-xs text-[#B9CDE3] flex items-start gap-2">
                     <ShieldCheck className="w-4 h-4 text-[#1769AA] shrink-0 mt-0.5" />
                     <span>
                       {companionLang === 'ar'
@@ -3221,19 +3221,19 @@ Examine what is visible in front of the camera right now with utmost precision:
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                     <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50">
-                      <span className="text-[#B9CDE3] block text-[10px]">{t('Expiry Date (EXP)', 'تاريخ الانتهاء')}</span>
+                      <span className="text-[#B9CDE3] block text-xs">{t('Expiry Date (EXP)', 'تاريخ الانتهاء')}</span>
                       <span className="font-bold text-emerald-400">
                         {currentExpiryResult.expiryDate || t('Not clearly visible', 'غير ظاهر بوضوح')}
                       </span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50">
-                      <span className="text-[#B9CDE3] block text-[10px]">{t('Production Date (PRD)', 'تاريخ الإنتاج')}</span>
+                      <span className="text-[#B9CDE3] block text-xs">{t('Production Date (PRD)', 'تاريخ الإنتاج')}</span>
                       <span className="font-bold text-[#F5F8FF]">
                         {currentExpiryResult.productionDate || t('Not clearly visible', 'غير ظاهر بوضوح')}
                       </span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50">
-                      <span className="text-[#B9CDE3] block text-[10px]">{t('Batch / LOT #', 'رقم التشغيلة')}</span>
+                      <span className="text-[#B9CDE3] block text-xs">{t('Batch / LOT #', 'رقم التشغيلة')}</span>
                       <span className="font-mono font-bold text-[#1769AA]">
                         {currentExpiryResult.batchNumber || t('N/A', 'غير مسجل')}
                       </span>
@@ -3249,7 +3249,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       </span>
                     </div>
                   )}
-                  <div className="p-2.5 rounded-xl bg-[#082344]/60 border border-amber-500/30 text-[11px] text-amber-400/90 flex items-start gap-2">
+                  <div className="p-2.5 rounded-xl bg-[#082344]/60 border border-amber-500/30 text-xs text-amber-400/90 flex items-start gap-2">
                     <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <span>
                       {companionLang === 'ar'
@@ -3280,7 +3280,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   </div>
                   {currentColorPatternResult.dominantColors.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                      <span className="text-[#B9CDE3] text-[11px] me-1">
+                      <span className="text-[#B9CDE3] text-xs me-1">
                         {t('Dominant Shades:', 'الألوان السائدة:')}
                       </span>
                       {currentColorPatternResult.dominantColors.map((col, idx) => (
@@ -3338,7 +3338,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         >
                           <span className="font-bold text-[#F5F8FF]">{it.category}</span>
                           {it.isCutOff && (
-                            <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-[10px] font-bold">
+                            <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-xs font-bold">
                               {t('Partial View', 'عرض جزئي')}
                             </span>
                           )}
@@ -3358,7 +3358,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   )}
                   {currentClothingResult.pairingSuggestionsAr.length > 0 && (
                     <div className="p-3 rounded-xl bg-[#082344] border border-[#07558A] text-xs space-y-1">
-                      <span className="text-[10px] text-[#1769AA] font-bold block">
+                      <span className="text-xs text-[#1769AA] font-bold block">
                         {t('Harmonious Outfit Suggestions:', 'اقتراحات التنسيق المتناسق:')}
                       </span>
                       <p className="text-[#F5F8FF]/90">
@@ -3388,7 +3388,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     </span>
                   </div>
                   <div className="p-3 rounded-xl bg-[#082344] border border-[#07558A] text-xs space-y-1">
-                    <span className="text-[10px] text-[#1769AA] font-bold block">
+                    <span className="text-xs text-[#1769AA] font-bold block">
                       {t('Spoken Summary:', 'الملخص الصوتي:')}
                     </span>
                     <p className="text-[#F5F8FF] leading-relaxed">
@@ -3401,19 +3401,19 @@ Examine what is visible in front of the camera right now with utmost precision:
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                       {currentDocumentResult.invoiceData.vendor && (
                         <div className="p-2.5 rounded-xl bg-[#082344] border border-[#07558A]">
-                          <span className="text-[#B9CDE3] block text-[10px]">{t('Vendor / Merchant', 'الجهة / التاجر')}</span>
+                          <span className="text-[#B9CDE3] block text-xs">{t('Vendor / Merchant', 'الجهة / التاجر')}</span>
                           <span className="font-bold text-[#F5F8FF]">{currentDocumentResult.invoiceData.vendor}</span>
                         </div>
                       )}
                       {currentDocumentResult.invoiceData.total && (
                         <div className="p-2.5 rounded-xl bg-[#082344] border border-[#07558A]">
-                          <span className="text-[#B9CDE3] block text-[10px]">{t('Total Balance', 'الإجمالي الصافي')}</span>
+                          <span className="text-[#B9CDE3] block text-xs">{t('Total Balance', 'الإجمالي الصافي')}</span>
                           <span className="font-bold text-emerald-400">{currentDocumentResult.invoiceData.total}</span>
                         </div>
                       )}
                       {currentDocumentResult.invoiceData.date && (
                         <div className="p-2.5 rounded-xl bg-[#082344] border border-[#07558A]">
-                          <span className="text-[#B9CDE3] block text-[10px]">{t('Date', 'التاريخ')}</span>
+                          <span className="text-[#B9CDE3] block text-xs">{t('Date', 'التاريخ')}</span>
                           <span className="font-bold text-[#F5F8FF]">{currentDocumentResult.invoiceData.date}</span>
                         </div>
                       )}
@@ -3421,7 +3421,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   )}
                   {currentDocumentResult.headings.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                      <span className="text-[#B9CDE3] text-[10px] block me-1">
+                      <span className="text-[#B9CDE3] text-xs block me-1">
                         {t('Headings Detected:', 'العناوين المكتشفة:')}
                       </span>
                       {currentDocumentResult.headings.map((h, idx) => (
@@ -3438,7 +3438,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                       {currentDocumentResult.formFields.slice(0, 4).map((f, idx) => (
                         <div key={idx} className="p-2 rounded-xl bg-[#082344] border border-[#07558A]">
-                          <span className="text-[#B9CDE3] text-[10px] block">{f.label}</span>
+                          <span className="text-[#B9CDE3] text-xs block">{f.label}</span>
                           <span className="font-bold text-[#F5F8FF]">{f.value}</span>
                         </div>
                       ))}
@@ -3521,7 +3521,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         type="button"
                         onClick={() => handleAskFollowUp(preset)}
                         disabled={isAnsweringFollowUp}
-                        className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] hover:border-[#1769AA] text-[11px] text-[#B9CDE3] hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                        className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] hover:border-[#1769AA] text-xs text-[#B9CDE3] hover:text-white transition-all cursor-pointer disabled:opacity-50"
                       >
                         {preset}
                       </button>
@@ -3540,7 +3540,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                               : 'bg-[#092747] border border-[#07558A] text-[#B9CDE3] me-6'
                           }`}
                         >
-                          <span className="font-bold text-[10px] block opacity-75 mb-1">
+                          <span className="font-bold text-xs block opacity-75 mb-1">
                             {item.role === 'user' ? t('You:', 'أنت:') : t('Assistant:', 'المساعد:')}
                           </span>
                           {item.text}
@@ -3556,7 +3556,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       value={followUpQuestion}
                       onChange={(e) => setFollowUpQuestion(e.target.value)}
                       placeholder={t('Type your question about this image...', 'اكتب سؤالك عن هذه الصورة...')}
-                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#1769AA]"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleAskFollowUp();
@@ -3670,7 +3670,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 onChange={(e) => setMemorySearchQuery(e.target.value)}
                 placeholder={t('Search saved memories...', 'البحث في الذاكرة...')}
                 aria-label={t('Search saved memories', 'البحث في الذاكرة المحفوظة')}
-                className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#1769AA]"
+                className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
               />
             </div>
 
@@ -3706,7 +3706,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         </span>
                         <h4 className="text-xs sm:text-sm font-bold text-[#F5F8FF] truncate">{mem.label}</h4>
                       </div>
-                      <span className="text-[10px] text-[#B9CDE3]/60 shrink-0">
+                      <span className="text-xs text-[#B9CDE3]/60 shrink-0">
                         {new Date(mem.createdAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -3866,7 +3866,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   value={spatialQueryInput}
                   onChange={(e) => setSpatialQueryInput(e.target.value)}
                   placeholder={t('e.g. Where did I leave my keys?', 'مثال: أين تركت مفاتيحي أو نظارتي؟')}
-                  className="flex-1 px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#1769AA]"
+                  className="flex-1 px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && profile?.uid) {
                       const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang === 'ar' ? 'ar' : 'en');
@@ -3894,7 +3894,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
               {spatialQueryResult && (
                 <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1769AA]/40 space-y-1.5">
-                  <span className="text-[11px] font-bold text-[#1769AA]">
+                  <span className="text-xs font-bold text-[#1769AA]">
                     {t('Spatial Engine Answer:', 'إجابة محرك الذاكرة المكانية:')}
                   </span>
                   <p className="text-xs text-[#F5F8FF] leading-relaxed">{spatialQueryResult}</p>
@@ -3913,13 +3913,13 @@ Examine what is visible in front of the camera right now with utmost precision:
                         className="p-2 rounded-lg bg-[#061A33] border border-[#07558A]/60 flex items-center justify-between text-xs"
                       >
                         <span className="text-[#F5F8FF] font-medium">{rec.objectName}</span>
-                        <span className="text-[10px] text-[#B9CDE3]/60">
+                        <span className="text-xs text-[#B9CDE3]/60">
                           {rec.relativePosition?.distance ? `${rec.relativePosition.distance}` : (rec.room || 'Detected')}
                         </span>
                       </div>
                     ))
                   ) : (
-                    <p className="text-[11px] text-[#B9CDE3]/50 italic">
+                    <p className="text-xs text-[#B9CDE3]/50 italic">
                       {t('No spatial landmarks recorded yet.', 'لم يتم تسجيل معالم مكانية بعد.')}
                     </p>
                   )}
@@ -3982,7 +3982,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               onChange={(e) => setLabelInput(e.target.value)}
               placeholder={t('e.g. My study desk, Front door key...', 'مثال: مكتبي، مفاتيح الشقة...')}
               aria-label={companionLang === 'ar' ? (isSavingPerson ? 'اسم الشخص أو الصديق' : 'اسم المكان أو الشيء') : (isSavingPerson ? 'Person or friend name' : 'Object or location label')}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] text-sm outline-none focus:border-[#1769AA]"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
               autoFocus
             />
             <div className="flex justify-end gap-2 pt-2">

@@ -785,7 +785,7 @@ export default function AudioDocumentIntelligenceView({
               <Headphones className="w-5 h-5 text-[#4B9FE1]" />
               <span>{isAr ? 'رفيقي — ذكاء الصوت والمستندات' : 'Rafiqi — Audio & Document Intelligence'}</span>
             </h1>
-            <p className="text-[11px] text-[#94A3B8]">
+            <p className="text-xs text-[#94A3B8]">
               {isAr ? 'قسم: اقرأ وتعلّم (المرحلة 6)' : 'Section: Read & Learn (Phase 6)'}
             </p>
           </div>
@@ -886,7 +886,7 @@ export default function AudioDocumentIntelligenceView({
               <div className="p-3 rounded-2xl bg-[#0D2542]/70 border border-[#1769AA]/30 text-xs text-[#94A3B8] flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0" />
-                  <span className="text-[11px] leading-relaxed">
+                  <span className="text-xs leading-relaxed">
                     {isAr ? CLOUD_PROCESSING_PRIVACY_NOTICE_AR : CLOUD_PROCESSING_PRIVACY_NOTICE_EN}
                   </span>
                 </div>
@@ -1000,28 +1000,28 @@ export default function AudioDocumentIntelligenceView({
                               type="text"
                               value={editingChapterTitle}
                               onChange={(e) => setEditingChapterTitle(e.target.value)}
-                              className="w-full px-2 py-1 rounded-lg bg-[#0B131E] border border-[#1769AA] text-white text-xs outline-none"
+                              className="w-full px-2 py-1 rounded-lg bg-[#0B131E] border border-[#1769AA] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                               aria-label={isAr ? 'اسم الفصل الجديد' : 'New chapter title'}
                             />
                             <div className="flex gap-2 justify-end">
                               <button
                                 type="button"
                                 onClick={() => handleSaveChapter(chap.id)}
-                                className="px-2 py-0.5 rounded bg-[#16845B] text-white text-[11px] font-bold"
+                                className="px-2 py-0.5 rounded bg-[#16845B] text-white text-xs font-bold"
                               >
                                 {isAr ? 'حفظ' : 'Save'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setEditingChapterId(null)}
-                                className="px-2 py-0.5 rounded bg-[#22354E] text-[#94A3B8] text-[11px]"
+                                className="px-2 py-0.5 rounded bg-[#22354E] text-[#94A3B8] text-xs"
                               >
                                 {isAr ? 'إلغاء' : 'Cancel'}
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <p onClick={() => handleSelectChapter(chap)} className="text-[11px] text-[#94A3B8] line-clamp-2 cursor-pointer">{chap.summary}</p>
+                          <p onClick={() => handleSelectChapter(chap)} className="text-xs text-[#94A3B8] line-clamp-2 cursor-pointer">{chap.summary}</p>
                         )}
                       </div>
                     ))}
@@ -1042,7 +1042,7 @@ export default function AudioDocumentIntelligenceView({
 
                     {/* Speed Controls */}
                     <div data-testid="audio-playback-controls" className="flex items-center gap-1.5 text-xs font-bold">
-                      <span className="text-[#94A3B8] text-[11px]">{isAr ? 'السرعة:' : 'Speed:'}</span>
+                      <span className="text-[#94A3B8] text-xs">{isAr ? 'السرعة:' : 'Speed:'}</span>
                       {[0.75, 1.0, 1.25, 1.5, 2.0].map((rate) => (
                         <button
                           key={rate}
@@ -1136,7 +1136,7 @@ export default function AudioDocumentIntelligenceView({
                               <textarea
                                 value={editingSegmentText}
                                 onChange={(e) => setEditingSegmentText(e.target.value)}
-                                className="w-full p-2.5 rounded-xl bg-[#0D2542] border border-[#1769AA] text-white text-xs outline-none focus:ring-2 focus:ring-[#1769AA]"
+                                className="w-full p-2.5 rounded-xl bg-[#0D2542] border border-[#1769AA] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                                 rows={3}
                                 aria-label={isAr ? 'تعديل نص تفريغ الفقرة' : 'Edit segment transcript text'}
                               />
@@ -1283,7 +1283,7 @@ export default function AudioDocumentIntelligenceView({
                       onChange={(e) => setLectureQuestion(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAskLecture()}
                       placeholder={isAr ? 'ماذا قال المحاضر عن...؟' : 'What did the lecturer say about...?'}
-                      className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-xs text-white outline-none focus:ring-2 focus:ring-[#1769AA]"
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                     />
                     <button
                       type="button"
@@ -1367,7 +1367,7 @@ export default function AudioDocumentIntelligenceView({
               {/* Reading Modes & Consent Controls */}
               <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-[#0D2542] border border-[#1769AA]/30 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#94A3B8] font-bold text-[11px]">{isAr ? 'نمط القراءة:' : 'Reading Mode:'}</span>
+                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'نمط القراءة:' : 'Reading Mode:'}</span>
                   {[
                     { id: 'verbatim' as const, labelAr: 'حرفي', labelEn: 'Verbatim' },
                     { id: 'concise' as const, labelAr: 'موجز', labelEn: 'Concise' },
@@ -1486,7 +1486,7 @@ export default function AudioDocumentIntelligenceView({
                       clearDocumentReadingHistory();
                       setReadingHistory([]);
                     }}
-                    className="text-[11px] text-[#C43D4D] hover:underline cursor-pointer"
+                    className="text-xs text-[#C43D4D] hover:underline cursor-pointer"
                   >
                     {isAr ? 'مسح السجل' : 'Clear History'}
                   </button>
@@ -1500,12 +1500,12 @@ export default function AudioDocumentIntelligenceView({
                     >
                       <div>
                         <span className="font-bold text-white block truncate">{item.title}</span>
-                        <span className="text-[#94A3B8] text-[11px]">
+                        <span className="text-[#94A3B8] text-xs">
                           {item.fileType.toUpperCase()} · {isAr ? `صفحة ${item.lastPageNumber}` : `Page ${item.lastPageNumber}`}
                         </span>
                       </div>
                       <div className="flex justify-between items-center pt-1 border-t border-[#1769AA]/20">
-                        <span className="text-[10px] text-[#4B9FE1]">{item.wordCount} {isAr ? 'كلمة' : 'words'}</span>
+                        <span className="text-xs text-[#4B9FE1]">{item.wordCount} {isAr ? 'كلمة' : 'words'}</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -1549,7 +1549,7 @@ export default function AudioDocumentIntelligenceView({
                   onChange={(e) => setContentQuestion(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAskContent()}
                   placeholder={isAr ? 'اطرح سؤالاً عن المستند (مثال: ما هي شروط التسجيل؟)...' : 'Ask a question from document...'}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-xs text-white outline-none focus:ring-2 focus:ring-[#1769AA]"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -1597,7 +1597,7 @@ export default function AudioDocumentIntelligenceView({
               {/* Quiz Settings */}
               <div className="flex flex-wrap items-center gap-3 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#94A3B8] font-bold text-[11px]">{isAr ? 'النوع:' : 'Type:'}</span>
+                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'النوع:' : 'Type:'}</span>
                   {[
                     { id: 'all' as const, labelAr: 'شامل', labelEn: 'All' },
                     { id: 'mcq' as const, labelAr: 'اختيار', labelEn: 'MCQ' },
@@ -1618,7 +1618,7 @@ export default function AudioDocumentIntelligenceView({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#94A3B8] font-bold text-[11px]">{isAr ? 'المستوى:' : 'Difficulty:'}</span>
+                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'المستوى:' : 'Difficulty:'}</span>
                   {(['easy', 'medium', 'hard'] as const).map((diff) => (
                     <button
                       key={diff}
@@ -1637,7 +1637,7 @@ export default function AudioDocumentIntelligenceView({
               {/* Generated Quiz Items */}
               {generatedQuiz && (
                 <div className="space-y-4 text-xs">
-                  <p className="text-[11px] text-[#FFA4A4] italic">{generatedQuiz.isAiGeneratedNotice}</p>
+                  <p className="text-xs text-[#FFA4A4] italic">{generatedQuiz.isAiGeneratedNotice}</p>
                   {generatedQuiz.questions.map((q, qIdx) => (
                     <div key={q.id} className="p-3.5 rounded-2xl bg-[#0D2542] border border-[#1769AA]/30 space-y-2">
                       <p className="font-bold text-white">
@@ -1675,14 +1675,14 @@ export default function AudioDocumentIntelligenceView({
                             value={shortAnswers[q.id] || ''}
                             onChange={(e) => setShortAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
                             placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer here...'}
-                            className="w-full px-3 py-1.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus:ring-2 focus:ring-[#1769AA]"
+                            className="w-full px-3 py-1.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                             aria-label={isAr ? `إجابة السؤال ${qIdx + 1}` : `Answer for question ${qIdx + 1}`}
                           />
                           <div className="flex items-center justify-between">
                             <button
                               type="button"
                               onClick={() => setRevealedShortAnswers((prev) => ({ ...prev, [q.id]: true }))}
-                              className="px-3 py-1 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white text-[11px] font-bold cursor-pointer"
+                              className="px-3 py-1 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
                             >
                               {isAr ? 'عرض الإجابة النموذجية' : 'Show Model Answer'}
                             </button>
@@ -1691,14 +1691,14 @@ export default function AudioDocumentIntelligenceView({
                             <div className="p-2.5 rounded-xl bg-[#16845B]/20 border border-[#16845B]/40 text-xs space-y-1">
                               <span className="font-bold text-[#93FFD8] block">{isAr ? 'الإجابة النموذجية المستخرجة:' : 'Model Answer:'}</span>
                               <p className="text-white">{q.correctAnswerText}</p>
-                              <p className="text-[11px] text-[#94A3B8] pt-1">{isAr ? 'التفسير المدعوم:' : 'Grounded explanation:'} {q.groundedExplanation}</p>
+                              <p className="text-xs text-[#94A3B8] pt-1">{isAr ? 'التفسير المدعوم:' : 'Grounded explanation:'} {q.groundedExplanation}</p>
                             </div>
                           )}
                         </div>
                       )}
 
                       {quizAnswers[q.id] !== undefined && q.type !== 'short_answer' && (
-                        <p className="text-[11px] text-[#4B9FE1] pt-1">
+                        <p className="text-xs text-[#4B9FE1] pt-1">
                           {isAr ? 'التفسير المدعوم:' : 'Grounded explanation:'} {q.groundedExplanation}
                         </p>
                       )}
@@ -1861,7 +1861,7 @@ export default function AudioDocumentIntelligenceView({
                     type="text"
                     value={sampleMathText}
                     onChange={(e) => setSampleMathText(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white font-mono text-xs outline-none focus:ring-2 focus:ring-[#1769AA]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white font-mono text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                     aria-label={isAr ? 'صيغة المعادلة الرياضية' : 'Mathematical expression formula'}
                   />
 
@@ -1876,7 +1876,7 @@ export default function AudioDocumentIntelligenceView({
 
                   {verbalizedMath && (
                     <div className="p-3.5 rounded-2xl bg-[#0D2542] border border-[#1769AA]/40 space-y-1">
-                      <span className="text-[11px] text-[#4B9FE1] font-bold">{isAr ? 'النطق اللفظي الميسر:' : 'Accessible Spoken Form:'}</span>
+                      <span className="text-xs text-[#4B9FE1] font-bold">{isAr ? 'النطق اللفظي الميسر:' : 'Accessible Spoken Form:'}</span>
                       <p className="text-white leading-relaxed">{verbalizedMath}</p>
                     </div>
                   )}
@@ -1919,14 +1919,14 @@ export default function AudioDocumentIntelligenceView({
                   value={brailleInputText}
                   onChange={(e) => handleConvertBraille(e.target.value)}
                   placeholder={isAr ? 'اكتب نصاً لتحويله إلى رموز برايل...' : 'Type text to convert to Braille...'}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus:ring-2 focus:ring-[#1769AA]"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
 
                 <div className="p-4 rounded-2xl bg-[#0D2542] border border-[#1769AA]/40 text-lg tracking-widest text-[#93FFD8] select-all font-mono">
                   {brailleOutput || '⠀'}
                 </div>
 
-                <p className="text-[11px] text-[#94A3B8]">
+                <p className="text-xs text-[#94A3B8]">
                   {isAr
                     ? 'ملاحظة التوافق: يدعم ترميز يونيكود الموحد لبرايل (Grade 1 Unicode). يتم نقل الإشارات لأجهزة برايل المتصلة بالبلوتوث أو الـ USB تلقائياً عبر قارئ الشاشة (NVDA / TalkBack / VoiceOver).'
                     : 'Compatibility notice: Outputs standard Unicode Braille patterns (\u2800-\u28FF) supported by refreshable Braille displays via active screen readers.'}
@@ -1953,7 +1953,7 @@ export default function AudioDocumentIntelligenceView({
                   onChange={(e) => setLookupWord(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLookupWord()}
                   placeholder={isAr ? 'ابحث عن شرح وترجمة أي كلمة أو مصطلح...' : 'Search term explanation and translation...'}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus:ring-2 focus:ring-[#1769AA]"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -1969,7 +1969,7 @@ export default function AudioDocumentIntelligenceView({
                 <div className="p-3.5 rounded-2xl bg-[#0D2542] border border-[#1769AA]/40 space-y-1 text-xs">
                   <div className="flex justify-between items-center text-[#4B9FE1] font-bold">
                     <span>{lookupResult.word}</span>
-                    <span className="text-[11px] text-[#93FFD8]">{lookupResult.translation}</span>
+                    <span className="text-xs text-[#93FFD8]">{lookupResult.translation}</span>
                   </div>
                   <p className="text-white leading-relaxed">{lookupResult.definition}</p>
                 </div>
@@ -1983,7 +1983,7 @@ export default function AudioDocumentIntelligenceView({
                       <div key={v.id} className="p-2.5 rounded-xl bg-[#0B131E] border border-[#22354E] flex items-center justify-between gap-2">
                         <div>
                           <strong className="text-[#4B9FE1] block">{v.word}</strong>
-                          <span className="text-[11px] text-[#94A3B8] line-clamp-1">{v.definition}</span>
+                          <span className="text-xs text-[#94A3B8] line-clamp-1">{v.definition}</span>
                         </div>
                         <button
                           type="button"

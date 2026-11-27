@@ -114,12 +114,12 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
         <div className="flex-1 min-w-0">
           <div className={`font-bold text-sm truncate ${task.completed ? 'line-through text-slate-500' : 'text-slate-100'}`}>{task.title}</div>
           <div className="flex items-center gap-2 mt-1">
-            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border ${meta.color}`}>{t(meta.en, meta.ar)}</span>
-            {task.course && <span className="text-[10px] text-slate-400 font-medium">{task.course}</span>}
-            <span className="text-[10px] text-slate-500">{parseLocalDate(task.dueDate).toLocaleDateString()}</span>
+            <span className={`text-xs font-black uppercase px-2 py-0.5 rounded-md border ${meta.color}`}>{t(meta.en, meta.ar)}</span>
+            {task.course && <span className="text-xs text-slate-400 font-medium">{task.course}</span>}
+            <span className="text-xs text-slate-500">{parseLocalDate(task.dueDate).toLocaleDateString()}</span>
           </div>
         </div>
-        {!task.completed && <span className={`text-[10px] font-black px-2.5 py-1 rounded-xl shrink-0 ${cd.color}`}>{cd.label}</span>}
+        {!task.completed && <span className={`text-xs font-black px-2.5 py-1 rounded-xl shrink-0 ${cd.color}`}>{cd.label}</span>}
         <button onClick={() => profile.uid && deleteTask(profile.uid, task.id)} className="p-1.5 text-slate-500 hover:text-rose-400 opacity-80 hover:opacity-100 shrink-0 transition-all" title={t('Delete', 'حذف')}>
           <Trash2 className="w-4 h-4" />
         </button>
@@ -130,9 +130,9 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
   const Section = ({ title, items }: { title: string; items: PlannerTask[] }) =>
     items.length ? (
       <div className="space-y-2.5">
-        <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
+        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
           <span>{title}</span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800/90 text-slate-300 font-mono">{items.length}</span>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/90 text-slate-300 font-mono">{items.length}</span>
         </h3>
         {items.map((task) => <TaskRow key={task.id} task={task} />)}
       </div>
@@ -220,19 +220,19 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
                 placeholder={t('Title (e.g. ML Assignment 2)', 'العنوان (مثلاً تكليف ML 2)')}
                 aria-label={t('Task title', 'عنوان المهمة')}
                 onKeyDown={(e) => e.key === 'Enter' && addTask()}
-                className="bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all"
+                className="bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all"
               />
               <input
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
                 placeholder={t('Course (optional)', 'المادة (اختياري)')}
                 aria-label={t('Course name', 'اسم المادة')}
-                className="bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all"
+                className="bg-[#150917] border border-[#4A1224]/60 text-white placeholder-slate-500 text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all"
               />
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as PlannerTaskType)}
-                className="bg-[#150917] border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all cursor-pointer"
+                className="bg-[#150917] border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all cursor-pointer"
               >
                 {(Object.keys(TYPE_META) as PlannerTaskType[]).map((k) => (
                   <option key={k} value={k} className="bg-[#150917] text-white">
@@ -245,7 +245,7 @@ export default function AcademicPlanner({ profile, onMenuClick, onNavigateBack }
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
                 aria-label={t('Due date', 'تاريخ الاستحقاق')}
-                className="bg-[#150917] border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all [color-scheme:dark]"
+                className="bg-[#150917] border border-[#4A1224]/60 text-white text-xs font-semibold rounded-2xl px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]/60 focus:ring-2 focus:ring-[#E5A93C]/10 transition-all [color-scheme:dark]"
               />
             </div>
             <button

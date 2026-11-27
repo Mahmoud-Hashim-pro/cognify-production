@@ -253,7 +253,7 @@ Keep your response conversational, concise (2-4 sentences max), and directly spo
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder={isAr ? 'مثال: قانون نيوتن الثاني، تفاعلات كريبس، خوارزميات الـ Dijkstra...' : 'e.g. Newton Second Law, Krebs Cycle, Dijkstra Algorithm...'}
-                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-emerald-500"
               />
             </div>
 
@@ -275,7 +275,7 @@ Keep your response conversational, concise (2-4 sentences max), and directly spo
                     <Award className="w-4 h-4" />
                     {isAr ? 'محاكاة امتحان شفوي (Oral Exam Simulation)' : 'Oral Exam Simulation'}
                   </div>
-                  <div className="text-[11px] text-slate-400">
+                  <div className="text-xs text-slate-400">
                     {isAr ? 'يسألك أستاذ الجامعة أسئلة امتحان متوقعة ويقيم أسلوب إجابتك واستخدامك للمصطلحات.' : 'Professor asks typical oral exam questions and evaluates your terminology.'}
                   </div>
                 </button>
@@ -293,7 +293,7 @@ Keep your response conversational, concise (2-4 sentences max), and directly spo
                     <Sparkles className="w-4 h-4" />
                     {isAr ? 'تقنية فاينمان (Feynman Technique)' : 'Feynman Technique'}
                   </div>
-                  <div className="text-[11px] text-slate-400">
+                  <div className="text-xs text-slate-400">
                     {isAr ? 'اشرح المفهوم بلغة بسيطة للغاية بدون مصطلحات معقدة لضمان فهمك الحقيقي للأساسيات.' : 'Explain the idea simply without jargon to ensure complete foundational understanding.'}
                   </div>
                 </button>
@@ -320,7 +320,7 @@ Keep your response conversational, concise (2-4 sentences max), and directly spo
               <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
               <div>
                 <h3 className="text-sm font-black text-white">{topic}</h3>
-                <span className="text-[10px] text-slate-400 font-bold uppercase">
+                <span className="text-xs text-slate-400 font-bold uppercase">
                   {mode === 'oral' ? (isAr ? 'امتحان شفوي تفاعلي' : 'Oral Exam') : (isAr ? 'تقنية فاينمان' : 'Feynman Technique')}
                 </span>
               </div>
@@ -344,7 +344,7 @@ Keep your response conversational, concise (2-4 sentences max), and directly spo
                 <button
                   type="button"
                   onClick={stopSpeaking}
-                  className="px-2.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] font-bold"
+                  className="px-2.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold"
                 >
                   {isAr ? 'إيقاف الصوت' : 'Mute'}
                 </button>
@@ -416,7 +416,7 @@ Keep your response conversational, concise (2-4 sentences max), and directly spo
                 onChange={(e) => setCurrentInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendResponse()}
                 placeholder={isAr ? 'تحدث بالمايك أو اكتب إجابتك هنا...' : 'Speak with mic or type your answer here...'}
-                className="flex-1 bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-3 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="flex-1 bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-3 text-xs md:text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-emerald-500"
               />
 
               <button

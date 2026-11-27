@@ -208,7 +208,7 @@ export const SystemResilienceDashboard: React.FC<SystemResilienceDashboardProps>
                 >
                   <div className="flex justify-between items-start">
                     <span className="text-xs font-bold text-white leading-tight">{p.name}</span>
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border ${stateColor}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-xs font-mono font-bold border ${stateColor}`}>
                       {p.circuitState}
                     </span>
                   </div>
@@ -224,7 +224,7 @@ export const SystemResilienceDashboard: React.FC<SystemResilienceDashboardProps>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-500 truncate pt-1 border-t border-[#4A1224]/60">
+                  <p className="text-xs text-slate-500 truncate pt-1 border-t border-[#4A1224]/60">
                     {p.message}
                   </p>
                 </div>
@@ -296,7 +296,7 @@ export const SystemResilienceDashboard: React.FC<SystemResilienceDashboardProps>
                 />
               </div>
 
-              <div className="flex justify-between text-[11px] text-slate-400">
+              <div className="flex justify-between text-xs text-slate-400">
                 <span>Remaining Quota: {rateStatus.remaining} reqs</span>
                 <span>Reset in: ~{Math.round((rateStatus.resetTimeMs - Date.now()) / 1000)}s</span>
               </div>
@@ -327,15 +327,15 @@ export const SystemResilienceDashboard: React.FC<SystemResilienceDashboardProps>
 
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="p-3.5 bg-[#080409] rounded-2xl border border-[#4A1224]/60">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">p50 (Median)</span>
+                <span className="text-xs text-slate-400 uppercase font-bold block">p50 (Median)</span>
                 <span className="text-xl font-bold font-mono text-[#E5A93C]">{telemetry.latency.p50} ms</span>
               </div>
               <div className="p-3.5 bg-[#080409] rounded-2xl border border-[#4A1224]/60">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">p95</span>
+                <span className="text-xs text-slate-400 uppercase font-bold block">p95</span>
                 <span className="text-xl font-bold font-mono text-purple-400">{telemetry.latency.p95} ms</span>
               </div>
               <div className="p-3.5 bg-[#080409] rounded-2xl border border-[#4A1224]/60">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">p99 (Tail)</span>
+                <span className="text-xs text-slate-400 uppercase font-bold block">p99 (Tail)</span>
                 <span className="text-xl font-bold font-mono text-amber-400">{telemetry.latency.p99} ms</span>
               </div>
             </div>
@@ -383,7 +383,7 @@ export const SystemResilienceDashboard: React.FC<SystemResilienceDashboardProps>
 
           {cachedOutput && (
             <div className="p-4 bg-[#080409] border border-amber-500/30 rounded-2xl space-y-2">
-              <span className="text-[11px] font-mono text-amber-400 uppercase font-bold block">
+              <span className="text-xs font-mono text-amber-400 uppercase font-bold block">
                 Cached Offline Response (Zero-API Call)
               </span>
               <p className="text-xs text-slate-200 leading-relaxed font-mono">

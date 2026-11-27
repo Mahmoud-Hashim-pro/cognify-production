@@ -466,7 +466,7 @@ Question: "${q}"`;
                 <h2 className="text-sm sm:text-base font-black text-[#F4F7FB] leading-tight">
                   {loc('Smart Sign Language Reading Camera', 'كاميرا قراءة لغة الإشارة الذكية')}
                 </h2>
-                <p className="text-[11px] text-[#A9BDD3] mt-0.5">
+                <p className="text-xs text-[#A9BDD3] mt-0.5">
                   {loc(
                     'Point the camera at the person using sign language or in front of you to begin translation.',
                     'قم بتوجيه الكاميرا نحو الشخص الذي يستخدم لغة الإشارة أو أمامك لبدء الترجمة.'
@@ -558,7 +558,7 @@ Question: "${q}"`;
             {/* Live Detected Sign Banner (Floating at bottom of preview) */}
             {isCameraActive && (
               <div className="absolute bottom-3 inset-x-3 flex items-center justify-between px-3 py-2 rounded-xl backdrop-blur-md bg-[#071B33]/85 border border-[#12CFE0]/30 text-xs shadow-lg z-10">
-                <span className="text-[11px] font-bold text-[#A9BDD3]">
+                <span className="text-xs font-bold text-[#A9BDD3]">
                   {cameraStatus || loc('Tracking Hands…', 'جاري رصد حركة اليدين…')}
                 </span>
                 <span className="font-extrabold text-[#12CFE0] text-xs tracking-wide">
@@ -689,7 +689,7 @@ Question: "${q}"`;
                 <h2 className="text-sm sm:text-base font-black text-[#F4F7FB] leading-tight">
                   {loc('Interactive 3D Avatar', 'الأفاتار ثلاثي الأبعاد التفاعلي')}
                 </h2>
-                <p className="text-[11px] text-[#A9BDD3] mt-0.5">
+                <p className="text-xs text-[#A9BDD3] mt-0.5">
                   {loc(
                     'Type any text or choose translations to render sign language with the avatar.',
                     'اكتب أي نص أو اختر من الترجمات لترجمة الأفاتار إلى لغة الإشارة أو لأسئلتك الأصلي.'
@@ -763,7 +763,7 @@ Question: "${q}"`;
                 {currentSigningWord || avatarWords[0] || loc('Ready', 'مستعد')}
               </span>
             </div>
-            <p className="text-[11px] text-[#A9BDD3] leading-relaxed">
+            <p className="text-xs text-[#A9BDD3] leading-relaxed">
               {loc(
                 'This word is currently being translated into sign language.',
                 'هذه الكلمة يتم ترجمتها الآن إلى لغة الإشارة.'
@@ -817,7 +817,7 @@ Question: "${q}"`;
                   'Type any sentence to translate to sign language or ask a question…',
                   'اكتب أي جملة للترجمة إلى لغة الإشارة أو اسأل سؤالاً...'
                 )}
-                className="w-full bg-[#071B33] border border-[#12CFE0]/25 rounded-xl py-2.5 px-4 text-xs sm:text-sm text-[#F4F7FB] placeholder:text-[#A9BDD3]/60 focus:outline-none focus:border-[#12CFE0] focus:ring-1 focus:ring-[#12CFE0] transition-colors"
+                className="w-full bg-[#071B33] border border-[#12CFE0]/25 rounded-xl py-2.5 px-4 text-xs sm:text-sm text-[#F4F7FB] placeholder:text-[#A9BDD3]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0] focus:ring-1 focus:ring-[#12CFE0] transition-colors"
               />
               <button
                 type="button"
@@ -826,7 +826,7 @@ Question: "${q}"`;
                 aria-label={loc('Send for translation', 'إرسال للترجمة')}
                 className={`absolute top-1/2 -translate-y-1/2 ${
                   isAr ? 'left-3' : 'right-3'
-                } p-1 text-[#12CFE0] hover:text-white disabled:opacity-30 transition-colors cursor-pointer focus:outline-none`}
+                } p-1 text-[#12CFE0] hover:text-white disabled:opacity-30 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
               >
                 <Send className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
               </button>

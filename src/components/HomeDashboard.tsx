@@ -392,7 +392,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 isDarkMode 
                   ? 'bg-[#0B1523] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                   : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'
-              } transition-all outline-none focus:ring-2 focus:ring-[#1769AA]/30`}
+              } transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/30`}
               aria-label={t('Global Tool Search', 'البحث في الأدوات والخدمات')}
             />
             {searchQuery && (
@@ -436,11 +436,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-slate-900 dark:text-white truncate">{item.title}</span>
-                        <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] shrink-0">
+                        <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] shrink-0">
                           {item.sectionTitle}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{item.desc}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{item.desc}</p>
                     </div>
                     <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} />
                   </button>
@@ -501,10 +501,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
                       {t(`Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
                     </span>
-                    <span className="text-[10px] text-slate-500 dark:text-[#94A3B8] font-semibold">
+                    <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-semibold">
                       {t(`${sec.features.length} tools`, `${sec.features.length} أدوات`)}
                     </span>
                   </div>
@@ -517,7 +517,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors truncate">
                         {isAr ? sec.titleAr : sec.titleEn}
                       </h3>
-                      <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] truncate">
+                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] truncate">
                         {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
                       </p>
                     </div>
@@ -550,7 +550,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('Quick Access', 'الوصول السريع')}
             </h2>
           </div>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8]">
             {t('Direct shortcuts to primary section tools', 'روابط مباشرة لأهم أدوات الأقسام')}
           </span>
         </div>
@@ -574,7 +574,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               </div>
               <div className="min-w-0 text-start">
                 <span className="truncate block leading-tight">{t('Launch Visual Assistant', 'تشغيل المساعد البصري')}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{t('See & Understand', 'الرؤية والفهم')}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('See & Understand', 'الرؤية والفهم')}</span>
               </div>
             </div>
             <ArrowRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
@@ -597,7 +597,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               </div>
               <div className="min-w-0 text-start">
                 <span className="truncate block leading-tight">{t('Live Captions', 'التفريغ الصوتي المباشر')}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{t('Communicate', 'التواصل والتعبير')}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('Communicate', 'التواصل والتعبير')}</span>
               </div>
             </div>
             <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
@@ -620,7 +620,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               </div>
               <div className="min-w-0 text-start">
                 <span className="truncate block leading-tight">{t('Accessibility Passport', 'جواز التسهيلات الموحد')}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{t('Personalize', 'التخصيص')}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('Personalize', 'التخصيص')}</span>
               </div>
             </div>
             <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
@@ -639,7 +639,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <span>{t('Recent Activity', 'النشاط الأخير')}</span>
           </h2>
           {consolidatedRecentActivity.length > 0 && (
-            <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
+            <span className="text-xs text-slate-500 dark:text-[#94A3B8]">
               {t(`${consolidatedRecentActivity.length} recent items`, `${consolidatedRecentActivity.length} عناصر حديثة`)}
             </span>
           )}
@@ -656,14 +656,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
                       {item.categoryLabel}
                     </span>
                   </div>
                   <h3 className="text-xs font-bold text-slate-900 dark:text-white mt-1.5 truncate">
                     {item.title}
                   </h3>
-                  <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] line-clamp-1 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] line-clamp-1 mt-0.5">
                     {item.desc}
                   </p>
                 </div>
@@ -688,7 +688,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 {t('No recent reading or working history yet', 'لم تبدأ قراءة أي كتاب أو مستند بعد')}
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] max-w-md mx-auto">
+              <p className="text-xs text-slate-500 dark:text-[#94A3B8] max-w-md mx-auto">
                 {t(
                   'Explore Section 2 (Read & Learn) to open educational books, convert documents to audio, and access reading rulers. No conversations started yet.',
                   'استكشف قسم القراءة والتعلّم لقراءة الكتب الميسرة، وتحويل النصوص إلى صوت. لا توجد محادثات مسجلة بعد.'
@@ -722,7 +722,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <h3 className="text-xs font-bold text-slate-900 dark:text-white">
               {t('Accessible Support & Guides', 'الدعم والمساعدة والإرشادات')}
             </h3>
-            <p className="text-[10px] text-slate-500 dark:text-[#94A3B8]">
+            <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
               {t('Reach human specialists, explore accessibility documentation, or report an issue.', 'تواصل مع أخصائي التيسير، أو استكشف أدلة الاستخدام.')}
             </p>
           </div>

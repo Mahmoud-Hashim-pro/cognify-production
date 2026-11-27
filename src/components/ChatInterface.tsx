@@ -1603,11 +1603,11 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               <h1 className="font-bold text-sm sm:text-base text-[#F8FAFC] leading-none truncate">
                 {localize(profile.language, 'AI Tutor', 'المعلم الذكي')}
               </h1>
-              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40 shrink-0">
+              <span className="text-xs font-bold px-1.5 py-0.2 rounded bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40 shrink-0">
                 Rafiqi
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] hidden sm:block truncate mt-0.5">
+            <p className="text-xs text-[#64748B] hidden sm:block truncate mt-0.5">
               {localize(profile.language, 'Calm, adaptive study copilot', 'رفيق دراسي ذكي ومخصص وبدون مشتتات')}
             </p>
           </div>
@@ -1638,7 +1638,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           >
             <Bookmark className="w-4 h-4" />
             {bookmarkedInsights.length > 0 && (
-              <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-[#1769AA] text-white text-[9px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-[#1769AA] text-white text-xs font-bold flex items-center justify-center">
                 {bookmarkedInsights.length}
               </span>
             )}
@@ -1669,7 +1669,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               onClick={handleDisableAccessibility}
               title={localize(profile.language, 'Accessibility mode is on — click to turn it off', 'وضع الإتاحة شغّال — اضغط لإيقافه')}
               aria-label={localize(profile.language, 'Turn off accessibility mode', 'إيقاف وضع الإتاحة')}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-[#1769AA]/15 text-[#4B9FE1] border border-[#1769AA]/40 hover:bg-[#0D4778]/25 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-[#1769AA]/15 text-[#4B9FE1] border border-[#1769AA]/40 hover:bg-[#0D4778]/25 rounded-full text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
             >
               <Accessibility className="w-3.5 h-3.5" />
               <span>{profile.accessibilityMode}</span>
@@ -1724,12 +1724,12 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={localize(profile.language, 'Search within this conversation...', 'بحث داخل هذه المحادثة...')}
-                    className="bg-transparent text-[#F8FAFC] text-xs sm:text-sm w-full outline-none placeholder:text-[#64748B] font-medium"
+                    className="bg-transparent text-[#F8FAFC] text-xs sm:text-sm w-full outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] placeholder:text-[#64748B] font-medium"
                     autoFocus
                   />
                 </div>
                 {searchQuery.trim() && (
-                  <span className="text-[11px] font-mono text-[#4B9FE1] bg-[#1A283D] border border-[#22354E] px-2 py-0.5 rounded-lg shrink-0">
+                  <span className="text-xs font-mono text-[#4B9FE1] bg-[#1A283D] border border-[#22354E] px-2 py-0.5 rounded-lg shrink-0">
                     {messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase())).length}{' '}
                     {localize(profile.language, 'results', 'نتيجة')}
                   </span>
@@ -1866,7 +1866,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   </span>
                                   <div className="min-w-0 flex-1">
                                     <h4 className="font-semibold text-xs sm:text-sm text-[#F8FAFC]">{c.title}</h4>
-                                    <p className="text-[11px] text-[#64748B] truncate mt-0.5">{c.desc}</p>
+                                    <p className="text-xs text-[#64748B] truncate mt-0.5">{c.desc}</p>
                                   </div>
                                 </button>
                               ))}
@@ -1950,14 +1950,14 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                       {file.type.startsWith('image/') && file.data ? (
                                         <img src={`data:${file.type};base64,${file.data}`} className="w-full h-full object-cover" alt="" />
                                       ) : (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')) ? (
-                                        <span className="text-[10px] font-bold text-rose-400">PDF</span>
+                                        <span className="text-xs font-bold text-rose-400">PDF</span>
                                       ) : (
                                         <FileText className="w-4 h-4 text-[#4B9FE1]" />
                                       )}
                                     </div>
                                     <div className="text-left flex-1 min-w-0">
                                       <p className="text-xs font-semibold text-[#F8FAFC] truncate w-full">{file.name}</p>
-                                      <p className="text-[10px] text-[#64748B]">
+                                      <p className="text-xs text-[#64748B]">
                                         {file.data ? 'Click to View' : 'Media Expired'}
                                       </p>
                                     </div>
@@ -1969,7 +1969,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                             <div className="space-y-3 max-w-[94%] sm:max-w-[90%] w-full">
                               {/* Assistant Header Row */}
                               <div className="flex items-center gap-2 flex-wrap">
-                                <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#131E2E] border border-[#22354E] rounded-lg text-[#4B9FE1] text-[11px] font-bold">
+                                <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#131E2E] border border-[#22354E] rounded-lg text-[#4B9FE1] text-xs font-bold">
                                   <Bot className="w-3.5 h-3.5 text-[#4B9FE1]" />
                                   <span>{localize(profile.language, 'AI Tutor', 'المعلم الذكي')}</span>
                                 </div>
@@ -1981,7 +1981,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   return (
                                     <span
                                       title={localize(profile.language, pMeta.descriptionEn, pMeta.descriptionAr)}
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#22354E] bg-[#1A283D] text-[#94A3B8] text-[10px] font-medium"
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#22354E] bg-[#1A283D] text-[#94A3B8] text-xs font-medium"
                                     >
                                       <span>{pMeta.id === 'analogies' ? '💡' : pMeta.id === 'scaffolded' ? '🪜' : '⚡'}</span>
                                       <span>{localize(profile.language, pMeta.labelEn, pMeta.labelAr)}</span>
@@ -1992,7 +1992,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 {'speechSynthesis' in window && (
                                   <button 
                                     onClick={() => handleSpeak(m)}
-                                    className={`text-[10px] font-bold transition-all px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                    className={`text-xs font-bold transition-all px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                       speakingMessageId === m.id
                                         ? 'bg-rose-600 text-white border-rose-500 shadow-sm animate-pulse'
                                         : 'bg-[#131E2E] text-[#94A3B8] hover:text-[#F8FAFC] border-[#22354E] hover:border-[#1769AA]'
@@ -2058,7 +2058,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                           </div>
                                         ) : null}
                                         <div className="text-center w-full px-1">
-                                          <p className="text-[11px] font-semibold text-[#F8FAFC] truncate max-w-[160px]">{file.name}</p>
+                                          <p className="text-xs font-semibold text-[#F8FAFC] truncate max-w-[160px]">{file.name}</p>
                                         </div>
                                       </button>
                                     </div>
@@ -2071,7 +2071,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleReactToMessage(m.id, 'up')}
-                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                     m.reaction === 'up'
                                       ? 'bg-[#1769AA]/20 text-[#4B9FE1] border-[#1769AA]'
                                       : 'text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]'
@@ -2084,7 +2084,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleReactToMessage(m.id, 'down')}
-                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                     m.reaction === 'down'
                                       ? 'bg-rose-500/20 text-rose-300 border-rose-500/50'
                                       : 'text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]'
@@ -2101,7 +2101,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                       () => toast.success(localize(profile.language, 'Copied', 'تم النسخ'))
                                     );
                                   }}
-                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
+                                  className="text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
                                   title={localize(profile.language, 'Copy answer', 'نسخ الإجابة')}
                                 >
                                   <Copy className="w-3.5 h-3.5" />
@@ -2110,7 +2110,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleSimplify(m)}
-                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#4B9FE1] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
+                                  className="text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#4B9FE1] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
                                   title={localize(profile.language, 'Explain this in simpler terms (ELI5)', 'شرح مبسط بدون أي تعقيد')}
                                 >
                                   <Zap className="w-3.5 h-3.5 text-[#4B9FE1]" />
@@ -2119,7 +2119,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleToggleBookmark(m)}
-                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                     bookmarkedInsights.some((b) => b.messageId === m.id)
                                       ? 'bg-[#1769AA]/20 text-[#4B9FE1] border-[#1769AA]'
                                       : 'text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#4B9FE1] hover:border-[#1769AA]'
@@ -2133,7 +2133,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   type="button"
                                   onClick={() => handleCompareAI(m)}
                                   disabled={comparingId === m.id}
-                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] disabled:opacity-50"
+                                  className="text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] disabled:opacity-50"
                                 >
                                   <Scale className="w-3.5 h-3.5" />
                                   <span>{comparingId === m.id ? localize(profile.language, 'Reviewing…', 'جاري المراجعة…') : localize(profile.language, 'Second opinion', 'رأي تانٍ')}</span>
@@ -2262,7 +2262,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                             }
                           }}
                           disabled={isLoading}
-                          className="flex-1 bg-transparent text-[#F8FAFC] placeholder-[#64748B] border-0 px-2 py-1.5 outline-none resize-none min-h-[36px] max-h-32 text-sm leading-relaxed custom-scrollbar disabled:opacity-50"
+                          className="flex-1 bg-transparent text-[#F8FAFC] placeholder-[#64748B] border-0 px-2 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] resize-none min-h-[36px] max-h-32 text-sm leading-relaxed custom-scrollbar disabled:opacity-50"
                         />
 
                         {/* Microphone Button (min 44x44px target) */}
@@ -2314,7 +2314,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 setShowPedagogyPopover(!showPedagogyPopover);
                                 setShowQuickActionsPopover(false);
                               }}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
                                 showPedagogyPopover
                                   ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]'
                                   : 'bg-[#1A283D] border-[#22354E] hover:border-[#1769AA] text-[#94A3B8]'
@@ -2338,7 +2338,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   transition={{ duration: 0.15 }}
                                   className="absolute bottom-full mb-2 start-0 w-64 bg-[#131E2E] border border-[#22354E] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
                                 >
-                                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#22354E] pb-1 mb-1">
+                                  <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#22354E] pb-1 mb-1">
                                     {localize(profile.language, 'Pedagogy Style', 'أسلوب الشرح')}
                                   </div>
                                   {PEDAGOGY_STYLES.map((st) => {
@@ -2361,7 +2361,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                           <span>{localize(profile.language, st.labelEn, st.labelAr)}</span>
                                           {isSelected && <span className="text-[#4B9FE1] text-xs">✓</span>}
                                         </div>
-                                        <span className="text-[10px] text-[#64748B] font-normal leading-tight">
+                                        <span className="text-xs text-[#64748B] font-normal leading-tight">
                                           {localize(profile.language, st.descriptionEn, st.descriptionAr)}
                                         </span>
                                       </button>
@@ -2380,7 +2380,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 setShowQuickActionsPopover(!showQuickActionsPopover);
                                 setShowPedagogyPopover(false);
                               }}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
                                 showQuickActionsPopover
                                   ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]'
                                   : 'bg-[#1A283D] border-[#22354E] hover:border-[#1769AA] text-[#94A3B8]'
@@ -2402,7 +2402,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   transition={{ duration: 0.15 }}
                                   className="absolute bottom-full mb-2 start-0 w-64 bg-[#131E2E] border border-[#22354E] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
                                 >
-                                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#22354E] pb-1 mb-1">
+                                  <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#22354E] pb-1 mb-1">
                                     {localize(profile.language, 'Quick AI Tools', 'أدوات الذكاء الاصطناعي')}
                                   </div>
                                   <button
@@ -2469,7 +2469,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           <button
                             type="button"
                             onClick={() => setShowWorkspace(!showWorkspace)}
-                            className={`hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                            className={`hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
                               showWorkspace
                                 ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]'
                                 : 'bg-[#1A283D] border-[#22354E] text-[#64748B] hover:text-[#94A3B8]'
@@ -2487,7 +2487,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           <button
                             type="button"
                             onClick={() => setShowFrenchTravelAssistant(true)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors cursor-pointer"
                             title={localize(profile.language, 'Open France Travel Assistant', 'دليل ومترجم فرنسا')}
                           >
                             <span>🇫🇷</span>
@@ -2500,7 +2500,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                   </form>
 
                   {/* Disclaimer */}
-                  <p className="text-center text-[10px] text-[#64748B] tracking-wide">
+                  <p className="text-center text-xs text-[#64748B] tracking-wide">
                     {localize(profile.language, 'Rafiqi can make mistakes. Check important information.', 'رفيقي ممكن يخطئ. راجِع المعلومات المهمة.')}
                   </p>
                 </div>

@@ -122,7 +122,7 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               {/* Title */}
               <div className="space-y-2">
-                <label htmlFor="add-goal-title" className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+                <label htmlFor="add-goal-title" className="text-xs font-black uppercase tracking-widest text-[#E5A93C]/80">
                   {isArabic ? 'اسم الهدف' : 'Goal Title'} *
                 </label>
                 <input
@@ -132,13 +132,13 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder={isArabic ? 'مثال: تعلم تعلم الآلة' : 'e.g. Learn Machine Learning'}
-                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-3 text-xs font-semibold text-white outline-none focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/10 placeholder:text-slate-500"
+                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-3 text-xs font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/10 placeholder:text-slate-500"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+                <label className="text-xs font-black uppercase tracking-widest text-[#E5A93C]/80">
                   {isArabic ? 'الوصف' : 'Description'}
                 </label>
                 <textarea
@@ -146,14 +146,14 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   placeholder={isArabic ? 'وصف مختصر للهدف...' : 'Brief description of your goal...'}
                   rows={2}
-                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-3 text-xs font-semibold text-white outline-none focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/10 resize-none placeholder:text-slate-500"
+                  className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-4 py-3 text-xs font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/10 resize-none placeholder:text-slate-500"
                 />
               </div>
 
               {/* Priority + Deadline */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+                  <label className="text-xs font-black uppercase tracking-widest text-[#E5A93C]/80">
                     {isArabic ? 'الأولوية' : 'Priority'}
                   </label>
                   <div className="flex flex-col gap-1.5">
@@ -175,7 +175,7 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="add-goal-deadline" className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+                  <label htmlFor="add-goal-deadline" className="text-xs font-black uppercase tracking-widest text-[#E5A93C]/80">
                     {isArabic ? 'الموعد النهائي' : 'Deadline'} *
                   </label>
                   <input
@@ -185,14 +185,14 @@ export default function AddGoalModal({ open, onClose, onSave, language }: AddGoa
                     value={form.deadline}
                     onChange={(e) => setForm({ ...form, deadline: e.target.value })}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-3 py-3 text-xs font-semibold text-white outline-none focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/10 [color-scheme:dark]"
+                    className="w-full bg-[#150917] border border-[#4A1224]/60 rounded-2xl px-3 py-3 text-xs font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C] focus:ring-2 focus:ring-[#E5A93C]/10 [color-scheme:dark]"
                   />
                 </div>
               </div>
 
               {/* Milestones */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[#E5A93C]/80">
+                <label className="text-xs font-black uppercase tracking-widest text-[#E5A93C]/80">
                   {isArabic ? 'الخطوات (Milestones)' : 'Milestones'}
                 </label>
                 <div className="bg-[#150917] border border-[#4A1224]/60 rounded-2xl p-4">

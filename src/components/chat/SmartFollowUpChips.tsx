@@ -145,7 +145,7 @@ export default function SmartFollowUpChips({
     >
       <div className="flex items-center gap-1.5 mb-2.5">
         <Sparkles className="w-3.5 h-3.5 text-[#E5A93C] animate-pulse" />
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+        <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
           {isAr ? 'متابعة سريعة بنقرة واحدة:' : isFr ? 'Poursuivre en 1 clic :' : '1-Click Smart Follow-ups:'}
         </span>
       </div>

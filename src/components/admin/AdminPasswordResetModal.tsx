@@ -63,15 +63,15 @@ export default function AdminPasswordResetModal({
               <div className="text-xs text-slate-400 truncate">{user.email}</div>
               <div className="flex items-center gap-2 mt-1">
                 {isSuperAdminUser(user) ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                  <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
                     <Crown className="w-2.5 h-2.5" /> Super Admin User
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-[#16395E]/50">
+                  <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-[#16395E]/50">
                     <UserIcon className="w-2.5 h-2.5" /> Normal User
                   </span>
                 )}
-                <span className="text-[10px] font-mono text-slate-500">UID: {user.uid.slice(0, 8)}…</span>
+                <span className="text-xs font-mono text-slate-500">UID: {user.uid.slice(0, 8)}…</span>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function AdminPasswordResetModal({
               The user can click the verified link to securely update their password.
             </p>
             {user.passwordResetRequestedAt && (
-              <p className="text-[11px] text-slate-400 font-mono pt-1.5 border-t border-[#16395E]/60">
+              <p className="text-xs text-slate-400 font-mono pt-1.5 border-t border-[#16395E]/60">
                 Last reset requested: {formatDate(user.passwordResetRequestedAt)}
               </p>
             )}

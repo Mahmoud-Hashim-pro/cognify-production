@@ -532,7 +532,7 @@ Database Systems,90,3,270`;
                 {localize(profile.language, 'Section 3: Work & Create', 'القسم 3: العمل والإبداع')}
               </span>
               <span className="text-[#22354E]">•</span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                 <ShieldCheck className="w-3 h-3" />
                 {localize(profile.language, 'WCAG 2.2 AA Verified', 'معتمد لإمكانية الوصول')}
               </span>
@@ -803,10 +803,10 @@ Database Systems,90,3,270`;
                     >
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#1A283D] text-[#4B9FE1] border border-[#22354E]">
+                          <span className="text-xs font-bold uppercase px-2 py-0.5 rounded bg-[#1A283D] text-[#4B9FE1] border border-[#22354E]">
                             {block.type}
                           </span>
-                          <span className="text-[10px] text-[#64748B]">#{idx + 1}</span>
+                          <span className="text-xs text-[#64748B]">#{idx + 1}</span>
                         </div>
                         {block.type === 'heading1' && (
                           <h3 className="text-xl font-black text-[#F8FAFC] tracking-tight">{block.text}</h3>
@@ -1551,7 +1551,7 @@ Database Systems,90,3,270`;
               {/* Grounded Metrics Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-[#22354E]">
                 <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
-                  <span className="block text-[11px] font-bold text-[#94A3B8]">
+                  <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Total Sum', 'المجموع الكلي')}
                   </span>
                   <span className="text-lg font-black text-[#F8FAFC]">
@@ -1559,7 +1559,7 @@ Database Systems,90,3,270`;
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
-                  <span className="block text-[11px] font-bold text-[#94A3B8]">
+                  <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Arithmetic Average', 'المتوسط الحسابي')}
                   </span>
                   <span className="text-lg font-black text-[#4B9FE1]">
@@ -1567,7 +1567,7 @@ Database Systems,90,3,270`;
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
-                  <span className="block text-[11px] font-bold text-[#94A3B8]">
+                  <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Peak Observation', 'أعلى قيمة مسجلة')}
                   </span>
                   <span className="text-lg font-black text-emerald-400">
@@ -1575,7 +1575,7 @@ Database Systems,90,3,270`;
                   </span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#22354E]">
-                  <span className="block text-[11px] font-bold text-[#94A3B8]">
+                  <span className="block text-xs font-bold text-[#94A3B8]">
                     {localize(profile.language, 'Lowest Observation', 'أدنى قيمة مسجلة')}
                   </span>
                   <span className="text-lg font-black text-amber-400">
@@ -1699,7 +1699,7 @@ Database Systems,90,3,270`;
                         </label>
 
                         {field.isSensitive && (
-                          <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
+                          <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
                             <ShieldCheck className="w-3 h-3" />
                             {localize(profile.language, 'Sensitive Field (Manual Only)', 'بيانات حساسة (إدخال يدوي حصراً)')}
                           </span>

@@ -193,7 +193,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
         {/* Global Summary Badge */}
         <div className="flex items-center gap-3 bg-[#13172b] border border-[#4A1224]/60 rounded-2xl p-2.5 px-4">
           <div className="text-right">
-            <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+            <div className="text-xs uppercase font-bold tracking-wider text-slate-400">
               {isAr ? 'مستحق المراجعة' : 'Reviews Ready'}
             </div>
             <div className="text-lg font-black text-[#E5A93C]">
@@ -202,7 +202,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
           </div>
           <div className="w-px h-8 bg-slate-800" />
           <div>
-            <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+            <div className="text-xs uppercase font-bold tracking-wider text-slate-400">
               {isAr ? 'مفاهيم متقنة' : 'Mastered'}
             </div>
             <div className="text-lg font-black text-emerald-400">
@@ -318,11 +318,11 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
                     <h3 className="text-sm font-bold text-white">
                       {resolveConceptTitle(item.conceptId, lang)}
                     </h3>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-400">
+                    <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-400">
                       {item.repetitions} {isAr ? 'تكرارات' : 'reps'} • {item.intervalDays} {isAr ? 'يوم' : 'days'}
                     </span>
                     {item.daysOverdue > 0 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
                         {isAr ? `متأخر ${item.daysOverdue} يوم` : `${item.daysOverdue}d overdue`}
                       </span>
                     )}
@@ -330,7 +330,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
 
                   {/* Decay Risk Bar */}
                   <div className="flex items-center gap-3 max-w-xs">
-                    <div className="text-[10px] text-slate-400 font-mono">
+                    <div className="text-xs text-slate-400 font-mono">
                       {isAr ? 'مخاطر النسيان:' : 'Decay Risk:'}
                     </div>
                     <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -341,7 +341,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
                         style={{ width: `${riskPct}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-bold text-slate-300">{riskPct}%</span>
+                    <span className="text-xs font-bold text-slate-300">{riskPct}%</span>
                   </div>
                 </div>
 
@@ -381,7 +381,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
                   <h3 className="text-sm font-bold text-white">
                     {resolveConceptTitle(activeReviewItem.conceptId, lang)}
                   </h3>
-                  <div className="text-[10px] text-slate-400 font-mono">
+                  <div className="text-xs text-slate-400 font-mono">
                     {isAr ? 'مراجعة تثبيت الذاكرة المصغرة' : 'Cognitive Micro-Retention Drill'}
                   </div>
                 </div>
@@ -464,7 +464,7 @@ export const RetentionLearningCenter: React.FC<RetentionLearningCenterProps> = (
 
                   {/* Interval progression pill */}
                   <span
-                    className={`text-[10px] font-mono font-bold px-2 py-1 rounded-lg border ${
+                    className={`text-xs font-mono font-bold px-2 py-1 rounded-lg border ${
                       reviewResult.isCorrect
                         ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
                         : 'bg-amber-500/10 text-amber-300 border-amber-500/30'

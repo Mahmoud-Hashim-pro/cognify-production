@@ -180,11 +180,11 @@ export default function ProactiveSuggestionCard({
           <div className="w-8 h-8 rounded-xl bg-[#0E0610]/90 border border-[#4A1224]/50 flex items-center justify-center shrink-0">
             <IconComponent className={`w-4 h-4 ${themeStyles.iconColor}`} />
           </div>
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${themeStyles.badgeBg}`}>
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border ${themeStyles.badgeBg}`}>
             {themeStyles.badgeText}
           </span>
           {(opportunity?.metadata?.daysOverdue || insight?.metricDelta) && (
-            <span className="text-[11px] font-medium text-slate-400 bg-[#0E0610]/70 px-2 py-0.5 rounded-lg border border-[#4A1224]/60">
+            <span className="text-xs font-medium text-slate-400 bg-[#0E0610]/70 px-2 py-0.5 rounded-lg border border-[#4A1224]/60">
               {insight?.metricDelta || `${opportunity?.metadata?.daysOverdue}d overdue`}
             </span>
           )}
@@ -226,7 +226,7 @@ export default function ProactiveSuggestionCard({
             </div>
             <button
               onClick={handleToggleGlobal}
-              className={`px-3 py-1 rounded-xl font-semibold text-[11px] transition-all border ${
+              className={`px-3 py-1 rounded-xl font-semibold text-xs transition-all border ${
                 proactiveEnabled
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
                   : 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
@@ -267,7 +267,7 @@ export default function ProactiveSuggestionCard({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
               {/* Pillar 1: Evidence */}
               <div className="p-3 rounded-2xl bg-[#150917]/70 border border-[#4A1224]/60 space-y-1">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C]" />
                   {localize(language, '1. Empirical Evidence', '١. الدليل التجريبي')}
                 </div>
@@ -278,7 +278,7 @@ export default function ProactiveSuggestionCard({
 
               {/* Pillar 2: Interpretation */}
               <div className="p-3 rounded-2xl bg-[#150917]/70 border border-[#4A1224]/60 space-y-1">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
                   {localize(language, '2. Pedagogical Meaning', '٢. التفسير التربوي')}
                 </div>

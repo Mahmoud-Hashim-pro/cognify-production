@@ -1074,7 +1074,7 @@ export default function App() {
           >
             <RefreshCw className="w-4 h-4" /> Retry · إعادة المحاولة
           </button>
-          <button onClick={() => logout()} className="text-[11px] text-slate-500 underline">
+          <button onClick={() => logout()} className="text-xs text-slate-500 underline">
             Sign out · تسجيل الخروج
           </button>
         </div>
@@ -1564,7 +1564,7 @@ export default function App() {
             onLogout={handleLogout}
           />
 
-          <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
+          <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]">
             <Suspense
               fallback={
                 <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
