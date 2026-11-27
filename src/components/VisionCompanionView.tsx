@@ -2434,7 +2434,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   ? t('Stop Camera Feed', 'إيقاف بث الكاميرا')
                   : t('Start Camera Feed', 'بدء تشغيل الكاميرا')
               }
-              className={`px-4 min-h-[44px] rounded-xl font-black text-xs flex items-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer ${
+              className={`${status === 'ready' && streamRef.current ? '' : 'hidden '}px-4 min-h-[44px] rounded-xl font-black text-xs flex items-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer ${
                 status === 'ready' && streamRef.current
                   ? 'bg-[#C43D4D] hover:bg-[#A82B3A] text-white shadow-[#C43D4D]/30'
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
@@ -2613,7 +2613,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 : activeToolConfig.titleEn;
 
             return (
-              <div className="relative z-10 flex flex-col items-center justify-center p-6 text-center space-y-4 max-w-lg">
+              <div className="relative z-10 flex flex-col items-center justify-center p-6 pt-14 text-center space-y-4 max-w-lg">
                 {status === 'starting-camera' ? (
                   <>
                     <Loader2 className="w-12 h-12 text-[#1769AA] animate-spin" />
@@ -2909,14 +2909,14 @@ Examine what is visible in front of the camera right now with utmost precision:
           return (
             <section
               aria-label={t('Visual Assistant Actions', 'إجراءات المساعد البصري')}
-              className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-1"
+              className={`${isCamStreaming ? 'hidden ' : ''}flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-1`}
             >
               {/* Camera Activation / Stop Toggle Button */}
               <button
                 type="button"
                 onClick={isCamStreaming ? stopCamera : () => startCamera()}
                 aria-label={isCamStreaming ? t('Stop Camera', 'إيقاف الكاميرا') : openCamBtnLabel}
-                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                className="hidden px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
                 <Camera className={`w-4 h-4 ${isCamStreaming ? 'text-emerald-400' : 'text-[#1769AA]'}`} />
                 <span>{isCamStreaming ? t('Stop Camera', 'إيقاف الكاميرا') : openCamBtnLabel}</span>
@@ -2940,7 +2940,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label={uploadBtnLabel}
-                className="px-6 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                className="hidden px-6 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
                 <Upload className="w-4 h-4 text-[#1769AA]" />
                 <span>{uploadBtnLabel}</span>
@@ -2955,7 +2955,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     describeScene(companionLang, undefined, undefined, false, 'currency');
                   }}
                   aria-label={t('Identify Banknote / Cash', 'فحص وقراءة العملة')}
-                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                  className="hidden px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <Banknote className="w-4 h-4 text-[#1769AA]" />
                   <span>{t('Cash Reader', 'قارئ العملات')}</span>
@@ -2968,7 +2968,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     describeScene(companionLang, undefined, undefined, false, 'scene');
                   }}
                   aria-label={t('What is in front of me now? Analyze camera scene', 'ماذا أمامي الآن؟ فحص المشهد')}
-                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                  className="hidden px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <Eye className="w-4 h-4 text-[#1769AA]" />
                   <span>{t('Scene Assistant', 'المساعد البصري')}</span>
@@ -2983,7 +2983,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   describeScene(companionLang, undefined, 'read', false, 'read');
                 }}
                 aria-label={t('Read printed text or signs aloud', 'قراءة النص واللافتات بصوت مسموع')}
-                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                className="hidden px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
                 <FileText className="w-4 h-4 text-[#1769AA]" />
                 <span>{t('Read Text', 'قراءة النص')}</span>
@@ -2994,7 +2994,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => playDemoSample(companionLang, activeTool)}
                 aria-label={t('Test spoken voice audio sample', 'تجربة الصوت وعينة وصف حية')}
-                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                className="hidden px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
                 <Volume2 className="w-4 h-4 text-[#1769AA]" />
                 <span>{t('Test Audio', 'تجربة الصوت')}</span>
