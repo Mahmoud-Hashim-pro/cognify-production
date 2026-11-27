@@ -1352,7 +1352,7 @@ export default function App() {
       case 'privacy_security':
       case 'privacy':
         return (
-          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#061A33] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
+          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#0A2342] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
             <header className="flex items-center gap-3 mb-6">
               <button
                 type="button"
@@ -1459,7 +1459,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <div
-        className={`app-navy flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#061A33] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} font-sans overflow-hidden selection:bg-[#1769AA]/25 transition-all duration-300 ${
+        className={`app-navy flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0A2342] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} font-sans overflow-hidden selection:bg-[#1769AA]/25 transition-all duration-300 ${
           profile?.accessibilityMode === 'Visual' ? 'text-lg contrast-125' : ''
         }`}
         dir={direction}
@@ -1597,7 +1597,7 @@ export default function App() {
           <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]">
             <Suspense
               fallback={
-                <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#061A33] text-teal-400">
+                <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0A2342] text-teal-400">
                   <Loader2 className="w-8 h-8 text-teal-400 animate-spin" aria-hidden="true" />
                   <span className="sr-only">Loading view...</span>
                 </div>

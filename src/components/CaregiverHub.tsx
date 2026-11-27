@@ -827,7 +827,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => openEditContact(c)}
-                  className="min-w-[40px] min-h-[40px] p-2.5 rounded-xl bg-[#1A283D] text-slate-300 hover:bg-[#24344D] transition-all flex items-center justify-center cursor-pointer"
+                  className="min-w-[40px] min-h-[40px] p-2.5 rounded-xl bg-[#17355C] text-slate-300 hover:bg-[#24344D] transition-all flex items-center justify-center cursor-pointer"
                   title={t('Edit number', 'تعديل الرقم')}
                   aria-label={t('Edit number for', 'تعديل رقم') + ' ' + (isAr ? (c.nameAr || c.nameEn) : c.nameEn)}
                 >
@@ -933,7 +933,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               </button>
               <button
                 onClick={() => setEditingContact(null)}
-                className="min-h-[48px] px-5 rounded-2xl bg-[#1A283D] text-slate-300 font-bold text-sm active:scale-95 transition-all cursor-pointer"
+                className="min-h-[48px] px-5 rounded-2xl bg-[#17355C] text-slate-300 font-bold text-sm active:scale-95 transition-all cursor-pointer"
               >
                 {t('Cancel', 'إلغاء')}
               </button>

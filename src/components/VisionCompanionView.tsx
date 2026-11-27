@@ -1958,8 +1958,8 @@ Examine what is visible in front of the camera right now with utmost precision:
   return (
     <div
       ref={containerRef}
-      className={`flex-1 flex flex-col h-full w-full bg-[#061A33] text-[#F5F8FF] overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 select-none transition-colors ${
-        isFullscreen ? 'fixed inset-0 z-[99999] p-4 bg-[#061A33]' : ''
+      className={`flex-1 flex flex-col h-full w-full bg-[#0A2342] text-[#F5F8FF] overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 select-none transition-colors ${
+        isFullscreen ? 'fixed inset-0 z-[99999] p-4 bg-[#0A2342]' : ''
       }`}
       dir={isAppRtl ? 'rtl' : 'ltr'}
     >
@@ -2082,13 +2082,13 @@ Examine what is visible in front of the camera right now with utmost precision:
               data-testid="detail-level-selector"
               role="group"
               aria-label={t('Speech detail level', 'مستوى تفصيل الوصف')}
-              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-xs"
+              className="flex items-center rounded-xl bg-[#0A2342] border border-[#07558A] p-0.5 text-xs"
             >
               <button
                 type="button"
                 onClick={() => handleDetailLevelChange('concise')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  detailLevel === 'concise' ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                  detailLevel === 'concise' ? 'bg-[#1769AA] text-[#0A2342]' : 'text-[#B9CDE3] hover:text-white'
                 }`}
                 title={t('Concise descriptions', 'أوصاف موجزة')}
               >
@@ -2098,7 +2098,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => handleDetailLevelChange('standard')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  detailLevel === 'standard' ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                  detailLevel === 'standard' ? 'bg-[#1769AA] text-[#0A2342]' : 'text-[#B9CDE3] hover:text-white'
                 }`}
                 title={t('Standard descriptions', 'أوصاف متوسطة')}
               >
@@ -2108,7 +2108,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => handleDetailLevelChange('detailed')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  detailLevel === 'detailed' ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                  detailLevel === 'detailed' ? 'bg-[#1769AA] text-[#0A2342]' : 'text-[#B9CDE3] hover:text-white'
                 }`}
                 title={t('Detailed comprehensive descriptions', 'أوصاف تفصيلية شاملة')}
               >
@@ -2125,7 +2125,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               data-testid="speech-rate-selector"
               role="group"
               aria-label={t('Speech playback speed', 'سرعة نطق الصوت')}
-              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-xs"
+              className="flex items-center rounded-xl bg-[#0A2342] border border-[#07558A] p-0.5 text-xs"
             >
               {[0.75, 1.0, 1.25, 1.5].map((rate) => (
                 <button
@@ -2150,7 +2150,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             <div
               role="group"
               aria-label={t('Assistant language', 'لغة المساعد')}
-              className="flex items-center rounded-xl bg-[#061A33] border border-[#07558A] p-0.5 text-xs"
+              className="flex items-center rounded-xl bg-[#0A2342] border border-[#07558A] p-0.5 text-xs"
             >
               {(['ar', 'en', 'fr'] as const).map((lang) => (
                 <button
@@ -2158,7 +2158,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   type="button"
                   onClick={() => handleSelectLang(lang)}
                   className={`px-2 py-1 rounded-lg font-bold uppercase transition-all ${
-                    companionLang === lang ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                    companionLang === lang ? 'bg-[#1769AA] text-[#0A2342]' : 'text-[#B9CDE3] hover:text-white'
                   }`}
                 >
                   {lang}
@@ -2212,24 +2212,24 @@ Examine what is visible in front of the camera right now with utmost precision:
               <span>{t('Simple 3-Step Assistive Guide', 'دليل الخطوات الثلاث السريع للرؤية')}</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
-                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#0A2342]/85 border border-[#07558A]/60">
+                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#0A2342] font-black text-xs flex items-center justify-center shrink-0">
                   1
                 </span>
                 <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
                   {t('Point your camera toward what you want to identify or read.', 'وجّه كاميرا جهازك نحو ما تريد معرفته أو قراءته.')}
                 </p>
               </div>
-              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
-                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#0A2342]/85 border border-[#07558A]/60">
+                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#0A2342] font-black text-xs flex items-center justify-center shrink-0">
                   2
                 </span>
                 <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
                   {t('Press the large button below (or press V on your keyboard).', 'اضغط على الزر الكبير في المنتصف (أو اضغط حرف V بلوحة المفاتيح).')}
                 </p>
               </div>
-              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
-                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#0A2342]/85 border border-[#07558A]/60">
+                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#0A2342] font-black text-xs flex items-center justify-center shrink-0">
                   3
                 </span>
                 <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
@@ -2279,12 +2279,12 @@ Examine what is visible in front of the camera right now with utmost precision:
                   <div className="flex items-center justify-center w-full">
                     <div
                       className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                        isSelected ? 'bg-[#1769AA] text-[#061A33]' : 'bg-[#092747] text-[#1769AA]'
+                        isSelected ? 'bg-[#1769AA] text-[#0A2342]' : 'bg-[#092747] text-[#1769AA]'
                       }`}
                     >
                       <ToolIcon className="w-4 h-4" />
                     </div>
-                    <span className="hidden text-xs font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#1769AA] border border-[#07558A]/80">
+                    <span className="hidden text-xs font-mono px-1.5 py-0.5 rounded bg-[#0A2342] text-[#1769AA] border border-[#07558A]/80">
                       {tool.keyboardShortcut}
                     </span>
                   </div>
@@ -2319,7 +2319,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     'e.g. Keys, wallet, glasses, phone, medication bottle...',
                     'مثال: المفاتيح، المحفظة، النظارة، الهاتف، علبة الدواء...'
                   )}
-                  className="w-full ps-9 pe-4 py-2.5 rounded-2xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA] placeholder:text-[#B9CDE3]/50"
+                  className="w-full ps-9 pe-4 py-2.5 rounded-2xl bg-[#0A2342] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA] placeholder:text-[#B9CDE3]/50"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       describeScene(companionLang);
@@ -2331,7 +2331,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => describeScene(companionLang)}
                 disabled={status === 'analyzing'}
-                className="px-5 py-2.5 rounded-2xl bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                className="px-5 py-2.5 rounded-2xl bg-[#1769AA] hover:bg-[#0878BD] text-[#0A2342] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
               >
                 {t('Search Scene', 'ابحث في المشهد')}
               </button>
@@ -2361,7 +2361,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
                   : status === 'starting-camera' || status === 'analyzing'
                   ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+                  : 'bg-[#0A2342] border-[#07558A] text-slate-400'
               }`}
             >
               <span
@@ -2390,7 +2390,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               className={`hidden items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
                 isVoiceCommandsActive
                   ? 'bg-red-500/15 border-red-500/40 text-red-300'
-                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+                  : 'bg-[#0A2342] border-[#07558A] text-slate-400'
               }`}
             >
               {isVoiceCommandsActive ? (
@@ -2411,7 +2411,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               className={`hidden items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-bold ${
                 isSpeaking
                   ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
-                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+                  : 'bg-[#0A2342] border-[#07558A] text-slate-400'
               }`}
             >
               <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-blue-400 animate-pulse' : 'text-slate-500'}`} />
@@ -2478,7 +2478,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             const ToolIcon = activeToolConfig.Icon;
             return (
               <div className="absolute top-3 start-3 z-20 pointer-events-none">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/85 border border-[#1769AA] text-[#F5F8FF] backdrop-blur-md shadow-md">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0A2342]/85 border border-[#1769AA] text-[#F5F8FF] backdrop-blur-md shadow-md">
                   <ToolIcon className="w-3.5 h-3.5 text-[#1769AA]" />
                   <span>
                     {companionLang === 'ar'
@@ -2511,7 +2511,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           {/* Top Overlays when stream is active */}
           {status === 'ready' && streamRef.current && (
             <div className="absolute top-6 end-6 z-20 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/80 border border-[#07558A] text-[#1769AA] backdrop-blur-md">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0A2342]/80 border border-[#07558A] text-[#1769AA] backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-[#1769AA] animate-pulse" />
                 <span>{t('Live Camera', 'بث مباشر')}</span>
               </span>
@@ -2520,7 +2520,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 onClick={stopCamera}
                 aria-label={t('Stop Camera', 'إيقاف الكاميرا')}
                 title={t('Stop Camera', 'إيقاف الكاميرا')}
-                className="p-2 rounded-xl bg-[#061A33]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
+                className="p-2 rounded-xl bg-[#0A2342]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -2528,7 +2528,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={flipCamera}
                 aria-label={t('Flip camera facing mode', 'تبديل الكاميرا')}
-                className="p-2 rounded-xl bg-[#061A33]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
+                className="p-2 rounded-xl bg-[#0A2342]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -2536,7 +2536,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={toggleFullscreen}
                 aria-label={t('Toggle fullscreen', 'ملء الشاشة')}
-                className="p-2 rounded-xl bg-[#061A33]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
+                className="p-2 rounded-xl bg-[#0A2342]/80 border border-[#07558A] text-[#B9CDE3] hover:text-white transition-all cursor-pointer backdrop-blur-md"
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
@@ -2568,7 +2568,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   disabled={(status as string) === 'analyzing'}
                   data-testid="floating-capture-shutter-btn"
                   aria-label={primaryBtnLabel}
-                  className="pointer-events-auto px-7 sm:px-9 py-3.5 min-h-[58px] rounded-full bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-2xl shadow-[#1769AA]/50 flex items-center justify-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md outline-none focus-visible:ring-4 focus-visible:ring-white disabled:opacity-50"
+                  className="pointer-events-auto px-7 sm:px-9 py-3.5 min-h-[58px] rounded-full bg-[#1769AA] hover:bg-[#0878BD] text-[#0A2342] hover:text-white font-black text-sm sm:text-base shadow-2xl shadow-[#1769AA]/50 flex items-center justify-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md outline-none focus-visible:ring-4 focus-visible:ring-white disabled:opacity-50"
                 >
                   <ToolIcon className="w-5 h-5 fill-current" />
                   <span>{primaryBtnLabel}</span>
@@ -2581,7 +2581,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   data-testid="floating-upload-btn"
                   aria-label={uploadBtnLabel}
                   title={uploadBtnLabel}
-                  className="pointer-events-auto p-3.5 min-h-[50px] min-w-[50px] rounded-full bg-[#061A33]/85 hover:bg-[#082344] text-[#1769AA] hover:text-white border border-[#07558A] hover:border-[#1769AA] shadow-xl flex items-center justify-center transition-all cursor-pointer backdrop-blur-md outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                  className="pointer-events-auto p-3.5 min-h-[50px] min-w-[50px] rounded-full bg-[#0A2342]/85 hover:bg-[#082344] text-[#1769AA] hover:text-white border border-[#07558A] hover:border-[#1769AA] shadow-xl flex items-center justify-center transition-all cursor-pointer backdrop-blur-md outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <Upload className="w-5 h-5" />
                 </button>
@@ -2627,7 +2627,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-4 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
                       >
                         {t('Retry Camera', 'إعادة محاولة الكاميرا')}
                       </button>
@@ -2658,7 +2658,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{openCamBtnLabel}</span>
@@ -2691,7 +2691,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{openCamBtnLabel}</span>
@@ -2724,9 +2724,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
-                        <Upload className="w-4 h-4 text-[#061A33]" />
+                        <Upload className="w-4 h-4 text-[#0A2342]" />
                         <span>{uploadBtnLabel}</span>
                       </button>
                     </div>
@@ -2749,7 +2749,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{openCamBtnLabel}</span>
@@ -2782,7 +2782,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{t('Retry Camera', 'إعادة محاولة الكاميرا')}</span>
@@ -2817,7 +2817,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         type="button"
                         onClick={() => startCamera()}
                         aria-label={openCamBtnLabel}
-                        className="px-6 py-3 min-h-[48px] rounded-2xl bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-sm flex items-center gap-2.5 shadow-xl shadow-[#1769AA]/30 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-white"
+                        className="px-6 py-3 min-h-[48px] rounded-2xl bg-[#1769AA] hover:bg-[#0878BD] text-[#0A2342] hover:text-white font-bold text-sm flex items-center gap-2.5 shadow-xl shadow-[#1769AA]/30 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-white"
                       >
                         <Camera className="w-5 h-5" />
                         <span>{openCamBtnLabel}</span>
@@ -2851,7 +2851,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
           {/* Analyzing Overlay Spinner */}
           {status === 'analyzing' && (
-            <div className="absolute inset-0 bg-[#061A33]/85 backdrop-blur-xs flex flex-col items-center justify-center z-30 space-y-3 p-4">
+            <div className="absolute inset-0 bg-[#0A2342]/85 backdrop-blur-xs flex flex-col items-center justify-center z-30 space-y-3 p-4">
               <Loader2 className="w-12 h-12 text-[#1769AA] animate-spin" />
               <p className="text-[#F5F8FF] font-bold text-sm sm:text-base animate-pulse">
                 {announce || t('Analyzing scene in front of you...', 'بحلل اللي قدامك في الكاميرا...')}
@@ -2873,7 +2873,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           <button
             type="button"
             onClick={() => speak(companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN, companionLang)}
-            className="px-3.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#07558A] hover:bg-[#1769AA] text-white hover:text-[#061A33] font-bold text-xs whitespace-nowrap cursor-pointer transition-all shrink-0"
+            className="px-3.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#07558A] hover:bg-[#1769AA] text-white hover:text-[#0A2342] font-bold text-xs whitespace-nowrap cursor-pointer transition-all shrink-0"
             aria-label={companionLang === 'ar' ? 'قراءة تنبيه الأمان بصوت عالٍ' : 'Read safety notice aloud'}
           >
             <Volume2 className="w-4 h-4 sm:hidden" aria-hidden="true" />
@@ -2928,7 +2928,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 onClick={() => describeScene(companionLang)}
                 disabled={status === 'analyzing'}
                 aria-label={primaryBtnLabel}
-                className="px-8 sm:px-10 py-3.5 min-h-[58px] rounded-full bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-xl shadow-[#1769AA]/30 flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50 disabled:pointer-events-none"
+                className="px-8 sm:px-10 py-3.5 min-h-[58px] rounded-full bg-[#1769AA] hover:bg-[#0878BD] text-[#0A2342] hover:text-white font-black text-sm sm:text-base shadow-xl shadow-[#1769AA]/30 flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50 disabled:pointer-events-none"
               >
                 <PrimaryToolIcon className="w-5 h-5 fill-current" />
                 <span>{primaryBtnLabel}</span>
@@ -3114,9 +3114,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                     }
                     className="px-5 py-2.5 rounded-full bg-[#082344] border border-[#07558A] hover:border-[#1769AA] text-[#F5F8FF] hover:text-[#1769AA] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   >
-                    <div className="w-7 h-7 rounded-full bg-[#1769AA] text-[#061A33] flex items-center justify-center font-bold">
+                    <div className="w-7 h-7 rounded-full bg-[#1769AA] text-[#0A2342] flex items-center justify-center font-bold">
                       {isSpeaking ? (
-                        <span className="w-2.5 h-2.5 bg-[#061A33] rounded-xs" />
+                        <span className="w-2.5 h-2.5 bg-[#0A2342] rounded-xs" />
                       ) : (
                         <Play className="w-3.5 h-3.5 fill-current" />
                       )}
@@ -3157,7 +3157,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   onClick={() => setShowFollowUp((prev) => !prev)}
                   className={`px-4 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                     showFollowUp
-                      ? 'bg-[#1769AA] text-[#061A33] border-[#1769AA]'
+                      ? 'bg-[#1769AA] text-[#0A2342] border-[#1769AA]'
                       : 'bg-[#082344] border-[#07558A] text-[#F5F8FF] hover:border-[#1769AA]'
                   }`}
                 >
@@ -3168,7 +3168,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
               {/* Raw OCR Text Review Box (For OCR Tool) */}
               {activeTool === 'read' && lastDescription && (
-                <div className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-2.5">
+                <div className="p-4 rounded-2xl bg-[#0A2342] border border-[#07558A] space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-bold text-[#1769AA]">
                       <FileText className="w-4 h-4" />
@@ -3209,7 +3209,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 <div
                   role="region"
                   aria-label={t('Barcode Scanner Details', 'بيانات ماسح الباركود')}
-                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                  className="p-4 rounded-2xl bg-[#0A2342] border border-[#07558A] space-y-3 text-start"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
@@ -3256,7 +3256,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 <div
                   role="region"
                   aria-label={t('Expiry Date Details', 'تفاصيل تاريخ الصلاحية والإنتاج')}
-                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                  className="p-4 rounded-2xl bg-[#0A2342] border border-[#07558A] space-y-3 text-start"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
@@ -3319,7 +3319,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 <div
                   role="region"
                   aria-label={t('Color and Pattern Analysis', 'فحص الألوان والأنماط')}
-                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                  className="p-4 rounded-2xl bg-[#0A2342] border border-[#07558A] space-y-3 text-start"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
@@ -3370,7 +3370,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 <div
                   role="region"
                   aria-label={t('Clothing Assistant Details', 'تفاصيل مساعد الملابس وتنسيق الإطلالة')}
-                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                  className="p-4 rounded-2xl bg-[#0A2342] border border-[#07558A] space-y-3 text-start"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
@@ -3430,7 +3430,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 <div
                   role="region"
                   aria-label={t('Document Structure Understanding', 'تحليل وفهم بنية المستند')}
-                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                  className="p-4 rounded-2xl bg-[#0A2342] border border-[#07558A] space-y-3 text-start"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
@@ -3532,7 +3532,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         rate: speechRate,
                       })
                     }
-                    className="px-3.5 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#1769AA] hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#0A2342] border border-[#07558A] text-[#1769AA] hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                     <span>{t('Listen to Comparison', 'استمع للمقارنة')}</span>
@@ -3575,7 +3575,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         type="button"
                         onClick={() => handleAskFollowUp(preset)}
                         disabled={isAnsweringFollowUp}
-                        className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] hover:border-[#1769AA] text-xs text-[#B9CDE3] hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                        className="px-3 py-1 rounded-xl bg-[#0A2342] border border-[#07558A] hover:border-[#1769AA] text-xs text-[#B9CDE3] hover:text-white transition-all cursor-pointer disabled:opacity-50"
                       >
                         {preset}
                       </button>
@@ -3584,7 +3584,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
                   {/* Q&A Thread History */}
                   {followUpHistory.length > 0 && (
-                    <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-2 p-2 rounded-xl bg-[#061A33]">
+                    <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-2 p-2 rounded-xl bg-[#0A2342]">
                       {followUpHistory.map((item, idx) => (
                         <div
                           key={idx}
@@ -3610,7 +3610,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       value={followUpQuestion}
                       onChange={(e) => setFollowUpQuestion(e.target.value)}
                       placeholder={t('Type your question about this image...', 'اكتب سؤالك عن هذه الصورة...')}
-                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#0A2342] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleAskFollowUp();
@@ -3621,7 +3621,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       type="button"
                       onClick={() => handleAskFollowUp()}
                       disabled={isAnsweringFollowUp || !followUpQuestion.trim()}
-                      className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                      className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0878BD] text-[#0A2342] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                     >
                       {isAnsweringFollowUp ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -3662,7 +3662,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <h2 className="text-base sm:text-lg font-bold text-[#F5F8FF]">
                 {t('Saved Memories & Places', 'ذاكرة الأماكن والمقتنيات المحفوظة')}
               </h2>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#061A33] text-[#1769AA] border border-[#07558A]">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#0A2342] text-[#1769AA] border border-[#07558A]">
                 {filteredMemories.length}
               </span>
             </div>
@@ -3692,7 +3692,7 @@ Examine what is visible in front of the camera right now with utmost precision:
 
           {/* Search & Category Filter Controls */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 p-1 bg-[#061A33] rounded-xl border border-[#07558A]/60 text-xs font-bold">
+            <div className="flex items-center gap-1.5 p-1 bg-[#0A2342] rounded-xl border border-[#07558A]/60 text-xs font-bold">
               {(
                 [
                   { id: 'all', labelEn: 'All', labelAr: 'الكل' },
@@ -3707,7 +3707,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   onClick={() => setSelectedMemoryCategory(cat.id)}
                   className={`px-3 py-1 rounded-lg transition-all ${
                     selectedMemoryCategory === cat.id
-                      ? 'bg-[#1769AA] text-[#061A33]'
+                      ? 'bg-[#1769AA] text-[#0A2342]'
                       : 'text-[#B9CDE3] hover:text-white'
                   }`}
                 >
@@ -3724,7 +3724,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 onChange={(e) => setMemorySearchQuery(e.target.value)}
                 placeholder={t('Search saved memories...', 'البحث في الذاكرة...')}
                 aria-label={t('Search saved memories', 'البحث في الذاكرة المحفوظة')}
-                className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
+                className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#0A2342] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
               />
             </div>
 
@@ -3781,7 +3781,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         })
                       }
                       aria-label={`${t('Listen to', 'استمع إلى')} ${mem.label}`}
-                      className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] text-[#1769AA] hover:text-white hover:border-[#1769AA] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-3 py-1 rounded-xl bg-[#0A2342] border border-[#07558A] text-[#1769AA] hover:text-white hover:border-[#1769AA] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Volume2 className="w-3 h-3" />
                       <span>{t('Listen', 'استمع')}</span>
@@ -3800,7 +3800,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               ))}
             </div>
           ) : (
-            <div className="p-6 text-center rounded-2xl bg-[#061A33]/50 border border-dashed border-[#07558A] space-y-1">
+            <div className="p-6 text-center rounded-2xl bg-[#0A2342]/50 border border-dashed border-[#07558A] space-y-1">
               <p className="text-xs text-[#B9CDE3]">
                 {memorySearchQuery
                   ? t('No memories match your search filter.', 'لا توجد عناصر مطابقة لبحثك.')
@@ -3855,7 +3855,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               ].map((shortcut) => (
                 <div
                   key={shortcut.key}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#061A33] border border-[#07558A]"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#0A2342] border border-[#07558A]"
                 >
                   <span className="text-xs text-[#F5F8FF] font-medium">
                     {companionLang === 'ar' ? shortcut.titleAr : shortcut.titleEn}
@@ -3871,7 +3871,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
-                className="px-5 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
               >
                 {t('Close', 'إغلاق')}
               </button>
@@ -3920,7 +3920,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   value={spatialQueryInput}
                   onChange={(e) => setSpatialQueryInput(e.target.value)}
                   placeholder={t('e.g. Where did I leave my keys?', 'مثال: أين تركت مفاتيحي أو نظارتي؟')}
-                  className="flex-1 px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
+                  className="flex-1 px-3.5 py-2 rounded-xl bg-[#0A2342] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && profile?.uid) {
                       const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang === 'ar' ? 'ar' : 'en');
@@ -3940,14 +3940,14 @@ Examine what is visible in front of the camera right now with utmost precision:
                         speak(res.message, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
                     }
                   }}
-                  className="px-4 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
                 >
                   {t('Query', 'استعلام')}
                 </button>
               </div>
 
               {spatialQueryResult && (
-                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1769AA]/40 space-y-1.5">
+                <div className="p-3.5 rounded-xl bg-[#0A2342] border border-[#1769AA]/40 space-y-1.5">
                   <span className="text-xs font-bold text-[#1769AA]">
                     {t('Spatial Engine Answer:', 'إجابة محرك الذاكرة المكانية:')}
                   </span>
@@ -3964,7 +3964,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     spatialRecords.slice(0, 5).map((rec) => (
                       <div
                         key={rec.id}
-                        className="p-2 rounded-lg bg-[#061A33] border border-[#07558A]/60 flex items-center justify-between text-xs"
+                        className="p-2 rounded-lg bg-[#0A2342] border border-[#07558A]/60 flex items-center justify-between text-xs"
                       >
                         <span className="text-[#F5F8FF] font-medium">{rec.objectName}</span>
                         <span className="text-xs text-[#B9CDE3]/60">
@@ -3985,7 +3985,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <button
                 type="button"
                 onClick={() => setShowSpatialMemory(false)}
-                className="px-5 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
               >
                 {t('Close', 'إغلاق')}
               </button>
@@ -4005,7 +4005,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               {t('Enter a name for this item or place to recognize it next time:', 'أدخل اسماً لهذا الشيء أو المكان ليتعرف عليه المساعد في المرات القادمة:')}
             </p>
             {/* Type Switcher: Object vs Person */}
-            <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#061A33] rounded-xl border border-[#07558A]/60">
+            <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#0A2342] rounded-xl border border-[#07558A]/60">
               <button
                 type="button"
                 role="tab"
@@ -4050,7 +4050,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <button
                 type="button"
                 onClick={saveMemory}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#1769AA] text-[#061A33] hover:bg-[#0878BD] hover:text-white transition-colors"
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#1769AA] text-[#0A2342] hover:bg-[#0878BD] hover:text-white transition-colors"
               >
                 {t('Save', 'حفظ')}
               </button>

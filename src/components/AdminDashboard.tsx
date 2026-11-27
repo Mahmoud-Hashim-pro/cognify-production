@@ -604,7 +604,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
 
   if (!isAdmin) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#061A33] text-slate-100 p-6">
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0A2342] text-slate-100 p-6">
         <ShieldAlert className="w-16 h-16 text-rose-500 mb-4" />
         <h2 className="text-2xl font-black uppercase tracking-tighter">Access Denied</h2>
         <p className="text-slate-400 font-medium text-sm mt-2">You do not have administrative privileges.</p>
@@ -615,7 +615,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
   return (
     <div
       data-security-zone={adminView === 'database' ? 'database-dashboard' : 'admin-dashboard'}
-      className="flex-1 flex flex-col bg-[#061A33] text-slate-100 relative overflow-hidden custom-scrollbar font-sans selection:bg-emerald-500/30 selection:text-emerald-300 min-h-screen"
+      className="flex-1 flex flex-col bg-[#0A2342] text-slate-100 relative overflow-hidden custom-scrollbar font-sans selection:bg-emerald-500/30 selection:text-emerald-300 min-h-screen"
     >
       {/* Background Nagm Gradient Accents */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -669,7 +669,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
       )}
 
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
-      <header className="flex items-center gap-4 p-5 md:p-8 shrink-0 border-b border-[#16395E]/60 bg-[#061A33]/80 backdrop-blur-xl shadow-lg z-20">
+      <header className="flex items-center gap-4 p-5 md:p-8 shrink-0 border-b border-[#16395E]/60 bg-[#0A2342]/80 backdrop-blur-xl shadow-lg z-20">
         {onNavigateBack && (
           <button
             onClick={onNavigateBack}
@@ -1421,7 +1421,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               </button>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden bg-[#061A33] border border-[#16395E]/60 flex items-center justify-center p-2 min-h-[280px]">
+            <div className="relative rounded-2xl overflow-hidden bg-[#0A2342] border border-[#16395E]/60 flex items-center justify-center p-2 min-h-[280px]">
               {photoLightboxUrl && !failedAvatarUrls[photoLightboxUrl] ? (
                 <img
                   src={photoLightboxUrl}

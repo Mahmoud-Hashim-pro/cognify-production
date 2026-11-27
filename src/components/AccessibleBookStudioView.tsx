@@ -414,7 +414,7 @@ export default function AccessibleBookStudioView({
     <div
       dir={metadata.language === 'ar' || metadata.language === 'mixed' ? 'rtl' : 'ltr'}
       className={`flex-1 flex flex-col h-full overflow-hidden tool-blue transition-colors duration-300 ${
-        isDarkMode ? 'bg-[#061A33] text-stone-100' : 'bg-rafiqi-bg-light text-stone-900'
+        isDarkMode ? 'bg-[#0A2342] text-stone-100' : 'bg-rafiqi-bg-light text-stone-900'
       }`}
     >
       {/* ── TOP HEADER ── */}

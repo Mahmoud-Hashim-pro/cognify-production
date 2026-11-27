@@ -408,13 +408,13 @@ export default function AdminDatabaseHub({
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono text-slate-400 shrink-0 flex-wrap">
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#061A33]/80 border border-[#16395E]/60">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0A2342]/80 border border-[#16395E]/60">
             <Clock className="w-3 h-3 text-[#00AEB8]" /> Uptime: Live
           </span>
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#061A33]/80 border border-[#16395E]/60">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0A2342]/80 border border-[#16395E]/60">
             <Lock className="w-3 h-3 text-emerald-400" /> SSL TLSv1.3
           </span>
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#061A33]/80 border border-[#16395E]/60">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0A2342]/80 border border-[#16395E]/60">
             <ShieldCheck className="w-3 h-3 text-indigo-400" /> Auth: RS256 Active
           </span>
         </div>
@@ -456,7 +456,7 @@ export default function AdminDatabaseHub({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#061A33] border border-[#16395E]/60 text-xs font-bold text-slate-300">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0A2342] border border-[#16395E]/60 text-xs font-bold text-slate-300">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
               Live Feed
             </span>
@@ -465,14 +465,14 @@ export default function AdminDatabaseHub({
 
         {/* 4 Sentinel KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Incidents</div>
             <div className="text-2xl sm:text-3xl font-black text-rose-400 font-mono mt-1">
               {securityAudits.length > 0 ? securityAudits.length : 89}
             </div>
           </div>
 
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Detected IPs</span>
               <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-[#0D2542] text-slate-400 border border-[#16395E]/60">
@@ -487,14 +487,14 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Protection Level</div>
             <div className="text-xl sm:text-2xl font-black text-emerald-400 flex items-center gap-1.5 mt-1">
               <Lock className="w-4 h-4" /> Zero-Trust
             </div>
           </div>
 
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-4">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-4">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Latest Incident</div>
             <div className="text-xl sm:text-2xl font-black text-slate-200 font-mono mt-1">
               {formatSentinelTime(securityAudits[0]?.timestampMs || Date.now() - 3600000 * 3)}
@@ -503,10 +503,10 @@ export default function AdminDatabaseHub({
         </div>
 
         {/* Sentinel Incidents Table */}
-        <div className="overflow-x-auto custom-scrollbar border border-[#16395E]/60 rounded-2xl bg-[#061A33]/60">
+        <div className="overflow-x-auto custom-scrollbar border border-[#16395E]/60 rounded-2xl bg-[#0A2342]/60">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#16395E]/60 text-xs font-black uppercase tracking-wider text-slate-400 bg-[#061A33]">
+              <tr className="border-b border-[#16395E]/60 text-xs font-black uppercase tracking-wider text-slate-400 bg-[#0A2342]">
                 <th className="py-3 px-4">Identity / User</th>
                 <th className="py-3 px-4">IP Address ⓘ</th>
                 <th className="py-3 px-4">Event / Trigger</th>
@@ -567,7 +567,7 @@ export default function AdminDatabaseHub({
           </span>
           <button
             onClick={() => setSentinelExpanded(!sentinelExpanded)}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#061A33] hover:bg-slate-800 text-xs font-bold text-slate-300 border border-[#16395E]/60 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#0A2342] hover:bg-slate-800 text-xs font-bold text-slate-300 border border-[#16395E]/60 transition-colors"
           >
             {sentinelExpanded ? (
               <>Collapse (5) <ChevronUp className="w-3.5 h-3.5" /></>
@@ -608,7 +608,7 @@ export default function AdminDatabaseHub({
               <button
                 type="button"
                 onClick={() => setIsClusterTierDropdownOpen(!isClusterTierDropdownOpen)}
-                className="px-3 py-1.5 rounded-xl bg-[#061A33] hover:bg-slate-800 active:bg-[#0D2542] border border-[#16395E]/60 hover:border-emerald-500/50 text-slate-200 font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md group select-none"
+                className="px-3 py-1.5 rounded-xl bg-[#0A2342] hover:bg-slate-800 active:bg-[#0D2542] border border-[#16395E]/60 hover:border-emerald-500/50 text-slate-200 font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md group select-none"
                 aria-expanded={isClusterTierDropdownOpen}
                 aria-haspopup="true"
                 title="Click to view cluster tier specifications or compare with Blaze Plan"
@@ -631,7 +631,7 @@ export default function AdminDatabaseHub({
 
             {/* Dropdown Menu */}
             {isClusterTierDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-[#061A33]/95 backdrop-blur-2xl border border-[#16395E]/60 rounded-2xl shadow-2xl p-3 space-y-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-[#0A2342]/95 backdrop-blur-2xl border border-[#16395E]/60 rounded-2xl shadow-2xl p-3 space-y-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                 <div className="text-xs font-black uppercase tracking-wider text-slate-400 px-2 pt-1 pb-0.5 flex items-center justify-between">
                   <span>Available Cluster Tiers</span>
                   <span className="text-emerald-400 font-mono">Live Google Cloud</span>
@@ -727,7 +727,7 @@ export default function AdminDatabaseHub({
 
         {/* 4 Hero Headroom Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Storage Limit</span>
               <span className="px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -764,7 +764,7 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Pool Concurrency</span>
               <span className="px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -788,7 +788,7 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Write Quota Headroom</span>
               <span className="px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -825,7 +825,7 @@ export default function AdminDatabaseHub({
             </div>
           </div>
 
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Latency SLA Buffer</span>
               <span className={`px-2 py-0.5 rounded-md text-xs font-mono font-bold border ${
@@ -888,7 +888,7 @@ export default function AdminDatabaseHub({
 
       {/* 6. Secondary Quick KPIs (Nagm Image 2 & 3) */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Query Latency (Ping)</span>
             <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
@@ -921,7 +921,7 @@ export default function AdminDatabaseHub({
           </div>
         </div>
 
-        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Active Connections</span>
             <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
@@ -938,7 +938,7 @@ export default function AdminDatabaseHub({
           </div>
         </div>
 
-        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Allocated Storage</span>
             <div className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -955,7 +955,7 @@ export default function AdminDatabaseHub({
           </div>
         </div>
 
-        <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Stored Records</span>
             <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-400 border border-purple-500/30">
@@ -1203,7 +1203,7 @@ export default function AdminDatabaseHub({
               className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
                 quotaCategoryFilter === f.id
                   ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                  : 'bg-[#061A33]/80 text-slate-400 hover:text-white border border-[#16395E]/60'
+                  : 'bg-[#0A2342]/80 text-slate-400 hover:text-white border border-[#16395E]/60'
               }`}
             >
               {f.label}
@@ -1227,7 +1227,7 @@ export default function AdminDatabaseHub({
             return (
               <div
                 key={item.id}
-                className="bg-[#061A33]/80 border border-[#16395E]/60 hover:border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-4 transition-all hover:shadow-xl group"
+                className="bg-[#0A2342]/80 border border-[#16395E]/60 hover:border-[#16395E]/60 rounded-2xl p-5 flex flex-col justify-between space-y-4 transition-all hover:shadow-xl group"
               >
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -1276,7 +1276,7 @@ export default function AdminDatabaseHub({
         </div>
 
         {/* Spark Plan Footnote */}
-        <div className="p-4 bg-[#061A33]/60 border border-[#16395E]/50 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+        <div className="p-4 bg-[#0A2342]/60 border border-[#16395E]/50 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-2.5">
             <Info className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
@@ -1320,7 +1320,7 @@ export default function AdminDatabaseHub({
             <button
               type="button"
               onClick={handleDownloadFullBackup}
-              className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-emerald-500/40 rounded-2xl transition-all group text-left cursor-pointer"
+              className="flex flex-col items-start p-4 bg-[#0A2342]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-emerald-500/40 rounded-2xl transition-all group text-left cursor-pointer"
             >
               <Download className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform mb-2" />
               <span className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
@@ -1334,7 +1334,7 @@ export default function AdminDatabaseHub({
           <button
             type="button"
             onClick={exportAllCsv}
-            className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-[#00AEB8]/40 rounded-2xl transition-all group text-left cursor-pointer"
+            className="flex flex-col items-start p-4 bg-[#0A2342]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-[#00AEB8]/40 rounded-2xl transition-all group text-left cursor-pointer"
           >
             <FileJson className="w-5 h-5 text-[#00AEB8] group-hover:scale-110 transition-transform mb-2" />
             <span className="text-xs font-black uppercase text-white tracking-wider">Export Database CSV</span>
@@ -1345,7 +1345,7 @@ export default function AdminDatabaseHub({
             type="button"
             onClick={handleCleanCache}
             disabled={isCleaningCache}
-            className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-amber-500/40 rounded-2xl transition-all group disabled:opacity-50 text-left cursor-pointer"
+            className="flex flex-col items-start p-4 bg-[#0A2342]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-amber-500/40 rounded-2xl transition-all group disabled:opacity-50 text-left cursor-pointer"
           >
             {isCleaningCache ? (
               <Loader2 className="w-5 h-5 text-amber-400 animate-spin mb-2" />
@@ -1359,7 +1359,7 @@ export default function AdminDatabaseHub({
           <button
             type="button"
             onClick={handleDownloadAuditReport}
-            className="flex flex-col items-start p-4 bg-[#061A33]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-indigo-500/40 rounded-2xl transition-all group text-left cursor-pointer"
+            className="flex flex-col items-start p-4 bg-[#0A2342]/80 hover:bg-slate-800/80 border border-[#16395E]/60 hover:border-indigo-500/40 rounded-2xl transition-all group text-left cursor-pointer"
           >
             <BookOpen className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform mb-2" />
             <span className="text-xs font-black uppercase text-white tracking-wider">Generate Audit Report (.md)</span>
@@ -1391,7 +1391,7 @@ export default function AdminDatabaseHub({
               placeholder="Search UID, email, name..."
               value={dbSearchTerm}
               onChange={(e) => setDbSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-white placeholder:text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] transition-all font-mono"
+              className="w-full pl-9 pr-8 py-2 bg-[#0A2342] border border-[#16395E]/60 rounded-xl text-xs text-white placeholder:text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] transition-all font-mono"
             />
             {dbSearchTerm && (
               <button
@@ -1407,7 +1407,7 @@ export default function AdminDatabaseHub({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 pt-2">
           {/* User Selection List */}
-          <div className="bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl p-2 max-h-[560px] overflow-y-auto custom-scrollbar divide-y divide-slate-800/40 space-y-1">
+          <div className="bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl p-2 max-h-[560px] overflow-y-auto custom-scrollbar divide-y divide-slate-800/40 space-y-1">
             <div className="px-2 py-1 text-xs font-black uppercase tracking-wider text-slate-500 flex items-center justify-between">
               <span>User Accounts ({inspectedUsersList.length})</span>
               <span className="font-mono text-[#00AEB8]">Live Sync</span>
@@ -1458,7 +1458,7 @@ export default function AdminDatabaseHub({
           </div>
 
           {/* Document & Chat Viewer */}
-          <div className="lg:col-span-2 bg-[#061A33] border border-[#16395E]/60 rounded-2xl p-5 flex flex-col min-h-[460px] max-h-[560px] overflow-hidden">
+          <div className="lg:col-span-2 bg-[#0A2342] border border-[#16395E]/60 rounded-2xl p-5 flex flex-col min-h-[460px] max-h-[560px] overflow-hidden">
             {inspectedDoc ? (
               <div className="flex flex-col h-full">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#16395E]/60 pb-3 mb-3">
@@ -1580,7 +1580,7 @@ export default function AdminDatabaseHub({
                                               key={mIdx}
                                               className={`p-3 rounded-xl text-xs leading-relaxed ${
                                                 isUserMsg
-                                                  ? 'bg-[#061A33] border border-[#16395E]/60 text-slate-200 ml-4'
+                                                  ? 'bg-[#0A2342] border border-[#16395E]/60 text-slate-200 ml-4'
                                                   : 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-100 mr-4'
                                               }`}
                                             >
@@ -1598,7 +1598,7 @@ export default function AdminDatabaseHub({
                                         })}
                                       </div>
                                     ) : (
-                                      <div className="p-3 bg-[#061A33] rounded-xl text-slate-400 text-xs font-mono">
+                                      <div className="p-3 bg-[#0A2342] rounded-xl text-slate-400 text-xs font-mono">
                                         Thread ID: {thread.id} · Messages synced under active conversation context.
                                       </div>
                                     )}
@@ -1623,7 +1623,7 @@ export default function AdminDatabaseHub({
                                 key={mIdx}
                                 className={`p-3 rounded-xl text-xs leading-relaxed ${
                                   isUserMsg
-                                    ? 'bg-[#061A33] border border-[#16395E]/60 text-slate-200 ml-4'
+                                    ? 'bg-[#0A2342] border border-[#16395E]/60 text-slate-200 ml-4'
                                     : 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-100 mr-4'
                                 }`}
                               >
@@ -1664,7 +1664,7 @@ export default function AdminDatabaseHub({
 
                 {inspectedDocTab === 'json' && (
                   <div className="flex-1 overflow-hidden flex flex-col">
-                    <pre className="font-mono text-xs text-emerald-300 overflow-auto flex-1 custom-scrollbar p-4 bg-[#061A33] rounded-xl border border-[#16395E]/60 leading-relaxed selection:bg-emerald-500/30 selection:text-emerald-100">
+                    <pre className="font-mono text-xs text-emerald-300 overflow-auto flex-1 custom-scrollbar p-4 bg-[#0A2342] rounded-xl border border-[#16395E]/60 leading-relaxed selection:bg-emerald-500/30 selection:text-emerald-100">
                       {JSON.stringify(sanitizeDocumentForInspector(inspectedDoc), null, 2)}
                     </pre>
                   </div>

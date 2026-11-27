@@ -30,7 +30,7 @@ export default function AdminPasswordResetModal({
         className="bg-[#0D2542] border border-amber-500/40 rounded-[28px] shadow-2xl shadow-amber-500/10 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200"
       >
         {/* Header */}
-        <div className="p-6 border-b border-[#16395E]/60 flex items-center justify-between bg-[#061A33]/70">
+        <div className="p-6 border-b border-[#16395E]/60 flex items-center justify-between bg-[#0A2342]/70">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-2xl shadow-inner">
               <Key className="w-5 h-5" aria-hidden="true" />
@@ -54,7 +54,7 @@ export default function AdminPasswordResetModal({
         {/* Content */}
         <div className="p-6 space-y-5">
           {/* Target user card */}
-          <div className="p-4 bg-[#061A33]/80 border border-[#16395E]/60 rounded-2xl flex items-center gap-3.5">
+          <div className="p-4 bg-[#0A2342]/80 border border-[#16395E]/60 rounded-2xl flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-rose-600/20 text-amber-300 font-black text-lg flex items-center justify-center border border-amber-500/30 shrink-0 shadow-inner">
               {(user.name || user.email || '?').charAt(0).toUpperCase()}
             </div>
@@ -77,7 +77,7 @@ export default function AdminPasswordResetModal({
           </div>
 
           {/* Informative notice */}
-          <div className="p-4 bg-[#061A33]/50 border border-amber-500/20 rounded-2xl space-y-2">
+          <div className="p-4 bg-[#0A2342]/50 border border-amber-500/20 rounded-2xl space-y-2">
             <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
               <Lock className="w-4 h-4 text-amber-400 shrink-0" />
               <span>Official Firebase Password Reset Protocol</span>

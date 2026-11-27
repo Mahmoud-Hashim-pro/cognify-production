@@ -367,7 +367,7 @@ export default function ProfilePage({
                   });
                   setIsEditing(true);
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#1769AA] hover:bg-[#18C6C3] text-[#061A33] font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 cursor-pointer active:scale-95"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#1769AA] hover:bg-[#18C6C3] text-[#0A2342] font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 cursor-pointer active:scale-95"
               >
                 <Edit3 className="w-3.5 h-3.5" /> 
                 <span>{localize(profile.language, 'Edit Profile', 'تعديل الملف')}</span>
@@ -386,7 +386,7 @@ export default function ProfilePage({
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-5 py-2 bg-[#1769AA] hover:bg-[#18C6C3] text-[#061A33] rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 active:scale-95 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-5 py-2 bg-[#1769AA] hover:bg-[#18C6C3] text-[#0A2342] rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 active:scale-95 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
                 >
                   {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} 
                   <span>{saving ? localize(profile.language, 'Saving...', 'جاري الحفظ...') : localize(profile.language, 'Save Changes', 'حفظ التعديلات')}</span>

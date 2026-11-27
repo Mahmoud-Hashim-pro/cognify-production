@@ -276,7 +276,7 @@ export default function AdminAccessibilityTab({
             {modeCounts.map(({ mode, count }) => (
               <span key={mode} className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black ${MODE_META[mode].cls}`}>
                 {MODE_META[mode].label}
-                <span className="bg-[#061A33]/60 px-2 py-0.5 rounded-lg font-mono text-white">{count}</span>
+                <span className="bg-[#0A2342]/60 px-2 py-0.5 rounded-lg font-mono text-white">{count}</span>
               </span>
             ))}
           </div>

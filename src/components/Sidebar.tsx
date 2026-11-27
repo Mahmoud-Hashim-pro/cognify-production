@@ -219,7 +219,7 @@ export default function Sidebar({
           ? 'bg-[#1769AA]/20 border border-[#1769AA]/50 text-white font-bold shadow-xs'
           : 'bg-[#1769AA]/10 border border-[#1769AA]/30 text-rafiqi-primary-dark font-bold shadow-xs'
         : isDarkMode
-          ? 'text-slate-300 hover:bg-[#1A283D] hover:text-white border border-transparent hover:border-[#22354E]'
+          ? 'text-slate-300 hover:bg-[#17355C] hover:text-white border border-transparent hover:border-[#24476F]'
           : 'text-slate-700 hover:bg-[#1769AA]/5 hover:text-slate-950 border border-transparent hover:border-[#1769AA]/20'
     }`;
 
@@ -237,7 +237,7 @@ export default function Sidebar({
         isCollapsed ? 'w-[74px]' : 'w-[280px]'
       } max-w-[85vw] h-full shrink-0 ${
         isDarkMode 
-          ? 'bg-[#0B1523] text-slate-200 border-[#1E2E44]' 
+          ? 'bg-[#0E2745] text-slate-200 border-[#1E2E44]' 
           : 'bg-white text-slate-800 border-slate-200'
       } border-e backdrop-blur-2xl flex flex-col px-3 py-4 select-none transition-[width] duration-200`}
     >
@@ -466,7 +466,7 @@ export default function Sidebar({
                 <div key={th.id} className={`group flex items-center gap-1 rounded-xl transition-all ${
                   active 
                     ? isDarkMode ? 'bg-[#1769AA]/20 border border-[#1769AA]/50' : 'bg-[#1769AA]/10 border border-[#1769AA]/30'
-                    : isDarkMode ? 'hover:bg-[#1A283D] border border-transparent' : 'hover:bg-slate-100 border border-transparent'
+                    : isDarkMode ? 'hover:bg-[#17355C] border border-transparent' : 'hover:bg-slate-100 border border-transparent'
                 }`}>
                   <button
                     type="button"
@@ -505,7 +505,7 @@ export default function Sidebar({
       <div className={`border-t ${isDarkMode ? 'border-[#1E2E44]' : 'border-slate-200'} pt-2.5 flex flex-col gap-2`}>
         {/* Profile Card & Settings Quick Trigger */}
         <div className={`flex items-center ${isCollapsed ? 'justify-center p-1' : 'gap-2.5 px-2.5'} w-full min-h-[48px] py-1 rounded-2xl border ${
-          isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-slate-50 border-slate-200'
+          isDarkMode ? 'bg-[#112C4F] border-[#24476F]' : 'bg-slate-50 border-slate-200'
         } backdrop-blur-md transition-all ${
           currentView === 'profile' || currentView === 'settings' 
             ? 'border-[#1769AA] shadow-xs'
@@ -526,7 +526,7 @@ export default function Sidebar({
               <div className="w-[32px] h-[32px] rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 overflow-hidden shadow-xs bg-gradient-to-br from-[#0D4778] to-[#1769AA] group-hover:scale-105 transition-transform ring-1 ring-[#1769AA]/30">
                 {profile.photoURL ? <img src={profile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : userInitial}
               </div>
-              <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ${isDarkMode ? 'ring-[#0B1523]' : 'ring-white'}`} aria-hidden="true" />
+              <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ${isDarkMode ? 'ring-[#0E2745]' : 'ring-white'}`} aria-hidden="true" />
             </div>
             {!isCollapsed && (
               <div className="leading-tight overflow-hidden flex-1">
@@ -581,7 +581,7 @@ export default function Sidebar({
             title={t('Open Live Captions', 'فتح الكابشن المباشر')}
             className={`flex-1 flex items-center justify-center gap-1.5 min-h-[44px] py-2 px-2 rounded-xl border ${
               isDarkMode 
-                ? 'border-[#22354E] bg-[#131E2E] text-slate-200 hover:bg-slate-800' 
+                ? 'border-[#24476F] bg-[#112C4F] text-slate-200 hover:bg-slate-800' 
                 : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
             } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none`}
           >

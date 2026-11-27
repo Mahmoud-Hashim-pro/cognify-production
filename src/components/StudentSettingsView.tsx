@@ -715,7 +715,7 @@ export default function StudentSettingsView({
   return (
     <div 
       dir={isAr ? 'rtl' : 'ltr'}
-      className="flex-1 w-full min-h-full bg-[#F5F9FD] dark:bg-[#061A33] text-slate-900 dark:text-[#F4F7FB] p-4 sm:p-6 lg:p-8 font-sans transition-colors duration-300 custom-scrollbar relative"
+      className="flex-1 w-full min-h-full bg-[#F5F9FD] dark:bg-[#0A2342] text-slate-900 dark:text-[#F4F7FB] p-4 sm:p-6 lg:p-8 font-sans transition-colors duration-300 custom-scrollbar relative"
     >
       <div className="max-w-7xl mx-auto space-y-6 pb-20">
 

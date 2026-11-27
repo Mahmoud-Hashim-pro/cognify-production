@@ -233,7 +233,7 @@ export default function AdminSecurityTab({
             placeholder="Search users, emails, UIDs, IPs, routes, or details..."
             value={securitySearchTerm}
             onChange={(e) => setSecuritySearchTerm(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all font-mono"
+            className="w-full pl-10 pr-9 py-2.5 bg-[#0A2342] border border-[#16395E]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all font-mono"
           />
           {securitySearchTerm && (
             <button
@@ -252,7 +252,7 @@ export default function AdminSecurityTab({
           <select
             value={securityUserFilter}
             onChange={(e) => setSecurityUserFilter(e.target.value)}
-            className="w-full px-3 py-2.5 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all cursor-pointer font-bold"
+            className="w-full px-3 py-2.5 bg-[#0A2342] border border-[#16395E]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all cursor-pointer font-bold"
           >
             <option value="all">All Users ({uniqueAuditUsers.length})</option>
             {uniqueAuditUsers.map((u) => (
@@ -269,7 +269,7 @@ export default function AdminSecurityTab({
           <select
             value={securityTriggerFilter}
             onChange={(e) => setSecurityTriggerFilter(e.target.value)}
-            className="w-full px-3 py-2.5 bg-[#061A33] border border-[#16395E]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all cursor-pointer font-bold"
+            className="w-full px-3 py-2.5 bg-[#0A2342] border border-[#16395E]/60 rounded-xl text-xs text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#00AEB8] focus:ring-1 focus:ring-[#00AEB8]/30 transition-all cursor-pointer font-bold"
           >
             <option value="all">All Triggers ({securityAudits.length})</option>
             <option value="devtools_inspect_shortcut">
@@ -349,7 +349,7 @@ export default function AdminSecurityTab({
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="inline-flex items-center gap-1.5 font-mono text-xs font-black bg-[#061A33] border border-[#16395E]/60 px-2.5 py-1 rounded-lg text-emerald-400">
+                      <span className="inline-flex items-center gap-1.5 font-mono text-xs font-black bg-[#0A2342] border border-[#16395E]/60 px-2.5 py-1 rounded-lg text-emerald-400">
                         {record.ip}
                         <button
                           onClick={() => copyToClipboard(record.ip, `IP ${record.ip} copied`)}

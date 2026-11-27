@@ -93,7 +93,7 @@ export default function AdminUserDetailModal({
         className="bg-[#0D2542] border border-[#16395E]/60 rounded-[32px] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"
       >
         {/* Modal Header */}
-        <div className="p-6 border-b border-[#16395E]/60 flex items-center justify-between bg-[#061A33]/60">
+        <div className="p-6 border-b border-[#16395E]/60 flex items-center justify-between bg-[#0A2342]/60">
           <div className="flex items-center gap-3.5 min-w-0">
             {/* User Avatar with Zoom Lightbox Trigger */}
             <div
@@ -213,26 +213,26 @@ export default function AdminUserDetailModal({
 
               {/* Key Stats Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Points</div>
                   <div className="text-xl font-black text-[#00AEB8] mt-1 font-mono">{user.points || 0}</div>
                 </div>
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Cognitive Score</div>
                   <div className="text-xl font-black text-white mt-1 font-mono">{user.iqScore || '--'}</div>
                 </div>
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Cognitive Level</div>
                   <div className="text-sm font-black text-white mt-1.5 uppercase">{user.level || 'Intermediate'}</div>
                 </div>
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Section</div>
                   <div className="text-sm font-black text-white mt-1.5">{sectionOf(user)}</div>
                 </div>
               </div>
 
               {/* Academic & Bio Info */}
-              <div className="bg-[#061A33] p-5 rounded-2xl border border-[#16395E]/60 space-y-3.5 text-xs font-medium">
+              <div className="bg-[#0A2342] p-5 rounded-2xl border border-[#16395E]/60 space-y-3.5 text-xs font-medium">
                 <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">Academic &amp; System Info</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div><span className="text-slate-400">University:</span> <span className="font-bold text-white">{user.university || 'N/A'}</span></div>
@@ -303,7 +303,7 @@ export default function AdminUserDetailModal({
               </div>
 
               {/* Admin Actions */}
-              <div className="bg-[#061A33] p-5 rounded-2xl border border-[#16395E]/60 space-y-3">
+              <div className="bg-[#0A2342] p-5 rounded-2xl border border-[#16395E]/60 space-y-3">
                 <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">Admin Adjustments</h4>
                 <div className="flex flex-wrap items-center gap-2.5">
                   {/* Role Promotion / Demotion */}
@@ -420,7 +420,7 @@ export default function AdminUserDetailModal({
                         className={`p-4 rounded-2xl border transition-all ${
                           isLatest
                             ? 'bg-emerald-950/20 border-emerald-500/30'
-                            : 'bg-[#061A33] border-[#16395E]/60'
+                            : 'bg-[#0A2342] border-[#16395E]/60'
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
@@ -460,7 +460,7 @@ export default function AdminUserDetailModal({
                   })}
                 </div>
               ) : (
-                <div className="p-6 bg-[#061A33] border border-[#16395E]/60 rounded-2xl space-y-3">
+                <div className="p-6 bg-[#0A2342] border border-[#16395E]/60 rounded-2xl space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-[#16395E]/30 text-[#00AEB8] border border-[#00AEB8]/20">
                       <Globe className="w-5 h-5" />
@@ -509,7 +509,7 @@ export default function AdminUserDetailModal({
               {user.chatThreads && user.chatThreads.length > 0 ? (
                 <div className="space-y-2">
                   {user.chatThreads.map((thread) => (
-                    <div key={thread.id} className="p-4 bg-[#061A33] border border-[#16395E]/60 rounded-2xl space-y-1">
+                    <div key={thread.id} className="p-4 bg-[#0A2342] border border-[#16395E]/60 rounded-2xl space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-white">{thread.title || 'Untitled Chat'}</span>
                         <span className="text-xs text-slate-400">{formatDate(thread.updatedAt)}</span>
@@ -532,7 +532,7 @@ export default function AdminUserDetailModal({
               {user.tasks && user.tasks.length > 0 ? (
                 <div className="space-y-2">
                   {user.tasks.map((task) => (
-                    <div key={task.id} className="flex items-center gap-3 p-3.5 bg-[#061A33] border border-[#16395E]/60 rounded-2xl text-xs">
+                    <div key={task.id} className="flex items-center gap-3 p-3.5 bg-[#0A2342] border border-[#16395E]/60 rounded-2xl text-xs">
                       <div className={`p-1.5 rounded-lg ${task.completed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
                         {task.completed ? <Check className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                       </div>
@@ -560,7 +560,7 @@ export default function AdminUserDetailModal({
                   <Copy className="w-3 h-3" /> Copy JSON
                 </button>
               </div>
-              <pre className="p-4 bg-[#061A33] text-emerald-400 font-mono text-xs rounded-2xl overflow-x-auto border border-[#16395E]/60 max-h-96 custom-scrollbar">
+              <pre className="p-4 bg-[#0A2342] text-emerald-400 font-mono text-xs rounded-2xl overflow-x-auto border border-[#16395E]/60 max-h-96 custom-scrollbar">
                 {JSON.stringify(user, null, 2)}
               </pre>
             </div>

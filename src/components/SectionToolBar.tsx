@@ -38,7 +38,7 @@ export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, 
     <nav
       aria-label={isAr ? section.titleAr : section.titleEn}
       data-testid="section-tool-bar"
-      className={`shrink-0 w-full border-b px-3 py-2 ${isDarkMode ? 'bg-[#061A33] border-[#22354E]' : 'bg-[#F5F9FD] border-slate-200'}`}
+      className={`shrink-0 w-full border-b px-3 py-2 ${isDarkMode ? 'bg-[#0A2342] border-[#24476F]' : 'bg-[#F5F9FD] border-slate-200'}`}
     >
       <div className="flex gap-2 overflow-x-auto custom-scrollbar" role="tablist">
         {buttons.map((f) => {
@@ -58,7 +58,7 @@ export default function SectionToolBar({ sectionId, isAr, isDarkMode, isActive, 
                 active
                   ? 'bg-[#1769AA] border-[#1769AA] text-white'
                   : isDarkMode
-                    ? 'bg-[#131E2E] border-[#22354E] text-slate-200 hover:border-[#1769AA]'
+                    ? 'bg-[#112C4F] border-[#24476F] text-slate-200 hover:border-[#1769AA]'
                     : 'bg-white border-slate-200 text-slate-700 hover:border-[#1769AA]'
               }`}
             >
