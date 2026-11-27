@@ -10,6 +10,7 @@ import {
   buildOpenAIMessages,
   buildContents,
   geminiFetch,
+  aiBusyMessage,
   fallbackChat,
 } from '../_lib/ai.js';
 import { applyCorsHeaders } from '../_lib/cors.js';
@@ -92,7 +93,7 @@ export async function logicResponseHandler(req: any, res: any) {
     const txt = await fallbackChat(buildOpenAIMessages(message, system, safeHistory));
     const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';
     res.status(200).json({
-      result: txt || (isAr ? '⚠️ الذكاء مشغول دلوقتي. جرّب تاني 🙏' : '⚠️ The AI is busy right now. Please try again 🙏'),
+      result: txt || aiBusyMessage(isAr),
     });
   } catch (err) {
     console.error('[api] generateLogicResponse:', err);

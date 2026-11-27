@@ -1,5 +1,5 @@
 /** Non-streaming chat. Returns { result }. Keys stay server-side. */
-import { guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat, validateAttachmentMimeAndName, type AssistiveQuotaCategory } from '../_lib/ai.js';
+import { aiBusyMessage, guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat, validateAttachmentMimeAndName, type AssistiveQuotaCategory } from '../_lib/ai.js';
 import { classifyRequest } from '../_lib/router.js';
 import { validateAndSanitizeResponse } from '../_lib/qualityGuard.js';
 import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
@@ -124,7 +124,7 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    const fallbackMessage = isAr ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني 🙏' : '⚠️ The AI is busy right now. Please try again 🙏';
+    const fallbackMessage = aiBusyMessage(isAr);
     const validated = validateAndSanitizeResponse(rawOutput || fallbackMessage, {
       accessibilityMode: profile?.accessibilityMode,
       language: profile?.language,

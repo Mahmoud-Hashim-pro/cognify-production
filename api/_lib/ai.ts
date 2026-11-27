@@ -680,6 +680,24 @@ export function buildOpenAIMessages(message: string, system: string, history: Ms
 }
 
 /** POST to Gemini, rotating keys and models on 429/503. Returns the first OK response. */
+/** Why the last Gemini call failed (0 = unknown, -1 = timed out / network, else the HTTP status). Used only to pick a kind message. */
+export const aiFailure = { status: 0 };
+
+/** Short, kind message for users when no AI provider answered. Never includes provider errors or secrets. */
+export function aiBusyMessage(isAr: boolean): string {
+  const st = aiFailure.status;
+  if (st === 429) {
+    return isAr ? '⚠️ وصلنا للحد المسموح للذكاء الاصطناعي دلوقتي. جرّب تاني بعد شوية 🙏' : '⚠️ The AI has reached its usage limit for now. Please try again in a little while 🙏';
+  }
+  if (st === 401 || st === 403) {
+    return isAr ? '⚠️ فيه مشكلة في إعدادات الذكاء الاصطناعي عندنا. الفريق هيصلحها، جرّب بعد شوية 🙏' : '⚠️ There is a problem with our AI setup. The team will fix it, please try again later 🙏';
+  }
+  if (st === -1) {
+    return isAr ? '⚠️ الذكاء الاصطناعي اتأخر في الرد. جرّب تاني بعد لحظات 🙏' : '⚠️ The AI took too long to answer. Please try again in a moment 🙏';
+  }
+  return isAr ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني 🙏' : '⚠️ The AI is busy right now. Please try again in a moment 🙏';
+}
+
 export async function geminiFetch(
   path: string,
   body: string,
@@ -687,6 +705,7 @@ export async function geminiFetch(
 ): Promise<{ res: Response | null; status: number }> {
   const keys = opts.byokKey ? [opts.byokKey] : GEMINI_KEYS();
   let lastStatus = 0;
+  aiFailure.status = 0;
   // Adaptive timeout: 60s for large multimodal/audio payloads, 25s for standard vision/chat
   const reqTimeoutMs = opts.timeoutMs ?? (body.length > 500_000 || opts.category === 'transcription' ? 60000 : 25000);
 
@@ -718,6 +737,7 @@ export async function geminiFetch(
           });
         } catch (err) {
           lastStatus = 0;
+          aiFailure.status = -1;
           console.log(`[Rafiqi AI Diagnostic: Response] Network error during Gemini fetch: ${err instanceof Error ? err.name : 'UnknownError'}`);
           logTelemetry({ provider: 'gemini', model, category: opts.category as TaskCategory, latencyMs: Date.now() - t0, inputChars: body.length, success: false, error: String(err) });
           break;
@@ -757,7 +777,7 @@ export async function geminiFetch(
         }
         lastStatus = r.status;
         // 400 = bad request payload — another key/model won't help.
-        if (r.status === 400) return { res: null, status: 400 };
+        if (r.status === 400) { aiFailure.status = 400; return { res: null, status: 400 }; }
         // 429/503 = rate limit or temporary provider overload -> exponential backoff with jitter before retry
         if (r.status === 429 || r.status === 503) {
           if (attempt < maxKeyRetries) {
@@ -773,6 +793,7 @@ export async function geminiFetch(
       }
     }
   }
+  if (lastStatus) aiFailure.status = lastStatus;
   return { res: null, status: lastStatus };
 }
 

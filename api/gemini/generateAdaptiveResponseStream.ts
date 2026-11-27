@@ -16,7 +16,7 @@
  */
 import {
   guard, readBody, buildPersona, threadsSummary, buildContents,
-  buildOpenAIMessages, geminiFetch, providerFor, orderedFallbackKeys, stripReasoning, validateAttachmentMimeAndName,
+  buildOpenAIMessages, geminiFetch, aiBusyMessage, providerFor, orderedFallbackKeys, stripReasoning, validateAttachmentMimeAndName,
 } from '../_lib/ai.js';
 import { classifyRequest, type TaskCategory } from '../_lib/router.js';
 import { logTelemetry } from '../_lib/telemetry.js';
@@ -281,9 +281,7 @@ export default async function handler(req: any, res: any) {
     full = stripReasoning(full);
     const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';
     if (!full) {
-      full = isAr
-        ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني بعد لحظات 🙏'
-        : '⚠️ The AI is busy right now. Please try again in a moment 🙏';
+      full = aiBusyMessage(isAr);
     }
 
     // Shared Output Quality Guard: sanitize output, redact sensitive secrets, repair markdown & latex
