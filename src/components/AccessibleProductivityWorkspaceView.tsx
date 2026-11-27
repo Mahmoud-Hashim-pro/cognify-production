@@ -25,6 +25,7 @@ import {
   Table,
   BarChart3,
   CheckSquare,
+  CalendarCheck,
   ArrowLeft,
   Volume2,
   VolumeX,
@@ -50,6 +51,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { AttendanceTrackerPanel } from './AttendanceTrackerPanel';
 import { localize, isArabicLocale } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { toast } from './Toast';
@@ -104,9 +106,10 @@ export type ProductivityToolId =
   | 'powerpoint_creator'
   | 'excel_assistant'
   | 'chart_describer'
-  | 'form_filler';
+  | 'form_filler'
+  | 'attendance';
 
-const VALID_PRODUCTIVITY_TOOLS: readonly ProductivityToolId[] = ['voice_doc', 'writing_assistant', 'powerpoint_creator', 'excel_assistant', 'chart_describer', 'form_filler'];
+const VALID_PRODUCTIVITY_TOOLS: readonly ProductivityToolId[] = ['voice_doc', 'writing_assistant', 'powerpoint_creator', 'excel_assistant', 'chart_describer', 'form_filler', 'attendance'];
 
 
 interface AccessibleProductivityWorkspaceViewProps {
@@ -492,6 +495,7 @@ Database Systems,90,3,270`;
     { id: 'excel_assistant', titleAr: 'مساعد إكسل والبيانات', titleEn: 'Excel & Data', icon: Table },
     { id: 'chart_describer', titleAr: 'واصف المخططات', titleEn: 'Chart Describer', icon: BarChart3 },
     { id: 'form_filler', titleAr: 'مساعد النماذج', titleEn: 'Form Assistant', icon: CheckSquare },
+    { id: 'attendance', titleAr: 'متتبع الحضور', titleEn: 'Attendance', icon: CalendarCheck },
   ];
 
   return (
@@ -574,6 +578,8 @@ Database Systems,90,3,270`;
                     ? generateSpreadsheetSummary(spreadsheetModel).summaryTextAr
                     : activeTool === 'chart_describer'
                     ? chartAnalysis.fullAccessibleDescriptionAr
+                    : activeTool === 'attendance'
+                    ? 'متتبع الحضور والغياب: أضف موادك وسجل حضورك وغيابك لتعرف نسبتك والغيابات المتبقية قبل الحرمان.'
                     : selectedFormTemplate.descriptionAr;
                 speakText(currentText);
               }}
@@ -1819,6 +1825,27 @@ Database Systems,90,3,270`;
                   </pre>
                 </div>
               )}
+            </div>
+          </section>
+        )}
+        {activeTool === 'attendance' && (
+          <section
+            aria-label={localize(profile.language, 'Attendance Tracker', 'متتبع الحضور والغياب')}
+            className="space-y-6"
+          >
+            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+              <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
+                <CalendarCheck className="w-5 h-5 text-[#1769AA]" />
+                <span>{localize(profile.language, 'Attendance & Absence Tracker', 'متتبع الحضور والغياب')}</span>
+              </h2>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                {localize(
+                  profile.language,
+                  'Add your subjects, mark each session attended or absent, and instantly see your attendance percentage and how many absences remain before falling below the required threshold.',
+                  'أضف موادك وسجّل كل محاضرة حضوراً أو غياباً، وشاهد فوراً نسبة حضورك وعدد الغيابات المتبقية قبل النزول عن النسبة المطلوبة (الحرمان).'
+                )}
+              </p>
+              <AttendanceTrackerPanel isArabic={isAr} isDarkMode={isDarkMode} />
             </div>
           </section>
         )}
