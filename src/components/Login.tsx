@@ -4,7 +4,6 @@ import {
   signInWithGoogleRedirect, 
   loginWithEmail, 
   registerWithEmail, 
-  signInAsGuest,
   auth 
 } from '../lib/firebase';
 import { sendPasswordResetEmail, getRedirectResult } from 'firebase/auth';
@@ -314,25 +313,6 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
     }
   };
 
-  // One-tap guest access: the fastest path to the camera for blind users.
-  // Needs the Anonymous provider enabled in Firebase Auth; if it is off we say
-  // so in plain Egyptian Arabic instead of showing a raw Firebase error.
-  const handleGuestAccess = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await signInAsGuest();
-    } catch (err: any) {
-      console.warn('Guest sign-in failed:', err);
-      setError(t(
-        'Guest access is not available right now. Please sign in with Google or email instead.',
-        'الدخول كضيف مش متاح دلوقتي. جرب تسجل بجوجل أو بالإيميل.'
-      ));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // First-launch spoken welcome: for blind users the real hook is the first
   // spoken word, not the artwork. Speaks once per browser session; browsers
   // that require a user gesture first simply skip it.
@@ -346,8 +326,8 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
     } catch { /* storage unavailable - still try once */ }
     speak(
       isRtl
-        ? 'أهلاً بيكي في رفيقي. موبايلك يشوفلك الدنيا. سجلي دخولك، أو كملي كضيف من غير حساب.'
-        : 'Welcome to Rafiqi. Your phone sees the world for you. Sign in, or continue as a guest without an account.',
+        ? 'أهلاً بيكي في رفيقي. موبايلك يشوفلك الدنيا. سجلي دخولك بجوجل أو بالإيميل، أو اعملي حساب جديد.'
+        : 'Welcome to Rafiqi. Your phone sees the world for you. Sign in with Google or email, or create a new account.',
       isRtl ? 'Arabic' : 'English'
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -358,10 +338,21 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       className="min-h-screen bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-[#F8FAFC] flex flex-col items-center justify-between p-3 sm:p-6 font-sans relative selection:bg-[#1769AA]/50 selection:text-white"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
-      {/* Deep-blue atmospheric background glow — subtle and non-intrusive */}
+      {/* Chosen full-page sign-in artwork behind everything, with a readability scrim.
+          Mobile crops to the woman (her face, phone and the sonar waves); from md up the
+          frame centers, so wide screens show the full scene including the bus. */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute top-1/4 -start-32 w-96 h-96 bg-[#1769AA]/15 dark:bg-[#1769AA]/20 rounded-full blur-[140px]" />
-        <div className="absolute bottom-1/4 -end-32 w-96 h-96 bg-[#00C2FF]/10 dark:bg-[#0D4778]/30 rounded-full blur-[140px]" />
+        <img
+          src="/assets/signin-bg-street.webp"
+          alt=""
+          width={1280}
+          height={720}
+          className="absolute inset-0 w-full h-full object-cover object-[30%_center] md:object-center select-none"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+        />
+        <div className="absolute inset-0 bg-slate-950/45 dark:bg-slate-950/60" />
       </div>
 
       {/* ── TOP HEADER: Brand Identity + Language Switcher + Theme Selector ── */}
@@ -379,7 +370,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                 R
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                <span className="text-base sm:text-xl font-black text-white drop-shadow-md tracking-tight">
                   {isRtl ? 'رفيقى' : 'Rafiqi'}
                 </span>
                 <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
@@ -394,14 +385,14 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
-                  <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  <span className="text-base sm:text-xl font-black text-white drop-shadow-md tracking-tight">
                     {isRtl ? 'رفيقى' : 'Rafiqi'}
                   </span>
                   <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
                     A11y
                   </span>
                 </div>
-                <span className="text-xs sm:text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] leading-tight">
+                <span className="text-xs sm:text-xs font-bold text-sky-200 dark:text-[#7CB8E8] leading-tight drop-shadow-sm">
                   {t('Your phone sees the world for you.', 'موبايلك يشوفلك الدنيا.')}
                 </span>
               </div>
@@ -451,28 +442,8 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       </header>
 
       {/* ── MAIN UNIFIED COMPOSITION: Natural, Centered Authentication Card (No Split-Screen) ── */}
-      <main className="w-full max-w-md lg:max-w-5xl my-auto z-10 py-3 sm:py-8">
-        {/* Chosen sign-in illustration: real asset, responsive, theme-safe panel.
-            Mobile: compact banner above the card. Large screens: side panel beside the card
-            (flex direction follows the page dir, so RTL keeps the natural reading order). */}
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
-        <figure className="mb-4 lg:mb-0 rounded-3xl overflow-hidden border border-slate-200 dark:border-[#22354E] shadow-xl shadow-slate-900/5 dark:shadow-black/40">
-          <img
-            src="/assets/signin-hero-cairo-sm.webp"
-            srcSet="/assets/signin-hero-cairo-sm.webp 768w, /assets/signin-hero-cairo.webp 1400w"
-            sizes="(min-width: 1024px) 44vw, 100vw"
-            width={768}
-            height={576}
-            alt={t(
-              'Illustration of students with disabilities - a blind woman with a white cane using her phone, a young man in a wheelchair with a laptop, and friends studying together - on the Cairo Nile corniche at night, with glowing icons of a tree, a bus stop, and a book above them.',
-              'رسم توضيحي لطلاب من ذوي الإعاقة - فتاة كفيفة بعصا بيضاء تستخدم هاتفها، وشاب على كرسي متحرك مع حاسوبه، وزملاء يذاكرون معاً - على كورنيش النيل بالقاهرة ليلاً، وفوقهم أيقونات مضيئة لشجرة وموقف أتوبيس وكتاب.'
-            )}
-            className="w-full h-40 sm:h-52 lg:h-auto object-cover object-center select-none"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-          />
-        </figure>
+      <main className="w-full max-w-md my-auto z-10 py-3 sm:py-8">
+        {/* Solid, readable authentication card over the full-page artwork. */}
         <div className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-3xl p-4 sm:p-8 shadow-xl shadow-slate-900/5 dark:shadow-black/40 text-start transition-colors">
           
           {/* Segmented Mode Selector: Sign In vs Create Account */}
@@ -757,16 +728,6 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                 </button>
               )}
 
-              {/* Guest Access: the biggest, lowest-friction path to the camera */}
-              <button
-                type="button"
-                onClick={handleGuestAccess}
-                disabled={loading}
-                className="w-full min-h-[52px] py-3 px-4 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] active:scale-[0.98] text-white text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-[#4B9FE1]/60 shadow-lg shadow-[#1769AA]/25 disabled:opacity-50 mt-1"
-              >
-                <Accessibility className="w-5 h-5 shrink-0" aria-hidden="true" />
-                <span>{t('Continue as Guest - no account needed', 'كملي كضيف - من غير حساب')}</span>
-              </button>
             </form>
           )}
 
@@ -784,7 +745,6 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
             </div>
           )}
 
-        </div>
         </div>
       </main>
 
