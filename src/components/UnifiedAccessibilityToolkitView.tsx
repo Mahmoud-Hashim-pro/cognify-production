@@ -49,6 +49,7 @@ import { localize, isArabicLocale } from '../lib/translations';
 import { toast } from './Toast';
 import { AdaptiveEnvironmentPanel } from './AdaptiveEnvironmentPanel';
 import { ReadingSupportPanel } from './ReadingSupportPanel';
+import { CognitiveGymPanel } from './CognitiveGymPanel';
 import { Breadcrumbs } from './ui/Breadcrumbs';
 import { getRouteBreadcrumbs } from '../lib/navigation';
 import { speak, cancelSpeech } from '../lib/tts';
@@ -475,6 +476,7 @@ export default function UnifiedAccessibilityToolkitView({
           { id: 'listen_transcribe' as const, labelAr: '🎙️ استمع وفرّغ (المحاضرات)', labelEn: '🎙️ Listen & Transcribe' },
           { id: 'format_edu' as const, labelAr: '📖 استوديو الكتب والامتحانات', labelEn: '📖 Educational Book Studio' },
           { id: 'environment' as const, labelAr: '🌿 مساعد البيئة (إضاءة وضوضاء)', labelEn: '🌿 Environment Assistant (Light & Noise)' },
+          { id: 'cognitive_gym' as const, labelAr: '🧠 صالة التفكير والتركيز', labelEn: '🧠 Thinking & Focus Gym' },
           { id: 'saved_activity' as const, labelAr: '🕒 السجل والنتائج المحفوظة', labelEn: '🕒 Saved Results & Activity' },
         ].map((cat) => {
           const isSelected = activeCategory === cat.id;
@@ -1165,6 +1167,15 @@ export default function UnifiedAccessibilityToolkitView({
                   currentA11y={profile.disabilityType ?? ''}
                 />
               </div>
+            </div>
+          )}
+
+          {activeCategory === 'cognitive_gym' && (
+            <div className="space-y-6">
+              <CognitiveGymPanel
+                isArabic={isArabicLocale(profile.language)}
+                isDarkMode={isDarkMode}
+              />
             </div>
           )}
 

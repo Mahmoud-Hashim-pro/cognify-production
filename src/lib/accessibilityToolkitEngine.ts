@@ -16,6 +16,7 @@ export type ToolkitCategory =
   | 'listen_transcribe'
   | 'format_edu'
   | 'environment'
+  | 'cognitive_gym'
   | 'saved_activity';
 
 export interface ScannedPageItem {
