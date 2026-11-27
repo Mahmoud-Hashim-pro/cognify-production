@@ -333,7 +333,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
   return (
     <div 
-      className="max-w-7xl mx-auto space-y-6 pb-12 text-start select-none"
+      className="max-w-6xl mx-auto space-y-4 pb-24 text-start select-none"
       aria-label={t('Rafiqi Home Dashboard', 'لوحة التحكم الرئيسية لرفيقي')}
     >
       {/* ── A. COMPACT WELCOME AREA (Replaces Oversized Hero) ── */}
@@ -360,7 +360,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </div>
 
           {/* Right: Exactly ONE Primary Action: Explore Your Tools */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="hidden flex items-center gap-2.5 shrink-0">
             <button
               type="button"
               onClick={handleScrollToSections}
@@ -455,89 +455,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
       </section>
 
-      {/* ── B. SIX OFFICIAL PRODUCT SECTIONS (Primary Heart of Dashboard) ── */}
-      <section 
-        id="six-product-sections"
-        aria-label={t('The Six Official Product Sections', 'أقسام رفيقي الستة الرسمية')}
-        className="space-y-3"
-      >
-        <div className="flex items-center justify-between px-1">
-          <div>
-            <h2 className="text-sm font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" aria-hidden="true" />
-              <span>{t('The Six Official Product Sections', 'أقسام رفيقي الستة الرسمية')}</span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5">
-              {t(
-                'Explore the complete assistive ecosystem. Each section holds a specialized suite of tools.',
-                'استكشف المنظومة الكاملة. يتضمن كل قسم مجموعة أدوات متخصصة لدعمك في مختلف المهام.'
-              )}
-            </p>
-          </div>
-        </div>
-
-        {/* Clean, balanced 6-card grid with consistent height and spacing */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          {PRODUCT_SECTIONS.map((sec) => {
-            const SecIcon = getSectionIconComponent(sec.iconName);
-            return (
-              <div
-                key={sec.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => onSelectSection(sec.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelectSection(sec.id);
-                  }
-                }}
-                className={`group p-4 sm:p-4.5 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-3 shadow-xs ${
-                  isDarkMode 
-                    ? 'bg-[#131E2E] border-[#22354E] hover:border-[#1769AA]' 
-                    : 'bg-white border-slate-200 hover:border-[#1769AA]'
-                } hover:-translate-y-0.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] min-h-[160px]`}
-                aria-label={isAr ? sec.titleAr : sec.titleEn}
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
-                      {t(`Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
-                    </span>
-                    <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-semibold">
-                      {t(`${sec.features.length} tools`, `${sec.features.length} أدوات`)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] group-hover:bg-[#1769AA] group-hover:text-white flex items-center justify-center transition-colors shrink-0">
-                      <SecIcon className="w-4.5 h-4.5" aria-hidden="true" />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors line-clamp-2 break-words">
-                        {isAr ? sec.titleAr : sec.titleEn}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] hidden">
-                        {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed line-clamp-2">
-                    {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-slate-200 dark:border-[#22354E] flex items-center justify-between text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
-                  <span>{t('Explore Section Suite', 'استكشف أدوات القسم')}</span>
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isAr ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
       {/* ── C. QUICK ACTIONS (Max 2-3 Useful, Compact Shortcuts) ── */}
       <section 
         aria-label={t('Quick Access', 'الوصول السريع للأدوات')}
@@ -625,6 +542,89 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             </div>
             <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
           </button>
+        </div>
+      </section>
+
+      {/* ── B. SIX OFFICIAL PRODUCT SECTIONS (Primary Heart of Dashboard) ── */}
+      <section 
+        id="six-product-sections"
+        aria-label={t('The Six Official Product Sections', 'أقسام رفيقي الستة الرسمية')}
+        className="space-y-3"
+      >
+        <div className="flex items-center justify-between px-1">
+          <div>
+            <h2 className="text-sm font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" aria-hidden="true" />
+              <span>{t('The Six Official Product Sections', 'أقسام رفيقي الستة الرسمية')}</span>
+            </h2>
+            <p className="hidden text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5">
+              {t(
+                'Explore the complete assistive ecosystem. Each section holds a specialized suite of tools.',
+                'استكشف المنظومة الكاملة. يتضمن كل قسم مجموعة أدوات متخصصة لدعمك في مختلف المهام.'
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Clean, balanced 6-card grid with consistent height and spacing */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {PRODUCT_SECTIONS.map((sec) => {
+            const SecIcon = getSectionIconComponent(sec.iconName);
+            return (
+              <div
+                key={sec.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelectSection(sec.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectSection(sec.id);
+                  }
+                }}
+                className={`group p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2 shadow-xs ${
+                  isDarkMode 
+                    ? 'bg-[#131E2E] border-[#22354E] hover:border-[#1769AA]' 
+                    : 'bg-white border-slate-200 hover:border-[#1769AA]'
+                } hover:-translate-y-0.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] min-h-[64px]`}
+                aria-label={isAr ? sec.titleAr : sec.titleEn}
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="hidden text-xs font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
+                      {t(`Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-semibold">
+                      {t(`${sec.features.length} tools`, `${sec.features.length} أدوات`)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] group-hover:bg-[#1769AA] group-hover:text-white flex items-center justify-center transition-colors shrink-0">
+                      <SecIcon className="w-4.5 h-4.5" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors line-clamp-2 break-words">
+                        {isAr ? sec.titleAr : sec.titleEn}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] hidden">
+                        {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="hidden text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed line-clamp-2">
+                    {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
+                  </p>
+                </div>
+
+                <div className="hidden pt-2 border-t border-slate-200 dark:border-[#22354E] flex items-center justify-between text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
+                  <span>{t('Explore Section Suite', 'استكشف أدوات القسم')}</span>
+                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isAr ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

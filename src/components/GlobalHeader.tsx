@@ -15,7 +15,8 @@ import {
   Sparkles,
   X,
   Volume2,
-  CheckCircle2
+  CheckCircle2,
+  Eye
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { ProductSectionId, getProductSection, PRODUCT_SECTIONS } from '../lib/sections';
@@ -30,6 +31,7 @@ export interface GlobalHeaderProps {
   activeTab?: string;
   onMenuClick?: () => void;
   onNavigate?: (view: string, tab?: string) => void;
+  onSelectSection?: (section: ProductSectionId) => void;
   onSearch?: (query: string) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
@@ -44,6 +46,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   activeTab,
   onMenuClick,
   onNavigate,
+  onSelectSection,
   onSearch,
   isDarkMode,
   toggleTheme,
@@ -55,6 +58,8 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSectionsOpen, setIsSectionsOpen] = useState(false);
+  const sectionsRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -129,12 +134,16 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
         setIsProfileMenuOpen(false);
       }
+      if (sectionsRef.current && !sectionsRef.current.contains(e.target as Node)) {
+        setIsSectionsOpen(false);
+      }
       if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) {
         setIsNotificationsOpen(false);
       }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        setIsSectionsOpen(false);
         setIsProfileMenuOpen(false);
         setIsNotificationsOpen(false);
       }
@@ -350,6 +359,52 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
         </nav>
       </div>
 
+      {/* ── SECTIONS MENU (desktop): the six sections in one place ── */}
+      <div className="hidden lg:block relative shrink-0" ref={sectionsRef}>
+        <button
+          type="button"
+          onClick={() => setIsSectionsOpen((v) => !v)}
+          aria-expanded={isSectionsOpen}
+          aria-haspopup="true"
+          data-testid="header-sections-menu"
+          className={`min-h-[44px] px-3 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+            isDarkMode ? 'border-[#22354E] text-slate-200 hover:bg-slate-800' : 'border-slate-200 text-slate-800 hover:bg-slate-100'
+          }`}
+        >
+          <span>{t('Sections', 'الأقسام')}</span>
+          <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+        </button>
+        {isSectionsOpen && (
+          <div
+            role="menu"
+            aria-label={t('Sections', 'الأقسام')}
+            className={`absolute top-full mt-2 start-0 w-64 p-1.5 rounded-2xl border shadow-xl z-50 ${
+              isDarkMode ? 'bg-[#131E2E] border-[#22354E] text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}
+          >
+            {PRODUCT_SECTIONS.map((sec) => (
+              <button
+                key={sec.id}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setIsSectionsOpen(false);
+                  onSelectSection?.(sec.id);
+                }}
+                className={`w-full min-h-[44px] px-3 rounded-xl text-start text-sm font-semibold flex items-center justify-between gap-2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+                  currentSection === sec.id
+                    ? 'bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1]'
+                    : isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-100'
+                }`}
+              >
+                <span className="truncate">{sec.numericOrder}. {isAr ? sec.titleAr : sec.titleEn}</span>
+                <span className="text-xs opacity-60 shrink-0">{sec.features.length}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* ── CENTER ZONE: SEARCH INPUT ── */}
       <div className="hidden md:flex flex-1 max-w-md mx-2" ref={searchBoxRef}>
         <form onSubmit={handleSearchSubmit} className="relative w-full">
@@ -421,6 +476,18 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
 
       {/* ── RIGHT ZONE: LANGUAGE, THEME, NOTIFICATIONS & PROFILE MENU ── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* The one primary action of the whole app */}
+        <button
+          type="button"
+          onClick={() => onNavigate?.('disability', 'vision')}
+          data-testid="header-primary-action"
+          className="min-h-[44px] px-3 sm:px-4 rounded-full bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1769AA] transition-colors"
+          aria-label={t('What is in front of me? Open the visual assistant', 'ماذا أمامي الآن؟ افتح المساعد البصري')}
+        >
+          <Eye className="w-4 h-4" aria-hidden="true" />
+          <span className="hidden sm:inline">{t('What is in front of me?', 'ماذا أمامي الآن؟')}</span>
+        </button>
+
         {/* Language Switcher */}
         <div
           role="group"

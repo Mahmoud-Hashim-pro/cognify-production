@@ -1542,6 +1542,7 @@ export default function App() {
             currentSection={currentSection}
             activeTab={disabilityTab}
             onMenuClick={handleOpenMobileMenu}
+            onSelectSection={(sec) => navigateTo(sec)}
             onNavigate={(view, tab) => {
               if (view === 'disability') {
                 if (tab) {

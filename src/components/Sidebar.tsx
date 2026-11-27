@@ -77,7 +77,10 @@ export default function Sidebar({
   // Collapsible sidebar state for desktop
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('rafiqi_sidebar_collapsed') === 'true';
+      const stored = localStorage.getItem('rafiqi_sidebar_collapsed');
+      // First visit on a wide screen: start slim so the page has room (the Sections menu in the top bar covers navigation)
+      if (stored === null) return typeof window !== 'undefined' && window.innerWidth >= 1280;
+      return stored === 'true';
     } catch {
       return false;
     }
