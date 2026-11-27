@@ -124,6 +124,8 @@ interface DisabilityModeViewProps {
   initialTool?: VisualToolId;
   initialSection?: ProductSectionId | null;
   onSectionChange?: (section: ProductSectionId | null) => void;
+  /** When set, picking a section opens its first tool directly instead of the section grid page. */
+  onOpenSectionTool?: (section: ProductSectionId) => void;
 }
 
 /**
@@ -242,6 +244,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   initialTool = 'scene',
   initialSection = null,
   onSectionChange,
+  onOpenSectionTool,
 }, ref) {
   const reduceMotion = useReducedMotion();
   const [selectedVisualTool, setSelectedVisualTool] = useState<VisualToolId>(() => {
@@ -312,6 +315,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, []);
 
   const handleSelectSection = useCallback((sectionId: ProductSectionId | null) => {
+    if (sectionId && onOpenSectionTool) {
+      onOpenSectionTool(sectionId);
+      return;
+    }
     setSelectedSectionLanding(sectionId);
     if (activeTab !== 'hub') {
       setActiveTab('hub');
@@ -322,7 +329,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       window.history.pushState({ view: 'disability', tab: 'hub', section: sectionId }, '', newHash);
     }
     if (onSectionChange) onSectionChange(sectionId);
-  }, [activeTab, onTabChange, onSectionChange]);
+  }, [activeTab, onTabChange, onSectionChange, onOpenSectionTool]);
   const [recentActivities, setRecentActivities] = useState<ToolkitActivityItem[]>([]);
   const [spatialObjects, setSpatialObjects] = useState<any[]>([]);
   

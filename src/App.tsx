@@ -38,7 +38,8 @@ import { RouteAnnouncer } from "./components/ui/RouteAnnouncer";
 import { isAdminUser } from "./lib/roles";
 import { subscribeToStudentMemory, clearStudentMemory, getCachedStudentMemory, DEFAULT_STUDENT_MEMORY } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
-import { ProductSectionId } from "./lib/sections";
+import { ProductSectionId, PRODUCT_SECTIONS, SectionFeatureItem, getProductSection } from "./lib/sections";
+import SectionToolBar, { featureKey, sectionToolButtons } from "./components/SectionToolBar";
 import { initSecurityTracker } from "./lib/securityTracker";
 import { getVisitorCountryCode } from "./lib/geo";
 import { recordUserLoginSession } from "./lib/loginHistory";
@@ -461,6 +462,10 @@ export default function App() {
 
     const SECTION_IDS: ProductSectionId[] = ['see_understand', 'read_learn', 'work_create', 'move_explore', 'personalize'];
     if (SECTION_IDS.includes(view as ProductSectionId) || (view === 'communicate' && (tab === 'hub' || section === 'communicate'))) {
+      if (SECTION_IDS.includes(view as ProductSectionId) || view === 'communicate') {
+        handleSelectSection((view === 'communicate' ? 'communicate' : view) as ProductSectionId);
+        return;
+      }
       targetView = 'disability';
       targetTab = 'hub';
       targetSection = view as ProductSectionId;
@@ -529,9 +534,40 @@ export default function App() {
     }, 50);
   };
 
-  const handleSelectSection = (sectionId: ProductSectionId) => {
-    navigateTo('disability', 'hub', sectionId);
+  // A section no longer opens a grid page: it opens its first tool, with every tool of the
+  // section as a button row on top (SectionToolBar).
+  const [toolbarSection, setToolbarSection] = useState<ProductSectionId | null>(null);
+  const openSectionFeature = (sectionId: ProductSectionId, f: SectionFeatureItem) => {
+    setToolbarSection(sectionId);
+    const view = (f.targetView === 'communicate' ? 'communication' : f.targetView) as AppView;
+    navigateTo(view, f.targetTab as DisabilityTab | undefined, null);
   };
+  const handleSelectSection = (sectionId: ProductSectionId) => {
+    const section = getProductSection(sectionId);
+    const first = section ? (section.features.find((f) => f.isPrimaryAction) || section.features[0]) : undefined;
+    if (!first) {
+      navigateTo('disability', 'hub', sectionId);
+      return;
+    }
+    openSectionFeature(sectionId, first);
+  };
+  const isFeatureActive = (f: SectionFeatureItem) => {
+    if (f.targetView === 'disability') return currentView === 'disability' && disabilityTab === f.targetTab;
+    if (f.targetView === 'communicate' || f.targetView === 'communication') {
+      return currentView === 'communicate' || currentView === 'communication';
+    }
+    return currentView === f.targetView;
+  };
+  const barSection: ProductSectionId | null = (() => {
+    if (currentView === 'disability' && (disabilityTab === 'hub' || !disabilityTab)) return null;
+    const matches = (id: ProductSectionId) => sectionToolButtons(id).some(isFeatureActive);
+    let id: ProductSectionId | null = null;
+    if (toolbarSection && matches(toolbarSection)) id = toolbarSection;
+    else id = (PRODUCT_SECTIONS.find((sec) => matches(sec.id))?.id as ProductSectionId | undefined) || null;
+    // The Visual Assistant page already has its own tool row.
+    if (id === 'see_understand' && currentView === 'disability' && disabilityTab === 'vision') return null;
+    return id;
+  })();
 
   const handleBack = () => {
     smartNavigateBack(navigateTo, 'disability', 'hub');
@@ -1200,6 +1236,7 @@ export default function App() {
           }}
           initialSection={currentSection}
           onSectionChange={setCurrentSection}
+          onOpenSectionTool={handleSelectSection}
           setProfile={setProfile}
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
@@ -1253,13 +1290,7 @@ export default function App() {
           <AccessibleProductivityWorkspaceView
             profile={activeProfile}
             onMenuClick={handleOpenMobileMenu}
-            onNavigateBack={() => {
-              if (currentSection === 'work_create') {
-                handleSelectSection('work_create');
-              } else {
-                handleBack();
-              }
-            }}
+            onNavigateBack={handleBack}
             onOpenBookStudio={(content, title) => {
               if (content) {
                 try {
@@ -1276,13 +1307,7 @@ export default function App() {
           <AccessibleMobilityWorkspaceView
             profile={activeProfile}
             onMenuClick={handleOpenMobileMenu}
-            onNavigateBack={() => {
-              if (currentSection === 'move_explore') {
-                handleSelectSection('move_explore');
-              } else {
-                handleBack();
-              }
-            }}
+            onNavigateBack={handleBack}
             isDarkMode={isDarkMode}
           />
         );
@@ -1292,13 +1317,7 @@ export default function App() {
           <AccessibleCommunicateWorkspaceView
             profile={activeProfile}
             onMenuClick={handleOpenMobileMenu}
-            onNavigateBack={() => {
-              if (currentSection === 'communicate') {
-                handleSelectSection('communicate');
-              } else {
-                handleBack();
-              }
-            }}
+            onNavigateBack={handleBack}
             onOpenHearingSuite={() => navigateTo('hear_express')}
             isDarkMode={isDarkMode}
           />
@@ -1564,6 +1583,16 @@ export default function App() {
             setProfile={setProfile}
             onLogout={handleLogout}
           />
+
+          {barSection && (
+            <SectionToolBar
+              sectionId={barSection}
+              isAr={direction === 'rtl'}
+              isDarkMode={isDarkMode}
+              isActive={isFeatureActive}
+              onSelect={(f) => openSectionFeature(barSection, f)}
+            />
+          )}
 
           <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]">
             <Suspense
