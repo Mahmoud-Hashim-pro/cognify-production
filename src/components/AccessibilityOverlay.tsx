@@ -61,11 +61,17 @@ export default function AccessibilityOverlay({
   const [isVisionAnalyzing, setIsVisionAnalyzing] = useState(false);
   // Lets the user hide the floating mic / camera / voice controls (remembered).
   const [controlsHidden, setControlsHidden] = useState<boolean>(() => {
-    try { return localStorage.getItem("rafiqi_a11y_hidden") === "1"; } catch { return false; }
+    // Default: collapsed into one small launcher so the controls never sit on
+    // page content. Blind (Visual) mode keeps the controls open as before.
+    try {
+      const v2 = localStorage.getItem("rafiqi_a11y_hidden_v2");
+      if (v2 !== null) return v2 === "1";
+    } catch { /* ignore */ }
+    return mode !== "Visual";
   });
   const toggleControlsHidden = (next: boolean) => {
     setControlsHidden(next);
-    try { localStorage.setItem("rafiqi_a11y_hidden", next ? "1" : "0"); } catch { /* ignore */ }
+    try { localStorage.setItem("rafiqi_a11y_hidden_v2", next ? "1" : "0"); } catch { /* ignore */ }
   };
   const [isAvatarSigning, setIsAvatarSigning] = useState(false);
   const [detectionConfidence, setDetectionConfidence] = useState(0);
@@ -698,7 +704,8 @@ export default function AccessibilityOverlay({
       <button
         onClick={() => toggleControlsHidden(false)}
         title="Show accessibility controls"
-        className="fixed bottom-24 start-3 md:start-24 z-50 w-8 h-8 rounded-full bg-[#112C4F]/90 text-[#4B9FE1] shadow-md border border-[#24476F] backdrop-blur-md flex items-center justify-center hover:bg-[#24476F] hover:text-white active:scale-95 pointer-events-auto transition-all"
+        aria-label="Show accessibility controls"
+        className="fixed bottom-24 start-3 md:bottom-4 md:start-24 z-50 w-11 h-11 rounded-full bg-[#112C4F]/90 text-[#4B9FE1] shadow-md border border-[#24476F] backdrop-blur-md flex items-center justify-center hover:bg-[#24476F] hover:text-white active:scale-95 pointer-events-auto transition-all"
       >
         <Eye className="w-4 h-4" />
       </button>
@@ -718,7 +725,7 @@ export default function AccessibilityOverlay({
       }}
       dragElastic={0.2}
       dragMomentum={false}
-      className="fixed bottom-32 start-4 md:start-24 z-50 flex flex-col gap-6 pointer-events-none max-w-[calc(100vw-1.5rem)]"
+      className="fixed bottom-32 start-4 md:bottom-16 md:start-24 z-50 flex flex-col gap-6 pointer-events-none max-w-[calc(100vw-1.5rem)]"
     >
       {/* Hide all accessibility controls */}
       <button

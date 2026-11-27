@@ -264,7 +264,7 @@ export const PRE_LOGIN_KEYS = [
 const PER_USER_LOCAL_KEYS = [
   'rafiqi_speech_history', 'rafiqi_speech_presets', 'rafiqi_euphonia_patterns',
   'rafiqi_pron_dict', 'rafiqi_speech_profile', 'rafiqi_pause_threshold',
-  'rafiqi_speech_rate', 'rafiqi_speech_pitch', 'rafiqi_a11y_hidden',
+  'rafiqi_speech_rate', 'rafiqi_speech_pitch', 'rafiqi_a11y_hidden', 'rafiqi_a11y_hidden_v2',
 ];
 
 export function clearPreLoginState() {
