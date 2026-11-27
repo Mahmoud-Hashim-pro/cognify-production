@@ -752,7 +752,7 @@ export default function AudioDocumentIntelligenceView({
   return (
     <div
       className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
-        isDarkMode ? 'bg-[#0B131E] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'
+        isDarkMode ? 'bg-[#061A33] text-slate-100' : 'tool-light bg-[#F5F9FD] text-slate-900'
       }`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
@@ -807,7 +807,7 @@ export default function AudioDocumentIntelligenceView({
       <nav
         role="tablist"
         aria-label={isAr ? 'أقسام ذكاء الصوت والمستندات' : 'Intelligence subphases'}
-        className="flex items-center gap-2 px-4 py-2.5 bg-[#131E2E] border-b border-[#22354E] overflow-x-auto"
+        className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-[#131E2E] border-b border-[#22354E]"
       >
         {[
           { id: 'lecture' as const, labelAr: '🎙️ تفريغ ومحاضرات ذكية', labelEn: '🎙️ Lecture Intelligence' },
@@ -825,7 +825,7 @@ export default function AudioDocumentIntelligenceView({
                 setActiveTab(tab.id);
                 announce(isAr ? tab.labelAr : tab.labelEn);
               }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer focus:ring-2 focus:ring-[#1769AA] ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center text-center cursor-pointer focus:ring-2 focus:ring-[#1769AA] ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md'
                   : 'text-[#94A3B8] hover:text-white hover:bg-[#22354E]'

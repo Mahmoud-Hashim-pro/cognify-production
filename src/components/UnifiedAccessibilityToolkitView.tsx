@@ -402,7 +402,7 @@ export default function UnifiedAccessibilityToolkitView({
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className={`flex-1 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
+      className={`flex-1 flex flex-col h-full overflow-hidden tool-blue transition-colors duration-300 ${
         isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'
       }`}
     >
@@ -466,7 +466,7 @@ export default function UnifiedAccessibilityToolkitView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Toolkit Categories', 'أقسام المنظومة الميسرة')}
-        className={`px-3 py-2 border-b flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 ${
+        className={`px-3 py-2 border-b flex flex-wrap items-center gap-1.5 shrink-0 ${
           isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
         }`}
       >
@@ -489,7 +489,7 @@ export default function UnifiedAccessibilityToolkitView({
                 setActiveCategory(cat.id);
                 announceToScreenReader(localize(profile.language, cat.labelEn, cat.labelAr));
               }}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center text-center gap-1.5 flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none min-h-[44px] ${
                 isSelected
                   ? 'bg-teal-700 text-white shadow-sm font-black'
                   : isDarkMode

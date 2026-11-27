@@ -991,7 +991,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   };
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex flex-col h-full w-full min-h-screen font-sans antialiased overflow-hidden selection:bg-[#1769AA]/40 selection:text-white transition-colors ${isDarkMode ? 'bg-[#F5F9FD] dark:bg-[#061A33] text-slate-900 dark:text-[#F8FAFC]' : 'bg-[#F5F9FD] text-slate-900'}`}>
+    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex flex-col h-full w-full min-h-screen font-sans antialiased overflow-hidden selection:bg-[#1769AA]/40 selection:text-white transition-colors ${isDarkMode ? 'bg-[#F5F9FD] dark:bg-[#061A33] text-slate-900 dark:text-[#F8FAFC]' : 'tool-light bg-[#F5F9FD] text-slate-900'}`}>
       
       {/* ── TOP HEADER (Suppressed when running inside App.tsx shell with onMenuClick) ── */}
       {!onMenuClick && (

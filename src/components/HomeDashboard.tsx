@@ -469,7 +469,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
 
         {/* Compact 3-action row with standardized touch targets */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Action 1: Visual Assistant inside Section 1 (See & Understand) */}
           <button
             type="button"
@@ -520,7 +520,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <button
             type="button"
             onClick={onOpenPassport}
-            className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
+            className={`hidden min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
               isDarkMode 
                 ? 'border-[#22354E] bg-[#131E2E] hover:border-[#1769AA] text-white' 
                 : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'

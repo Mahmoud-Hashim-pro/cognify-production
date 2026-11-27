@@ -377,7 +377,7 @@ export default function HearAndExpressView({
   return (
     <div
       className={`min-h-screen flex flex-col transition-colors duration-200 relative select-none ${
-        isDarkMode ? 'bg-[#0B131E] text-slate-100' : 'bg-[#F5F9FD] text-slate-900'
+        isDarkMode ? 'bg-[#061A33] text-slate-100' : 'tool-light bg-[#F5F9FD] text-slate-900'
       } ${isAlertFlashing ? 'ring-8 ring-amber-400 bg-amber-500/20' : ''}`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
@@ -475,7 +475,7 @@ export default function HearAndExpressView({
       <nav
         role="tablist"
         aria-label={isAr ? 'أدوات التواصل والتعبير' : 'Communication sub-modules'}
-        className="flex items-center gap-2 px-4 py-2.5 bg-[#131E2E] border-b border-[#22354E] overflow-x-auto custom-scrollbar"
+        className="flex flex-wrap items-center gap-2 px-4 py-2.5 bg-[#131E2E] border-b border-[#22354E]"
       >
         {[
           { id: 'captions' as const, labelAr: '🎙️ تفريغ الكلام المباشر', labelEn: '🎙️ Live Captions' },
@@ -495,7 +495,7 @@ export default function HearAndExpressView({
                 setActiveTab(tab.id);
                 announce(isAr ? tab.labelAr : tab.labelEn);
               }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shrink-0 ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold  transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none justify-center text-center ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/35 border border-[#4B9FE1]'
                   : 'bg-[#1A283D] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#22354E]'

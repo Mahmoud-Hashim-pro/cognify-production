@@ -413,8 +413,8 @@ export default function AccessibleBookStudioView({
   return (
     <div
       dir={metadata.language === 'ar' || metadata.language === 'mixed' ? 'rtl' : 'ltr'}
-      className={`flex-1 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
-        isDarkMode ? 'bg-rafiqi-bg-dark text-stone-100' : 'bg-rafiqi-bg-light text-stone-900'
+      className={`flex-1 flex flex-col h-full overflow-hidden tool-blue transition-colors duration-300 ${
+        isDarkMode ? 'bg-[#061A33] text-stone-100' : 'bg-rafiqi-bg-light text-stone-900'
       }`}
     >
       {/* ── TOP HEADER ── */}
@@ -522,11 +522,11 @@ export default function AccessibleBookStudioView({
       {/* ── WORKFLOW STEP NAVIGATOR (Screen-reader Accessible Tablist) ── */}
       <nav
         aria-label={isArLocale ? 'خطوات استوديو الكتب التعليمية' : 'Book Studio Steps'}
-        className={`px-4 py-2 border-b shrink-0 flex items-center justify-start gap-2 overflow-x-auto custom-scrollbar ${
+        className={`px-4 py-2 border-b shrink-0 flex items-center justify-start gap-2 ${
           isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-100 border-stone-200'
         }`}
       >
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2 w-full">
           {[
             { step: 1 as const, labelAr: '1. المصدر والمحتوى', labelEn: '1. Content & Source', icon: FileUp },
             { step: 2 as const, labelAr: '2. القالب والتنسيق', labelEn: '2. Template & Layout', icon: Settings2 },
@@ -541,7 +541,7 @@ export default function AccessibleBookStudioView({
                 type="button"
                 onClick={() => setActiveStep(item.step)}
                 aria-current={isActive ? 'step' : undefined}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shrink-0 ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] flex-1 basis-[calc(50%-0.25rem)] sm:basis-auto sm:flex-none min-h-[44px] ${
                   isActive
                     ? 'bg-teal-700 text-white shadow-sm font-black'
                     : isDarkMode
