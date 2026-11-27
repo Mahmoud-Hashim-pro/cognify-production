@@ -35,6 +35,11 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { ConversationEngine } from '../modules/hearAndExpress/liveConversation/conversationEngine';
+import {
+  loadEuphoniaPhraseBank,
+  getCategoryIcon,
+  type EuphoniaPhraseDef,
+} from '../lib/euphoniaPhraseBank';
 import { UserProfile } from '../types';
 
 const SoundAwarenessInterface = React.lazy(() =>
@@ -199,6 +204,19 @@ export default function HearAndExpressView({
     conversationEngineRef.current = new ConversationEngine();
   }
   const [personalizationOpen, setPersonalizationOpen] = useState(false);
+
+  // Euphonia phrase bank (Arabic quick-speak phrases, loaded from the bundled asset)
+  const [euphoniaPhrases, setEuphoniaPhrases] = useState<EuphoniaPhraseDef[]>([]);
+  const [euphoniaCategory, setEuphoniaCategory] = useState<string>('all');
+  useEffect(() => {
+    let cancelled = false;
+    loadEuphoniaPhraseBank().then((phrases) => {
+      if (!cancelled) setEuphoniaPhrases(phrases);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [announceText, setAnnounceText] = useState('');
 
   // 1. Live Captions State
@@ -823,6 +841,53 @@ export default function HearAndExpressView({
                 <PersonalAacWorkspaceView isArabic={isAr} />
               </React.Suspense>
             </div>
+
+            {/* Euphonia phrase bank: ready-made Arabic quick-speak phrases by category */}
+            {euphoniaPhrases.length > 0 && (
+              <div className="space-y-3" data-testid="euphonia-phrase-bank">
+                <h3 className="text-sm font-black text-[#F8FAFC]">
+                  {isAr ? '🗣️ بنك العبارات الجاهزة' : '🗣️ Ready Phrase Bank'}
+                </h3>
+                <p className="text-xs text-[#94A3B8] leading-relaxed">
+                  {isAr
+                    ? 'عبارات عربية جاهزة مصنفة حسب الحاجة - اضغط على أي عبارة لنطقها فوراً.'
+                    : 'Ready Arabic phrases grouped by need - tap any phrase to speak it instantly.'}
+                </p>
+                <div className="flex flex-wrap gap-2" role="group" aria-label={isAr ? 'تصنيفات العبارات' : 'Phrase categories'}>
+                  {['all', ...Array.from(new Set(euphoniaPhrases.map((ph) => ph.category)))].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setEuphoniaCategory(cat)}
+                      aria-pressed={euphoniaCategory === cat}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors cursor-pointer ${
+                        euphoniaCategory === cat
+                          ? 'bg-[#1769AA] text-white'
+                          : 'bg-[#1A283D] text-[#94A3B8] hover:bg-[#1769AA]/30 border border-[#22354E]'
+                      }`}
+                    >
+                      {cat === 'all' ? (isAr ? 'الكل' : 'All') : `${getCategoryIcon(cat)} ${cat}`}
+                    </button>
+                  ))}
+                </div>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {euphoniaPhrases
+                    .filter((ph) => euphoniaCategory === 'all' || ph.category === euphoniaCategory)
+                    .map((ph) => (
+                      <button
+                        key={ph.id}
+                        type="button"
+                        onClick={() => speak(ph.text, profile.language)}
+                        aria-label={`${isAr ? 'نطق العبارة:' : 'Speak phrase:'} ${ph.text}`}
+                        className="p-3 rounded-2xl bg-[#131E2E] hover:bg-[#1769AA]/20 border border-[#22354E] hover:border-[#1769AA] text-start text-xs font-bold text-[#F8FAFC] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                      >
+                        <span aria-hidden="true">{getCategoryIcon(ph.category)}</span>
+                        <span>{ph.text}</span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
