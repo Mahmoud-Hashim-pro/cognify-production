@@ -295,7 +295,7 @@ const GlobalVoiceControls: React.FC<GlobalVoiceControlsProps> = ({ profile, isAr
         role="region"
         aria-label={isArabic ? 'التحكم الصوتي' : 'Voice control'}
         data-voice-dock
-        className="shrink-0 w-full flex items-center justify-end gap-3 px-4 py-2 bg-[#0B1F3A] border-t border-[#24476F]"
+        className="shrink-0 w-full flex items-center justify-end gap-3 px-4 max-md:ps-[68px] py-2 bg-[#0B1F3A] border-t border-[#24476F]"
       >
         <span className="text-sm flex-1 text-start" style={{ color: "#E2E8F0" }} aria-hidden="true">
           {isArabic ? 'اضغط مطولا واتكلم، أو اضغط مرة للبدء ومرة للإيقاف' : 'Hold to talk, or tap once to start and once to stop'}

@@ -709,7 +709,7 @@ export default function AccessibilityOverlay({
         onClick={() => toggleControlsHidden(false)}
         title="Show accessibility controls"
         aria-label="Show accessibility controls"
-        className="fixed bottom-24 start-3 md:bottom-20 md:start-24 z-50 w-11 h-11 rounded-full bg-[#112C4F]/90 text-[#4B9FE1] shadow-md border border-[#24476F] backdrop-blur-md flex items-center justify-center hover:bg-[#24476F] hover:text-white active:scale-95 pointer-events-auto transition-all"
+        className="fixed bottom-[7px] start-3 md:bottom-20 md:start-24 z-50 w-11 h-11 rounded-full bg-[#112C4F]/90 text-[#4B9FE1] shadow-md border border-[#24476F] backdrop-blur-md flex items-center justify-center hover:bg-[#24476F] hover:text-white active:scale-95 pointer-events-auto transition-all"
       >
         <Eye className="w-4 h-4" />
       </button>
