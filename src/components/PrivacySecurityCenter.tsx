@@ -342,7 +342,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         </div>
 
         {/* Header Cockpit */}
-        <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+        <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-4 sm:p-8 backdrop-blur-xl shadow-2xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
@@ -350,10 +350,10 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                   <Shield className="w-7 h-7" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                  <h1 className="text-lg sm:text-3xl font-bold tracking-tight text-white">
                     {isArabic ? 'مركز ذكاء الخصوصية والأمان' : 'Privacy & Security Intelligence'}
                   </h1>
-                  <p className="text-sm text-slate-400 mt-1">
+                  <p className="hidden sm:block text-sm text-slate-400 mt-1">
                     {isArabic
                       ? 'الخصوصية التفاضلية، محو البيانات الشامل GDPR/FERPA، وسجل تدقيق غير قابل للتلاعب'
                       : 'Epsilon-Differential Privacy, GDPR Article 17 Cascade Erasure, and Cryptographic Chained Audit Logging'}
@@ -362,7 +362,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Lock className="w-3.5 h-3.5" /> FERPA / GDPR Compliant
               </span>

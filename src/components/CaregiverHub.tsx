@@ -519,7 +519,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <h1 className={`font-black text-sm sm:text-base leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                 {t('Caregiver & Specialist Command Hub', 'لوحة تحكم المرافق والمختص الطبي', 'Centre Accompagnant & Spécialiste')}
               </h1>
-              <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+              <p className={`hidden sm:block text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {t('Telemetry, safety controls, sensory pattern analytics and clinical insights', 'متابعة المؤشرات الحيوية، التحليل السريري للأنماط الحسية، تجربة الطوارئ وجواز الوصول')}
               </p>
             </div>
