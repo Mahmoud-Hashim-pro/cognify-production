@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { L } from '../lib/translations';
 import {
   Terminal,
   Key,
@@ -119,12 +120,12 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                 </div>
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                    {isArabic ? 'وحدة تحكم مطوري المنصة وخطافات الويب' : 'Open Developer API & Webhooks Console'}
+                    {isArabic ? 'وحدة تحكم مطوري المنصة وخطافات الويب' : L('Open Developer API & Webhooks Console')}
                   </h1>
                   <p className="text-sm text-slate-400 mt-1">
                     {isArabic
                       ? 'مفاتيح API مشفرة، توقيعات HMAC-SHA256 لخطافات الويب، ومواصفات OpenAPI 3.1 القياسية'
-                      : 'Cryptographic API Key Lifecycle, RFC 2104 HMAC Webhook Stamping, and OpenAPI 3.1 Spec'}
+                      : L('Cryptographic API Key Lifecycle, RFC 2104 HMAC Webhook Stamping, and OpenAPI 3.1 Spec')}
                   </p>
                 </div>
               </div>

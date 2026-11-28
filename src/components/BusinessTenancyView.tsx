@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { L } from '../lib/translations';
 import {
   Building2,
   Users,
@@ -113,7 +114,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                 </div>
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                    {isArabic ? 'إدارة المؤسسات والمشتركين المتعددين' : 'Business & Multi-Tenant Management'}
+                    {isArabic ? 'إدارة المؤسسات والمشتركين المتعددين' : L('Business & Multi-Tenant Management')}
                   </h1>
                   <p className="text-sm text-slate-400 mt-1">
                     {tenant.name} &bull; <span className="font-mono text-[#E5A93C]">ID: {tenant.tenantId}</span>

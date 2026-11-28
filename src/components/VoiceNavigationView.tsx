@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MapPin, Navigation, Mic, Camera, Square, ExternalLink, LocateFixed } from 'lucide-react';
+import { L } from '../lib/translations';
 import { UserProfile } from '../types';
 import { speak, cancelSpeech } from '../lib/tts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
@@ -57,7 +58,7 @@ function localizeManeuver(instruction: string, name: string, distanceMeters: num
     straight: 'continue straight', '': 'continue straight',
   };
 
-  if (type === 'arrive') return isArabic ? 'وصلت وجهتك' : 'You have arrived';
+  if (type === 'arrive') return isArabic ? 'وصلت وجهتك' : L('You have arrived');
   if (type === 'depart') return isArabic ? `ابدأ ماشي${street}` : `Start walking${street}`;
   if (type === 'roundabout') return isArabic ? `${dist} ادخل الدوار واخرج منه${street}` : `${dist} take the roundabout${street}`;
   if (type === 'turn' || type === 'end' || type === 'fork' || type === 'merge' || type === 'new' || type === 'continue' || type === 'notification') {
@@ -146,7 +147,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
   const dictateDestination = useCallback(() => {
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
-      say(isArabic ? 'التعرف على الصوت مش مدعوم في المتصفح ده' : 'Speech recognition is not supported in this browser');
+      say(isArabic ? 'التعرف على الصوت مش مدعوم في المتصفح ده' : L('Speech recognition is not supported in this browser'));
       return;
     }
     cancelSpeech();
@@ -171,11 +172,11 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
     async (query: string) => {
       const p = positionRef.current;
       if (!p) {
-        say(isArabic ? 'لسه معرفتش مكانك، ثانية واحدة وجرب تاني' : 'I do not have your location yet, try again in a moment');
+        say(isArabic ? 'لسه معرفتش مكانك، ثانية واحدة وجرب تاني' : L('I do not have your location yet, try again in a moment'));
         return;
       }
       setBusy(true);
-      setStatusLine(isArabic ? 'بدور على المكان...' : 'Finding the place...');
+      setStatusLine(isArabic ? 'بدور على المكان...' : L('Finding the place...'));
       say(isArabic ? `بدور على ${query}` : `Looking for ${query}`);
       try {
         const headers = await getAuthHeaders();
@@ -205,7 +206,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
           : `The walk is ${Math.round(data.distanceMeters)} meters, about ${Math.max(1, Math.round(data.durationSeconds / 60))} minutes. ${localizeManeuver(data.steps[0].instruction, data.steps[0].name, data.steps[0].distanceMeters, false)}`;
         say(summary);
       } catch {
-        const msg = isArabic ? 'مقدرتش أجيب الطريق دلوقتي. جرب تاني بعد شوية.' : 'I could not get directions right now. Try again shortly.';
+        const msg = isArabic ? 'مقدرتش أجيب الطريق دلوقتي. جرب تاني بعد شوية.' : L('I could not get directions right now. Try again shortly.');
         setStatusLine(msg);
         say(msg);
       } finally {
@@ -251,7 +252,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
     const clean = dataUrl.replace(/^data:[^;]+;base64,/, '');
     const prompt = isArabic
       ? 'أنت مُحذّر عوائق لشخص كفيف ماشي في الشارع. بص للصورة وحدد: هل فيه خطر أو عائق قريب في طريق المشي (حفرة، سلالم، عربية، عمود، حاجز، أشخاص قريبين جدا، حبل، ارتفاع مفاجئ)؟ لو فيه خطر: ارد بجملة واحدة قصيرة جدا بالعامية المصرية تبدأ بكلمة "خطر" أو "انتبه" وتحدد نوع الخطر واتجاهه (يمين/شمال/قدام). لو الطريق آمن ارد بكلمة واحدة فقط: آمن.'
-      : 'You are an obstacle warner for a blind pedestrian. Look at the image: is there a close hazard in the walking path (hole, stairs, vehicle, pole, barrier, very close people, rope, sudden drop)? If yes: reply with ONE very short sentence starting with "Warning" naming the hazard and its direction (left/right/ahead). If the path is safe reply with exactly one word: safe.';
+      : L('You are an obstacle warner for a blind pedestrian. Look at the image: is there a close hazard in the walking path (hole, stairs, vehicle, pole, barrier, very close people, rope, sudden drop)? If yes: reply with ONE very short sentence starting with "Warning" naming the hazard and its direction (left/right/ahead). If the path is safe reply with exactly one word: safe.');
     try {
       const res = await generateAdaptiveResponse(
         prompt,
@@ -289,13 +290,13 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
       sayRef.current(
         isArabic
           ? 'مراقبة العقبات شغالة. ارفع الموبايل قدامك وامشي بحذر. ده مساعد مش بديل للعصا أو الكلب المرشد.'
-          : 'Obstacle assist is on. Hold the phone in front of you and walk carefully. This is an aid, not a replacement for a cane or guide dog.'
+          : L('Obstacle assist is on. Hold the phone in front of you and walk carefully. This is an aid, not a replacement for a cane or guide dog.')
       );
       obstacleTimerRef.current = window.setInterval(() => {
         void analyzeFrameRef.current();
       }, 2500);
     } catch {
-      sayRef.current(isArabic ? 'الكاميرا مش متاحة. اسمح بالكاميرا وجرب تاني.' : 'Camera unavailable. Allow camera access and try again.');
+      sayRef.current(isArabic ? 'الكاميرا مش متاحة. اسمح بالكاميرا وجرب تاني.' : L('Camera unavailable. Allow camera access and try again.'));
     }
   }, [isArabic]);
 
@@ -309,7 +310,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
     <div className="flex-1 w-full h-full overflow-y-auto bg-slate-950 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="mx-auto w-full max-w-xl px-4 py-4 pb-24 flex flex-col gap-4">
         <header className="space-y-1">
-          <h1 className="text-3xl font-black">{isArabic ? 'التنقل بالصوت' : 'Voice navigation'}</h1>
+          <h1 className="text-3xl font-black">{isArabic ? 'التنقل بالصوت' : L('Voice navigation')}</h1>
           <p className="text-base text-amber-300 font-semibold" role="note">
             {isArabic ? MOBILITY_SAFETY_DISCLAIMER_AR : MOBILITY_SAFETY_DISCLAIMER_EN}
           </p>
@@ -319,7 +320,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
           <p role="alert" className="rounded-2xl bg-red-900/60 border border-red-500 p-4 text-lg font-bold">
             {isArabic
               ? 'الموقع الجغرافي مش متاح. فعّل الموقع للمتصفح علشان التنقل يشتغل.'
-              : 'Location is unavailable. Enable location for this browser so navigation can work.'}
+              : L('Location is unavailable. Enable location for this browser so navigation can work.')}
           </p>
         )}
 
@@ -332,12 +333,12 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
             className={`w-full min-h-[110px] rounded-3xl text-2xl font-black flex items-center justify-center gap-4 shadow-xl active:scale-[0.98] ${
               listeningDest ? 'bg-red-600 animate-pulse' : 'bg-teal-600 hover:bg-teal-500'
             }`}
-            aria-label={isArabic ? 'قول وجهتك بالصوت' : 'Say your destination'}
+            aria-label={isArabic ? 'قول وجهتك بالصوت' : L('Say your destination')}
           >
             <Mic className="w-10 h-10" aria-hidden="true" />
             {listeningDest
-              ? (isArabic ? 'بسمعك... قول الوجهة' : 'Listening... say the destination')
-              : (isArabic ? 'قول وجهتك' : 'Say your destination')}
+              ? (isArabic ? 'بسمعك... قول الوجهة' : L('Listening... say the destination'))
+              : (isArabic ? 'قول وجهتك' : L('Say your destination'))}
           </button>
           <form
             className="flex gap-2"
@@ -347,13 +348,13 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
             }}
           >
             <label htmlFor="dest-input" className="sr-only">
-              {isArabic ? 'أو اكتب الوجهة' : 'Or type the destination'}
+              {isArabic ? 'أو اكتب الوجهة' : L('Or type the destination')}
             </label>
             <input
               id="dest-input"
               value={destinationText}
               onChange={(e) => setDestinationText(e.target.value)}
-              placeholder={isArabic ? 'أو اكتب الوجهة هنا' : 'Or type the destination here'}
+              placeholder={isArabic ? 'أو اكتب الوجهة هنا' : L('Or type the destination here')}
               className="flex-1 min-h-[64px] rounded-2xl bg-slate-800 border-2 border-slate-600 px-4 text-xl"
             />
             <button
@@ -362,7 +363,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
               className="min-h-[64px] px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-xl font-black disabled:opacity-40"
             >
               <Navigation className="w-7 h-7" aria-hidden="true" />
-              <span className="sr-only">{isArabic ? 'ابدأ التنقل' : 'Start navigation'}</span>
+              <span className="sr-only">{isArabic ? 'ابدأ التنقل' : L('Start navigation')}</span>
             </button>
           </form>
         </div>
@@ -375,7 +376,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
 
         {/* Active route */}
         {route && (
-          <section aria-label={isArabic ? 'الطريق الحالي' : 'Current route'} className="rounded-3xl bg-slate-900 border-2 border-teal-700 p-5 space-y-3">
+          <section aria-label={isArabic ? 'الطريق الحالي' : L('Current route')} className="rounded-3xl bg-slate-900 border-2 border-teal-700 p-5 space-y-3">
             <p className="text-xl font-bold">
               {isArabic
                 ? `المشوار: ${route.distanceMeters >= 1000 ? (route.distanceMeters / 1000).toFixed(1) + ' كيلو' : Math.round(route.distanceMeters) + ' متر'} — حوالي ${Math.max(1, Math.round(route.durationSeconds / 60))} دقيقة`
@@ -393,11 +394,11 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
               onClick={() => {
                 setRoute(null);
                 cancelSpeech();
-                say(isArabic ? 'اتلغى التنقل' : 'Navigation cancelled');
+                say(isArabic ? 'اتلغى التنقل' : L('Navigation cancelled'));
               }}
               className="w-full min-h-[64px] rounded-2xl bg-slate-700 hover:bg-slate-600 text-xl font-bold"
             >
-              {isArabic ? 'إنهاء التنقل' : 'End navigation'}
+              {isArabic ? 'إنهاء التنقل' : L('End navigation')}
             </button>
           </section>
         )}
@@ -425,12 +426,12 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
         <section className="rounded-3xl bg-slate-900 border-2 border-amber-700 p-5 space-y-3">
           <h2 className="text-2xl font-black flex items-center gap-2">
             <Camera className="w-7 h-7" aria-hidden="true" />
-            {isArabic ? 'تحذير العقبات أثناء المشي' : 'Walking obstacle warning'}
+            {isArabic ? 'تحذير العقبات أثناء المشي' : L('Walking obstacle warning')}
           </h2>
           <p className="text-base text-amber-300 font-semibold">
             {isArabic
               ? 'ده مساعد بس — مش بديل للعصا البيضاء أو الكلب المرشد. ميعرفش يشوف كل حاجة.'
-              : 'This is an aid only — not a replacement for a white cane or guide dog. It cannot see everything.'}
+              : L('This is an aid only — not a replacement for a white cane or guide dog. It cannot see everything.')}
           </p>
           <video ref={videoRef} className="w-full rounded-2xl bg-black aspect-video" muted playsInline aria-hidden="true" />
           {obstacleActive ? (
@@ -438,12 +439,12 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
               type="button"
               onClick={() => {
                 stopObstacleAssist();
-                say(isArabic ? 'اتوقفت مراقبة العقبات' : 'Obstacle assist stopped');
+                say(isArabic ? 'اتوقفت مراقبة العقبات' : L('Obstacle assist stopped'));
               }}
               className="w-full min-h-[90px] rounded-3xl bg-red-700 hover:bg-red-600 text-2xl font-black flex items-center justify-center gap-3 active:scale-[0.98]"
             >
               <Square className="w-8 h-8" aria-hidden="true" />
-              {isArabic ? 'إيقاف التحذير' : 'Stop warnings'}
+              {isArabic ? 'إيقاف التحذير' : L('Stop warnings')}
             </button>
           ) : (
             <button
@@ -451,7 +452,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
               onClick={() => void startObstacleAssist()}
               className="w-full min-h-[90px] rounded-3xl bg-amber-600 hover:bg-amber-500 text-2xl font-black active:scale-[0.98]"
             >
-              {isArabic ? 'تشغيل تحذير العقبات' : 'Start obstacle warning'}
+              {isArabic ? 'تشغيل تحذير العقبات' : L('Start obstacle warning')}
             </button>
           )}
         </section>
@@ -465,7 +466,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
             className="flex items-center justify-center gap-2 min-h-[64px] rounded-2xl bg-slate-800 border border-slate-600 text-lg font-bold text-slate-200"
           >
             <ExternalLink className="w-5 h-5" aria-hidden="true" />
-            {isArabic ? 'افتح في خرائط جوجل (احتياطي)' : 'Open in Google Maps (fallback)'}
+            {isArabic ? 'افتح في خرائط جوجل (احتياطي)' : L('Open in Google Maps (fallback)')}
           </a>
         )}
 
@@ -474,7 +475,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
           onClick={onNavigateBack}
           className="w-full min-h-[64px] rounded-2xl bg-slate-700 hover:bg-slate-600 text-xl font-bold"
         >
-          {isArabic ? 'رجوع' : 'Back'}
+          {isArabic ? 'رجوع' : L('Back')}
         </button>
       </div>
     </div>

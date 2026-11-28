@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { L } from '../../../../lib/translations';
 import {
   Volume2,
   VolumeX,
@@ -172,12 +173,12 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
 
   const handleRemoveToken = (idx: number) => {
     engine.removeSymbolFromSentence(idx);
-    setLiveAnnouncement(isArabic ? 'تم حذف العنصر' : 'Removed item');
+    setLiveAnnouncement(isArabic ? 'تم حذف العنصر' : L('Removed item'));
   };
 
   const handleClearSentence = () => {
     engine.clearSentence();
-    setLiveAnnouncement(isArabic ? 'تم مسح اللوحة' : 'Sentence cleared');
+    setLiveAnnouncement(isArabic ? 'تم مسح اللوحة' : L('Sentence cleared'));
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -199,7 +200,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
       return;
     }
 
-    setLiveAnnouncement(isArabic ? 'جارٍ نطق الرسالة' : 'Speaking message');
+    setLiveAnnouncement(isArabic ? 'جارٍ نطق الرسالة' : L('Speaking message'));
     if (confirmSpeakDialogOpen) {
       setConfirmSpeakDialogOpen(false);
     }
@@ -214,7 +215,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
     setShowNewBoardModal(false);
     setNewBoardNameAr('');
     setNewBoardNameEn('');
-    setLiveAnnouncement(isArabic ? 'تم إنشاء اللوحة الجديدة' : 'Created new board');
+    setLiveAnnouncement(isArabic ? 'تم إنشاء اللوحة الجديدة' : L('Created new board'));
   };
 
   const handleAddCustomSymbol = () => {
@@ -240,7 +241,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
     if (!sentenceText.trim()) return;
     engine.addFavoritePhrase(sentenceText, sentenceText, selectedCategory as string);
     setFavoritePhrases(engine.getFavoritePhrases());
-    setLiveAnnouncement(isArabic ? 'حُفظت في الرسائل المفضلة' : 'Saved to favorites');
+    setLiveAnnouncement(isArabic ? 'حُفظت في الرسائل المفضلة' : L('Saved to favorites'));
   };
 
   const handleExportData = () => {
@@ -266,12 +267,12 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
           setCategoryCatalog(engine.getCategoryMetadataCatalog());
           setSymbols(engine.getSymbols(selectedCategory));
           setFavoritePhrases(engine.getFavoritePhrases());
-          setLiveAnnouncement(isArabic ? 'تم استيراد البيانات بنجاح' : 'Import successful');
+          setLiveAnnouncement(isArabic ? 'تم استيراد البيانات بنجاح' : L('Import successful'));
         } else {
           alert(res.error);
         }
       } catch (err) {
-        alert(isArabic ? 'ملف غير صالح' : 'Invalid file format');
+        alert(isArabic ? 'ملف غير صالح' : L('Invalid file format'));
       }
     };
     reader.readAsText(file);
@@ -351,7 +352,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center gap-3">
             <MessageSquare className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-            {isArabic ? 'نظام التواصل البديل والمعزز (AAC)' : 'Personal AAC Communication System'}
+            {isArabic ? 'نظام التواصل البديل والمعزز (AAC)' : L('Personal AAC Communication System')}
           </h1>
           <p className="text-sm opacity-80 mt-1">
             {isArabic
@@ -368,9 +369,9 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               const bId = e.target.value;
               engine.setActiveBoard(bId);
               setActiveBoard(engine.getActiveBoard());
-              setLiveAnnouncement(isArabic ? 'تم تغيير اللوحة النشطة' : 'Active board switched');
+              setLiveAnnouncement(isArabic ? 'تم تغيير اللوحة النشطة' : L('Active board switched'));
             }}
-            aria-label={isArabic ? 'اختر لوحة التواصل' : 'Select AAC Board'}
+            aria-label={isArabic ? 'اختر لوحة التواصل' : L('Select AAC Board')}
             className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-indigo-500"
           >
             {allBoards.map((b) => (
@@ -385,7 +386,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-sm font-medium hover:bg-indigo-100 transition-colors"
           >
             <Plus className="w-4 h-4" />
-            {isArabic ? 'لوحة جديدة' : 'New Board'}
+            {isArabic ? 'لوحة جديدة' : L('New Board')}
           </button>
 
           {/* Switch Scan Mode Toggle */}
@@ -402,16 +403,16 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             {isScanning
               ? isArabic
                 ? 'المسح التلقائي مفعل'
-                : 'Scanning Active'
+                : L('Scanning Active')
               : isArabic
               ? 'تفعيل المسح (مفتاح)'
-              : 'Enable Switch Scan'}
+              : L('Enable Switch Scan')}
           </button>
 
           {/* Settings Modal Button */}
           <button
             onClick={() => setShowSettingsModal(true)}
-            aria-label={isArabic ? 'إعدادات الوصول والصوت' : 'Accessibility & Voice Settings'}
+            aria-label={isArabic ? 'إعدادات الوصول والصوت' : L('Accessibility & Voice Settings')}
             className="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <Settings className="w-5 h-5" />
@@ -421,7 +422,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
 
       {/* ─── Top Sentence Builder & Text Input Bar ────────────────────────── */}
       <section
-        aria-label={isArabic ? 'شريط تركيب وقراءة الجملة' : 'Sentence Composition & Speech Bar'}
+        aria-label={isArabic ? 'شريط تركيب وقراءة الجملة' : L('Sentence Composition & Speech Bar')}
         className={`mb-6 p-4 rounded-2xl border transition-all ${
           preferences.highContrastMode
             ? 'border-yellow-400 bg-black'
@@ -430,7 +431,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
       >
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs uppercase tracking-wider font-bold opacity-70">
-            {isArabic ? 'الرسالة المجمعة / النص المقروء' : 'Composed Message / Spoken Text'}
+            {isArabic ? 'الرسالة المجمعة / النص المقروء' : L('Composed Message / Spoken Text')}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -439,7 +440,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/30 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800 disabled:opacity-40"
             >
               <Heart className="w-3.5 h-3.5" />
-              {isArabic ? 'حفظ كمفضلة' : 'Save Favorite'}
+              {isArabic ? 'حفظ كمفضلة' : L('Save Favorite')}
             </button>
             <button
               onClick={handleClearSentence}
@@ -447,7 +448,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 disabled:opacity-40"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              {isArabic ? 'مسح الكل (Esc)' : 'Clear (Esc)'}
+              {isArabic ? 'مسح الكل (Esc)' : L('Clear (Esc)')}
             </button>
           </div>
         </div>
@@ -482,9 +483,9 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             placeholder={
               isArabic
                 ? 'انقر على الرموز لتأليف الجملة، أو اكتب مباشرة هنا...'
-                : 'Click symbols to construct sentence, or type directly here...'
+                : L('Click symbols to construct sentence, or type directly here...')
             }
-            aria-label={isArabic ? 'نص الرسالة للتعديل والنطق' : 'Message text to speak'}
+            aria-label={isArabic ? 'نص الرسالة للتعديل والنطق' : L('Message text to speak')}
             className={`flex-1 p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] resize-none ${getTextSizeClass()}`}
           />
 
@@ -492,27 +493,27 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
           <button
             onClick={() => handleSpeak(false)}
             disabled={!sentenceText.trim()}
-            aria-label={isArabic ? 'انطق الرسالة صوتياً' : 'Speak Message Aloud'}
+            aria-label={isArabic ? 'انطق الرسالة صوتياً' : L('Speak Message Aloud')}
             className="min-h-[48px] px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-extrabold text-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
           >
             <Volume2 className="w-6 h-6" />
-            {isArabic ? 'انطق (Enter)' : 'Speak (Enter)'}
+            {isArabic ? 'انطق (Enter)' : L('Speak (Enter)')}
           </button>
         </div>
       </section>
 
       {/* ─── Category Selection Tabs (Large Touch Targets >= 56px) ────────── */}
-      <nav aria-label={isArabic ? 'فئات لوحة التواصل' : 'AAC Board Categories'} className="mb-6">
+      <nav aria-label={isArabic ? 'فئات لوحة التواصل' : L('AAC Board Categories')} className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs uppercase tracking-wider font-bold opacity-70">
-            {isArabic ? 'الفئات الأساسية (9 فئات معتمدة)' : 'Default Categories (9 Approved)'}
+            {isArabic ? 'الفئات الأساسية (9 فئات معتمدة)' : L('Default Categories (9 Approved)')}
           </span>
           <button
             onClick={() => setShowReorderModal(true)}
             className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
           >
             <Sliders className="w-3 h-3" />
-            {isArabic ? 'إعادة ترتيب الفئات' : 'Reorder Categories'}
+            {isArabic ? 'إعادة ترتيب الفئات' : L('Reorder Categories')}
           </button>
         </div>
 
@@ -545,7 +546,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
       </nav>
 
       {/* ─── Symbols Grid (Spacious Touch Targets >= 64px) ─────────────────── */}
-      <main aria-label={isArabic ? 'رموز وبطاقات الفئة' : 'Category Symbol Cards'}>
+      <main aria-label={isArabic ? 'رموز وبطاقات الفئة' : L('Category Symbol Cards')}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-lg">
@@ -554,7 +555,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 : categoryCatalog.find((c) => c.id === selectedCategory)?.labelEn}
             </span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 font-medium">
-              {symbols.length} {isArabic ? 'رمز' : 'symbols'}
+              {symbols.length} {isArabic ? 'رمز' : L('symbols')}
             </span>
           </div>
 
@@ -563,7 +564,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold hover:bg-emerald-100"
           >
             <Plus className="w-3.5 h-3.5" />
-            {isArabic ? 'إضافة بطاقة مخصصة' : 'Add Custom Symbol'}
+            {isArabic ? 'إضافة بطاقة مخصصة' : L('Add Custom Symbol')}
           </button>
         </div>
 
@@ -619,7 +620,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                         engine.deleteCustomSymbol(sym.id);
                         setSymbols(engine.getSymbols(selectedCategory));
                       }}
-                      aria-label={isArabic ? 'حذف البطاقة المخصصة' : 'Delete Custom Symbol'}
+                      aria-label={isArabic ? 'حذف البطاقة المخصصة' : L('Delete Custom Symbol')}
                       className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -634,12 +635,12 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
 
       {/* ─── Quick Phrases & Personal Shortcuts Drawer ─────────────────────── */}
       <section
-        aria-label={isArabic ? 'الردود السريعة والعبارات الشائعة' : 'Quick Responses'}
+        aria-label={isArabic ? 'الردود السريعة والعبارات الشائعة' : L('Quick Responses')}
         className="mt-8 p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
       >
         <h2 className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500" />
-          {isArabic ? 'الردود السريعة والعبارات المفضلة' : 'Quick Responses & Favorite Phrases'}
+          {isArabic ? 'الردود السريعة والعبارات المفضلة' : L('Quick Responses & Favorite Phrases')}
         </h2>
 
         <div className="flex flex-wrap gap-2">
@@ -674,13 +675,13 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
           <span>
             {isArabic
               ? 'إفصاح إتاحة الوصول الحركي والعمل دون اتصال'
-              : 'Motor Access & Offline Operational Disclosure'}
+              : L('Motor Access & Offline Operational Disclosure')}
           </span>
         </div>
         <p className="text-blue-800 dark:text-blue-300/80 leading-relaxed">
           {isArabic
             ? 'يدعم النظام مفاتيح الوصول الحركية البرمجية عبر واجهات HID القياسية (مفتاح المسافة Space للمسح، ومفتاح الإدخال Enter للتأكيد). جميع اللوحات والرموز وحفظ البيانات تعمل دون إنترنت 100%. نطق الأصوات (TTS) يعتمد دون إنترنت على الأصوات المثبتة محلياً بنظام التشغيل.'
-            : 'Supports software switch scanning via standard HID keyboard interfaces (Space for scan, Enter for select). All boards, symbols, and local storage operate 100% offline. Offline TTS relies strictly on locally installed OS speech synthesis voices.'}
+            : L('Supports software switch scanning via standard HID keyboard interfaces (Space for scan, Enter for select). All boards, symbols, and local storage operate 100% offline. Offline TTS relies strictly on locally installed OS speech synthesis voices.')}
         </p>
       </footer>
 
@@ -691,13 +692,13 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             <div className="flex items-center gap-3 text-amber-600 mb-4">
               <AlertTriangle className="w-6 h-6 shrink-0" />
               <h3 className="text-lg font-bold">
-                {isArabic ? 'تأكيد نطق الرسالة' : 'Confirm Speaking Message'}
+                {isArabic ? 'تأكيد نطق الرسالة' : L('Confirm Speaking Message')}
               </h3>
             </div>
             <p className="text-sm opacity-80 mb-4">
               {isArabic
                 ? 'تحتوي الرسالة على تنبيه طارئ أو نص معدل يدوياً. نرجو مراجعة النص قبل إخراجه صوتياً منعاً لأي تغيير في المعنى المقصود:'
-                : 'This message contains emergency alerts or modified text. Please confirm the exact wording before voicing aloud:'}
+                : L('This message contains emergency alerts or modified text. Please confirm the exact wording before voicing aloud:')}
             </p>
             <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-950 font-bold mb-6 text-sm">
               "{sentenceText}"
@@ -707,13 +708,13 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 onClick={() => setConfirmSpeakDialogOpen(false)}
                 className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                {isArabic ? 'إلغاء' : 'Cancel'}
+                {isArabic ? 'إلغاء' : L('Cancel')}
               </button>
               <button
                 onClick={() => handleSpeak(true)}
                 className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md"
               >
-                {isArabic ? 'تأكيد ونطق الآن' : 'Confirm & Speak Now'}
+                {isArabic ? 'تأكيد ونطق الآن' : L('Confirm & Speak Now')}
               </button>
             </div>
           </div>
@@ -727,7 +728,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-4">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <Sliders className="w-5 h-5 text-indigo-600" />
-                {isArabic ? 'إعدادات الإتاحة وتخصيص الصوت' : 'Accessibility & Voice Settings'}
+                {isArabic ? 'إعدادات الإتاحة وتخصيص الصوت' : L('Accessibility & Voice Settings')}
               </h3>
               <button
                 onClick={() => setShowSettingsModal(false)}
@@ -741,7 +742,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               {/* Text Size */}
               <div>
                 <label className="font-semibold block mb-1">
-                  {isArabic ? 'حجم النص على البطاقات:' : 'Text Size on Cards:'}
+                  {isArabic ? 'حجم النص على البطاقات:' : L('Text Size on Cards:')}
                 </label>
                 <div className="grid grid-cols-4 gap-2">
                   {(['small', 'medium', 'large', 'extra-large'] as const).map((sz) => (
@@ -766,7 +767,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               {/* High Contrast Mode */}
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                 <span className="font-semibold">
-                  {isArabic ? 'وضع التباين العالي (High Contrast):' : 'High Contrast Mode:'}
+                  {isArabic ? 'وضع التباين العالي (High Contrast):' : L('High Contrast Mode:')}
                 </span>
                 <input
                   type="checkbox"
@@ -783,12 +784,12 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div>
                   <span className="font-semibold block">
-                    {isArabic ? 'تأكيد الرسائل الحرجة قبل النطق:' : 'Confirm Critical Messages Before Speaking:'}
+                    {isArabic ? 'تأكيد الرسائل الحرجة قبل النطق:' : L('Confirm Critical Messages Before Speaking:')}
                   </span>
                   <span className="text-xs opacity-70">
                     {isArabic
                       ? 'يمنع النطق الخاطئ في نداءات الطوارئ والنصوص المعدلة'
-                      : 'Prevents unintended transmission of modified messages'}
+                      : L('Prevents unintended transmission of modified messages')}
                   </span>
                 </div>
                 <input
@@ -805,7 +806,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               {/* Speech Rate */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex justify-between font-semibold mb-1">
-                  <span>{isArabic ? 'سرعة النطق الصوتي:' : 'Speech Speed (Rate):'}</span>
+                  <span>{isArabic ? 'سرعة النطق الصوتي:' : L('Speech Speed (Rate):')}</span>
                   <span>{preferences.speechRate}x</span>
                 </div>
                 <input
@@ -826,7 +827,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               {/* Switch Scan Speed */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex justify-between font-semibold mb-1">
-                  <span>{isArabic ? 'سرعة المسح التلقائي للمفتاح:' : 'Switch Scan Interval:'}</span>
+                  <span>{isArabic ? 'سرعة المسح التلقائي للمفتاح:' : L('Switch Scan Interval:')}</span>
                   <span>{preferences.switchScanSpeedMs / 1000}s</span>
                 </div>
                 <input
@@ -851,18 +852,18 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 font-semibold text-xs"
                 >
                   <Download className="w-4 h-4" />
-                  {isArabic ? 'تصدير اللوحات (JSON)' : 'Export Boards (JSON)'}
+                  {isArabic ? 'تصدير اللوحات (JSON)' : L('Export Boards (JSON)')}
                 </button>
 
                 <label className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 font-semibold text-xs cursor-pointer">
                   <Upload className="w-4 h-4" />
-                  {isArabic ? 'استيراد لوحات' : 'Import Boards'}
+                  {isArabic ? 'استيراد لوحات' : L('Import Boards')}
                   <input type="file" accept=".json" onChange={handleImportFile} className="hidden" />
                 </label>
 
                 <button
                   onClick={() => {
-                    if (confirm(isArabic ? 'هل أنت متأكد من مسح البيانات المحلية واستعادة الإعدادات الافتراضية؟' : 'Reset all local AAC data?')) {
+                    if (confirm(isArabic ? 'هل أنت متأكد من مسح البيانات المحلية واستعادة الإعدادات الافتراضية؟' : L('Reset all local AAC data?'))) {
                       engine.clearAllLocalData();
                       setAllBoards(engine.getBoards());
                       setActiveBoard(engine.getActiveBoard());
@@ -876,7 +877,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 font-semibold text-xs ml-auto"
                 >
                   <Trash2 className="w-4 h-4" />
-                  {isArabic ? 'استعادة الافتراضي' : 'Reset to Factory'}
+                  {isArabic ? 'استعادة الافتراضي' : L('Reset to Factory')}
                 </button>
               </div>
             </div>
@@ -890,24 +891,24 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
           <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
               <Plus className="w-5 h-5 text-indigo-600" />
-              {isArabic ? 'إنشاء لوحة تواصل مخصصة' : 'Create Custom Board'}
+              {isArabic ? 'إنشاء لوحة تواصل مخصصة' : L('Create Custom Board')}
             </h3>
             <div className="space-y-3 mb-6">
               <div>
                 <label className="block text-xs font-bold mb-1">
-                  {isArabic ? 'اسم اللوحة (بالعربية):' : 'Board Name (Arabic):'}
+                  {isArabic ? 'اسم اللوحة (بالعربية):' : L('Board Name (Arabic):')}
                 </label>
                 <input
                   type="text"
                   value={newBoardNameAr}
                   onChange={(e) => setNewBoardNameAr(e.target.value)}
-                  placeholder={isArabic ? 'مثال: زيارة الطبيب' : 'e.g., Doctor Visit'}
+                  placeholder={isArabic ? 'مثال: زيارة الطبيب' : L('e.g., Doctor Visit')}
                   className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1">
-                  {isArabic ? 'اسم اللوحة (بالإنجليزية - اختياري):' : 'Board Name (English - Optional):'}
+                  {isArabic ? 'اسم اللوحة (بالإنجليزية - اختياري):' : L('Board Name (English - Optional):')}
                 </label>
                 <input
                   type="text"
@@ -923,14 +924,14 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 onClick={() => setShowNewBoardModal(false)}
                 className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold"
               >
-                {isArabic ? 'إلغاء' : 'Cancel'}
+                {isArabic ? 'إلغاء' : L('Cancel')}
               </button>
               <button
                 onClick={handleCreateBoard}
                 disabled={!newBoardNameAr.trim()}
                 className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold disabled:opacity-40"
               >
-                {isArabic ? 'حفظ وإنشاء' : 'Save & Create'}
+                {isArabic ? 'حفظ وإنشاء' : L('Save & Create')}
               </button>
             </div>
           </div>
@@ -943,36 +944,36 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
           <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
               <Plus className="w-5 h-5 text-emerald-600" />
-              {isArabic ? 'إضافة بطاقة / رمز تواصل مخصص' : 'Add Custom Symbol Card'}
+              {isArabic ? 'إضافة بطاقة / رمز تواصل مخصص' : L('Add Custom Symbol Card')}
             </h3>
             <div className="space-y-3 mb-6 text-sm">
               <div>
                 <label className="block text-xs font-bold mb-1">
-                  {isArabic ? 'الاسم الظاهر (بالعربية):' : 'Card Label (Arabic):'}
+                  {isArabic ? 'الاسم الظاهر (بالعربية):' : L('Card Label (Arabic):')}
                 </label>
                 <input
                   type="text"
                   value={newSymLabelAr}
                   onChange={(e) => setNewSymLabelAr(e.target.value)}
-                  placeholder={isArabic ? 'مثال: عصير برتقال' : 'e.g. Orange Juice'}
+                  placeholder={isArabic ? 'مثال: عصير برتقال' : L('e.g. Orange Juice')}
                   className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1">
-                  {isArabic ? 'الجملة المنطوقة (بالعربية):' : 'Spoken Text (Arabic):'}
+                  {isArabic ? 'الجملة المنطوقة (بالعربية):' : L('Spoken Text (Arabic):')}
                 </label>
                 <input
                   type="text"
                   value={newSymSpokenAr}
                   onChange={(e) => setNewSymSpokenAr(e.target.value)}
-                  placeholder={isArabic ? 'أود شرب كوب من عصير البرتقال من فضلك' : 'I would like orange juice please'}
+                  placeholder={isArabic ? 'أود شرب كوب من عصير البرتقال من فضلك' : L('I would like orange juice please')}
                   className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1">
-                  {isArabic ? 'الفئة:' : 'Category:'}
+                  {isArabic ? 'الفئة:' : L('Category:')}
                 </label>
                 <select
                   value={newSymCategory}
@@ -992,14 +993,14 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 onClick={() => setShowAddSymbolModal(false)}
                 className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold"
               >
-                {isArabic ? 'إلغاء' : 'Cancel'}
+                {isArabic ? 'إلغاء' : L('Cancel')}
               </button>
               <button
                 onClick={handleAddCustomSymbol}
                 disabled={!newSymLabelAr.trim()}
                 className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold disabled:opacity-40"
               >
-                {isArabic ? 'إضافة الرمز' : 'Add Symbol'}
+                {isArabic ? 'إضافة الرمز' : L('Add Symbol')}
               </button>
             </div>
           </div>
@@ -1012,12 +1013,12 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
           <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl">
             <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
               <Sliders className="w-5 h-5 text-indigo-600" />
-              {isArabic ? 'إعادة ترتيب فئات لوحة التواصل' : 'Reorder Categories'}
+              {isArabic ? 'إعادة ترتيب فئات لوحة التواصل' : L('Reorder Categories')}
             </h3>
             <p className="text-xs opacity-70 mb-4">
               {isArabic
                 ? 'استخدم الأسهم لتحريك الفئات الأكثر أهمية للأعلى لتسهيل الوصول إليها:'
-                : 'Use arrows to move frequently needed categories higher for faster access:'}
+                : L('Use arrows to move frequently needed categories higher for faster access:')}
             </p>
             <div className="space-y-1.5 max-h-60 overflow-y-auto mb-6">
               {categoryCatalog.map((c, i) => (
@@ -1041,7 +1042,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                         setCategoryCatalog(engine.getCategoryMetadataCatalog());
                       }}
                       className="p-1 rounded bg-slate-200 dark:bg-slate-800 disabled:opacity-30"
-                      aria-label={isArabic ? 'تحريك للأعلى' : 'Move up'}
+                      aria-label={isArabic ? 'تحريك للأعلى' : L('Move up')}
                     >
                       ↑
                     </button>
@@ -1056,7 +1057,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                         setCategoryCatalog(engine.getCategoryMetadataCatalog());
                       }}
                       className="p-1 rounded bg-slate-200 dark:bg-slate-800 disabled:opacity-30"
-                      aria-label={isArabic ? 'تحريك للأسفل' : 'Move down'}
+                      aria-label={isArabic ? 'تحريك للأسفل' : L('Move down')}
                     >
                       ↓
                     </button>
@@ -1069,7 +1070,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 onClick={() => setShowReorderModal(false)}
                 className="px-5 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm"
               >
-                {isArabic ? 'تم' : 'Done'}
+                {isArabic ? 'تم' : L('Done')}
               </button>
             </div>
           </div>

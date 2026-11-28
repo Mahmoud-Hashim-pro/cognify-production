@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, BookOpen, Plus, Trash2, Check } from 'lucide-react';
+import { L } from '../../../../lib/translations';
 import type { VocabularyItem } from '../types';
 
 interface VocabularyModalProps {
@@ -52,12 +53,12 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
           <div className="flex items-center gap-2.5">
             <BookOpen className="w-5 h-5 text-[#12CFE0]" aria-hidden="true" />
             <h2 id="vocab-modal-title" className="text-lg font-extrabold text-[#F4F7FB]">
-              {isAr ? 'المفردات المخصصة والتصحيح الصوتي' : 'Custom Vocabulary & Phonetic Corrections'}
+              {isAr ? 'المفردات المخصصة والتصحيح الصوتي' : L('Custom Vocabulary & Phonetic Corrections')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            aria-label={isAr ? 'إغلاق' : 'Close'}
+            aria-label={isAr ? 'إغلاق' : L('Close')}
             className="p-2 rounded-xl text-[#A9BDD3] hover:text-white hover:bg-[#102D4D] transition-colors focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -67,7 +68,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
         <p className="text-xs text-[#A9BDD3] leading-relaxed mb-5">
           {isAr
             ? 'عرّف الكلمات والأسماء التي يخطئ المحرك الصوتي في سماعها، وسيتم استبدالها تلقائياً بالنص الصحيح لحظياً في الترجمة.'
-            : 'Define custom words, proper names, or technical terms that speech recognition mishears. They will automatically be corrected in live captions.'}
+            : L('Define custom words, proper names, or technical terms that speech recognition mishears. They will automatically be corrected in live captions.')}
         </p>
 
         {/* Add Form */}
@@ -75,40 +76,40 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#A9BDD3] mb-1">
-                {isAr ? 'الكلمة كما يسمعها المحرك (الخطأ):' : 'Misheard Phrase (What audio engine hears):'}
+                {isAr ? 'الكلمة كما يسمعها المحرك (الخطأ):' : L('Misheard Phrase (What audio engine hears):')}
               </label>
               <input
                 type="text"
                 required
                 value={original}
                 onChange={(e) => setOriginal(e.target.value)}
-                placeholder={isAr ? 'مثال: رفيق' : 'e.g., Rafik'}
+                placeholder={isAr ? 'مثال: رفيق' : L('e.g., Rafik')}
                 className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-[#12CFE0] mb-1">
-                {isAr ? 'الكلمة الصحيحة المطلوبة:' : 'Correct Replacement Phrase:'}
+                {isAr ? 'الكلمة الصحيحة المطلوبة:' : L('Correct Replacement Phrase:')}
               </label>
               <input
                 type="text"
                 required
                 value={replacement}
                 onChange={(e) => setReplacement(e.target.value)}
-                placeholder={isAr ? 'مثال: رفيقي' : 'e.g., Rafiqi'}
+                placeholder={isAr ? 'مثال: رفيقي' : L('e.g., Rafiqi')}
                 className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
               />
             </div>
           </div>
           <div>
             <label className="block text-xs font-bold text-[#A9BDD3] mb-1">
-              {isAr ? 'ملاحظة اختيارية (سياق أو تصنيف):' : 'Optional Context Note:'}
+              {isAr ? 'ملاحظة اختيارية (سياق أو تصنيف):' : L('Optional Context Note:')}
             </label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder={isAr ? 'مثال: اسم التطبيق' : 'e.g., App Name'}
+              placeholder={isAr ? 'مثال: اسم التطبيق' : L('e.g., App Name')}
               className="w-full bg-[#071B33] border border-[#12CFE0]/30 rounded-lg px-3 py-2 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
             />
           </div>
@@ -117,7 +118,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
             className="w-full py-2.5 rounded-lg bg-[#1769AA] hover:bg-[#076D78] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
-            <span>{isAr ? 'إضافة إلى القاموس الصوتي' : 'Add to Vocabulary'}</span>
+            <span>{isAr ? 'إضافة إلى القاموس الصوتي' : L('Add to Vocabulary')}</span>
           </button>
         </form>
 
@@ -128,7 +129,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
           </h3>
           {items.length === 0 ? (
             <p className="text-xs text-[#A9BDD3]/60 italic p-3 text-center bg-[#102D4D]/50 rounded-lg">
-              {isAr ? 'لا توجد كلمات مخصصة حالياً.' : 'No custom vocabulary defined yet.'}
+              {isAr ? 'لا توجد كلمات مخصصة حالياً.' : L('No custom vocabulary defined yet.')}
             </p>
           ) : (
             <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
@@ -163,7 +164,7 @@ export const VocabularyModal: React.FC<VocabularyModalProps> = ({
             onClick={onClose}
             className="py-2 px-5 rounded-xl bg-[#1769AA] text-white font-bold text-xs hover:bg-[#076D78] transition-all focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
           >
-            {isAr ? 'تم' : 'Done'}
+            {isAr ? 'تم' : L('Done')}
           </button>
         </div>
       </div>

@@ -8,6 +8,7 @@
  * sampled in-memory and streams are stopped immediately after each check.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import { L } from '../lib/translations';
 import { Sun, Volume2, Lightbulb, Loader2 } from 'lucide-react';
 import {
   analyzeAmbientLuminance,
@@ -133,15 +134,15 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
   const subCls = isDarkMode ? 'text-stone-400' : 'text-stone-500';
 
   const statusLabel = (state: CheckState) => {
-    if (state === 'checking') return isArabic ? 'جاري الفحص...' : 'Checking...';
+    if (state === 'checking') return isArabic ? 'جاري الفحص...' : L('Checking...');
     if (state === 'denied')
       return isArabic
         ? 'تم رفض الإذن. اسمح بالوصول من إعدادات المتصفح ثم أعد المحاولة.'
-        : 'Permission denied. Allow access in your browser settings and try again.';
+        : L('Permission denied. Allow access in your browser settings and try again.');
     if (state === 'unsupported')
       return isArabic
         ? 'هذا المتصفح لا يدعم الوصول للكاميرا/الميكروفون.'
-        : 'This browser does not support camera/microphone access.';
+        : L('This browser does not support camera/microphone access.');
     return '';
   };
 
@@ -179,7 +180,7 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
       <p className={`text-xs leading-relaxed ${subCls}`}>
         {isArabic
           ? 'يفحص هذا القسم إضاءة المكان ومستوى الضوضاء لحظياً عبر الكاميرا والميكروفون ليقترح إعدادات أسهل لعينيك وأذنيك. لا يتم تسجيل أو رفع أي صورة أو صوت — الفحص يتم على جهازك فقط ويتوقف فور انتهائه.'
-          : 'This section checks your room lighting and noise level on the spot using your camera and microphone, then suggests settings that are easier on your eyes and ears. Nothing is recorded or uploaded - the check runs only on your device and stops as soon as it finishes.'}
+          : L('This section checks your room lighting and noise level on the spot using your camera and microphone, then suggests settings that are easier on your eyes and ears. Nothing is recorded or uploaded - the check runs only on your device and stops as soon as it finishes.')}
       </p>
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -188,12 +189,12 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
           <div className="flex items-center gap-2">
             <Sun className="w-5 h-5 text-amber-400" aria-hidden="true" />
             <h3 className={`text-sm font-black ${textCls}`}>
-              {isArabic ? 'فحص الإضاءة المحيطة' : 'Ambient lighting check'}
+              {isArabic ? 'فحص الإضاءة المحيطة' : L('Ambient lighting check')}
             </h3>
           </div>
           {luminance && (
             <p className={`text-xs font-bold ${textCls}`}>
-              {isArabic ? 'النتيجة: ' : 'Result: '}
+              {isArabic ? 'النتيجة: ' : L('Result: ')}
               {luminanceLabel(luminance)}
             </p>
           )}
@@ -214,7 +215,7 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
             disabled={lightState === 'checking'}
             className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] disabled:opacity-50 text-white text-xs font-bold transition-colors cursor-pointer"
           >
-            {isArabic ? 'افحص الإضاءة الآن' : 'Check lighting now'}
+            {isArabic ? 'افحص الإضاءة الآن' : L('Check lighting now')}
           </button>
         </div>
 
@@ -223,12 +224,12 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
           <div className="flex items-center gap-2">
             <Volume2 className="w-5 h-5 text-sky-400" aria-hidden="true" />
             <h3 className={`text-sm font-black ${textCls}`}>
-              {isArabic ? 'فحص الضوضاء المحيطة' : 'Ambient noise check'}
+              {isArabic ? 'فحص الضوضاء المحيطة' : L('Ambient noise check')}
             </h3>
           </div>
           {noiseLevel && (
             <p className={`text-xs font-bold ${textCls}`}>
-              {isArabic ? 'النتيجة: ' : 'Result: '}
+              {isArabic ? 'النتيجة: ' : L('Result: ')}
               {noiseLabel(noiseLevel)}
               {dbApprox !== null &&
                 (isArabic ? ` (حوالي ${dbApprox} ديسيبل)` : ` (~${dbApprox} dB)`)}
@@ -251,7 +252,7 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
             disabled={noiseState === 'checking'}
             className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] disabled:opacity-50 text-white text-xs font-bold transition-colors cursor-pointer"
           >
-            {isArabic ? 'افحص الضوضاء الآن' : 'Check noise now'}
+            {isArabic ? 'افحص الضوضاء الآن' : L('Check noise now')}
           </button>
         </div>
       </div>
@@ -267,7 +268,7 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
           <div className="flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-emerald-400" aria-hidden="true" />
             <h3 className={`text-sm font-black ${textCls}`}>
-              {isArabic ? 'التوصيات' : 'Recommendations'}
+              {isArabic ? 'التوصيات' : L('Recommendations')}
             </h3>
           </div>
           <p className={`text-xs leading-relaxed ${textCls}`}>
@@ -276,17 +277,17 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
           <div className="flex flex-wrap gap-2">
             {recommendations.highContrastRecommended && (
               <span className="px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[11px] font-bold">
-                {isArabic ? '⬛ وضع التباين العالي' : '⬛ High-contrast mode'}
+                {isArabic ? '⬛ وضع التباين العالي' : L('⬛ High-contrast mode')}
               </span>
             )}
             {recommendations.liveCaptionsRecommended && (
               <span className="px-3 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/40 text-sky-300 text-[11px] font-bold">
-                {isArabic ? '💬 التسميات التوضيحية المباشرة' : '💬 Live captions'}
+                {isArabic ? '💬 التسميات التوضيحية المباشرة' : L('💬 Live captions')}
               </span>
             )}
             {!recommendations.highContrastRecommended && !recommendations.liveCaptionsRecommended && (
               <span className="px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold">
-                {isArabic ? '✓ البيئة الحالية مناسبة' : '✓ Current environment is suitable'}
+                {isArabic ? '✓ البيئة الحالية مناسبة' : L('✓ Current environment is suitable')}
               </span>
             )}
           </div>

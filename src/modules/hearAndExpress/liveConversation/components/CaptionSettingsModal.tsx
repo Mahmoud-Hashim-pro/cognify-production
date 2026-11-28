@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Sliders, Eye, Shield, Check } from 'lucide-react';
+import { L } from '../../../../lib/translations';
 import type { CaptionVisualSettings, CaptionTextSize, CaptionTheme, CaptionFontFamily, PrivacySettings } from '../types';
 
 interface CaptionSettingsModalProps {
@@ -97,12 +98,12 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
           <div className="flex items-center gap-2.5">
             <Sliders className="w-5 h-5 text-[#12CFE0]" aria-hidden="true" />
             <h2 id="caption-settings-title" className="text-lg font-extrabold text-[#F4F7FB]">
-              {isAr ? 'إعدادات الترجمة والخصوصية' : 'Caption & Privacy Settings'}
+              {isAr ? 'إعدادات الترجمة والخصوصية' : L('Caption & Privacy Settings')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            aria-label={isAr ? 'إغلاق الإعدادات' : 'Close Settings'}
+            aria-label={isAr ? 'إغلاق الإعدادات' : L('Close Settings')}
             className="p-2 rounded-xl text-[#A9BDD3] hover:text-white hover:bg-[#102D4D] transition-colors focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -113,7 +114,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
         <div className="space-y-3 mb-6">
           <label className="text-sm font-bold text-[#12CFE0] flex items-center gap-2">
             <Eye className="w-4 h-4" aria-hidden="true" />
-            <span>{isAr ? 'حجم خط الترجمة (للقراءة السهلة)' : 'Caption Font Size (Readability)'}</span>
+            <span>{isAr ? 'حجم خط الترجمة (للقراءة السهلة)' : L('Caption Font Size (Readability)')}</span>
           </label>
           <div className="grid grid-cols-2 gap-2.5">
             {textSizes.map((s) => (
@@ -137,7 +138,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
         {/* Section 2: Contrast Theme */}
         <div className="space-y-3 mb-6">
           <label className="text-sm font-bold text-[#12CFE0]">
-            {isAr ? 'سمة التباين اللوني (معايير WCAG 2.2 AA)' : 'Contrast Theme (WCAG 2.2 AA Standards)'}
+            {isAr ? 'سمة التباين اللوني (معايير WCAG 2.2 AA)' : L('Contrast Theme (WCAG 2.2 AA Standards)')}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {themes.map((t) => (
@@ -172,7 +173,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
         {/* Section 3: Font Family */}
         <div className="space-y-3 mb-6">
           <label className="text-sm font-bold text-[#12CFE0]">
-            {isAr ? 'نوع الخط' : 'Font Family'}
+            {isAr ? 'نوع الخط' : L('Font Family')}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {fontFamilies.map((f) => (
@@ -196,7 +197,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
         <div className="space-y-3 mb-6 border-t border-[#12CFE0]/20 pt-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-[#F4F7FB]">
-              {isAr ? 'عرض الطوابع الزمنية' : 'Show Timestamps'}
+              {isAr ? 'عرض الطوابع الزمنية' : L('Show Timestamps')}
             </span>
             <input
               type="checkbox"
@@ -207,7 +208,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-[#F4F7FB]">
-              {isAr ? 'عرض أسماء المتحدثين' : 'Show Speaker Labels'}
+              {isAr ? 'عرض أسماء المتحدثين' : L('Show Speaker Labels')}
             </span>
             <input
               type="checkbox"
@@ -218,7 +219,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-[#F4F7FB]">
-              {isAr ? 'تمرير تلقائي لأسفل مع الكلام الجديد' : 'Auto-scroll to latest captions'}
+              {isAr ? 'تمرير تلقائي لأسفل مع الكلام الجديد' : L('Auto-scroll to latest captions')}
             </span>
             <input
               type="checkbox"
@@ -233,17 +234,17 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
         <div className="border-t border-[#12CFE0]/20 pt-4 space-y-3">
           <div className="flex items-center gap-2 text-sm font-bold text-emerald-400">
             <Shield className="w-4 h-4" aria-hidden="true" />
-            <span>{isAr ? 'ضمان الخصوصية وعدم حفظ الصوت' : 'Privacy & Audio Security Policy'}</span>
+            <span>{isAr ? 'ضمان الخصوصية وعدم حفظ الصوت' : L('Privacy & Audio Security Policy')}</span>
           </div>
           <p className="text-xs text-[#A9BDD3] leading-relaxed">
             {isAr
               ? 'التعرف الصوتي يتم معالجته لحظياً عبر واجهة المتصفح المدعومة. رفيقي لا يسجل أو يخزن أي ملفات صوتية خام على خوادمه نهائياً.'
-              : 'Speech recognition is processed in real time via the supported browser speech engine. Rafiqi never records or stores raw audio on any server.'}
+              : L('Speech recognition is processed in real time via the supported browser speech engine. Rafiqi never records or stores raw audio on any server.')}
           </p>
 
           <div className="space-y-2 pt-2">
             <label className="text-xs font-bold text-[#A9BDD3]">
-              {isAr ? 'سياسة الاحتفاظ بالنصوص المترجمة:' : 'Transcript Retention Policy:'}
+              {isAr ? 'سياسة الاحتفاظ بالنصوص المترجمة:' : L('Transcript Retention Policy:')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -255,7 +256,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
                     : 'bg-[#102D4D] border-white/10 text-[#A9BDD3]'
                 }`}
               >
-                {isAr ? 'أثناء الجلسة فقط (تمسح عند الإغلاق)' : 'Session Only (Cleared on Exit)'}
+                {isAr ? 'أثناء الجلسة فقط (تمسح عند الإغلاق)' : L('Session Only (Cleared on Exit)')}
               </button>
               <button
                 type="button"
@@ -266,7 +267,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
                     : 'bg-[#102D4D] border-white/10 text-[#A9BDD3]'
                 }`}
               >
-                {isAr ? 'حفظ محلي بالجهاز (مشفر في المتصفح)' : 'Save Locally on Device'}
+                {isAr ? 'حفظ محلي بالجهاز (مشفر في المتصفح)' : L('Save Locally on Device')}
               </button>
             </div>
           </div>
@@ -279,7 +280,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
             onClick={onClose}
             className="py-2.5 px-6 rounded-xl bg-[#1769AA] hover:bg-[#076D78] text-white font-bold text-sm transition-all focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
           >
-            {isAr ? 'حفظ وتطبيق' : 'Apply & Close'}
+            {isAr ? 'حفظ وتطبيق' : L('Apply & Close')}
           </button>
         </div>
       </div>

@@ -29,7 +29,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import type { ProactiveOpportunity } from '../lib/proactiveAssistantEngine';
 import type { LearningInsight } from '../lib/learningInsightsEngine';
 import {
@@ -118,7 +118,7 @@ export default function ProactiveSuggestionCard({
     border: 'border-amber-500/30 hover:border-amber-500/50',
     glow: 'bg-amber-500/10',
     badgeBg: 'bg-amber-500/15 border-amber-500/30 text-amber-300',
-    badgeText: isAr ? 'مراجعة تثبيت' : 'Retention Review',
+    badgeText: isAr ? 'مراجعة تثبيت' : L('Retention Review'),
     icon: RotateCcw,
     iconColor: 'text-amber-400',
     actionBtn: 'from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-amber-500/20',
@@ -130,7 +130,7 @@ export default function ProactiveSuggestionCard({
       border: 'border-rose-500/30 hover:border-rose-500/50',
       glow: 'bg-rose-500/10',
       badgeBg: 'bg-rose-500/15 border-rose-500/30 text-rose-300',
-      badgeText: isAr ? 'مساعدة مستهدفة' : 'Targeted Support',
+      badgeText: isAr ? 'مساعدة مستهدفة' : L('Targeted Support'),
       icon: AlertTriangle,
       iconColor: 'text-rose-400',
       actionBtn: 'from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-rose-500/20',
@@ -141,7 +141,7 @@ export default function ProactiveSuggestionCard({
       border: 'border-emerald-500/30 hover:border-emerald-500/50',
       glow: 'bg-emerald-500/10',
       badgeBg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300',
-      badgeText: isAr ? 'تحدٍ معرفي متقدم' : 'Growth Challenge',
+      badgeText: isAr ? 'تحدٍ معرفي متقدم' : L('Growth Challenge'),
       icon: Sparkles,
       iconColor: 'text-emerald-400',
       actionBtn: 'from-emerald-500 to-rose-600 hover:from-emerald-400 hover:to-rose-600 text-slate-950 shadow-emerald-500/20',
@@ -152,7 +152,7 @@ export default function ProactiveSuggestionCard({
       border: 'border-[#E5A93C]/30 hover:border-[#E5A93C]/50',
       glow: 'bg-[#4A1224]/30',
       badgeBg: 'bg-[#4A1224]/40 border-[#E5A93C]/30 text-[#E5A93C]',
-      badgeText: isAr ? 'استراتيجية عالية الفاعلية' : 'Optimal Strategy',
+      badgeText: isAr ? 'استراتيجية عالية الفاعلية' : L('Optimal Strategy'),
       icon: Zap,
       iconColor: 'text-[#E5A93C]',
       actionBtn: 'from-amber-400 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white shadow-[#E5A93C]/20',

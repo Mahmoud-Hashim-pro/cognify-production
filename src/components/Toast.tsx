@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { L } from '../lib/translations';
 import { X, CheckCircle2, AlertCircle, Info, AlertTriangle, RefreshCw } from "lucide-react";
 
 export interface ToastAction {
@@ -105,7 +106,7 @@ export function ToastContainer({ rtl = false }: ToastContainerProps) {
       aria-live="polite"
       aria-atomic="false"
       className={`fixed top-4 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none px-4 ${
-        rtl ? "left-0 sm:left-4" : "right-0 sm:right-4"
+        rtl ? "left-0 sm:left-4" : L("right-0 sm:right-4")
       }`}
       style={{ direction: rtl ? "rtl" : "ltr" }}
     >
@@ -176,8 +177,8 @@ export function ToastContainer({ rtl = false }: ToastContainerProps) {
                   <button
                     type="button"
                     onClick={() => removeToast(item.id)}
-                    aria-label={rtl ? "إغلاق الإشعار" : "Dismiss notification"}
-                    title={rtl ? "إغلاق الإشعار" : "Dismiss notification"}
+                    aria-label={rtl ? "إغلاق الإشعار" : L("Dismiss notification")}
+                    title={rtl ? "إغلاق الإشعار" : L("Dismiss notification")}
                     className="min-h-[36px] min-w-[36px] p-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-3 transition flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
                   >
                     <X className="h-4 w-4" aria-hidden="true" />

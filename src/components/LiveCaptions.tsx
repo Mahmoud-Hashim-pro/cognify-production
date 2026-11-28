@@ -286,7 +286,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const speakText = useCallback((text: string) => {
     if (!text.trim()) return;
     if (!('speechSynthesis' in window)) {
-      setError(isAr ? 'ميزة إخراج الصوت غير مدعومة في هذا المتصفح.' : "Speech output isn't supported on this browser.");
+      setError(isAr ? 'ميزة إخراج الصوت غير مدعومة في هذا المتصفح.' : L("Speech output isn't supported on this browser."));
       return;
     }
     try {
@@ -339,7 +339,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError(isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : "Speech recognition isn't supported in this browser. Try Chrome on Android or a recent Safari.");
+      setError(isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : L("Speech recognition isn't supported in this browser. Try Chrome on Android or a recent Safari."));
       return;
     }
     recognitionRef.current = new SpeechRecognition();
@@ -353,11 +353,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       // Map every error code to a clear message — otherwise captions just stop
       // mid-conversation with no explanation (common on hospital networks).
       const code = event?.error;
-      if (code === 'not-allowed' || code === 'service-not-allowed') setError(isAr ? 'تم رفض إذن الميكروفون. يرجى تفعيل الإذن من إعدادات المتصفح.' : "Microphone access denied. Enable permissions in your browser settings.");
-      else if (code === 'audio-capture') setError(isAr ? 'لم يتم العثور على ميكروفون. يرجى توصيل ميكروفون والمحاولة ثانية.' : "No microphone found. Please connect one and try again.");
-      else if (code === 'network') setError(isAr ? 'تعذر الاتصال بخدمة التعرف الصوتي — تحقق من اتصال الإنترنت.' : "Speech service unreachable — check the internet connection.");
+      if (code === 'not-allowed' || code === 'service-not-allowed') setError(isAr ? 'تم رفض إذن الميكروفون. يرجى تفعيل الإذن من إعدادات المتصفح.' : L("Microphone access denied. Enable permissions in your browser settings."));
+      else if (code === 'audio-capture') setError(isAr ? 'لم يتم العثور على ميكروفون. يرجى توصيل ميكروفون والمحاولة ثانية.' : L("No microphone found. Please connect one and try again."));
+      else if (code === 'network') setError(isAr ? 'تعذر الاتصال بخدمة التعرف الصوتي — تحقق من اتصال الإنترنت.' : L("Speech service unreachable — check the internet connection."));
       else if (code === 'no-speech' || code === 'aborted') { /* benign — no message */ }
-      else setError(isAr ? 'توقف التعرف على الصوت. اضغط على الميكروفون للمحاولة ثانية.' : "Speech recognition stopped. Tap the mic to retry.");
+      else setError(isAr ? 'توقف التعرف على الصوت. اضغط على الميكروفون للمحاولة ثانية.' : L("Speech recognition stopped. Tap the mic to retry."));
       setIsListening(false);
       stopAudioLevelTracking();
     };
@@ -613,10 +613,10 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             if (result?.trim()) {
               await processUtterance(result.trim());
             } else {
-              setError(isAr ? 'لم يتم رصد صوت واضح. حاول التحدث بنبرة أوضح أو تعديل الملف الصوتي.' : "No speech detected. Try speaking more clearly or adjusting your speech profile.");
+              setError(isAr ? 'لم يتم رصد صوت واضح. حاول التحدث بنبرة أوضح أو تعديل الملف الصوتي.' : L("No speech detected. Try speaking more clearly or adjusting your speech profile."));
             }
           } catch (err) {
-            setError(isAr ? 'فشل فك ترميز الصوت. تحقق من الميكروفون وحاول ثانية.' : "Audio decoding failed. Check your microphone and try again.");
+            setError(isAr ? 'فشل فك ترميز الصوت. تحقق من الميكروفون وحاول ثانية.' : L("Audio decoding failed. Check your microphone and try again."));
           } finally { setIsDecoding(false); }
         };
       };
@@ -632,7 +632,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError(isAr ? 'تعذر الوصول للميكروفون. يرجى التحقق من أذونات المتصفح.' : "Cannot access microphone. Check browser permissions.");
+      setError(isAr ? 'تعذر الوصول للميكروفون. يرجى التحقق من أذونات المتصفح.' : L("Cannot access microphone. Check browser permissions."));
     }
   };
 
@@ -715,7 +715,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError(isAr ? 'تعذر الوصول للميكروفون لإجراء المعايرة.' : "Cannot access microphone for calibration.");
+      setError(isAr ? 'تعذر الوصول للميكروفون لإجراء المعايرة.' : L("Cannot access microphone for calibration."));
     }
   };
 
@@ -947,7 +947,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                         <p className="text-neutral-600 text-xs mt-2 max-w-xs">
                           {isAr
                             ? 'Euphonia AI يحلل الصوت الخام إطارًا بإطار، متجاوزًا التعرف القياسي على الكلام'
-                            : 'Euphonia AI analyzes raw audio frame-by-frame, bypassing standard speech recognition'}
+                            : L('Euphonia AI analyzes raw audio frame-by-frame, bypassing standard speech recognition')}
                         </p>
                       </>
                     )}
@@ -1378,7 +1378,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             <textarea
               value={customText}
               onChange={e => setCustomText(e.target.value)}
-              placeholder={isAr ? "اكتب شيئاً لنطقه بالصوت…" : "Type a sentence to speak aloud…"}
+              placeholder={isAr ? "اكتب شيئاً لنطقه بالصوت…" : L("Type a sentence to speak aloud…")}
               dir={dir}
               className="w-full text-sm bg-neutral-950 border border-white/10 rounded-xl p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500/50 text-white placeholder-neutral-600 resize-none h-16"
             />

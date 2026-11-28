@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, FileText, Plus, Trash2, Copy, Check } from 'lucide-react';
+import { L } from '../../../../lib/translations';
 import type { ConversationNote } from '../types';
 
 interface NotesModalProps {
@@ -59,12 +60,12 @@ export const NotesModal: React.FC<NotesModalProps> = ({
           <div className="flex items-center gap-2.5">
             <FileText className="w-5 h-5 text-[#12CFE0]" aria-hidden="true" />
             <h2 id="notes-modal-title" className="text-lg font-extrabold text-[#F4F7FB]">
-              {isAr ? 'ملاحظات المحادثة الحالية' : 'Conversation Notes'}
+              {isAr ? 'ملاحظات المحادثة الحالية' : L('Conversation Notes')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            aria-label={isAr ? 'إغلاق' : 'Close'}
+            aria-label={isAr ? 'إغلاق' : L('Close')}
             className="p-2 rounded-xl text-[#A9BDD3] hover:text-white hover:bg-[#102D4D] transition-colors focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -74,7 +75,7 @@ export const NotesModal: React.FC<NotesModalProps> = ({
         {/* Add Note Form */}
         <form onSubmit={handleAdd} className="space-y-2 mb-5">
           <label className="block text-xs font-bold text-[#A9BDD3]">
-            {isAr ? 'تدوين ملاحظة سريعة أثناء الحوار:' : 'Take a quick note during discussion:'}
+            {isAr ? 'تدوين ملاحظة سريعة أثناء الحوار:' : L('Take a quick note during discussion:')}
           </label>
           <div className="flex gap-2">
             <input
@@ -82,7 +83,7 @@ export const NotesModal: React.FC<NotesModalProps> = ({
               required
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
-              placeholder={isAr ? 'اكتب ملاحظة أو نقطة مهمة…' : 'Type a note or reminder…'}
+              placeholder={isAr ? 'اكتب ملاحظة أو نقطة مهمة…' : L('Type a note or reminder…')}
               className="flex-1 bg-[#102D4D] border border-[#12CFE0]/30 rounded-xl px-3.5 py-2.5 text-sm text-[#F4F7FB] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
             />
             <button
@@ -108,14 +109,14 @@ export const NotesModal: React.FC<NotesModalProps> = ({
                 className="text-xs text-[#12CFE0] hover:underline flex items-center gap-1"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? (isAr ? 'تم النسخ' : 'Copied') : (isAr ? 'نسخ الكل' : 'Copy All')}</span>
+                <span>{copied ? (isAr ? 'تم النسخ' : L('Copied')) : (isAr ? 'نسخ الكل' : L('Copy All'))}</span>
               </button>
             )}
           </div>
 
           {notes.length === 0 ? (
             <p className="text-xs text-[#A9BDD3]/60 italic p-4 text-center bg-[#102D4D]/50 rounded-xl">
-              {isAr ? 'لا توجد ملاحظات مسجلة بعد.' : 'No notes written yet.'}
+              {isAr ? 'لا توجد ملاحظات مسجلة بعد.' : L('No notes written yet.')}
             </p>
           ) : (
             <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
@@ -132,7 +133,7 @@ export const NotesModal: React.FC<NotesModalProps> = ({
                   </div>
                   <button
                     onClick={() => onRemoveNote(n.id)}
-                    aria-label={isAr ? 'حذف الملاحظة' : 'Delete note'}
+                    aria-label={isAr ? 'حذف الملاحظة' : L('Delete note')}
                     className="p-1 rounded text-[#A9BDD3] hover:text-rose-400 hover:bg-[#071B33] transition-colors shrink-0"
                   >
                     <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
@@ -150,7 +151,7 @@ export const NotesModal: React.FC<NotesModalProps> = ({
             onClick={onClose}
             className="py-2 px-5 rounded-xl bg-[#1769AA] text-white font-bold text-xs hover:bg-[#076D78] transition-all focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
           >
-            {isAr ? 'تم' : 'Done'}
+            {isAr ? 'تم' : L('Done')}
           </button>
         </div>
       </div>

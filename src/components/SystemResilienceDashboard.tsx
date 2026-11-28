@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { L } from '../lib/translations';
 import {
   Activity,
   ShieldAlert,
@@ -147,12 +148,12 @@ export const SystemResilienceDashboard: React.FC<SystemResilienceDashboardProps>
                 </div>
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                    {isArabic ? 'لوحة قيادة المتانة والمراقبة والتشغيل' : 'Production Hardening & Resilience Cockpit'}
+                    {isArabic ? 'لوحة قيادة المتانة والمراقبة والتشغيل' : L('Production Hardening & Resilience Cockpit')}
                   </h1>
                   <p className="text-sm text-slate-400 mt-1">
                     {isArabic
                       ? 'قواطع الدوائر الآلية (Circuit Breakers)، محدد المعدل الانزلاقي، ومصفوفة التدهور السلس'
-                      : 'Circuit Breaker State Machines, Sliding Window Rate Limiting, Latency Percentiles & Graceful Degradation'}
+                      : L('Circuit Breaker State Machines, Sliding Window Rate Limiting, Latency Percentiles & Graceful Degradation')}
                   </p>
                 </div>
               </div>

@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { ThemeSelector } from './ui/ThemeSelector';
 import { speak } from '../lib/tts';
-import { frOf } from '../lib/translations';
+import { frOf, L } from '../lib/translations';
 
 interface LoginProps {
   onLoginSuccess?: () => void;
@@ -328,7 +328,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
     speak(
       isRtl
         ? 'أهلاً بيكي في رفيقي. موبايلك يشوفلك الدنيا. سجلي دخولك بجوجل أو بالإيميل، أو اعملي حساب جديد.'
-        : 'Welcome to Rafiqi. Your phone sees the world for you. Sign in with Google or email, or create a new account.',
+        : L('Welcome to Rafiqi. Your phone sees the world for you. Sign in with Google or email, or create a new account.'),
       isRtl ? 'Arabic' : 'English'
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -375,7 +375,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-base sm:text-xl font-black text-white drop-shadow-md tracking-tight">
-                  {isRtl ? 'رفيقى' : 'Rafiqi'}
+                  {isRtl ? 'رفيقى' : L('Rafiqi')}
                 </span>
                 <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
                   A11y
@@ -390,7 +390,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
                   <span className="text-base sm:text-xl font-black text-white drop-shadow-md tracking-tight">
-                    {isRtl ? 'رفيقى' : 'Rafiqi'}
+                    {isRtl ? 'رفيقى' : L('Rafiqi')}
                   </span>
                   <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
                     A11y

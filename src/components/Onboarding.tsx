@@ -32,7 +32,7 @@ import {
   Check
 } from "lucide-react";
 import { auth, logout } from "../lib/firebase";
-import { getTranslation, isRTL, localize, isArabicLocale, frOf } from "../lib/translations";
+import { getTranslation, isRTL, localize, isArabicLocale, frOf, L } from "../lib/translations";
 import { speak } from "../lib/tts";
 import { PRODUCT_SECTIONS, getSectionIconComponent } from "../lib/sections";
 import { ThemeSelector, ThemeMode } from "./ui/ThemeSelector";
@@ -791,7 +791,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         {/* Brand identity pill */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-black text-slate-900 dark:text-white">
-            {isRtl ? 'رفيقي' : 'Rafiqi'}
+            {isRtl ? 'رفيقي' : L('Rafiqi')}
           </span>
           <span className="text-xs text-slate-400 dark:text-[#94A3B8]">
             {t('Onboarding', 'إعداد البداية')}

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { L } from '../lib/translations';
 import {
   Shield,
   Download,
@@ -134,7 +135,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
       );
       setAuditChain(prev => [...prev, auditEntry]);
     } catch (err: any) {
-      toast.error(err.message || 'DP Budget Error', isArabic ? 'خطأ في ميزانية الخصوصية' : 'Differential Privacy Error');
+      toast.error(err.message || 'DP Budget Error', isArabic ? 'خطأ في ميزانية الخصوصية' : L('Differential Privacy Error'));
     }
   };
 
@@ -278,7 +279,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         toast.error(
           isArabic
             ? 'تم حذف بيانات Firestore لكن تعذر حذف حساب تسجيل الدخول. لم يكتمل المحو.'
-            : 'Firestore data was deleted, but the authentication account could not be deleted. Erasure is partial.'
+            : L('Firestore data was deleted, but the authentication account could not be deleted. Erasure is partial.')
         );
         return;
       }
@@ -332,12 +333,12 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         {/* Plain-language disclosure: who can see what */}
         <div className="bg-[#0E0610]/95 border border-[#4A1224]/40 rounded-2xl p-4 sm:p-5 text-xs leading-relaxed text-slate-300 space-y-1.5">
           <p className="font-bold text-slate-100">
-            {isArabic ? 'مين يقدر يشوف بياناتك؟' : 'Who can see your data?'}
+            {isArabic ? 'مين يقدر يشوف بياناتك؟' : L('Who can see your data?')}
           </p>
           <p>
             {isArabic
               ? 'محادثاتك وذاكرة الكاميرا المكانية ليك إنت بس. فريق الدعم (الأدمن) يقدر يشوف بيانات الحساب والذاكرة التعليمية عند حل مشكلة، وده بيتسجل في سجل التدقيق. ممنوع أي حد تاني يقرا بياناتك.'
-              : 'Your chats and spatial camera memory are visible to you alone. Support admins can view account and learning-memory data when resolving an issue, and this is recorded in the audit trail. No one else can read your data.'}
+              : L('Your chats and spatial camera memory are visible to you alone. Support admins can view account and learning-memory data when resolving an issue, and this is recorded in the audit trail. No one else can read your data.')}
           </p>
         </div>
 
@@ -351,12 +352,12 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 </div>
                 <div>
                   <h1 className="text-lg sm:text-3xl font-bold tracking-tight text-white">
-                    {isArabic ? 'مركز ذكاء الخصوصية والأمان' : 'Privacy & Security Intelligence'}
+                    {isArabic ? 'مركز ذكاء الخصوصية والأمان' : L('Privacy & Security Intelligence')}
                   </h1>
                   <p className="hidden sm:block text-sm text-slate-400 mt-1">
                     {isArabic
                       ? 'الخصوصية التفاضلية، محو البيانات الشامل GDPR/FERPA، وسجل تدقيق غير قابل للتلاعب'
-                      : 'Epsilon-Differential Privacy, GDPR Article 17 Cascade Erasure, and Cryptographic Chained Audit Logging'}
+                      : L('Epsilon-Differential Privacy, GDPR Article 17 Cascade Erasure, and Cryptographic Chained Audit Logging')}
                   </p>
                 </div>
               </div>
@@ -375,10 +376,10 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
           {/* Navigation Tabs */}
           <div className="flex flex-nowrap overflow-x-auto custom-scrollbar gap-2 mt-4 sm:mt-8 border-b border-[#4A1224]/60 pb-4">
             {[
-              { id: 'dp', label: isArabic ? 'الخصوصية التفاضلية' : 'Differential Privacy', icon: Cpu },
-              { id: 'export', label: isArabic ? 'تصدير البيانات المستقل' : 'Self-Service Export', icon: Download },
-              { id: 'erasure', label: isArabic ? 'محو البيانات (الحق في النسيان)' : 'Cascade Erasure', icon: Trash2 },
-              { id: 'audit', label: isArabic ? 'سجل التدقيق المشفر' : 'Chained Audit Trail', icon: FileCheck }
+              { id: 'dp', label: isArabic ? 'الخصوصية التفاضلية' : L('Differential Privacy'), icon: Cpu },
+              { id: 'export', label: isArabic ? 'تصدير البيانات المستقل' : L('Self-Service Export'), icon: Download },
+              { id: 'erasure', label: isArabic ? 'محو البيانات (الحق في النسيان)' : L('Cascade Erasure'), icon: Trash2 },
+              { id: 'audit', label: isArabic ? 'سجل التدقيق المشفر' : L('Chained Audit Trail'), icon: FileCheck }
             ].map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -407,7 +408,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <Cpu className="w-5 h-5 text-[#5BB0F0]" />
-                  {isArabic ? 'محاكي الخصوصية التفاضلية (Laplace Mechanism)' : 'Laplace Mechanism Simulator'}
+                  {isArabic ? 'محاكي الخصوصية التفاضلية (Laplace Mechanism)' : L('Laplace Mechanism Simulator')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Perturbs raw aggregate analytics with controlled calibrated noise ($b = \Delta f / \epsilon$) so individual student records can never be reconstructed.
@@ -426,7 +427,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     min="0"
                     max="100"
                     value={testMetric}
-                    aria-label={isArabic ? 'القيمة الخام الأصلية' : 'Raw query test metric'}
+                    aria-label={isArabic ? 'القيمة الخام الأصلية' : L('Raw query test metric')}
                     aria-valuetext={`${testMetric}%`}
                     onChange={e => setTestMetric(Number(e.target.value))}
                     className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#5BB0F0]"
@@ -444,7 +445,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     max="2.0"
                     step="0.1"
                     value={epsilon}
-                    aria-label={isArabic ? 'معامل الخصوصية التفاضلية إبسيلون' : 'Differential privacy parameter epsilon'}
+                    aria-label={isArabic ? 'معامل الخصوصية التفاضلية إبسيلون' : L('Differential privacy parameter epsilon')}
                     aria-valuetext={`epsilon ${epsilon}`}
                     onChange={e => setEpsilon(Number(e.target.value))}
                     className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#5BB0F0]"
@@ -460,7 +461,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                   className="w-full py-3 px-4 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold rounded-2xl hover:opacity-95 transition shadow-lg shadow-[#5BB0F0]/20 flex items-center justify-center gap-2"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  {isArabic ? 'تطبيق ضوضاء الخصوصية وخصم الميزانية' : 'Apply Laplace Noise & Query Anonymized Aggregate'}
+                  {isArabic ? 'تطبيق ضوضاء الخصوصية وخصم الميزانية' : L('Apply Laplace Noise & Query Anonymized Aggregate')}
                 </button>
               </div>
 
@@ -490,7 +491,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
               <div>
                 <h3 className="text-md font-bold text-white flex items-center gap-2">
                   <Key className="w-4 h-4 text-sky-400" />
-                  {isArabic ? 'ميزانية الخصوصية الإجمالية' : 'Differential Privacy Budget'}
+                  {isArabic ? 'ميزانية الخصوصية الإجمالية' : L('Differential Privacy Budget')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Limits aggregate queries to prevent cumulative database reconstruction attacks.
@@ -548,7 +549,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <Download className="w-5 h-5 text-[#5BB0F0]" />
-                  {isArabic ? 'تصدير البيانات الشخصية (GDPR Article 20)' : 'Self-Service Data Portability'}
+                  {isArabic ? 'تصدير البيانات الشخصية (GDPR Article 20)' : L('Self-Service Data Portability')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Export complete student history: state, cognitive stage, concept mastery, spaced retention, and spatial memories in signed JSON.
@@ -560,7 +561,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 className="py-2.5 px-5 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold rounded-2xl hover:bg-[#5BB0F0] transition shadow-lg shadow-[#5BB0F0]/20 flex items-center gap-2 text-sm"
               >
                 <Download className="w-4 h-4" />
-                {isArabic ? 'إنشاء حزمة التصدير الآن' : 'Generate Export Package'}
+                {isArabic ? 'إنشاء حزمة التصدير الآن' : L('Generate Export Package')}
               </button>
             </div>
 
@@ -607,7 +608,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div>
               <h3 className="text-lg font-bold text-rose-400 flex items-center gap-2">
                 <Trash2 className="w-5 h-5" />
-                {isArabic ? 'الحق في المحو الكامل (GDPR Article 17)' : 'Right to be Forgotten (Cascade Erasure)'}
+                {isArabic ? 'الحق في المحو الكامل (GDPR Article 17)' : L('Right to be Forgotten (Cascade Erasure)')}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
                 Irreversibly deletes student state, cascades redactions across event logs, wipes spatial 2.0 object memories, and issues a cryptographic receipt.
@@ -626,7 +627,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <label className="flex items-center gap-3 cursor-pointer text-xs text-slate-300">
                   <input
                     type="checkbox"
-                    aria-label={isArabic ? 'تأكيد الرغبة في محو جميع بيانات الطالب بشكل نهائي لا رجعة فيه' : 'Confirm irrevocable erasure of all student data'}
+                    aria-label={isArabic ? 'تأكيد الرغبة في محو جميع بيانات الطالب بشكل نهائي لا رجعة فيه' : L('Confirm irrevocable erasure of all student data')}
                     checked={erasureConfirmed}
                     onChange={e => setErasureConfirmed(e.target.checked)}
                     className="w-4 h-4 rounded bg-slate-800 border-[#4A1224]/50 text-rose-500 focus:ring-0"
@@ -646,7 +647,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                   }`}
                 >
                   <Trash2 className="w-4 h-4" />
-                  {isArabic ? 'تنفيذ المحو الشامل وإصدار الإيصال المشفر' : 'Execute Cascade Erasure & Generate Receipt'}
+                  {isArabic ? 'تنفيذ المحو الشامل وإصدار الإيصال المشفر' : L('Execute Cascade Erasure & Generate Receipt')}
                 </button>
               </div>
             ) : (
@@ -695,7 +696,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-[#5BB0F0]" />
-                  {isArabic ? 'سجل التدقيق المشفر بالسلاسل' : 'Tamper-Resistant Chained Audit Trail'}
+                  {isArabic ? 'سجل التدقيق المشفر بالسلاسل' : L('Tamper-Resistant Chained Audit Trail')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Every security action is cryptographically chained to previous entries via SHA-256 block hashing.

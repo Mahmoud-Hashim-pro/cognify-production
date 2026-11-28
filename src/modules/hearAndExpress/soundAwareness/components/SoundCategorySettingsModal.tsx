@@ -1,4 +1,5 @@
 import React from 'react';
+import { L } from '../../../../lib/translations';
 import {
   X,
   Sliders,
@@ -42,21 +43,21 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            {isArabic ? 'متحقق منه' : 'Active Verified'}
+            {isArabic ? 'متحقق منه' : L('Active Verified')}
           </span>
         );
       case 'model_weights_required':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
             <AlertCircle className="w-3.5 h-3.5" />
-            {isArabic ? 'يتطلب نموذجاً' : 'Model Required'}
+            {isArabic ? 'يتطلب نموذجاً' : L('Model Required')}
           </span>
         );
       case 'user_configured':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
             <HelpCircle className="w-3.5 h-3.5" />
-            {isArabic ? 'معايرة مستخدم' : 'User Configured'}
+            {isArabic ? 'معايرة مستخدم' : L('User Configured')}
           </span>
         );
     }
@@ -79,18 +80,18 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
             </div>
             <div>
               <h2 id="sound-settings-title" className="text-xl font-bold text-white">
-                {isArabic ? 'إعدادات رصد الأصوات البيئية' : 'Environmental Sound Awareness Settings'}
+                {isArabic ? 'إعدادات رصد الأصوات البيئية' : L('Environmental Sound Awareness Settings')}
               </h2>
               <p className="text-xs text-slate-400">
                 {isArabic
                   ? 'ضبط الحساسية، والأولويات، واختيار الأصوات المفعلة'
-                  : 'Configure sensitivity, alert priorities, and active categories'}
+                  : L('Configure sensitivity, alert priorities, and active categories')}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            aria-label={isArabic ? 'إغلاق' : 'Close'}
+            aria-label={isArabic ? 'إغلاق' : L('Close')}
             className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors"
           >
             <X className="w-6 h-6" />
@@ -104,12 +105,12 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
               <Vibrate className="w-5 h-5 text-indigo-400" />
               <div>
                 <span className="text-sm font-semibold text-white block">
-                  {isArabic ? 'الاهتزاز اللمسي (Haptic Vibration)' : 'Haptic Vibration Feedback'}
+                  {isArabic ? 'الاهتزاز اللمسي (Haptic Vibration)' : L('Haptic Vibration Feedback')}
                 </span>
                 <span className="text-xs text-slate-400 block">
                   {isArabic
                     ? 'اهتزاز الهاتف بأنماط مميزة عند حدوث التنبيهات'
-                    : 'Vibrate device with distinct patterns upon sound detection'}
+                    : L('Vibrate device with distinct patterns upon sound detection')}
                 </span>
               </div>
             </div>
@@ -119,7 +120,7 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
                 checked={config.enableVibration}
                 onChange={(e) => onToggleVibration(e.target.checked)}
                 className="sr-only peer"
-                aria-label={isArabic ? 'تفعيل الاهتزاز' : 'Enable vibration'}
+                aria-label={isArabic ? 'تفعيل الاهتزاز' : L('Enable vibration')}
               />
               <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
             </label>
@@ -130,7 +131,7 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
             <span>
               {isArabic
                 ? 'إفصاح هندسي: الفئات التي تتطلب نماذج تعلم عميق (مثل بكاء الأطفال ونباح الكلاب) موضحة بصدق، ولن يتم إطلاق تنبيهات زائفة مبنية على عتبات ترددية عشوائية.'
-                : 'Engineering Transparency: Categories requiring deep learning models (baby crying, dog barking) are honestly labeled. We never fake AI classification using arbitrary FFT thresholds.'}
+                : L('Engineering Transparency: Categories requiring deep learning models (baby crying, dog barking) are honestly labeled. We never fake AI classification using arbitrary FFT thresholds.')}
             </span>
           </div>
         </div>
@@ -178,7 +179,7 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-700/50 text-xs">
                 <div>
                   <label className="text-slate-400 block mb-1 font-medium">
-                    {isArabic ? 'الحساسية الصوتية:' : 'Acoustic Sensitivity:'}
+                    {isArabic ? 'الحساسية الصوتية:' : L('Acoustic Sensitivity:')}
                   </label>
                   <select
                     value={cat.sensitivity}
@@ -190,15 +191,15 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
                     disabled={!cat.isEnabled}
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
                   >
-                    <option value="low">{isArabic ? 'منخفضة (أصوات مرتفعة فقط)' : 'Low (Loud only)'}</option>
-                    <option value="medium">{isArabic ? 'متوسطة (متوازنة)' : 'Medium (Balanced)'}</option>
-                    <option value="high">{isArabic ? 'عالية (أصوات هادئة وحساسة)' : 'High (Sensitive)'}</option>
+                    <option value="low">{isArabic ? 'منخفضة (أصوات مرتفعة فقط)' : L('Low (Loud only)')}</option>
+                    <option value="medium">{isArabic ? 'متوسطة (متوازنة)' : L('Medium (Balanced)')}</option>
+                    <option value="high">{isArabic ? 'عالية (أصوات هادئة وحساسة)' : L('High (Sensitive)')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="text-slate-400 block mb-1 font-medium">
-                    {isArabic ? 'مستوى خطورة التنبيه:' : 'Alert Priority Level:'}
+                    {isArabic ? 'مستوى خطورة التنبيه:' : L('Alert Priority Level:')}
                   </label>
                   <select
                     value={cat.userPriority}
@@ -210,9 +211,9 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
                     disabled={!cat.isEnabled}
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
                   >
-                    <option value="info">{isArabic ? 'معلوماتي (أزرق)' : 'Informational (Blue)'}</option>
-                    <option value="warning">{isArabic ? 'تحذيري (أصفر)' : 'Warning (Amber)'}</option>
-                    <option value="danger">{isArabic ? 'خطر حرج (أحمر)' : 'Critical Danger (Red)'}</option>
+                    <option value="info">{isArabic ? 'معلوماتي (أزرق)' : L('Informational (Blue)')}</option>
+                    <option value="warning">{isArabic ? 'تحذيري (أصفر)' : L('Warning (Amber)')}</option>
+                    <option value="danger">{isArabic ? 'خطر حرج (أحمر)' : L('Critical Danger (Red)')}</option>
                   </select>
                 </div>
               </div>
@@ -226,7 +227,7 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
             onClick={onClose}
             className="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all focus:ring-4 focus:ring-indigo-500/50"
           >
-            {isArabic ? 'حفظ وإغلاق' : 'Save & Close'}
+            {isArabic ? 'حفظ وإغلاق' : L('Save & Close')}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { L } from '../../../../lib/translations';
 import {
   Mic,
   MicOff,
@@ -289,8 +290,8 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             onClick={toggleListening}
             aria-label={
               recognitionState === 'listening' || recognitionState === 'processing'
-                ? isAr ? 'إيقاف مؤقت للترجمة' : 'Pause captions'
-                : isAr ? 'بدء تشغيل الترجمة الفورية' : 'Start live captions'
+                ? isAr ? 'إيقاف مؤقت للترجمة' : L('Pause captions')
+                : isAr ? 'بدء تشغيل الترجمة الفورية' : L('Start live captions')
             }
             className={`py-2 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-md min-h-[44px] min-w-[44px] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] ${
               recognitionState === 'listening' || recognitionState === 'processing'
@@ -303,17 +304,17 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             {recognitionState === 'listening' || recognitionState === 'processing' ? (
               <>
                 <Pause className="w-4 h-4 shrink-0" aria-hidden="true" />
-                <span>{isAr ? 'إيقاف مؤقت' : 'Pause'}</span>
+                <span>{isAr ? 'إيقاف مؤقت' : L('Pause')}</span>
               </>
             ) : recognitionState === 'paused' ? (
               <>
                 <Play className="w-4 h-4 shrink-0" aria-hidden="true" />
-                <span>{isAr ? 'استئناف الاستماع' : 'Resume'}</span>
+                <span>{isAr ? 'استئناف الاستماع' : L('Resume')}</span>
               </>
             ) : (
               <>
                 <Mic className="w-4 h-4 shrink-0" aria-hidden="true" />
-                <span>{isAr ? 'تشغيل الترجمة الفورية' : 'Start Captions'}</span>
+                <span>{isAr ? 'تشغيل الترجمة الفورية' : L('Start Captions')}</span>
               </>
             )}
           </button>
@@ -323,9 +324,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             <button
               type="button"
               onClick={handleStop}
-              aria-label={isAr ? 'إنهاء الاستماع' : 'Stop listening'}
+              aria-label={isAr ? 'إنهاء الاستماع' : L('Stop listening')}
               className="p-2.5 rounded-xl bg-inherit/40 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-rose-400"
-              title={isAr ? 'إيقاف كامل' : 'Stop completely'}
+              title={isAr ? 'إيقاف كامل' : L('Stop completely')}
             >
               <MicOff className="w-4 h-4" aria-hidden="true" />
             </button>
@@ -342,7 +343,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
               }
             }}
             disabled={recognitionState === 'listening'}
-            aria-label={isAr ? 'اختيار لغة التعرف' : 'Select recognition language'}
+            aria-label={isAr ? 'اختيار لغة التعرف' : L('Select recognition language')}
             className="bg-[#102D4D] border border-inherit/30 text-xs font-bold rounded-xl px-3 py-2 text-[#F4F7FB] min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
           >
             <option value="Arabic">العربية الفصحى (ar-SA)</option>
@@ -353,10 +354,10 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           {/* Privacy badge */}
           <div
             className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400"
-            title={isAr ? 'لا يتم تخزين أي صوت خام على الخوادم' : 'Raw audio is never recorded or stored'}
+            title={isAr ? 'لا يتم تخزين أي صوت خام على الخوادم' : L('Raw audio is never recorded or stored')}
           >
             <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>{isAr ? 'صوت غير مسجل' : 'Zero Audio Storage'}</span>
+            <span>{isAr ? 'صوت غير مسجل' : L('Zero Audio Storage')}</span>
           </div>
         </div>
 
@@ -367,9 +368,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             type="button"
             onClick={handleCopyTranscript}
             disabled={segments.length === 0}
-            aria-label={isAr ? 'نسخ النص المترجم' : 'Copy transcript'}
+            aria-label={isAr ? 'نسخ النص المترجم' : L('Copy transcript')}
             className="p-2.5 rounded-xl bg-inherit/40 hover:bg-[#102D4D] text-inherit border border-inherit/25 transition-colors disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
-            title={isAr ? 'نسخ النص' : 'Copy text'}
+            title={isAr ? 'نسخ النص' : L('Copy text')}
           >
             {copiedNotification ? (
               <Check className="w-4 h-4 text-emerald-400" aria-hidden="true" />
@@ -383,9 +384,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             <button
               type="button"
               disabled={segments.length === 0}
-              aria-label={isAr ? 'تصدير النص' : 'Export transcript'}
+              aria-label={isAr ? 'تصدير النص' : L('Export transcript')}
               className="p-2.5 rounded-xl bg-inherit/40 hover:bg-[#102D4D] text-inherit border border-inherit/25 transition-colors disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
-              title={isAr ? 'تصدير' : 'Export'}
+              title={isAr ? 'تصدير' : L('Export')}
             >
               <Download className="w-4 h-4" aria-hidden="true" />
             </button>
@@ -418,9 +419,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           <button
             type="button"
             onClick={() => setIsVocabOpen(true)}
-            aria-label={isAr ? 'المفردات المخصصة' : 'Custom vocabulary'}
+            aria-label={isAr ? 'المفردات المخصصة' : L('Custom vocabulary')}
             className="p-2.5 rounded-xl bg-inherit/40 hover:bg-[#102D4D] text-inherit border border-inherit/25 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
-            title={isAr ? 'قاموس المفردات المخصصة' : 'Custom Vocabulary'}
+            title={isAr ? 'قاموس المفردات المخصصة' : L('Custom Vocabulary')}
           >
             <BookOpen className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -429,9 +430,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           <button
             type="button"
             onClick={() => setIsNotesOpen(true)}
-            aria-label={isAr ? 'ملاحظات المحادثة' : 'Conversation notes'}
+            aria-label={isAr ? 'ملاحظات المحادثة' : L('Conversation notes')}
             className="p-2.5 rounded-xl bg-inherit/40 hover:bg-[#102D4D] text-inherit border border-inherit/25 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
-            title={isAr ? 'تدوين ملاحظات' : 'Take notes'}
+            title={isAr ? 'تدوين ملاحظات' : L('Take notes')}
           >
             <FileText className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -441,9 +442,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             type="button"
             onClick={() => setSummaryData(engine.generateSummary())}
             disabled={segments.length === 0}
-            aria-label={isAr ? 'ملخص المحادثة' : 'Conversation summary'}
+            aria-label={isAr ? 'ملخص المحادثة' : L('Conversation summary')}
             className="p-2.5 rounded-xl bg-inherit/40 hover:bg-[#102D4D] text-inherit border border-inherit/25 transition-colors disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
-            title={isAr ? 'إنشاء ملخص للمحادثة' : 'Summarize conversation'}
+            title={isAr ? 'إنشاء ملخص للمحادثة' : L('Summarize conversation')}
           >
             <Sparkles className="w-4 h-4 text-[#12CFE0]" aria-hidden="true" />
           </button>
@@ -452,9 +453,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           <button
             type="button"
             onClick={() => setIsSettingsOpen(true)}
-            aria-label={isAr ? 'إعدادات الخط والتباين والخصوصية' : 'Settings'}
+            aria-label={isAr ? 'إعدادات الخط والتباين والخصوصية' : L('Settings')}
             className="p-2.5 rounded-xl bg-inherit/40 hover:bg-[#102D4D] text-inherit border border-inherit/25 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
-            title={isAr ? 'إعدادات النص والتباين' : 'Visual & Contrast Settings'}
+            title={isAr ? 'إعدادات النص والتباين' : L('Visual & Contrast Settings')}
           >
             <Sliders className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -464,9 +465,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             type="button"
             onClick={() => setIsClearConfirmOpen(true)}
             disabled={segments.length === 0}
-            aria-label={isAr ? 'مسح المحادثة' : 'Clear transcript'}
+            aria-label={isAr ? 'مسح المحادثة' : L('Clear transcript')}
             className="p-2.5 rounded-xl bg-inherit/40 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors disabled:opacity-30 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-rose-400"
-            title={isAr ? 'مسح كل النصوص' : 'Clear all'}
+            title={isAr ? 'مسح كل النصوص' : L('Clear all')}
           >
             <Trash2 className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -482,13 +483,13 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={isAr ? 'بحث في نصوص المحادثة (Alt+S)…' : 'Search transcript (Alt+S)…'}
+            placeholder={isAr ? 'بحث في نصوص المحادثة (Alt+S)…' : L('Search transcript (Alt+S)…')}
             className="w-full bg-[#102D4D]/70 border border-inherit/20 rounded-xl pl-9 pr-3 py-1.5 text-xs text-inherit placeholder:text-inherit/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0]"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              aria-label={isAr ? 'مسح البحث' : 'Clear search'}
+              aria-label={isAr ? 'مسح البحث' : L('Clear search')}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-inherit/60 hover:text-inherit"
             >
               ×
@@ -506,7 +507,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           }`}
         >
           <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{isAr ? 'المميزة بنجمة' : 'Starred'}</span>
+          <span>{isAr ? 'المميزة بنجمة' : L('Starred')}</span>
         </button>
       </div>
 
@@ -525,7 +526,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           </div>
           <button
             onClick={() => setActiveError(null)}
-            aria-label={isAr ? 'إغلاق التنبيه' : 'Dismiss error'}
+            aria-label={isAr ? 'إغلاق التنبيه' : L('Dismiss error')}
             className="p-1 hover:bg-rose-900 rounded"
           >
             <X className="w-3.5 h-3.5" />
@@ -540,19 +541,19 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
         role="region"
         aria-live="polite"
         aria-atomic="false"
-        aria-label={isAr ? 'نصوص الترجمة الفورية' : 'Live captions transcript region'}
+        aria-label={isAr ? 'نصوص الترجمة الفورية' : L('Live captions transcript region')}
         className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 relative"
       >
         {displayedSegments.length === 0 && !interimText && (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-inherit/50 gap-3">
             <Mic className="w-10 h-10 opacity-40" aria-hidden="true" />
             <h3 className="text-base font-bold text-inherit">
-              {isAr ? 'الترجمة الفورية جاهزة للاستماع' : 'Live Captions Ready'}
+              {isAr ? 'الترجمة الفورية جاهزة للاستماع' : L('Live Captions Ready')}
             </h3>
             <p className="text-xs max-w-sm leading-relaxed">
               {isAr
                 ? 'اضغط على زر "تشغيل الترجمة الفورية" بالأعلى للبدء في قراءة الكلام المنطوق في الوقت الفعلي مع ضبط الخط والتباين والخصوصية.'
-                : 'Click "Start Captions" above to follow spoken conversation in real time with adjustable contrast, font scaling, and privacy controls.'}
+                : L('Click "Start Captions" above to follow spoken conversation in real time with adjustable contrast, font scaling, and privacy controls.')}
             </p>
           </div>
         )}
@@ -581,15 +582,15 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                 )}
                 {seg.isEdited && (
                   <span className="text-xs px-1.5 py-0.2 rounded bg-inherit/50 border border-inherit/20 text-[#12CFE0]">
-                    {isAr ? 'معدل' : 'edited'}
+                    {isAr ? 'معدل' : L('edited')}
                   </span>
                 )}
                 {seg.isLowConfidence && (
                   <span
                     className="text-xs px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300"
-                    title={isAr ? 'دقة السمع منخفضة (يرجى التحقق)' : 'Low audio confidence'}
+                    title={isAr ? 'دقة السمع منخفضة (يرجى التحقق)' : L('Low audio confidence')}
                   >
-                    {isAr ? 'صوت غير واضح' : 'low confidence'}
+                    {isAr ? 'صوت غير واضح' : L('low confidence')}
                   </span>
                 )}
               </div>
@@ -600,9 +601,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                 <button
                   type="button"
                   onClick={() => engine.speak(seg.text, seg.dialect)}
-                  aria-label={isAr ? 'قراءة النص بصوت عالٍ' : 'Speak text aloud'}
+                  aria-label={isAr ? 'قراءة النص بصوت عالٍ' : L('Speak text aloud')}
                   className="p-1 rounded hover:bg-inherit/40 text-inherit"
-                  title={isAr ? 'نطق' : 'Speak'}
+                  title={isAr ? 'نطق' : L('Speak')}
                 >
                   <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
@@ -611,11 +612,11 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                 <button
                   type="button"
                   onClick={() => engine.toggleBookmark(seg.id)}
-                  aria-label={seg.isBookmarked ? (isAr ? 'إزالة النجمة' : 'Unstar') : (isAr ? 'تمييز بنجمة' : 'Star')}
+                  aria-label={seg.isBookmarked ? (isAr ? 'إزالة النجمة' : L('Unstar')) : (isAr ? 'تمييز بنجمة' : L('Star'))}
                   className={`p-1 rounded hover:bg-inherit/40 ${
                     seg.isBookmarked ? 'text-amber-400' : 'text-inherit'
                   }`}
-                  title={isAr ? 'تمييز' : 'Star'}
+                  title={isAr ? 'تمييز' : L('Star')}
                 >
                   <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
@@ -624,9 +625,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                 <button
                   type="button"
                   onClick={() => handleStartEdit(seg)}
-                  aria-label={isAr ? 'تعديل النص' : 'Edit segment'}
+                  aria-label={isAr ? 'تعديل النص' : L('Edit segment')}
                   className="p-1 rounded hover:bg-inherit/40 text-inherit"
-                  title={isAr ? 'تعديل' : 'Edit'}
+                  title={isAr ? 'تعديل' : L('Edit')}
                 >
                   <Edit2 className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
@@ -648,13 +649,13 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                     onClick={() => setEditingSegmentId(null)}
                     className="px-3 py-1.5 rounded-lg bg-inherit/40 text-inherit"
                   >
-                    {isAr ? 'إلغاء' : 'Cancel'}
+                    {isAr ? 'إلغاء' : L('Cancel')}
                   </button>
                   <button
                     onClick={() => handleSaveEdit(seg.id)}
                     className="px-3 py-1.5 rounded-lg bg-[#1769AA] text-white font-bold"
                   >
-                    {isAr ? 'حفظ التعديل' : 'Save'}
+                    {isAr ? 'حفظ التعديل' : L('Save')}
                   </button>
                 </div>
               </div>
@@ -672,7 +673,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
           >
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase mb-1 opacity-80">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>{isAr ? 'جاري الاستماع الآن…' : 'Listening now…'}</span>
+              <span>{isAr ? 'جاري الاستماع الآن…' : L('Listening now…')}</span>
             </div>
             <p className={`font-medium ${sizeClass}`}>
               {interimText}
@@ -691,7 +692,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             className="py-1.5 px-4 rounded-full bg-[#1769AA] text-white text-xs font-bold flex items-center gap-1.5 shadow-2xl border border-[#12CFE0] hover:bg-[#076D78] transition-all"
           >
             <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{isAr ? 'الانتقال إلى أحدث الكلام' : 'Jump to latest'}</span>
+            <span>{isAr ? 'الانتقال إلى أحدث الكلام' : L('Jump to latest')}</span>
           </button>
         </div>
       )}
@@ -743,12 +744,12 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
         >
           <div className="w-full max-w-md bg-[#071B33] border-2 border-rose-500/50 rounded-2xl p-6 shadow-2xl text-[#F4F7FB]">
             <h3 className="text-base font-extrabold text-rose-400 mb-2">
-              {isAr ? 'تأكيد مسح نصوص المحادثة' : 'Confirm Clear Transcript'}
+              {isAr ? 'تأكيد مسح نصوص المحادثة' : L('Confirm Clear Transcript')}
             </h3>
             <p className="text-xs text-[#A9BDD3] leading-relaxed mb-5">
               {isAr
                 ? 'هل أنت متأكد من مسح جميع النصوص المترجمة والملاحظات المسجلة في هذه الجلسة؟ لا يمكن التراجع عن هذا الإجراء.'
-                : 'Are you sure you want to clear all transcript segments and notes recorded in this session? This action cannot be undone.'}
+                : L('Are you sure you want to clear all transcript segments and notes recorded in this session? This action cannot be undone.')}
             </p>
             <div className="flex justify-end gap-2.5">
               <button
@@ -756,7 +757,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                 onClick={() => setIsClearConfirmOpen(false)}
                 className="py-2 px-4 rounded-xl bg-[#102D4D] text-[#A9BDD3] hover:text-white text-xs font-bold"
               >
-                {isAr ? 'إلغاء' : 'Cancel'}
+                {isAr ? 'إلغاء' : L('Cancel')}
               </button>
               <button
                 type="button"
@@ -766,7 +767,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                 }}
                 className="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold"
               >
-                {isAr ? 'نعم، امسح الكل' : 'Yes, Clear All'}
+                {isAr ? 'نعم، امسح الكل' : L('Yes, Clear All')}
               </button>
             </div>
           </div>
@@ -798,7 +799,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
             <div className="space-y-4 text-xs">
               <div>
                 <h4 className="font-extrabold text-[#12CFE0] uppercase tracking-wider mb-2">
-                  {isAr ? 'النقاط الرئيسية المطروحة:' : 'Key Discussed Points:'}
+                  {isAr ? 'النقاط الرئيسية المطروحة:' : L('Key Discussed Points:')}
                 </h4>
                 <ul className="list-disc list-inside space-y-1.5 text-[#F4F7FB] leading-relaxed">
                   {summaryData.keyPoints.map((pt, i) => (
@@ -810,7 +811,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
               {summaryData.actionItems.length > 0 && (
                 <div>
                   <h4 className="font-extrabold text-emerald-400 uppercase tracking-wider mb-2">
-                    {isAr ? 'المهام ومواعيد المتابعة:' : 'Action Items & Follow-ups:'}
+                    {isAr ? 'المهام ومواعيد المتابعة:' : L('Action Items & Follow-ups:')}
                   </h4>
                   <ul className="list-disc list-inside space-y-1.5 text-emerald-100 leading-relaxed">
                     {summaryData.actionItems.map((ai, i) => (
@@ -827,7 +828,7 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
                 onClick={() => setSummaryData(null)}
                 className="py-2 px-5 rounded-xl bg-[#1769AA] text-white font-bold text-xs hover:bg-[#076D78]"
               >
-                {isAr ? 'إغلاق' : 'Close'}
+                {isAr ? 'إغلاق' : L('Close')}
               </button>
             </div>
           </div>

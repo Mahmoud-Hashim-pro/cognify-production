@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { L } from '../../../../lib/translations';
 import {
   BookOpen,
   Search,
@@ -148,12 +149,12 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
           </div>
           <div>
             <h1 className="text-2xl font-black text-white">
-              {isArabic ? 'منصة تعلم لغة الإشارة المصرية المعتمدة' : 'Egyptian Sign Language Learning Hub'}
+              {isArabic ? 'منصة تعلم لغة الإشارة المصرية المعتمدة' : L('Egyptian Sign Language Learning Hub')}
             </h1>
             <p className="text-sm text-slate-400">
               {isArabic
                 ? 'قاموس معتمد ودروس تأسيسية موثقة من مجتمع الصم'
-                : 'Certified Deaf community dictionary and foundational lessons'}
+                : L('Certified Deaf community dictionary and foundational lessons')}
             </p>
           </div>
         </div>
@@ -161,12 +162,12 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
         {/* Progress Badge */}
         <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-800/60 border border-slate-700 text-xs">
           <div className="flex flex-col items-center px-2">
-            <span className="text-slate-400">{isArabic ? 'الإتقان' : 'Mastery'}</span>
+            <span className="text-slate-400">{isArabic ? 'الإتقان' : L('Mastery')}</span>
             <span className="text-base font-bold text-emerald-400">{userState.overallMasteryPercentage}%</span>
           </div>
           <div className="h-6 w-px bg-slate-700" />
           <div className="flex flex-col items-center px-2">
-            <span className="text-slate-400">{isArabic ? 'المفضلة' : 'Favorites'}</span>
+            <span className="text-slate-400">{isArabic ? 'المفضلة' : L('Favorites')}</span>
             <span className="text-base font-bold text-indigo-300">{userState.favoriteSignIds.length}</span>
           </div>
         </div>
@@ -183,7 +184,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
       {/* 3. Accessible Tab Navigation */}
       <div
         role="tablist"
-        aria-label={isArabic ? 'أقسام المنصة التعليمية' : 'Learning Hub Sections'}
+        aria-label={isArabic ? 'أقسام المنصة التعليمية' : L('Learning Hub Sections')}
         className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 overflow-x-auto text-xs"
       >
         {[
@@ -220,7 +221,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={isArabic ? 'ابحث في القاموس الإشاري المعتمد (مثال: سلام، مستشفى، ماء)...' : 'Search verified dictionary...'}
+                placeholder={isArabic ? 'ابحث في القاموس الإشاري المعتمد (مثال: سلام، مستشفى، ماء)...' : L('Search verified dictionary...')}
                 className="w-full bg-slate-950 border border-slate-700/80 rounded-2xl py-3 ps-12 pe-4 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-indigo-500 placeholder-slate-500"
               />
             </div>
@@ -235,7 +236,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                 }`}
               >
-                {isArabic ? 'جميع الإشارات' : 'All Signs'}
+                {isArabic ? 'جميع الإشارات' : L('All Signs')}
               </button>
               {categoriesList.map((cat) => (
                 <button
@@ -269,7 +270,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                         e.stopPropagation();
                         handleToggleFavorite(entry.id);
                       }}
-                      aria-label={isArabic ? 'إضافة إلى المفضلة' : 'Toggle Favorite'}
+                      aria-label={isArabic ? 'إضافة إلى المفضلة' : L('Toggle Favorite')}
                       className="p-1 text-slate-400 hover:text-red-400 transition-colors"
                     >
                       <Heart
@@ -292,11 +293,11 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 <div className="pt-3 border-t border-slate-800 text-xs text-slate-400 flex items-center justify-between">
                   <span className="flex items-center gap-1 text-emerald-400">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    {isArabic ? 'موثق رسمياً' : 'Verified'}
+                    {isArabic ? 'موثق رسمياً' : L('Verified')}
                   </span>
                   <span className="text-indigo-300 hover:underline flex items-center gap-1">
                     <Play className="w-3 h-3" />
-                    {isArabic ? 'عرض الإشارة' : 'View Demonstration'}
+                    {isArabic ? 'عرض الإشارة' : L('View Demonstration')}
                   </span>
                 </div>
               </div>
@@ -343,7 +344,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                       onClick={() => handleStartLesson(lesson)}
                       className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all shadow-md"
                     >
-                      {isArabic ? 'بدء الدرس' : 'Start Lesson'}
+                      {isArabic ? 'بدء الدرس' : L('Start Lesson')}
                     </button>
                   </div>
                 </div>
@@ -365,14 +366,14 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 {quizCompleted
                   ? isArabic
                     ? 'اكتمل الاختبار بنجاح!'
-                    : 'Quiz Completed!'
+                    : L('Quiz Completed!')
                   : isArabic
                   ? 'اختبارات التدريب والتأكيد المعجمي'
-                  : 'Verified Practice Quizzes'}
+                  : L('Verified Practice Quizzes')}
               </h2>
               {quizCompleted && (
                 <div className="text-base text-slate-300">
-                  {isArabic ? 'درجتك النهائية:' : 'Your final score:'}{' '}
+                  {isArabic ? 'درجتك النهائية:' : L('Your final score:')}{' '}
                   <strong className="text-emerald-400 text-xl">
                     {quizScore} من {quizQuestions.length} ({Math.round((quizScore / quizQuestions.length) * 100)}%)
                   </strong>
@@ -381,7 +382,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
               <p className="text-xs text-slate-400 leading-relaxed">
                 {isArabic
                   ? 'أسئلة تفاعلية مبنية حصرياً على الإشارات المعتمدة وملاحظات تعبيرات الوجه النحوية.'
-                  : 'Interactive questions derived strictly from verified signs and grammatical facial cues.'}
+                  : L('Interactive questions derived strictly from verified signs and grammatical facial cues.')}
               </p>
               <button
                 onClick={handleStartQuiz}
@@ -390,10 +391,10 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 {quizCompleted
                   ? isArabic
                     ? 'إعادة الاختبار'
-                    : 'Retake Quiz'
+                    : L('Retake Quiz')
                   : isArabic
                   ? 'بدء اختبار جديد'
-                  : 'Start Practice Quiz'}
+                  : L('Start Practice Quiz')}
               </button>
             </div>
           ) : (
@@ -445,7 +446,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
               {selectedOption !== null && (
                 <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-3 animate-fadeIn">
                   <div className="text-xs text-slate-300 leading-relaxed">
-                    <strong>{isArabic ? 'التفسير اللغوي:' : 'Explanation:'}</strong>{' '}
+                    <strong>{isArabic ? 'التفسير اللغوي:' : L('Explanation:')}</strong>{' '}
                     {quizQuestions[currentQuestionIndex].explanationAr}
                   </div>
                   <div className="flex justify-end">
@@ -456,10 +457,10 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                       {currentQuestionIndex + 1 < quizQuestions.length
                         ? isArabic
                           ? 'السؤال التالي'
-                          : 'Next Question'
+                          : L('Next Question')
                         : isArabic
                         ? 'إنهاء الاختبار'
-                        : 'Finish Quiz'}
+                        : L('Finish Quiz')}
                     </button>
                   </div>
                 </div>
@@ -476,7 +477,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
             <div className="p-12 text-center text-slate-500 text-sm bg-slate-900 rounded-3xl border border-slate-800">
               {isArabic
                 ? 'لم تقم بحفظ أي إشارات في المفضلة بعد. انقر على رمز القلب لحفظ الإشارات التي تود مراجعتها.'
-                : 'No favorites saved yet. Click the heart icon on any sign to save it for review.'}
+                : L('No favorites saved yet. Click the heart icon on any sign to save it for review.')}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -531,7 +532,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
               </div>
               <button
                 onClick={() => setSelectedSign(null)}
-                aria-label={isArabic ? 'إغلاق' : 'Close'}
+                aria-label={isArabic ? 'إغلاق' : L('Close')}
                 className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors"
               >
                 <X className="w-6 h-6" />
@@ -554,7 +555,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 {/* Demonstration Mode Badge */}
                 <div className="absolute top-3 start-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-sm text-xs font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
                   <Video className="w-3.5 h-3.5" />
-                  <span>{isArabic ? 'عرض فيديو حقيقي معتمد' : 'Verified Video Demonstration'}</span>
+                  <span>{isArabic ? 'عرض فيديو حقيقي معتمد' : L('Verified Video Demonstration')}</span>
                 </div>
 
                 {/* Captions Overlay */}
@@ -569,7 +570,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
               <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/80 text-xs">
                 {/* Playback Speed Controls */}
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-400 font-semibold">{isArabic ? 'السرعة:' : 'Speed:'}</span>
+                  <span className="text-slate-400 font-semibold">{isArabic ? 'السرعة:' : L('Speed:')}</span>
                   {[0.5, 0.75, 1.0, 1.25].map((speed) => (
                     <button
                       key={speed}
@@ -594,7 +595,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                       : 'bg-slate-800 text-slate-400 border-slate-700'
                   }`}
                 >
-                  {isArabic ? 'الترجمة النصية (CC)' : 'Captions (CC)'}
+                  {isArabic ? 'الترجمة النصية (CC)' : L('Captions (CC)')}
                 </button>
               </div>
 
@@ -602,7 +603,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-700">
                   <strong className="text-indigo-300 block mb-1">
-                    {isArabic ? 'شكل اليد والموقع:' : 'Handshape & Location:'}
+                    {isArabic ? 'شكل اليد والموقع:' : L('Handshape & Location:')}
                   </strong>
                   <span className="text-slate-200">
                     {selectedSign.handshapeDescriptionAr} • {selectedSign.locationDescriptionAr}
@@ -611,7 +612,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
 
                 <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-700">
                   <strong className="text-indigo-300 block mb-1">
-                    {isArabic ? 'تعبيرات الوجه المصاحبة:' : 'Non-Manual Facial Cues:'}
+                    {isArabic ? 'تعبيرات الوجه المصاحبة:' : L('Non-Manual Facial Cues:')}
                   </strong>
                   <span className="text-slate-200">{selectedSign.nonManualCuesAr}</span>
                 </div>
@@ -621,7 +622,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
               {selectedSign.regionalVariationNotesAr && (
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
                   <strong className="text-amber-300 block mb-1">
-                    {isArabic ? 'الفروق الإقليمية واللهجات:' : 'Regional Variations:'}
+                    {isArabic ? 'الفروق الإقليمية واللهجات:' : L('Regional Variations:')}
                   </strong>
                   <span>{selectedSign.regionalVariationNotesAr}</span>
                 </div>
@@ -633,7 +634,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-400"
               >
                 <strong className="text-slate-300 block mb-1">
-                  {isArabic ? 'الوصف لقارئ الشاشة:' : 'Screen Reader Accessible Description:'}
+                  {isArabic ? 'الوصف لقارئ الشاشة:' : L('Screen Reader Accessible Description:')}
                 </strong>
                 <span>{selectedSign.screenReaderDescriptionAr}</span>
               </div>
@@ -646,7 +647,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 onClick={() => setSelectedSign(null)}
                 className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold"
               >
-                {isArabic ? 'إغلاق' : 'Close'}
+                {isArabic ? 'إغلاق' : L('Close')}
               </button>
             </div>
           </div>

@@ -877,7 +877,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!files) return;
 
     if (!profile.uid) {
-         toast.warning(isArabicLocale(profile.language) ? 'يرجى تسجيل الدخول أولاً لإرفاق المستندات والملفات.' : 'Please log in first to attach files.', isArabicLocale(profile.language) ? 'مطلوب تسجيل الدخول' : 'Authentication Required');
+         toast.warning(isArabicLocale(profile.language) ? 'يرجى تسجيل الدخول أولاً لإرفاق المستندات والملفات.' : L('Please log in first to attach files.'), isArabicLocale(profile.language) ? 'مطلوب تسجيل الدخول' : L('Authentication Required'));
          return;
     }
 
@@ -1289,7 +1289,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         id: `assistant-err-${Date.now()}`,
         role: 'assistant',
         content: lastText
-          ? lastText + (isArabic ? '\n\n⚠️ (الرد اتقطع قبل ما يكمل)' : '\n\n⚠️ (response was cut off)')
+          ? lastText + (isArabic ? '\n\n⚠️ (الرد اتقطع قبل ما يكمل)' : L('\n\n⚠️ (response was cut off)'))
           : (isArabic
             ? '⚠️ حصلت مشكلة في الاتصال بالذكاء الاصطناعي. جرّب تاني 🙏'
             : L('⚠️ Something went wrong connecting to the AI. Please try again 🙏')),

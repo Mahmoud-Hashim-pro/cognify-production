@@ -525,7 +525,7 @@ export default function StudentSettingsView({
     setIsPlayingPreview(true);
     const phrase = isAr
       ? 'مرحباً بك في رفيقي. إعدادات الصوت والقراءة الشخصية تعمل بنجاح وبوضوح.'
-      : 'Welcome to Rafiqi. Your personal voice and reading settings are active and calibrated.';
+      : L('Welcome to Rafiqi. Your personal voice and reading settings are active and calibrated.');
 
     speak(phrase, interfaceLanguage === 'English' ? 'English' : interfaceLanguage === 'French' ? 'French' : 'Arabic', {
       rate: audioSpeed,

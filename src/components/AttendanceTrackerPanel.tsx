@@ -9,6 +9,7 @@
  * that sign-in is required - no fake local data.
  */
 import React, { useEffect, useState } from 'react';
+import { L } from '../lib/translations';
 import { CalendarCheck, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import {
@@ -58,7 +59,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
         setLoadError(
           isArabic
             ? 'تعذر تحميل بيانات الحضور. تحقق من اتصالك وحاول مجدداً.'
-            : 'Could not load attendance data. Check your connection and try again.'
+            : L('Could not load attendance data. Check your connection and try again.')
         )
     );
     return () => unsub();
@@ -101,13 +102,13 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
         <div className="flex items-center gap-2 mb-2">
           <CalendarCheck className="w-5 h-5 text-[#4B9FE1]" aria-hidden="true" />
           <h3 className={`text-sm font-black ${textCls}`}>
-            {isArabic ? 'متتبع الحضور والغياب' : 'Attendance tracker'}
+            {isArabic ? 'متتبع الحضور والغياب' : L('Attendance tracker')}
           </h3>
         </div>
         <p className={`text-xs leading-relaxed ${subCls}`}>
           {isArabic
             ? 'سجّل دخولك أولاً حتى نحفظ سجل حضورك بأمان في حسابك ويتزامن على كل أجهزتك. وضع الضيف لا يحتفظ ببيانات الحضور.'
-            : 'Sign in first so we can safely store your attendance record in your account and sync it across your devices. Guest mode does not keep attendance data.'}
+            : L('Sign in first so we can safely store your attendance record in your account and sync it across your devices. Guest mode does not keep attendance data.')}
         </p>
       </div>
     );
@@ -120,7 +121,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
         <div className="flex items-center gap-2">
           <Plus className="w-5 h-5 text-[#4B9FE1]" aria-hidden="true" />
           <h3 className={`text-sm font-black ${textCls}`}>
-            {isArabic ? 'إضافة مادة' : 'Add a subject'}
+            {isArabic ? 'إضافة مادة' : L('Add a subject')}
           </h3>
         </div>
         <div className="grid sm:grid-cols-3 gap-2">
@@ -129,8 +130,8 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             dir="auto"
-            aria-label={isArabic ? 'اسم المادة' : 'Subject name'}
-            placeholder={isArabic ? 'اسم المادة (مثال: فيزياء)' : 'Subject name (e.g., Physics)'}
+            aria-label={isArabic ? 'اسم المادة' : L('Subject name')}
+            placeholder={isArabic ? 'اسم المادة (مثال: فيزياء)' : L('Subject name (e.g., Physics)')}
             className={`p-3 rounded-2xl border text-xs ${
               isDarkMode ? 'bg-[#09101A] border-[#24476F] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
@@ -141,8 +142,8 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
             onChange={(e) => setNewThreshold(e.target.value)}
             min={1}
             max={100}
-            aria-label={isArabic ? 'نسبة الحضور المطلوبة' : 'Required attendance percent'}
-            placeholder={isArabic ? 'النسبة المطلوبة % (افتراضي 75)' : 'Required % (default 75)'}
+            aria-label={isArabic ? 'نسبة الحضور المطلوبة' : L('Required attendance percent')}
+            placeholder={isArabic ? 'النسبة المطلوبة % (افتراضي 75)' : L('Required % (default 75)')}
             className={`p-3 rounded-2xl border text-xs ${
               isDarkMode ? 'bg-[#09101A] border-[#24476F] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
@@ -152,8 +153,8 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
             value={newTotal}
             onChange={(e) => setNewTotal(e.target.value)}
             min={0}
-            aria-label={isArabic ? 'إجمالي المحاضرات المخططة' : 'Total planned sessions'}
-            placeholder={isArabic ? 'إجمالي المحاضرات (اختياري)' : 'Total sessions (optional)'}
+            aria-label={isArabic ? 'إجمالي المحاضرات المخططة' : L('Total planned sessions')}
+            placeholder={isArabic ? 'إجمالي المحاضرات (اختياري)' : L('Total sessions (optional)')}
             className={`p-3 rounded-2xl border text-xs ${
               isDarkMode ? 'bg-[#09101A] border-[#24476F] text-[#F8FAFC] placeholder:text-[#94A3B8]' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
@@ -165,7 +166,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
           disabled={busy || !newName.trim()}
           className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] disabled:opacity-50 text-white text-xs font-bold transition-colors cursor-pointer"
         >
-          {isArabic ? 'أضف المادة' : 'Add subject'}
+          {isArabic ? 'أضف المادة' : L('Add subject')}
         </button>
       </div>
 
@@ -178,7 +179,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
       {/* Subject list */}
       {subjects.length === 0 && !loadError ? (
         <p className={`text-xs ${subCls}`}>
-          {isArabic ? 'لا توجد مواد بعد - أضف أول مادة بالأعلى.' : 'No subjects yet - add your first one above.'}
+          {isArabic ? 'لا توجد مواد بعد - أضف أول مادة بالأعلى.' : L('No subjects yet - add your first one above.')}
         </p>
       ) : (
         subjects.map((s) => {
@@ -246,7 +247,7 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
                   <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
                   {isArabic
                     ? 'تجاوزت حد الغياب المسموح لهذه المادة (الحرمان). راجع إدارة الكلية.'
-                    : 'You exceeded the allowed absences for this subject. Contact your faculty office.'}
+                    : L('You exceeded the allowed absences for this subject. Contact your faculty office.')}
                 </p>
               )}
 
@@ -256,14 +257,14 @@ export const AttendanceTrackerPanel: React.FC<AttendanceTrackerPanelProps> = ({
                   onClick={() => mark(s, 'attended')}
                   className="px-4 py-2 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 text-white text-xs font-bold transition-colors cursor-pointer"
                 >
-                  {isArabic ? '✓ حضرت اليوم' : '✓ Attended today'}
+                  {isArabic ? '✓ حضرت اليوم' : L('✓ Attended today')}
                 </button>
                 <button
                   type="button"
                   onClick={() => mark(s, 'absent')}
                   className="px-4 py-2 rounded-xl bg-rose-600/70 hover:bg-rose-600 text-white text-xs font-bold transition-colors cursor-pointer"
                 >
-                  {isArabic ? '✗ غبت اليوم' : '✗ Absent today'}
+                  {isArabic ? '✗ غبت اليوم' : L('✗ Absent today')}
                 </button>
               </div>
             </div>

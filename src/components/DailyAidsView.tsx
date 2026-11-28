@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Bell, Pill, Clock, PhoneCall, MessageCircle, Trash2, Plus, CalendarClock, Sun, BatteryMedium } from 'lucide-react';
+import { L } from '../lib/translations';
 import { UserProfile } from '../types';
 import { speak } from '../lib/tts';
 import { toast } from './Toast';
@@ -47,7 +48,7 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
         const msg = isArabic ? `تذكير: ${describeReminder(r, true)}` : `Reminder: ${describeReminder(r, false)}`;
         sayRef.current(msg);
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-          try { new Notification(isArabic ? 'رفيقي — تذكير' : 'Rafiqi reminder', { body: msg }); } catch { /* noop */ }
+          try { new Notification(isArabic ? 'رفيقي — تذكير' : L('Rafiqi reminder'), { body: msg }); } catch { /* noop */ }
         }
       }, ms);
       timersRef.current.push(id);
@@ -61,7 +62,7 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
 
   const add = () => {
     if (!title.trim() || !time) {
-      toast.error(isArabic ? 'اكتب الاسم والوقت' : 'Enter a name and a time');
+      toast.error(isArabic ? 'اكتب الاسم والوقت' : L('Enter a name and a time'));
       return;
     }
     const r = addReminder({ kind, title: title.trim(), time });
@@ -76,7 +77,7 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
   const remove = (id: string) => {
     deleteReminder(id);
     setReminders(loadReminders());
-    say(isArabic ? 'اتمسح التذكير' : 'Reminder deleted');
+    say(isArabic ? 'اتمسح التذكير' : L('Reminder deleted'));
   };
 
   const quick = (q: 'time' | 'date' | 'battery' | 'weather') => {
@@ -93,11 +94,11 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
     <div className="flex-1 w-full h-full overflow-y-auto bg-slate-950 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="mx-auto w-full max-w-xl px-4 py-4 pb-24 flex flex-col gap-4">
         <header className="space-y-1">
-          <h1 className="text-3xl font-black">{isArabic ? 'التذكيرات والمساعدات اليومية' : 'Daily reminders and aids'}</h1>
+          <h1 className="text-3xl font-black">{isArabic ? 'التذكيرات والمساعدات اليومية' : L('Daily reminders and aids')}</h1>
           <p className="text-base text-slate-300" role="note">
             {isArabic
               ? 'التذكيرات بتشتغل لما التطبيق مفتوح. المتصفح مش بيقدر يصحيك لو الشاشة مقفولة — للمنبه الأساسي استخدم منبه الموبايل.'
-              : 'Reminders fire while the app is open. A browser cannot wake you with the screen off — use the phone alarm for critical wake-ups.'}
+              : L('Reminders fire while the app is open. A browser cannot wake you with the screen off — use the phone alarm for critical wake-ups.')}
           </p>
         </header>
 
@@ -122,12 +123,12 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
         </div>
 
         {/* Add reminder */}
-        <section aria-label={isArabic ? 'إضافة تذكير' : 'Add a reminder'} className="rounded-3xl bg-slate-900 border-2 border-teal-700 p-5 space-y-4">
+        <section aria-label={isArabic ? 'إضافة تذكير' : L('Add a reminder')} className="rounded-3xl bg-slate-900 border-2 border-teal-700 p-5 space-y-4">
           <h2 className="text-2xl font-black flex items-center gap-2">
             <Plus className="w-7 h-7" aria-hidden="true" />
-            {isArabic ? 'تذكير جديد' : 'New reminder'}
+            {isArabic ? 'تذكير جديد' : L('New reminder')}
           </h2>
-          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={isArabic ? 'نوع التذكير' : 'Reminder type'}>
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={isArabic ? 'نوع التذكير' : L('Reminder type')}>
             {kindOptions.map((k) => (
               <button
                 key={k.id}
@@ -145,18 +146,18 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
             ))}
           </div>
           <label className="block text-lg font-bold">
-            {isArabic ? 'اسم التذكير (مثال: دواء الضغط)' : 'Reminder name (e.g. blood pressure pills)'}
+            {isArabic ? 'اسم التذكير (مثال: دواء الضغط)' : L('Reminder name (e.g. blood pressure pills)')}
             <input
-              aria-label={isArabic ? 'اسم التذكير' : 'Reminder name'}
+              aria-label={isArabic ? 'اسم التذكير' : L('Reminder name')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="mt-1 w-full min-h-[64px] rounded-2xl bg-slate-800 border-2 border-slate-600 px-4 text-xl font-normal"
             />
           </label>
           <label className="block text-lg font-bold">
-            {isArabic ? 'الوقت' : 'Time'}
+            {isArabic ? 'الوقت' : L('Time')}
             <input
-              aria-label={isArabic ? 'وقت التذكير' : 'Reminder time'}
+              aria-label={isArabic ? 'وقت التذكير' : L('Reminder time')}
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
@@ -168,15 +169,15 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
             onClick={add}
             className="w-full min-h-[80px] rounded-3xl bg-teal-600 hover:bg-teal-500 text-2xl font-black active:scale-[0.98]"
           >
-            {isArabic ? 'سجل التذكير' : 'Save reminder'}
+            {isArabic ? 'سجل التذكير' : L('Save reminder')}
           </button>
         </section>
 
         {/* Existing reminders */}
-        <section aria-label={isArabic ? 'التذكيرات المسجلة' : 'Saved reminders'} className="space-y-3">
-          <h2 className="text-2xl font-black">{isArabic ? 'تذكيراتي' : 'My reminders'}</h2>
+        <section aria-label={isArabic ? 'التذكيرات المسجلة' : L('Saved reminders')} className="space-y-3">
+          <h2 className="text-2xl font-black">{isArabic ? 'تذكيراتي' : L('My reminders')}</h2>
           {reminders.length === 0 && (
-            <p className="text-lg text-slate-400">{isArabic ? 'مفيش تذكيرات لسه' : 'No reminders yet'}</p>
+            <p className="text-lg text-slate-400">{isArabic ? 'مفيش تذكيرات لسه' : L('No reminders yet')}</p>
           )}
           {reminders.map((r) => (
             <div key={r.id} className="flex items-center gap-3 rounded-2xl bg-slate-900 border border-slate-700 p-4">
@@ -194,11 +195,11 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
         </section>
 
         {/* Caregivers quick contact */}
-        <section aria-label={isArabic ? 'الاتصال بالمرافقين' : 'Call caregivers'} className="space-y-3">
-          <h2 className="text-2xl font-black">{isArabic ? 'مرافقيني' : 'My caregivers'}</h2>
+        <section aria-label={isArabic ? 'الاتصال بالمرافقين' : L('Call caregivers')} className="space-y-3">
+          <h2 className="text-2xl font-black">{isArabic ? 'مرافقيني' : L('My caregivers')}</h2>
           {contacts.length === 0 && (
             <p className="text-lg text-slate-400">
-              {isArabic ? 'مفيش مرافقين محفوظين. ضيفهم من الإعدادات.' : 'No saved caregivers. Add them from settings.'}
+              {isArabic ? 'مفيش مرافقين محفوظين. ضيفهم من الإعدادات.' : L('No saved caregivers. Add them from settings.')}
           </p>
           )}
           {contacts.map((c) => (
@@ -213,11 +214,11 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
               </button>
               <button
                 type="button"
-                onClick={() => sendWhatsAppMessage(c.phone, isArabic ? 'سلام، محتاجك' : 'Hi, I need you')}
+                onClick={() => sendWhatsAppMessage(c.phone, isArabic ? 'سلام، محتاجك' : L('Hi, I need you'))}
                 className="min-h-[80px] rounded-2xl bg-green-800 hover:bg-green-700 text-xl font-black flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-6 h-6" aria-hidden="true" />
-                {isArabic ? 'واتساب' : 'WhatsApp'}
+                {isArabic ? 'واتساب' : L('WhatsApp')}
               </button>
             </div>
           ))}
@@ -228,7 +229,7 @@ const DailyAidsView: React.FC<DailyAidsViewProps> = ({ isArabic, onNavigateBack 
           onClick={onNavigateBack}
           className="w-full min-h-[64px] rounded-2xl bg-slate-700 hover:bg-slate-600 text-xl font-bold"
         >
-          {isArabic ? 'رجوع' : 'Back'}
+          {isArabic ? 'رجوع' : L('Back')}
         </button>
       </div>
     </div>

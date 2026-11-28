@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera, Trash2, UserPlus, Users, ShieldCheck } from 'lucide-react';
+import { L } from '../lib/translations';
 import { UserProfile } from '../types';
 import { speak } from '../lib/tts';
 import { toast } from './Toast';
@@ -83,7 +84,7 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
       }
       setCameraOn(true);
     } catch {
-      say(isArabic ? 'الكاميرا مش متاحة' : 'Camera unavailable');
+      say(isArabic ? 'الكاميرا مش متاحة' : L('Camera unavailable'));
     }
   }, [isArabic, say]);
 
@@ -103,17 +104,17 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
   const giveConsent = () => {
     try { localStorage.setItem(CONSENT_KEY, '1'); } catch { /* noop */ }
     setConsent(true);
-    say(isArabic ? 'تم تسجيل موافقتك. الصور بتتخزن على جهازك بس.' : 'Consent recorded. Photos stay on your device only.');
+    say(isArabic ? 'تم تسجيل موافقتك. الصور بتتخزن على جهازك بس.' : L('Consent recorded. Photos stay on your device only.'));
   };
 
   const addFromCamera = () => {
     const frame = captureFrame();
     if (!frame) {
-      say(isArabic ? 'شغل الكاميرا الأول' : 'Start the camera first');
+      say(isArabic ? 'شغل الكاميرا الأول' : L('Start the camera first'));
       return;
     }
     if (!newName.trim()) {
-      say(isArabic ? 'اكتب اسم الشخص الأول' : 'Enter the person name first');
+      say(isArabic ? 'اكتب اسم الشخص الأول' : L('Enter the person name first'));
       return;
     }
     const person: KnownPerson = {
@@ -132,21 +133,21 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
     savePeople([]);
     setPeople([]);
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* noop */ }
-    say(isArabic ? 'اتمسحت كل بيانات الأشخاص من الجهاز ده' : 'All people data erased from this device');
+    say(isArabic ? 'اتمسحت كل بيانات الأشخاص من الجهاز ده' : L('All people data erased from this device'));
   };
 
   const identify = async () => {
     const frame = captureFrame();
     if (!frame) {
-      say(isArabic ? 'شغل الكاميرا الأول ووجهها للشخص' : 'Start the camera and point it at the person');
+      say(isArabic ? 'شغل الكاميرا الأول ووجهها للشخص' : L('Start the camera and point it at the person'));
       return;
     }
     if (people.length === 0) {
-      say(isArabic ? 'لسه مفيش أشخاص مسجلين' : 'No saved people yet');
+      say(isArabic ? 'لسه مفيش أشخاص مسجلين' : L('No saved people yet'));
       return;
     }
     setBusy(true);
-    say(isArabic ? 'ثانية واحدة، بقارن' : 'One moment, comparing');
+    say(isArabic ? 'ثانية واحدة، بقارن' : L('One moment, comparing'));
     try {
       const prompt = isArabic
         ? `أنت مساعد لشخص كفيف. الصورة الأولى التقطت الآن. الصور التالية أشخاص معروفين بأسمائهم: ${people.map((p, i) => `صورة ${i + 2} = ${p.name}`).join('، ')}. هل الشخص في الصورة الأولى واحد منهم؟ رد بجملة واحدة قصيرة بالعامية المصرية: لو متأكد قول "ده يبدو <الاسم>"، ولو مش متأكد قول "مش متأكد مين ده"، ولو مش واضح قول "الصورة مش واضحة، قرّب الكاميرا". ممنوع تخمن اسم من غير تشابه واضح.`
@@ -160,10 +161,10 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
         })),
       ];
       const res = await generateAdaptiveResponse(prompt, { ...profile, language: isArabic ? 'Egyptian Ammiya' : 'English' } as any, [], attachments);
-      const text = String(res || '').trim() || (isArabic ? 'مش متأكد مين ده' : 'I am not sure who this is');
+      const text = String(res || '').trim() || (isArabic ? 'مش متأكد مين ده' : L('I am not sure who this is'));
       say(text.slice(0, 200));
     } catch {
-      say(isArabic ? 'مقدرتش أقارن دلوقتي، جرب تاني' : 'Could not compare right now, try again');
+      say(isArabic ? 'مقدرتش أقارن دلوقتي، جرب تاني' : L('Could not compare right now, try again'));
     } finally {
       setBusy(false);
     }
@@ -174,25 +175,25 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
       <div className="flex-1 w-full h-full overflow-y-auto bg-slate-950 text-white" dir={isArabic ? 'rtl' : 'ltr'}>
         <div className="mx-auto w-full max-w-xl px-4 py-4 pb-24 flex flex-col gap-4">
           <ShieldCheck className="w-16 h-16 text-teal-400" aria-hidden="true" />
-          <h1 className="text-3xl font-black">{isArabic ? 'التعرف على الأشخاص المعروفين' : 'Known people recognition'}</h1>
+          <h1 className="text-3xl font-black">{isArabic ? 'التعرف على الأشخاص المعروفين' : L('Known people recognition')}</h1>
           <p className="text-xl leading-relaxed" role="note">
             {isArabic
               ? 'الميزة دي اختيارية تماما. صور أصحابك بتتسجل على جهازك بس، ومش بتتخزن عندنا. لما تسأل "مين ده؟" الصور بتتبعت لخدمة الذكاء الاصطناعي للمقارنة لحظيا. تقدر تمسح كل حاجة في أي وقت بزرار واحد. لازم توافقة كل شخص تسجل صورته.'
-              : 'This feature is fully optional. Photos of your people are stored on this device only, not on our servers. When you ask "who is this?", photos are sent to the AI service for a one-time comparison. You can erase everything anytime with one button. Every person you save must agree.'}
+              : L('This feature is fully optional. Photos of your people are stored on this device only, not on our servers. When you ask "who is this?", photos are sent to the AI service for a one-time comparison. You can erase everything anytime with one button. Every person you save must agree.')}
           </p>
           <button
             type="button"
             onClick={giveConsent}
             className="w-full min-h-[90px] rounded-3xl bg-teal-600 hover:bg-teal-500 text-2xl font-black active:scale-[0.98]"
           >
-            {isArabic ? 'موافق — فعّل الميزة' : 'I agree — enable it'}
+            {isArabic ? 'موافق — فعّل الميزة' : L('I agree — enable it')}
           </button>
           <button
             type="button"
             onClick={onNavigateBack}
             className="w-full min-h-[80px] rounded-3xl bg-slate-700 hover:bg-slate-600 text-2xl font-bold active:scale-[0.98]"
           >
-            {isArabic ? 'لا — رجوع' : 'No — go back'}
+            {isArabic ? 'لا — رجوع' : L('No — go back')}
           </button>
         </div>
       </div>
@@ -205,7 +206,7 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
         <header>
           <h1 className="text-3xl font-black flex items-center gap-2">
             <Users className="w-8 h-8" aria-hidden="true" />
-            {isArabic ? 'الأشخاص المعروفين' : 'Known people'}
+            {isArabic ? 'الأشخاص المعروفين' : L('Known people')}
           </h1>
           <p className="text-base text-slate-300">
             {isArabic ? `${people.length} مسجل على الجهاز ده فقط` : `${people.length} saved on this device only`}
@@ -221,7 +222,7 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
             className="w-full min-h-[80px] rounded-3xl bg-slate-700 hover:bg-slate-600 text-2xl font-black flex items-center justify-center gap-3"
           >
             <Camera className="w-8 h-8" aria-hidden="true" />
-            {isArabic ? 'تشغيل الكاميرا' : 'Start camera'}
+            {isArabic ? 'تشغيل الكاميرا' : L('Start camera')}
           </button>
         ) : (
           <button
@@ -230,19 +231,19 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
             disabled={busy}
             className="w-full min-h-[100px] rounded-3xl bg-teal-600 hover:bg-teal-500 text-3xl font-black active:scale-[0.98] disabled:opacity-50"
           >
-            {busy ? (isArabic ? 'بقارن...' : 'Comparing...') : (isArabic ? 'مين ده؟' : 'Who is this?')}
+            {busy ? (isArabic ? 'بقارن...' : L('Comparing...')) : (isArabic ? 'مين ده؟' : L('Who is this?'))}
           </button>
         )}
 
-        <section className="rounded-3xl bg-slate-900 border-2 border-slate-700 p-5 space-y-3" aria-label={isArabic ? 'تسجيل شخص جديد' : 'Save a new person'}>
+        <section className="rounded-3xl bg-slate-900 border-2 border-slate-700 p-5 space-y-3" aria-label={isArabic ? 'تسجيل شخص جديد' : L('Save a new person')}>
           <h2 className="text-2xl font-black flex items-center gap-2">
             <UserPlus className="w-7 h-7" aria-hidden="true" />
-            {isArabic ? 'سجل شخص جديد' : 'Save a new person'}
+            {isArabic ? 'سجل شخص جديد' : L('Save a new person')}
           </h2>
           <label className="block text-lg font-bold">
-            {isArabic ? 'اسمه' : 'Their name'}
+            {isArabic ? 'اسمه' : L('Their name')}
             <input
-              aria-label={isArabic ? 'اسم الشخص' : 'Person name'}
+              aria-label={isArabic ? 'اسم الشخص' : L('Person name')}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               className="mt-1 w-full min-h-[64px] rounded-2xl bg-slate-800 border-2 border-slate-600 px-4 text-xl font-normal"
@@ -253,12 +254,12 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
             onClick={addFromCamera}
             className="w-full min-h-[80px] rounded-3xl bg-indigo-700 hover:bg-indigo-600 text-2xl font-black active:scale-[0.98]"
           >
-            {isArabic ? 'التقط صورته وسجله' : 'Capture photo and save'}
+            {isArabic ? 'التقط صورته وسجله' : L('Capture photo and save')}
           </button>
         </section>
 
         {people.length > 0 && (
-          <ul className="space-y-2" aria-label={isArabic ? 'المسجلون' : 'Saved people'}>
+          <ul className="space-y-2" aria-label={isArabic ? 'المسجلون' : L('Saved people')}>
             {people.map((p) => (
               <li key={p.id} className="rounded-2xl bg-slate-900 border border-slate-700 p-4 text-xl font-bold">
                 {p.name}
@@ -274,18 +275,18 @@ const KnownPeopleView: React.FC<KnownPeopleViewProps> = ({ profile, isArabic, on
             className="w-full min-h-[80px] rounded-3xl bg-red-800 hover:bg-red-700 text-xl font-black flex items-center justify-center gap-3"
           >
             <Trash2 className="w-7 h-7" aria-hidden="true" />
-            {isArabic ? 'امسح كل بيانات الأشخاص' : 'Erase all people data'}
+            {isArabic ? 'امسح كل بيانات الأشخاص' : L('Erase all people data')}
           </button>
         )}
 
-        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" aria-hidden="true" aria-label={isArabic ? 'رفع صورة شخص' : 'Upload a person photo'} tabIndex={-1} />
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" aria-hidden="true" aria-label={isArabic ? 'رفع صورة شخص' : L('Upload a person photo')} tabIndex={-1} />
 
         <button
           type="button"
           onClick={onNavigateBack}
           className="w-full min-h-[64px] rounded-2xl bg-slate-700 hover:bg-slate-600 text-xl font-bold"
         >
-          {isArabic ? 'رجوع' : 'Back'}
+          {isArabic ? 'رجوع' : L('Back')}
         </button>
       </div>
     </div>

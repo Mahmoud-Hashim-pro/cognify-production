@@ -9,6 +9,7 @@
  *   3. Plain-language simplification with key points and glossary
  */
 import React, { useMemo, useState } from 'react';
+import { L } from '../lib/translations';
 import { BookOpenText, Scissors, Sparkles } from 'lucide-react';
 import {
   bionicizeText,
@@ -78,12 +79,12 @@ export const ReadingSupportPanel: React.FC<ReadingSupportPanelProps> = ({
   return (
     <div className={`p-6 rounded-3xl border space-y-4 ${cardCls}`} data-testid="reading-support-panel">
       <h3 className={`text-sm font-black ${textCls}`}>
-        {isArabic ? '📖 مساعد القراءة (دعم عسر القراءة)' : '📖 Reading Support (Dyslexia Aids)'}
+        {isArabic ? '📖 مساعد القراءة (دعم عسر القراءة)' : L('📖 Reading Support (Dyslexia Aids)')}
       </h3>
       <p className={`text-xs leading-relaxed ${subCls}`}>
         {isArabic
           ? 'الصق أي نص هنا واختر طريقة عرض أسهل: تثبيت بصري على بدايات الكلمات، تقطيع صوتي للمقاطع، أو تبسيط لغوي مع النقاط الأساسية. كل المعالجة تتم على جهازك فقط.'
-          : 'Paste any text and pick an easier way to read it: visual fixation on word beginnings, syllable chunking, or plain-language simplification with key points. All processing happens on your device only.'}
+          : L('Paste any text and pick an easier way to read it: visual fixation on word beginnings, syllable chunking, or plain-language simplification with key points. All processing happens on your device only.')}
       </p>
 
       <textarea
@@ -91,11 +92,11 @@ export const ReadingSupportPanel: React.FC<ReadingSupportPanelProps> = ({
         onChange={(e) => setInputText(e.target.value)}
         rows={4}
         dir="auto"
-        aria-label={isArabic ? 'النص المراد قراءته' : 'Text to read'}
+        aria-label={isArabic ? 'النص المراد قراءته' : L('Text to read')}
         placeholder={
           isArabic
             ? 'اكتب أو الصق النص هنا...'
-            : 'Type or paste the text here...'
+            : L('Type or paste the text here...')
         }
         className={`w-full p-3 rounded-2xl border text-sm leading-relaxed resize-y ${
           isDarkMode
@@ -104,7 +105,7 @@ export const ReadingSupportPanel: React.FC<ReadingSupportPanelProps> = ({
         }`}
       />
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label={isArabic ? 'أدوات القراءة' : 'Reading tools'}>
+      <div className="flex flex-wrap gap-2" role="group" aria-label={isArabic ? 'أدوات القراءة' : L('Reading tools')}>
         {tools.map((t) => (
           <button
             key={t.id}
@@ -187,7 +188,7 @@ export const ReadingSupportPanel: React.FC<ReadingSupportPanelProps> = ({
           {simplified.summary && (
             <div>
               <h4 className={`text-xs font-black mb-1 ${textCls}`}>
-                {isArabic ? 'الملخص' : 'Summary'}
+                {isArabic ? 'الملخص' : L('Summary')}
               </h4>
               <p className={`leading-relaxed ${textCls}`}>{simplified.summary}</p>
             </div>
@@ -195,7 +196,7 @@ export const ReadingSupportPanel: React.FC<ReadingSupportPanelProps> = ({
           {simplified.keyPoints.length > 0 && (
             <div>
               <h4 className={`text-xs font-black mb-1 ${textCls}`}>
-                {isArabic ? 'النقاط الأساسية' : 'Key points'}
+                {isArabic ? 'النقاط الأساسية' : L('Key points')}
               </h4>
               <ul className={`list-disc ps-5 space-y-1 ${subCls}`}>
                 {simplified.keyPoints.map((kp, ki) => (
@@ -207,7 +208,7 @@ export const ReadingSupportPanel: React.FC<ReadingSupportPanelProps> = ({
           {simplified.difficultGlossary.length > 0 && (
             <div>
               <h4 className={`text-xs font-black mb-1 ${textCls}`}>
-                {isArabic ? 'معجم المصطلحات الصعبة' : 'Glossary of difficult terms'}
+                {isArabic ? 'معجم المصطلحات الصعبة' : L('Glossary of difficult terms')}
               </h4>
               <ul className={`space-y-1 ${subCls}`}>
                 {simplified.difficultGlossary.map((g, gi) => (

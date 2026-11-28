@@ -11,6 +11,7 @@
  *      attempts (stored locally) keeps the preview exploratory.
  */
 import React, { useMemo, useRef, useState } from 'react';
+import { L } from '../lib/translations';
 import { Brain, Dumbbell, Grid3x3, ListChecks, Palette, RotateCcw, ShieldAlert, Sigma, TrendingUp, Volume2, VolumeX } from 'lucide-react';
 import { compareQuizzes, type QuizComparisonResult } from '../lib/evaluationEngine';
 import {
@@ -305,10 +306,10 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             {workoutAnswer === workout.correctIndex
               ? isArabic
                 ? '✓ إجابة صحيحة! '
-                : '✓ Correct! '
+                : L('✓ Correct! ')
               : isArabic
                 ? '✗ إجابة غير صحيحة. '
-                : '✗ Not quite. '}
+                : L('✗ Not quite. ')}
             {workout.explanation}
           </p>
         )}
@@ -320,7 +321,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-violet-400" aria-hidden="true" />
             <h3 className={`text-sm font-black ${textCls}`}>
-              {isArabic ? 'استكشاف أسلوب التفكير (12 سؤالاً)' : 'Thinking-style preview (12 questions)'}
+              {isArabic ? 'استكشاف أسلوب التفكير (12 سؤالاً)' : L('Thinking-style preview (12 questions)')}
             </h3>
           </div>
           <div
@@ -344,7 +345,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
               onClick={startPreview}
               className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
             >
-              {isArabic ? 'ابدأ الاستكشاف' : 'Start the preview'}
+              {isArabic ? 'ابدأ الاستكشاف' : L('Start the preview')}
             </button>
           )}
         </div>
@@ -420,11 +421,11 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
       {stage === 'preview_results' && results && (
         <div className={`p-5 rounded-3xl border space-y-4 ${cardCls}`} data-testid="cognitive-preview-results">
           <h3 className={`text-sm font-black ${textCls}`}>
-            {isArabic ? 'نتيجة الاستكشاف' : 'Preview results'}
+            {isArabic ? 'نتيجة الاستكشاف' : L('Preview results')}
           </h3>
           <div className={`p-4 rounded-2xl border text-center ${innerCls}`}>
             <p className={`text-[11px] font-bold ${subCls}`}>
-              {isArabic ? 'مؤشر أسلوب التفكير (استكشافي)' : 'Cognitive Style Index (exploratory)'}
+              {isArabic ? 'مؤشر أسلوب التفكير (استكشافي)' : L('Cognitive Style Index (exploratory)')}
             </p>
             <p className="text-3xl font-black text-[#4B9FE1]">{results.styleIndex}</p>
           </div>
@@ -463,7 +464,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             }`}
           >
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
-            {isArabic ? 'عودة' : 'Back'}
+            {isArabic ? 'عودة' : L('Back')}
           </button>
         </div>
       )}
@@ -474,7 +475,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
           <div className="flex items-center gap-2">
             <Grid3x3 className="w-5 h-5 text-violet-400" aria-hidden="true" />
             <h3 className={`text-sm font-black ${textCls}`}>
-              {isArabic ? 'مدرب الذاكرة العاملة (الشبكة)' : 'Working-memory grid trainer'}
+              {isArabic ? 'مدرب الذاكرة العاملة (الشبكة)' : L('Working-memory grid trainer')}
             </h3>
           </div>
           {gridBestSpan > 0 && (
@@ -486,7 +487,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
         <p className={`text-[11px] leading-relaxed ${subCls}`}>
           {isArabic
             ? 'شاهد الخلايا وهي تضيء بالترتيب، ثم اضغط عليها بنفس الترتيب. كل نجاح يزيد طول السلسلة.'
-            : 'Watch the cells light up in order, then tap them in the same order. Each success grows the sequence.'}
+            : L('Watch the cells light up in order, then tap them in the same order. Each success grows the sequence.')}
         </p>
         {gridPhase === 'idle' && (
           <button
@@ -502,7 +503,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             <div
               className="grid grid-cols-3 gap-1.5 max-w-[220px]"
               role="group"
-              aria-label={isArabic ? 'شبكة الذاكرة' : 'Memory grid'}
+              aria-label={isArabic ? 'شبكة الذاكرة' : L('Memory grid')}
             >
               {Array.from({ length: gridRound.gridSize * gridRound.gridSize }, (_, idx) => {
                 const isHighlighted = gridHighlight === idx;
@@ -513,7 +514,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                     type="button"
                     disabled={gridPhase !== 'input'}
                     onClick={() => tapGridCell(idx)}
-                    aria-label={`${isArabic ? 'خلية' : 'Cell'} ${idx + 1}`}
+                    aria-label={`${isArabic ? 'خلية' : L('Cell')} ${idx + 1}`}
                     className={`aspect-square rounded-xl border transition-all cursor-pointer ${
                       isHighlighted
                         ? 'bg-violet-500 border-violet-400 scale-105'
@@ -529,7 +530,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             </div>
             {gridPhase === 'showing' && (
               <p className={`text-[11px] font-bold ${subCls}`}>
-                {isArabic ? 'شاهد الترتيب...' : 'Watch the sequence...'}
+                {isArabic ? 'شاهد الترتيب...' : L('Watch the sequence...')}
               </p>
             )}
             {gridPhase === 'input' && (
@@ -563,8 +564,8 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                     className="px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
                   >
                     {gridResult.isCorrect
-                      ? isArabic ? 'الجولة التالية (أصعب)' : 'Next round (harder)'
-                      : isArabic ? 'حاول مجدداً (أسهل)' : 'Try again (easier)'}
+                      ? isArabic ? 'الجولة التالية (أصعب)' : L('Next round (harder)')
+                      : isArabic ? 'حاول مجدداً (أسهل)' : L('Try again (easier)')}
                   </button>
                   <button
                     type="button"
@@ -577,7 +578,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                       isDarkMode ? 'bg-stone-800 text-stone-200 hover:bg-stone-700' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     }`}
                   >
-                    {isArabic ? 'إيقاف' : 'Stop'}
+                    {isArabic ? 'إيقاف' : L('Stop')}
                   </button>
                 </div>
               </div>
@@ -591,13 +592,13 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
         <div className="flex items-center gap-2">
           <ListChecks className="w-5 h-5 text-sky-400" aria-hidden="true" />
           <h3 className={`text-sm font-black ${textCls}`}>
-            {isArabic ? 'مقطّع المهام الكبيرة' : 'Big-task slicer'}
+            {isArabic ? 'مقطّع المهام الكبيرة' : L('Big-task slicer')}
           </h3>
         </div>
         <p className={`text-[11px] leading-relaxed ${subCls}`}>
           {isArabic
             ? 'اكتب مهمة تبدو ثقيلة (بحث، شيت مسائل، قراءة فصل) وسنحولها لخطوات صغيرة لا تتجاوز 3 دقائق لتسهيل البدء.'
-            : 'Write a task that feels heavy (essay, problem sheet, chapter reading) and we turn it into tiny steps under 3 minutes each to make starting easier.'}
+            : L('Write a task that feels heavy (essay, problem sheet, chapter reading) and we turn it into tiny steps under 3 minutes each to make starting easier.')}
         </p>
         <div className="flex gap-2">
           <input
@@ -605,8 +606,8 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             value={taskInput}
             onChange={(e) => setTaskInput(e.target.value)}
             dir="auto"
-            aria-label={isArabic ? 'المهمة المراد تقسيمها' : 'Task to slice'}
-            placeholder={isArabic ? 'مثال: كتابة بحث عن الطاقة الشمسية' : 'e.g., Write an essay about solar energy'}
+            aria-label={isArabic ? 'المهمة المراد تقسيمها' : L('Task to slice')}
+            placeholder={isArabic ? 'مثال: كتابة بحث عن الطاقة الشمسية' : L('e.g., Write an essay about solar energy')}
             className={`flex-1 p-3 rounded-2xl border text-xs ${
               isDarkMode ? 'bg-stone-900 border-stone-700 text-stone-100 placeholder:text-stone-500' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
@@ -620,7 +621,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             }}
             className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
           >
-            {isArabic ? 'قسّم' : 'Slice'}
+            {isArabic ? 'قسّم' : L('Slice')}
           </button>
         </div>
         {slicedTask && (
@@ -662,7 +663,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
           <div className="flex items-center gap-2">
             <Palette className="w-5 h-5 text-rose-400" aria-hidden="true" />
             <h3 className={`text-sm font-black ${textCls}`}>
-              {isArabic ? 'مدرب الانتباه (ستروب)' : 'Attention trainer (Stroop)'}
+              {isArabic ? 'مدرب الانتباه (ستروب)' : L('Attention trainer (Stroop)')}
             </h3>
           </div>
           {stroopScore.total > 0 && (
@@ -674,7 +675,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
         <p className={`text-[11px] leading-relaxed ${subCls}`}>
           {isArabic
             ? 'ستظهر كلمة لون مكتوبة بحبر ملون. تجاهل معنى الكلمة واختر لون الحبر فقط - تمرين كلاسيكي للتركيز وكبح الاستجابة التلقائية.'
-            : 'A color word appears in colored ink. Ignore the word meaning and pick the INK color only - a classic focus and impulse-control exercise.'}
+            : L('A color word appears in colored ink. Ignore the word meaning and pick the INK color only - a classic focus and impulse-control exercise.')}
         </p>
         {!stroopTrial ? (
           <button
@@ -685,7 +686,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             }}
             className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
           >
-            {isArabic ? 'ابدأ' : 'Start'}
+            {isArabic ? 'ابدأ' : L('Start')}
           </button>
         ) : (
           <div className="space-y-3">
@@ -697,8 +698,8 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             {stroopFeedback && (
               <p className={`text-xs font-black ${stroopFeedback === 'correct' ? 'text-emerald-400' : 'text-rose-400'}`} role="status">
                 {stroopFeedback === 'correct'
-                  ? isArabic ? '✓ صحيح!' : '✓ Correct!'
-                  : isArabic ? '✗ لون الحبر هو المطلوب، ليس معنى الكلمة' : '✗ Pick the ink color, not the word meaning'}
+                  ? isArabic ? '✓ صحيح!' : L('✓ Correct!')
+                  : isArabic ? '✗ لون الحبر هو المطلوب، ليس معنى الكلمة' : L('✗ Pick the ink color, not the word meaning')}
               </p>
             )}
             <div className="grid grid-cols-4 gap-2">
@@ -722,7 +723,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                 isDarkMode ? 'bg-stone-800 text-stone-200 hover:bg-stone-700' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
               }`}
             >
-              {isArabic ? 'إيقاف' : 'Stop'}
+              {isArabic ? 'إيقاف' : L('Stop')}
             </button>
           </div>
         )}
@@ -733,13 +734,13 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
         <div className="flex items-center gap-2">
           <Sigma className="w-5 h-5 text-sky-400" aria-hidden="true" />
           <h3 className={`text-sm font-black ${textCls}`}>
-            {isArabic ? 'الرياضيات بالصور (إطار العشرة والقضبان)' : 'Picture math (ten-frame & rods)'}
+            {isArabic ? 'الرياضيات بالصور (إطار العشرة والقضبان)' : L('Picture math (ten-frame & rods)')}
           </h3>
         </div>
         <p className={`text-[11px] leading-relaxed ${subCls}`}>
           {isArabic
             ? 'مسألة جمع أو طرح بسيطة معروضة بصرياً بإطار العشرة وقضبان كويزنير - طريقة ملموسة لفهم الأعداد لمن يجد صعوبة في الحساب.'
-            : 'A simple addition or subtraction problem shown visually with a ten-frame and Cuisenaire rods - a concrete way to understand numbers for anyone who finds arithmetic hard.'}
+            : L('A simple addition or subtraction problem shown visually with a ten-frame and Cuisenaire rods - a concrete way to understand numbers for anyone who finds arithmetic hard.')}
         </p>
         <div className="flex gap-2">
           <button
@@ -751,8 +752,8 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
           >
             {mathProblem
-              ? isArabic ? 'مسألة جديدة' : 'New problem'
-              : isArabic ? 'اعرض مسألة' : 'Show a problem'}
+              ? isArabic ? 'مسألة جديدة' : L('New problem')
+              : isArabic ? 'اعرض مسألة' : L('Show a problem')}
           </button>
           {mathProblem && !mathRevealed && (
             <button
@@ -762,7 +763,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                 isDarkMode ? 'bg-stone-800 text-stone-200 hover:bg-stone-700' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
               }`}
             >
-              {isArabic ? 'اعرض الحل' : 'Show answer'}
+              {isArabic ? 'اعرض الحل' : L('Show answer')}
             </button>
           )}
         </div>
@@ -802,7 +803,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             {/* Cuisenaire rods for both operands */}
             <div className="space-y-1">
               <p className={`text-[11px] font-bold ${subCls}`}>
-                {isArabic ? 'قضبان كويزنير:' : 'Cuisenaire rods:'}
+                {isArabic ? 'قضبان كويزنير:' : L('Cuisenaire rods:')}
               </p>
               {[mathProblem.a, mathProblem.b].map((v, vi) => {
                 const rod = CUISENAIRE_RODS[Math.min(10, Math.max(1, v))];
@@ -832,13 +833,13 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
         <div className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-emerald-400" aria-hidden="true" />
           <h3 className={`text-sm font-black ${textCls}`}>
-            {isArabic ? 'حاسبة مكاسب التعلم' : 'Learning-gain calculator'}
+            {isArabic ? 'حاسبة مكاسب التعلم' : L('Learning-gain calculator')}
           </h3>
         </div>
         <p className={`text-[11px] leading-relaxed ${subCls}`}>
           {isArabic
             ? 'أدخل درجتك في الاختبار القبلي والبعدي (من 100) لترى مقدار ما تعلمته فعلاً بمعيار Hake للتحصيل المعياري.'
-            : "Enter your pre-quiz and post-quiz scores (out of 100) to see how much you actually learned, using Hake's normalized gain standard."}
+            : L("Enter your pre-quiz and post-quiz scores (out of 100) to see how much you actually learned, using Hake's normalized gain standard.")}
         </p>
         <div className="flex flex-wrap gap-2">
           <input
@@ -847,8 +848,8 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             onChange={(e) => setPreScoreInput(e.target.value)}
             min={0}
             max={100}
-            aria-label={isArabic ? 'درجة الاختبار القبلي' : 'Pre-quiz score'}
-            placeholder={isArabic ? 'الدرجة القبلية' : 'Pre-quiz score'}
+            aria-label={isArabic ? 'درجة الاختبار القبلي' : L('Pre-quiz score')}
+            placeholder={isArabic ? 'الدرجة القبلية' : L('Pre-quiz score')}
             className={`w-32 p-3 rounded-2xl border text-xs ${
               isDarkMode ? 'bg-stone-900 border-stone-700 text-stone-100 placeholder:text-stone-500' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
@@ -859,8 +860,8 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             onChange={(e) => setPostScoreInput(e.target.value)}
             min={0}
             max={100}
-            aria-label={isArabic ? 'درجة الاختبار البعدي' : 'Post-quiz score'}
-            placeholder={isArabic ? 'الدرجة البعدية' : 'Post-quiz score'}
+            aria-label={isArabic ? 'درجة الاختبار البعدي' : L('Post-quiz score')}
+            placeholder={isArabic ? 'الدرجة البعدية' : L('Post-quiz score')}
             className={`w-32 p-3 rounded-2xl border text-xs ${
               isDarkMode ? 'bg-stone-900 border-stone-700 text-stone-100 placeholder:text-stone-500' : 'bg-stone-50 border-stone-300 text-stone-900 placeholder:text-stone-400'
             }`}
@@ -879,7 +880,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                 setGainError(
                   isArabic
                     ? 'أدخل درجتين صحيحتين بين 0 و 100.'
-                    : 'Enter two valid scores between 0 and 100.'
+                    : L('Enter two valid scores between 0 and 100.')
                 );
                 return;
               }
@@ -888,7 +889,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             }}
             className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold transition-colors cursor-pointer"
           >
-            {isArabic ? 'احسب' : 'Calculate'}
+            {isArabic ? 'احسب' : L('Calculate')}
           </button>
         </div>
         {gainError && (
@@ -927,15 +928,15 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
         <div className="flex items-center gap-2">
           <Volume2 className="w-5 h-5 text-amber-400" aria-hidden="true" />
           <h3 className={`text-sm font-black ${textCls}`}>
-            {isArabic ? 'ضوضاء التركيز الهادئة' : 'Calm focus noise'}
+            {isArabic ? 'ضوضاء التركيز الهادئة' : L('Calm focus noise')}
           </h3>
         </div>
         <p className={`text-[11px] leading-relaxed ${subCls}`}>
           {isArabic
             ? 'خلفية صوتية ثابتة تُولَّد على جهازك للمساعدة على التركيز وتغطية الأصوات المشتتة. اضغط مرة للتشغيل ومرة أخرى للإيقاف.'
-            : 'A steady sound background generated on your device to help focus and mask distracting sounds. Tap once to play, again to stop.'}
+            : L('A steady sound background generated on your device to help focus and mask distracting sounds. Tap once to play, again to stop.')}
         </p>
-        <div className="flex flex-wrap gap-2" role="group" aria-label={isArabic ? 'أنواع الضوضاء' : 'Noise types'}>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={isArabic ? 'أنواع الضوضاء' : L('Noise types')}>
           {(['brown', 'pink', 'white'] as NoiseType[]).map((type) => {
             const active = activeNoise === type;
             const label = isArabic
