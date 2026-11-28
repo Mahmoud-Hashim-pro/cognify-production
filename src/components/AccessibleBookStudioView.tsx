@@ -113,20 +113,20 @@ export default function AccessibleBookStudioView({
   // Metadata & Layout Settings
   const [metadata, setMetadata] = useState<BookStudioMetadata>(() => {
     return {
-      title: initialTitle || (isArLocale ? 'كتاب العلوم التطبيقية الشامل' : 'Applied Science Comprehensive Textbook'),
-      subtitle: isArLocale ? 'الوحدة الدراسية الأولى: الطاقة والحركة' : 'Unit 1: Energy & Motion',
+      title: initialTitle || (isArLocale ? 'كتاب العلوم التطبيقية الشامل' : L('Applied Science Comprehensive Textbook')),
+      subtitle: isArLocale ? 'الوحدة الدراسية الأولى: الطاقة والحركة' : L('Unit 1: Energy & Motion'),
       author: profile?.name || 'الأستاذ الدكتور / المشرف الأكاديمي',
       subject: profile?.field
         ? (isArLocale
             ? ({ Medicine: 'الطب', Engineering: 'الهندسة', Business: 'إدارة الأعمال', General: 'عام', Other: 'أخرى' } as Record<string, string>)[profile.field] || profile.field
             : profile.field)
-        : (isArLocale ? 'العلوم الطبيعية والفيزياء' : 'Physics & Natural Science'),
+        : (isArLocale ? 'العلوم الطبيعية والفيزياء' : L('Physics & Natural Science')),
       gradeLevel: profile?.educationLevel
         ? (isArLocale
             ? ({ Primary: 'المرحلة الابتدائية', Secondary: 'المرحلة الثانوية', University: 'المرحلة الجامعية', Professional: 'المستوى المهني' } as Record<string, string>)[profile.educationLevel] || profile.educationLevel
             : profile.educationLevel)
-        : (isArLocale ? 'المرحلة الثانوية / الجامعية' : 'High School / University'),
-      institution: profile?.organization || (isArLocale ? 'منصة رفيقي للتعليم الميسر' : 'Rafiqi Inclusive Learning Platform'),
+        : (isArLocale ? 'المرحلة الثانوية / الجامعية' : L('High School / University')),
+      institution: profile?.organization || (isArLocale ? 'منصة رفيقي للتعليم الميسر' : L('Rafiqi Inclusive Learning Platform')),
       date: new Date().toLocaleDateString(isArLocale ? 'ar-EG' : 'en-US'),
       language: isArLocale ? 'ar' : 'en',
       template: 'textbook',
@@ -134,7 +134,7 @@ export default function AccessibleBookStudioView({
       includeCoverPage: true,
       includeTableOfContents: true,
       includeAnswerKey: true,
-      fontFamily: isArLocale ? 'Segoe UI' : 'Calibri',
+      fontFamily: isArLocale ? 'Segoe UI' : L('Calibri'),
       fontSizeScale: 'normal',
       lineSpacing: 280,
     };
@@ -200,13 +200,13 @@ export default function AccessibleBookStudioView({
       setRawSourceHistory((prev) => prev.slice(0, -1));
       setRawContent(previous);
       toast.info(
-        isArLocale ? 'تم استرجاع النص الأولي قبل التنسيق.' : 'Reverted content to previous state.',
-        isArLocale ? 'تراجع عن التنسيق' : 'Undo'
+        isArLocale ? 'تم استرجاع النص الأولي قبل التنسيق.' : L('Reverted content to previous state.'),
+        isArLocale ? 'تراجع عن التنسيق' : L('Undo')
       );
     } else {
       toast.warning(
-        isArLocale ? 'لا يوجد نص سابق محفوظ للتراجع عنه.' : 'No earlier draft to undo.',
-        isArLocale ? 'تنبيه' : 'Notice'
+        isArLocale ? 'لا يوجد نص سابق محفوظ للتراجع عنه.' : L('No earlier draft to undo.'),
+        isArLocale ? 'تنبيه' : L('Notice')
       );
     }
   };
@@ -233,12 +233,12 @@ export default function AccessibleBookStudioView({
           }));
           toast.success(
             isArLocale ? `تم استخراج ${extracted.wordCount} كلمة من ملف Word بنجاح!` : `Extracted ${extracted.wordCount} words from DOCX!`,
-            isArLocale ? 'استيراد ناجح' : 'Import Successful'
+            isArLocale ? 'استيراد ناجح' : L('Import Successful')
           );
         } else {
           toast.error(
-            isArLocale ? 'تعذر استخراج النصوص من ملف Word.' : 'Failed to extract text from DOCX.',
-            isArLocale ? 'خطأ' : 'Error'
+            isArLocale ? 'تعذر استخراج النصوص من ملف Word.' : L('Failed to extract text from DOCX.'),
+            isArLocale ? 'خطأ' : L('Error')
           );
         }
       } else {
@@ -249,15 +249,15 @@ export default function AccessibleBookStudioView({
           title: file.name.replace(/\.[^/.]+$/, ''),
         }));
         toast.success(
-          isArLocale ? 'تم استيراد الملف النصي بنجاح!' : 'Imported text file successfully!',
-          isArLocale ? 'استيراد' : 'Import'
+          isArLocale ? 'تم استيراد الملف النصي بنجاح!' : L('Imported text file successfully!'),
+          isArLocale ? 'استيراد' : L('Import')
         );
       }
     } catch (err) {
       console.error('File import error:', err);
       toast.error(
-        isArLocale ? 'حدث خطأ أثناء قراءة الملف.' : 'Error reading document file.',
-        isArLocale ? 'خطأ' : 'Error'
+        isArLocale ? 'حدث خطأ أثناء قراءة الملف.' : L('Error reading document file.'),
+        isArLocale ? 'خطأ' : L('Error')
       );
     } finally {
       setIsProcessingFile(false);
@@ -286,17 +286,17 @@ export default function AccessibleBookStudioView({
         if (rawContent) setRawSourceHistory((prev) => [...prev, rawContent]);
         setRawContent(imported);
         toast.success(
-          isArLocale ? 'تم استيراد المحتوى المستخرج من قارئ المستندات!' : 'Imported text from Rafiqi Document Reader!',
-          isArLocale ? 'استيراد' : 'Import'
+          isArLocale ? 'تم استيراد المحتوى المستخرج من قارئ المستندات!' : L('Imported text from Rafiqi Document Reader!'),
+          isArLocale ? 'استيراد' : L('Import')
         );
       } else {
         toast.info(
-          isArLocale ? 'لم يتم العثور على مستندات مستخرجة حديثاً في الجلسة.' : 'No recent extracted documents found in current session.',
-          isArLocale ? 'لا يوجد محتوى' : 'No Content'
+          isArLocale ? 'لم يتم العثور على مستندات مستخرجة حديثاً في الجلسة.' : L('No recent extracted documents found in current session.'),
+          isArLocale ? 'لا يوجد محتوى' : L('No Content')
         );
       }
     } catch {
-      toast.error(isArLocale ? 'فشل استيراد المحتوى.' : 'Failed to import session content.');
+      toast.error(isArLocale ? 'فشل استيراد المحتوى.' : L('Failed to import session content.'));
     }
   };
 
@@ -304,8 +304,8 @@ export default function AccessibleBookStudioView({
   const handleDownloadDocx = async () => {
     if (!sections.length && !rawContent.trim()) {
       toast.warning(
-        isArLocale ? 'يرجى إدخال محتوى تعليمي أولاً قبل تصدير المستند.' : 'Please provide educational content before export.',
-        isArLocale ? 'تنبيه' : 'Notice'
+        isArLocale ? 'يرجى إدخال محتوى تعليمي أولاً قبل تصدير المستند.' : L('Please provide educational content before export.'),
+        isArLocale ? 'تنبيه' : L('Notice')
       );
       return;
     }
@@ -332,14 +332,14 @@ export default function AccessibleBookStudioView({
       saveToHistory(metadata.title, rawContent, activeSections);
 
       toast.success(
-        isArLocale ? 'تم إنشاء وتنزيل مستند Word الميسر بنجاح!' : 'Accessible Word (.docx) document generated and downloaded!',
-        isArLocale ? 'تم التصدير' : 'Export Complete'
+        isArLocale ? 'تم إنشاء وتنزيل مستند Word الميسر بنجاح!' : L('Accessible Word (.docx) document generated and downloaded!'),
+        isArLocale ? 'تم التصدير' : L('Export Complete')
       );
     } catch (err) {
       console.error('DOCX Export error:', err);
       toast.error(
-        isArLocale ? 'حدث خطأ أثناء إنشاء ملف Word.' : 'Error generating Word document.',
-        isArLocale ? 'فشل التصدير' : 'Export Failed'
+        isArLocale ? 'حدث خطأ أثناء إنشاء ملف Word.' : L('Error generating Word document.'),
+        isArLocale ? 'فشل التصدير' : L('Export Failed')
       );
     } finally {
       setIsGeneratingDocx(false);
@@ -354,7 +354,7 @@ export default function AccessibleBookStudioView({
 
     const printWin = window.open('', '_blank');
     if (!printWin) {
-      toast.error(isArLocale ? 'تم حظر النافذة المنبثقة من المتصفح.' : 'Popup was blocked by browser.');
+      toast.error(isArLocale ? 'تم حظر النافذة المنبثقة من المتصفح.' : L('Popup was blocked by browser.'));
       return;
     }
     printWin.document.write(htmlContent);
@@ -400,7 +400,7 @@ export default function AccessibleBookStudioView({
     setActiveStep(3); // Jump straight to outline and questions
     toast.success(
       isArLocale ? `تم استرجاع المستند: ${item.title}` : `Reopened document: ${item.title}`,
-      isArLocale ? 'استرجاع' : 'Loaded'
+      isArLocale ? 'استرجاع' : L('Loaded')
     );
   };
 
@@ -443,7 +443,7 @@ export default function AccessibleBookStudioView({
             <button
               type="button"
               onClick={onNavigateBack}
-              aria-label={isArLocale ? 'الرجوع للوحة الميزات' : 'Back'}
+              aria-label={isArLocale ? 'الرجوع للوحة الميزات' : L('Back')}
               className={`min-h-[44px] min-w-[44px] p-2.5 rounded-xl border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
                 isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-[#4B9FE1]' : 'bg-stone-100 border-stone-200 text-[#1769AA]'
               }`}
@@ -470,28 +470,28 @@ export default function AccessibleBookStudioView({
         <div className="flex items-center gap-2 shrink-0">
           <ToolSwitcherSlot />
           <HeaderMenu
-            ariaLabel={isArLocale ? 'المزيد' : 'More actions'}
+            ariaLabel={isArLocale ? 'المزيد' : L('More actions')}
             isDarkMode={isDarkMode}
             items={[
               ...(rawSourceHistory.length > 0
                 ? [{
                     key: 'undo',
-                    label: isArLocale ? 'تراجع / إلغاء' : 'Undo / Cancel',
-                    ariaLabel: isArLocale ? 'تراجع عن التنسيق وإلغاء التغييرات واسترجاع النص الأصلي' : 'Undo changes / Cancel',
+                    label: isArLocale ? 'تراجع / إلغاء' : L('Undo / Cancel'),
+                    ariaLabel: isArLocale ? 'تراجع عن التنسيق وإلغاء التغييرات واسترجاع النص الأصلي' : L('Undo changes / Cancel'),
                     icon: <Undo2 className="w-4 h-4" />,
                     onSelect: handleRevertToOriginal,
                   }]
                 : []),
               {
                 key: 'history',
-                label: isArLocale ? 'أرشيف الكتب المحفوظة' : 'Document History',
+                label: isArLocale ? 'أرشيف الكتب المحفوظة' : L('Document History'),
                 icon: <History className="w-4 h-4" />,
                 onSelect: () => setShowHistoryModal(true),
               },
               ...(toggleTheme
                 ? [{
                     key: 'theme',
-                    label: isDarkMode ? (isArLocale ? 'الوضع النهاري' : 'Light mode') : (isArLocale ? 'الوضع الليلي' : 'Dark mode'),
+                    label: isDarkMode ? (isArLocale ? 'الوضع النهاري' : L('Light mode')) : (isArLocale ? 'الوضع الليلي' : L('Dark mode')),
                     ariaLabel: 'Toggle theme',
                     icon: isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />,
                     onSelect: toggleTheme,
@@ -500,7 +500,7 @@ export default function AccessibleBookStudioView({
               ...(onMenuClick
                 ? [{
                     key: 'menu',
-                    label: isArLocale ? 'القائمة' : 'Menu',
+                    label: isArLocale ? 'القائمة' : L('Menu'),
                     ariaLabel: 'Toggle menu',
                     icon: <Menu className="w-4 h-4" />,
                     onSelect: onMenuClick,
@@ -513,7 +513,7 @@ export default function AccessibleBookStudioView({
 
       {/* ── WORKFLOW STEP NAVIGATOR (Screen-reader Accessible Tablist) ── */}
       <nav
-        aria-label={isArLocale ? 'خطوات استوديو الكتب التعليمية' : 'Book Studio Steps'}
+        aria-label={isArLocale ? 'خطوات استوديو الكتب التعليمية' : L('Book Studio Steps')}
         className={`px-3 sm:px-4 py-2 border-b shrink-0 flex items-center justify-start gap-2 ${
           isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-100 border-stone-200'
         }`}
@@ -550,9 +550,9 @@ export default function AccessibleBookStudioView({
 
         {/* Quick Word & Question Counter Badge */}
         <div className="hidden sm:flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 font-bold shrink-0 ms-auto">
-          <span>{stats.words} {isArLocale ? 'كلمة' : 'words'}</span>
+          <span>{stats.words} {isArLocale ? 'كلمة' : L('words')}</span>
           <span>•</span>
-          <span>{stats.questionsCount} {isArLocale ? 'سؤال مكتشف' : 'questions'}</span>
+          <span>{stats.questionsCount} {isArLocale ? 'سؤال مكتشف' : L('questions')}</span>
         </div>
       </nav>
 
@@ -581,7 +581,7 @@ export default function AccessibleBookStudioView({
                   onChange={handleFileUpload}
                   className="hidden"
                   id="book-studio-file-upload"
-                  aria-label={isArLocale ? 'رفع ملف المستند' : 'Upload document file'}
+                  aria-label={isArLocale ? 'رفع ملف المستند' : L('Upload document file')}
                 />
                 <button
                   type="button"
@@ -598,10 +598,10 @@ export default function AccessibleBookStudioView({
                   </div>
                   <div className="min-w-0">
                     <div className="font-bold text-xs sm:text-sm truncate">
-                      {isArLocale ? 'رفع ملف Word أو TXT' : 'Upload DOCX or TXT'}
+                      {isArLocale ? 'رفع ملف Word أو TXT' : L('Upload DOCX or TXT')}
                     </div>
                     <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
-                      {isArLocale ? 'استيراد فوري واستخراج النصوص' : 'Instant pure extraction'}
+                      {isArLocale ? 'استيراد فوري واستخراج النصوص' : L('Instant pure extraction')}
                     </div>
                   </div>
                 </button>
@@ -620,10 +620,10 @@ export default function AccessibleBookStudioView({
                   </div>
                   <div className="min-w-0">
                     <div className="font-bold text-xs sm:text-sm truncate">
-                      {isArLocale ? 'استيراد من قارئ المستندات' : 'Import from File Reader'}
+                      {isArLocale ? 'استيراد من قارئ المستندات' : L('Import from File Reader')}
                     </div>
                     <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
-                      {isArLocale ? 'المحاضرات أو النصوص المستخرجة' : 'Lecture notes or PDF scans'}
+                      {isArLocale ? 'المحاضرات أو النصوص المستخرجة' : L('Lecture notes or PDF scans')}
                     </div>
                   </div>
                 </button>
@@ -638,10 +638,10 @@ export default function AccessibleBookStudioView({
                   </div>
                   <div className="min-w-0">
                     <div className="font-bold text-xs sm:text-sm truncate">
-                      {isArLocale ? 'حفظ الأصول وإمكانية التراجع' : 'Non-destructive Formatting'}
+                      {isArLocale ? 'حفظ الأصول وإمكانية التراجع' : L('Non-destructive Formatting')}
                     </div>
                     <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
-                      {isArLocale ? 'النص الأصلي محفوظ ومحمي دائماً' : 'Original text is never altered'}
+                      {isArLocale ? 'النص الأصلي محفوظ ومحمي دائماً' : L('Original text is never altered')}
                     </div>
                   </div>
                 </div>
@@ -655,47 +655,47 @@ export default function AccessibleBookStudioView({
               >
                 <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-xs sm:text-sm">
                   <Bookmark className="w-4 h-4" />
-                  <span>{isArLocale ? 'بيانات وهوية الكتاب / الوثيقة التعليمية' : 'Document Identity & Metadata'}</span>
+                  <span>{isArLocale ? 'بيانات وهوية الكتاب / الوثيقة التعليمية' : L('Document Identity & Metadata')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'عنوان الكتاب أو المستند *' : 'Document Title *'}
+                      {isArLocale ? 'عنوان الكتاب أو المستند *' : L('Document Title *')}
                     </label>
                     <input
                       type="text"
-                      id="book-meta-title" aria-label={isArLocale ? 'عنوان الكتاب أو المستند' : 'Document Title'} value={metadata.title}
+                      id="book-meta-title" aria-label={isArLocale ? 'عنوان الكتاب أو المستند' : L('Document Title')} value={metadata.title}
                       onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
-                      placeholder={isArLocale ? 'مثال: كتاب الفيزياء الحيوية' : 'e.g. Biophysics Lecture Notes'}
+                      placeholder={isArLocale ? 'مثال: كتاب الفيزياء الحيوية' : L('e.g. Biophysics Lecture Notes')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'العنوان الفرعي أو الوحدة' : 'Subtitle or Unit'}
+                      {isArLocale ? 'العنوان الفرعي أو الوحدة' : L('Subtitle or Unit')}
                     </label>
                     <input
                       type="text"
-                      id="book-meta-subtitle" aria-label={isArLocale ? 'العنوان الفرعي أو الوحدة' : 'Subtitle or Unit'} value={metadata.subtitle || ''}
+                      id="book-meta-subtitle" aria-label={isArLocale ? 'العنوان الفرعي أو الوحدة' : L('Subtitle or Unit')} value={metadata.subtitle || ''}
                       onChange={(e) => setMetadata({ ...metadata, subtitle: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
-                      placeholder={isArLocale ? 'مثال: الوحدة الأولى: الميكانيكا' : 'e.g. Unit 1: Mechanics'}
+                      placeholder={isArLocale ? 'مثال: الوحدة الأولى: الميكانيكا' : L('e.g. Unit 1: Mechanics')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'المؤلف / المعلم' : 'Author / Teacher'}
+                      {isArLocale ? 'المؤلف / المعلم' : L('Author / Teacher')}
                     </label>
                     <input
                       type="text"
-                      id="book-meta-author" aria-label={isArLocale ? 'المؤلف أو المعلم' : 'Author or Teacher'} value={metadata.author}
+                      id="book-meta-author" aria-label={isArLocale ? 'المؤلف أو المعلم' : L('Author or Teacher')} value={metadata.author}
                       onChange={(e) => setMetadata({ ...metadata, author: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -705,11 +705,11 @@ export default function AccessibleBookStudioView({
 
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'المادة التخصصية' : 'Subject'}
+                      {isArLocale ? 'المادة التخصصية' : L('Subject')}
                     </label>
                     <input
                       type="text"
-                      id="book-meta-subject" aria-label={isArLocale ? 'المادة التخصصية' : 'Subject'} value={metadata.subject}
+                      id="book-meta-subject" aria-label={isArLocale ? 'المادة التخصصية' : L('Subject')} value={metadata.subject}
                       onChange={(e) => setMetadata({ ...metadata, subject: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -719,11 +719,11 @@ export default function AccessibleBookStudioView({
 
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'المرحلة / الصف الدراسي' : 'Grade / Educational Level'}
+                      {isArLocale ? 'المرحلة / الصف الدراسي' : L('Grade / Educational Level')}
                     </label>
                     <input
                       type="text"
-                      id="book-meta-grade" aria-label={isArLocale ? 'المرحلة أو الصف الدراسي' : 'Grade or Educational Level'} value={metadata.gradeLevel}
+                      id="book-meta-grade" aria-label={isArLocale ? 'المرحلة أو الصف الدراسي' : L('Grade or Educational Level')} value={metadata.gradeLevel}
                       onChange={(e) => setMetadata({ ...metadata, gradeLevel: e.target.value })}
                       className={`w-full px-3 py-2 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-teal-600 transition-colors ${
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
@@ -733,7 +733,7 @@ export default function AccessibleBookStudioView({
 
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'لغة المحتوى والتنسيق' : 'Content Language'}
+                      {isArLocale ? 'لغة المحتوى والتنسيق' : L('Content Language')}
                     </label>
                     <select
                       value={metadata.language}
@@ -742,9 +742,9 @@ export default function AccessibleBookStudioView({
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
-                      <option value="ar">{isArLocale ? 'العربية (RTL من اليمين لليسار)' : 'Arabic (RTL)'}</option>
-                      <option value="en">{isArLocale ? 'الإنجليزية (LTR)' : 'English (LTR)'}</option>
-                      <option value="mixed">{isArLocale ? 'ثنائي اللغة (عربي ومصطلحات إنجليزية)' : 'Bilingual (Arabic & English)'}</option>
+                      <option value="ar">{isArLocale ? 'العربية (RTL من اليمين لليسار)' : L('Arabic (RTL)')}</option>
+                      <option value="en">{isArLocale ? 'الإنجليزية (LTR)' : L('English (LTR)')}</option>
+                      <option value="mixed">{isArLocale ? 'ثنائي اللغة (عربي ومصطلحات إنجليزية)' : L('Bilingual (Arabic & English)')}</option>
                     </select>
                   </div>
                 </div>
@@ -759,7 +759,7 @@ export default function AccessibleBookStudioView({
                 <p className="leading-relaxed">
                   {isArLocale
                     ? 'ضمان الأمانة: يحافظ الاستوديو على النص الأصلي والعناوين والأسئلة بدقة كاملة. يتم تجاهل وحدات الماكرو القديمة والعناصر غير المتوافقة مع قارئات الشاشة لضمان التوافقية والمعيارية.'
-                    : 'Formatting Notice: Source text, headings, and questions are preserved verbatim. Incompatible legacy macros or non-standard formatting are omitted to guarantee full screen-reader compliance.'}
+                    : L('Formatting Notice: Source text, headings, and questions are preserved verbatim. Incompatible legacy macros or non-standard formatting are omitted to guarantee full screen-reader compliance.')}
                 </p>
               </div>
 
@@ -772,10 +772,10 @@ export default function AccessibleBookStudioView({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-xs sm:text-sm">
                     <FileText className="w-4 h-4" />
-                    <span>{isArLocale ? 'محرر المحتوى والنصوص التعليمية' : 'Educational Content Source'}</span>
+                    <span>{isArLocale ? 'محرر المحتوى والنصوص التعليمية' : L('Educational Content Source')}</span>
                   </div>
                   <span className="text-xs text-stone-500 dark:text-stone-400">
-                    {stats.words} {isArLocale ? 'كلمة' : 'words'} • {stats.paras} {isArLocale ? 'فقرة' : 'paragraphs'}
+                    {stats.words} {isArLocale ? 'كلمة' : L('words')} • {stats.paras} {isArLocale ? 'فقرة' : L('paragraphs')}
                   </span>
                 </div>
 
@@ -789,7 +789,7 @@ export default function AccessibleBookStudioView({
                   placeholder={
                     isArLocale
                       ? 'الصق هنا محتوى الدرس، الشرح، الأسئلة والتدريبات، أو الفصول التعليمية...\nمثال:\nالفصل الأول: الحركة الموجية\nتعتبر الأمواج من أهم الظواهر الفيزيائية الطبيعية...\nس 1: عرف التردد وسعة الموجة؟\nس 2: اختر الإجابة الصحيحة:\n[A] التردد يقاس بالهرتز\n[B] السرعة تقاس بالنيوتن'
-                      : 'Paste lecture content, chapters, review exercises, or questions here...'
+                      : L('Paste lecture content, chapters, review exercises, or questions here...')
                   }
                 />
 
@@ -797,7 +797,7 @@ export default function AccessibleBookStudioView({
                   <span className="text-xs text-stone-500 dark:text-stone-400">
                     {isArLocale
                       ? 'يمكنك الانتقال للخطوة التالية لاختيار القالب والتحكم بالهيكل الأكاديمي'
-                      : 'Proceed to Step 2 to select templates and formatting presets'}
+                      : L('Proceed to Step 2 to select templates and formatting presets')}
                   </span>
                   <button
                     type="button"
@@ -805,7 +805,7 @@ export default function AccessibleBookStudioView({
                     disabled={!rawContent.trim()}
                     className="px-5 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
                   >
-                    <span>{isArLocale ? 'متابعة: اختيار القالب والتنسيق' : 'Next: Template & Layout'}</span>
+                    <span>{isArLocale ? 'متابعة: اختيار القالب والتنسيق' : L('Next: Template & Layout')}</span>
                     <ChevronRight className={`w-4 h-4 ${isArLocale ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
@@ -826,12 +826,12 @@ export default function AccessibleBookStudioView({
             >
               <div className="text-start">
                 <h2 className="text-base sm:text-lg font-black tracking-tight">
-                  {isArLocale ? 'اختر قالب المستند الأكاديمي المناسب' : 'Choose Academic Document Template'}
+                  {isArLocale ? 'اختر قالب المستند الأكاديمي المناسب' : L('Choose Academic Document Template')}
                 </h2>
                 <p className="text-xs text-stone-500 dark:text-stone-400">
                   {isArLocale
                     ? 'يقوم الاستوديو بتطبيق الأنماط الهيكلية الاحترافية (عناوين Word، مساحات الإجابة، والغلاف) وفق الغرض التعليمي'
-                    : 'Applies real Word styles, TOC, cover page, and answer spaces according to educational purpose'}
+                    : L('Applies real Word styles, TOC, cover page, and answer spaces according to educational purpose')}
                 </p>
               </div>
 
@@ -871,9 +871,9 @@ export default function AccessibleBookStudioView({
                       </div>
 
                       <div className="pt-3 border-t border-stone-200 dark:border-stone-800/80 mt-3 flex items-center justify-between text-xs text-stone-400 font-bold">
-                        <span>{preset.defaultCover ? (isArLocale ? '✓ غلاف' : '✓ Cover') : (isArLocale ? 'ترويسة' : 'Header')}</span>
-                        <span>{preset.defaultToc ? (isArLocale ? '✓ فهرس' : '✓ TOC') : ''}</span>
-                        <span>{preset.defaultAnswerStyle !== 'none' ? (isArLocale ? '✓ مساحات حل' : '✓ Answers') : ''}</span>
+                        <span>{preset.defaultCover ? (isArLocale ? '✓ غلاف' : L('✓ Cover')) : (isArLocale ? 'ترويسة' : L('Header'))}</span>
+                        <span>{preset.defaultToc ? (isArLocale ? '✓ فهرس' : L('✓ TOC')) : ''}</span>
+                        <span>{preset.defaultAnswerStyle !== 'none' ? (isArLocale ? '✓ مساحات حل' : L('✓ Answers')) : ''}</span>
                       </div>
                     </button>
                   );
@@ -889,14 +889,14 @@ export default function AccessibleBookStudioView({
               >
                 <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-xs sm:text-sm">
                   <Settings2 className="w-4 h-4" />
-                  <span>{isArLocale ? 'تخصيص خيارات التنسيق والطباعة' : 'Layout & Formatting Settings'}</span>
+                  <span>{isArLocale ? 'تخصيص خيارات التنسيق والطباعة' : L('Layout & Formatting Settings')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Answer Space Style */}
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'نمط مساحات الإجابة للأسئلة' : 'Answer Space Style'}
+                      {isArLocale ? 'نمط مساحات الإجابة للأسئلة' : L('Answer Space Style')}
                     </label>
                     <select
                       value={metadata.answerSpaceStyle}
@@ -905,17 +905,17 @@ export default function AccessibleBookStudioView({
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
-                      <option value="dots">{isArLocale ? 'نقاط متباعدة (..................)' : 'Dot leaders (......)'}</option>
-                      <option value="lines">{isArLocale ? 'أسطر مسطرة (خطوط إجابة)' : 'Ruled lines'}</option>
-                      <option value="box">{isArLocale ? 'صندوق إجابة محدد [ للحل والشرح ]' : 'Bordered response box'}</option>
-                      <option value="none">{isArLocale ? 'بدون مساحات إجابة (مضغوط)' : 'None (compact layout)'}</option>
+                      <option value="dots">{isArLocale ? 'نقاط متباعدة (..................)' : L('Dot leaders (......)')}</option>
+                      <option value="lines">{isArLocale ? 'أسطر مسطرة (خطوط إجابة)' : L('Ruled lines')}</option>
+                      <option value="box">{isArLocale ? 'صندوق إجابة محدد [ للحل والشرح ]' : L('Bordered response box')}</option>
+                      <option value="none">{isArLocale ? 'بدون مساحات إجابة (مضغوط)' : L('None (compact layout)')}</option>
                     </select>
                   </div>
 
                   {/* Typography Font */}
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'خط العناوين والنصوص' : 'Typography Font'}
+                      {isArLocale ? 'خط العناوين والنصوص' : L('Typography Font')}
                     </label>
                     <select
                       value={metadata.fontFamily}
@@ -935,7 +935,7 @@ export default function AccessibleBookStudioView({
                   {/* Font Size Scaling (Low Vision Accommodation) */}
                   <div>
                     <label className="block text-xs font-bold text-stone-500 dark:text-stone-400 mb-1">
-                      {isArLocale ? 'مقياس حجم الخط (لتيسير القراءة)' : 'Font Size Scale (Low-Vision)'}
+                      {isArLocale ? 'مقياس حجم الخط (لتيسير القراءة)' : L('Font Size Scale (Low-Vision)')}
                     </label>
                     <select
                       value={metadata.fontSizeScale}
@@ -944,9 +944,9 @@ export default function AccessibleBookStudioView({
                         isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
                       }`}
                     >
-                      <option value="normal">{isArLocale ? 'حجم طبيعي (Standard 11pt/16pt)' : 'Normal (11pt/16pt)'}</option>
-                      <option value="large">{isArLocale ? 'حجم كبير (Large 13pt/21pt)' : 'Large (13pt/21pt)'}</option>
-                      <option value="extralarge">{isArLocale ? 'حجم فائق لضعاف البصر (15pt/24pt)' : 'Extra Large Low-Vision (15pt/24pt)'}</option>
+                      <option value="normal">{isArLocale ? 'حجم طبيعي (Standard 11pt/16pt)' : L('Normal (11pt/16pt)')}</option>
+                      <option value="large">{isArLocale ? 'حجم كبير (Large 13pt/21pt)' : L('Large (13pt/21pt)')}</option>
+                      <option value="extralarge">{isArLocale ? 'حجم فائق لضعاف البصر (15pt/24pt)' : L('Extra Large Low-Vision (15pt/24pt)')}</option>
                     </select>
                   </div>
                 </div>
@@ -957,13 +957,13 @@ export default function AccessibleBookStudioView({
                     <input
                       type="checkbox"
                       id="book-meta-cover"
-                      aria-label={isArLocale ? 'إدراج صفحة غلاف كاملة' : 'Include Title Cover Page'}
+                      aria-label={isArLocale ? 'إدراج صفحة غلاف كاملة' : L('Include Title Cover Page')}
                       checked={metadata.includeCoverPage}
                       onChange={(e) => setMetadata({ ...metadata, includeCoverPage: e.target.checked })}
                       className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
                     />
                     <span className="text-xs font-bold">
-                      {isArLocale ? 'إدراج صفحة غلاف كاملة (Cover Page)' : 'Include Title Cover Page'}
+                      {isArLocale ? 'إدراج صفحة غلاف كاملة (Cover Page)' : L('Include Title Cover Page')}
                     </span>
                   </label>
 
@@ -971,13 +971,13 @@ export default function AccessibleBookStudioView({
                     <input
                       type="checkbox"
                       id="book-meta-toc"
-                      aria-label={isArLocale ? 'إدراج فهرس محتويات' : 'Include Table of Contents'}
+                      aria-label={isArLocale ? 'إدراج فهرس محتويات' : L('Include Table of Contents')}
                       checked={metadata.includeTableOfContents}
                       onChange={(e) => setMetadata({ ...metadata, includeTableOfContents: e.target.checked })}
                       className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
                     />
                     <span className="text-xs font-bold">
-                      {isArLocale ? 'إدراج فهرس محتويات (Table of Contents)' : 'Include Table of Contents'}
+                      {isArLocale ? 'إدراج فهرس محتويات (Table of Contents)' : L('Include Table of Contents')}
                     </span>
                   </label>
 
@@ -985,13 +985,13 @@ export default function AccessibleBookStudioView({
                     <input
                       type="checkbox"
                       id="book-meta-answer-key"
-                      aria-label={isArLocale ? 'إدراج ملحق نموذج الإجابة' : 'Include Answer Key Appendix'}
+                      aria-label={isArLocale ? 'إدراج ملحق نموذج الإجابة' : L('Include Answer Key Appendix')}
                       checked={metadata.includeAnswerKey}
                       onChange={(e) => setMetadata({ ...metadata, includeAnswerKey: e.target.checked })}
                       className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
                     />
                     <span className="text-xs font-bold">
-                      {isArLocale ? 'إدراج ملحق نموذج الإجابة (Answer Key)' : 'Include Answer Key Appendix'}
+                      {isArLocale ? 'إدراج ملحق نموذج الإجابة (Answer Key)' : L('Include Answer Key Appendix')}
                     </span>
                   </label>
                 </div>
@@ -1004,7 +1004,7 @@ export default function AccessibleBookStudioView({
                       isDarkMode ? 'border-stone-800 text-stone-300' : 'border-stone-200 text-stone-700'
                     }`}
                   >
-                    {isArLocale ? 'الرجوع للمحتوى' : 'Back to Content'}
+                    {isArLocale ? 'الرجوع للمحتوى' : L('Back to Content')}
                   </button>
 
                   <button
@@ -1012,7 +1012,7 @@ export default function AccessibleBookStudioView({
                     onClick={() => setActiveStep(3)}
                     className="px-5 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer shadow-sm"
                   >
-                    <span>{isArLocale ? 'متابعة: مراجعة الهيكل والأسئلة' : 'Next: Outline & Questions'}</span>
+                    <span>{isArLocale ? 'متابعة: مراجعة الهيكل والأسئلة' : L('Next: Outline & Questions')}</span>
                     <ChevronRight className={`w-4 h-4 ${isArLocale ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
@@ -1034,17 +1034,17 @@ export default function AccessibleBookStudioView({
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-base sm:text-lg font-black tracking-tight">
-                    {isArLocale ? 'الهيكل الأكاديمي وبنك الأسئلة المكتشفة' : 'Structured Outline & Question Inspector'}
+                    {isArLocale ? 'الهيكل الأكاديمي وبنك الأسئلة المكتشفة' : L('Structured Outline & Question Inspector')}
                   </h2>
                   <p className="text-xs text-stone-500 dark:text-stone-400">
                     {isArLocale
                       ? 'يمكنك فحص العناوين، تصحيح نوع السؤال (اختيار من متعدد / صح وخطأ / مقالي)، وتعديل الدرجات ومساحات الحل'
-                      : 'Inspect sections, review recognized question types, and fine-tune response spaces'}
+                      : L('Inspect sections, review recognized question types, and fine-tune response spaces')}
                   </p>
                 </div>
 
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
-                  {stats.sectionsCount} {isArLocale ? 'أبواب وأقسام' : 'sections'} • {stats.questionsCount} {isArLocale ? 'سؤال' : 'questions'}
+                  {stats.sectionsCount} {isArLocale ? 'أبواب وأقسام' : L('sections')} • {stats.questionsCount} {isArLocale ? 'سؤال' : L('questions')}
                 </span>
               </div>
 
@@ -1065,19 +1065,19 @@ export default function AccessibleBookStudioView({
                               ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
                               : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                           }`}>
-                            {sec.isChapter ? (isArLocale ? 'فصل رئيسي' : 'Chapter') : `H${sec.level}`}
+                            {sec.isChapter ? (isArLocale ? 'فصل رئيسي' : L('Chapter')) : `H${sec.level}`}
                           </span>
                           <h3 className="font-bold text-xs sm:text-sm truncate">{sec.title}</h3>
                         </div>
 
                         <span className="text-xs text-stone-400 shrink-0">
-                          {sec.questions?.length || 0} {isArLocale ? 'أسئلة' : 'questions'}
+                          {sec.questions?.length || 0} {isArLocale ? 'أسئلة' : L('questions')}
                         </span>
                       </div>
 
                       {/* Section Text Summary */}
                       <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 leading-relaxed">
-                        {sec.content.join(' ') || (isArLocale ? 'لا يوجد نص تمهيدي' : 'No introductory text')}
+                        {sec.content.join(' ') || (isArLocale ? 'لا يوجد نص تمهيدي' : L('No introductory text'))}
                       </p>
 
                       {/* Questions List for this Section */}
@@ -1085,7 +1085,7 @@ export default function AccessibleBookStudioView({
                         <div data-testid="exercise-formatting" className="space-y-2.5 pt-2">
                           <h4 className="text-xs font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1.5">
                             <HelpCircle className="w-3.5 h-3.5" />
-                            <span>{isArLocale ? 'الأسئلة والتمارين المكتشفة بهذا القسم:' : 'Recognized Questions in this section:'}</span>
+                            <span>{isArLocale ? 'الأسئلة والتمارين المكتشفة بهذا القسم:' : L('Recognized Questions in this section:')}</span>
                           </h4>
 
                           {sec.questions.map((q, qIdx) => (
@@ -1118,22 +1118,22 @@ export default function AccessibleBookStudioView({
                                       isDarkMode ? 'bg-rafiqi-surface-dark border-stone-700 text-stone-200' : 'bg-white border-stone-300 text-stone-800'
                                     }`}
                                   >
-                                    <option value="mcq">{isArLocale ? 'اختيار من متعدد (MCQ)' : 'Multiple Choice'}</option>
-                                    <option value="true_false">{isArLocale ? 'صح أم خطأ (True/False)' : 'True / False'}</option>
-                                    <option value="fill_blank">{isArLocale ? 'أكمل الفراغات (Fill Blank)' : 'Fill in Blank'}</option>
-                                    <option value="short_answer">{isArLocale ? 'سؤال قصير وإجابة' : 'Short Answer'}</option>
-                                    <option value="essay">{isArLocale ? 'سؤال مقالي وشرح' : 'Essay Question'}</option>
-                                    <option value="matching">{isArLocale ? 'توصيل ومطابقة' : 'Matching Exercise'}</option>
+                                    <option value="mcq">{isArLocale ? 'اختيار من متعدد (MCQ)' : L('Multiple Choice')}</option>
+                                    <option value="true_false">{isArLocale ? 'صح أم خطأ (True/False)' : L('True / False')}</option>
+                                    <option value="fill_blank">{isArLocale ? 'أكمل الفراغات (Fill Blank)' : L('Fill in Blank')}</option>
+                                    <option value="short_answer">{isArLocale ? 'سؤال قصير وإجابة' : L('Short Answer')}</option>
+                                    <option value="essay">{isArLocale ? 'سؤال مقالي وشرح' : L('Essay Question')}</option>
+                                    <option value="matching">{isArLocale ? 'توصيل ومطابقة' : L('Matching Exercise')}</option>
                                   </select>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-xs">
-                                  <span className="text-stone-400">{isArLocale ? 'الدرجات:' : 'Marks:'}</span>
+                                  <span className="text-stone-400">{isArLocale ? 'الدرجات:' : L('Marks:')}</span>
                                   <input
                       type="number"
                       min="1"
                       max="50"
-                      aria-label={isArLocale ? 'درجات السؤال' : 'Question points'}
+                      aria-label={isArLocale ? 'درجات السؤال' : L('Question points')}
                       value={q.points || 1}
                                     onChange={(e) => {
                                       const pts = parseInt(e.target.value, 10) || 1;
@@ -1192,7 +1192,7 @@ export default function AccessibleBookStudioView({
                     isDarkMode ? 'border-stone-800 text-stone-300' : 'border-stone-200 text-stone-700'
                   }`}
                 >
-                  {isArLocale ? 'الرجوع للقوالب' : 'Back to Templates'}
+                  {isArLocale ? 'الرجوع للقوالب' : L('Back to Templates')}
                 </button>
 
                 <button
@@ -1200,7 +1200,7 @@ export default function AccessibleBookStudioView({
                   onClick={() => setActiveStep(4)}
                   className="px-5 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer shadow-sm"
                 >
-                  <span>{isArLocale ? 'متابعة: التصدير والمعاينة النهائية' : 'Next: Export & Download'}</span>
+                  <span>{isArLocale ? 'متابعة: التصدير والمعاينة النهائية' : L('Next: Export & Download')}</span>
                   <ChevronRight className={`w-4 h-4 ${isArLocale ? 'rotate-180' : ''}`} />
                 </button>
               </div>
@@ -1227,7 +1227,7 @@ export default function AccessibleBookStudioView({
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <span className="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-wider">
-                      {isArLocale ? 'جاهز للتصدير الأكاديمي' : 'Ready for Academic Export'}
+                      {isArLocale ? 'جاهز للتصدير الأكاديمي' : L('Ready for Academic Export')}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-black tracking-tight">{metadata.title}</h2>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -1247,7 +1247,7 @@ export default function AccessibleBookStudioView({
                       ) : (
                         <Download className="w-4 h-4" />
                       )}
-                      <span>{isArLocale ? 'تنزيل ملف Word (.docx)' : 'Download Word (.docx)'}</span>
+                      <span>{isArLocale ? 'تنزيل ملف Word (.docx)' : L('Download Word (.docx)')}</span>
                     </button>
 
                     <button
@@ -1260,7 +1260,7 @@ export default function AccessibleBookStudioView({
                       }`}
                     >
                       <Printer className="w-4 h-4" />
-                      <span>{isArLocale ? 'طباعة / حفظ PDF' : 'Print / Save PDF'}</span>
+                      <span>{isArLocale ? 'طباعة / حفظ PDF' : L('Print / Save PDF')}</span>
                     </button>
                   </div>
                 </div>
@@ -1268,27 +1268,27 @@ export default function AccessibleBookStudioView({
                 {/* Document Properties Review Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 mt-6 border-t border-stone-200 dark:border-stone-800 text-xs">
                   <div>
-                    <span className="text-stone-400 block text-xs">{isArLocale ? 'نوع القالب:' : 'Template:'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'نوع القالب:' : L('Template:')}</span>
                     <span className="font-bold">{TEMPLATE_PRESETS[metadata.template].labelAr}</span>
                   </div>
                   <div>
-                    <span className="text-stone-400 block text-xs">{isArLocale ? 'الأبواب والأقسام:' : 'Sections:'}</span>
-                    <span className="font-bold">{stats.sectionsCount} {isArLocale ? 'أقسام' : 'sections'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'الأبواب والأقسام:' : L('Sections:')}</span>
+                    <span className="font-bold">{stats.sectionsCount} {isArLocale ? 'أقسام' : L('sections')}</span>
                   </div>
                   <div>
-                    <span className="text-stone-400 block text-xs">{isArLocale ? 'بنك الأسئلة:' : 'Questions:'}</span>
-                    <span className="font-bold">{stats.questionsCount} {isArLocale ? 'سؤال' : 'questions'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'بنك الأسئلة:' : L('Questions:')}</span>
+                    <span className="font-bold">{stats.questionsCount} {isArLocale ? 'سؤال' : L('questions')}</span>
                   </div>
                   <div>
-                    <span className="text-stone-400 block text-xs">{isArLocale ? 'مساحات الحل:' : 'Answer Spaces:'}</span>
+                    <span className="text-stone-400 block text-xs">{isArLocale ? 'مساحات الحل:' : L('Answer Spaces:')}</span>
                     <span className="font-bold">
                       {metadata.answerSpaceStyle === 'dots'
-                        ? isArLocale ? 'نقاط' : 'Dots'
+                        ? isArLocale ? 'نقاط' : L('Dots')
                         : metadata.answerSpaceStyle === 'lines'
-                        ? isArLocale ? 'أسطر مسطرة' : 'Ruled'
+                        ? isArLocale ? 'أسطر مسطرة' : L('Ruled')
                         : metadata.answerSpaceStyle === 'box'
                         ? isArLocale ? 'صندوق حل' : 'Box'
-                        : isArLocale ? 'بدون' : 'None'}
+                        : isArLocale ? 'بدون' : L('None')}
                     </span>
                   </div>
                 </div>
@@ -1304,10 +1304,10 @@ export default function AccessibleBookStudioView({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-xs sm:text-sm">
                     <Eye className="w-4 h-4" />
-                    <span>{isArLocale ? 'مراجعة هيكل المستند والمحتوى الفعلي' : 'Document Content Inspector'}</span>
+                    <span>{isArLocale ? 'مراجعة هيكل المستند والمحتوى الفعلي' : L('Document Content Inspector')}</span>
                   </div>
                   <span className="text-xs text-stone-400">
-                    {isArLocale ? 'قراءة متسقة بالكامل لقارئات الشاشة (Screen Readers)' : 'Accessible reading order verified'}
+                    {isArLocale ? 'قراءة متسقة بالكامل لقارئات الشاشة (Screen Readers)' : L('Accessible reading order verified')}
                   </span>
                 </div>
 
@@ -1350,7 +1350,7 @@ export default function AccessibleBookStudioView({
                       isDarkMode ? 'border-stone-800 text-stone-300' : 'border-stone-200 text-stone-700'
                     }`}
                   >
-                    {isArLocale ? 'الرجوع للهيكل' : 'Back to Outline'}
+                    {isArLocale ? 'الرجوع للهيكل' : L('Back to Outline')}
                   </button>
 
                   <button
@@ -1359,7 +1359,7 @@ export default function AccessibleBookStudioView({
                     className="px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer shadow-sm"
                   >
                     <Download className="w-4 h-4" />
-                    <span>{isArLocale ? 'تحميل المستند الآن (.docx)' : 'Download Document Now (.docx)'}</span>
+                    <span>{isArLocale ? 'تحميل المستند الآن (.docx)' : L('Download Document Now (.docx)')}</span>
                   </button>
                 </div>
               </div>
@@ -1374,7 +1374,7 @@ export default function AccessibleBookStudioView({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={isArLocale ? 'أرشيف الكتب والمستندات السابقة' : 'Book Studio History'}
+          aria-label={isArLocale ? 'أرشيف الكتب والمستندات السابقة' : L('Book Studio History')}
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
         >
           <div
@@ -1386,7 +1386,7 @@ export default function AccessibleBookStudioView({
               <div className="flex items-center gap-2">
                 <History className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                 <h3 className="font-black text-sm sm:text-base">
-                  {isArLocale ? 'أرشيف المستندات والكتب السابقة' : 'Saved Book Studio Documents'}
+                  {isArLocale ? 'أرشيف المستندات والكتب السابقة' : L('Saved Book Studio Documents')}
                 </h3>
               </div>
               <button
@@ -1401,7 +1401,7 @@ export default function AccessibleBookStudioView({
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2.5">
               {historyItems.length === 0 ? (
                 <div className="text-center py-12 text-stone-400 text-xs">
-                  {isArLocale ? 'لا توجد مستندات محفوظة حتى الآن.' : 'No saved documents in history.'}
+                  {isArLocale ? 'لا توجد مستندات محفوظة حتى الآن.' : L('No saved documents in history.')}
                 </div>
               ) : (
                 historyItems.map((item) => (
@@ -1414,7 +1414,7 @@ export default function AccessibleBookStudioView({
                     <div className="min-w-0">
                       <h4 className="font-bold text-xs sm:text-sm truncate">{item.title}</h4>
                       <p className="text-xs text-stone-400">
-                        {TEMPLATE_PRESETS[item.template]?.labelAr || item.template} • {item.wordCount} {isArLocale ? 'كلمة' : 'words'} • {item.questionsCount} {isArLocale ? 'سؤال' : 'questions'}
+                        {TEMPLATE_PRESETS[item.template]?.labelAr || item.template} • {item.wordCount} {isArLocale ? 'كلمة' : L('words')} • {item.questionsCount} {isArLocale ? 'سؤال' : L('questions')}
                       </p>
                     </div>
 
@@ -1423,7 +1423,7 @@ export default function AccessibleBookStudioView({
                       onClick={() => handleReopenHistoryItem(item)}
                       className="px-3 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shrink-0 active:scale-95 transition-all cursor-pointer"
                     >
-                      {isArLocale ? 'فتح وتعديل' : 'Reopen'}
+                      {isArLocale ? 'فتح وتعديل' : L('Reopen')}
                     </button>
                   </div>
                 ))
