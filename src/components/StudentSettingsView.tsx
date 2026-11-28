@@ -733,7 +733,7 @@ export default function StudentSettingsView({
                   className="shrink-0 whitespace-nowrap min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-[#082344] hover:bg-white hover:dark:bg-[#0D2542] border border-slate-200 dark:border-[#16395E] hover:border-[#1769AA]/50 text-slate-700 dark:text-[#C4D3E5] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#1769AA] dark:text-[#4B9FE1]" />
-                  <span className="text-xs font-bold">{localize(profile.language, 'Back', 'رجوع')}</span>
+                  <span className="text-xs font-bold hidden sm:inline">{localize(profile.language, 'Back', 'رجوع')}</span>
                 </button>
               )}
               <div className="flex items-center gap-2.5 min-w-0">
