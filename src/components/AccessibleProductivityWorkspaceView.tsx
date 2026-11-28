@@ -331,7 +331,7 @@ Database Systems,90,3,270`);
           speakText(isAr ? 'تم تفريغ المستند' : L('Document cleared'));
         });
         setShowReplacementWarning(true);
-        speakText(isAr ? safety.warningAr : safety.warningEn);
+        speakText(isAr ? safety.warningAr : L(safety.warningEn));
         return;
       }
     }
@@ -351,7 +351,7 @@ Database Systems,90,3,270`);
 
     setDictationInput('');
     toast.success(localize(profile.language, parsed.spokenFeedbackEn, parsed.spokenFeedbackAr));
-    speakText(isAr ? parsed.spokenFeedbackAr : parsed.spokenFeedbackEn);
+    speakText(isAr ? parsed.spokenFeedbackAr : L(parsed.spokenFeedbackEn));
   };
 
   const toggleSpeechRecognition = () => {
@@ -459,7 +459,7 @@ Database Systems,90,3,270`);
     const safety = verifyCellUpdateSafety(existingVal, val, false);
 
     if (!safety.safeToApplyDirectly && safety.warningAr) {
-      setCellOverwriteWarning(isAr ? safety.warningAr : safety.warningEn || '');
+      setCellOverwriteWarning(isAr ? safety.warningAr : L(safety.warningEn) || '');
       // Keep pending update
       return;
     }
@@ -613,7 +613,7 @@ Database Systems,90,3,270`);
                 type="button"
                 onClick={() => {
                   setActiveTool(t.id);
-                  speakText(isAr ? t.titleAr : t.titleEn);
+                  speakText(isAr ? t.titleAr : L(t.titleEn));
                 }}
                 aria-current={isActive ? 'page' : undefined}
                 className={`shrink-0 whitespace-nowrap min-h-[44px] px-3 py-2.5 justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
@@ -1292,7 +1292,7 @@ Database Systems,90,3,270`);
                     type="button"
                     onClick={() => {
                       const sum = generateSpreadsheetSummary(spreadsheetModel);
-                      speakText(isAr ? sum.summaryTextAr : sum.summaryTextEn);
+                      speakText(isAr ? sum.summaryTextAr : L(sum.summaryTextEn));
                     }}
                     className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                   >
@@ -1359,7 +1359,7 @@ Database Systems,90,3,270`);
                       const res = evaluateSpreadsheetFormula(formulaInput, spreadsheetModel);
                       setEvaluatedFormulaResult(res);
                       toast.success(localize(profile.language, `Result: ${res.result}`, `النتيجة: ${res.result}`));
-                      speakText(isAr ? res.explanationAr : res.explanationEn);
+                      speakText(isAr ? res.explanationAr : L(res.explanationEn));
                     }}
                     className="min-h-[44px] px-5 py-2 bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
                   >
@@ -1380,7 +1380,7 @@ Database Systems,90,3,270`);
                       </span>
                     </div>
                     <p className="leading-relaxed">
-                      {isAr ? evaluatedFormulaResult.explanationAr : evaluatedFormulaResult.explanationEn}
+                      {isAr ? evaluatedFormulaResult.explanationAr : L(evaluatedFormulaResult.explanationEn)}
                     </p>
                   </div>
                 )}
@@ -1518,7 +1518,7 @@ Database Systems,90,3,270`);
                     <span>{chartAnalysis.title}</span>
                   </h2>
                   <p className="text-xs text-[#94A3B8] mt-1">
-                    {isAr ? chartAnalysis.chartTypeDescriptionAr : chartAnalysis.chartTypeDescriptionEn}
+                    {isAr ? chartAnalysis.chartTypeDescriptionAr : L(chartAnalysis.chartTypeDescriptionEn)}
                   </p>
                 </div>
 
@@ -1653,10 +1653,10 @@ Database Systems,90,3,270`);
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
                     <CheckSquare className="w-5 h-5 text-[#1769AA]" />
-                    <span>{isAr ? selectedFormTemplate.titleAr : selectedFormTemplate.titleEn}</span>
+                    <span>{isAr ? selectedFormTemplate.titleAr : L(selectedFormTemplate.titleEn)}</span>
                   </h2>
                   <p className="text-xs text-[#94A3B8] mt-1">
-                    {isAr ? selectedFormTemplate.descriptionAr : selectedFormTemplate.descriptionEn}
+                    {isAr ? selectedFormTemplate.descriptionAr : L(selectedFormTemplate.descriptionEn)}
                   </p>
                 </div>
 
@@ -1674,7 +1674,7 @@ Database Systems,90,3,270`);
                   >
                     {ACCESSIBLE_FORM_TEMPLATES.map((tpl) => (
                       <option key={tpl.id} value={tpl.id}>
-                        {isAr ? tpl.titleAr : tpl.titleEn}
+                        {isAr ? tpl.titleAr : L(tpl.titleEn)}
                       </option>
                     ))}
                   </select>
@@ -1695,7 +1695,7 @@ Database Systems,90,3,270`);
                           htmlFor={`field_${field.id}`}
                           className="font-bold text-xs sm:text-sm text-[#F8FAFC] flex items-center gap-2"
                         >
-                          <span>{isAr ? field.labelAr : field.labelEn}</span>
+                          <span>{isAr ? field.labelAr : L(field.labelEn)}</span>
                           {field.required ? (
                             <span className="text-red-400 text-xs font-bold">
                               *{localize(profile.language, 'Required', 'إلزامي')}
@@ -1716,7 +1716,7 @@ Database Systems,90,3,270`);
                       </div>
 
                       <p className="text-xs text-[#94A3B8]">
-                        {isAr ? field.explanationAr : field.explanationEn}
+                        {isAr ? field.explanationAr : L(field.explanationEn)}
                       </p>
 
                       {field.type === 'select' ? (
@@ -1750,7 +1750,7 @@ Database Systems,90,3,270`);
                           id={`field_${field.id}`}
                           type={field.type}
                           value={formFieldValues[field.id] || ''}
-                          aria-label={isAr ? field.labelAr : field.labelEn}
+                          aria-label={isAr ? field.labelAr : L(field.labelEn)}
                           onChange={(e) =>
                             setFormFieldValues({ ...formFieldValues, [field.id]: e.target.value })
                           }

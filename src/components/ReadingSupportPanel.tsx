@@ -121,7 +121,7 @@ export const ReadingSupportPanel: React.FC<ReadingSupportPanelProps> = ({
             }`}
           >
             {t.icon}
-            <span>{isArabic ? t.labelAr : t.labelEn}</span>
+            <span>{isArabic ? t.labelAr : L(t.labelEn)}</span>
           </button>
         ))}
       </div>

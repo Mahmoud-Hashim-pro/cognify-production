@@ -11,6 +11,7 @@
  *   so metadata resolution can be verified deterministically in Node/SSR tests
  *   without requiring a browser DOM.
  */
+import { L } from './translations';
 
 import { BRAND_CONFIG } from '../config/brand';
 import { isArabicLocale } from './translations';
@@ -178,8 +179,8 @@ export function resolveSeoMetadata(context: SeoContext): SeoMetadata {
   const isAr = isArabicLocale(context.language);
   const isFr = context.language === 'French' || context.language === 'fr';
 
-  const title = isAr ? entry.titleAr : isFr ? entry.titleFr : entry.titleEn;
-  const description = isAr ? entry.descAr : isFr ? entry.descFr : entry.descEn;
+  const title = isAr ? entry.titleAr : isFr ? entry.titleFr : L(entry.titleEn);
+  const description = isAr ? entry.descAr : isFr ? entry.descFr : L(entry.descEn);
   const ogLocale = isAr ? 'ar_EG' : isFr ? 'fr_FR' : 'en_US';
   const lang = isAr ? 'ar' : isFr ? 'fr' : 'en';
   const dir: 'rtl' | 'ltr' = isAr ? 'rtl' : 'ltr';

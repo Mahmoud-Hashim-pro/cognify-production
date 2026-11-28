@@ -5,6 +5,7 @@
  * Allows 1-click comprehension verification, calculates latency, updates
  * student state, and triggers prerequisite diagnosis upon incorrect answers.
  */
+import { L } from '../../lib/translations';
 
 import React, { useState, useMemo } from 'react';
 import { CheckCircle2, XCircle, AlertCircle, ArrowRight, ArrowLeft, Sparkles, Brain } from 'lucide-react';
@@ -86,7 +87,7 @@ export default function MicroCheckWidget({
 
   const currentConcept = data.conceptId ? getConcept(data.conceptId) : null;
   const conceptDisplayName = currentConcept
-    ? (isAr ? currentConcept.nameAr : isFr ? currentConcept.nameEn : currentConcept.nameEn)
+    ? (isAr ? currentConcept.nameAr : isFr ? currentConcept.nameEn : L(currentConcept.nameEn))
     : data.conceptId.replace(/_/g, ' ');
 
   return (
@@ -187,7 +188,7 @@ export default function MicroCheckWidget({
                   onClick={() =>
                     onPrerequisiteClick(
                       prerequisiteGap.id,
-                      isAr ? prerequisiteGap.nameAr : prerequisiteGap.nameEn
+                      isAr ? prerequisiteGap.nameAr : L(prerequisiteGap.nameEn)
                     )
                   }
                   className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all shadow-md active:scale-95"

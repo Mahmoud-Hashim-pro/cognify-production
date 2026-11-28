@@ -373,7 +373,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             </div>
           </div>
           <p className={`text-sm font-bold leading-relaxed ${textCls}`} dir="auto">
-            {isArabic ? currentQuestion.promptAr : currentQuestion.promptEn}
+            {isArabic ? currentQuestion.promptAr : L(currentQuestion.promptEn)}
           </p>
           {currentQuestion.matrixData && (
             <div className="grid grid-cols-3 gap-1.5 max-w-[220px]" aria-hidden="true">
@@ -411,7 +411,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                 }`}
               >
                 {opt.symbol && <span className="me-1.5">{opt.symbol}</span>}
-                {isArabic ? opt.labelAr : opt.labelEn}
+                {isArabic ? opt.labelAr : L(opt.labelEn)}
               </button>
             ))}
           </div>
@@ -433,7 +433,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             {domainLabels.map((d) => (
               <div key={d.key}>
                 <div className="flex justify-between text-[11px] font-bold mb-0.5">
-                  <span className={textCls}>{isArabic ? d.labelAr : d.labelEn}</span>
+                  <span className={textCls}>{isArabic ? d.labelAr : L(d.labelEn)}</span>
                   <span className={subCls}>{results.domainScores[d.key]}/100</span>
                 </div>
                 <div className="h-2 rounded-full bg-stone-700/40 overflow-hidden">
@@ -648,7 +648,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                   }`}
                 >
                   <span aria-hidden="true">{done ? '✅' : `${si + 1}.`}</span>
-                  <span className="flex-1">{isArabic ? step.titleAr : step.titleEn}</span>
+                  <span className="flex-1">{isArabic ? step.titleAr : L(step.titleEn)}</span>
                   <span className={`shrink-0 text-[10px] ${subCls}`}>~{step.estMinutes}m</span>
                 </button>
               );
@@ -712,7 +712,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                   className="p-3 rounded-2xl border-2 font-black text-xs transition-all active:scale-95 cursor-pointer"
                   style={{ borderColor: opt.hex, color: opt.hex }}
                 >
-                  {isArabic ? opt.labelAr : opt.labelEn}
+                  {isArabic ? opt.labelAr : L(opt.labelEn)}
                 </button>
               ))}
             </div>
@@ -821,7 +821,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
             </div>
             {mathRevealed && (
               <p className={`text-[11px] leading-relaxed ${textCls}`} dir="auto">
-                {isArabic ? mathProblem.friendlyDecompositionAr : mathProblem.friendlyDecompositionEn}
+                {isArabic ? mathProblem.friendlyDecompositionAr : L(mathProblem.friendlyDecompositionEn)}
               </p>
             )}
           </div>
@@ -904,11 +904,11 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
                 g = {gainResult.normalizedGain.toFixed(2)}
               </span>
               <span className={`px-3 py-1 rounded-full border text-[11px] font-black ${gainResult.categoryInfo.colorClass}`}>
-                {isArabic ? gainResult.categoryInfo.labelAr : gainResult.categoryInfo.labelEn}
+                {isArabic ? gainResult.categoryInfo.labelAr : L(gainResult.categoryInfo.labelEn)}
               </span>
             </div>
             <p className={`text-[11px] leading-relaxed ${subCls}`}>
-              {isArabic ? gainResult.categoryInfo.descriptionAr : gainResult.categoryInfo.descriptionEn}
+              {isArabic ? gainResult.categoryInfo.descriptionAr : L(gainResult.categoryInfo.descriptionEn)}
             </p>
             <p className={`text-[11px] font-bold ${textCls}`}>
               {gainResult.isImprovement

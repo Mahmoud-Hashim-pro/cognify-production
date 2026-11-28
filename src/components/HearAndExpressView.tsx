@@ -490,7 +490,7 @@ export default function HearAndExpressView({
               aria-selected={isSelected}
               onClick={() => {
                 setActiveTab(tab.id);
-                announce(isAr ? tab.labelAr : tab.labelEn);
+                announce(isAr ? tab.labelAr : L(tab.labelEn));
               }}
               className={`px-4 py-2 rounded-xl text-xs font-bold  transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shrink-0 whitespace-nowrap min-h-[44px] flex items-center gap-2 ${
                 isSelected
@@ -499,7 +499,7 @@ export default function HearAndExpressView({
               }`}
             >
               <tab.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-              <span>{isAr ? tab.labelAr : tab.labelEn}</span>
+              <span>{isAr ? tab.labelAr : L(tab.labelEn)}</span>
             </button>
           );
         })}
@@ -806,7 +806,7 @@ export default function HearAndExpressView({
                         : 'bg-[#112C4F] text-[#94A3B8] border border-[#24476F]'
                     }`}
                   >
-                    {isAr ? cat.titleAr : cat.titleEn}
+                    {isAr ? cat.titleAr : L(cat.titleEn)}
                   </button>
                 );
               })}

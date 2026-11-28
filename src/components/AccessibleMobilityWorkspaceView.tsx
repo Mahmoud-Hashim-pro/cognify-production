@@ -226,7 +226,7 @@ export default function AccessibleMobilityWorkspaceView({
 
         const evalResult = evaluateGpsAccuracy(pos.coords.accuracy);
         toast.success(localize(profile.language, 'Location acquired', 'تم تحديد الموقع'));
-        speakText(isAr ? evalResult.warningAr : evalResult.warningEn);
+        speakText(isAr ? evalResult.warningAr : L(evalResult.warningEn));
       },
       (err) => {
         setIsLocatingGps(false);
@@ -447,7 +447,7 @@ export default function AccessibleMobilityWorkspaceView({
                 type="button"
                 onClick={() => {
                   setActiveTool(t.id);
-                  speakText(isAr ? t.titleAr : t.titleEn);
+                  speakText(isAr ? t.titleAr : L(t.titleEn));
                 }}
                 aria-current={isActive ? 'page' : undefined}
                 className={`shrink-0 whitespace-nowrap min-h-[44px] px-3 py-2.5 justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
@@ -528,11 +528,11 @@ export default function AccessibleMobilityWorkspaceView({
                   </button>
                 </div>
                 <p className="text-sm text-[#F8FAFC] leading-relaxed">
-                  {isAr ? placeAnalysis.overviewAr : placeAnalysis.overviewEn}
+                  {isAr ? placeAnalysis.overviewAr : L(placeAnalysis.overviewEn)}
                 </p>
                 {placeAnalysis.uncertaintyNotesAr && (
                   <p className="text-xs text-amber-400 font-bold">
-                    {isAr ? placeAnalysis.uncertaintyNotesAr : placeAnalysis.uncertaintyNotesEn}
+                    {isAr ? placeAnalysis.uncertaintyNotesAr : L(placeAnalysis.uncertaintyNotesEn)}
                   </p>
                 )}
               </div>
@@ -550,10 +550,10 @@ export default function AccessibleMobilityWorkspaceView({
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm text-[#F8FAFC]">
-                          {isAr ? lm.labelAr : lm.labelEn}
+                          {isAr ? lm.labelAr : L(lm.labelEn)}
                         </span>
                         <span className="text-xs font-bold text-[#4B9FE1] bg-[#1769AA]/15 px-2.5 py-0.5 rounded-full border border-[#1769AA]/30">
-                          {isAr ? lm.positionTextAr : lm.positionTextEn}
+                          {isAr ? lm.positionTextAr : L(lm.positionTextEn)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
@@ -566,7 +566,7 @@ export default function AccessibleMobilityWorkspaceView({
                       </div>
                       {lm.accessibilityNotesAr && (
                         <p className="text-xs text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
-                          {isAr ? lm.accessibilityNotesAr : lm.accessibilityNotesEn}
+                          {isAr ? lm.accessibilityNotesAr : L(lm.accessibilityNotesEn)}
                         </p>
                       )}
                     </article>
@@ -661,7 +661,7 @@ export default function AccessibleMobilityWorkspaceView({
                     const res = parseDirectionalSign(signInputText);
                     setParsedSign(res);
                     toast.success(localize(profile.language, 'Sign parsed', 'تم فحص اللافتة'));
-                    speakText(isAr ? res.inferredDirectionGuidanceAr : res.inferredDirectionGuidanceEn);
+                    speakText(isAr ? res.inferredDirectionGuidanceAr : L(res.inferredDirectionGuidanceEn));
                   }}
                   className="min-h-[44px] px-5 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
                 >
@@ -699,7 +699,7 @@ export default function AccessibleMobilityWorkspaceView({
                     {localize(profile.language, 'Directional Guidance & Caveats', 'الإرشادات والتنبيهات الاتجاهية المستنتجة')}
                   </span>
                   <div className="p-3 bg-[#112C4F] rounded-lg border border-[#24476F] text-xs text-[#CBD5E1] leading-relaxed">
-                    {isAr ? parsedSign.inferredDirectionGuidanceAr : parsedSign.inferredDirectionGuidanceEn}
+                    {isAr ? parsedSign.inferredDirectionGuidanceAr : L(parsedSign.inferredDirectionGuidanceEn)}
                   </div>
                   <p className="text-xs text-amber-300/90 font-medium">
                     {localize(
@@ -782,7 +782,7 @@ export default function AccessibleMobilityWorkspaceView({
                 <div className="flex items-center justify-between">
                   <h3 className="font-black text-lg text-[#F8FAFC]">{doorwayResult.labelAr}</h3>
                   <span className="text-xs font-bold text-[#4B9FE1] bg-[#1769AA]/20 px-3 py-1 rounded-full border border-[#1769AA]/40">
-                    {isAr ? doorwayResult.relativeOrientationAr : doorwayResult.relativeOrientationEn}
+                    {isAr ? doorwayResult.relativeOrientationAr : L(doorwayResult.relativeOrientationEn)}
                   </span>
                 </div>
 
@@ -791,12 +791,12 @@ export default function AccessibleMobilityWorkspaceView({
                     {localize(profile.language, 'Accessibility Feature Verification:', 'حالة فحص ميزات الإتاحة:')}
                   </span>
                   <p className="leading-relaxed">
-                    {isAr ? doorwayResult.accessibilityStateAr : doorwayResult.accessibilityStateEn}
+                    {isAr ? doorwayResult.accessibilityStateAr : L(doorwayResult.accessibilityStateEn)}
                   </p>
                 </div>
 
                 <p className="text-xs text-amber-200 font-bold bg-amber-500/10 p-3 rounded-xl border border-amber-500/30">
-                  {isAr ? doorwayResult.spokenWarningAr : doorwayResult.spokenWarningEn}
+                  {isAr ? doorwayResult.spokenWarningAr : L(doorwayResult.spokenWarningEn)}
                 </p>
               </div>
             </div>
@@ -861,7 +861,7 @@ export default function AccessibleMobilityWorkspaceView({
                     onClick={() => {
                       const res = parseTransitSign(transitSignInput, transitConfidence);
                       setTransitResult(res);
-                      speakText(isAr ? res.spokenTextAr : res.spokenTextEn);
+                      speakText(isAr ? res.spokenTextAr : L(res.spokenTextEn));
                     }}
                     className="min-h-[44px] px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
                   >
@@ -899,12 +899,12 @@ export default function AccessibleMobilityWorkspaceView({
                 </div>
 
                 <p className="text-xs text-[#CBD5E1] leading-relaxed bg-[#112C4F] p-3.5 rounded-xl border border-[#24476F]">
-                  {isAr ? transitResult.guidanceTextAr : transitResult.guidanceTextEn}
+                  {isAr ? transitResult.guidanceTextAr : L(transitResult.guidanceTextEn)}
                 </p>
 
                 {/* Telemetry disclosure */}
                 <div className="p-3 rounded-xl bg-[#17355C] border border-[#24476F] text-xs text-[#94A3B8]">
-                  <p>{isAr ? transitResult.telemetryNoticeAr : transitResult.telemetryNoticeEn}</p>
+                  <p>{isAr ? transitResult.telemetryNoticeAr : L(transitResult.telemetryNoticeEn)}</p>
                 </div>
               </div>
             </div>
@@ -970,7 +970,7 @@ export default function AccessibleMobilityWorkspaceView({
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <h3 className="font-bold text-base text-[#F8FAFC]">
-                        {isAr ? place.nameAr : place.nameEn}
+                        {isAr ? place.nameAr : L(place.nameEn)}
                       </h3>
                       <span className="text-xs font-bold uppercase text-[#4B9FE1] bg-[#17355C] px-2.5 py-1 rounded-full border border-[#24476F] self-start sm:self-auto">
                         {place.category}
@@ -979,7 +979,7 @@ export default function AccessibleMobilityWorkspaceView({
 
                     <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
                       <MapPin className="w-3.5 h-3.5 text-[#1769AA] shrink-0" />
-                      <span>{isAr ? place.addressAr : place.addressEn}</span>
+                      <span>{isAr ? place.addressAr : L(place.addressEn)}</span>
                     </div>
 
                     {/* Features checklist */}
@@ -1160,7 +1160,7 @@ export default function AccessibleMobilityWorkspaceView({
               {/* Transparent Disclosure */}
               <div className="p-4 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-3 text-xs text-[#CBD5E1]">
                 <p className="leading-relaxed font-semibold text-amber-200">
-                  {isAr ? indoorBoundary.disclaimerAr : indoorBoundary.disclaimerEn}
+                  {isAr ? indoorBoundary.disclaimerAr : L(indoorBoundary.disclaimerEn)}
                 </p>
 
                 <div className="space-y-2 pt-2 border-t border-[#24476F]">
@@ -1211,7 +1211,7 @@ export default function AccessibleMobilityWorkspaceView({
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-[#F8FAFC]">
-                    {isAr ? safetyAdvisory.titleAr : safetyAdvisory.titleEn}
+                    {isAr ? safetyAdvisory.titleAr : L(safetyAdvisory.titleEn)}
                   </h3>
                   <span className="text-xs text-amber-400 font-bold">
                     {localize(profile.language, 'Strict Orientation & Mobility Guidelines', 'إرشادات الحركة والتوجه الإلزامية')}
@@ -1229,7 +1229,7 @@ export default function AccessibleMobilityWorkspaceView({
               </ul>
 
               <div className="p-3.5 rounded-xl bg-[#0A2342] border border-amber-500/30 text-xs font-semibold text-amber-200 leading-relaxed">
-                {isAr ? safetyAdvisory.fullAdvisoryAr : safetyAdvisory.fullAdvisoryEn}
+                {isAr ? safetyAdvisory.fullAdvisoryAr : L(safetyAdvisory.fullAdvisoryEn)}
               </div>
 
               <div className="flex justify-end pt-2 border-t border-[#24476F]">

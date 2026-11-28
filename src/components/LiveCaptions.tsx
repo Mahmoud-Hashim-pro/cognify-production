@@ -1453,7 +1453,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
             <div className="grid grid-cols-2 gap-2">
               {((activeTab === 'favorites' ? favorites : SOUNDBOARD_DATA[activeTab as keyof typeof SOUNDBOARD_DATA]) || []).map(item => {
-                const phrase = isArabic ? item.textAr : item.textEn;
+                const phrase = isArabic ? item.textAr : L(item.textEn);
                 const color = activeTab === 'emergencies' ? 'hover:border-rose-500/40 hover:bg-rose-500/8' :
                               activeTab === 'needs' ? 'hover:border-orange-500/40 hover:bg-orange-500/8' :
                               activeTab === 'social' ? 'hover:border-green-500/40 hover:bg-green-500/8' :

@@ -5,6 +5,7 @@
  * concepts at risk of memory decay (due for review). Surfaces a 30-second
  * contextual warm-up before new topics.
  */
+import { L } from '../../lib/translations';
 
 import React, { useState, useMemo } from 'react';
 import { Clock, RotateCcw, X, Brain, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
@@ -54,7 +55,7 @@ export default function RetentionWarmupBanner({
         seen.add(cid);
         const node = getConcept(cid);
         const name = node
-          ? (isAr ? node.nameAr : isFr ? node.nameEn : node.nameEn)
+          ? (isAr ? node.nameAr : isFr ? node.nameEn : L(node.nameEn))
           : cid.replace(/_/g, ' ');
         const dueDaysAgo = Math.max(0, Math.floor((now - sched.nextReviewDate) / 86400000));
         const prof = plm?.conceptProfiles?.[cid];
@@ -75,7 +76,7 @@ export default function RetentionWarmupBanner({
           seen.add(cid);
           const node = getConcept(cid);
           const name = node
-            ? (isAr ? node.nameAr : isFr ? node.nameEn : node.nameEn)
+            ? (isAr ? node.nameAr : isFr ? node.nameEn : L(node.nameEn))
             : cid.replace(/_/g, ' ');
           list.push({
             conceptId: cid,

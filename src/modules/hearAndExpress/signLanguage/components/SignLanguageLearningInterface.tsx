@@ -204,7 +204,7 @@ export const SignLanguageLearningInterface: React.FC<SignLanguageLearningInterfa
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            {isArabic ? tab.labelAr : tab.labelEn}
+            {isArabic ? tab.labelAr : L(tab.labelEn)}
           </button>
         ))}
       </div>

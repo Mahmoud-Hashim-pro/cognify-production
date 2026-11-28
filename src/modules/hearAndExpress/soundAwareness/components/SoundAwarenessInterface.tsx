@@ -350,7 +350,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                     </div>
                     <div>
                       <span className="text-sm font-bold text-white block">
-                        {isArabic ? cat.nameAr : cat.nameEn}
+                        {isArabic ? cat.nameAr : L(cat.nameEn)}
                       </span>
                       {isSnoozed && (
                         <span className="text-xs text-amber-400 font-semibold">
@@ -384,7 +384,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                 </div>
 
                 <p className="text-xs text-slate-400 line-clamp-2">
-                  {isArabic ? cat.descriptionAr : cat.descriptionEn}
+                  {isArabic ? cat.descriptionAr : L(cat.descriptionEn)}
                 </p>
               </div>
             );
@@ -435,7 +435,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                   <div className="p-2 rounded-xl bg-white/5">{getCategoryIcon(alert.category)}</div>
                   <div>
                     <span className="text-sm font-bold text-white block">
-                      {isArabic ? alert.labelAr : alert.labelEn}
+                      {isArabic ? alert.labelAr : L(alert.labelEn)}
                     </span>
                     <span className="text-xs text-slate-400">
                       {new Date(alert.timestamp).toLocaleTimeString(isArabic ? 'ar-EG' : 'en-US')} •{' '}

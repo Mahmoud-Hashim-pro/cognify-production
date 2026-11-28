@@ -584,7 +584,7 @@ export default function ProfilePage({
                   className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#18C6C3] cursor-pointer"
                 >
                   {LANGUAGE_OPTIONS.map(opt => (
-                    <option key={opt.id} value={opt.id}>{opt.flag} {isAr ? opt.nameAr : opt.nameEn}</option>
+                    <option key={opt.id} value={opt.id}>{opt.flag} {isAr ? opt.nameAr : L(opt.nameEn)}</option>
                   ))}
                 </select>
               </div>
@@ -818,7 +818,7 @@ export default function ProfilePage({
                     <div key={idx} className="space-y-1.5 text-start">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-[#F4F7FB] truncate">
-                          {isAr ? sub.nameAr : sub.nameEn}
+                          {isAr ? sub.nameAr : L(sub.nameEn)}
                         </span>
                         <span className="font-bold text-[#F4F7FB] ms-2">
                           {sub.percentage}%

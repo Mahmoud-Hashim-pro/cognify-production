@@ -176,7 +176,7 @@ export const HearAndExpressPersonalizationCenter: React.FC<HearAndExpressPersona
                 className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 flex flex-col items-center justify-center gap-1.5 text-xs font-bold text-center shadow-xs transition-all active:scale-95"
               >
                 <Icon className="w-4 h-4 text-indigo-600" />
-                <span>{isArabic ? p.labelAr : p.labelEn}</span>
+                <span>{isArabic ? p.labelAr : L(p.labelEn)}</span>
               </button>
             );
           })}
@@ -205,7 +205,7 @@ export const HearAndExpressPersonalizationCenter: React.FC<HearAndExpressPersona
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                <span>{isArabic ? tab.labelAr : tab.labelEn}</span>
+                <span>{isArabic ? tab.labelAr : L(tab.labelEn)}</span>
               </button>
             );
           })}
@@ -257,7 +257,7 @@ export const HearAndExpressPersonalizationCenter: React.FC<HearAndExpressPersona
                       : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
                   }`}
                 >
-                  {isArabic ? thm.labelAr : thm.labelEn}
+                  {isArabic ? thm.labelAr : L(thm.labelEn)}
                 </button>
               ))}
             </div>
@@ -411,7 +411,7 @@ export const HearAndExpressPersonalizationCenter: React.FC<HearAndExpressPersona
                       : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
                   }`}
                 >
-                  {isArabic ? mode.labelAr : mode.labelEn}
+                  {isArabic ? mode.labelAr : L(mode.labelEn)}
                 </button>
               ))}
             </div>

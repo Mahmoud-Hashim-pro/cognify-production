@@ -695,7 +695,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             <div className="flex items-center gap-3 text-xs font-mono text-slate-400 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-sky-400" />
-                <span>{t('Peak Overload Window:', 'ذروة نوبات الضغط:')} <strong className="text-sky-300 font-bold">{isAr ? patternAnalysis.peakTimeWindow : patternAnalysis.peakTimeWindowEn}</strong></span>
+                <span>{t('Peak Overload Window:', 'ذروة نوبات الضغط:')} <strong className="text-sky-300 font-bold">{isAr ? patternAnalysis.peakTimeWindow : L(patternAnalysis.peakTimeWindowEn)}</strong></span>
               </div>
               <button
                 onClick={handlePrintWeeklyClinicalReport}
@@ -716,7 +716,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 <span>{t('Actionable Clinical Insight & Routine Correlation:', 'اكتشاف ارتباط سريري بالروتين اليومي (ABA Insight):')}</span>
               </div>
               <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                {isAr ? patternAnalysis.scheduleCorrelation.clinicalRecommendation : patternAnalysis.scheduleCorrelation.clinicalRecommendationEn}
+                {isAr ? patternAnalysis.scheduleCorrelation.clinicalRecommendation : L(patternAnalysis.scheduleCorrelation.clinicalRecommendationEn)}
               </p>
             </div>
           )}
@@ -819,7 +819,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <div key={c.id} className="p-3.5 rounded-2xl bg-[#111622] border border-[#4A1224]/60 flex items-center justify-between">
                 <div>
                   <div className="font-bold text-xs text-white flex items-center gap-1.5">
-                    <span>{isAr ? (c.nameAr || c.nameEn) : c.nameEn}</span>
+                    <span>{isAr ? (c.nameAr || c.nameEn) : L(c.nameEn)}</span>
                     {c.isPrimaryEmergency && <span className="text-xs px-1.5 py-0.5 rounded-full bg-rose-900 text-rose-300 font-bold">{t('Primary', 'أساسي')}</span>}
                   </div>
                   <div className="text-xs text-slate-400 font-mono mt-0.5">{c.phone || t('No number', 'بدون رقم')}</div>
@@ -829,7 +829,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                   onClick={() => openEditContact(c)}
                   className="min-w-[40px] min-h-[40px] p-2.5 rounded-xl bg-[#17355C] text-slate-300 hover:bg-[#24344D] transition-all flex items-center justify-center cursor-pointer"
                   title={t('Edit number', 'تعديل الرقم')}
-                  aria-label={t('Edit number for', 'تعديل رقم') + ' ' + (isAr ? (c.nameAr || c.nameEn) : c.nameEn)}
+                  aria-label={t('Edit number for', 'تعديل رقم') + ' ' + (isAr ? (c.nameAr || c.nameEn) : L(c.nameEn))}
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
@@ -890,7 +890,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
         >
           <div className="w-full max-w-md rounded-3xl bg-[#150917] border border-[#4A1224] p-6 space-y-4 shadow-2xl">
             <h3 id="caregiver-consent-title" className="font-black text-base text-white">
-              {t('Edit contact number', 'تعديل رقم جهة الاتصال')}: {isAr ? (editingContact.nameAr || editingContact.nameEn) : editingContact.nameEn}
+              {t('Edit contact number', 'تعديل رقم جهة الاتصال')}: {isAr ? (editingContact.nameAr || editingContact.nameEn) : L(editingContact.nameEn)}
             </h3>
             <label className="block text-xs text-slate-400 font-bold">
               {t('Phone number with country code', 'رقم التليفون بكود الدولة')}

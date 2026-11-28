@@ -102,7 +102,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
           <div className="flex items-start gap-2 text-[#E5A93C]">
             <HelpCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#E5A93C]" />
             <p className="text-xs font-semibold leading-relaxed">
-              {isAr ? disambiguation.clarificationPromptAr : disambiguation.clarificationPromptEn}
+              {isAr ? disambiguation.clarificationPromptAr : L(disambiguation.clarificationPromptEn)}
             </p>
           </div>
 
@@ -120,9 +120,9 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                   }`}
                 >
                   <MapPin className="w-3 h-3" />
-                  <span>{isAr ? cand.labelAr : cand.labelEn}</span>
+                  <span>{isAr ? cand.labelAr : L(cand.labelEn)}</span>
                   <span className="text-xs opacity-75">
-                    ({isAr ? cand.roomAr : cand.roomEn})
+                    ({isAr ? cand.roomAr : L(cand.roomEn)})
                   </span>
                 </button>
               );
@@ -138,7 +138,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-black text-white">
-                  {isAr ? currentObj.labelAr : currentObj.labelEn}
+                  {isAr ? currentObj.labelAr : L(currentObj.labelEn)}
                 </span>
                 <span className="px-2 py-0.5 rounded-md text-xs font-mono bg-slate-800 text-slate-300 border border-[#4A1224]/50">
                   {Math.round(currentObj.confidence * 100)}% {isAr ? 'دقة' : L('confidence')}
@@ -152,11 +152,11 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
               <p className="text-xs text-slate-400 mt-1">
                 {isAr ? 'الموقع الحالي:' : L('Current Location:')}{' '}
                 <span className="text-[#E5A93C] font-semibold">
-                  {isAr ? currentObj.surfaceAr : currentObj.surfaceEn}
+                  {isAr ? currentObj.surfaceAr : L(currentObj.surfaceEn)}
                 </span>{' '}
                 {isAr ? 'في' : 'in'}{' '}
                 <span className="text-emerald-300 font-semibold">
-                  {isAr ? currentObj.roomAr : currentObj.roomEn}
+                  {isAr ? currentObj.roomAr : L(currentObj.roomEn)}
                 </span>
               </p>
             </div>
@@ -232,7 +232,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                       />
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-white">
-                          {isAr ? obs.surfaceAr : obs.surfaceEn}
+                          {isAr ? obs.surfaceAr : L(obs.surfaceEn)}
                         </span>
                         <span className="text-slate-400">
                           {isAr ? `في ${obs.roomAr}` : `in ${obs.roomEn}`}

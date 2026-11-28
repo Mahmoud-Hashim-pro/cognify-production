@@ -4,6 +4,7 @@
  * spatial extraction from vision descriptions, location history,
  * and epistemically honest spatial queries across English, Arabic, and French.
  */
+import { L } from './translations';
 
 import { SpatialObjectRecord } from '../types';
 import {
@@ -247,7 +248,7 @@ export function extractSpatialObjectsFromVision(
           : detectedRoom?.roomEn;
 
       const objName =
-        lang === 'ar' ? objDef.nameAr : lang === 'fr' ? objDef.nameFr : objDef.nameEn;
+        lang === 'ar' ? objDef.nameAr : lang === 'fr' ? objDef.nameFr : L(objDef.nameEn);
 
       detected.push({
         id: `sp_${objDef.category}_${uid.substring(0, 6)}`,

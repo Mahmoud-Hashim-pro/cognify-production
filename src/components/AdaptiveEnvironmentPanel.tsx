@@ -272,7 +272,7 @@ export const AdaptiveEnvironmentPanel: React.FC<AdaptiveEnvironmentPanelProps> =
             </h3>
           </div>
           <p className={`text-xs leading-relaxed ${textCls}`}>
-            {isArabic ? recommendations.reasonAr : recommendations.reasonEn}
+            {isArabic ? recommendations.reasonAr : L(recommendations.reasonEn)}
           </p>
           <div className="flex flex-wrap gap-2">
             {recommendations.highContrastRecommended && (

@@ -494,8 +494,8 @@ export function simplifyAcademicText(
     if (lowerText.includes(term.toLowerCase())) {
       glossary.push({
         term,
-        definition: isAr ? data.definitionAr : data.definitionEn,
-        example: isAr ? data.exampleAr : data.exampleEn,
+        definition: isAr ? data.definitionAr : L(data.definitionEn),
+        example: isAr ? data.exampleAr : L(data.exampleEn),
       });
     }
   }

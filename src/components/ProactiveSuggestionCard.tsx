@@ -246,10 +246,10 @@ export default function ProactiveSuggestionCard({
         {opportunity && (
           <div>
             <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-              {isAr ? opportunity.titleAr : opportunity.titleEn}
+              {isAr ? opportunity.titleAr : L(opportunity.titleEn)}
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-              {isAr ? opportunity.messageAr : opportunity.messageEn}
+              {isAr ? opportunity.messageAr : L(opportunity.messageEn)}
             </p>
           </div>
         )}
@@ -259,7 +259,7 @@ export default function ProactiveSuggestionCard({
           <div className="space-y-3">
             <div>
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                {isAr ? insight.headlineAr : insight.headlineEn}
+                {isAr ? insight.headlineAr : L(insight.headlineEn)}
               </h3>
             </div>
 
@@ -272,7 +272,7 @@ export default function ProactiveSuggestionCard({
                   {localize(language, '1. Empirical Evidence', '١. الدليل التجريبي')}
                 </div>
                 <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                  {isAr ? insight.evidenceAr : insight.evidenceEn}
+                  {isAr ? insight.evidenceAr : L(insight.evidenceEn)}
                 </p>
               </div>
 
@@ -283,7 +283,7 @@ export default function ProactiveSuggestionCard({
                   {localize(language, '2. Pedagogical Meaning', '٢. التفسير التربوي')}
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  {isAr ? insight.interpretationAr : insight.interpretationEn}
+                  {isAr ? insight.interpretationAr : L(insight.interpretationEn)}
                 </p>
               </div>
             </div>

@@ -452,7 +452,7 @@ export default function CrossDisabilityOrchestrator({
                 }`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{isAr ? tab.titleAr : tab.titleEn}</span>
+                <span className="truncate">{isAr ? tab.titleAr : L(tab.titleEn)}</span>
               </button>
             );
           })}
@@ -585,11 +585,11 @@ export default function CrossDisabilityOrchestrator({
                         {RELAY_PRESETS.map((p, idx) => (
                           <button
                             key={idx}
-                            onClick={() => handleSendDeafVoiceToBlind(isAr ? p.textAr : p.textEn)}
+                            onClick={() => handleSendDeafVoiceToBlind(isAr ? p.textAr : L(p.textEn))}
                             className="p-2 rounded-xl bg-[#150917] hover:bg-[#2D0B16] border border-[#4A1224]/60 hover:border-[#E5A93C]/40 text-start text-xs font-bold text-slate-200 transition-all active:scale-95 flex items-center gap-1.5 truncate"
                           >
                             <span className="text-base shrink-0">{p.icon}</span>
-                            <span className="truncate">{isAr ? p.textAr : p.textEn}</span>
+                            <span className="truncate">{isAr ? p.textAr : L(p.textEn)}</span>
                           </button>
                         ))}
                       </div>

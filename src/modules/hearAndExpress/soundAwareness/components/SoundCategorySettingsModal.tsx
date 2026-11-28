@@ -150,7 +150,7 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-base text-white">
-                    {isArabic ? cat.nameAr : cat.nameEn}
+                    {isArabic ? cat.nameAr : L(cat.nameEn)}
                   </span>
                   {getStatusBadge(cat.modelStatus)}
                 </div>
@@ -164,7 +164,7 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
                         onUpdateCategory(cat.category, { isEnabled: e.target.checked })
                       }
                       className="sr-only peer"
-                      aria-label={`${isArabic ? cat.nameAr : cat.nameEn} toggle`}
+                      aria-label={`${isArabic ? cat.nameAr : L(cat.nameEn)} toggle`}
                     />
                     <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                   </label>
@@ -172,7 +172,7 @@ export const SoundCategorySettingsModal: React.FC<SoundCategorySettingsModalProp
               </div>
 
               <p className="text-xs text-slate-400 mb-4">
-                {isArabic ? cat.descriptionAr : cat.descriptionEn}
+                {isArabic ? cat.descriptionAr : L(cat.descriptionEn)}
               </p>
 
               {/* Sensitivity and Priority controls */}

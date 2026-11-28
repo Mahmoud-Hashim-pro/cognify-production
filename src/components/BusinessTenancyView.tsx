@@ -157,7 +157,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
-                      <span className="text-sm font-bold text-white">{isArabic ? spec.displayNameAr : spec.displayNameEn}</span>
+                      <span className="text-sm font-bold text-white">{isArabic ? spec.displayNameAr : L(spec.displayNameEn)}</span>
                       {isCurrent && (
                         <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-500 text-slate-950">
                           Active

@@ -97,7 +97,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
   useEffect(() => {
     const unsub = engine.subscribeSentence((sent) => {
       setSentenceSymbols(sent.symbols);
-      setSentenceText(isArabic ? sent.textAr : sent.textEn);
+      setSentenceText(isArabic ? sent.textAr : L(sent.textEn));
     });
     return () => unsub();
   }, [isArabic, engine]);
@@ -376,7 +376,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
           >
             {allBoards.map((b) => (
               <option key={b.id} value={b.id}>
-                {isArabic ? b.nameAr : b.nameEn}
+                {isArabic ? b.nameAr : L(b.nameEn)}
               </option>
             ))}
           </select>
@@ -538,7 +538,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 }`}
               >
                 {getCategoryIcon(cat.id)}
-                <span className="truncate w-full">{isArabic ? cat.labelAr : cat.labelEn}</span>
+                <span className="truncate w-full">{isArabic ? cat.labelAr : L(cat.labelEn)}</span>
               </button>
             );
           })}
@@ -592,7 +592,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                   </div>
                   <div>
                     <div className="font-bold text-sm sm:text-base leading-tight">
-                      {isArabic ? sym.labelAr : sym.labelEn}
+                      {isArabic ? sym.labelAr : L(sym.labelEn)}
                     </div>
                     <div className="text-xs opacity-60 mt-0.5 line-clamp-1">
                       {isArabic ? sym.labelEn : sym.labelAr}
@@ -648,7 +648,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
             <button
               key={i}
               onClick={() => {
-                setSentenceText(isArabic ? phrase.textAr : phrase.textEn);
+                setSentenceText(isArabic ? phrase.textAr : L(phrase.textEn));
                 engine.updateSentenceText(
                   isArabic ? phrase.textAr : '',
                   isArabic ? '' : phrase.textEn
@@ -662,7 +662,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
               }}
               className="px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-xs sm:text-sm font-medium shadow-xs transition-all active:scale-95"
             >
-              {isArabic ? phrase.textAr : phrase.textEn}
+              {isArabic ? phrase.textAr : L(phrase.textEn)}
             </button>
           ))}
         </div>
@@ -982,7 +982,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 >
                   {categoryCatalog.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {isArabic ? c.labelAr : c.labelEn}
+                      {isArabic ? c.labelAr : L(c.labelEn)}
                     </option>
                   ))}
                 </select>
@@ -1028,7 +1028,7 @@ export const PersonalAacWorkspaceView: React.FC<PersonalAacWorkspaceViewProps> =
                 >
                   <div className="flex items-center gap-2">
                     {getCategoryIcon(c.id)}
-                    <span>{isArabic ? c.labelAr : c.labelEn}</span>
+                    <span>{isArabic ? c.labelAr : L(c.labelEn)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <button

@@ -1201,7 +1201,7 @@ export default function StudentSettingsView({
                   <span>{isAr ? 'ملاحظة توافقية المتصفح ونظام التشغيل' : L('Browser & OS Compatibility Notice')}</span>
                 </div>
                 <p className="leading-relaxed">
-                  {isAr ? voiceSupport.explanationAr : voiceSupport.explanationEn}
+                  {isAr ? voiceSupport.explanationAr : L(voiceSupport.explanationEn)}
                 </p>
               </div>
 
@@ -1563,7 +1563,7 @@ export default function StudentSettingsView({
                             {isAr ? sc.labelAr : L(sc.labelEn)}
                           </td>
                           <td className="p-3 text-slate-600 dark:text-[#A9C4DD] leading-relaxed">
-                            {isAr ? sc.descriptionAr : sc.descriptionEn}
+                            {isAr ? sc.descriptionAr : L(sc.descriptionEn)}
                           </td>
                           <td className="p-3">
                             <span className="px-2 py-0.5 rounded text-xs font-bold uppercase bg-[#1769AA]/15 border border-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1]">
@@ -1966,7 +1966,7 @@ export default function StudentSettingsView({
                     {OFFLINE_CAPABILITY_MATRIX.map((cap) => (
                       <tr key={cap.featureId} className="hover:bg-slate-100/50 dark:hover:bg-[#082344]/50 transition-colors">
                         <td className="p-3 font-bold text-slate-900 dark:text-[#F4F7FB]">
-                          {isAr ? cap.nameAr : cap.nameEn}
+                          {isAr ? cap.nameAr : L(cap.nameEn)}
                         </td>
                         <td className="p-3">
                           {cap.worksOffline ? (
@@ -1981,7 +1981,7 @@ export default function StudentSettingsView({
                           )}
                         </td>
                         <td className="p-3 text-slate-600 dark:text-[#A9C4DD] leading-relaxed">
-                          {isAr ? cap.explanationAr : cap.explanationEn}
+                          {isAr ? cap.explanationAr : L(cap.explanationEn)}
                         </td>
                       </tr>
                     ))}

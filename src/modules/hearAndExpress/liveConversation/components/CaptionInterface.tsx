@@ -519,9 +519,9 @@ export const CaptionInterface: React.FC<CaptionInterfaceProps> = ({
         >
           <AlertCircle className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" aria-hidden="true" />
           <div className="flex-1">
-            <p className="font-bold">{isAr ? activeError.messageAr : activeError.messageEn}</p>
+            <p className="font-bold">{isAr ? activeError.messageAr : L(activeError.messageEn)}</p>
             <p className="text-xs text-rose-300/80 mt-0.5">
-              {isAr ? activeError.suggestedActionAr : activeError.suggestedActionEn}
+              {isAr ? activeError.suggestedActionAr : L(activeError.suggestedActionEn)}
             </p>
           </div>
           <button

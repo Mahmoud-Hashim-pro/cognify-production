@@ -128,7 +128,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
                     : 'bg-[#102D4D] border-[#12CFE0]/20 text-[#A9BDD3] hover:bg-[#15385E]'
                 }`}
               >
-                <span className="text-sm">{isAr ? s.labelAr : s.labelEn}</span>
+                <span className="text-sm">{isAr ? s.labelAr : L(s.labelEn)}</span>
                 {visualSettings.textSize === s.id && <Check className="w-4 h-4 text-white" aria-hidden="true" />}
               </button>
             ))}
@@ -163,7 +163,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
                   className="text-xs font-extrabold truncate"
                   style={{ color: t.previewText }}
                 >
-                  {isAr ? t.nameAr : t.nameEn}
+                  {isAr ? t.nameAr : L(t.nameEn)}
                 </span>
               </button>
             ))}
@@ -187,7 +187,7 @@ export const CaptionSettingsModal: React.FC<CaptionSettingsModalProps> = ({
                     : 'bg-[#102D4D] border-[#12CFE0]/20 text-[#A9BDD3] hover:bg-[#15385E]'
                 }`}
               >
-                {isAr ? f.labelAr : f.labelEn}
+                {isAr ? f.labelAr : L(f.labelEn)}
               </button>
             ))}
           </div>

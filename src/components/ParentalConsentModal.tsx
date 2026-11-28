@@ -282,7 +282,7 @@ export default function ParentalConsentModal({
                       : 'border-[#4A1224]/60 bg-[#080409] text-slate-400 hover:text-white'
                   }`}
                 >
-                  {isAr ? item.labelAr : item.labelEn}
+                  {isAr ? item.labelAr : L(item.labelEn)}
                 </button>
               ))}
             </div>

@@ -270,7 +270,7 @@ export const UnifiedTwoWayCommunicationView: React.FC<UnifiedTwoWayCommunication
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                <span>{isArabic ? wf.labelAr : wf.labelEn}</span>
+                <span>{isArabic ? wf.labelAr : L(wf.labelEn)}</span>
               </button>
             );
           })}
@@ -287,7 +287,7 @@ export const UnifiedTwoWayCommunicationView: React.FC<UnifiedTwoWayCommunication
             <AlertTriangle className="w-6 h-6 text-red-600 shrink-0" />
             <div>
               <div className="font-bold text-sm text-red-900 dark:text-red-200">
-                {isArabic ? status.activeError.messageAr : status.activeError.messageEn}
+                {isArabic ? status.activeError.messageAr : L(status.activeError.messageEn)}
               </div>
               <div className="text-xs text-red-700 dark:text-red-300 mt-0.5">
                 {isArabic ? 'يمكنك اختيار إجراء للتعافي فوراً:' : L('Select a recovery action below:')}

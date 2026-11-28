@@ -5,6 +5,7 @@
  * Rafiqi Accessible Educational Book & Document Studio View
  * (Phase 6: Dedicated Accessible Studio for Transforming Rough Content into Professional DOCX/PDF)
  */
+import { L } from '../lib/translations';
 
 import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -541,7 +542,7 @@ export default function AccessibleBookStudioView({
                 } focus-visible:ring-2 focus-visible:ring-teal-600`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span>{isArLocale ? item.labelAr : item.labelEn}</span>
+                <span>{isArLocale ? item.labelAr : L(item.labelEn)}</span>
               </button>
             );
           })}
@@ -862,10 +863,10 @@ export default function AccessibleBookStudioView({
                           {isSelected && <Check className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
                         </div>
                         <h3 className={`font-bold text-xs sm:text-sm ${isSelected ? 'text-teal-900 dark:text-teal-200' : ''}`}>
-                          {isArLocale ? preset.labelAr : preset.labelEn}
+                          {isArLocale ? preset.labelAr : L(preset.labelEn)}
                         </h3>
                         <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
-                          {isArLocale ? preset.descriptionAr : preset.descriptionEn}
+                          {isArLocale ? preset.descriptionAr : L(preset.descriptionEn)}
                         </p>
                       </div>
 

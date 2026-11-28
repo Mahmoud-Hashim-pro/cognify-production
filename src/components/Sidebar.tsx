@@ -153,7 +153,7 @@ export default function Sidebar({
     id: sec.id,
     numericOrder: sec.numericOrder,
     label: isAr ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`,
-    shortTitle: isAr ? sec.titleAr : sec.titleEn,
+    shortTitle: isAr ? sec.titleAr : L(sec.titleEn),
     icon: getSectionIconComponent(sec.iconName),
     action: () => {
       onClose?.();

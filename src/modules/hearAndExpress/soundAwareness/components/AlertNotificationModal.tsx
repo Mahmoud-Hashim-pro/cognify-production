@@ -103,7 +103,7 @@ export const AlertNotificationModal: React.FC<AlertNotificationModalProps> = ({
 
           <div className="space-y-1">
             <h2 className="text-2xl font-black text-white">
-              {isArabic ? alert.labelAr : alert.labelEn}
+              {isArabic ? alert.labelAr : L(alert.labelEn)}
             </h2>
             <p id="alert-modal-desc" className="text-sm text-slate-300">
               {isArabic

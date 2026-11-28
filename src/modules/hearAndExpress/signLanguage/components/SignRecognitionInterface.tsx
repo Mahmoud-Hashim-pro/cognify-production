@@ -163,7 +163,7 @@ export const SignRecognitionInterface: React.FC<SignRecognitionInterfaceProps> =
         </div>
 
         <p className="text-xs leading-relaxed text-slate-300">
-          {isArabic ? gateAudit.formalAuditSummaryAr : gateAudit.formalAuditSummaryEn}
+          {isArabic ? gateAudit.formalAuditSummaryAr : L(gateAudit.formalAuditSummaryEn)}
         </p>
 
         {/* Gate Criteria Grid */}

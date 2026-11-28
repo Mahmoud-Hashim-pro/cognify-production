@@ -267,7 +267,7 @@ export default function AudioDocumentIntelligenceView({
 
     const validation = validateLectureAudioFile(file);
     if (!validation.valid) {
-      const err = isAr ? validation.errorMessageAr : validation.errorMessageEn;
+      const err = isAr ? validation.errorMessageAr : L(validation.errorMessageEn);
       toast.error(err || 'Invalid audio file');
       announce(err || 'Invalid audio file');
       return;
@@ -825,9 +825,9 @@ export default function AudioDocumentIntelligenceView({
               aria-selected={isSelected}
               onClick={() => {
                 setActiveTab(tab.id);
-                announce(isAr ? tab.labelAr : tab.labelEn);
+                announce(isAr ? tab.labelAr : L(tab.labelEn));
               }}
-              title={isAr ? tab.labelAr : tab.labelEn}
+              title={isAr ? tab.labelAr : L(tab.labelEn)}
               className={`shrink-0 min-h-[44px] px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer focus:ring-2 focus:ring-[#1769AA] ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md'
@@ -835,7 +835,7 @@ export default function AudioDocumentIntelligenceView({
               }`}
             >
               <tab.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-              <span>{isAr ? tab.shortAr : tab.shortEn}</span>
+              <span>{isAr ? tab.shortAr : L(tab.shortEn)}</span>
             </button>
           );
         })}
@@ -1391,7 +1391,7 @@ export default function AudioDocumentIntelligenceView({
                           : 'bg-[#0A2342] border border-[#24476F] text-[#94A3B8] hover:text-white'
                       }`}
                     >
-                      {isAr ? mode.labelAr : mode.labelEn}
+                      {isAr ? mode.labelAr : L(mode.labelEn)}
                     </button>
                   ))}
                 </div>
@@ -1616,7 +1616,7 @@ export default function AudioDocumentIntelligenceView({
                         quizType === t.id ? 'bg-[#1769AA] text-white shadow-sm' : 'text-[#94A3B8] hover:text-white'
                       }`}
                     >
-                      {isAr ? t.labelAr : t.labelEn}
+                      {isAr ? t.labelAr : L(t.labelEn)}
                     </button>
                   ))}
                 </div>

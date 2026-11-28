@@ -1,3 +1,4 @@
+import { L } from '../../lib/translations';
 import React, { useState, useEffect } from 'react';
 import { Sun, Moon, Laptop } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -95,7 +96,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               type="button"
               onClick={() => handleSelect(opt.id)}
               aria-pressed={isSelected}
-              title={isAr ? opt.labelAr : opt.labelEn}
+              title={isAr ? opt.labelAr : L(opt.labelEn)}
               className={cn(
                 'min-h-[44px] min-w-[44px] max-sm:min-w-[36px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] select-none',
                 'focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2',
@@ -105,7 +106,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               )}
             >
               {opt.icon}
-              <span className="sr-only">{isAr ? opt.labelAr : opt.labelEn}</span>
+              <span className="sr-only">{isAr ? opt.labelAr : L(opt.labelEn)}</span>
             </button>
           );
         })}
@@ -140,7 +141,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
             )}
           >
             {opt.icon}
-            <span>{isAr ? opt.labelAr : opt.labelEn}</span>
+            <span>{isAr ? opt.labelAr : L(opt.labelEn)}</span>
           </button>
         );
       })}

@@ -3,6 +3,7 @@
  * Life-assistant camera tool for blind and visually impaired users.
  * Reference-matched UI implementation with dark navy palette and teal primary action.
  */
+import { L } from '../lib/translations';
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { ClampedNotice } from './ui/ClampedNotice';
 import { motion, AnimatePresence } from 'motion/react';
@@ -736,7 +737,7 @@ export default function VisionCompanionView({
               }
               setStatus('ready');
               const activeToolConfig = VISUAL_TOOLS.find((t) => t.id === activeToolRef.current) || VISUAL_TOOLS[0];
-              const toolCapLabel = companionLang === 'ar' ? activeToolConfig.captureBtnAr : companionLang === 'fr' ? activeToolConfig.captureBtnFr : activeToolConfig.captureBtnEn;
+              const toolCapLabel = companionLang === 'ar' ? activeToolConfig.captureBtnAr : companionLang === 'fr' ? activeToolConfig.captureBtnFr : L(activeToolConfig.captureBtnEn);
               setAnnounce(
                 companionLang === 'ar'
                   ? `الكاميرا جاهزة. اضغط على «${toolCapLabel}» للفحص الفوري.`
@@ -901,7 +902,7 @@ export default function VisionCompanionView({
 
     const tool = VISUAL_TOOLS.find((t) => t.id === toolId);
     if (tool) {
-      const toolName = companionLang === 'ar' ? tool.titleAr : companionLang === 'fr' ? tool.titleFr : tool.titleEn;
+      const toolName = companionLang === 'ar' ? tool.titleAr : companionLang === 'fr' ? tool.titleFr : L(tool.titleEn);
       const msg = companionLang === 'ar' ? `تم تفعيل أداة: ${toolName}` : `Activated ${toolName}`;
       setAnnounce(msg);
     }
@@ -1850,7 +1851,7 @@ Examine what is visible in front of the camera right now with utmost precision:
     // Phase 6 Requirement H: Comprehensive file validation
     const validation = validateUploadedImageFile(file);
     if (!validation.isValid) {
-      const msg = companionLang === 'ar' ? validation.errorMessageAr! : validation.errorMessageEn!;
+      const msg = companionLang === 'ar' ? validation.errorMessageAr! : L(validation.errorMessageEn)!;
       toast.error(msg);
       speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
       e.target.value = '';
@@ -2260,8 +2261,8 @@ Examine what is visible in front of the camera right now with utmost precision:
             {VISUAL_TOOLS.map((tool) => {
               const isSelected = activeTool === tool.id;
               const ToolIcon = tool.Icon;
-              const title = companionLang === 'ar' ? tool.titleAr : companionLang === 'fr' ? tool.titleFr : tool.titleEn;
-              const badge = companionLang === 'ar' ? tool.badgeAr : companionLang === 'fr' ? tool.badgeFr : tool.badgeEn;
+              const title = companionLang === 'ar' ? tool.titleAr : companionLang === 'fr' ? tool.titleFr : L(tool.titleEn);
+              const badge = companionLang === 'ar' ? tool.badgeAr : companionLang === 'fr' ? tool.badgeFr : L(tool.badgeEn);
 
               return (
                 <button
@@ -2814,7 +2815,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         {toolTitle}
                       </h3>
                       <p className="text-xs sm:text-sm text-[#B9CDE3] max-w-sm">
-                        {companionLang === 'ar' ? activeToolConfig.shortDescAr : companionLang === 'fr' ? activeToolConfig.shortDescFr : activeToolConfig.shortDescEn}
+                        {companionLang === 'ar' ? activeToolConfig.shortDescAr : companionLang === 'fr' ? activeToolConfig.shortDescFr : L(activeToolConfig.shortDescEn)}
                       </p>
                     </div>
 
@@ -3717,7 +3718,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       : 'text-[#B9CDE3] hover:text-white'
                   }`}
                 >
-                  {companionLang === 'ar' ? cat.labelAr : cat.labelEn}
+                  {companionLang === 'ar' ? cat.labelAr : L(cat.labelEn)}
                 </button>
               ))}
             </div>
@@ -3864,7 +3865,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   className="flex items-center justify-between p-2.5 rounded-xl bg-[#0A2342] border border-[#07558A]"
                 >
                   <span className="text-xs text-[#F5F8FF] font-medium">
-                    {companionLang === 'ar' ? shortcut.titleAr : shortcut.titleEn}
+                    {companionLang === 'ar' ? shortcut.titleAr : L(shortcut.titleEn)}
                   </span>
                   <kbd className="px-2 py-1 rounded bg-[#092747] border border-[#1769AA]/40 text-[#1769AA] font-mono text-xs font-bold">
                     {shortcut.key}

@@ -379,7 +379,7 @@ export default function AccessibleCommunicateWorkspaceView({
               aria-selected={isSelected}
               onClick={() => {
                 setActiveTool(t.id);
-                speakText(isAr ? t.titleAr : t.titleEn);
+                speakText(isAr ? t.titleAr : L(t.titleEn));
               }}
               className={`shrink-0 whitespace-nowrap flex items-center justify-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
                 isSelected
@@ -388,7 +388,7 @@ export default function AccessibleCommunicateWorkspaceView({
               }`}
             >
               <IconComponent className="w-4 h-4 text-[#4B9FE1]" />
-              <span>{isAr ? t.titleAr : t.titleEn}</span>
+              <span>{isAr ? t.titleAr : L(t.titleEn)}</span>
             </button>
           );
         })}
