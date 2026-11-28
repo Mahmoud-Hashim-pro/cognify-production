@@ -50,16 +50,16 @@ interface RouteSeoEntry {
 
 const ROUTE_SEO_REGISTRY: Record<string, RouteSeoEntry> = {
   chat: {
-    titleEn: 'Rafiqi — Adaptive AI Study Mentor & Personal Assistant',
-    titleAr: 'رفيقي (Rafiqi) — المعلم الذكي التكيفي والمساعد الشخصي',
-    titleFr: 'Rafiqi — Mentor IA Adaptatif & Assistant Personnel',
+    titleEn: 'Rafiqi (رفيقي) — Inclusive AI Tutor & Assistive Learning Platform',
+    titleAr: 'رفيقي (Rafiqi) — المعلم الذكي ومنصة التعلّم الشامل لذوي الهمم',
+    titleFr: 'Rafiqi — Tuteur IA Inclusif & Plateforme d’Accessibilité',
     descEn: BRAND_CONFIG.descriptionEn,
     descAr: BRAND_CONFIG.descriptionAr,
-    descFr: 'Rafiqi est un assistant personnel et mentor IA adaptatif et accessible pour tous les apprenants.',
+    descFr: 'Rafiqi est une plateforme d’apprentissage inclusif et de technologies d’assistance pour tous les apprenants.',
   },
   disability: {
-    titleEn: 'Rafiqi Accessibility Hub — Assistive AI for Visual, Hearing & Motor Needs',
-    titleAr: 'رفيقي (Rafiqi) — منظومة الإتاحة الشاملة لذوي الهمم',
+    titleEn: 'Rafiqi (رفيقي) — Inclusive Learning & Assistive Technology Platform',
+    titleAr: 'رفيقي (Rafiqi) — منصة التعلّم الشامل والتقنيات المساندة لذوي الهمم',
     titleFr: 'Rafiqi — Centre d’Accessibilité Universelle & Technologies d’Assistance',
     descEn:
       'Explore Rafiqi’s universal accessibility suite featuring real-time AI visual companion, 3D sign language interpreter, live captions, and motor/Euphonia voice control.',
