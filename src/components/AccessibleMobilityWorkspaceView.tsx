@@ -14,6 +14,8 @@
  * 7. Indoor Navigation Boundary: Transparent infrastructure boundary disclosures without fake positioning.
  */
 
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
+import { ClampedNotice } from './ui/ClampedNotice';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -44,7 +46,7 @@ import {
   Check,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { toast } from './Toast';
 import {
@@ -77,6 +79,9 @@ export type MobilityToolId =
   | 'gps_nav'
   | 'indoor_boundary';
 
+const VALID_MOBILITY_TOOLS: readonly MobilityToolId[] = ['place_desc', 'sign_reader', 'entrance_door', 'transit_assistant', 'places_directory', 'gps_nav', 'indoor_boundary'];
+
+
 interface AccessibleMobilityWorkspaceViewProps {
   profile: UserProfile;
   onNavigateBack: () => void;
@@ -95,7 +100,9 @@ export default function AccessibleMobilityWorkspaceView({
   const isAr = isArabicLocale(profile.language);
   const langKey = isAr ? 'ar' : 'en';
 
-  const [activeTool, setActiveTool] = useState<MobilityToolId>(initialTool);
+  const [activeTool, setActiveTool] = useState<MobilityToolId>(() =>
+    VALID_MOBILITY_TOOLS.includes(initialTool) ? initialTool : 'place_desc'
+  );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showSafetyModal, setShowSafetyModal] = useState(false);
 
@@ -105,7 +112,7 @@ export default function AccessibleMobilityWorkspaceView({
   const [sceneInputText, setSceneInputText] = useState(
     isAr
       ? 'مدخل رئيسي واسع أمامي، مكتب استعلامات على اليمين، درج سلالم، ومصعد كهربائي على اليسار.'
-      : 'Spacious main entrance straight ahead, information counter to the right, staircase, and elevator to the left.'
+      : L('Spacious main entrance straight ahead, information counter to the right, staircase, and elevator to the left.')
   );
   const [visibilityQuality, setVisibilityQuality] = useState<'clear' | 'glare' | 'low_light' | 'partially_obstructed'>('clear');
   const [placeAnalysis, setPlaceAnalysis] = useState(() =>
@@ -118,7 +125,7 @@ export default function AccessibleMobilityWorkspaceView({
   // 2. SIGN & DIRECTION READER STATE
   // ─────────────────────────────────────────────────────────────────────────────
   const [signInputText, setSignInputText] = useState(
-    isAr ? 'قاعة 304 — قسم الحاسب الآلي' : 'Room 304 — Computer Science Dept'
+    isAr ? 'قاعة 304 — قسم الحاسب الآلي' : L('Room 304 — Computer Science Dept')
   );
   const [parsedSign, setParsedSign] = useState<ParsedSignResult>(() =>
     parseDirectionalSign(signInputText)
@@ -127,7 +134,7 @@ export default function AccessibleMobilityWorkspaceView({
   // ─────────────────────────────────────────────────────────────────────────────
   // 3. ENTRANCE & DOOR ASSISTANCE STATE
   // ─────────────────────────────────────────────────────────────────────────────
-  const [doorTypeInput, setDoorTypeInput] = useState(isAr ? 'الباب الزجاجي الرئيسي' : 'Main Glass Door');
+  const [doorTypeInput, setDoorTypeInput] = useState(isAr ? 'الباب الزجاجي الرئيسي' : L('Main Glass Door'));
   const [doorClockPos, setDoorClockPos] = useState<RelativeClockPosition>('12_oclock');
   const [doorwayResult, setDoorwayResult] = useState<DoorAssistanceResult>(() =>
     evaluateDoorwayAssistance(doorTypeInput, doorClockPos, false)
@@ -136,7 +143,7 @@ export default function AccessibleMobilityWorkspaceView({
   // ─────────────────────────────────────────────────────────────────────────────
   // 4. PUBLIC TRANSPORT ASSISTANT STATE
   // ─────────────────────────────────────────────────────────────────────────────
-  const [transitSignInput, setTransitSignInput] = useState(isAr ? 'أتوبيس 104 — التحرير' : 'Bus 104 — Tahrir');
+  const [transitSignInput, setTransitSignInput] = useState(isAr ? 'أتوبيس 104 — التحرير' : L('Bus 104 — Tahrir'));
   const [transitConfidence, setTransitConfidence] = useState(0.8);
   const [transitResult, setTransitResult] = useState<TransitMatchResult>(() =>
     parseTransitSign(transitSignInput, transitConfidence)
@@ -198,7 +205,7 @@ export default function AccessibleMobilityWorkspaceView({
     if (!navigator.geolocation) {
       const err = isAr
         ? 'خاصية تحديد الموقع الجغرافي (GPS) غير مدعومة في هذا المتصفح.'
-        : 'Geolocation API is not supported in this browser.';
+        : L('Geolocation API is not supported in this browser.');
       setGpsErrorState(err);
       toast.error(err);
       speakText(err);
@@ -219,7 +226,7 @@ export default function AccessibleMobilityWorkspaceView({
 
         const evalResult = evaluateGpsAccuracy(pos.coords.accuracy);
         toast.success(localize(profile.language, 'Location acquired', 'تم تحديد الموقع'));
-        speakText(isAr ? evalResult.warningAr : evalResult.warningEn);
+        speakText(isAr ? evalResult.warningAr : L(evalResult.warningEn));
       },
       (err) => {
         setIsLocatingGps(false);
@@ -294,8 +301,8 @@ export default function AccessibleMobilityWorkspaceView({
 
   return (
     <div
-      className={`min-h-screen flex flex-col ${
-        isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'bg-[#F5F9FD] text-[#061A33]'
+      className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
+        isDarkMode ? 'bg-[#0A2342] text-[#F8FAFC]' : 'tool-light bg-[#F5F9FD] text-[#0A2342]'
       } font-sans selection:bg-[#1769AA]/30`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
@@ -306,21 +313,21 @@ export default function AccessibleMobilityWorkspaceView({
         aria-atomic="true"
         className="sr-only"
       >
-        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : 'Speaking orientation guidance...') : ''}
+        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : L('Speaking orientation guidance...')) : ''}
         {followUpAnswer || ''}
       </div>
 
       {/* ── HEADER ── */}
       <header
         role="banner"
-        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#131E2E]/95 backdrop-blur-md border-b border-[#22354E] shadow-md"
+        className="sticky top-0 z-30 flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={onNavigateBack}
             aria-label={localize(profile.language, 'Back to Move & Explore Section', 'الرجوع لقسم الحركة والاستكشاف')}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
           >
             <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
           </button>
@@ -329,61 +336,64 @@ export default function AccessibleMobilityWorkspaceView({
               type="button"
               onClick={onMenuClick}
               aria-label={localize(profile.language, 'Open Main Menu', 'فتح القائمة الرئيسية')}
-              className="lg:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#22354E] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
+              className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
             >
               <Menu className="w-5 h-5" />
             </button>
           )}
 
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="hidden items-center gap-2">
               <span className="text-xs font-bold text-[#4B9FE1] uppercase tracking-wider">
                 {localize(profile.language, 'Section 4: Move & Explore', 'القسم 4: الحركة والاستكشاف')}
               </span>
-              <span className="text-[#22354E]">•</span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+              <span className="text-[#24476F]">•</span>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                 <ShieldAlert className="w-3 h-3" />
                 {localize(profile.language, 'Safety Critical Zone', 'منطقة حساسة للأمان')}
               </span>
             </div>
-            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC]">
-              {localize(
-                profile.language,
-                'Mobility, Places & Public Transport Assistant',
-                'مساعد الحركة واستكشاف الأماكن والنقل الميسر'
-              )}
+            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] truncate">
+              <span>{localize(profile.language, 'Mobility & Places', 'الحركة والأماكن')}</span>
+              <span className="hidden">
+                {localize(
+                  profile.language,
+                  'Mobility, Places & Public Transport Assistant',
+                  'مساعد الحركة واستكشاف الأماكن والنقل الميسر'
+                )}
+              </span>
             </h1>
           </div>
         </div>
 
-        {/* Global Sound & Safety Actions */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowSafetyModal(true)}
-            aria-label={localize(profile.language, 'View Safety Advisory', 'عرض تعليمات الأمان والسلامة')}
-            className="min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
-          >
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
-            <span className="hidden sm:inline">
-              {localize(profile.language, 'Safety Rules', 'تعليمات الأمان')}
-            </span>
-          </button>
-
-          {isSpeaking ? (
-            <button
-              type="button"
-              onClick={stopSpeaking}
-              aria-label={localize(profile.language, 'Stop Voice Reading', 'إيقاف النطق الصوتي')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
-            >
-              <VolumeX className="w-4 h-4 animate-pulse" />
-              <span>{localize(profile.language, 'Stop Audio', 'إيقاف')}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
+          <HeaderMenu
+            ariaLabel={localize(profile.language, 'More actions', 'المزيد')}
+            isDarkMode={isDarkMode}
+            items={[
+              {
+                key: 'safety',
+                label: localize(profile.language, 'Safety Rules', 'تعليمات الأمان'),
+                ariaLabel: localize(profile.language, 'View Safety Advisory', 'عرض تعليمات الأمان والسلامة'),
+                icon: <ShieldAlert className="w-4 h-4 text-amber-400" />,
+                onSelect: () => setShowSafetyModal(true),
+              },
+              isSpeaking
+                ? {
+                    key: 'stop',
+                    label: localize(profile.language, 'Stop Audio', 'إيقاف'),
+                    ariaLabel: localize(profile.language, 'Stop Voice Reading', 'إيقاف النطق الصوتي'),
+                    icon: <VolumeX className="w-4 h-4" />,
+                    danger: true,
+                    onSelect: stopSpeaking,
+                  }
+                : {
+                    key: 'read',
+                    label: localize(profile.language, 'Read Aloud', 'قراءة صوتية'),
+                    ariaLabel: localize(profile.language, 'Read content aloud', 'قراءة المحتوى بصوت واضح'),
+                    icon: <Volume2 className="w-4 h-4" />,
+                    onSelect: () => {
                 const textToRead =
                   activeTool === 'place_desc'
                     ? placeAnalysis.spokenSummaryAr
@@ -399,14 +409,10 @@ export default function AccessibleMobilityWorkspaceView({
                     ? (userCoords ? `إحداثياتك الحالية محددة بدقة ${gpsAccuracyMeters} متراً.` : 'يرجى تفعيل زر تحديد الموقع.')
                     : indoorBoundary.disclaimerAr;
                 speakText(textToRead);
-              }}
-              aria-label={localize(profile.language, 'Read content aloud', 'قراءة المحتوى بصوت واضح')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40 hover:bg-[#1769AA]/30 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
-            >
-              <Volume2 className="w-4 h-4" />
-              <span className="hidden sm:inline">{localize(profile.language, 'Read Aloud', 'قراءة صوتية')}</span>
-            </button>
-          )}
+                    },
+                  },
+            ]}
+          />
         </div>
       </header>
 
@@ -418,18 +424,20 @@ export default function AccessibleMobilityWorkspaceView({
       >
         <div className="max-w-7xl mx-auto flex items-start gap-2.5">
           <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-          <p className="leading-relaxed font-semibold">
-            {isAr ? MOBILITY_SAFETY_DISCLAIMER_AR : MOBILITY_SAFETY_DISCLAIMER_EN}
-          </p>
+          <ClampedNotice isAr={isAr}>
+            <p className="leading-relaxed font-semibold">
+              {isAr ? MOBILITY_SAFETY_DISCLAIMER_AR : L(MOBILITY_SAFETY_DISCLAIMER_EN)}
+            </p>
+          </ClampedNotice>
         </div>
       </aside>
 
       {/* ── SUB-NAV: 7 ACCESSIBLE MOBILITY TABS ── */}
       <nav
         aria-label={localize(profile.language, 'Mobility Assistant Tools', 'أدوات مساعد الحركة والاستكشاف')}
-        className="bg-[#0D4778]/20 border-b border-[#22354E] px-4 sm:px-6 py-2 overflow-x-auto custom-scrollbar"
+        className="bg-[#0D2542] border-b border-[#24476F] px-3 sm:px-6 py-2"
       >
-        <div className="flex items-center gap-2 min-w-max">
+        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto custom-scrollbar">
           {tools.map((t) => {
             const Icon = t.icon;
             const isActive = activeTool === t.id;
@@ -439,13 +447,13 @@ export default function AccessibleMobilityWorkspaceView({
                 type="button"
                 onClick={() => {
                   setActiveTool(t.id);
-                  speakText(isAr ? t.titleAr : t.titleEn);
+                  speakText(isAr ? t.titleAr : L(t.titleEn));
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
+                className={`shrink-0 whitespace-nowrap min-h-[44px] px-3 py-2.5 justify-center rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] ${
                   isActive
                     ? 'bg-[#1769AA] text-white shadow-md'
-                    : 'bg-[#131E2E] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D] border border-[#22354E]'
+                    : 'bg-[#112C4F] text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#17355C] border border-[#24476F]'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#4B9FE1]'}`} />
@@ -457,16 +465,16 @@ export default function AccessibleMobilityWorkspaceView({
       </nav>
 
       {/* ── MAIN CONTENT ── */}
-      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-5 pb-24 space-y-4">
         {/* ═════════════════════════════════════════════════════════════════════
             1. PLACE & SCENE DESCRIPTION TAB
            ═════════════════════════════════════════════════════════════════════ */}
         {activeTool === 'place_desc' && (
           <section
             aria-label={localize(profile.language, 'Place and Landmark Description', 'وصف المكان والمعالم المحيطة')}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#112C4F] border border-[#24476F] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -490,12 +498,12 @@ export default function AccessibleMobilityWorkspaceView({
                       setVisibilityQuality(v);
                       setPlaceAnalysis(analyzePlaceEnvironment(sceneInputText, v));
                     }}
-                    className="min-h-[44px] px-3 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-xs text-[#F8FAFC]"
+                    className="min-h-[44px] px-3 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   >
-                    <option value="clear">{isAr ? 'رؤية واضحة' : 'Clear View'}</option>
-                    <option value="glare">{isAr ? 'وهج / انعكاس ضوء' : 'Direct Glare'}</option>
-                    <option value="low_light">{isAr ? 'إضاءة خافتة' : 'Low Light'}</option>
-                    <option value="partially_obstructed">{isAr ? 'حجب جزئي للرؤية' : 'Partially Obstructed'}</option>
+                    <option value="clear">{isAr ? 'رؤية واضحة' : L('Clear View')}</option>
+                    <option value="glare">{isAr ? 'وهج / انعكاس ضوء' : L('Direct Glare')}</option>
+                    <option value="low_light">{isAr ? 'إضاءة خافتة' : L('Low Light')}</option>
+                    <option value="partially_obstructed">{isAr ? 'حجب جزئي للرؤية' : L('Partially Obstructed')}</option>
                   </select>
                 </div>
               </div>
@@ -504,7 +512,7 @@ export default function AccessibleMobilityWorkspaceView({
               <div
                 role="region"
                 aria-label={localize(profile.language, 'Scene summary', 'ملخص المشهد')}
-                className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-2"
+                className="p-4 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-2"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-[#4B9FE1] uppercase">
@@ -520,17 +528,17 @@ export default function AccessibleMobilityWorkspaceView({
                   </button>
                 </div>
                 <p className="text-sm text-[#F8FAFC] leading-relaxed">
-                  {isAr ? placeAnalysis.overviewAr : placeAnalysis.overviewEn}
+                  {isAr ? placeAnalysis.overviewAr : L(placeAnalysis.overviewEn)}
                 </p>
                 {placeAnalysis.uncertaintyNotesAr && (
                   <p className="text-xs text-amber-400 font-bold">
-                    {isAr ? placeAnalysis.uncertaintyNotesAr : placeAnalysis.uncertaintyNotesEn}
+                    {isAr ? placeAnalysis.uncertaintyNotesAr : L(placeAnalysis.uncertaintyNotesEn)}
                   </p>
                 )}
               </div>
 
               {/* Detected Landmarks Grid */}
-              <div className="space-y-3 pt-2 border-t border-[#22354E]">
+              <div className="space-y-3 pt-2 border-t border-[#24476F]">
                 <h3 className="text-xs font-bold text-[#94A3B8] uppercase">
                   {localize(profile.language, 'Identified Orientation Landmarks', 'المعالم التي تم رصدها واتجاهاتها')}
                 </h3>
@@ -538,27 +546,27 @@ export default function AccessibleMobilityWorkspaceView({
                   {placeAnalysis.landmarks.map((lm) => (
                     <article
                       key={lm.id}
-                      className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-2 hover:border-[#1769AA]/50 transition-all"
+                      className="p-4 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-2 hover:border-[#1769AA]/50 transition-all"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm text-[#F8FAFC]">
-                          {isAr ? lm.labelAr : lm.labelEn}
+                          {isAr ? lm.labelAr : L(lm.labelEn)}
                         </span>
-                        <span className="text-[11px] font-bold text-[#4B9FE1] bg-[#1769AA]/15 px-2.5 py-0.5 rounded-full border border-[#1769AA]/30">
-                          {isAr ? lm.positionTextAr : lm.positionTextEn}
+                        <span className="text-xs font-bold text-[#4B9FE1] bg-[#1769AA]/15 px-2.5 py-0.5 rounded-full border border-[#1769AA]/30">
+                          {isAr ? lm.positionTextAr : L(lm.positionTextEn)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
                         <span>{localize(profile.language, 'Distance:', 'المسافة النوعية:')}</span>
                         <span className="text-[#CBD5E1] font-semibold">
                           {lm.distanceTier === 'near'
-                            ? (isAr ? 'قريب منك' : 'Near')
-                            : (isAr ? 'في المسافة المتوسطة' : 'Mid-ground')}
+                            ? (isAr ? 'قريب منك' : L('Near'))
+                            : (isAr ? 'في المسافة المتوسطة' : L('Mid-ground'))}
                         </span>
                       </div>
                       {lm.accessibilityNotesAr && (
                         <p className="text-xs text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
-                          {isAr ? lm.accessibilityNotesAr : lm.accessibilityNotesEn}
+                          {isAr ? lm.accessibilityNotesAr : L(lm.accessibilityNotesEn)}
                         </p>
                       )}
                     </article>
@@ -567,7 +575,7 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Conversational Follow-up Q&A */}
-              <div className="p-4 rounded-xl bg-[#1A283D]/60 border border-[#22354E] space-y-3 pt-4">
+              <div className="p-4 rounded-xl bg-[#17355C]/60 border border-[#24476F] space-y-3 pt-4">
                 <span className="text-xs font-bold text-[#F8FAFC] flex items-center gap-1.5">
                   <HelpCircle className="w-4 h-4 text-[#4B9FE1]" />
                   <span>{localize(profile.language, 'Ask a follow-up question about this place:', 'اسأل سؤالاً توضيحياً عن هذا المكان:')}</span>
@@ -583,9 +591,9 @@ export default function AccessibleMobilityWorkspaceView({
                     placeholder={
                       isAr
                         ? 'مثال: "أين مكتب الاستقبال؟" أو "هل يوجد درج على يميني؟"'
-                        : 'e.g. "Where is the counter?" or "Are there stairs near me?"'
+                        : L('e.g. "Where is the counter?" or "Are there stairs near me?"')
                     }
-                    className="flex-1 min-h-[44px] px-4 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-xs text-[#F8FAFC]"
+                    className="flex-1 min-h-[44px] px-4 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   />
                   <button
                     type="button"
@@ -597,7 +605,7 @@ export default function AccessibleMobilityWorkspaceView({
                 </div>
 
                 {followUpAnswer && (
-                  <div role="status" className="p-3 rounded-lg bg-[#061A33] border border-[#22354E] text-xs text-[#CBD5E1] space-y-1">
+                  <div role="status" className="p-3 rounded-lg bg-[#0A2342] border border-[#24476F] text-xs text-[#CBD5E1] space-y-1">
                     <span className="font-bold text-emerald-400 block">
                       {localize(profile.language, 'Assistant Answer:', 'إجابة المساعد:')}
                     </span>
@@ -615,9 +623,9 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'sign_reader' && (
           <section
             aria-label={localize(profile.language, 'Signs and Direction Reader', 'قارئ اللافتات واللوحات')}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#112C4F] border border-[#24476F] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -635,7 +643,7 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Sign Input Box */}
-              <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#22354E]">
+              <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#24476F]">
                 <input
                   type="text"
                   value={signInputText}
@@ -643,9 +651,9 @@ export default function AccessibleMobilityWorkspaceView({
                   placeholder={
                     isAr
                       ? 'أدخل النص المقروء من اللافتة (مثال: "قاعة 304" أو "مخرج طوارئ ←" أو "الدور الثاني")'
-                      : 'Enter sign text (e.g. "Room 304", "Emergency Exit ->", or "Floor 2")'
+                      : L('Enter sign text (e.g. "Room 304", "Emergency Exit ->", or "Floor 2")')
                   }
-                  className="flex-1 min-h-[44px] px-4 py-2.5 bg-[#061A33] border border-[#22354E] rounded-xl text-sm text-[#F8FAFC]"
+                  className="flex-1 min-h-[44px] px-4 py-2.5 bg-[#0A2342] border border-[#24476F] rounded-xl text-sm text-[#F8FAFC]"
                 />
                 <button
                   type="button"
@@ -653,7 +661,7 @@ export default function AccessibleMobilityWorkspaceView({
                     const res = parseDirectionalSign(signInputText);
                     setParsedSign(res);
                     toast.success(localize(profile.language, 'Sign parsed', 'تم فحص اللافتة'));
-                    speakText(isAr ? res.inferredDirectionGuidanceAr : res.inferredDirectionGuidanceEn);
+                    speakText(isAr ? res.inferredDirectionGuidanceAr : L(res.inferredDirectionGuidanceEn));
                   }}
                   className="min-h-[44px] px-5 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
                 >
@@ -664,16 +672,16 @@ export default function AccessibleMobilityWorkspaceView({
               {/* Analysis Result Display */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 {/* 1. Verbatim Detected Text Card */}
-                <div className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-2">
+                <div className="p-4 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
                       {localize(profile.language, 'Verbatim Detected Text (OCR)', 'النص المكتوب على اللافتة حرفياً')}
                     </span>
-                    <span className="text-[10px] font-bold text-[#94A3B8] bg-[#1A283D] px-2 py-0.5 rounded">
+                    <span className="text-xs font-bold text-[#94A3B8] bg-[#17355C] px-2 py-0.5 rounded">
                       {parsedSign.signType}
                     </span>
                   </div>
-                  <p className="text-xl font-black text-[#F8FAFC] tracking-tight p-3 bg-[#131E2E] rounded-lg border border-[#22354E]">
+                  <p className="text-xl font-black text-[#F8FAFC] tracking-tight p-3 bg-[#112C4F] rounded-lg border border-[#24476F]">
                     {parsedSign.rawDetectedText}
                   </p>
                   <p className="text-xs text-[#94A3B8]">
@@ -686,12 +694,12 @@ export default function AccessibleMobilityWorkspaceView({
                 </div>
 
                 {/* 2. Inferred Direction Guidance Card */}
-                <div className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-2">
+                <div className="p-4 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-2">
                   <span className="text-xs font-bold text-[#4B9FE1] uppercase tracking-wide">
                     {localize(profile.language, 'Directional Guidance & Caveats', 'الإرشادات والتنبيهات الاتجاهية المستنتجة')}
                   </span>
-                  <div className="p-3 bg-[#131E2E] rounded-lg border border-[#22354E] text-xs text-[#CBD5E1] leading-relaxed">
-                    {isAr ? parsedSign.inferredDirectionGuidanceAr : parsedSign.inferredDirectionGuidanceEn}
+                  <div className="p-3 bg-[#112C4F] rounded-lg border border-[#24476F] text-xs text-[#CBD5E1] leading-relaxed">
+                    {isAr ? parsedSign.inferredDirectionGuidanceAr : L(parsedSign.inferredDirectionGuidanceEn)}
                   </div>
                   <p className="text-xs text-amber-300/90 font-medium">
                     {localize(
@@ -712,9 +720,9 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'entrance_door' && (
           <section
             aria-label={localize(profile.language, 'Entrance and Door Assistance', 'مرشد المداخل والأبواب')}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#112C4F] border border-[#24476F] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -732,7 +740,7 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Door Configuration */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#22354E]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#24476F]">
                 <div>
                   <label className="block text-xs font-bold text-[#94A3B8] mb-1">
                     {localize(profile.language, 'Observed Door / Entrance Type', 'نوع الباب / المدخل المرصود')}
@@ -742,7 +750,7 @@ export default function AccessibleMobilityWorkspaceView({
                     value={doorTypeInput}
                     onChange={(e) => setDoorTypeInput(e.target.value)}
                     aria-label={localize(profile.language, 'Observed Door / Entrance Type', 'نوع الباب / المدخل المرصود')}
-                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-xs text-[#F8FAFC]"
+                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#0A2342] border border-[#24476F] text-xs text-[#F8FAFC]"
                   />
                 </div>
                 <div>
@@ -756,7 +764,7 @@ export default function AccessibleMobilityWorkspaceView({
                       setDoorClockPos(pos);
                       setDoorwayResult(evaluateDoorwayAssistance(doorTypeInput, pos, false));
                     }}
-                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#22354E] text-xs text-[#F8FAFC]"
+                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#0A2342] border border-[#24476F] text-xs text-[#F8FAFC]"
                   >
                     <option value="12_oclock">{formatClockPosition('12_oclock', langKey)}</option>
                     <option value="1_oclock">{formatClockPosition('1_oclock', langKey)}</option>
@@ -770,25 +778,25 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Door Result Card */}
-              <div className="p-5 rounded-2xl bg-[#061A33] border-2 border-[#1769AA]/50 space-y-3 shadow-md">
+              <div className="p-5 rounded-2xl bg-[#0A2342] border-2 border-[#1769AA]/50 space-y-3 shadow-md">
                 <div className="flex items-center justify-between">
                   <h3 className="font-black text-lg text-[#F8FAFC]">{doorwayResult.labelAr}</h3>
                   <span className="text-xs font-bold text-[#4B9FE1] bg-[#1769AA]/20 px-3 py-1 rounded-full border border-[#1769AA]/40">
-                    {isAr ? doorwayResult.relativeOrientationAr : doorwayResult.relativeOrientationEn}
+                    {isAr ? doorwayResult.relativeOrientationAr : L(doorwayResult.relativeOrientationEn)}
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#CBD5E1] space-y-1">
+                <div className="p-3.5 rounded-xl bg-[#112C4F] border border-[#24476F] text-xs text-[#CBD5E1] space-y-1">
                   <span className="font-bold text-amber-400 block">
                     {localize(profile.language, 'Accessibility Feature Verification:', 'حالة فحص ميزات الإتاحة:')}
                   </span>
                   <p className="leading-relaxed">
-                    {isAr ? doorwayResult.accessibilityStateAr : doorwayResult.accessibilityStateEn}
+                    {isAr ? doorwayResult.accessibilityStateAr : L(doorwayResult.accessibilityStateEn)}
                   </p>
                 </div>
 
                 <p className="text-xs text-amber-200 font-bold bg-amber-500/10 p-3 rounded-xl border border-amber-500/30">
-                  {isAr ? doorwayResult.spokenWarningAr : doorwayResult.spokenWarningEn}
+                  {isAr ? doorwayResult.spokenWarningAr : L(doorwayResult.spokenWarningEn)}
                 </p>
               </div>
             </div>
@@ -801,9 +809,9 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'transit_assistant' && (
           <section
             aria-label={localize(profile.language, 'Public Transport Assistant', 'مساعد وسائل النقل والمواصلات')}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#112C4F] border border-[#24476F] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -821,7 +829,7 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Transit Input Form */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-[#22354E]">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-[#24476F]">
                 <div className="sm:col-span-8">
                   <input
                     type="text"
@@ -830,9 +838,9 @@ export default function AccessibleMobilityWorkspaceView({
                     placeholder={
                       isAr
                         ? 'أدخل لافتة الحافلة (مثال: "أتوبيس 104 — التحرير" أو "خط 25")'
-                        : 'Enter bus sign (e.g. "Bus 104 — Tahrir" or "Route 25")'
+                        : L('Enter bus sign (e.g. "Bus 104 — Tahrir" or "Route 25")')
                     }
-                    className="w-full min-h-[44px] px-4 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-xs text-[#F8FAFC]"
+                    className="w-full min-h-[44px] px-4 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   />
                 </div>
                 <div className="sm:col-span-4 flex gap-2">
@@ -843,17 +851,17 @@ export default function AccessibleMobilityWorkspaceView({
                       setTransitConfidence(c);
                       setTransitResult(parseTransitSign(transitSignInput, c));
                     }}
-                    className="flex-1 min-h-[44px] px-2 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-xs text-[#F8FAFC]"
+                    className="flex-1 min-h-[44px] px-2 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   >
-                    <option value={0.95}>{isAr ? 'وضوح عالي (95%)' : 'High Clarity (95%)'}</option>
-                    <option value={0.7}>{isAr ? 'وضوح متوسط/ضبابي (70%)' : 'Blurry/Uncertain (70%)'}</option>
+                    <option value={0.95}>{isAr ? 'وضوح عالي (95%)' : L('High Clarity (95%)')}</option>
+                    <option value={0.7}>{isAr ? 'وضوح متوسط/ضبابي (70%)' : L('Blurry/Uncertain (70%)')}</option>
                   </select>
                   <button
                     type="button"
                     onClick={() => {
                       const res = parseTransitSign(transitSignInput, transitConfidence);
                       setTransitResult(res);
-                      speakText(isAr ? res.spokenTextAr : res.spokenTextEn);
+                      speakText(isAr ? res.spokenTextAr : L(res.spokenTextEn));
                     }}
                     className="min-h-[44px] px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
                   >
@@ -863,12 +871,12 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Recognition Result Card */}
-              <div className="p-5 rounded-2xl bg-[#061A33] border-2 border-[#1769AA]/50 space-y-3 shadow-md">
+              <div className="p-5 rounded-2xl bg-[#0A2342] border-2 border-[#1769AA]/50 space-y-3 shadow-md">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-[#F8FAFC]">
                       {transitResult.routeNumber
-                        ? `${isAr ? 'خط رقم' : 'Route'}: ${transitResult.routeNumber}`
+                        ? `${isAr ? 'خط رقم' : L('Route')}: ${transitResult.routeNumber}`
                         : localize(profile.language, 'Route unverified', 'الرقم غير محدد')}
                     </span>
                     {transitResult.destinationDetected && (
@@ -878,25 +886,25 @@ export default function AccessibleMobilityWorkspaceView({
                     )}
                   </div>
                   {transitResult.isUncertain ? (
-                    <span className="text-[11px] font-bold text-amber-400 bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1">
+                    <span className="text-xs font-bold text-amber-400 bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1">
                       <AlertTriangle className="w-3.5 h-3.5" />
                       {localize(profile.language, 'Uncertain Match', 'مطابقة غير مؤكدة')}
                     </span>
                   ) : (
-                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
                       <Check className="w-3.5 h-3.5" />
                       {localize(profile.language, 'Clear Sign', 'لافتة واضحة')}
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-[#CBD5E1] leading-relaxed bg-[#131E2E] p-3.5 rounded-xl border border-[#22354E]">
-                  {isAr ? transitResult.guidanceTextAr : transitResult.guidanceTextEn}
+                <p className="text-xs text-[#CBD5E1] leading-relaxed bg-[#112C4F] p-3.5 rounded-xl border border-[#24476F]">
+                  {isAr ? transitResult.guidanceTextAr : L(transitResult.guidanceTextEn)}
                 </p>
 
                 {/* Telemetry disclosure */}
-                <div className="p-3 rounded-xl bg-[#1A283D] border border-[#22354E] text-xs text-[#94A3B8]">
-                  <p>{isAr ? transitResult.telemetryNoticeAr : transitResult.telemetryNoticeEn}</p>
+                <div className="p-3 rounded-xl bg-[#17355C] border border-[#24476F] text-xs text-[#94A3B8]">
+                  <p>{isAr ? transitResult.telemetryNoticeAr : L(transitResult.telemetryNoticeEn)}</p>
                 </div>
               </div>
             </div>
@@ -909,9 +917,9 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'places_directory' && (
           <section
             aria-label={localize(profile.language, 'Accessible Places Directory', 'دليل الأماكن والخدمات المهيأة')}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#112C4F] border border-[#24476F] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -929,7 +937,7 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Search & Category Filter Bar */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-[#22354E]">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-[#24476F]">
                 <div className="flex-1 relative">
                   <Search className="w-4 h-4 text-[#64748B] absolute top-3.5 start-3" />
                   <input
@@ -937,19 +945,19 @@ export default function AccessibleMobilityWorkspaceView({
                     value={directorySearch}
                     onChange={(e) => setDirectorySearch(e.target.value)}
                     placeholder={localize(profile.language, 'Search verified places...', 'بحث في الأماكن والمنشآت الموثقة...')}
-                    className="w-full min-h-[44px] ps-9 pe-4 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-xs text-[#F8FAFC]"
+                    className="w-full min-h-[44px] ps-9 pe-4 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   />
                 </div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="min-h-[44px] px-3 py-2 bg-[#061A33] border border-[#22354E] rounded-xl text-xs text-[#F8FAFC]"
+                  className="min-h-[44px] px-3 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                 >
-                  <option value="all">{isAr ? 'كافة الفئات' : 'All Categories'}</option>
-                  <option value="university">{isAr ? 'جامعات وتعليم' : 'University'}</option>
-                  <option value="transit">{isAr ? 'محطات ومواصلات' : 'Transit'}</option>
-                  <option value="library">{isAr ? 'مكتبات وبرايل' : 'Libraries'}</option>
-                  <option value="medical">{isAr ? 'مستشفيات ورعاية' : 'Medical'}</option>
+                  <option value="all">{isAr ? 'كافة الفئات' : L('All Categories')}</option>
+                  <option value="university">{isAr ? 'جامعات وتعليم' : L('University')}</option>
+                  <option value="transit">{isAr ? 'محطات ومواصلات' : L('Transit')}</option>
+                  <option value="library">{isAr ? 'مكتبات وبرايل' : L('Libraries')}</option>
+                  <option value="medical">{isAr ? 'مستشفيات ورعاية' : L('Medical')}</option>
                 </select>
               </div>
 
@@ -958,25 +966,25 @@ export default function AccessibleMobilityWorkspaceView({
                 {filteredPlaces.map((place) => (
                   <article
                     key={place.id}
-                    className="p-5 rounded-2xl bg-[#061A33] border border-[#22354E] hover:border-[#1769AA]/60 transition-all space-y-3"
+                    className="p-5 rounded-2xl bg-[#0A2342] border border-[#24476F] hover:border-[#1769AA]/60 transition-all space-y-3"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <h3 className="font-bold text-base text-[#F8FAFC]">
-                        {isAr ? place.nameAr : place.nameEn}
+                        {isAr ? place.nameAr : L(place.nameEn)}
                       </h3>
-                      <span className="text-[10px] font-bold uppercase text-[#4B9FE1] bg-[#1A283D] px-2.5 py-1 rounded-full border border-[#22354E] self-start sm:self-auto">
+                      <span className="text-xs font-bold uppercase text-[#4B9FE1] bg-[#17355C] px-2.5 py-1 rounded-full border border-[#24476F] self-start sm:self-auto">
                         {place.category}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
                       <MapPin className="w-3.5 h-3.5 text-[#1769AA] shrink-0" />
-                      <span>{isAr ? place.addressAr : place.addressEn}</span>
+                      <span>{isAr ? place.addressAr : L(place.addressEn)}</span>
                     </div>
 
                     {/* Features checklist */}
-                    <div className="p-3 rounded-xl bg-[#131E2E] border border-[#22354E] space-y-1.5">
-                      <span className="text-[11px] font-bold text-emerald-400 block">
+                    <div className="p-3 rounded-xl bg-[#112C4F] border border-[#24476F] space-y-1.5">
+                      <span className="text-xs font-bold text-emerald-400 block">
                         {localize(profile.language, 'Documented Accessibility Features:', 'مواصفات التيسير والإتاحة الموثقة:')}
                       </span>
                       <ul className="space-y-1 text-xs text-[#CBD5E1]">
@@ -990,7 +998,7 @@ export default function AccessibleMobilityWorkspaceView({
                     </div>
 
                     {/* Provenance & Action Footer */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 text-[11px] text-[#64748B] border-t border-[#22354E]">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 text-xs text-[#64748B] border-t border-[#24476F]">
                       <div>
                         <span>{localize(profile.language, 'Source: ', 'المصدر: ')}</span>
                         <span className="text-[#94A3B8] font-semibold">{place.verifiedSource}</span>
@@ -1006,7 +1014,7 @@ export default function AccessibleMobilityWorkspaceView({
                           )}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold text-xs flex items-center gap-1.5"
+                          className="min-h-[44px] px-3.5 py-1.5 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold text-xs flex items-center gap-1.5"
                         >
                           <Navigation className="w-3.5 h-3.5" />
                           <span>{localize(profile.language, 'Navigate via Maps', 'توجيه في الخرائط')}</span>
@@ -1027,9 +1035,9 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'gps_nav' && (
           <section
             aria-label={localize(profile.language, 'Navigation and GPS Integration', 'الملاحة وتكامل الخرائط')}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#112C4F] border border-[#24476F] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-[#F8FAFC] flex items-center gap-2">
@@ -1062,7 +1070,7 @@ export default function AccessibleMobilityWorkspaceView({
 
               {/* GPS Telemetry Result */}
               {userCoords && gpsAccuracyMeters !== null && (
-                <div className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-3">
+                <div className="p-4 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emerald-400">
                       {localize(profile.language, 'GPS Telemetry Active', 'إشارة الموقع نشطة')}
@@ -1087,7 +1095,7 @@ export default function AccessibleMobilityWorkspaceView({
               )}
 
               {/* Provider Selection & Launch */}
-              <div className="p-5 rounded-xl bg-[#061A33] border border-[#22354E] space-y-4">
+              <div className="p-5 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-4">
                 <h3 className="text-xs font-bold text-[#F8FAFC]">
                   {localize(profile.language, 'Select Preferred Navigation Provider:', 'اختر تطبيق الملاحة المفضل:')}
                 </h3>
@@ -1106,7 +1114,7 @@ export default function AccessibleMobilityWorkspaceView({
                       className={`min-h-[44px] p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                         selectedNavigationApp === p.id
                           ? 'bg-[#1769AA] text-white border-[#1769AA]'
-                          : 'bg-[#131E2E] text-[#94A3B8] border-[#22354E] hover:text-white'
+                          : 'bg-[#112C4F] text-[#94A3B8] border-[#24476F] hover:text-white'
                       }`}
                     >
                       {p.label}
@@ -1114,7 +1122,7 @@ export default function AccessibleMobilityWorkspaceView({
                   ))}
                 </div>
 
-                <p className="text-[11px] text-[#64748B] leading-relaxed">
+                <p className="text-xs text-[#64748B] leading-relaxed">
                   {localize(
                     profile.language,
                     'Rafiqi passes your chosen destination to your device\'s tested navigation client for full turn-by-turn voice guidance.',
@@ -1132,9 +1140,9 @@ export default function AccessibleMobilityWorkspaceView({
         {activeTool === 'indoor_boundary' && (
           <section
             aria-label={localize(profile.language, 'Indoor Navigation Technical Boundary', 'حدود الملاحة الداخلية')}
-            className="space-y-6"
+            className="space-y-4"
           >
-            <div className="bg-[#131E2E] border border-[#22354E] rounded-2xl p-6 shadow-lg space-y-4">
+            <div className="bg-[#112C4F] border border-[#24476F] rounded-2xl p-6 shadow-lg space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-2xl bg-[#1769AA]/20 text-[#4B9FE1]">
                   <Layers className="w-6 h-6" />
@@ -1150,12 +1158,12 @@ export default function AccessibleMobilityWorkspaceView({
               </div>
 
               {/* Transparent Disclosure */}
-              <div className="p-4 rounded-xl bg-[#061A33] border border-[#22354E] space-y-3 text-xs text-[#CBD5E1]">
+              <div className="p-4 rounded-xl bg-[#0A2342] border border-[#24476F] space-y-3 text-xs text-[#CBD5E1]">
                 <p className="leading-relaxed font-semibold text-amber-200">
-                  {isAr ? indoorBoundary.disclaimerAr : indoorBoundary.disclaimerEn}
+                  {isAr ? indoorBoundary.disclaimerAr : L(indoorBoundary.disclaimerEn)}
                 </p>
 
-                <div className="space-y-2 pt-2 border-t border-[#22354E]">
+                <div className="space-y-2 pt-2 border-t border-[#24476F]">
                   <span className="font-bold text-[#F8FAFC] block">
                     {localize(profile.language, 'Required Physical Infrastructure Standards:', 'معايير البنية التحتية الفيزيائية المطلوبة:')}
                   </span>
@@ -1170,7 +1178,7 @@ export default function AccessibleMobilityWorkspaceView({
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#1A283D] border border-[#22354E] text-xs text-[#94A3B8] leading-relaxed">
+              <div className="p-4 rounded-xl bg-[#17355C] border border-[#24476F] text-xs text-[#94A3B8] leading-relaxed">
                 {localize(
                   profile.language,
                   'Currently operational in Rafiqi: Optical landmark reading, room sign recognition, and qualitative entrance orientation. No simulated or fictional indoor coordinates are presented.',
@@ -1195,7 +1203,7 @@ export default function AccessibleMobilityWorkspaceView({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#131E2E] border-2 border-amber-500 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 text-start"
+              className="bg-[#112C4F] border-2 border-amber-500 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 text-start"
             >
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-400">
@@ -1203,7 +1211,7 @@ export default function AccessibleMobilityWorkspaceView({
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-[#F8FAFC]">
-                    {isAr ? safetyAdvisory.titleAr : safetyAdvisory.titleEn}
+                    {isAr ? safetyAdvisory.titleAr : L(safetyAdvisory.titleEn)}
                   </h3>
                   <span className="text-xs text-amber-400 font-bold">
                     {localize(profile.language, 'Strict Orientation & Mobility Guidelines', 'إرشادات الحركة والتوجه الإلزامية')}
@@ -1220,11 +1228,11 @@ export default function AccessibleMobilityWorkspaceView({
                 ))}
               </ul>
 
-              <div className="p-3.5 rounded-xl bg-[#061A33] border border-amber-500/30 text-xs font-semibold text-amber-200 leading-relaxed">
-                {isAr ? safetyAdvisory.fullAdvisoryAr : safetyAdvisory.fullAdvisoryEn}
+              <div className="p-3.5 rounded-xl bg-[#0A2342] border border-amber-500/30 text-xs font-semibold text-amber-200 leading-relaxed">
+                {isAr ? safetyAdvisory.fullAdvisoryAr : L(safetyAdvisory.fullAdvisoryEn)}
               </div>
 
-              <div className="flex justify-end pt-2 border-t border-[#22354E]">
+              <div className="flex justify-end pt-2 border-t border-[#24476F]">
                 <button
                   type="button"
                   onClick={() => setShowSafetyModal(false)}

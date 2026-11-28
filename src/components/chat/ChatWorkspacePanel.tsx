@@ -59,7 +59,7 @@ export default function ChatWorkspacePanel({
   studyMinutes,
   messageCount = 0,
 }: ChatWorkspacePanelProps) {
-  const storageKey = `cognify_workspace_subjects_${profile.uid || 'guest'}`;
+  const storageKey = `rafiqi_workspace_subjects_${profile.uid || 'guest'}`;
 
   const [subjects, setSubjects] = useState<StudySubject[]>(() => {
     try {
@@ -190,7 +190,7 @@ export default function ChatWorkspacePanel({
                 {localize(profile.language, 'Workspace', 'مساحة العمل')}
                 <span className="w-1.5 h-1.5 rounded-full bg-[0A96A5] animate-pulse" />
               </h3>
-              <p className="text-[10px] text-[0A96A5]/80 font-semibold truncate max-w-[120px]">
+              <p className="text-xs text-[0A96A5]/80 font-semibold truncate max-w-[120px]">
                 {profile.faculty || profile.field || 'Curriculum'}
               </p>
             </div>
@@ -225,21 +225,21 @@ export default function ChatWorkspacePanel({
               value={newSubjectName}
               onChange={(e) => setNewSubjectName(e.target.value)}
               placeholder={localize(profile.language, 'Subject name (e.g. Algorithms)', 'اسم المادة (مثل الخوارزميات)')}
-              className="w-full bg-[0D2542] border border-[16395E]/50 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 outline-none focus:border-[0A96A5]"
+              className="w-full bg-[0D2542] border border-[16395E]/50 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[0A96A5]"
               autoFocus
             />
             <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="px-2.5 py-1 text-[11px] text-slate-400 hover:text-white"
+                className="px-2.5 py-1 text-xs text-slate-400 hover:text-white"
               >
                 {localize(profile.language, 'Cancel', 'إلغاء')}
               </button>
               <button
                 type="submit"
                 disabled={!newSubjectName.trim()}
-                className="px-3 py-1 bg-gradient-to-r from-amber-400 via-[0A96A5] to-rose-600 text-slate-950 font-bold rounded-lg text-[11px] disabled:opacity-40 transition-all shadow-md shadow-[16395E]/20"
+                className="px-3 py-1 bg-gradient-to-r from-amber-400 via-[0A96A5] to-rose-600 text-slate-950 font-bold rounded-lg text-xs disabled:opacity-40 transition-all shadow-md shadow-[16395E]/20"
               >
                 {localize(profile.language, 'Add', 'إضافة')}
               </button>
@@ -249,7 +249,7 @@ export default function ChatWorkspacePanel({
 
         {/* Active Focus Modules Section */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400 px-1">
+          <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-400 px-1">
             <span>{localize(profile.language, 'Active Focus Modules', 'الوحدات الدراسية')}</span>
             <span className="font-mono text-[0A96A5]">{subjects.length}</span>
           </div>
@@ -277,7 +277,7 @@ export default function ChatWorkspacePanel({
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[11px] font-mono font-bold text-[0A96A5]">
+                    <span className="text-xs font-mono font-bold text-[0A96A5]">
                       {progress}%
                     </span>
                     {subjects.length > 1 && (
@@ -310,18 +310,18 @@ export default function ChatWorkspacePanel({
       <div className="mt-4 pt-4 border-t border-[16395E]/50">
         <div className="bg-[0A203A]/90 border border-[16395E]/60 rounded-2xl p-3.5 shadow-xl backdrop-blur-xl space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-[0A96A5]" />
               {localize(profile.language, 'Current Study Session', 'جلسة المذاكرة الحالية')}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-black bg-[16395E]/50 text-[0A96A5] border border-[#831843]/60">
+            <span className="px-2 py-0.5 rounded-full text-xs font-mono font-black bg-[16395E]/50 text-[0A96A5] border border-[#831843]/60">
               {studyMinutes}m
             </span>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1 text-center">
             <div className="bg-[0D2542] border border-[16395E]/50 rounded-xl p-2">
-              <div className="text-[9px] font-bold text-slate-400 uppercase">
+              <div className="text-xs font-bold text-slate-400 uppercase">
                 {localize(profile.language, 'Focus', 'التركيز')}
               </div>
               <div className="text-xs font-black text-emerald-400 font-mono mt-0.5">
@@ -330,7 +330,7 @@ export default function ChatWorkspacePanel({
             </div>
 
             <div className="bg-[0D2542] border border-[16395E]/50 rounded-xl p-2">
-              <div className="text-[9px] font-bold text-slate-400 uppercase">
+              <div className="text-xs font-bold text-slate-400 uppercase">
                 {localize(profile.language, 'Pace', 'السرعة')}
               </div>
               <div className="text-xs font-black text-[0A96A5] font-mono mt-0.5">
@@ -339,7 +339,7 @@ export default function ChatWorkspacePanel({
             </div>
 
             <div className="bg-[0D2542] border border-[16395E]/50 rounded-xl p-2">
-              <div className="text-[9px] font-bold text-slate-400 uppercase">
+              <div className="text-xs font-bold text-slate-400 uppercase">
                 {localize(profile.language, 'Mastery', 'الإتقان')}
               </div>
               <div className="text-xs font-black text-amber-300 font-mono mt-0.5">

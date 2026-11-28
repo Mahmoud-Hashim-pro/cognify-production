@@ -12,7 +12,7 @@ export interface VisitorGeo {
   ip?: string | null;
 }
 
-const CACHE_KEY = 'cognify_visitor_geo';
+const CACHE_KEY = 'rafiqi_visitor_geo';
 
 // Common countries list for dashboard selection and display
 export const COMMON_COUNTRIES = [

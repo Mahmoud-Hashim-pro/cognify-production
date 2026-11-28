@@ -594,14 +594,14 @@ export function generateFullSystemBackupJson(
   }
 
   const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `cognify-superadmin-backup-${dateStr}.json`;
+  const filename = `rafiqi-superadmin-backup-${dateStr}.json`;
 
   return { blob, filename, jsonString };
 }
 
 /**
  * Scans localStorage and sessionStorage for expired temp tokens, stale caches
- * (`cognify_cached_*`, temporary drafts older than 7 days) and cleans them up safely
+ * (`rafiqi_cached_*`, temporary drafts older than 7 days) and cleans them up safely
  * without deleting user credentials or preferences.
  */
 export async function cleanStaleSessionsAndCache(): Promise<{
@@ -612,11 +612,11 @@ export async function cleanStaleSessionsAndCache(): Promise<{
   let freedBytesApprox = 0;
 
   const protectedPrefixes = [
-    'cognify_auth_',
-    'cognify_theme',
-    'cognify_language',
-    'cognify_accessibility',
-    'cognify_user_profile',
+    'rafiqi_auth_',
+    'rafiqi_theme',
+    'rafiqi_language',
+    'rafiqi_accessibility',
+    'rafiqi_user_profile',
     'firebase:authUser',
   ];
 
@@ -640,12 +640,12 @@ export async function cleanStaleSessionsAndCache(): Promise<{
         let shouldRemove = false;
 
         // 1. Transient caches and temp keys
-        if (key.startsWith('cognify_cached_') || key.startsWith('cognify_temp_') || key.startsWith('_cognify_stale_')) {
+        if (key.startsWith('rafiqi_cached_') || key.startsWith('rafiqi_temp_') || key.startsWith('_rafiqi_stale_')) {
           shouldRemove = true;
         }
 
         // 2. Drafts older than 7 days
-        if (key.startsWith('cognify_draft_')) {
+        if (key.startsWith('rafiqi_draft_')) {
           const rawVal = storageObj.getItem(key);
           if (rawVal) {
             try {
@@ -668,7 +668,7 @@ export async function cleanStaleSessionsAndCache(): Promise<{
         }
 
         // 3. Expired items with explicit expiresAt property
-        if (!shouldRemove && key.startsWith('cognify_')) {
+        if (!shouldRemove && key.startsWith('rafiqi_')) {
           const rawVal = storageObj.getItem(key);
           if (rawVal) {
             try {

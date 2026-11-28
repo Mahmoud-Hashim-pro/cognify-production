@@ -27,7 +27,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import { generateAdaptiveResponse } from '../services/gemini';
@@ -54,7 +54,7 @@ export default function UnifiedHearingCenter({
 }: UnifiedHearingCenterProps) {
   // Dialect / Language
   const [dialect, setDialect] = useState<Dialect>(() => {
-    if (profile.language === 'English') return 'English';
+    if (profile.language === 'English' || profile.language === 'French') return 'English';
     if (profile.language === 'Arabic') return 'Arabic';
     return 'Egyptian Ammiya';
   });
@@ -68,7 +68,7 @@ export default function UnifiedHearingCenter({
 
   // Helper for dialect-responsive localization
   const loc = useCallback(
-    (en: string, ar: string) => (dialect === 'English' ? en : ar),
+    (en: string, ar: string) => (dialect === 'English' ? L(en) : ar),
     [dialect]
   );
 
@@ -84,7 +84,7 @@ export default function UnifiedHearingCenter({
       ? 'أهلاً بك! اكتب أي نص أو اسأل سؤالاً وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
       : isAr
       ? 'مرحباً بك! اكتب أي نص أو اسأل سؤالاً وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
-      : 'Welcome! Type any text or ask a question and I will explain it in 3D Sign Language and text.'
+      : L('Welcome! Type any text or ask a question and I will explain it in 3D Sign Language and text.')
   );
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
   const [isQuestionVoiceActive, setIsQuestionVoiceActive] = useState<boolean>(false);
@@ -140,7 +140,7 @@ Question: "${q}"`;
           ? 'تمام، فهمت سؤالك وسأشرحه لك بلغة الإشارة.'
           : isAr
           ? 'حسناً، فهمت سؤالك وسأشرحه لك بلغة الإشارة.'
-          : 'Understood, I will explain this in sign language.';
+          : L('Understood, I will explain this in sign language.');
       }
       setAiAnswer(cleanAnswer);
       triggerAvatarSign(cleanAnswer);
@@ -257,7 +257,7 @@ Question: "${q}"`;
       setDetectedSign(
         isAr
           ? 'تم تتبع معالم اليد (التعرف اللحظي قيد التطوير البحثي)'
-          : 'Hand landmarks tracked (Continuous recognition in empirical development)'
+          : L('Hand landmarks tracked (Continuous recognition in empirical development)')
       );
     } else {
       setDetectedSign('');
@@ -388,10 +388,10 @@ Question: "${q}"`;
               onClick={onNavigateBack}
               aria-label={loc('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
               title={loc('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية')}
-              className="min-h-[44px] min-w-[44px] p-2.5 rounded-2xl bg-[#0D2542] hover:bg-[#102D4D] border border-[#12CFE0]/30 hover:border-[#12CFE0] text-[#12CFE0] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12CFE0]"
+              className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA] shrink-0"
             >
               <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-              <span className="text-xs font-bold hidden sm:inline">{loc('Back', 'رجوع')}</span>
+              <span className="text-xs font-bold hidden">{loc('Back', 'رجوع')}</span>
             </button>
           )}
           <div className="w-11 h-11 rounded-2xl bg-[#0D2542] border border-[#12CFE0]/30 text-[#12CFE0] flex items-center justify-center shadow-[0_0_20px_rgba(18,207,224,0.15)] shrink-0">
@@ -417,8 +417,8 @@ Question: "${q}"`;
           className="flex items-center gap-1.5 p-1 rounded-full bg-[#0D2542] border border-[#12CFE0]/20 self-start sm:self-auto shrink-0 shadow-inner"
         >
           {([
-            { id: 'Egyptian Ammiya' as const, labelEn: '🇪🇬 Egyptian', labelAr: 'مصري', icon: true },
-            { id: 'Arabic' as const, labelEn: '🇸🇦 Arabic', labelAr: 'عربي', icon: false },
+            { id: 'Egyptian Ammiya' as const, labelEn: L('🇪🇬 Egyptian'), labelAr: 'مصري', icon: true },
+            { id: 'Arabic' as const, labelEn: L('🇸🇦 Arabic'), labelAr: 'عربي', icon: false },
             { id: 'English' as const, labelEn: 'us EN', labelAr: 'us EN', icon: false },
           ]).map((item) => {
             const isSelected = dialect === item.id;
@@ -466,7 +466,7 @@ Question: "${q}"`;
                 <h2 className="text-sm sm:text-base font-black text-[#F4F7FB] leading-tight">
                   {loc('Smart Sign Language Reading Camera', 'كاميرا قراءة لغة الإشارة الذكية')}
                 </h2>
-                <p className="text-[11px] text-[#A9BDD3] mt-0.5">
+                <p className="text-xs text-[#A9BDD3] mt-0.5">
                   {loc(
                     'Point the camera at the person using sign language or in front of you to begin translation.',
                     'قم بتوجيه الكاميرا نحو الشخص الذي يستخدم لغة الإشارة أو أمامك لبدء الترجمة.'
@@ -558,7 +558,7 @@ Question: "${q}"`;
             {/* Live Detected Sign Banner (Floating at bottom of preview) */}
             {isCameraActive && (
               <div className="absolute bottom-3 inset-x-3 flex items-center justify-between px-3 py-2 rounded-xl backdrop-blur-md bg-[#071B33]/85 border border-[#12CFE0]/30 text-xs shadow-lg z-10">
-                <span className="text-[11px] font-bold text-[#A9BDD3]">
+                <span className="text-xs font-bold text-[#A9BDD3]">
                   {cameraStatus || loc('Tracking Hands…', 'جاري رصد حركة اليدين…')}
                 </span>
                 <span className="font-extrabold text-[#12CFE0] text-xs tracking-wide">
@@ -592,7 +592,7 @@ Question: "${q}"`;
             </div>
 
             {/* Output Box */}
-            <div className="bg-[#071B33] border border-[#12CFE0]/20 rounded-xl p-3.5 min-h-[56px] flex items-center justify-between gap-3 shadow-inner">
+            <div className="bg-[#071B33] border border-[#12CFE0]/20 rounded-xl p-3.5 min-h-[48px] flex items-center justify-between gap-3 shadow-inner">
               <p
                 className={`text-sm sm:text-base font-semibold leading-relaxed ${
                   accumulatedText.trim() ? 'text-[#F4F7FB]' : 'text-[#A9BDD3]/60 font-normal text-xs'
@@ -689,7 +689,7 @@ Question: "${q}"`;
                 <h2 className="text-sm sm:text-base font-black text-[#F4F7FB] leading-tight">
                   {loc('Interactive 3D Avatar', 'الأفاتار ثلاثي الأبعاد التفاعلي')}
                 </h2>
-                <p className="text-[11px] text-[#A9BDD3] mt-0.5">
+                <p className="text-xs text-[#A9BDD3] mt-0.5">
                   {loc(
                     'Type any text or choose translations to render sign language with the avatar.',
                     'اكتب أي نص أو اختر من الترجمات لترجمة الأفاتار إلى لغة الإشارة أو لأسئلتك الأصلي.'
@@ -763,7 +763,7 @@ Question: "${q}"`;
                 {currentSigningWord || avatarWords[0] || loc('Ready', 'مستعد')}
               </span>
             </div>
-            <p className="text-[11px] text-[#A9BDD3] leading-relaxed">
+            <p className="text-xs text-[#A9BDD3] leading-relaxed">
               {loc(
                 'This word is currently being translated into sign language.',
                 'هذه الكلمة يتم ترجمتها الآن إلى لغة الإشارة.'
@@ -817,7 +817,7 @@ Question: "${q}"`;
                   'Type any sentence to translate to sign language or ask a question…',
                   'اكتب أي جملة للترجمة إلى لغة الإشارة أو اسأل سؤالاً...'
                 )}
-                className="w-full bg-[#071B33] border border-[#12CFE0]/25 rounded-xl py-2.5 px-4 text-xs sm:text-sm text-[#F4F7FB] placeholder:text-[#A9BDD3]/60 focus:outline-none focus:border-[#12CFE0] focus:ring-1 focus:ring-[#12CFE0] transition-colors"
+                className="w-full bg-[#071B33] border border-[#12CFE0]/25 rounded-xl py-2.5 px-4 text-xs sm:text-sm text-[#F4F7FB] placeholder:text-[#A9BDD3]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#12CFE0] focus:ring-1 focus:ring-[#12CFE0] transition-colors"
               />
               <button
                 type="button"
@@ -826,7 +826,7 @@ Question: "${q}"`;
                 aria-label={loc('Send for translation', 'إرسال للترجمة')}
                 className={`absolute top-1/2 -translate-y-1/2 ${
                   isAr ? 'left-3' : 'right-3'
-                } p-1 text-[#12CFE0] hover:text-white disabled:opacity-30 transition-colors cursor-pointer focus:outline-none`}
+                } p-1 text-[#12CFE0] hover:text-white disabled:opacity-30 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
               >
                 <Send className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
               </button>

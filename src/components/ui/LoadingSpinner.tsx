@@ -18,8 +18,8 @@ const sizeClasses: Record<SpinnerSize, string> = {
 };
 
 const colorClasses: Record<SpinnerColor, string> = {
-  indigo: 'border-cognify-indigo/20 border-t-cognify-indigo dark:border-cognify-indigo-light/30 dark:border-t-cognify-indigo-light',
-  teal: 'border-cognify-teal/20 border-t-cognify-teal dark:border-cognify-teal/30 dark:border-t-cognify-teal-light',
+  indigo: 'border-rafiqi-indigo/20 border-t-rafiqi-indigo dark:border-rafiqi-indigo-light/30 dark:border-t-rafiqi-indigo-light',
+  teal: 'border-rafiqi-teal/20 border-t-rafiqi-teal dark:border-rafiqi-teal/30 dark:border-t-rafiqi-teal-light',
   white: 'border-white/20 border-t-white',
   current: 'border-current/20 border-t-current',
 };

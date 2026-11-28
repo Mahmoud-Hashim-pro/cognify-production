@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { scoreFeature } from '../lib/featureSearch';
 import { 
   UserProfile, 
   ChatThread 
@@ -10,7 +11,7 @@ import {
   getSectionIconComponent,
   SectionFeatureItem 
 } from '../lib/sections';
-import { isArabicLocale, localize } from '../lib/translations';
+import { isArabicLocale, localize, L, isFrenchActive } from '../lib/translations';
 import { 
   Eye, 
   BookOpen, 
@@ -56,27 +57,27 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   isDarkMode,
 }) => {
   const isAr = isArabicLocale(profile.language);
-  const t = (en: string, ar: string) => (isAr ? ar : en);
+  const t = (en: string, ar: string) => (isAr ? ar : L(en));
 
   const [searchQuery, setSearchQuery] = useState('');
 
   // 1. Time-of-day personalized greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    const name = profile.name || profile.email?.split('@')[0] || (isAr ? 'صديقي' : 'Friend');
+    const name = profile.name || profile.email?.split('@')[0] || (isAr ? 'صديقي' : isFrenchActive() ? 'ami' : 'Friend');
     if (hour < 12) {
-      return isAr ? `صباح الخير، ${name}` : `Good morning, ${name}`;
+      return isAr ? `صباح الخير، ${name}` : isFrenchActive() ? `Bonjour, ${name}` : `Good morning, ${name}`;
     }
     if (hour < 18) {
-      return isAr ? `مساء الخير، ${name}` : `Good afternoon, ${name}`;
+      return isAr ? `مساء الخير، ${name}` : isFrenchActive() ? `Bon après-midi, ${name}` : `Good afternoon, ${name}`;
     }
-    return isAr ? `مساء الخير، ${name}` : `Good evening, ${name}`;
+    return isAr ? `مساء الخير، ${name}` : isFrenchActive() ? `Bonsoir, ${name}` : `Good evening, ${name}`;
   }, [profile.name, profile.email, isAr]);
 
   // 2. Read actual recent reading history (Zero fake data)
   const recentReadingItems = useMemo(() => {
     try {
-      const saved = localStorage.getItem('cognify_recent_books');
+      const saved = localStorage.getItem('rafiqi_recent_books');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, 3);
@@ -170,10 +171,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       iconName: string;
       targetTab?: string;
       targetView?: string;
+      score?: number;
     }> = [];
 
     PRODUCT_SECTIONS.forEach((sec) => {
-      const secTitle = isAr ? sec.titleAr : sec.titleEn;
+      const secTitle = isAr ? sec.titleAr : L(sec.titleEn);
       const secMatch = 
         sec.titleEn.toLowerCase().includes(q) ||
         sec.titleAr.toLowerCase().includes(q) ||
@@ -186,27 +188,22 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           sectionId: sec.id,
           sectionTitle: secTitle,
           title: secTitle,
-          desc: isAr ? sec.shortExplanationAr : sec.shortExplanationEn,
+          desc: isAr ? sec.shortExplanationAr : L(sec.shortExplanationEn),
           iconName: sec.iconName,
         });
       }
 
       sec.features.forEach((feat) => {
-        const featMatch = 
-          feat.titleEn.toLowerCase().includes(q) ||
-          feat.titleAr.toLowerCase().includes(q) ||
-          feat.descEn.toLowerCase().includes(q) ||
-          feat.descAr.toLowerCase().includes(q) ||
-          feat.tagsEn.some((tag) => tag.toLowerCase().includes(q)) ||
-          feat.tagsAr.some((tag) => tag.toLowerCase().includes(q));
+        const featScore = scoreFeature(feat, q);
 
-        if (featMatch) {
+        if (featScore > 0) {
           matches.push({
+            score: featScore,
             type: 'feature',
             sectionId: sec.id,
             sectionTitle: secTitle,
-            title: isAr ? feat.titleAr : feat.titleEn,
-            desc: isAr ? feat.descAr : feat.descEn,
+            title: isAr ? feat.titleAr : L(feat.titleEn),
+            desc: isAr ? feat.descAr : L(feat.descEn),
             iconName: feat.iconName,
             targetTab: feat.targetTab,
             targetView: feat.targetView,
@@ -215,7 +212,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       });
     });
 
-    return matches.slice(0, 6);
+    const secs = matches.filter((m) => m.type === 'section');
+    const feats = matches.filter((m) => m.type === 'feature').sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    return [...feats, ...secs].slice(0, 8);
   }, [searchQuery, isAr]);
 
   // Recommended tools customized by authentic user preferences (Phase 3 invariant)
@@ -333,7 +332,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
   return (
     <div 
-      className="max-w-7xl mx-auto space-y-6 pb-12 text-start select-none"
+      className="max-w-6xl mx-auto space-y-4 pb-24 text-start select-none"
       aria-label={t('Rafiqi Home Dashboard', 'لوحة التحكم الرئيسية لرفيقي')}
     >
       {/* ── A. COMPACT WELCOME AREA (Replaces Oversized Hero) ── */}
@@ -341,7 +340,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         aria-label={t('Personal Welcome', 'الترحيب الشخصي')}
         className={`rounded-2xl border p-4 sm:p-5 shadow-xs transition-colors ${
           isDarkMode 
-            ? 'bg-[#131E2E] border-[#22354E]' 
+            ? 'bg-[#112C4F] border-[#24476F]' 
             : 'bg-white border-slate-200'
         }`}
       >
@@ -360,7 +359,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </div>
 
           {/* Right: Exactly ONE Primary Action: Explore Your Tools */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="hidden flex items-center gap-2.5 shrink-0">
             <button
               type="button"
               onClick={handleScrollToSections}
@@ -375,7 +374,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
 
         {/* Global Compact Tool Search Bar */}
-        <div className="relative mt-3.5 pt-3 border-t border-slate-200 dark:border-[#22354E]/80">
+        <div className="relative mt-3.5 pt-3 border-t border-slate-200 dark:border-[#24476F]/80">
           <div className="relative">
             <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
               <Search className="w-4 h-4" aria-hidden="true" />
@@ -384,15 +383,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t(
-                'Search tools across the 6 sections (e.g. Visual Assistant, OCR, Signs, Books)...',
-                'ابحث في أدوات الأقسام الستة (مثل المساعد البصري، قراءة النصوص، قاموس الإشارة)...'
-              )}
-              className={`w-full min-h-[42px] text-xs font-medium ps-9 pe-10 py-2 rounded-xl border ${
+              placeholder={t('Search any tool', 'ابحث عن أي أداة')}
+              className={`w-full min-h-[48px] text-sm font-medium ps-9 pe-10 py-2 rounded-xl border ${
                 isDarkMode 
-                  ? 'bg-[#0B1523] border-[#22354E] text-white placeholder-slate-400 focus:border-[#1769AA]' 
+                  ? 'bg-[#0E2745] border-[#24476F] text-white placeholder-slate-400 focus:border-[#1769AA]' 
                   : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#1769AA]'
-              } transition-all outline-none focus:ring-2 focus:ring-[#1769AA]/30`}
+              } transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/30`}
               aria-label={t('Global Tool Search', 'البحث في الأدوات والخدمات')}
             />
             {searchQuery && (
@@ -410,7 +406,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Interactive Search Results Dropdown */}
           {searchQuery.trim().length > 0 && (
             <div className={`mt-2 rounded-xl border ${
-              isDarkMode ? 'bg-[#0B1523] border-[#22354E]' : 'bg-white border-slate-200'
+              isDarkMode ? 'bg-[#0E2745] border-[#24476F]' : 'bg-white border-slate-200'
             } shadow-lg p-2 space-y-1 z-20`}>
               {searchResults.length > 0 ? (
                 searchResults.map((item, idx) => (
@@ -429,18 +425,18 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                         onSelectSection(item.sectionId);
                       }
                     }}
-                    className={`w-full min-h-[40px] px-3 py-1.5 rounded-lg text-start flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer ${
-                      isDarkMode ? 'hover:bg-[#1A283D] text-slate-200' : 'hover:bg-slate-100 text-slate-800'
+                    className={`w-full min-h-[44px] px-3 py-1.5 rounded-lg text-start flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer ${
+                      isDarkMode ? 'hover:bg-[#17355C] text-slate-200' : 'hover:bg-slate-100 text-slate-800'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-slate-900 dark:text-white truncate">{item.title}</span>
-                        <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] shrink-0">
+                        <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] shrink-0">
                           {item.sectionTitle}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{item.desc}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{item.desc}</p>
                     </div>
                     <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} />
                   </button>
@@ -452,6 +448,96 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               )}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ── C. QUICK ACTIONS (Max 2-3 Useful, Compact Shortcuts) ── */}
+      <section 
+        aria-label={t('Quick Access', 'الوصول السريع للأدوات')}
+        className="space-y-2.5"
+      >
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" aria-hidden="true" />
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
+              {t('Quick Access', 'الوصول السريع')}
+            </h2>
+          </div>
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8]">
+            {t('Direct shortcuts to primary section tools', 'روابط مباشرة لأهم أدوات الأقسام')}
+          </span>
+        </div>
+
+        {/* Compact 3-action row with standardized touch targets */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Action 1: Visual Assistant inside Section 1 (See & Understand) */}
+          <button
+            type="button"
+            onClick={() => onSelectTab('vision')}
+            className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
+              isDarkMode 
+                ? 'border-[#24476F] bg-[#112C4F] hover:border-[#1769AA] text-white' 
+                : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
+            } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
+            aria-label={t('Launch Visual Assistant (Section 1)', 'تشغيل المساعد البصري (القسم 1)')}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
+                <Eye className="w-4 h-4" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 text-start">
+                <span className="line-clamp-2 break-words block leading-tight">{t('Launch Visual Assistant', 'تشغيل المساعد البصري')}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('See & Understand', 'الرؤية والفهم')}</span>
+              </div>
+            </div>
+            <ArrowRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
+
+          {/* Action 2: Live Captions inside Section 5 (Communicate) */}
+          <button
+            type="button"
+            onClick={() => onSelectTab('deaf')}
+            className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
+              isDarkMode 
+                ? 'border-[#24476F] bg-[#112C4F] hover:border-[#1769AA] text-white' 
+                : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
+            } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
+            aria-label={t('Live Captions (Section 5)', 'التفريغ الصوتي المباشر (القسم 5)')}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
+                <Mic className="w-4 h-4" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 text-start">
+                <span className="line-clamp-2 break-words block leading-tight">{t('Live Captions', 'التفريغ الصوتي المباشر')}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('Communicate', 'التواصل والتعبير')}</span>
+              </div>
+            </div>
+            <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
+
+          {/* Action 3: Accessibility Passport inside Section 6 (Personalize) */}
+          <button
+            type="button"
+            onClick={onOpenPassport}
+            className={`hidden min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
+              isDarkMode 
+                ? 'border-[#24476F] bg-[#112C4F] hover:border-[#1769AA] text-white' 
+                : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
+            } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
+            aria-label={t('Accessibility Passport (Section 6)', 'جواز التسهيلات الموحد (القسم 6)')}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 text-start">
+                <span className="line-clamp-2 break-words block leading-tight">{t('Accessibility Passport', 'جواز التسهيلات الموحد')}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">{t('Personalize', 'التخصيص')}</span>
+              </div>
+            </div>
+            <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
         </div>
       </section>
 
@@ -467,7 +553,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <Layers className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" aria-hidden="true" />
               <span>{t('The Six Official Product Sections', 'أقسام رفيقي الستة الرسمية')}</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5">
+            <p className="hidden text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5">
               {t(
                 'Explore the complete assistive ecosystem. Each section holds a specialized suite of tools.',
                 'استكشف المنظومة الكاملة. يتضمن كل قسم مجموعة أدوات متخصصة لدعمك في مختلف المهام.'
@@ -492,20 +578,20 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                     onSelectSection(sec.id);
                   }
                 }}
-                className={`group p-4 sm:p-4.5 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-3 shadow-xs ${
+                className={`group p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2 shadow-xs ${
                   isDarkMode 
-                    ? 'bg-[#131E2E] border-[#22354E] hover:border-[#1769AA]' 
+                    ? 'bg-[#112C4F] border-[#24476F] hover:border-[#1769AA]' 
                     : 'bg-white border-slate-200 hover:border-[#1769AA]'
-                } hover:-translate-y-0.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] min-h-[160px]`}
-                aria-label={isAr ? sec.titleAr : sec.titleEn}
+                } hover:-translate-y-0.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] min-h-[64px]`}
+                aria-label={isAr ? sec.titleAr : L(sec.titleEn)}
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
+                    <span className="hidden text-xs font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
                       {t(`Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
                     </span>
-                    <span className="text-[10px] text-slate-500 dark:text-[#94A3B8] font-semibold">
-                      {t(`${sec.features.length} tools`, `${sec.features.length} أدوات`)}
+                    <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-semibold">
+                      {(isFrenchActive() && !isAr ? `${sec.features.length} outils` : t(`${sec.features.length} tools`, `${sec.features.length} أدوات`))}
                     </span>
                   </div>
 
@@ -514,117 +600,27 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       <SecIcon className="w-4.5 h-4.5" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors truncate">
-                        {isAr ? sec.titleAr : sec.titleEn}
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#1769AA] dark:group-hover:text-[#4B9FE1] transition-colors line-clamp-2 break-words">
+                        {isAr ? sec.titleAr : L(sec.titleEn)}
                       </h3>
-                      <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] truncate">
-                        {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
+                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] hidden">
+                        {isAr ? sec.shortExplanationAr : L(sec.shortExplanationEn)}
                       </p>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed line-clamp-2">
-                    {isAr ? sec.shortExplanationAr : sec.shortExplanationEn}
+                  <p className="hidden text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed line-clamp-2">
+                    {isAr ? sec.shortExplanationAr : L(sec.shortExplanationEn)}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-200 dark:border-[#22354E] flex items-center justify-between text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
+                <div className="hidden pt-2 border-t border-slate-200 dark:border-[#24476F] flex items-center justify-between text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
                   <span>{t('Explore Section Suite', 'استكشف أدوات القسم')}</span>
                   <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isAr ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                 </div>
               </div>
             );
           })}
-        </div>
-      </section>
-
-      {/* ── C. QUICK ACTIONS (Max 2-3 Useful, Compact Shortcuts) ── */}
-      <section 
-        aria-label={t('Quick Access', 'الوصول السريع للأدوات')}
-        className="space-y-2.5"
-      >
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" aria-hidden="true" />
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
-              {t('Quick Access', 'الوصول السريع')}
-            </h2>
-          </div>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
-            {t('Direct shortcuts to primary section tools', 'روابط مباشرة لأهم أدوات الأقسام')}
-          </span>
-        </div>
-
-        {/* Compact 3-action row with standardized touch targets */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Action 1: Visual Assistant inside Section 1 (See & Understand) */}
-          <button
-            type="button"
-            onClick={() => onSelectTab('vision')}
-            className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
-              isDarkMode 
-                ? 'border-[#22354E] bg-[#131E2E] hover:border-[#1769AA] text-white' 
-                : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
-            } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
-            aria-label={t('Launch Visual Assistant (Section 1)', 'تشغيل المساعد البصري (القسم 1)')}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
-                <Eye className="w-4 h-4" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 text-start">
-                <span className="truncate block leading-tight">{t('Launch Visual Assistant', 'تشغيل المساعد البصري')}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{t('See & Understand', 'الرؤية والفهم')}</span>
-              </div>
-            </div>
-            <ArrowRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
-          </button>
-
-          {/* Action 2: Live Captions inside Section 5 (Communicate) */}
-          <button
-            type="button"
-            onClick={() => onSelectTab('deaf')}
-            className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
-              isDarkMode 
-                ? 'border-[#22354E] bg-[#131E2E] hover:border-[#1769AA] text-white' 
-                : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
-            } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
-            aria-label={t('Live Captions (Section 5)', 'التفريغ الصوتي المباشر (القسم 5)')}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center shrink-0">
-                <Mic className="w-4 h-4" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 text-start">
-                <span className="truncate block leading-tight">{t('Live Captions', 'التفريغ الصوتي المباشر')}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{t('Communicate', 'التواصل والتعبير')}</span>
-              </div>
-            </div>
-            <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
-          </button>
-
-          {/* Action 3: Accessibility Passport inside Section 6 (Personalize) */}
-          <button
-            type="button"
-            onClick={onOpenPassport}
-            className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
-              isDarkMode 
-                ? 'border-[#22354E] bg-[#131E2E] hover:border-[#1769AA] text-white' 
-                : 'border-slate-200 bg-white hover:border-[#1769AA] text-slate-900'
-            } shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]`}
-            aria-label={t('Accessibility Passport (Section 6)', 'جواز التسهيلات الموحد (القسم 6)')}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-4 h-4" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 text-start">
-                <span className="truncate block leading-tight">{t('Accessibility Passport', 'جواز التسهيلات الموحد')}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{t('Personalize', 'التخصيص')}</span>
-              </div>
-            </div>
-            <ChevronRight className={`w-3.5 h-3.5 text-slate-400 shrink-0 ${isAr ? 'rotate-180' : ''}`} aria-hidden="true" />
-          </button>
         </div>
       </section>
 
@@ -639,7 +635,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <span>{t('Recent Activity', 'النشاط الأخير')}</span>
           </h2>
           {consolidatedRecentActivity.length > 0 && (
-            <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
+            <span className="text-xs text-slate-500 dark:text-[#94A3B8]">
               {t(`${consolidatedRecentActivity.length} recent items`, `${consolidatedRecentActivity.length} عناصر حديثة`)}
             </span>
           )}
@@ -651,19 +647,19 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <div
                 key={item.id}
                 className={`p-3.5 rounded-2xl border text-start flex flex-col justify-between gap-2 ${
-                  isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-white border-slate-200'
+                  isDarkMode ? 'bg-[#112C4F] border-[#24476F]' : 'bg-white border-slate-200'
                 } shadow-xs`}
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]">
                       {item.categoryLabel}
                     </span>
                   </div>
                   <h3 className="text-xs font-bold text-slate-900 dark:text-white mt-1.5 truncate">
                     {item.title}
                   </h3>
-                  <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] line-clamp-1 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] line-clamp-1 mt-0.5">
                     {item.desc}
                   </p>
                 </div>
@@ -681,14 +677,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         ) : (
           /* Honest Empty State for new users without reading, tasks, or conversations */
           <div className={`p-4 sm:p-5 rounded-2xl border text-center space-y-2 ${
-            isDarkMode ? 'bg-[#131E2E]/60 border-[#22354E]' : 'bg-slate-50 border-slate-200'
+            isDarkMode ? 'bg-[#112C4F]/60 border-[#24476F]' : 'bg-slate-50 border-slate-200'
           }`}>
             <Clock className="w-5 h-5 text-slate-400 mx-auto" aria-hidden="true" />
             <div className="space-y-0.5">
               <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 {t('No recent reading or working history yet', 'لم تبدأ قراءة أي كتاب أو مستند بعد')}
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] max-w-md mx-auto">
+              <p className="text-xs text-slate-500 dark:text-[#94A3B8] max-w-md mx-auto">
                 {t(
                   'Explore Section 2 (Read & Learn) to open educational books, convert documents to audio, and access reading rulers. No conversations started yet.',
                   'استكشف قسم القراءة والتعلّم لقراءة الكتب الميسرة، وتحويل النصوص إلى صوت. لا توجد محادثات مسجلة بعد.'
@@ -711,7 +707,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       <section 
         aria-label={t('Support and Assistance', 'الدعم والمساعدة')}
         className={`px-4 py-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 ${
-          isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-slate-50 border-slate-200'
+          isDarkMode ? 'bg-[#112C4F] border-[#24476F]' : 'bg-slate-50 border-slate-200'
         } transition-colors`}
       >
         <div className="flex items-center gap-2.5">
@@ -722,7 +718,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <h3 className="text-xs font-bold text-slate-900 dark:text-white">
               {t('Accessible Support & Guides', 'الدعم والمساعدة والإرشادات')}
             </h3>
-            <p className="text-[10px] text-slate-500 dark:text-[#94A3B8]">
+            <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
               {t('Reach human specialists, explore accessibility documentation, or report an issue.', 'تواصل مع أخصائي التيسير، أو استكشف أدلة الاستخدام.')}
             </p>
           </div>

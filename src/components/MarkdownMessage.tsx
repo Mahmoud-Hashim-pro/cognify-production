@@ -96,7 +96,7 @@ function MarkdownImage({ src, alt, ...props }: { src?: string; alt?: string; [ke
             href={src}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#4B9FE1] hover:text-[#4B9FE1] hover:underline shrink-0"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#4B9FE1] hover:text-[#4B9FE1] hover:underline shrink-0"
           >
             <span>Full Size</span>
             <ExternalLink className="w-3 h-3" />

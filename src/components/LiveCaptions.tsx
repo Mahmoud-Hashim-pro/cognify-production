@@ -1,4 +1,4 @@
-import { localize } from '../lib/translations';
+import { localize, L } from '../lib/translations';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Mic, MicOff, Sparkles, RefreshCw, X, Volume2, MessageSquare,
@@ -146,7 +146,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
   // ── Speech profile for impairment type
   const [speechProfile, setSpeechProfile] = useState<string>(() =>
-    localStorage.getItem('cognify_speech_profile') || 'Standard'
+    localStorage.getItem('rafiqi_speech_profile') || 'Standard'
   );
 
   // ── Euphonia (direct audio) state
@@ -164,7 +164,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   // ── Phoneme pattern mappings
   const [euphoniaPatterns, setEuphoniaPatterns] = useState<EuphoniaPattern[]>(() => {
     try {
-      const saved = localStorage.getItem('cognify_euphonia_patterns');
+      const saved = localStorage.getItem('rafiqi_euphonia_patterns');
       return saved ? JSON.parse(saved) : [
         { id: 'ep1', phrase: "wa wa", translation: "Can I have some water?" },
         { id: 'ep2', phrase: "baf roo", translation: "Where is the restroom?" },
@@ -181,7 +181,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const [activeTab, setActiveTab] = useState<'essentials' | 'needs' | 'social' | 'emergencies' | 'favorites'>('essentials');
   const [favorites, setFavorites] = useState<SoundboardItem[]>(() => {
     try {
-      const saved = localStorage.getItem('cognify_speech_presets');
+      const saved = localStorage.getItem('rafiqi_speech_presets');
       return saved ? JSON.parse(saved) : [
         { id: 'fav1', emoji: '🏡', textEn: "I am ready to go home", textAr: "أنا جاهز للذهاب إلى المنزل" },
         { id: 'fav2', emoji: '☕', textEn: "I would love some coffee", textAr: "أود بعض القهوة" },
@@ -196,19 +196,19 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
   // ── Settings
   const [pauseThreshold, setPauseThreshold] = useState<number>(() =>
-    Number(localStorage.getItem('cognify_pause_threshold') || 2500)
+    Number(localStorage.getItem('rafiqi_pause_threshold') || 2500)
   );
   const [speechRate, setSpeechRate] = useState<number>(() =>
-    Number(localStorage.getItem('cognify_speech_rate') || 1.0)
+    Number(localStorage.getItem('rafiqi_speech_rate') || 1.0)
   );
   const [speechPitch, setSpeechPitch] = useState<number>(() =>
-    Number(localStorage.getItem('cognify_speech_pitch') || 1.0)
+    Number(localStorage.getItem('rafiqi_speech_pitch') || 1.0)
   );
   const [showSettings, setShowSettings] = useState(false);
   const [copiedState, setCopiedState] = useState(false);
   const [speechHistory, setSpeechHistory] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('cognify_speech_history');
+      const saved = localStorage.getItem('rafiqi_speech_history');
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
@@ -231,14 +231,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const isArabic = language.startsWith('ar');
 
   // ── Persist settings
-  useEffect(() => { localStorage.setItem('cognify_speech_history', JSON.stringify(speechHistory)); }, [speechHistory]);
-  useEffect(() => { localStorage.setItem('cognify_speech_presets', JSON.stringify(favorites)); }, [favorites]);
-  useEffect(() => { localStorage.setItem('cognify_euphonia_patterns', JSON.stringify(euphoniaPatterns)); }, [euphoniaPatterns]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_history', JSON.stringify(speechHistory)); }, [speechHistory]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_presets', JSON.stringify(favorites)); }, [favorites]);
+  useEffect(() => { localStorage.setItem('rafiqi_euphonia_patterns', JSON.stringify(euphoniaPatterns)); }, [euphoniaPatterns]);
   useEffect(() => { savePronDict(pronDict); }, [pronDict]);
-  useEffect(() => { localStorage.setItem('cognify_pause_threshold', String(pauseThreshold)); }, [pauseThreshold]);
-  useEffect(() => { localStorage.setItem('cognify_speech_rate', String(speechRate)); }, [speechRate]);
-  useEffect(() => { localStorage.setItem('cognify_speech_pitch', String(speechPitch)); }, [speechPitch]);
-  useEffect(() => { localStorage.setItem('cognify_speech_profile', speechProfile); }, [speechProfile]);
+  useEffect(() => { localStorage.setItem('rafiqi_pause_threshold', String(pauseThreshold)); }, [pauseThreshold]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_rate', String(speechRate)); }, [speechRate]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_pitch', String(speechPitch)); }, [speechPitch]);
+  useEffect(() => { localStorage.setItem('rafiqi_speech_profile', speechProfile); }, [speechProfile]);
 
   // Auto-scroll segments
   useEffect(() => {
@@ -286,7 +286,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   const speakText = useCallback((text: string) => {
     if (!text.trim()) return;
     if (!('speechSynthesis' in window)) {
-      setError(isAr ? 'ميزة إخراج الصوت غير مدعومة في هذا المتصفح.' : "Speech output isn't supported on this browser.");
+      setError(isAr ? 'ميزة إخراج الصوت غير مدعومة في هذا المتصفح.' : L("Speech output isn't supported on this browser."));
       return;
     }
     try {
@@ -339,7 +339,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setError(isAr ? 'تتطلب التسميات التوضيحية المباشرة متصفحاً مدعوماً مثل Chrome أو Edge أو Safari.' : "Live captions need a supported browser such as Chrome, Edge, or Safari.");
+      setError(isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : L("Speech recognition isn't supported in this browser. Try Chrome on Android or a recent Safari."));
       return;
     }
     recognitionRef.current = new SpeechRecognition();
@@ -353,11 +353,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       // Map every error code to a clear message — otherwise captions just stop
       // mid-conversation with no explanation (common on hospital networks).
       const code = event?.error;
-      if (code === 'not-allowed' || code === 'service-not-allowed') setError(isAr ? 'تم رفض إذن الميكروفون. يرجى تفعيل الإذن من إعدادات المتصفح.' : "Microphone access denied. Enable permissions in your browser settings.");
-      else if (code === 'audio-capture') setError(isAr ? 'لم يتم العثور على ميكروفون. يرجى توصيل ميكروفون والمحاولة ثانية.' : "No microphone found. Please connect one and try again.");
-      else if (code === 'network') setError(isAr ? 'تعذر الاتصال بخدمة التعرف الصوتي — تحقق من اتصال الإنترنت.' : "Speech service unreachable — check the internet connection.");
+      if (code === 'not-allowed' || code === 'service-not-allowed') setError(isAr ? 'تم رفض إذن الميكروفون. يرجى تفعيل الإذن من إعدادات المتصفح.' : L("Microphone access denied. Enable permissions in your browser settings."));
+      else if (code === 'audio-capture') setError(isAr ? 'لم يتم العثور على ميكروفون. يرجى توصيل ميكروفون والمحاولة ثانية.' : L("No microphone found. Please connect one and try again."));
+      else if (code === 'network') setError(isAr ? 'تعذر الاتصال بخدمة التعرف الصوتي — تحقق من اتصال الإنترنت.' : L("Speech service unreachable — check the internet connection."));
       else if (code === 'no-speech' || code === 'aborted') { /* benign — no message */ }
-      else setError(isAr ? 'توقف التعرف على الصوت. اضغط على الميكروفون للمحاولة ثانية.' : "Speech recognition stopped. Tap the mic to retry.");
+      else setError(isAr ? 'توقف التعرف على الصوت. اضغط على الميكروفون للمحاولة ثانية.' : L("Speech recognition stopped. Tap the mic to retry."));
       setIsListening(false);
       stopAudioLevelTracking();
     };
@@ -588,9 +588,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       audioChunksRef.current = [];
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                       MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
                        MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
-      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      const mediaRecorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
@@ -609,10 +613,10 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             if (result?.trim()) {
               await processUtterance(result.trim());
             } else {
-              setError(isAr ? 'لم يتم رصد صوت واضح. حاول التحدث بنبرة أوضح أو تعديل الملف الصوتي.' : "No speech detected. Try speaking more clearly or adjusting your speech profile.");
+              setError(isAr ? 'لم يتم رصد صوت واضح. حاول التحدث بنبرة أوضح أو تعديل الملف الصوتي.' : L("No speech detected. Try speaking more clearly or adjusting your speech profile."));
             }
           } catch (err) {
-            setError(isAr ? 'فشل فك ترميز الصوت. تحقق من الميكروفون وحاول ثانية.' : "Audio decoding failed. Check your microphone and try again.");
+            setError(isAr ? 'فشل فك ترميز الصوت. تحقق من الميكروفون وحاول ثانية.' : L("Audio decoding failed. Check your microphone and try again."));
           } finally { setIsDecoding(false); }
         };
       };
@@ -628,7 +632,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError(isAr ? 'تعذر الوصول للميكروفون. يرجى التحقق من أذونات المتصفح.' : "Cannot access microphone. Check browser permissions.");
+      setError(isAr ? 'تعذر الوصول للميكروفون. يرجى التحقق من أذونات المتصفح.' : L("Cannot access microphone. Check browser permissions."));
     }
   };
 
@@ -647,9 +651,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
     try {
       audioChunksRef.current = [];
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                       MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
                        MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
-      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      const mediaRecorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
@@ -707,7 +715,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
         });
       }, 1000);
     } catch (err) {
-      setError(isAr ? 'تعذر الوصول للميكروفون لإجراء المعايرة.' : "Cannot access microphone for calibration.");
+      setError(isAr ? 'تعذر الوصول للميكروفون لإجراء المعايرة.' : L("Cannot access microphone for calibration."));
     }
   };
 
@@ -757,8 +765,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
       low: { color: 'text-red-400 bg-red-500/10 border-red-500/20', label: 'Unclear', icon: '●○○' },
     }[level];
     return (
-      <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${config.color}`}>
-        <span className="font-mono text-[8px]">{config.icon}</span>
+      <span className={`inline-flex items-center gap-1 text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${config.color}`}>
+        <span className="font-mono text-xs">{config.icon}</span>
         {config.label}
       </span>
     );
@@ -789,20 +797,20 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             {/* Continuous Listen */}
             <button
               onClick={() => { setActiveMode('listen'); if (isRecordingEuphonia) stopEuphoniaRecord(); }}
-              className={`text-[10px] md:text-[11px] font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`text-xs md:text-xs font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'listen'
                   ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
                   : 'border-transparent text-neutral-400 hover:text-white hover:bg-bg-card/5'
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
-              Live Listen
+              {isAr ? 'استماع مباشر' : L('Live Listen')}
             </button>
 
             {/* Euphonia Direct Audio */}
             <button
               onClick={() => { setActiveMode('euphonia'); if (isListening) recognitionRef.current?.stop(); }}
-              className={`text-[10px] md:text-[11px] font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`text-xs md:text-xs font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'euphonia'
                   ? 'border-purple-500/40 bg-purple-500/10 text-purple-400'
                   : 'border-transparent text-neutral-400 hover:text-white hover:bg-bg-card/5'
@@ -815,14 +823,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             {/* Calibration */}
             <button
               onClick={() => setActiveMode('calibrate')}
-              className={`text-[10px] md:text-[11px] font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`text-xs md:text-xs font-black uppercase tracking-wider py-2 px-3 border rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'calibrate'
                   ? 'border-sky-500/40 bg-sky-500/10 text-sky-400'
                   : 'border-transparent text-neutral-400 hover:text-white hover:bg-bg-card/5'
               }`}
             >
               <Target className="w-3.5 h-3.5" />
-              Voice Training
+              {isAr ? 'تدريب الصوت' : L('Voice Training')}
               {calibrationComplete && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
             </button>
           </div>
@@ -839,7 +847,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                   key={code}
                   onClick={() => setActiveLang(code)}
                   title={title}
-                  className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
+                  className={`text-xs font-bold px-2 py-1 rounded-lg transition-all ${
                     activeLang === code
                       ? 'bg-primary text-white shadow-sm font-black'
                       : 'text-neutral-400 hover:text-white'
@@ -854,21 +862,27 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             <button
               onClick={() => setRepeatModeOn(prev => !prev)}
               title="Repeat Mode: AI speaks back what it hears in a clear voice"
-              className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider py-1.5 px-3 border rounded-xl transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 text-xs font-black uppercase tracking-wider py-1.5 px-3 border rounded-xl transition-all cursor-pointer ${
                 repeatModeOn
                   ? 'border-orange-500/40 bg-orange-500/10 text-orange-400'
                   : 'border-white/10 text-neutral-500 hover:text-white hover:bg-bg-card/5'
               }`}
             >
               <Repeat2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Repeat</span>
+              <span className="hidden sm:inline">{isAr ? 'تكرار' : L('Repeat')}</span>
             </button>
 
             {/* Live status dot */}
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-neutral-600'}`} />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 hidden sm:block">
-                {isCalibrationRecording ? 'Recording…' : isRecordingEuphonia ? 'Decoding…' : isListening ? 'Listening' : 'Standby'}
+              <span className="text-xs font-bold uppercase tracking-widest text-neutral-400 hidden sm:block">
+                {isCalibrationRecording
+                  ? (isAr ? 'جاري التسجيل…' : L('Recording…'))
+                  : isRecordingEuphonia
+                  ? (isAr ? 'جاري فك الترميز…' : L('Decoding…'))
+                  : isListening
+                  ? (isAr ? 'يستمع' : L('Listening'))
+                  : (isAr ? 'جاهز' : L('Standby'))}
               </span>
             </div>
 
@@ -885,18 +899,20 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
         {/* ── Speech Profile Selector (compact pill row) ── */}
         <div className="px-4 py-2.5 border-b border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 whitespace-nowrap">Profile:</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-neutral-500 whitespace-nowrap">{isAr ? 'الملف:' : L('Profile:')}</span>
           {(['Standard', 'Dysarthria', 'Stutter', 'Aphasia', 'Kanevsky'] as const).map(p => (
             <button
               key={p}
               onClick={() => setSpeechProfile(p)}
-              className={`text-[10px] font-bold px-3 py-1 rounded-full border whitespace-nowrap transition-all cursor-pointer ${
+              className={`text-xs font-bold px-3 py-1 rounded-full border whitespace-nowrap transition-all cursor-pointer ${
                 speechProfile === p
                   ? 'border-purple-500/50 bg-purple-500/15 text-purple-300'
                   : 'border-white/10 text-neutral-500 hover:text-white hover:border-white/20'
               }`}
             >
-              {p === 'Kanevsky' ? 'Severe Dysarthria' : p}
+              {isAr
+                ? { Standard: 'قياسي', Dysarthria: 'عسر الكلام', Stutter: 'التلعثم', Aphasia: 'الحبسة الكلامية', Kanevsky: 'عسر كلام شديد' }[p]
+                : p === 'Kanevsky' ? 'Severe Dysarthria' : p}
             </button>
           ))}
         </div>
@@ -919,7 +935,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     {activeMode === 'listen' ? (
                       <>
                         <Waves className="w-10 h-10 text-neutral-700 mb-4" />
-                        <p className="text-neutral-400 text-sm font-semibold">Tap the microphone to start listening</p>
+                        <p className="text-neutral-400 text-sm font-semibold">{isAr ? 'اضغط الميكروفون عشان يبدأ الاستماع' : L('Tap the microphone to start listening')}</p>
                         <p className="text-neutral-600 text-xs mt-2 max-w-xs">
                           Each utterance appears as a card with confidence scoring and AI decoding
                         </p>
@@ -927,9 +943,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     ) : (
                       <>
                         <Zap className="w-10 h-10 text-accent mb-4" />
-                        <p className="text-neutral-400 text-sm font-semibold">Tap the record button below</p>
+                        <p className="text-neutral-400 text-sm font-semibold">{isAr ? 'اضغط زر التسجيل بالأسفل' : L('Tap the record button below')}</p>
                         <p className="text-neutral-600 text-xs mt-2 max-w-xs">
-                          Euphonia AI analyzes raw audio frame-by-frame, bypassing standard speech recognition
+                          {isAr
+                            ? 'Euphonia AI يحلل الصوت الخام إطارًا بإطار، متجاوزًا التعرف القياسي على الكلام'
+                            : L('Euphonia AI analyzes raw audio frame-by-frame, bypassing standard speech recognition')}
                         </p>
                       </>
                     )}
@@ -950,12 +968,12 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                           autoFocus
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          aria-label={isAr ? 'تعديل التسمية التوضيحية' : 'Edit caption text'}
+                          aria-label={isAr ? 'تعديل التسمية التوضيحية' : L('Edit caption text')}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') saveEditSegment(seg);
                             if (e.key === 'Escape') setEditingId(null);
                           }}
-                          className="flex-1 bg-neutral-800 border border-emerald-500/40 rounded-xl px-3 py-2 text-lg md:text-xl font-bold text-white outline-none focus:border-emerald-500"
+                          className="flex-1 bg-neutral-800 border border-emerald-500/40 rounded-xl px-3 py-2 text-lg md:text-xl font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-emerald-500"
                         />
                         <button
                           onClick={() => saveEditSegment(seg)}
@@ -983,22 +1001,22 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                       <div className="flex items-center gap-2 flex-wrap">
                         <ConfidenceBadge level={seg.confidence} />
                         {typeof seg.confidencePct === 'number' && (
-                          <span className="text-[10px] font-mono font-bold text-neutral-500">
+                          <span className="text-xs font-mono font-bold text-neutral-500">
                             {seg.confidencePct}%
                           </span>
                         )}
                         {seg.intent && (
-                          <span className="text-[10px] font-bold text-neutral-400 bg-bg-card/5 border border-white/10 px-2 py-0.5 rounded-full">
+                          <span className="text-xs font-bold text-neutral-400 bg-bg-card/5 border border-white/10 px-2 py-0.5 rounded-full">
                             {seg.intent}
                           </span>
                         )}
-                        <span className="text-[10px] text-neutral-600 font-mono">{seg.timestamp}</span>
+                        <span className="text-xs text-neutral-600 font-mono">{seg.timestamp}</span>
                       </div>
 
                       <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         {/* Show raw if different */}
                         {seg.raw !== seg.decoded && (
-                          <span className="text-[10px] text-neutral-600 italic truncate max-w-[140px]">
+                          <span className="text-xs text-neutral-600 italic truncate max-w-[140px]">
                             heard: "{seg.raw}"
                           </span>
                         )}
@@ -1029,8 +1047,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     {/* Alternative interpretations for uncertain words */}
                     {editingId !== seg.id && seg.alternatives && seg.alternatives.length > 0 && (
                       <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] text-amber-400/90 font-bold uppercase tracking-wider">
-                          {seg.clarificationPrompt || (isAr ? 'هل تقصد:' : 'Did you mean:')}
+                        <span className="text-xs text-amber-400/90 font-bold uppercase tracking-wider">
+                          {seg.clarificationPrompt || (isAr ? 'هل تقصد:' : L('Did you mean:'))}
                         </span>
                         {seg.alternatives.map((alt, i) => (
                           <button
@@ -1081,7 +1099,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               <div className="mx-4 mb-2 px-4 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
                 <p className="text-xs text-red-300">{error}</p>
-                <button onClick={() => setError(null)} aria-label={isAr ? 'إغلاق رسالة الخطأ' : 'Dismiss error'} className="ms-auto text-red-400 hover:text-white p-1 rounded-lg"><X className="w-3.5 h-3.5" /></button>
+                <button onClick={() => setError(null)} aria-label={isAr ? 'إغلاق رسالة الخطأ' : L('Dismiss error')} className="ms-auto text-red-400 hover:text-white p-1 rounded-lg"><X className="w-3.5 h-3.5" /></button>
               </div>
             )}
 
@@ -1142,16 +1160,20 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               </div>
 
               <div className="flex items-center gap-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-white/40">
                   {activeMode === 'listen'
-                    ? (isListening ? 'Tap to stop' : 'Tap to listen')
-                    : (isRecordingEuphonia ? `Recording… ${euphoniaTimer}s / 7s` : (isDecoding ? 'Decoding audio…' : 'Tap for Euphonia decode'))
+                    ? (isListening ? (isAr ? 'اضغط للإيقاف' : L('Tap to stop')) : (isAr ? 'اضغط للاستماع' : L('Tap to listen')))
+                    : (isRecordingEuphonia
+                        ? (isAr ? `جاري التسجيل… ${euphoniaTimer} ث / 7 ث` : `Recording… ${euphoniaTimer}s / 7s`)
+                        : (isDecoding
+                            ? (isAr ? 'جاري فك ترميز الصوت…' : L('Decoding audio…'))
+                            : (isAr ? 'اضغط لفك الترميز بـ Euphonia' : L('Tap for Euphonia decode'))))
                   }
                 </p>
                 {segments.length > 0 && (
                   <button
                     onClick={() => setSegments([])}
-                    className="text-[10px] text-neutral-600 hover:text-red-400 font-bold uppercase tracking-wider"
+                    className="text-xs text-neutral-600 hover:text-red-400 font-bold uppercase tracking-wider"
                   >
                     Clear
                   </button>
@@ -1171,7 +1193,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                 <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                 </div>
-                <h2 className="text-2xl font-black text-white">Voice Profile Ready</h2>
+                <h2 className="text-2xl font-black text-white">{isAr ? 'الملف الصوتي جاهز' : L('Voice Profile Ready')}</h2>
                 <p className="text-neutral-400 text-sm max-w-xs mx-auto">
                   AI-LA has learned your speech patterns. {calibrationAudioBlobs.length} phrases recorded and {euphoniaPatterns.filter(p => p.id.startsWith('cal_')).length} patterns auto-mapped.
                 </p>
@@ -1188,7 +1210,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                 {/* Progress */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-neutral-400 font-bold uppercase tracking-wider">Voice Training Session</span>
+                    <span className="text-neutral-400 font-bold uppercase tracking-wider">{isAr ? 'جلسة تدريب الصوت' : L('Voice Training Session')}</span>
                     <span className="text-sky-400 font-black">{calibrationIndex} / {calibrationPhrases.length}</span>
                   </div>
                   <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
@@ -1197,14 +1219,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                       animate={{ width: `${(calibrationIndex / calibrationPhrases.length) * 100}%` }}
                     />
                   </div>
-                  <p className="text-[10px] text-neutral-500">
+                  <p className="text-xs text-neutral-500">
                     Read each phrase aloud naturally — exactly as you speak. AI will learn your unique patterns.
                   </p>
                 </div>
 
                 {/* Current phrase */}
                 <div className="bg-sky-500/5 border border-sky-500/20 rounded-2xl p-6 text-center space-y-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-sky-500">Say this phrase</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-sky-500">{isAr ? 'قول العبارة دي' : L('Say this phrase')}</span>
                   <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
                     "{calibrationPhrases[calibrationIndex]?.text}"
                   </h2>
@@ -1247,7 +1269,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                       phrase.recorded ? 'border-emerald-500/15 bg-emerald-500/5' :
                       'border-white/5 opacity-40'
                     }`}>
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-black ${
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black ${
                         phrase.recorded ? 'bg-emerald-500/20 text-emerald-400' :
                         idx === calibrationIndex ? 'bg-sky-500/20 text-sky-400' :
                         'bg-bg-card/5 text-neutral-600'
@@ -1279,8 +1301,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
           <div className="flex items-center gap-3">
             <Volume2 className="w-5 h-5 text-purple-400" aria-hidden="true" />
             <div>
-              <h3 className="text-sm font-bold text-white">Vocal Speech Assistant</h3>
-              <p className="text-[11px] text-neutral-500">Tap any card to speak it aloud</p>
+              <h3 className="text-sm font-bold text-white">{isAr ? 'مساعد الكلام الصوتي' : L('Vocal Speech Assistant')}</h3>
+              <p className="text-xs text-neutral-500">{isAr ? 'اضغط أي كارت لنطقه بصوت عالي' : L('Tap any card to speak it aloud')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1313,21 +1335,21 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               animate={{ height: 'auto', opacity: 1 }}
               className="bg-neutral-950/60 p-4 rounded-2xl border border-white/5 space-y-4"
             >
-              <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider block">Pronunciation & Capture</span>
+              <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider block">{isAr ? 'النطق والتقاط الصوت' : L('Pronunciation & Capture')}</span>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-400">Silence Threshold</span>
+                  <span className="text-neutral-400">{isAr ? 'حد الصمت' : L('Silence Threshold')}</span>
                   <span className="text-emerald-400 font-mono">{(pauseThreshold / 1000).toFixed(1)}s</span>
                 </div>
                 <input type="range" min="1000" max="6500" step="500" aria-label="Silence threshold" aria-valuetext={`${(pauseThreshold / 1000).toFixed(1)}s`} value={pauseThreshold}
                   onChange={e => setPauseThreshold(Number(e.target.value))}
                   className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
-                <p className="text-[10px] text-neutral-600">Extend for stutters/blocks</p>
+                <p className="text-xs text-neutral-600">Extend for stutters/blocks</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-neutral-400">Voice Rate</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-neutral-400">{isAr ? 'سرعة الصوت' : L('Voice Rate')}</span>
                     <span className="text-purple-400 font-mono">{speechRate.toFixed(1)}x</span>
                   </div>
                   <input type="range" min="0.5" max="1.8" step="0.1" aria-label="Voice rate" aria-valuetext={`${speechRate.toFixed(1)}x`} value={speechRate}
@@ -1335,8 +1357,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500" />
                 </div>
                 <div className="space-y-1.5">
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-neutral-400">Voice Pitch</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-neutral-400">{isAr ? 'طبقة الصوت' : L('Voice Pitch')}</span>
                     <span className="text-purple-400 font-mono">{speechPitch.toFixed(1)}</span>
                   </div>
                   <input type="range" min="0.5" max="1.5" step="0.1" aria-label="Voice pitch" aria-valuetext={`${speechPitch.toFixed(1)}`} value={speechPitch}
@@ -1351,14 +1373,14 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
           <div className="space-y-2 bg-neutral-950/40 p-4 rounded-2xl border border-white/5">
             <div className="flex items-center gap-2 mb-1">
               <MessageSquare className="w-4 h-4 text-purple-400" />
-              <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">Type to Speak</span>
+              <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">{isAr ? 'اكتب ليتم نطقه' : L('Type to Speak')}</span>
             </div>
             <textarea
               value={customText}
               onChange={e => setCustomText(e.target.value)}
-              placeholder={isAr ? "اكتب شيئاً لنطقه بالصوت…" : "Type a sentence to speak aloud…"}
+              placeholder={isAr ? "اكتب شيئاً لنطقه بالصوت…" : L("Type a sentence to speak aloud…")}
               dir={dir}
-              className="w-full text-sm bg-neutral-950 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-purple-500/50 text-white placeholder-neutral-600 resize-none h-16"
+              className="w-full text-sm bg-neutral-950 border border-white/10 rounded-xl p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500/50 text-white placeholder-neutral-600 resize-none h-16"
             />
             <div className="flex items-center gap-2 justify-end flex-wrap">
               {customText.trim() && (
@@ -1387,11 +1409,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-yellow-400" />
-                  <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">AI Suggested Replies</span>
+                  <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">{isAr ? 'ردود مقترحة بالذكاء الاصطناعي' : L('AI Suggested Replies')}</span>
                 </div>
                 <button onClick={() => fetchSmartReplies(segments[segments.length - 1]?.decoded || 'Hello')}
                   disabled={isGeneratingReplies}
-                  className="p-1 text-[10px] uppercase font-black text-neutral-500 hover:text-white bg-bg-card/5 rounded-md hover:bg-bg-card/10 disabled:opacity-40">
+                  className="p-1 text-xs uppercase font-black text-neutral-500 hover:text-white bg-bg-card/5 rounded-md hover:bg-bg-card/10 disabled:opacity-40">
                   <RefreshCw className={`w-3 h-3 ${isGeneratingReplies ? 'animate-spin' : ''}`} />
                 </button>
               </div>
@@ -1417,11 +1439,11 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
           {/* ── Soundboard ── */}
           <div className="space-y-3">
-            <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">Quick Phrase Deck</span>
+            <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">{isAr ? 'مجموعة العبارات السريعة' : L('Quick Phrase Deck')}</span>
             <div className="flex flex-wrap gap-1 p-1 bg-neutral-950 rounded-xl border border-white/5">
               {(['essentials', 'needs', 'social', 'favorites', 'emergencies'] as const).map(cat => (
                 <button key={cat} onClick={() => setActiveTab(cat)}
-                  className={`text-[10px] py-1.5 px-2.5 rounded-lg font-bold transition-all flex-1 text-center truncate cursor-pointer ${
+                  className={`text-xs py-1.5 px-2.5 rounded-lg font-bold transition-all flex-1 text-center truncate cursor-pointer ${
                     activeTab === cat ? 'bg-neutral-800 text-white shadow' : 'text-neutral-500 hover:text-white'
                   }`}>
                   {cat === 'essentials' ? 'Basics' : cat === 'favorites' ? 'My Phrases' : cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -1431,7 +1453,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
             <div className="grid grid-cols-2 gap-2">
               {((activeTab === 'favorites' ? favorites : SOUNDBOARD_DATA[activeTab as keyof typeof SOUNDBOARD_DATA]) || []).map(item => {
-                const phrase = isArabic ? item.textAr : item.textEn;
+                const phrase = isArabic ? item.textAr : L(item.textEn);
                 const color = activeTab === 'emergencies' ? 'hover:border-rose-500/40 hover:bg-rose-500/8' :
                               activeTab === 'needs' ? 'hover:border-orange-500/40 hover:bg-orange-500/8' :
                               activeTab === 'social' ? 'hover:border-green-500/40 hover:bg-green-500/8' :
@@ -1460,7 +1482,7 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                 );
               })}
               {activeTab === 'favorites' && favorites.length === 0 && (
-                <div className="col-span-2 text-center py-6 text-[11px] text-neutral-600 italic">
+                <div className="col-span-2 text-center py-6 text-xs text-neutral-600 italic">
                   Type a sentence above and tap "Save" to add your own phrases here
                 </div>
               )}
@@ -1478,8 +1500,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
             >
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-purple-400" />
-                <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">Phoneme Pattern Dictionary</span>
-                <span className="text-[10px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 rounded-full font-black">
+                <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider">{isAr ? 'قاموس الأنماط الصوتية' : L('Phoneme Pattern Dictionary')}</span>
+                <span className="text-xs text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 rounded-full font-black">
                   {euphoniaPatterns.length}
                 </span>
               </div>
@@ -1488,21 +1510,21 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
 
             {showPatternsPanel && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-3 overflow-hidden">
-                <p className="text-[10px] text-neutral-500 leading-relaxed">
+                <p className="text-xs text-neutral-500 leading-relaxed">
                   Map what standard speech-to-text hears you say → what you actually mean. Matched instantly, no AI call needed.
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[10px] text-neutral-500 block mb-1">STT hears:</span>
+                    <span className="text-xs text-neutral-500 block mb-1">STT hears:</span>
                     <input type="text" placeholder="e.g. wa wa" value={newPattern}
                       onChange={e => setNewPattern(e.target.value)}
-                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus:border-purple-500 placeholder-neutral-700" />
+                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500 placeholder-neutral-700" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-neutral-500 block mb-1">You mean:</span>
+                    <span className="text-xs text-neutral-500 block mb-1">You mean:</span>
                     <input type="text" placeholder="e.g. I need water" value={newTranslation}
                       onChange={e => setNewTranslation(e.target.value)}
-                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus:border-purple-500 placeholder-neutral-700" />
+                      className="w-full text-xs bg-neutral-950 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500 placeholder-neutral-700" />
                   </div>
                 </div>
                 <button
@@ -1512,13 +1534,13 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
                     setNewPattern(''); setNewTranslation('');
                   }}
                   disabled={!newPattern.trim() || !newTranslation.trim()}
-                  className="w-full text-[11px] font-bold text-white bg-purple-600 disabled:opacity-40 hover:bg-purple-500 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all">
+                  className="w-full text-xs font-bold text-white bg-purple-600 disabled:opacity-40 hover:bg-purple-500 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all">
                   <Plus className="w-3.5 h-3.5" /> Add Pattern
                 </button>
                 <div className="space-y-1 max-h-40 overflow-y-auto">
                   {euphoniaPatterns.map(pat => (
                     <div key={pat.id} className="flex items-center justify-between bg-neutral-950/80 p-2 border border-white/5 rounded-xl group/p">
-                      <div className="text-[11px] flex items-center gap-2 flex-1 min-w-0">
+                      <div className="text-xs flex items-center gap-2 flex-1 min-w-0">
                         <span className="text-purple-300 font-mono truncate">"{pat.phrase}"</span>
                         <span className="text-neutral-600 flex-shrink-0">→</span>
                         <span className="text-emerald-400 font-semibold truncate">{pat.translation}</span>
@@ -1545,9 +1567,9 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-neutral-500">
                   <History className="w-3.5 h-3.5" />
-                  <span className="text-xs font-bold uppercase tracking-wider">Recent Phrases</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">{isAr ? 'العبارات الأخيرة' : L('Recent Phrases')}</span>
                 </div>
-                <button onClick={() => setSpeechHistory([])} className="text-[10px] text-neutral-600 hover:text-rose-400 flex items-center gap-1">
+                <button onClick={() => setSpeechHistory([])} className="text-xs text-neutral-600 hover:text-rose-400 flex items-center gap-1">
                   <Trash2 className="w-3 h-3" /> Clear
                 </button>
               </div>
@@ -1564,8 +1586,8 @@ export default function LiveCaptions({ language = 'en-US', onClose }: LiveCaptio
           )}
         </div>
 
-        <div className="p-3 border-t border-white/5 text-center text-[10px] text-neutral-600 flex items-center justify-center gap-1.5">
-          <span>Built for independence & inclusion</span>
+        <div className="p-3 border-t border-white/5 text-center text-xs text-neutral-600 flex items-center justify-center gap-1.5">
+          <span>{isAr ? 'صُنع من أجل الاستقلالية والشمول' : L('Built for independence & inclusion')}</span>
           <Heart className="w-2.5 h-2.5 text-rose-500/60 animate-pulse" />
         </div>
       </div>

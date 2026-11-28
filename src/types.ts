@@ -141,6 +141,8 @@ export interface UserProfile {
   points: number;
   quizDuration?: number; // in seconds
   onboardingComplete: boolean;
+  /** Blind-first mode: land on the voice-first home with four huge buttons and spoken guidance. Set during onboarding when the user picks a visual impairment. */
+  voiceFirstMode?: boolean;
   age?: number;
   isMinor?: boolean;
   photoURL?: string;
@@ -215,6 +217,12 @@ export interface UserProfile {
   /** Timestamp when a Super Admin requested/sent a password reset email for this user. */
   passwordResetRequestedAt?: string;
   /**
+   * One-time informed consent for camera/microphone/location features.
+   * Stored with the policy version and date so consent can be re-asked
+   * when the policy materially changes. Guests keep it in localStorage.
+   */
+  mediaConsent?: MediaConsentRecord;
+  /**
    * Labeled snapshot descriptions saved from the Visual Companion (blind
    * users: "remember this as..."). Kept short and text-only — no images are
    * stored, just what the person asked us to remember about it.
@@ -229,6 +237,12 @@ export interface UserProfile {
    * Universal Accessibility Passport: unified user settings across all disability modules.
    */
   accessibilityPassport?: AccessibilityPassport;
+}
+
+export interface MediaConsentRecord {
+  granted: boolean;
+  version: string;      // consent text version, e.g. "2026-11-27"
+  consentedAt: string;  // ISO date string
 }
 
 export interface VisionMemory {

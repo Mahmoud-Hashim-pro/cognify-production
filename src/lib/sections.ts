@@ -690,7 +690,7 @@ export const PRODUCT_SECTIONS: ProductSectionDefinition[] = [
       {
         id: 'feat_accessible_communication_workspace',
         titleEn: 'Accessible Communication Assistant Workspace',
-        titleAr: 'مساعد التواصل الشامل لذوي الإعاقة البصرية',
+        titleAr: 'مساعد التواصل الشامل',
         descEn: 'Everyday communication suite: human & live video assistance, handwriting reader, form explainer, voice note transcriber, social message describer, and payment guidance.',
         descAr: 'منظومة التواصل اليومي: المساعدة البشرية وفيديو البث الحي، قراءة الخط اليدوي، شرح النماذج، تفريغ الرسائل الصوتية، واصف صور المحادثات، وإرشادات الدفع.',
         iconName: 'MessageSquare',

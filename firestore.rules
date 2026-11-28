@@ -32,23 +32,45 @@ service cloud.firestore {
     // FOUNDER super admins are hardcoded here and can NEVER be demoted — that's
     // the lockout protection. Runtime super admins carry isSuperAdmin:true on
     // their user document and can be granted/revoked from the Admin Dashboard.
+    // Admin identity lists live in the /config/admins document (written ONLY by
+    // scripts/set-admin-claims.mjs via the Admin SDK; client reads/writes are
+    // denied by the match block below). No personal emails are hardcoded in
+    // these rules anymore. If the document is missing, every helper fails
+    // closed (empty lists), so run the script BEFORE deploying these rules.
+    function adminConfigPath() {
+      return /databases/$(database)/documents/config/admins;
+    }
+    function founderEmails() {
+      return exists(adminConfigPath())
+        ? get(adminConfigPath()).data.get('founderEmails', [])
+        : [];
+    }
+    function permanentAdminEmails() {
+      return exists(adminConfigPath())
+        ? get(adminConfigPath()).data.get('permanentAdminEmails', [])
+        : [];
+    }
+    function securityAuditsOwnerEmail() {
+      return exists(adminConfigPath())
+        ? get(adminConfigPath()).data.get('securityAuditsOwner', '')
+        : '';
+    }
+
     function isFounderSuperAdmin() {
       // .lower() so a differently-cased token email can't miss the allowlist
       // (the stored side in isFounderTarget/protectedEmails already lowercases).
       // STRICT REQUIREMENT: email_verified must be true to prevent unverified email spoofing.
       return isAuthenticated() &&
              request.auth.token.get('email_verified', false) == true &&
-             request.auth.token.email.lower() in [
-               "modyhashim2006@gmail.com",
-               "pro.mahmoud.h@gmail.com"
-             ];
+             request.auth.token.email.lower() in founderEmails();
     }
 
-    // Security & DevTools telemetry stream is strictly restricted to modyhashim2006@gmail.com
+    // Security & DevTools telemetry stream is strictly restricted to the
+    // designated security-audits owner from /config/admins.
     function isSecurityAuditsOwner() {
       return isAuthenticated() &&
              request.auth.token.get('email_verified', false) == true &&
-             request.auth.token.email.lower() == "modyhashim2006@gmail.com";
+             request.auth.token.email.lower() == securityAuditsOwnerEmail();
     }
 
     // Super admin = Custom Claims role check (primary: request.auth.token.role == 'superadmin')
@@ -67,10 +89,7 @@ service cloud.firestore {
 
     // The TARGET of this write is a founder — their super-admin status is immutable.
     function isFounderTarget() {
-      return resource.data.get('email', '').lower() in [
-        "modyhashim2006@gmail.com",
-        "pro.mahmoud.h@gmail.com"
-      ];
+      return resource.data.get('email', '').lower() in founderEmails();
     }
 
     // The isSuperAdmin flag must not change on this write.
@@ -82,11 +101,7 @@ service cloud.firestore {
     function isPermanentAdmin() {
       return isAuthenticated() &&
              request.auth.token.get('email_verified', false) == true &&
-             request.auth.token.email.lower() in [
-               "its.alkhateeb@gmail.com",
-               "esraahosni8@gmail.com",
-               "audit.test.student2026@gmail.com"
-             ];
+             request.auth.token.email.lower() in permanentAdminEmails();
     }
 
     // Admin = Custom Claims role check (primary: request.auth.token.role in ['admin', 'superadmin'])
@@ -110,12 +125,7 @@ service cloud.firestore {
 
     // All permanent members (super admins + permanent admins), lowercase.
     function protectedEmails() {
-      return [
-        "modyhashim2006@gmail.com",
-        "pro.mahmoud.h@gmail.com",
-        "its.alkhateeb@gmail.com",
-        "esraahosni8@gmail.com"
-      ];
+      return founderEmails() + permanentAdminEmails();
     }
 
     // A "protected" doc belongs to a permanent member (super admin or permanent
@@ -311,6 +321,12 @@ service cloud.firestore {
       }
     }
 
+    // Admin identity configuration: managed only by the Admin SDK script
+    // (Admin SDK bypasses security rules). Clients can neither read nor write.
+    match /config/{docId} {
+      allow read, write: if false;
+    }
+
     match /securityAudits/{auditId} {
       allow create: if isAuthenticated() &&
                        request.resource.data.keys().hasAll(['eventType', 'timestamp']) &&
@@ -321,7 +337,8 @@ service cloud.firestore {
     }
 
     match /system/{docId} {
-      allow read: if true; // Connection test path
+      // Only the connection-test document is readable without sign-in.
+      allow read: if docId == 'ping';
     }
 
     // ── Emergency Incidents Persistent Audit Log ───────────────────────────

@@ -111,7 +111,7 @@ export default function OrgDashboard({ profile, onNavigateBack }: OrgDashboardPr
               {L("Organization Dashboard", "لوحة متابعة الجهة")}
               <span className="ms-2 text-xs font-black text-primary bg-primary-soft px-2 py-0.5 rounded-lg align-middle">{org}</span>
             </h2>
-            <p className="text-[11px] font-bold text-text-muted uppercase tracking-widest mt-1.5">
+            <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1.5">
               {L("Your organization's users only — follow-up view", "مستخدمو جهتك فقط — لوحة متابعة")}
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function OrgDashboard({ profile, onNavigateBack }: OrgDashboardPr
               <div className={`p-2.5 rounded-xl ${cls}`}><Icon className="w-5 h-5" /></div>
               <div>
                 <div className="text-2xl font-black text-white leading-none tabular-nums">{value}</div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</div>
               </div>
             </div>
           ))}
@@ -144,7 +144,7 @@ export default function OrgDashboard({ profile, onNavigateBack }: OrgDashboardPr
             <div className="overflow-x-auto">
               <table className="w-full text-start border-collapse">
                 <thead>
-                  <tr className="bg-[#080409]/80 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-[#4A1224]/60">
+                  <tr className="bg-[#080409]/80 text-xs uppercase font-black tracking-widest text-slate-400 border-b border-[#4A1224]/60">
                     <th className="p-4 text-start">{L("User", "المستخدم")}</th>
                     <th className="p-4 text-start">{L("Disability", "نوع الإعاقة")}</th>
                     <th className="p-4 text-start">{L("Mode", "الوضع")}</th>
@@ -162,20 +162,20 @@ export default function OrgDashboard({ profile, onNavigateBack }: OrgDashboardPr
                       <tr key={u.uid} className={idle ? "bg-amber-500/5 hover:bg-white/[0.02]" : "hover:bg-white/[0.02]"}>
                         <td className="p-4 font-bold text-white">{u.name || u.email?.split('@')[0] || L("Unnamed", "بدون اسم")}</td>
                         <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-[#150917]/80 text-slate-200 border border-[#4A1224]/50/50">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-[#150917]/80 text-slate-200 border border-[#4A1224]/50/50">
                             <DisIcon className="w-3.5 h-3.5 text-[#E5A93C]" /> {u.disabilityType || L("Other", "أخرى")}
                           </span>
                         </td>
                         <td className="p-4 text-xs font-bold text-slate-400">{u.accessibilityMode || '—'}</td>
                         <td className="p-4">
                           {d <= 7 ? (
-                            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase text-emerald-400">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase text-emerald-400">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {L("Active", "نشط")}
                             </span>
                           ) : d === Infinity ? (
-                            <span className="text-[10px] font-black uppercase text-slate-500">{L("Never", "لم يبدأ")}</span>
+                            <span className="text-xs font-black uppercase text-slate-500">{L("Never", "لم يبدأ")}</span>
                           ) : (
-                            <span className="text-[10px] font-black uppercase text-amber-400 tabular-nums">
+                            <span className="text-xs font-black uppercase text-amber-400 tabular-nums">
                               {Math.floor(d)} {L("d idle", "يوم خمول")}
                             </span>
                           )}
@@ -184,7 +184,7 @@ export default function OrgDashboard({ profile, onNavigateBack }: OrgDashboardPr
                         <td className="p-4 text-end">
                           <a
                             href={`mailto:${u.email}`}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors border border-[#4A1224]/50"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors border border-[#4A1224]/50"
                           >
                             <Mail className="w-3 h-3" /> {L("Email", "إيميل")}
                           </a>
@@ -204,7 +204,7 @@ export default function OrgDashboard({ profile, onNavigateBack }: OrgDashboardPr
           </div>
         )}
 
-        <p className="text-[11px] text-faint font-medium">
+        <p className="text-xs text-faint font-medium">
           {L("Read-only view: organization staff can follow up but cannot modify or delete accounts.",
              "لوحة قراءة فقط: مشرف الجهة يتابع مستخدميه ولا يمكنه تعديل أو حذف أي حساب.")}
         </p>

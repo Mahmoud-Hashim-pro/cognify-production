@@ -6,7 +6,7 @@
  * Returns: { result: string, cached?: boolean }
  *
  * Features (Phase 8 Backend Reliability):
- * 1. Generous payload sizes (up to 50MB audio, 25MB images/documents).
+ * 1. Payload sizes capped at 3MB binary (Vercel serverless body ceiling ~4.5MB).
  * 2. Assistive category quota accounting & accessible error explanations.
  * 3. In-flight request deduplication to prevent duplicate provider charges.
  * 4. User-isolated idempotent response caching (zero cross-user leakage).
@@ -63,15 +63,21 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // Generous media size allowance: 50MB for audio, 25MB for images/documents
+    // Media size limits reflect the real platform ceiling: Vercel serverless
+    // truncates request bodies at ~4.5MB, so anything above 3MB of binary
+    // (about 4MB base64) would 413 at the platform before this code runs.
+    // Longer recordings/files should go through the Gemini Files API or
+    // Vercel Blob instead of inline base64.
     const inlineBytes = parts.reduce(
       (n: number, p: any) => n + (typeof p?.inlineData?.data === 'string' ? p.inlineData.data.length : 0),
       0
     );
-    const maxAllowedBytes = isAudio ? 50 * 1024 * 1024 : hasMedia ? 25 * 1024 * 1024 : 4 * 1024 * 1024;
+    const maxAllowedBytes = 4 * 1024 * 1024; // base64 chars, ~3MB of binary
     if (inlineBytes > maxAllowedBytes) {
       res.status(413).json({
-        error: `Attached media exceeds the ${isAudio ? '50MB' : '25MB'} limit. Please provide a shorter recording or compressed file.`,
+        error: 'Attached media exceeds the 3MB limit. Please provide a shorter recording or compressed file.',
+        code: 'PAYLOAD_TOO_LARGE',
+        maxBytes: 3 * 1024 * 1024,
       });
       return;
     }
@@ -89,7 +95,12 @@ export default async function handler(req: any, res: any) {
 
     // 2. Execute with in-flight deduplication to avoid double-spend on rapid triggers
     const finalResult = await deduplicateInflight(cacheKey, async () => {
-      const body = JSON.stringify({ contents: [{ role: 'user', parts }] });
+      const body = JSON.stringify({
+        contents: [{ role: 'user', parts }],
+        // Vision/OCR reads numbers and text: low temperature avoids invented
+        // denominations/dates. Chat-only payloads keep the livelier 0.7.
+        generationConfig: hasMedia || isAudio ? { temperature: 0.2, topP: 0.8 } : { temperature: 0.7, topP: 0.95 },
+      });
       const timeoutMs = isAudio ? 60000 : 25000;
       const { res: gres } = await geminiFetch('generateContent', body, { category, timeoutMs, byokKey: req.byokKey });
       if (gres) {

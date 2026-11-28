@@ -51,9 +51,9 @@ export default function ChatErgonomicsBar({
   };
 
   return (
-    <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#0D2542] border border-[#22354E] shadow-md backdrop-blur-md">
+    <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#0D2542] border border-[#24476F] shadow-md backdrop-blur-md">
       {/* Font Scaler Controls */}
-      <div className="flex items-center bg-[#0A203A] border border-[#22354E] rounded-xl p-0.5">
+      <div className="flex items-center bg-[#0A203A] border border-[#24476F] rounded-xl p-0.5">
         <button
           type="button"
           onClick={handleDecreaseFont}
@@ -62,11 +62,11 @@ export default function ChatErgonomicsBar({
           title={localize(language, 'Decrease font size (A-)', 'تصغير حجم الخط (A-)')}
           aria-label="Decrease font size"
         >
-          <span className="text-[11px] font-black leading-none px-1">A-</span>
+          <span className="text-xs font-black leading-none px-1">A-</span>
         </button>
 
         <span
-          className="px-1.5 text-[10px] font-bold text-[#4B9FE1] font-mono select-none"
+          className="px-1.5 text-xs font-bold text-[#4B9FE1] font-mono select-none"
           title={localize(language, scaleLabels[fontScale].en, scaleLabels[fontScale].ar)}
         >
           {fontScale === 'sm' ? '85%' : fontScale === 'base' ? '100%' : fontScale === 'lg' ? '115%' : '130%'}
@@ -80,7 +80,7 @@ export default function ChatErgonomicsBar({
           title={localize(language, 'Increase font size (A+)', 'تكبير حجم الخط (A+)')}
           aria-label="Increase font size"
         >
-          <span className="text-[11px] font-black leading-none px-1">A+</span>
+          <span className="text-xs font-black leading-none px-1">A+</span>
         </button>
       </div>
 
@@ -90,8 +90,8 @@ export default function ChatErgonomicsBar({
         onClick={onToggleEyeComfort}
         className={`flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all border ${
           isEyeComfort
-            ? 'bg-[#1A283D]/60 border-[#E5A93C]/60 text-[#4B9FE1] shadow-md shadow-[#1A283D]/20'
-            : 'bg-[#131E2E] border-[#22354E]/50 text-slate-400 hover:text-[#4B9FE1] hover:border-[#E5A93C]/40'
+            ? 'bg-[#17355C]/60 border-[#E5A93C]/60 text-[#4B9FE1] shadow-md shadow-[#17355C]/20'
+            : 'bg-[#112C4F] border-[#24476F]/50 text-slate-400 hover:text-[#4B9FE1] hover:border-[#E5A93C]/40'
         }`}
         title={localize(
           language,
@@ -100,7 +100,7 @@ export default function ChatErgonomicsBar({
         )}
       >
         <Eye className={`w-3.5 h-3.5 ${isEyeComfort ? 'text-[#4B9FE1] fill-[#E5A93C]/20' : 'text-slate-400'}`} />
-        <span className="hidden md:inline text-[10px]">
+        <span className="hidden md:inline text-xs">
           {isEyeComfort
             ? localize(language, 'Warm Hue', 'قراءة دافئة')
             : localize(language, 'Comfort', 'راحة العين')}
@@ -111,7 +111,7 @@ export default function ChatErgonomicsBar({
       <button
         type="button"
         onClick={onOpenSearch}
-        className="p-1.5 rounded-xl bg-[#131E2E] border border-[#22354E]/50 text-slate-400 hover:text-[#4B9FE1] hover:border-[#E5A93C]/40 transition-colors"
+        className="p-1.5 rounded-xl bg-[#112C4F] border border-[#24476F]/50 text-slate-400 hover:text-[#4B9FE1] hover:border-[#E5A93C]/40 transition-colors"
         title={localize(language, 'Search within this chat session', 'بحث داخل هذه المحادثة')}
         aria-label="Search within chat"
       >
@@ -124,14 +124,14 @@ export default function ChatErgonomicsBar({
         onClick={onOpenBookmarks}
         className={`flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all border ${
           bookmarksCount > 0
-            ? 'bg-[#1A283D]/40 border-[#E5A93C]/40 text-[#4B9FE1] hover:bg-[#1A283D]/60'
-            : 'bg-[#131E2E] border-[#22354E]/50 text-slate-400 hover:text-[#4B9FE1]'
+            ? 'bg-[#17355C]/40 border-[#E5A93C]/40 text-[#4B9FE1] hover:bg-[#17355C]/60'
+            : 'bg-[#112C4F] border-[#24476F]/50 text-slate-400 hover:text-[#4B9FE1]'
         }`}
         title={localize(language, 'Open saved key takeaways', 'فتح بنك الأفكار والإجابات المحفوظة')}
       >
         <Bookmark className={`w-3.5 h-3.5 ${bookmarksCount > 0 ? 'fill-[#E5A93C] text-[#4B9FE1]' : 'text-slate-400'}`} />
         {bookmarksCount > 0 && (
-          <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-[#E5A93C]/20 text-[#4B9FE1]">
+          <span className="text-xs font-mono px-1 py-0.2 rounded-full bg-[#E5A93C]/20 text-[#4B9FE1]">
             {bookmarksCount}
           </span>
         )}

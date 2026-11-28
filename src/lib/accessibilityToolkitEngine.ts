@@ -5,6 +5,7 @@
  * Rafiqi Unified Accessibility Toolkit Engine
  * (Phase 7: Integrated Vision, Document Scanner, PDF Evidence Assistant, and Sticker Explainer)
  */
+import { L } from './translations';
 
 import { generateAdaptiveResponse } from '../services/gemini';
 import { cleanVisionDescription } from './visionCleaner';
@@ -15,6 +16,8 @@ export type ToolkitCategory =
   | 'read_scan'
   | 'listen_transcribe'
   | 'format_edu'
+  | 'environment'
+  | 'cognitive_gym'
   | 'saved_activity';
 
 export interface ScannedPageItem {
@@ -61,7 +64,7 @@ export interface ToolkitActivityItem {
   metadata?: Record<string, any>;
 }
 
-export const TOOLKIT_STORAGE_KEY = 'cognify_accessibility_toolkit_activity_v1';
+export const TOOLKIT_STORAGE_KEY = 'rafiqi_accessibility_toolkit_activity_v1';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. WEBP / STICKER INSPECTION & HONEST FORMAT HANDLING
@@ -187,10 +190,10 @@ Format your response strictly as:
     const formatNotice = isAnimated
       ? (isAr
           ? 'تم استيراد ملصق متحرك عبر واجهة المشاركة/الملفات. تم فحص الإطار الأول بأمان دون الولوج لبيانات التطبيقات الخاصة.'
-          : 'Animated sticker received via standard file upload. Primary frame analyzed honestly without accessing external messaging databases.')
+          : L('Animated sticker received via standard file upload. Primary frame analyzed honestly without accessing external messaging databases.'))
       : (isAr
           ? 'تم التحليل عبر واجهة مشاركة النظام/رفع الملفات المعتمدة.'
-          : 'Analyzed via system share/standard file picker.');
+          : L('Analyzed via system share/standard file picker.'));
 
     return {
       summary: cleanVisionDescription(summary),
@@ -205,10 +208,10 @@ Format your response strictly as:
   } catch (err: any) {
     console.error('Failed to analyze sticker/image:', err);
     return {
-      summary: isAr ? 'تعذر وصف الملصق حالياً. يرجى إعادة المحاولة.' : 'Failed to describe image. Please retry.',
+      summary: isAr ? 'تعذر وصف الملصق حالياً. يرجى إعادة المحاولة.' : L('Failed to describe image. Please retry.'),
       detailedDescription: isAr
         ? 'حدث خطأ أثناء فحص الصورة. تأكد من اتصال الإنترنت وأن صيغة الملف مدعومة.'
-        : 'An error occurred while analyzing the image. Please verify internet connection and format.',
+        : L('An error occurred while analyzing the image. Please verify internet connection and format.'),
       inscribedText: '',
       emotionOrVibe: '',
       isAnimated,
@@ -576,7 +579,7 @@ export async function queryPdfWithEvidence(
 ): Promise<DocumentEvidenceResult> {
   if (!documentText.trim() || !question.trim()) {
     return {
-      answer: language === 'ar' ? 'المستند أو السؤال فارغ.' : 'Document or query is empty.',
+      answer: language === 'ar' ? 'المستند أو السؤال فارغ.' : L('Document or query is empty.'),
       evidenceQuote: '',
       pageNumber: 1,
       confidence: 0,
@@ -676,7 +679,7 @@ Format your answer strictly as:
   } catch (err: any) {
     console.error('Failed to query PDF evidence:', err);
     return {
-      answer: isAr ? 'تعذر استخراج الدليل من المستند.' : 'Failed to query document evidence.',
+      answer: isAr ? 'تعذر استخراج الدليل من المستند.' : L('Failed to query document evidence.'),
       evidenceQuote: '',
       pageNumber: 1,
       confidence: 0,

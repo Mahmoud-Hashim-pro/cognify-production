@@ -533,3 +533,166 @@ export function setUserDailyUsageForTesting(
   const record = getOrCreateUserUsage(uid);
   record.dailyCounts[category] = count;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Distributed daily quota (Upstash Redis)
+//
+// The in-memory usageStore above resets on every serverless cold start, so the
+// daily allowances are not enforceable in production. When
+// UPSTASH_REDIS_REST_URL/UPSTASH_REDIS_REST_TOKEN are configured, daily counts
+// live in a Redis hash (cognify:quota:{uid}:{dayKey}, one field per category)
+// that expires at midnight UTC and is shared by every instance. Burst
+// (per-minute) protection stays local: a 60-second window is safe per instance.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const UPSTASH_URL = () => (process.env.UPSTASH_REDIS_REST_URL || '').replace(/\/$/, '');
+const UPSTASH_TOKEN = () => process.env.UPSTASH_REDIS_REST_TOKEN || '';
+
+// Check-then-consume atomically: never increments past the allowance, so
+// over-limit attempts do not inflate the daily counter.
+const QUOTA_LUA = `
+local current = tonumber(redis.call('HGET', KEYS[1], ARGV[1]) or '0')
+local cost = tonumber(ARGV[2])
+local limit = tonumber(ARGV[3])
+redis.call('EXPIREAT', KEYS[1], tonumber(ARGV[4]))
+if current + cost > limit then
+  return {current, 0}
+end
+redis.call('HINCRBY', KEYS[1], ARGV[1], cost)
+return {current + cost, 1}
+`;
+
+let warnedNoQuotaRedis = false;
+function warnNoQuotaRedisOnce(): void {
+  if (warnedNoQuotaRedis) return;
+  warnedNoQuotaRedis = true;
+  if (process.env.NODE_ENV === 'production') {
+    console.error(
+      '[usageQuotaEngine] UPSTASH_REDIS_REST_URL/TOKEN not configured: daily quotas are per-instance memory only. Set the env vars for real enforcement.'
+    );
+  }
+}
+
+/**
+ * Distributed version of checkAndConsumeQuota. Daily counts are enforced in
+ * Redis when configured; otherwise falls back to the in-memory implementation
+ * (local development / tests). Never throws: on Redis failure it falls back to
+ * the in-memory check and logs.
+ */
+export async function checkAndConsumeQuotaDistributed(
+  uid: string,
+  category: AssistiveQuotaCategory,
+  cost = 1
+): Promise<QuotaCheckResult> {
+  if (!UPSTASH_URL() || !UPSTASH_TOKEN()) {
+    warnNoQuotaRedisOnce();
+    return checkAndConsumeQuota(uid, category, cost);
+  }
+
+  const def = ASSISTIVE_QUOTAS[category] || ASSISTIVE_QUOTAS.general_chat;
+  const now = Date.now();
+  const nextMidnight = getNextMidnightUtc();
+  const resetInSeconds = Math.max(1, Math.round((nextMidnight.getTime() - now) / 1000));
+  const resetTimeUtc = nextMidnight.toISOString();
+  const key = `cognify:quota:${uid}:${getUtcDayKey()}`;
+
+  let dailyCount: number;
+  let consumed: boolean;
+  try {
+    const response = await fetch(UPSTASH_URL(), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN()}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        command: 'EVAL',
+        args: [
+          QUOTA_LUA,
+          '1',
+          key,
+          category,
+          String(cost),
+          String(def.dailyAllowance),
+          String(Math.floor(nextMidnight.getTime() / 1000)),
+        ],
+      }),
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!response.ok) throw new Error(`Upstash HTTP ${response.status}`);
+    const payload = await response.json();
+    const result = Array.isArray(payload?.result) ? payload.result : null;
+    if (!result || result.length < 2) throw new Error('Invalid quota response');
+    dailyCount = Number(result[0]);
+    consumed = Number(result[1]) === 1;
+    if (!Number.isFinite(dailyCount)) throw new Error('Invalid quota counter');
+  } catch (err) {
+    console.error(`[usageQuotaEngine] Redis quota check failed (${err instanceof Error ? err.name : 'error'}); falling back to in-memory.`);
+    return checkAndConsumeQuota(uid, category, cost);
+  }
+
+  // Burst protection stays local (60s sliding window is safe per instance)
+  const record = getOrCreateUserUsage(uid);
+  const windowMs = 60 * 1000;
+  record.burstTimestamps[category] = (record.burstTimestamps[category] || []).filter(
+    (t) => now - t < windowMs
+  );
+  const burstCount = record.burstTimestamps[category].length;
+
+  if (!consumed) {
+    const hours = Math.floor(resetInSeconds / 3600);
+    const minutes = Math.floor((resetInSeconds % 3600) / 60);
+    const timeStrEn = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    const timeStrAr = hours > 0 ? `${hours} ساعة و ${minutes} دقيقة` : `${minutes} دقيقة`;
+    const timeStrFr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    return {
+      allowed: false,
+      category,
+      limitType: 'daily',
+      burstRemaining: Math.max(0, def.burstPerMinute - burstCount),
+      burstLimit: def.burstPerMinute,
+      dailyRemaining: 0,
+      dailyLimit: def.dailyAllowance,
+      resetTimeUtc,
+      resetInSeconds,
+      explanation: {
+        en: `You have reached your daily allowance of ${def.dailyAllowance} for ${def.nameEn}. Resets at midnight UTC (in ${timeStrEn}). Other assistive tools remain active.`,
+        ar: `لقد استنفدت الحصة اليومية (${def.dailyAllowance}) لـ ${def.nameAr}. تتجدد الحصة عند منتصف الليل بتوقيت UTC (خلال ${timeStrAr}). باقي الأدوات المساعدة تعمل بشكل طبيعي.`,
+        fr: `Vous avez atteint votre quota journalier de ${def.dailyAllowance} pour ${def.nameFr}. Réinitialisation à minuit UTC (dans ${timeStrFr}).`,
+      },
+    };
+  }
+
+  if (burstCount + cost > def.burstPerMinute) {
+    const oldest = record.burstTimestamps[category][0] || now;
+    const burstResetSeconds = Math.max(1, Math.ceil((windowMs - (now - oldest)) / 1000));
+    return {
+      allowed: false,
+      category,
+      limitType: 'burst',
+      burstRemaining: 0,
+      burstLimit: def.burstPerMinute,
+      dailyRemaining: Math.max(0, def.dailyAllowance - dailyCount),
+      dailyLimit: def.dailyAllowance,
+      resetTimeUtc,
+      resetInSeconds: burstResetSeconds,
+      explanation: {
+        en: `Burst limit reached for ${def.nameEn}. Please wait ${burstResetSeconds} seconds before sending more requests.`,
+        ar: `تم الوصول للحد المؤقت لـ ${def.nameAr}. يرجى الانتظار ${burstResetSeconds} ثانية للمتابعة.`,
+        fr: `Limite temporaire atteinte pour ${def.nameFr}. Veuillez patienter ${burstResetSeconds} secondes.`,
+      },
+    };
+  }
+
+  for (let i = 0; i < cost; i++) {
+    record.burstTimestamps[category].push(now);
+  }
+
+  return {
+    allowed: true,
+    category,
+    burstRemaining: Math.max(0, def.burstPerMinute - (burstCount + cost)),
+    burstLimit: def.burstPerMinute,
+    dailyRemaining: Math.max(0, def.dailyAllowance - dailyCount),
+    dailyLimit: def.dailyAllowance,
+    resetTimeUtc,
+    resetInSeconds,
+  };
+}

@@ -32,7 +32,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       role="alert"
       className={cn(
         'p-8 max-w-lg mx-auto my-8 rounded-3xl text-center space-y-5 font-sans',
-        'bg-cognify-surface-light dark:bg-cognify-surface-dark border border-cognify-error-text-light/20 dark:border-cognify-error-text-dark/30 shadow-lg',
+        'bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark border border-rafiqi-error-text-light/20 dark:border-rafiqi-error-text-dark/30 shadow-lg',
         className
       )}
     >
@@ -41,10 +41,10 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-lg sm:text-xl font-bold text-cognify-text-primary dark:text-cognify-text-dark-primary">
+        <h3 className="text-lg sm:text-xl font-bold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary">
           {title}
         </h3>
-        <p className="text-sm text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-relaxed">
+        <p className="text-sm text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary leading-relaxed">
           {message}
         </p>
       </div>
@@ -54,7 +54,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
           <button
             type="button"
             onClick={() => setShowDetails(!showDetails)}
-            className="text-xs font-semibold text-cognify-text-secondary dark:text-cognify-text-dark-secondary hover:text-rafiqi-primary dark:hover:text-rafiqi-primary-muted inline-flex items-center gap-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus"
+            className="text-xs font-semibold text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary hover:text-rafiqi-primary dark:hover:text-rafiqi-primary-muted inline-flex items-center gap-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-focus"
           >
             <span>{showDetails ? 'Hide technical details' : 'Show technical details'}</span>
             {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}

@@ -1,4 +1,4 @@
-import { localize } from '../lib/translations';
+import { localize, L } from '../lib/translations';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { 
   AriaButton, 
@@ -27,7 +27,7 @@ import {
   GraduationCap, History, Clock, Trash2, Play, FileUp, Download, ExternalLink,
   RotateCcw, Search, X, Database, LogOut
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore, logout } from '../lib/firebase';
 import { toast } from './Toast';
@@ -124,6 +124,8 @@ interface DisabilityModeViewProps {
   initialTool?: VisualToolId;
   initialSection?: ProductSectionId | null;
   onSectionChange?: (section: ProductSectionId | null) => void;
+  /** When set, picking a section opens its first tool directly instead of the section grid page. */
+  onOpenSectionTool?: (section: ProductSectionId) => void;
 }
 
 /**
@@ -132,7 +134,7 @@ interface DisabilityModeViewProps {
  */
 function detectDirectDisabilityTab(_profile: UserProfile): DisabilityTab {
   try {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('cognify_default_disability_tab') : null;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('rafiqi_default_disability_tab') : null;
     if (saved === 'chat' || saved === 'deaf' || saved === 'vision' || saved === 'hub') {
       return saved as DisabilityTab;
     }
@@ -242,8 +244,22 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   initialTool = 'scene',
   initialSection = null,
   onSectionChange,
+  onOpenSectionTool,
 }, ref) {
-  const [selectedVisualTool, setSelectedVisualTool] = useState<VisualToolId>(initialTool);
+  const reduceMotion = useReducedMotion();
+  const [selectedVisualTool, setSelectedVisualTool] = useState<VisualToolId>(() => {
+    // Blind-first flows (BlindHomeView, global voice commands) ask for a specific
+    // vision tool through sessionStorage before navigating here.
+    try {
+      const requested = sessionStorage.getItem('rafiqi_vision_autostart_tool');
+      if (requested) {
+        sessionStorage.removeItem('rafiqi_vision_autostart_tool');
+        const valid: VisualToolId[] = ['scene', 'currency', 'read', 'color', 'object', 'face', 'product'];
+        if (valid.includes(requested as VisualToolId)) return requested as VisualToolId;
+      }
+    } catch { /* sessionStorage unavailable */ }
+    return initialTool;
+  });
 
   const [activeTab, setActiveTab] = useState<DisabilityTab>(() => {
     const directTab = currentTab || detectDirectDisabilityTab(profile);
@@ -299,6 +315,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   }, []);
 
   const handleSelectSection = useCallback((sectionId: ProductSectionId | null) => {
+    if (sectionId && onOpenSectionTool) {
+      onOpenSectionTool(sectionId);
+      return;
+    }
     setSelectedSectionLanding(sectionId);
     if (activeTab !== 'hub') {
       setActiveTab('hub');
@@ -309,7 +329,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
       window.history.pushState({ view: 'disability', tab: 'hub', section: sectionId }, '', newHash);
     }
     if (onSectionChange) onSectionChange(sectionId);
-  }, [activeTab, onTabChange, onSectionChange]);
+  }, [activeTab, onTabChange, onSectionChange, onOpenSectionTool]);
   const [recentActivities, setRecentActivities] = useState<ToolkitActivityItem[]>([]);
   const [spatialObjects, setSpatialObjects] = useState<any[]>([]);
   
@@ -373,7 +393,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
   const handleOpenSavedDoc = (docItem: SavedBookStudioItem) => {
     try {
-      sessionStorage.setItem('cognify_book_studio_active_source', docItem.rawSource);
+      sessionStorage.setItem('rafiqi_book_studio_active_source', docItem.rawSource);
     } catch {}
     if (onNavigate) {
       (onNavigate as any)('book_studio');
@@ -415,7 +435,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     onTabChange?.(targetTab);
     if (targetTab === 'vision' || targetTab === 'deaf' || targetTab === 'chat' || targetTab === 'hub') {
       try {
-        localStorage.setItem('cognify_default_disability_tab', targetTab);
+        localStorage.setItem('rafiqi_default_disability_tab', targetTab);
       } catch {}
       let newMode: AccessibilityMode | null = null;
       let newType: string | null = null;
@@ -441,7 +461,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
     if (activeTab !== 'hub') {
       handleSelectTab('hub');
       try {
-        localStorage.setItem('cognify_default_disability_tab', 'hub');
+        localStorage.setItem('rafiqi_default_disability_tab', 'hub');
         window.history.pushState({ view: 'disability', tab: 'hub' }, '', '#disability/hub');
       } catch {}
     } else {
@@ -978,11 +998,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
   };
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="flex flex-col h-full w-full min-h-screen bg-[#061A33] text-[#F8FAFC] font-sans antialiased overflow-hidden selection:bg-[#1769AA]/40 selection:text-white">
+    <div dir={isAr ? 'rtl' : 'ltr'} className={`flex flex-col h-full w-full min-h-screen font-sans antialiased overflow-hidden selection:bg-[#1769AA]/40 selection:text-white transition-colors ${isDarkMode ? 'bg-[#F5F9FD] dark:bg-[#0A2342] text-slate-900 dark:text-[#F8FAFC]' : 'tool-light bg-[#F5F9FD] text-slate-900'}`}>
       
       {/* ── TOP HEADER (Suppressed when running inside App.tsx shell with onMenuClick) ── */}
       {!onMenuClick && (
-      <header className="relative z-30 h-16 shrink-0 flex items-center justify-between border-b border-[#22354E] bg-[#131E2E]/95 backdrop-blur-xl px-4 sm:px-6 transition-colors">
+      <header className="relative z-30 h-16 shrink-0 flex items-center justify-between border-b border-slate-200 dark:border-[#24476F] bg-white/95 dark:bg-[#112C4F]/95 backdrop-blur-xl px-4 sm:px-6 transition-colors">
         {/* Left Header Group: Logo & Mobile Toggle */}
         <div className="flex items-center gap-3">
           {/* Mobile Sidebar Toggle Button */}
@@ -996,7 +1016,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               }
             }}
             aria-label={localize(profile.language, 'Open navigation menu', 'فتح القائمة الرئيسية')}
-            className="lg:hidden p-2 rounded-xl text-[#94A3B8] hover:text-white bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA]/50 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+            className="lg:hidden p-2 rounded-xl text-slate-500 dark:text-[#94A3B8] hover:text-white bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] hover:border-[#1769AA]/50 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -1012,10 +1032,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               <Brain className="w-5 h-5 text-white" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-black tracking-tight text-[#F8FAFC] leading-none group-hover:text-[#4B9FE1] transition-colors">
+              <span className="text-lg font-black tracking-tight text-slate-900 dark:text-[#F8FAFC] leading-none group-hover:text-[#1769AA] group-hover:dark:text-[#4B9FE1] transition-colors">
                 Rafiqi
               </span>
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-[#1769AA]/30 text-[#4B9FE1] border border-[#1769AA]/50 uppercase tracking-wider">
+              <span className="px-1.5 py-0.5 rounded-md text-xs font-extrabold bg-[#1769AA]/30 text-[#1769AA] dark:text-[#4B9FE1] border border-[#1769AA]/50 uppercase tracking-wider">
                 A11y
               </span>
             </div>
@@ -1023,7 +1043,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
         </div>
 
         {/* Center: Suite Switcher Tabs */}
-        <div className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl bg-[#1A283D] border border-[#22354E]">
+        <div className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F]">
           {[
             { id: 'hub' as const, labelEn: 'All Tools', labelAr: 'جميع الأدوات', Icon: Grid },
             { id: 'vision' as const, labelEn: 'Visual Assistant', labelAr: 'المساعد البصري', Icon: Eye },
@@ -1053,10 +1073,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     handleSelectTab(suite.id);
                   }
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                   isSelected
                     ? 'bg-[#1769AA] text-white shadow-md font-black'
-                    : 'text-[#94A3B8] hover:text-white hover:bg-[#131E2E]'
+                    : 'text-slate-500 dark:text-[#94A3B8] hover:text-white hover:bg-white hover:dark:bg-[#112C4F]'
                 }`}
               >
                 <suite.Icon className="w-3.5 h-3.5 shrink-0" />
@@ -1073,21 +1093,21 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 min-h-[38px] min-w-[38px] rounded-xl border border-[#22354E] bg-[#1A283D] text-[#94A3B8] hover:text-amber-400 hover:border-[#1769AA]/50 transition-all flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+              className="p-2 min-h-[36px] min-w-[38px] rounded-xl border border-slate-200 dark:border-[#24476F] bg-slate-100 dark:bg-[#17355C] text-slate-500 dark:text-[#94A3B8] hover:text-amber-400 hover:border-[#1769AA]/50 transition-all flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               title={isDarkMode ? 'التبديل للوضع النهاري' : 'التبديل للوضع الليلي'}
               aria-label="Toggle light or dark theme"
             >
-              {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-[#94A3B8]" />}
+              {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-500 dark:text-[#94A3B8]" />}
             </button>
           )}
 
           {/* Language Switcher Pill (EN | AR) */}
-          <div className="flex items-center rounded-xl border border-[#22354E] bg-[#1A283D] p-0.5">
+          <div className="flex items-center rounded-xl border border-slate-200 dark:border-[#24476F] bg-slate-100 dark:bg-[#17355C] p-0.5">
             <button
               type="button"
               onClick={() => updateLanguage('English')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                !isAr ? 'bg-[#1769AA] text-white font-black shadow-xs' : 'text-[#94A3B8] hover:text-white'
+                !isAr ? 'bg-[#1769AA] text-white font-black shadow-xs' : 'text-slate-500 dark:text-[#94A3B8] hover:text-white'
               }`}
             >
               EN
@@ -1096,7 +1116,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               type="button"
               onClick={() => updateLanguage('Arabic')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                isAr ? 'bg-[#1769AA] text-white font-black shadow-xs' : 'text-[#94A3B8] hover:text-white'
+                isAr ? 'bg-[#1769AA] text-white font-black shadow-xs' : 'text-slate-500 dark:text-[#94A3B8] hover:text-white'
               }`}
             >
               AR
@@ -1110,16 +1130,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               if (onNavigate) (onNavigate as any)('profile');
               else setShowPassportModal(true);
             }}
-            className="flex items-center gap-2 px-3 py-1.5 min-h-[38px] rounded-full border border-[#22354E] bg-[#1A283D] hover:bg-[#131E2E] hover:border-[#1769AA]/50 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+            className="flex items-center gap-2 px-3 py-1.5 min-h-[36px] rounded-full border border-slate-200 dark:border-[#24476F] bg-slate-100 dark:bg-[#17355C] hover:bg-white hover:dark:bg-[#112C4F] hover:border-[#1769AA]/50 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
             aria-label={localize(profile.language, 'Open user profile', 'فتح الملف الشخصي')}
           >
             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#0D4778] to-[#1769AA] flex items-center justify-center text-xs font-bold text-white shadow-xs">
               {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
             </div>
-            <span className="text-xs font-medium text-[#F8FAFC] max-w-[120px] truncate hidden md:inline">
+            <span className="text-xs font-medium text-slate-900 dark:text-[#F8FAFC] max-w-[120px] truncate hidden md:inline">
               {localize(profile.language, `Welcome, ${profile.name || 'User'}`, `مرحباً، ${profile.name || 'المستخدم'}`)}
             </span>
-            <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8]" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-[#94A3B8]" />
           </button>
         </div>
       </header>
@@ -1130,7 +1150,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
         {/* ── DESKTOP LEFT SIDEBAR (Fallback when onMenuClick is not provided) ── */}
         {!onMenuClick && (
-        <aside className="hidden lg:flex flex-col justify-between w-64 shrink-0 bg-[#131E2E] border-e border-[#22354E] p-4 overflow-y-auto custom-scrollbar">
+        <aside className="hidden lg:flex flex-col justify-between w-64 shrink-0 bg-white dark:bg-[#112C4F] border-e border-slate-200 dark:border-[#24476F] p-4 overflow-y-auto custom-scrollbar">
           {/* Main Sidebar Navigation Links */}
           <div className="space-y-1">
             {/* Home */}
@@ -1141,10 +1161,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                 activeTab === 'hub' && !selectedSectionLanding
                   ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                  : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                  : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
               }`}
             >
-              <Home className="w-4 h-4 text-[#4B9FE1]" />
+              <Home className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
               <span>{localize(profile.language, 'Home', 'الرئيسية')}</span>
             </button>
 
@@ -1159,17 +1179,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                 activeTab === 'vision'
                   ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                  : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                  : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
               }`}
             >
-              <Eye className="w-4 h-4 text-[#4B9FE1]" />
+              <Eye className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
               <span>{localize(profile.language, 'Visual Assistant', 'المساعد البصري')}</span>
             </button>
 
             {/* The Six Official Product Sections */}
             <div className="pt-3 pb-1 px-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#4B9FE1]">
-                {isAr ? 'الأقسام الرسمية (٦)' : 'Official Sections (6)'}
+              <p className="text-xs font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
+                {isAr ? 'الأقسام الرسمية (٦)' : L('Official Sections (6)')}
               </p>
             </div>
 
@@ -1185,11 +1205,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                     isSecActive
                       ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                      : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                      : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <SecIcon className="w-4 h-4 shrink-0 text-[#4B9FE1]" />
+                    <SecIcon className="w-4 h-4 shrink-0 text-[#1769AA] dark:text-[#4B9FE1]" />
                     <span className="truncate">
                       {isAr ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`}
                     </span>
@@ -1203,8 +1223,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
             {/* Essential Tools & Settings */}
             <div className="pt-3 pb-1 px-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]/70">
-                {isAr ? 'أدوات وإعدادات' : 'Tools & Settings'}
+              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
+                {isAr ? 'أدوات وإعدادات' : L('Tools & Settings')}
               </p>
             </div>
 
@@ -1220,10 +1240,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-start ${
                 activeTab === 'progress'
                   ? 'bg-[#1769AA] text-white font-bold shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                  : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                  : 'text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
               }`}
             >
-              <Activity className="w-4 h-4 text-[#4B9FE1]" />
+              <Activity className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
               <span>{localize(profile.language, 'My Progress', 'تقدمي')}</span>
             </button>
 
@@ -1238,10 +1258,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                 activeTab === 'settings'
                   ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                  : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                  : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
               }`}
             >
-              <Settings className="w-4 h-4 text-[#4B9FE1]" />
+              <Settings className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
               <span>{localize(profile.language, 'Settings', 'الإعدادات')}</span>
             </button>
 
@@ -1257,15 +1277,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                   activeTab === 'admin'
                     ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                    : 'font-semibold text-[#4B9FE1] hover:text-[#F8FAFC] hover:bg-[#1A283D] border border-[#1769AA]/20 bg-[#1769AA]/10'
+                    : 'font-semibold text-[#1769AA] dark:text-[#4B9FE1] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C] border border-[#1769AA]/20 bg-[#1769AA]/10'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Database className="w-4 h-4" />
                   <span>{localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
                 </div>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
-                  activeTab === 'admin' ? 'bg-[#061A33] text-[#4B9FE1]' : 'bg-[#1769AA]/20 text-[#4B9FE1]'
+                <span className={`text-xs px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                  activeTab === 'admin' ? 'bg-[#F5F9FD] dark:bg-[#0A2342] text-[#1769AA] dark:text-[#4B9FE1]' : 'bg-[#1769AA]/20 text-[#1769AA] dark:text-[#4B9FE1]'
                 }`}>
                   {localize(profile.language, 'Admin', 'مشرف')}
                 </span>
@@ -1274,16 +1294,16 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           </div>
 
           {/* Bottom Sidebar Accessibility Reassurance Badge */}
-          <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-2 mt-auto text-start shadow-sm">
-            <div className="flex items-center gap-2 text-[#4B9FE1]">
-              <div className="w-8 h-8 rounded-lg bg-[#1769AA]/20 flex items-center justify-center text-[#4B9FE1] shrink-0">
+          <div className="p-4 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] space-y-2 mt-auto text-start shadow-sm">
+            <div className="flex items-center gap-2 text-[#1769AA] dark:text-[#4B9FE1]">
+              <div className="w-8 h-8 rounded-lg bg-[#1769AA]/20 flex items-center justify-center text-[#1769AA] dark:text-[#4B9FE1] shrink-0">
                 <Accessibility className="w-4 h-4" />
               </div>
-              <h4 className="text-xs font-bold text-[#F8FAFC]">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC]">
                 {localize(profile.language, 'Accessibility First', 'الإتاحة أولاً')}
               </h4>
             </div>
-            <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">
               {localize(
                 profile.language,
                 'Rafiqi supports comprehensive assistive technologies with full accessibility for all.',
@@ -1293,14 +1313,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           </div>
 
           {/* Desktop Sidebar Bottom Footer: User Info & Log Out */}
-          <div className="pt-3 mt-3 border-t border-[#22354E] flex items-center justify-between gap-2">
+          <div className="pt-3 mt-3 border-t border-slate-200 dark:border-[#24476F] flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0D4778] to-[#1769AA] flex items-center justify-center text-xs font-bold text-white shrink-0">
                 {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-[#F8FAFC] truncate">{profile.name || 'User'}</p>
-                <p className="text-[10px] text-[#94A3B8] truncate">{profile.email || ''}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC] truncate">{profile.name || 'User'}</p>
+                <p className="text-xs text-slate-500 dark:text-[#94A3B8] truncate">{profile.email || ''}</p>
               </div>
             </div>
             <button
@@ -1325,7 +1345,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
           {isMobileSidebarOpen && (
             <>
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileSidebarOpen(false)}
@@ -1336,21 +1356,21 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 animate={{ x: 0 }}
                 exit={{ x: isAr ? '100%' : '-100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                className={`fixed top-0 bottom-0 ${isAr ? 'right-0' : 'left-0'} w-72 bg-[#131E2E] border-[#22354E] z-50 p-5 flex flex-col justify-between shadow-2xl lg:hidden`}
+                className={`fixed top-0 bottom-0 ${isAr ? 'right-0' : 'left-0'} w-72 bg-white dark:bg-[#112C4F] border-slate-200 dark:border-[#24476F] z-50 p-5 flex flex-col justify-between shadow-2xl lg:hidden`}
               >
                 <div className="space-y-4">
                   {/* Drawer Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-[#22354E]">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-[#24476F]">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-[#1769AA] flex items-center justify-center text-white">
                         <Brain className="w-4 h-4" />
                       </div>
-                      <span className="font-bold text-[#F8FAFC] text-base">Rafiqi</span>
+                      <span className="font-bold text-slate-900 dark:text-[#F8FAFC] text-base">Rafiqi</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsMobileSidebarOpen(false)}
-                      className="p-2 rounded-lg text-[#94A3B8] hover:text-white"
+                      className="p-2 rounded-lg text-slate-500 dark:text-[#94A3B8] hover:text-white"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -1369,10 +1389,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                         activeTab === 'hub' && !selectedSectionLanding
                           ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                          : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                          : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
                       }`}
                     >
-                      <Home className="w-4 h-4 text-[#4B9FE1]" />
+                      <Home className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
                       <span>{localize(profile.language, 'Home', 'الرئيسية')}</span>
                     </button>
 
@@ -1388,17 +1408,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                         activeTab === 'vision'
                           ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                          : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                          : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
                       }`}
                     >
-                      <Eye className="w-4 h-4 text-[#4B9FE1]" />
+                      <Eye className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
                       <span>{localize(profile.language, 'Visual Assistant', 'المساعد البصري')}</span>
                     </button>
 
                     {/* The Six Official Product Sections */}
                     <div className="pt-3 pb-1 px-3">
-                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#4B9FE1]">
-                        {isAr ? 'الأقسام الرسمية (٦)' : 'Official Sections (6)'}
+                      <p className="text-xs font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
+                        {isAr ? 'الأقسام الرسمية (٦)' : L('Official Sections (6)')}
                       </p>
                     </div>
 
@@ -1417,11 +1437,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                             isSecActive
                               ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                              : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                              : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <SecIcon className="w-4 h-4 shrink-0 text-[#4B9FE1]" />
+                            <SecIcon className="w-4 h-4 shrink-0 text-[#1769AA] dark:text-[#4B9FE1]" />
                             <span className="truncate">
                               {isAr ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`}
                             </span>
@@ -1435,8 +1455,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                     {/* Essential Tools & Settings */}
                     <div className="pt-3 pb-1 px-3">
-                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]/70">
-                        {isAr ? 'أدوات وإعدادات' : 'Tools & Settings'}
+                      <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
+                        {isAr ? 'أدوات وإعدادات' : L('Tools & Settings')}
                       </p>
                     </div>
 
@@ -1453,10 +1473,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-start ${
                         activeTab === 'progress'
                           ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                          : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                          : 'text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
                       }`}
                     >
-                      <Activity className="w-4 h-4 text-[#4B9FE1]" />
+                      <Activity className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
                       <span>{localize(profile.language, 'My Progress', 'تقدمي الدراسي')}</span>
                     </button>
 
@@ -1472,10 +1492,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                         activeTab === 'settings'
                           ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                          : 'font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                          : 'font-semibold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C]'
                       }`}
                     >
-                      <Settings className="w-4 h-4 text-[#4B9FE1]" />
+                      <Settings className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
                       <span>{localize(profile.language, 'Settings', 'الإعدادات')}</span>
                     </button>
 
@@ -1492,15 +1512,15 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-start ${
                           activeTab === 'admin'
                             ? 'font-bold bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30 border border-[#1769AA]/40'
-                            : 'font-semibold text-[#4B9FE1] hover:text-[#F8FAFC] hover:bg-[#1A283D] border border-[#1769AA]/20 bg-[#1769AA]/10'
+                            : 'font-semibold text-[#1769AA] dark:text-[#4B9FE1] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:bg-slate-100 hover:dark:bg-[#17355C] border border-[#1769AA]/20 bg-[#1769AA]/10'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <Database className="w-4 h-4" />
                           <span>{localize(profile.language, 'Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
                         </div>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
-                          activeTab === 'admin' ? 'bg-[#061A33] text-[#4B9FE1]' : 'bg-[#1769AA]/20 text-[#4B9FE1]'
+                        <span className={`text-xs px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                          activeTab === 'admin' ? 'bg-[#F5F9FD] dark:bg-[#0A2342] text-[#1769AA] dark:text-[#4B9FE1]' : 'bg-[#1769AA]/20 text-[#1769AA] dark:text-[#4B9FE1]'
                         }`}>
                           {localize(profile.language, 'Admin', 'مشرف')}
                         </span>
@@ -1510,14 +1530,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 </div>
 
                 {/* Bottom Badge */}
-                <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-1.5 text-start">
-                  <div className="flex items-center gap-2 text-[#4B9FE1]">
+                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] space-y-1.5 text-start">
+                  <div className="flex items-center gap-2 text-[#1769AA] dark:text-[#4B9FE1]">
                     <ShieldCheck className="w-4 h-4 shrink-0" />
-                    <h4 className="text-xs font-bold text-[#F8FAFC]">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC]">
                       {localize(profile.language, 'Accessibility First', 'الإتاحة أولاً')}
                     </h4>
                   </div>
-                  <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">
                     {localize(
                       profile.language,
                       'Designed for every learner with high contrast and assistive navigation.',
@@ -1527,14 +1547,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                 </div>
 
                 {/* Mobile Drawer Bottom User & Log Out */}
-                <div className="pt-4 border-t border-[#22354E] flex items-center justify-between gap-3">
+                <div className="pt-4 border-t border-slate-200 dark:border-[#24476F] flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0D4778] to-[#1769AA] flex items-center justify-center text-xs font-bold text-white shrink-0">
                       {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-[#F8FAFC] truncate">{profile.name || 'User'}</p>
-                      <p className="text-[10px] text-[#94A3B8] truncate">{profile.email || ''}</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC] truncate">{profile.name || 'User'}</p>
+                      <p className="text-xs text-slate-500 dark:text-[#94A3B8] truncate">{profile.email || ''}</p>
                     </div>
                   </div>
                   <button
@@ -1568,7 +1588,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'hub' && (
               <motion.div
                 key={selectedSectionLanding ? `section-landing-${selectedSectionLanding}` : 'hub-features-view'}
-                initial={{ opacity: 0, y: 8 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
@@ -1618,17 +1638,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   {/* ── 1. WELCOME HERO SECTION (Exact Reference Match) ── */}
                   <section
                     aria-label={localize(profile.language, 'Welcome to Rafiqi', 'مرحباً بك في رفيقي')}
-                    className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#131E2E] via-[#1A283D] to-[#131E2E] border border-[#22354E] p-6 sm:p-8 lg:p-10 shadow-xl"
+                    className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#112C4F] via-[#17355C] to-[#112C4F] border border-slate-200 dark:border-[#24476F] p-6 sm:p-8 lg:p-10 shadow-xl"
                   >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
                       {/* Left Column: Heading, Subtitle, and Tag */}
                       <div className="lg:col-span-7 space-y-4 text-start">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-[#1769AA]/15 text-[#4B9FE1] border border-[#1769AA]/30 shadow-xs">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] border border-[#1769AA]/30 shadow-xs">
                           <Sparkles className="w-3.5 h-3.5" />
                           <span>{localize(profile.language, 'Welcome to Rafiqi', 'مرحباً بك في رفيقي')}</span>
                         </div>
 
-                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#F8FAFC] tracking-tight leading-tight">
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-[#F8FAFC] tracking-tight leading-tight">
                           {localize(
                             profile.language,
                             'Tools for a More Inclusive Learning Experience',
@@ -1636,7 +1656,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           )}
                         </h1>
 
-                        <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed max-w-xl font-normal">
+                        <p className="text-sm sm:text-base text-slate-500 dark:text-[#94A3B8] leading-relaxed max-w-xl font-normal">
                           {localize(
                             profile.language,
                             'Explore assistive tools designed to support diverse learning needs, from vision enhancement to speech and cognitive aids.',
@@ -1648,7 +1668,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           <Button
                             variant="outline"
                             size="sm"
-                            leftIcon={<ShieldCheck className="w-4 h-4 text-[#4B9FE1]" />}
+                            leftIcon={<ShieldCheck className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />}
                             onPress={() => setShowPassportModal(true)}
                             aria-label={localize(profile.language, 'Open Accessibility Passport', 'فتح جواز التيسير')}
                             className="w-full sm:w-auto min-h-[44px]"
@@ -1672,11 +1692,23 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       {/* Right Column: Seamless Transparent Floating Illustration with Ambient Glow */}
                       <div className="lg:col-span-5 relative flex items-center justify-center">
                         <div className="absolute inset-0 bg-radial from-[#1769AA]/35 via-[#1769B0]/20 to-transparent blur-3xl -z-10 rounded-full scale-125 pointer-events-none" />
-                        <img
-                          src="/assets/inclusive-learners-illustration.png"
-                          alt={localize(profile.language, 'Diverse learners collaborating inclusively', 'طلاب متنوعون يتعلمون معاً في بيئة ميسرة')}
-                          className="w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px] object-contain drop-shadow-[0_15px_35px_rgba(8,127,140,0.35)] select-none pointer-events-none transform transition-transform duration-500 hover:scale-105"
-                        />
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcSet="/assets/inclusive-learners-illustration-480.webp 480w, /assets/inclusive-learners-illustration-768.webp 768w, /assets/inclusive-learners-illustration-1200.webp 1200w"
+                            sizes="(min-width: 1024px) 420px, (min-width: 640px) 380px, 320px"
+                          />
+                          <img
+                            src="/assets/inclusive-learners-illustration-768.webp"
+                            alt={localize(profile.language, 'Diverse learners collaborating inclusively', 'طلاب متنوعون يتعلمون معاً في بيئة ميسرة')}
+                            width={768}
+                            height={429}
+                            fetchPriority="high"
+                            loading="eager"
+                            decoding="async"
+                            className="w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px] object-contain drop-shadow-[0_15px_35px_rgba(8,127,140,0.35)] select-none pointer-events-none transform transition-transform duration-500 hover:scale-105"
+                          />
+                        </picture>
                       </div>
                     </div>
                   </section>
@@ -1688,11 +1720,11 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   >
                     <div className="flex items-center justify-between px-1">
                       <div>
-                        <h2 className="text-sm font-black uppercase tracking-wider text-[#F8FAFC] flex items-center gap-2">
-                          <Layers className="w-4 h-4 text-[#4B9FE1]" />
+                        <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-[#F8FAFC] flex items-center gap-2">
+                          <Layers className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
                           <span>{localize(profile.language, 'The Six Official Product Sections', 'أقسام رفيقي الستة الرسمية')}</span>
                         </h2>
-                        <p className="text-xs text-[#94A3B8] mt-0.5">
+                        <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5">
                           {localize(
                             profile.language,
                             'Core pillars of Rafiqi assistive ecosystem. Choose any section to explore its dedicated suite.',
@@ -1717,34 +1749,34 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                 handleSelectSection(sec.id);
                               }
                             }}
-                            className="group p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-4 shadow-md text-start outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+                            className="group p-5 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] hover:border-[#1769AA] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-4 shadow-md text-start outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                             aria-label={localize(profile.language, sec.titleEn, sec.titleAr)}
                           >
                             <div className="space-y-2.5">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#131E2E] text-[#4B9FE1] border border-[#22354E]">
+                                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-[#112C4F] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#24476F]">
                                   {localize(profile.language, `Section ${sec.numericOrder} of 6`, `القسم ${sec.numericOrder} من 6`)}
                                 </span>
-                                <span className="text-[11px] text-[#94A3B8] font-semibold">
+                                <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-semibold">
                                   {localize(profile.language, `${sec.features.length} tools`, `${sec.features.length} أدوات`)}
                                 </span>
                               </div>
 
                               <div className="flex items-center gap-3 pt-1">
-                                <div className="w-10 h-10 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#4B9FE1] group-hover:bg-[#1769AA] group-hover:text-white flex items-center justify-center transition-colors">
+                                <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] text-[#1769AA] dark:text-[#4B9FE1] group-hover:bg-[#1769AA] group-hover:text-white flex items-center justify-center transition-colors">
                                   <SecIcon className="w-5 h-5" />
                                 </div>
-                                <h3 className="text-base font-bold text-[#F8FAFC] group-hover:text-[#4B9FE1] transition-colors">
+                                <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC] group-hover:text-[#1769AA] group-hover:dark:text-[#4B9FE1] transition-colors">
                                   {localize(profile.language, sec.titleEn, sec.titleAr)}
                                 </h3>
                               </div>
 
-                              <p className="text-xs text-[#94A3B8] leading-relaxed line-clamp-2">
+                              <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed line-clamp-2">
                                 {localize(profile.language, sec.shortExplanationEn, sec.shortExplanationAr)}
                               </p>
                             </div>
 
-                            <div className="pt-3 border-t border-[#22354E] flex items-center justify-between text-xs font-bold text-[#4B9FE1]">
+                            <div className="pt-3 border-t border-slate-200 dark:border-[#24476F] flex items-center justify-between text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
                               <span>{localize(profile.language, 'Explore Section Suite', 'استكشف أدوات القسم')}</span>
                               <ChevronRight className={`w-4 h-4 transition-transform ${isAr ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                             </div>
@@ -1760,8 +1792,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     className="space-y-3.5"
                   >
                     <div className="flex items-center justify-between px-1">
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-[#4B9FE1]" />
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8] flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                         <span>{localize(profile.language, 'Continue Reading & Working', 'متابعة القراءة والعمل الأخير')}</span>
                       </h2>
                     </div>
@@ -1771,19 +1803,19 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         {readingHistory.slice(0, 3).map((item) => (
                           <div
                             key={item.id}
-                            className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA]/60 transition-all flex flex-col justify-between gap-3 text-start shadow-sm"
+                            className="p-4 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] hover:border-[#1769AA]/60 transition-all flex flex-col justify-between gap-3 text-start shadow-sm"
                           >
                             <div>
-                              <div className="flex items-center justify-between text-[10px] text-[#94A3B8] mb-1">
-                                <span className="px-2 py-0.5 rounded bg-[#131E2E] text-[#4B9FE1] font-bold border border-[#22354E]">
+                              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
+                                <span className="px-2 py-0.5 rounded bg-white dark:bg-[#112C4F] text-[#1769AA] dark:text-[#4B9FE1] font-bold border border-slate-200 dark:border-[#24476F]">
                                   {item.fileType.toUpperCase()}
                                 </span>
                                 <span>{new Date(item.lastOpenedTimestamp).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}</span>
                               </div>
-                              <h4 className="text-sm font-bold text-[#F8FAFC] truncate" title={item.title}>
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-[#F8FAFC] truncate" title={item.title}>
                                 {item.title}
                               </h4>
-                              <p className="text-xs text-[#94A3B8] mt-1">
+                              <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-1">
                                 {localize(
                                   profile.language,
                                   `Page ${item.lastPageNumber} (${item.progressPercentage}%) · ${item.wordCount} words`,
@@ -1809,19 +1841,19 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         {recentDocs.slice(0, 3 - Math.min(3, readingHistory.length)).map((docItem) => (
                           <div
                             key={docItem.id}
-                            className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA]/60 transition-all flex flex-col justify-between gap-3 text-start shadow-sm"
+                            className="p-4 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] hover:border-[#1769AA]/60 transition-all flex flex-col justify-between gap-3 text-start shadow-sm"
                           >
                             <div>
-                              <div className="flex items-center justify-between text-[10px] text-[#94A3B8] mb-1">
-                                <span className="px-2 py-0.5 rounded bg-[#131E2E] text-[#4B9FE1] font-bold border border-[#22354E]">
+                              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#94A3B8] mb-1">
+                                <span className="px-2 py-0.5 rounded bg-white dark:bg-[#112C4F] text-[#1769AA] dark:text-[#4B9FE1] font-bold border border-slate-200 dark:border-[#24476F]">
                                   {docItem.template}
                                 </span>
                                 <span>{new Date(docItem.updatedAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}</span>
                               </div>
-                              <h4 className="text-sm font-bold text-[#F8FAFC] truncate" title={docItem.title}>
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-[#F8FAFC] truncate" title={docItem.title}>
                                 {docItem.title}
                               </h4>
-                              <p className="text-xs text-[#94A3B8] mt-1">
+                              <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-1">
                                 {localize(
                                   profile.language,
                                   `${docItem.wordCount || 0} words in Book Studio`,
@@ -1833,25 +1865,25 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             <button
                               type="button"
                               onClick={() => handleOpenSavedDoc(docItem)}
-                              className="w-full py-2 px-3 rounded-xl bg-[#1A283D] hover:bg-[#131E2E] border border-[#22354E] hover:border-[#1769AA] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                              className="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-[#17355C] hover:bg-white hover:dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] hover:border-[#1769AA] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                             >
-                              <BookOpen className="w-3.5 h-3.5 text-[#4B9FE1]" />
+                              <BookOpen className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                               <span>{localize(profile.language, 'Open in Studio', 'فتح في الاستوديو')}</span>
                             </button>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="p-6 rounded-2xl bg-[#131E2E] border border-[#22354E] flex flex-col sm:flex-row items-center justify-between gap-4 text-start">
+                      <div className="p-6 rounded-2xl bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] flex flex-col sm:flex-row items-center justify-between gap-4 text-start">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[#1A283D] border border-[#22354E] flex items-center justify-center text-[#4B9FE1] shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] flex items-center justify-center text-[#1769AA] dark:text-[#4B9FE1] shrink-0">
                             <BookOpen className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-bold text-[#F8FAFC]">
+                            <h4 className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC]">
                               {localize(profile.language, 'No recent reading sessions yet', 'لا توجد جلسات قراءة أو مستندات نشطة حتى الآن')}
                             </h4>
-                            <p className="text-[11px] text-[#94A3B8] mt-0.5">
+                            <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5">
                               {localize(
                                 profile.language,
                                 'Start reading an EPUB/PDF book, transcribe a lecture, or scan a document with your camera.',
@@ -1879,9 +1911,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               if (onNavigate) (onNavigate as any)('toolkit');
                               else handleSelectTab('hub');
                             }}
-                            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-[#1A283D] hover:bg-[#131E2E] border border-[#22354E] text-[#F8FAFC] text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-[#17355C] hover:bg-white hover:dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] text-slate-900 dark:text-[#F8FAFC] text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                           >
-                            <ScanLine className="w-3.5 h-3.5 text-[#4B9FE1]" />
+                            <ScanLine className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                             <span>{localize(profile.language, 'Camera Scanner', 'سكانر المستندات')}</span>
                           </button>
                         </div>
@@ -1895,8 +1927,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     className="space-y-2.5"
                   >
                     <div className="flex items-center justify-between px-1">
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-[#4B9FE1]" />
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8] flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                         <span>{localize(profile.language, 'Common Actions', 'إجراءات سريعة شائعة')}</span>
                       </h2>
                     </div>
@@ -1966,7 +1998,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           type="button"
                           onClick={item.action}
                           aria-label={localize(profile.language, item.titleEn, item.titleAr)}
-                          className="p-3 min-h-[48px] rounded-2xl border border-[#22354E] bg-[#1A283D] hover:bg-[#131E2E] hover:border-[#1769AA]/50 text-[#F8FAFC] flex items-center gap-3 transition-all active:scale-95 cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] last:col-span-2 sm:last:col-span-1 lg:last:col-span-1 shadow-sm"
+                          className="p-3 min-h-[48px] rounded-2xl border border-slate-200 dark:border-[#24476F] bg-slate-100 dark:bg-[#17355C] hover:bg-white hover:dark:bg-[#112C4F] hover:border-[#1769AA]/50 text-slate-900 dark:text-[#F8FAFC] flex items-center gap-3 transition-all active:scale-95 cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] last:col-span-2 sm:last:col-span-1 lg:last:col-span-1 shadow-sm"
                         >
                           <FeatureIcon icon={<item.icon className="w-4 h-4" />} tone={item.tone} size="sm" />
                           <span className="text-xs font-bold truncate">
@@ -1986,7 +2018,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         <label htmlFor="dashboard-feature-search" className="sr-only">
                           {localize(profile.language, 'Search for tools', 'البحث عن الأدوات')}
                         </label>
-                        <Search className="w-4 h-4 text-[#4B9FE1] absolute start-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <Search className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1] absolute start-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <input
                           id="dashboard-feature-search"
                           type="search"
@@ -1997,14 +2029,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             'Search for tools (e.g. camera, currency, speech, study)...',
                             'ابحث عن الأدوات (مثال: كاميرا، عملات، تفريغ، مذاكرة)...'
                           )}
-                          className="w-full bg-[#131E2E] border border-[#22354E] rounded-2xl py-3 ps-11 pe-10 text-sm text-[#F8FAFC] placeholder:text-[#94A3B8]/60 outline-none focus:border-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/20 transition-all shadow-inner"
+                          className="w-full bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] rounded-2xl py-3 ps-11 pe-10 text-sm text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-500/60 placeholder:dark:text-[#94A3B8]/60 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA] focus:ring-2 focus:ring-[#1769AA]/20 transition-all shadow-inner"
                         />
                         {searchQuery && (
                           <button
                             type="button"
                             onClick={() => setSearchQuery('')}
                             aria-label={localize(profile.language, 'Clear search', 'مسح البحث')}
-                            className="absolute inset-y-0 end-0 pe-4 flex items-center text-[#94A3B8] hover:text-[#F8FAFC] cursor-pointer"
+                            className="absolute inset-y-0 end-0 pe-4 flex items-center text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] cursor-pointer"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -2016,7 +2048,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                         <select
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value as DashboardCategory)}
-                          className="w-full bg-[#131E2E] border border-[#22354E] rounded-2xl py-3 px-4 text-xs font-bold text-[#F8FAFC] outline-none"
+                          className="w-full bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] rounded-2xl py-3 px-4 text-xs font-bold text-slate-900 dark:text-[#F8FAFC] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                         >
                           {DASHBOARD_CATEGORIES.map((cat) => (
                             <option key={cat.id} value={cat.id}>
@@ -2050,17 +2082,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             onClick={() => setSelectedCategory(cat.id as DashboardCategory)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] shrink-0 ${
                               isSelected
-                                ? 'bg-[#1769AA] text-white border border-[#4B9FE1] shadow-md shadow-[#1769AA]/35'
-                                : 'bg-[#131E2E] text-[#94A3B8] border border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]/40'
+                                ? 'bg-[#1769AA] text-white border border-[#1769AA] dark:border-[#4B9FE1] shadow-md shadow-[#1769AA]/35'
+                                : 'bg-white dark:bg-[#112C4F] text-slate-500 dark:text-[#94A3B8] border border-slate-200 dark:border-[#24476F] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:border-[#1769AA]/40'
                             }`}
                           >
                             <cat.icon className="w-3.5 h-3.5 shrink-0" />
                             <span>{localize(profile.language, cat.titleEn, cat.titleAr)}</span>
                             <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                                 isSelected
-                                  ? 'bg-[#1A283D] text-[#4B9FE1]'
-                                  : 'bg-[#1A283D] text-[#94A3B8]/80'
+                                  ? 'bg-slate-100 dark:bg-[#17355C] text-[#1769AA] dark:text-[#4B9FE1]'
+                                  : 'bg-slate-100 dark:bg-[#17355C] text-slate-500/80 dark:text-[#94A3B8]/80'
                               }`}
                             >
                               {count}
@@ -2090,36 +2122,36 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                 }
                               }}
                               aria-label={localize(profile.language, card.titleEn, card.titleAr)}
-                              className="group relative flex flex-col justify-between p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA]/60 hover:-translate-y-1 transition-all duration-200 cursor-pointer shadow-md hover:shadow-xl hover:shadow-[#1769AA]/15 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] text-start last:col-span-2 sm:last:col-span-1"
+                              className="group relative flex flex-col justify-between p-5 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] hover:border-[#1769AA]/60 hover:-translate-y-1 transition-all duration-200 cursor-pointer shadow-md hover:shadow-xl hover:shadow-[#1769AA]/15 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] text-start last:col-span-2 sm:last:col-span-1"
                             >
                               <div className="space-y-3.5">
                                 {/* Top Row: Icon Container + Chevron Action Button */}
                                 <div className="flex items-center justify-between">
-                                  <div className="w-11 h-11 rounded-xl bg-[#131E2E] border border-[#22354E] group-hover:border-[#1769AA] group-hover:bg-[#1769AA] text-[#4B9FE1] group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-xs">
+                                  <div className="w-11 h-11 rounded-xl bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] group-hover:border-[#1769AA] group-hover:bg-[#1769AA] text-[#1769AA] dark:text-[#4B9FE1] group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-xs">
                                     <CardIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
                                   </div>
-                                  <div className="w-8 h-8 rounded-lg bg-[#131E2E] border border-[#22354E] text-[#94A3B8] group-hover:bg-[#0D4778] group-hover:text-white group-hover:border-[#1769AA] flex items-center justify-center transition-all duration-200">
+                                  <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] text-slate-500 dark:text-[#94A3B8] group-hover:bg-[#0D4778] group-hover:text-white group-hover:border-[#1769AA] flex items-center justify-center transition-all duration-200">
                                     <ChevronRight className={`w-4 h-4 transition-transform ${isAr ? 'rotate-180 group-hover:-translate-x-0.5' : 'group-hover:translate-x-0.5'}`} />
                                   </div>
                                 </div>
 
                                 {/* Title */}
-                                <h3 className="text-base font-bold text-[#F8FAFC] group-hover:text-[#4B9FE1] transition-colors leading-snug line-clamp-1">
+                                <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC] group-hover:text-[#1769AA] group-hover:dark:text-[#4B9FE1] transition-colors leading-snug line-clamp-1">
                                   {localize(profile.language, card.titleEn, card.titleAr)}
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-xs text-[#94A3B8] leading-relaxed line-clamp-3 min-h-[3rem]">
+                                <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed line-clamp-3 min-h-[3rem]">
                                   {localize(profile.language, card.descEn, card.descAr)}
                                 </p>
                               </div>
 
                               {/* Bottom: Category Tag Badge & Action Hint */}
-                              <div className="pt-4 mt-2 border-t border-[#22354E]/60 flex flex-wrap items-center justify-between gap-2">
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#131E2E] border border-[#22354E] text-[#4B9FE1]">
+                              <div className="pt-4 mt-2 border-t border-slate-200 dark:border-[#24476F]/60 flex flex-wrap items-center justify-between gap-2">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] text-[#1769AA] dark:text-[#4B9FE1]">
                                   {localize(profile.language, card.categoryLabelEn, card.categoryLabelAr)}
                                 </span>
-                                <span className="text-[11px] font-medium text-[#94A3B8]/70 group-hover:text-[#F8FAFC] transition-colors">
+                                <span className="text-xs font-medium text-slate-500/70 dark:text-[#94A3B8]/70 group-hover:text-slate-900 group-hover:dark:text-[#F8FAFC] transition-colors">
                                   {localize(profile.language, 'Open Tool', 'فتح الأداة')}
                                 </span>
                               </div>
@@ -2134,7 +2166,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                           <button
                             type="button"
                             onClick={() => setShowAllToolsInAllView(!showAllToolsInAllView)}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#22354E] bg-[#131E2E] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#1769AA]/50 transition-all text-xs font-bold cursor-pointer"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-[#24476F] bg-white dark:bg-[#112C4F] text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 hover:dark:text-[#F8FAFC] hover:border-[#1769AA]/50 transition-all text-xs font-bold cursor-pointer"
                           >
                             <span>
                               {showAllToolsInAllView
@@ -2148,12 +2180,12 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
 
                       {/* Empty Search Result State */}
                       {displayCards.length === 0 && (
-                        <div className="p-8 sm:p-12 text-center rounded-3xl border border-dashed border-[#22354E] bg-[#131E2E]/50 space-y-3">
-                          <Search className="w-8 h-8 text-[#4B9FE1] mx-auto" />
-                          <h3 className="text-base font-bold text-[#F8FAFC]">
+                        <div className="p-8 sm:p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-[#24476F] bg-white/50 dark:bg-[#112C4F]/50 space-y-3">
+                          <Search className="w-8 h-8 text-[#1769AA] dark:text-[#4B9FE1] mx-auto" />
+                          <h3 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC]">
                             {localize(profile.language, 'No matching tools found', 'لم يتم العثور على أدوات مطابقة')}
                           </h3>
-                          <p className="text-xs sm:text-sm text-[#94A3B8] max-w-md mx-auto leading-relaxed">
+                          <p className="text-xs sm:text-sm text-slate-500 dark:text-[#94A3B8] max-w-md mx-auto leading-relaxed">
                             {localize(
                               profile.language,
                               `No assistive features found matching "${searchQuery}". Try a different keyword or reset filters.`,
@@ -2185,8 +2217,8 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <History className="w-5 h-5 text-[#4B9FE1]" />
-                          <h2 className="text-lg font-bold text-[#F8FAFC]">
+                          <History className="w-5 h-5 text-[#1769AA] dark:text-[#4B9FE1]" />
+                          <h2 className="text-lg font-bold text-slate-900 dark:text-[#F8FAFC]">
                             {localize(profile.language, 'Saved Results & Recent Activity', 'النتائج المحفوظة والنشاط الأخير')}
                           </h2>
                         </div>
@@ -2207,10 +2239,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       {/* Sub-Section A: Saved Documents */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
-                            <BookOpen className="w-3.5 h-3.5 text-[#4B9FE1]" />
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8] flex items-center gap-1.5">
+                            <BookOpen className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                             <span>{localize(profile.language, 'Saved Educational Documents', 'الكتب والمستندات المحفوظة')}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1A283D] text-[#4B9FE1] border border-[#22354E]">
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#17355C] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#24476F]">
                               {recentDocs.length}
                             </span>
                           </h3>
@@ -2221,7 +2253,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               if (onNavigate) (onNavigate as any)('book_studio');
                               else handleSelectTab('hub');
                             }}
-                            className="text-xs font-bold text-[#4B9FE1] hover:underline flex items-center gap-1 cursor-pointer"
+                            className="text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] hover:underline flex items-center gap-1 cursor-pointer"
                           >
                             <span>{localize(profile.language, 'Open Studio', 'فتح الاستوديو')}</span>
                             <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
@@ -2233,21 +2265,21 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             {recentDocs.map((docItem) => (
                               <div
                                 key={docItem.id}
-                                className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] flex flex-col justify-between gap-3 text-start shadow-sm"
+                                className="p-4 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] flex flex-col justify-between gap-3 text-start shadow-sm"
                               >
                                 <div>
                                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#131E2E] text-[#4B9FE1] border border-[#22354E]">
+                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-white dark:bg-[#112C4F] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#24476F]">
                                       {docItem.template}
                                     </span>
-                                    <span className="text-[10px] text-[#94A3B8]/70 font-medium">
+                                    <span className="text-xs text-slate-500/70 dark:text-[#94A3B8]/70 font-medium">
                                       {new Date(docItem.updatedAt).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
                                     </span>
                                   </div>
-                                  <h4 className="text-sm font-bold truncate text-[#F8FAFC]">
+                                  <h4 className="text-sm font-bold truncate text-slate-900 dark:text-[#F8FAFC]">
                                     {docItem.title}
                                   </h4>
-                                  <p className="text-xs text-[#94A3B8] mt-1">
+                                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-1">
                                     {localize(
                                       profile.language,
                                       `${docItem.wordCount || 0} words · ${docItem.sectionsCount || 0} sections`,
@@ -2256,7 +2288,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                   </p>
                                 </div>
 
-                                <div className="flex items-center gap-2 pt-2 border-t border-[#22354E]">
+                                <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-[#24476F]">
                                   <button
                                     type="button"
                                     onClick={() => handleOpenSavedDoc(docItem)}
@@ -2268,7 +2300,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                                   <button
                                     type="button"
                                     onClick={() => handleSpeakSnippet(docItem.title)}
-                                    className="p-1.5 rounded-lg border border-[#22354E] text-[#94A3B8] hover:text-[#4B9FE1] hover:bg-[#131E2E] transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-lg border border-slate-200 dark:border-[#24476F] text-slate-500 dark:text-[#94A3B8] hover:text-[#1769AA] hover:dark:text-[#4B9FE1] hover:bg-white hover:dark:bg-[#112C4F] transition-colors cursor-pointer"
                                   >
                                     <Volume2 className="w-4 h-4" />
                                   </button>
@@ -2277,9 +2309,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             ))}
                           </div>
                         ) : (
-                          <div className="p-8 text-center rounded-2xl bg-[#131E2E] border border-[#22354E] space-y-2">
-                            <BookOpen className="w-6 h-6 text-[#4B9FE1] mx-auto" />
-                            <p className="text-xs text-[#94A3B8]">
+                          <div className="p-8 text-center rounded-2xl bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] space-y-2">
+                            <BookOpen className="w-6 h-6 text-[#1769AA] dark:text-[#4B9FE1] mx-auto" />
+                            <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
                               {localize(profile.language, 'No saved documents yet in Book Studio', 'لا توجد مستندات محفوظة حتى الآن في استوديو الكتب')}
                             </p>
                           </div>
@@ -2289,10 +2321,10 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                       {/* Sub-Section B: Recent Scans */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
-                            <ScanLine className="w-3.5 h-3.5 text-[#4B9FE1]" />
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8] flex items-center gap-1.5">
+                            <ScanLine className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                             <span>{localize(profile.language, 'Recent Scans & Toolkit Activity', 'المسح الضوئي والنشاط الأخير')}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1A283D] text-[#4B9FE1] border border-[#22354E]">
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#17355C] text-[#1769AA] dark:text-[#4B9FE1] border border-slate-200 dark:border-[#24476F]">
                               {recentActivities.length}
                             </span>
                           </h3>
@@ -2303,7 +2335,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                               if (onNavigate) (onNavigate as any)('toolkit');
                               else handleSelectTab('hub');
                             }}
-                            className="text-xs font-bold text-[#4B9FE1] hover:underline flex items-center gap-1 cursor-pointer"
+                            className="text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] hover:underline flex items-center gap-1 cursor-pointer"
                           >
                             <span>{localize(profile.language, 'Open Scanner Toolkit', 'فتح منظومة السكانر')}</span>
                             <ChevronRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
@@ -2315,38 +2347,38 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             {recentActivities.map((act) => (
                               <div
                                 key={act.id}
-                                className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] flex flex-col justify-between gap-3 text-start shadow-sm"
+                                className="p-4 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] flex flex-col justify-between gap-3 text-start shadow-sm"
                               >
                                 <div>
                                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#131E2E] text-[#94A3B8] border border-[#22354E]">
+                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-white dark:bg-[#112C4F] text-slate-500 dark:text-[#94A3B8] border border-slate-200 dark:border-[#24476F]">
                                       {act.type}
                                     </span>
-                                    <span className="text-[10px] text-[#94A3B8]/70 font-medium">
+                                    <span className="text-xs text-slate-500/70 dark:text-[#94A3B8]/70 font-medium">
                                       {new Date(act.timestamp).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                   </div>
-                                  <h4 className="text-sm font-bold truncate text-[#F8FAFC]">
+                                  <h4 className="text-sm font-bold truncate text-slate-900 dark:text-[#F8FAFC]">
                                     {act.title}
                                   </h4>
-                                  <p className="text-xs text-[#94A3B8] line-clamp-2 mt-1">
+                                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] line-clamp-2 mt-1">
                                     {act.snippet}
                                   </p>
                                 </div>
 
-                                <div className="flex items-center gap-2 pt-2 border-t border-[#22354E]">
+                                <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-[#24476F]">
                                   <button
                                     type="button"
                                     onClick={() => handleSpeakSnippet(act.snippet || act.title)}
-                                    className="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold bg-[#131E2E] hover:bg-[#1A283D] text-[#94A3B8] hover:text-white border border-[#22354E] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                                    className="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold bg-white dark:bg-[#112C4F] hover:bg-slate-100 hover:dark:bg-[#17355C] text-slate-500 dark:text-[#94A3B8] hover:text-white border border-slate-200 dark:border-[#24476F] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                                   >
-                                    <Volume2 className="w-3.5 h-3.5 text-[#4B9FE1]" />
+                                    <Volume2 className="w-3.5 h-3.5 text-[#1769AA] dark:text-[#4B9FE1]" />
                                     <span>{localize(profile.language, 'Listen Aloud', 'استمع صوتياً')}</span>
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteActivity(act.id)}
-                                    className="p-1.5 rounded-lg border border-transparent text-[#94A3B8] hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-lg border border-transparent text-slate-500 dark:text-[#94A3B8] hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
@@ -2355,9 +2387,9 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                             ))}
                           </div>
                         ) : (
-                          <div className="p-8 text-center rounded-2xl bg-[#131E2E] border border-[#22354E] space-y-2">
-                            <ScanLine className="w-6 h-6 text-[#4B9FE1] mx-auto" />
-                            <p className="text-xs text-[#94A3B8]">
+                          <div className="p-8 text-center rounded-2xl bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] space-y-2">
+                            <ScanLine className="w-6 h-6 text-[#1769AA] dark:text-[#4B9FE1] mx-auto" />
+                            <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
                               {localize(profile.language, 'No recent scans or OCR activity', 'لا توجد عمليات مسح ضوئي سابقة')}
                             </p>
                           </div>
@@ -2369,17 +2401,17 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                   {/* ── 5. BOTTOM REASSURANCE BANNER (Accessibility First) ── */}
                   <section
                     aria-label={localize(profile.language, 'Accessibility Commitment', 'التزام إمكانية الوصول')}
-                    className="p-5 sm:p-6 rounded-2xl bg-[#131E2E] border border-[#22354E] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg"
+                    className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#112C4F] border border-slate-200 dark:border-[#24476F] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg"
                   >
                     <div className="flex items-center gap-4 text-start">
-                      <div className="w-12 h-12 rounded-2xl bg-[#1A283D] border border-[#22354E] flex items-center justify-center text-[#4B9FE1] shrink-0 shadow-inner">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#17355C] border border-slate-200 dark:border-[#24476F] flex items-center justify-center text-[#1769AA] dark:text-[#4B9FE1] shrink-0 shadow-inner">
                         <ShieldCheck className="w-6 h-6" />
                       </div>
                       <div className="space-y-0.5">
-                        <h3 className="text-sm sm:text-base font-bold text-[#F8FAFC]">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-[#F8FAFC]">
                           {localize(profile.language, 'Accessibility First', 'الإتاحة أولاً وأبداً')}
                         </h3>
-                        <p className="text-xs text-[#94A3B8] leading-relaxed max-w-2xl">
+                        <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed max-w-2xl">
                           {localize(
                             profile.language,
                             'Rafiqi is committed to providing equal learning opportunities through adaptive technologies.',
@@ -2392,7 +2424,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     <button
                       type="button"
                       onClick={() => setShowPassportModal(true)}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#1A283D] hover:bg-[#1769AA] text-[#4B9FE1] hover:text-white border border-[#22354E] hover:border-[#1769AA] transition-all text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-sm"
+                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-[#17355C] hover:bg-[#1769AA] text-[#1769AA] dark:text-[#4B9FE1] hover:text-white border border-slate-200 dark:border-[#24476F] hover:border-[#1769AA] transition-all text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-sm"
                     >
                       <ShieldCheck className="w-4 h-4" />
                       <span>{localize(profile.language, 'Universal Passport', 'جواز التسهيلات')}</span>
@@ -2412,13 +2444,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'vision' && (
               <motion.div
                 key="vision-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
@@ -2436,13 +2468,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {isDeafActive && (
               <motion.div
                 key="deaf-unified-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
@@ -2459,13 +2491,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'caregiver' && (
               <motion.div
                 key="caregiver-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
@@ -2482,13 +2514,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'orchestrator' && (
               <motion.div
                 key="orchestrator-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
@@ -2504,13 +2536,13 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'org' && (
               <motion.div
                 key="org-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
@@ -2522,14 +2554,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'chat' && (
               <motion.div
                 key="chat-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="w-full h-full min-h-0 flex flex-col p-2 sm:p-4 pb-0"
               >
                 <div className="flex-1 min-h-0 bg-[#0A203A] rounded-2xl shadow-xl border border-[rgba(72,139,190,0.22)] overflow-hidden relative flex flex-col">
                   <React.Suspense fallback={
-                    <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                    <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                       <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                     </div>
                   }>
@@ -2554,14 +2586,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'progress' && (
               <motion.div
                 key="progress-profile-view"
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
@@ -2581,14 +2613,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'settings' && (
               <motion.div
                 key="settings-view"
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
@@ -2607,14 +2639,14 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {activeTab === 'admin' && isAdmin && (
               <motion.div
                 key="admin-view"
-                initial={{ opacity: 0, y: 8 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
                 className="w-full h-full min-h-0 overflow-y-auto custom-scrollbar"
               >
                 <React.Suspense fallback={
-                  <div className="flex-1 flex items-center justify-center p-8 text-[#94A3B8]">
+                  <div className="flex-1 flex items-center justify-center p-8 text-slate-500 dark:text-[#94A3B8]">
                     <div className="w-8 h-8 border-2 border-[#1769AA] border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>

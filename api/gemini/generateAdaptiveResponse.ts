@@ -1,5 +1,5 @@
 /** Non-streaming chat. Returns { result }. Keys stay server-side. */
-import { guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat, validateAttachmentMimeAndName, type AssistiveQuotaCategory } from '../_lib/ai.js';
+import { aiBusyMessage, guard, readBody, buildPersona, threadsSummary, buildContents, buildOpenAIMessages, geminiFetch, fallbackChat, validateAttachmentMimeAndName, type AssistiveQuotaCategory } from '../_lib/ai.js';
 import { classifyRequest } from '../_lib/router.js';
 import { validateAndSanitizeResponse } from '../_lib/qualityGuard.js';
 import { ensureImageInResponse } from '../_lib/imageSynthesis.js';
@@ -47,9 +47,15 @@ export default async function handler(req: any, res: any) {
         if (att.data) {
           const approxBytes = Math.round((att.data.length * 3) / 4);
           const isAudio = (att.type || '').startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(att.name || '');
-          const maxLimit = isAudio ? 50 * 1024 * 1024 : 25 * 1024 * 1024;
+          // Vercel serverless truncates bodies at ~4.5MB; keep binary under 3MB
+          // (about 4MB base64) so this check runs before the platform 413.
+          const maxLimit = 3 * 1024 * 1024;
           if (approxBytes > maxLimit) {
-            res.status(413).json({ error: `Payload too large: attachment "${att.name || 'file'}" exceeds limit` });
+            res.status(413).json({
+              error: `Payload too large: attachment "${att.name || 'file'}" exceeds the 3MB limit. Use a shorter recording or compress the file.`,
+              code: 'PAYLOAD_TOO_LARGE',
+              maxBytes: 3 * 1024 * 1024,
+            });
             return;
           }
         }
@@ -90,7 +96,9 @@ export default async function handler(req: any, res: any) {
       const body = JSON.stringify({
         contents: buildContents(message, safeHistory, safeAttachments),
         systemInstruction: { parts: [{ text: system }] },
-        generationConfig: { temperature: 0.7, topP: 0.95 },
+        // Vision/OCR reads numbers and text: low temperature avoids invented
+        // denominations/dates. Educational chat keeps the livelier 0.7.
+        generationConfig: isVision || isAudio ? { temperature: 0.2, topP: 0.8 } : { temperature: 0.7, topP: 0.95 },
       });
       const gResult = await geminiFetch('generateContent', body, { category, byokKey: req.byokKey });
       const gres = gResult.res;
@@ -116,7 +124,7 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    const fallbackMessage = isAr ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني 🙏' : '⚠️ The AI is busy right now. Please try again 🙏';
+    const fallbackMessage = aiBusyMessage(isAr);
     const validated = validateAndSanitizeResponse(rawOutput || fallbackMessage, {
       accessibilityMode: profile?.accessibilityMode,
       language: profile?.language,

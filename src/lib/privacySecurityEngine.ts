@@ -203,7 +203,7 @@ export function packageStudentExport(
     exportId: 'export_' + exportTimestamp + '_' + studentState.uid.slice(0, 8),
     exportedAt: new Date(exportTimestamp).toISOString(),
     studentUid: studentState.uid,
-    formatVersion: 'cognify-export-v2.0',
+    formatVersion: 'rafiqi-export-v2.0',
     data: exportPayload,
     integrityChecksum,
     complianceStatement: 'Generated in strict compliance with GDPR Article 20 (Right to Data Portability) and FERPA regulations.'

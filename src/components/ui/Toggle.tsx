@@ -72,13 +72,13 @@ export const Toggle: React.FC<ToggleProps> = ({
           {label && (
             <label
               id={`${id}-label`}
-              className="block text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary leading-tight cursor-pointer"
+              className="block text-sm font-semibold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary leading-tight cursor-pointer"
             >
               {label}
             </label>
           )}
           {description && (
-            <p id={descId} className="text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-normal">
+            <p id={descId} className="text-xs text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary leading-normal">
               {description}
             </p>
           )}
@@ -100,8 +100,8 @@ export const Toggle: React.FC<ToggleProps> = ({
         }}
         onKeyDown={handleKeyDown}
         className={cn(
-          'relative inline-flex shrink-0 items-center rounded-full transition-colors duration-200 cursor-pointer outline-none',
-          'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark',
+          'relative inline-flex shrink-0 items-center rounded-full transition-colors duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]',
+          'focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2 focus-visible:ring-offset-rafiqi-surface-light dark:focus-visible:ring-offset-rafiqi-bg-dark',
           'motion-reduce:transition-none',
           isSm ? 'w-10 h-6' : 'w-12 h-7',
           isChecked

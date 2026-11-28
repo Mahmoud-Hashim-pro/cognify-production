@@ -46,17 +46,17 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <div className="flex items-center justify-between">
             <label
               htmlFor={id}
-              className="block text-xs sm:text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary"
+              className="block text-xs sm:text-sm font-semibold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary"
             >
               {label}
               {required && (
-                <span className="text-cognify-error-text-light dark:text-cognify-error-text-dark ms-1" aria-hidden="true">
+                <span className="text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark ms-1" aria-hidden="true">
                   *
                 </span>
               )}
             </label>
             {showCount && maxLength && (
-              <span className="text-xs text-cognify-text-muted dark:text-cognify-text-dark-secondary">
+              <span className="text-xs text-rafiqi-text-muted dark:text-rafiqi-text-dark-secondary">
                 {currentLength}/{maxLength}
               </span>
             )}
@@ -78,14 +78,14 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           }
           className={cn(
             'w-full px-4 py-3 text-sm rounded-2xl transition-all duration-150',
-            'bg-cognify-surface-light dark:bg-cognify-surface-dark',
-            'text-cognify-text-primary dark:text-cognify-text-dark-primary',
-            'placeholder:text-cognify-text-muted dark:placeholder:text-cognify-text-dark-secondary/60',
+            'bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark',
+            'text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary',
+            'placeholder:text-rafiqi-text-muted dark:placeholder:text-rafiqi-text-dark-secondary/60',
             'border resize-y min-h-[96px]',
             isInvalid
-              ? 'border-cognify-error-text-light dark:border-cognify-error-text-dark focus:ring-cognify-error-text-light dark:focus:ring-cognify-error-text-dark'
-              : 'border-cognify-border-light dark:border-cognify-border-dark hover:border-rafiqi-primary/50 dark:hover:border-rafiqi-primary/50 focus:border-rafiqi-primary dark:focus:border-rafiqi-primary',
-            'outline-none focus:ring-2 focus:ring-cognify-focus focus:ring-offset-2 focus:ring-offset-cognify-surface-light dark:focus:ring-offset-cognify-bg-dark',
+              ? 'border-rafiqi-error-text-light dark:border-rafiqi-error-text-dark focus:ring-rafiqi-error-text-light dark:focus:ring-rafiqi-error-text-dark'
+              : 'border-rafiqi-border-light dark:border-rafiqi-border-dark hover:border-rafiqi-primary/50 dark:hover:border-rafiqi-primary/50 focus:border-rafiqi-primary dark:focus:border-rafiqi-primary',
+            'outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-rafiqi-focus focus:ring-offset-2 focus:ring-offset-rafiqi-surface-light dark:focus:ring-offset-rafiqi-bg-dark',
             'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-900',
             className
           )}
@@ -93,14 +93,14 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
 
         {isInvalid && (
-          <div id={errorId} className="flex items-center gap-1.5 text-xs text-cognify-error-text-light dark:text-cognify-error-text-dark font-medium" role="alert">
+          <div id={errorId} className="flex items-center gap-1.5 text-xs text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark font-medium" role="alert">
             <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {!isInvalid && helperText && (
-          <p id={helperId} className="text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary">
+          <p id={helperId} className="text-xs text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary">
             {helperText}
           </p>
         )}

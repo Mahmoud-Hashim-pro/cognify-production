@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { L } from '../lib/translations';
 import {
   Building2,
   Users,
@@ -113,7 +114,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                 </div>
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                    {isArabic ? 'إدارة المؤسسات والمشتركين المتعددين' : 'Business & Multi-Tenant Management'}
+                    {isArabic ? 'إدارة المؤسسات والمشتركين المتعددين' : L('Business & Multi-Tenant Management')}
                   </h1>
                   <p className="text-sm text-slate-400 mt-1">
                     {tenant.name} &bull; <span className="font-mono text-[#E5A93C]">ID: {tenant.tenantId}</span>
@@ -156,9 +157,9 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
-                      <span className="text-sm font-bold text-white">{isArabic ? spec.displayNameAr : spec.displayNameEn}</span>
+                      <span className="text-sm font-bold text-white">{isArabic ? spec.displayNameAr : L(spec.displayNameEn)}</span>
                       {isCurrent && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500 text-slate-950">
+                        <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-500 text-slate-950">
                           Active
                         </span>
                       )}
@@ -233,7 +234,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                   placeholder="student@university.edu"
                   value={newEmail}
                   onChange={e => setNewEmail(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[#080409] border border-[#4A1224]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:border-[#E5A93C]/40 outline-none"
+                  className="flex-1 px-3 py-2 bg-[#080409] border border-[#4A1224]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:border-[#E5A93C]/40 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 />
                 <select
                   value={newRole}
@@ -307,7 +308,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead>
-                <tr className="border-b border-[#4A1224]/60 text-slate-500 uppercase text-[10px]">
+                <tr className="border-b border-[#4A1224]/60 text-slate-500 uppercase text-xs">
                   <th className="pb-3 font-semibold">User Email</th>
                   <th className="pb-3 font-semibold">Role</th>
                   <th className="pb-3 font-semibold">Status</th>
@@ -319,7 +320,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                   <tr key={m.memberUid} className="hover:bg-[#150917]/40 transition">
                     <td className="py-3 font-mono text-slate-200">{m.email}</td>
                     <td className="py-3">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-bold uppercase ${
                         m.role === 'owner'
                           ? 'bg-amber-500/20 text-amber-300'
                           : m.role === 'educator'
@@ -330,7 +331,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                       </span>
                     </td>
                     <td className="py-3">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${
                         m.status === 'active' ? 'text-emerald-400' : 'text-slate-500'
                       }`}>
                         {m.status}
@@ -340,7 +341,7 @@ export const BusinessTenancyView: React.FC<BusinessTenancyViewProps> = ({
                       {m.role !== 'owner' && m.status === 'active' && (
                         <button
                           onClick={() => handleRevoke(m.memberUid)}
-                          className="text-rose-400 hover:text-rose-300 font-semibold text-[11px]"
+                          className="text-rose-400 hover:text-rose-300 font-semibold text-xs"
                         >
                           Revoke Seat
                         </button>

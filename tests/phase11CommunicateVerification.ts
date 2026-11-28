@@ -342,8 +342,8 @@ export async function runPhase11CommunicateTests() {
   assert(!viewContent.includes('#00AEB8'), 'src/components/AccessibleCommunicateWorkspaceView.tsx contains ZERO legacy cyan #00AEB8');
   assert(viewContent.includes('#1769AA'), 'AccessibleCommunicateWorkspaceView uses Unified Blue #1769AA primary brand');
   assert(viewContent.includes('#0D4778'), 'AccessibleCommunicateWorkspaceView uses Unified Blue #0D4778 navy dark');
-  assert(viewContent.includes('#131E2E'), 'AccessibleCommunicateWorkspaceView uses Unified Blue #131E2E surface');
-  assert(viewContent.includes('#061A33'), 'AccessibleCommunicateWorkspaceView uses Unified Blue #061A33 deep background');
+  assert(viewContent.includes('#112C4F'), 'AccessibleCommunicateWorkspaceView uses Unified Blue #112C4F surface');
+  assert(viewContent.includes('#0A2342'), 'AccessibleCommunicateWorkspaceView uses Unified Blue #0A2342 deep background');
   assert(viewContent.includes('role="region"'), 'AccessibleCommunicateWorkspaceView provides semantic ARIA regions');
   assert(viewContent.includes('aria-live'), 'AccessibleCommunicateWorkspaceView provides aria-live announcements');
 

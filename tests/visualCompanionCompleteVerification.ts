@@ -109,13 +109,13 @@ assert(
 assert(
   visionContent.includes(`data-testid="detail-level-selector"`) &&
   visionContent.includes(`handleDetailLevelChange`) &&
-  visionContent.includes(`cognify_vision_detail_level`),
+  visionContent.includes(`rafiqi_vision_detail_level`),
   'Detail Level selector supports concise, standard, and detailed descriptions'
 );
 assert(
   visionContent.includes(`data-testid="speech-rate-selector"`) &&
   visionContent.includes(`handleSpeechRateChange`) &&
-  visionContent.includes(`cognify_vision_speech_rate`),
+  visionContent.includes(`rafiqi_vision_speech_rate`),
   'Speech rate selector supports custom speeds from 0.75x to 1.5x'
 );
 

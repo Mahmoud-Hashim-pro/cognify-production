@@ -7,11 +7,11 @@
  * specific user's atypical pronunciation over time.
  *
  * Persistence: localStorage (consistent with the other speech settings the app
- * already stores there, e.g. cognify_euphonia_patterns).
+ * already stores there, e.g. rafiqi_euphonia_patterns).
  */
 
-const DICT_KEY = "cognify_pron_dict";
-const VOCAB_KEY = "cognify_custom_vocab";
+const DICT_KEY = "rafiqi_pron_dict";
+const VOCAB_KEY = "rafiqi_custom_vocab";
 
 /** misspelled/heard word (normalized, lowercase) -> intended word. */
 export type PronDict = Record<string, string>;

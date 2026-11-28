@@ -12,13 +12,18 @@ export interface ModelPricing {
   completionCostPer1k: number;
 }
 
-// Pricing table in USD per 1,000 tokens
+// Pricing table in USD per 1,000 tokens.
+// Gemini numbers follow https://ai.google.dev/gemini-api/docs/pricing (checked Nov 2026):
+// gemini-2.5-flash $0.30/1M input, $2.50/1M output (incl. thinking); flash-lite and
+// 2.0-flash $0.10/1M input, $0.40/1M output; 1.5-flash legacy $0.075/1M, $0.30/1M.
+// Prompt token counts include image and audio tokens as reported by usageMetadata.
 export const MODEL_PRICING: Record<string, ModelPricing> = {
   // Google Gemini
-  'gemini-2.5-flash': { promptCostPer1k: 0.000075, completionCostPer1k: 0.0003 },
-  'gemini-2.5-flash-lite': { promptCostPer1k: 0.0000375, completionCostPer1k: 0.00015 },
+  'gemini-2.5-flash': { promptCostPer1k: 0.0003, completionCostPer1k: 0.0025 },
+  'gemini-2.5-flash-lite': { promptCostPer1k: 0.0001, completionCostPer1k: 0.0004 },
   'gemini-2.0-flash': { promptCostPer1k: 0.0001, completionCostPer1k: 0.0004 },
-  'gemini-flash-latest': { promptCostPer1k: 0.000075, completionCostPer1k: 0.0003 },
+  'gemini-1.5-flash': { promptCostPer1k: 0.000075, completionCostPer1k: 0.0003 },
+  'gemini-flash-latest': { promptCostPer1k: 0.0003, completionCostPer1k: 0.0025 },
 
   // Groq Cloud
   'llama-3.3-70b-versatile': { promptCostPer1k: 0.00059, completionCostPer1k: 0.00079 },
@@ -250,4 +255,190 @@ export function getAllOrgUsages(): OrgBudgetUsage[] {
  */
 export function resetOrgBudgets(): void {
   orgBudgets.clear();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Distributed budget ledger (Upstash Redis)
+//
+// The in-memory Map above resets on every serverless cold start, so in
+// production it cannot enforce a real monthly cap. When
+// UPSTASH_REDIS_REST_URL/UPSTASH_REDIS_REST_TOKEN are configured, the ledger
+// lives in a Redis hash (cognify:budget:{orgId}:{monthKey}) shared by every
+// instance. Without Redis it falls back to the in-memory ledger (local dev),
+// logging loudly in production so a missing env var never passes silently.
+//
+// Note on storage choice: the API has no Firebase Admin SDK and Firestore REST
+// writes run under the caller's security rules, which cannot share one org-wide
+// ledger document across users. Redis (already used by rateLimiter.ts) gives
+// atomic cross-instance accounting with the same infra.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const UPSTASH_URL = () => (process.env.UPSTASH_REDIS_REST_URL || '').replace(/\/$/, '');
+const UPSTASH_TOKEN = () => process.env.UPSTASH_REDIS_REST_TOKEN || '';
+
+/** The single tenant this deployment bills under (Rafiqi is single-org). */
+export const BUDGET_ORG_ID = () => process.env.RAFIQI_ORG_ID || 'global';
+
+const DEFAULT_MONTHLY_CAP_USD = () => {
+  const n = Number(process.env.RAFIQI_MONTHLY_BUDGET_USD || '50');
+  return Number.isFinite(n) && n > 0 ? n : 50;
+};
+
+/** Seconds until the 10th of next month: outlives the monthKey, self-cleans. */
+function ledgerTtlSeconds(): number {
+  const now = new Date();
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 10, 0, 0, 0, 0));
+  return Math.max(3600, Math.round((end.getTime() - now.getTime()) / 1000));
+}
+
+// Atomically initialize the hash (cap only on first write), optionally record a
+// call, refresh TTL, and return all fields. Micro-dollars keep math exact.
+const LEDGER_LUA = `
+local key = KEYS[1]
+redis.call('HSETNX', key, 'capMicro', ARGV[1])
+redis.call('HSETNX', key, 'warnPct', ARGV[2])
+local spend = tonumber(ARGV[3])
+local pt = tonumber(ARGV[4])
+local ct = tonumber(ARGV[5])
+if spend > 0 then redis.call('HINCRBY', key, 'spendMicro', spend) end
+if pt > 0 then redis.call('HINCRBY', key, 'promptTokens', pt) end
+if ct > 0 then redis.call('HINCRBY', key, 'completionTokens', ct) end
+if spend > 0 or pt > 0 or ct > 0 then redis.call('HINCRBY', key, 'callCount', 1) end
+redis.call('EXPIRE', key, ARGV[6])
+return redis.call('HGETALL', key)
+`;
+
+interface LedgerFields {
+  capMicro: number;
+  warnPct: number;
+  spendMicro: number;
+  promptTokens: number;
+  completionTokens: number;
+  callCount: number;
+}
+
+async function ledgerEval(
+  orgId: string,
+  record?: { costUsd: number; promptTokens: number; completionTokens: number }
+): Promise<LedgerFields | null> {
+  const url = UPSTASH_URL();
+  const token = UPSTASH_TOKEN();
+  if (!url || !token) return null;
+
+  const key = `cognify:budget:${orgId}:${getCurrentMonthKey()}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      command: 'EVAL',
+      args: [
+        LEDGER_LUA,
+        '1',
+        key,
+        String(Math.round(DEFAULT_MONTHLY_CAP_USD() * 1e6)),
+        '80',
+        String(Math.round(Math.max(0, record?.costUsd || 0) * 1e6)),
+        String(Math.max(0, Math.round(record?.promptTokens || 0))),
+        String(Math.max(0, Math.round(record?.completionTokens || 0))),
+        String(ledgerTtlSeconds()),
+      ],
+    }),
+    signal: AbortSignal.timeout(2500),
+  });
+  if (!response.ok) throw new Error(`Upstash HTTP ${response.status}`);
+  const payload = await response.json();
+  const arr: string[] = Array.isArray(payload?.result) ? payload.result : [];
+  const map: Record<string, string> = {};
+  for (let i = 0; i + 1 < arr.length; i += 2) map[arr[i]] = arr[i + 1];
+  return {
+    capMicro: Number(map.capMicro || DEFAULT_MONTHLY_CAP_USD() * 1e6),
+    warnPct: Number(map.warnPct || 80),
+    spendMicro: Number(map.spendMicro || 0),
+    promptTokens: Number(map.promptTokens || 0),
+    completionTokens: Number(map.completionTokens || 0),
+    callCount: Number(map.callCount || 0),
+  };
+}
+
+let warnedNoRedis = false;
+function warnNoRedisOnce(): void {
+  if (warnedNoRedis) return;
+  warnedNoRedis = true;
+  if (process.env.NODE_ENV === 'production') {
+    console.error(
+      '[costTelemetry] UPSTASH_REDIS_REST_URL/TOKEN not configured: monthly budget ledger is per-instance memory only. Set the env vars for real enforcement.'
+    );
+  }
+}
+
+function evaluationFromSpend(orgId: string, spendUsd: number, capUsd: number, warnPct: number, estimatedCallCostUsd: number): BudgetEvaluation {
+  const projected = spendUsd + Math.max(0, estimatedCallCostUsd);
+  const percentUsed = capUsd > 0 ? Number(((spendUsd / capUsd) * 100).toFixed(2)) : 100;
+  const isExceeded = projected > capUsd;
+  const isWarning = percentUsed >= warnPct;
+  return {
+    allowed: !isExceeded,
+    orgId,
+    currentSpendUsd: Number(spendUsd.toFixed(6)),
+    monthlyCapUsd: capUsd,
+    remainingBudgetUsd: Number(Math.max(0, capUsd - spendUsd).toFixed(6)),
+    percentUsed,
+    isWarning,
+    isExceeded,
+    reason: isExceeded
+      ? `Monthly budget cap of $${capUsd.toFixed(2)} exceeded. Current spend: $${spendUsd.toFixed(4)}.`
+      : isWarning
+        ? `Organization spend has reached ${percentUsed.toFixed(1)}% of monthly budget cap ($${capUsd.toFixed(2)}).`
+        : undefined,
+  };
+}
+
+/**
+ * Distributed budget check. Use inside the API guard before any server-key AI
+ * call; returns 429-worthy evaluation when the monthly cap is spent.
+ * Falls back to the in-memory ledger when Redis is not configured (dev only).
+ */
+export async function checkBudgetAllowedDistributed(
+  orgId: string = BUDGET_ORG_ID(),
+  estimatedCallCostUsd = 0
+): Promise<BudgetEvaluation> {
+  if (!UPSTASH_URL() || !UPSTASH_TOKEN()) {
+    warnNoRedisOnce();
+    return checkBudgetAllowed(orgId, estimatedCallCostUsd);
+  }
+  try {
+    const f = await ledgerEval(orgId);
+    if (!f) throw new Error('empty ledger');
+    return evaluationFromSpend(orgId, f.spendMicro / 1e6, f.capMicro / 1e6, f.warnPct, estimatedCallCostUsd);
+  } catch (err) {
+    console.error(`[costTelemetry] Redis ledger unavailable (${err instanceof Error ? err.name : 'error'}); using in-memory fallback for this check.`);
+    return checkBudgetAllowed(orgId, estimatedCallCostUsd);
+  }
+}
+
+/**
+ * Record one AI call's actual spend (from usageMetadata, not estimates) against
+ * the distributed monthly ledger. Fire-and-forget safe: never throws.
+ */
+export async function recordOrgUsageDistributed(
+  orgId: string = BUDGET_ORG_ID(),
+  costUsd: number,
+  tokens?: { promptTokens?: number; completionTokens?: number }
+): Promise<void> {
+  const rec = {
+    costUsd: Math.max(0, costUsd),
+    promptTokens: Math.max(0, tokens?.promptTokens || 0),
+    completionTokens: Math.max(0, tokens?.completionTokens || 0),
+  };
+  if (!UPSTASH_URL() || !UPSTASH_TOKEN()) {
+    warnNoRedisOnce();
+    recordOrgUsage(orgId, rec.costUsd, tokens);
+    return;
+  }
+  try {
+    await ledgerEval(orgId, rec);
+  } catch (err) {
+    console.error(`[costTelemetry] Redis ledger write failed (${err instanceof Error ? err.name : 'error'}); recorded in memory only.`);
+    recordOrgUsage(orgId, rec.costUsd, tokens);
+  }
 }

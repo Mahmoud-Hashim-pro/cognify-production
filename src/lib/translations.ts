@@ -1,3 +1,4 @@
+import { FR_UI } from './frenchUi.js';
 
 export type TranslationKey = 
   | 'appName'
@@ -1654,3 +1655,27 @@ export function localize(language: string | undefined, en: string, ar?: string):
   }
   return en;
 }
+
+Object.assign(EXTRA.French ?? (EXTRA.French = {}), FR_UI);
+
+// ── Active UI language (module-level) so plain "isAr ? ar : en" call sites can ──
+// show French without every component being rewritten. App sets it on render.
+let activeUiLanguage = 'English';
+export function setActiveUiLanguage(lang: string | undefined | null): void {
+  activeUiLanguage = lang || 'English';
+}
+export const isFrenchLocale = (lang: string | undefined | null): boolean =>
+  lang === 'French' || lang === 'fr' || lang === 'fr-FR';
+export const isFrenchActive = (): boolean => isFrenchLocale(activeUiLanguage);
+/** English fallback text -> French when the UI is French (EXTRA.French lookup). Arabic is chosen by the caller. */
+export function L(en: string): string {
+  if (!isFrenchLocale(activeUiLanguage)) return en;
+  return EXTRA.French?.[en] || en;
+}
+/** Which strings still have no French translation (used by the coverage test). */
+export function hasFrench(en: string): boolean {
+  return !!EXTRA.French?.[en];
+}
+
+/** French lookup that does not depend on the active UI language (for tools with their own language switch). */
+export const frOf = (en: string): string => EXTRA.French?.[en] || en;

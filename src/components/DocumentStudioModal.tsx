@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { L } from '../lib/translations';
 import {
   FileText,
   X,
@@ -99,7 +100,7 @@ export interface DocFlashcard {
   flipped?: boolean;
 }
 
-export const DOC_HISTORY_KEY = 'cognify_vision_doc_history';
+export const DOC_HISTORY_KEY = 'rafiqi_vision_doc_history';
 
 export function downloadTextAsTxtFile(text: string, filename: string) {
   if (typeof window === 'undefined') return;
@@ -163,7 +164,7 @@ export function printAccessibleDocument(
     <html lang="${isAr ? 'ar' : 'en'}" dir="${isAr ? 'rtl' : 'ltr'}">
     <head>
       <meta charset="utf-8">
-      <title>${title || (isAr ? 'مستند رفيقي التعليمي' : 'Rafiqi Educational Document')}</title>
+      <title>${title || (isAr ? 'مستند رفيقي التعليمي' : L('Rafiqi Educational Document'))}</title>
       <style>
         @page { margin: 20mm; size: A4; }
         body {
@@ -179,7 +180,7 @@ export function printAccessibleDocument(
         h2 { font-size: 14pt; color: #312e81; margin-top: 24px; margin-bottom: 10px; }
         .meta { color: #64748b; font-size: 10pt; margin-bottom: 20px; }
         .box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
-        .q-box { border-right: ${isAr ? '4px solid #16a34a' : 'none'}; border-left: ${isAr ? 'none' : '4px solid #16a34a'}; background: #f0fdf4; padding: 12px; margin-bottom: 12px; }
+        .q-box { border-right: ${isAr ? '4px solid #16a34a' : L('none')}; border-left: ${isAr ? 'none' : '4px solid #16a34a'}; background: #f0fdf4; padding: 12px; margin-bottom: 12px; }
         .fc-box { border: 1px solid #e9d5ff; background: #faf5ff; padding: 10px; margin-bottom: 10px; }
         @media print {
           body { padding: 0; }
@@ -187,31 +188,31 @@ export function printAccessibleDocument(
       </style>
     </head>
     <body>
-      <h1>${title || (isAr ? 'مستند رفيقي التعليمي' : 'Rafiqi Educational Document')}</h1>
-      <div class="meta">${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')} • ${isAr ? 'منصة رفيقي التعليمية الميسرة' : 'Rafiqi Inclusive Learning Platform'}</div>
-      <h2>${isAr ? '📌 الزبدة وخلاصة المحتوى' : '📌 Core Takeaways'}</h2>
+      <h1>${title || (isAr ? 'مستند رفيقي التعليمي' : L('Rafiqi Educational Document'))}</h1>
+      <div class="meta">${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')} • ${isAr ? 'منصة رفيقي التعليمية الميسرة' : L('Rafiqi Inclusive Learning Platform')}</div>
+      <h2>${isAr ? '📌 الزبدة وخلاصة المحتوى' : L('📌 Core Takeaways')}</h2>
       <div class="box">${cleanSummary.replace(/\n/g, '<br/>')}</div>
       ${quiz && quiz.length > 0 ? `
-        <h2>${isAr ? '📝 بنك الأسئلة والتدريبات' : '📝 Practice Questions'}</h2>
+        <h2>${isAr ? '📝 بنك الأسئلة والتدريبات' : L('📝 Practice Questions')}</h2>
         ${quiz.map((q, i) => `
           <div class="q-box">
-            <b>${isAr ? 'سؤال' : 'Question'} ${i + 1}: ${q.question}</b><br/>
+            <b>${isAr ? 'سؤال' : L('Question')} ${i + 1}: ${q.question}</b><br/>
             ${q.options.map((opt, oi) => `&bull; ${opt} ${oi === q.answerIndex ? '<b>(الإجابة الصحيحة ✅)</b>' : ''}`).join('<br/>')}<br/>
-            <span style="color:#4338ca; font-size:10pt;">💡 ${isAr ? 'التوضيح' : 'Explanation'}: ${q.explanation}</span>
+            <span style="color:#4338ca; font-size:10pt;">💡 ${isAr ? 'التوضيح' : L('Explanation')}: ${q.explanation}</span>
           </div>
         `).join('')}
       ` : ''}
       ${flashcards && flashcards.length > 0 ? `
-        <h2>${isAr ? '🗂️ بطاقات المراجعة السريعة' : '🗂️ Flashcards'}</h2>
+        <h2>${isAr ? '🗂️ بطاقات المراجعة السريعة' : L('🗂️ Flashcards')}</h2>
         ${flashcards.map((f, i) => `
           <div class="fc-box">
-            <b>${isAr ? 'بطاقة' : 'Card'} ${i + 1}:</b> ${f.front}<br/>
-            <b>${isAr ? 'المفهوم / الإجابة:' : 'Answer / Concept:'}</b> ${f.back}
+            <b>${isAr ? 'بطاقة' : L('Card')} ${i + 1}:</b> ${f.front}<br/>
+            <b>${isAr ? 'المفهوم / الإجابة:' : L('Answer / Concept:')}</b> ${f.back}
           </div>
         `).join('')}
       ` : ''}
       ${cleanFull ? `
-        <h2>${isAr ? '📝 النص الكامل المستخرج' : '📝 Full Extracted Content'}</h2>
+        <h2>${isAr ? '📝 النص الكامل المستخرج' : L('📝 Full Extracted Content')}</h2>
         <div class="box" style="white-space: pre-wrap; font-size: 11pt;">${cleanFull}</div>
       ` : ''}
     </body>
@@ -258,8 +259,8 @@ function legacyExportToWordDocument(
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const safeTitle = (title || 'cognify-document').replace(/[^\w\u0600-\u06FF\s-]/g, '').trim().replace(/\s+/g, '_');
-  a.download = `${safeTitle || 'cognify-document'}.doc`;
+  const safeTitle = (title || 'rafiqi-document').replace(/[^\w\u0600-\u06FF\s-]/g, '').trim().replace(/\s+/g, '_');
+  a.download = `${safeTitle || 'rafiqi-document'}.doc`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -365,7 +366,7 @@ export default function DocumentStudioModal({
   const [audioLectureState, setAudioLectureState] = useState<AudioLectureState>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const raw = sessionStorage.getItem('cognify_doc_audio_lecture_draft');
+        const raw = sessionStorage.getItem('rafiqi_doc_audio_lecture_draft');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && (parsed.transcript || parsed.summaries)) {
@@ -384,7 +385,7 @@ export default function DocumentStudioModal({
   useEffect(() => {
     try {
       if (audioLectureState.transcript || audioLectureState.summaries?.short || audioLectureState.summaries?.detailed) {
-        sessionStorage.setItem('cognify_doc_audio_lecture_draft', JSON.stringify({
+        sessionStorage.setItem('rafiqi_doc_audio_lecture_draft', JSON.stringify({
           status: audioLectureState.status,
           file: audioLectureState.file,
           transcript: audioLectureState.transcript,
@@ -486,7 +487,7 @@ export default function DocumentStudioModal({
       },
       status: 'transcribing',
       progressPct: 10,
-      statusMessage: isAr ? 'جاري بدء التفريغ الصوتي للمحاضرة...' : 'Starting lecture transcription...',
+      statusMessage: isAr ? 'جاري بدء التفريغ الصوتي للمحاضرة...' : L('Starting lecture transcription...'),
       transcript: '',
       segments: [],
       currentPlaybackTime: 0,
@@ -516,7 +517,7 @@ export default function DocumentStudioModal({
         ...prev,
         status: 'ready',
         progressPct: 100,
-        statusMessage: isAr ? 'اكتمل التفريغ الصوتي بنجاح!' : 'Transcription complete!',
+        statusMessage: isAr ? 'اكتمل التفريغ الصوتي بنجاح!' : L('Transcription complete!'),
         transcript: result.transcript,
         segments: result.segments,
       }));
@@ -554,7 +555,7 @@ export default function DocumentStudioModal({
       console.error('Audio transcription error:', err);
       const errMsg = isAr
         ? 'تعذر تفريغ المحاضرة الصوتية. يرجى التأكد من جودة الملف والمحاولة مرة أخرى.'
-        : 'Failed to transcribe audio lecture. Please check the file and try again.';
+        : L('Failed to transcribe audio lecture. Please check the file and try again.');
       toast.error(errMsg);
       speak(errMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
       setAudioLectureState((prev) => ({
@@ -755,7 +756,7 @@ export default function DocumentStudioModal({
           directTextContent = pdfInfo.text;
           setExtractedDocMeta({ pageCount, isScanned, needsOcr });
           if (needsOcr) {
-            toast.info(isAr ? 'تم رصد صفحات مصورة؛ جاري تفعيل التعرف الضوئي OCR...' : 'Scanned pages detected; running OCR...');
+            toast.info(isAr ? 'تم رصد صفحات مصورة؛ جاري تفعيل التعرف الضوئي OCR...' : L('Scanned pages detected; running OCR...'));
           }
         } catch (e) {
           console.warn('PDF parsing error fallback:', e);
@@ -909,7 +910,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
             question: d.prompt,
             options: d.options && d.options.length > 0 ? d.options : [isAr ? 'صح' : 'True', isAr ? 'خطأ' : 'False'],
             answerIndex: 0,
-            explanation: d.explanation || (isAr ? 'مستخرجة مباشرة من سياق المحاضرة' : 'Extracted from lecture context'),
+            explanation: d.explanation || (isAr ? 'مستخرجة مباشرة من سياق المحاضرة' : L('Extracted from lecture context')),
           }))
         );
       }
@@ -929,7 +930,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
       setDocStatusText('');
 
       const partialNotice = isPartiallySummarized
-        ? (isAr ? ' (تم حفظ كامل النص للقراءة في تبويب النص الكامل، والملخص يغطي القسم الرئيسي)' : ' (Full text preserved in Full Text tab; summary covers primary section)')
+        ? (isAr ? ' (تم حفظ كامل النص للقراءة في تبويب النص الكامل، والملخص يغطي القسم الرئيسي)' : L(' (Full text preserved in Full Text tab; summary covers primary section)'))
         : '';
       const readout = isAr
         ? `تم تلخيص ملف ${docItem.title} بنجاح${partialNotice}. إليك أهم ما في المحاضرة: ${cleanSummary || summary}`
@@ -948,7 +949,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
       setLastFailedFile(file);
       const errMsg = isAr
         ? 'عذراً، حدث خطأ أثناء قراءة المستند. تأكد من حجم الملف واتصالك بالإنترنت.'
-        : 'Failed to process document. Please check the file and try again.';
+        : L('Failed to process document. Please check the file and try again.');
       toast.error(errMsg);
       speak(errMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
     }
@@ -959,7 +960,12 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
       unlockSpeechSynthesis();
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream);
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                       MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+      const mediaRecorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => {
@@ -1027,7 +1033,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
     const isAr = docTargetLang === 'ar';
     const statusMsg = isAr
       ? 'جاري إيقاف التسجيل وتحضير التفريغ الصوتي للمحاضرة...'
-      : 'Stopping recording and preparing audio transcription...';
+      : L('Stopping recording and preparing audio transcription...');
     toast.info(statusMsg);
 
     mediaRecorderRef.current.onstop = async () => {
@@ -1088,7 +1094,7 @@ ${currentDoc.fullText || ''}
       });
     } catch {
       setIsDocChatAnswering(false);
-      const errMsg = isAr ? 'حصل خطأ في الإجابة، جرب تسأل تاني.' : 'Error answering question, please try again.';
+      const errMsg = isAr ? 'حصل خطأ في الإجابة، جرب تسأل تاني.' : L('Error answering question, please try again.');
       setDocChatMessages((prev) => [...prev, { role: 'assistant', content: errMsg }]);
       speak(errMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
     }
@@ -1252,15 +1258,15 @@ ${currentDoc.summary}
         setDocViewMode('quiz');
         const announcement = isAr
           ? 'تم توليد بنك الأسئلة وبطاقات المراجعة بنجاح! يمكنك الآن بدء الاختبار.'
-          : 'Quiz & flashcards generated successfully!';
+          : L('Quiz & flashcards generated successfully!');
         toast.success(announcement);
         speak(announcement, isAr ? 'Arabic' : isFr ? 'French' : 'English');
       } else {
-        toast.error(isAr ? 'تعذر إعداد الأسئلة، يرجى المحاولة ثانية.' : 'Could not generate quiz, please retry.');
+        toast.error(isAr ? 'تعذر إعداد الأسئلة، يرجى المحاولة ثانية.' : L('Could not generate quiz, please retry.'));
       }
     } catch (err) {
       console.error(err);
-      toast.error(isAr ? 'حدث خطأ أثناء إعداد بنك الأسئلة.' : 'Error generating quiz.');
+      toast.error(isAr ? 'حدث خطأ أثناء إعداد بنك الأسئلة.' : L('Error generating quiz.'));
     } finally {
       setIsGeneratingStudyKit(false);
     }
@@ -1387,13 +1393,13 @@ ${currentDoc.summary}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 30, opacity: 0, scale: 0.98 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-4xl bg-cognify-surface-dark rounded-3xl border border-cognify-border-dark/60 shadow-2xl text-white max-h-[92vh] max-h-[92dvh] flex flex-col overflow-hidden"
+            className="w-full max-w-4xl bg-rafiqi-surface-dark rounded-3xl border border-rafiqi-border-dark/60 shadow-2xl text-white max-h-[92vh] max-h-[92dvh] flex flex-col overflow-hidden"
             dir={companionLang === 'ar' ? 'rtl' : 'ltr'}
           >
             {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-cognify-border-dark/60 flex items-center justify-between gap-3 flex-wrap bg-cognify-bg-dark/70">
+            <div className="p-4 sm:p-5 border-b border-rafiqi-border-dark/60 flex items-center justify-between gap-3 flex-wrap bg-rafiqi-bg-dark/70">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-cognify-focus">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-rafiqi-focus">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
@@ -1414,8 +1420,8 @@ ${currentDoc.summary}
 
               <div className="flex flex-wrap items-center gap-2">
                 {/* Target Translation Language Selector */}
-                <div className="flex items-center bg-cognify-surface-dark border border-cognify-border-dark/50 p-1 rounded-xl text-xs font-bold" role="group" aria-label={companionLang === 'ar' ? 'لغة الترجمة والتلخيص' : 'Translation language'}>
-                  <Languages className="w-3.5 h-3.5 text-cognify-focus mr-1.5 ml-1" aria-hidden="true" />
+                <div className="flex items-center bg-rafiqi-surface-dark border border-rafiqi-border-dark/50 p-1 rounded-xl text-xs font-bold" role="group" aria-label={companionLang === 'ar' ? 'لغة الترجمة والتلخيص' : 'Translation language'}>
+                  <Languages className="w-3.5 h-3.5 text-rafiqi-focus mr-1.5 ml-1" aria-hidden="true" />
                   <button
                     type="button"
                     onClick={() => setDocTargetLang('ar')}
@@ -1472,7 +1478,7 @@ ${currentDoc.summary}
             <div
               role="tablist"
               aria-label={companionLang === 'ar' ? 'أقسام استوديو المستندات' : 'Document Studio tabs'}
-              className="flex border-b border-cognify-border-dark/60 px-4 gap-1 sm:gap-2 overflow-x-auto scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-cognify-bg-dark/40"
+              className="flex border-b border-rafiqi-border-dark/60 px-4 gap-1 sm:gap-2 overflow-x-auto scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-rafiqi-bg-dark/40"
             >
               <button
                 type="button"
@@ -1483,7 +1489,7 @@ ${currentDoc.summary}
                 onClick={() => setDocStudioTab('pdf')}
                 className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                   docStudioTab === 'pdf'
-                    ? 'border-indigo-500 text-cognify-focus'
+                    ? 'border-indigo-500 text-rafiqi-focus'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -1541,7 +1547,7 @@ ${currentDoc.summary}
               >
                 <History className="w-4 h-4" aria-hidden="true" />
                 <span>{companionLang === 'ar' ? 'سجل المحفوظات' : 'Doc History'}</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300">
+                <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-xs text-slate-300">
                   {docHistory.length}
                 </span>
               </button>
@@ -1556,10 +1562,10 @@ ${currentDoc.summary}
                   id="doc-panel-pdf"
                   aria-labelledby="doc-tab-pdf"
                   tabIndex={0}
-                  className="space-y-5 focus:outline-none"
+                  className="space-y-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   {/* Upload Card */}
-                  <div className="border-2 border-dashed border-cognify-focus/30 hover:border-indigo-400 rounded-3xl p-6 sm:p-8 bg-cognify-bg-dark/40 text-center transition-all">
+                  <div className="border-2 border-dashed border-rafiqi-focus/30 hover:border-indigo-400 rounded-3xl p-6 sm:p-8 bg-rafiqi-bg-dark/40 text-center transition-all">
                     <input
                       type="file"
                       id="vision-doc-file-upload-modal"
@@ -1576,7 +1582,7 @@ ${currentDoc.summary}
                       htmlFor="vision-doc-file-upload-modal"
                       className="cursor-pointer flex flex-col items-center justify-center space-y-3"
                     >
-                      <div className="w-16 h-16 rounded-3xl bg-indigo-600/20 border border-cognify-focus/30 flex items-center justify-center text-cognify-focus shadow-xl group-hover:scale-105 transition-transform">
+                      <div className="w-16 h-16 rounded-3xl bg-indigo-600/20 border border-rafiqi-focus/30 flex items-center justify-center text-rafiqi-focus shadow-xl group-hover:scale-105 transition-transform">
                         <FileUp className="w-8 h-8" />
                       </div>
                       <div className="space-y-1">
@@ -1606,7 +1612,7 @@ ${currentDoc.summary}
                           <p className="font-bold text-white">
                             {companionLang === 'ar' ? 'تعذر استخراج محتوى الملف الأخير:' : 'Failed to process previous file:'}
                           </p>
-                          <p className="text-[11px] text-red-300 font-mono">{lastFailedFile.name} ({formatBytes(lastFailedFile.size)})</p>
+                          <p className="text-xs text-red-300 font-mono">{lastFailedFile.name} ({formatBytes(lastFailedFile.size)})</p>
                         </div>
                       </div>
                       <button
@@ -1622,8 +1628,8 @@ ${currentDoc.summary}
 
                   {/* Loading State */}
                   {docLoading && (
-                    <div className="p-6 rounded-2xl bg-indigo-950/40 border border-cognify-focus/30 text-center space-y-3">
-                      <Loader2 className="w-8 h-8 text-cognify-focus animate-spin mx-auto" />
+                    <div className="p-6 rounded-2xl bg-indigo-950/40 border border-rafiqi-focus/30 text-center space-y-3">
+                      <Loader2 className="w-8 h-8 text-rafiqi-focus animate-spin mx-auto" />
                       <p className="font-bold text-sm sm:text-base text-indigo-200">
                         {docStatusText || (companionLang === 'ar' ? 'جاري فحص وتلخيص المستند بالذكاء الاصطناعي...' : 'Processing document with AI...')}
                       </p>
@@ -1632,12 +1638,12 @@ ${currentDoc.summary}
 
                   {/* Document Display Result */}
                   {currentDoc && !docLoading && (
-                    <div className="space-y-4 rounded-3xl bg-cognify-bg-dark/70 border border-cognify-border-dark/60 p-4 sm:p-6 shadow-xl">
+                    <div className="space-y-4 rounded-3xl bg-rafiqi-bg-dark/70 border border-rafiqi-border-dark/60 p-4 sm:p-6 shadow-xl">
                       {/* Title & Action Bar */}
-                      <div className="flex items-center justify-between gap-3 border-b border-cognify-border-dark/60 pb-4 flex-wrap">
+                      <div className="flex items-center justify-between gap-3 border-b border-rafiqi-border-dark/60 pb-4 flex-wrap">
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-lg bg-indigo-600/30 text-indigo-300 font-mono text-[10px] uppercase font-bold">
+                            <span className="px-2 py-0.5 rounded-lg bg-indigo-600/30 text-indigo-300 font-mono text-xs uppercase font-bold">
                               {currentDoc.sourceType}
                             </span>
                             <h4 className="font-black text-base sm:text-lg text-white">
@@ -1645,26 +1651,26 @@ ${currentDoc.summary}
                             </h4>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-xs text-slate-400">
                               {new Date(currentDoc.createdAt).toLocaleString(companionLang === 'ar' ? 'ar-EG' : 'en-US')}
                             </span>
                             {extractedDocMeta?.pageCount && (
-                              <span className="px-2 py-0.5 rounded-md bg-blue-900/40 border border-blue-500/30 text-blue-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-blue-900/40 border border-blue-500/30 text-blue-300 text-xs font-bold">
                                 📄 {companionLang === 'ar' ? `${extractedDocMeta.pageCount} صفحات` : `${extractedDocMeta.pageCount} Pages`}
                               </span>
                             )}
                             {extractedDocMeta?.wordCount && (
-                              <span className="px-2 py-0.5 rounded-md bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
                                 📝 {companionLang === 'ar' ? `${extractedDocMeta.wordCount} كلمة` : `${extractedDocMeta.wordCount} Words`}
                               </span>
                             )}
                             {extractedDocMeta?.hasTables && (
-                              <span className="px-2 py-0.5 rounded-md bg-purple-900/40 border border-purple-500/30 text-purple-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-purple-900/40 border border-purple-500/30 text-purple-300 text-xs font-bold">
                                 📊 {companionLang === 'ar' ? 'جداول منظمة' : 'Tables'}
                               </span>
                             )}
                             {extractedDocMeta?.isScanned && extractedDocMeta?.needsOcr && (
-                              <span className="px-2 py-0.5 rounded-md bg-amber-900/50 border border-amber-500/40 text-amber-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-amber-900/50 border border-amber-500/40 text-amber-300 text-xs font-bold">
                                 ⚠️ {companionLang === 'ar' ? 'مستند ممسوح ضوئياً (OCR نشط)' : 'Scanned Doc (OCR Active)'}
                               </span>
                             )}
@@ -1673,7 +1679,7 @@ ${currentDoc.summary}
 
                         <div className="flex items-center gap-2 flex-wrap">
                           {/* 4-way Mode Toggle: Summary | Full | Quiz | Flashcards */}
-                          <div className="flex p-1 bg-cognify-surface-dark rounded-xl border border-cognify-border-dark/60 text-xs font-bold overflow-x-auto max-w-full">
+                          <div className="flex p-1 bg-rafiqi-surface-dark rounded-xl border border-rafiqi-border-dark/60 text-xs font-bold overflow-x-auto max-w-full">
                             <button
                               type="button"
                               onClick={() => setDocViewMode('summary')}
@@ -1710,7 +1716,7 @@ ${currentDoc.summary}
                               <HelpCircle className="w-3.5 h-3.5" />
                               <span>{companionLang === 'ar' ? 'بنك الأسئلة' : 'Quiz'}</span>
                               {docQuiz.length > 0 && (
-                                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/40 text-[10px] text-white">
+                                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/40 text-xs text-white">
                                   {docQuiz.length}
                                 </span>
                               )}
@@ -1731,7 +1737,7 @@ ${currentDoc.summary}
                               <Sparkles className="w-3.5 h-3.5" />
                               <span>{companionLang === 'ar' ? 'فلاش كاردز' : 'Flashcards'}</span>
                               {docFlashcards.length > 0 && (
-                                <span className="px-1.5 py-0.2 rounded-full bg-purple-500/40 text-[10px] text-white">
+                                <span className="px-1.5 py-0.2 rounded-full bg-purple-500/40 text-xs text-white">
                                   {docFlashcards.length}
                                 </span>
                               )}
@@ -1830,7 +1836,7 @@ ${currentDoc.summary}
                             onClick={() => {
                               try {
                                 sessionStorage.setItem(
-                                  'cognify_book_studio_import',
+                                  'rafiqi_book_studio_import',
                                   JSON.stringify({
                                     text: currentDoc.fullText || currentDoc.summary || '',
                                     title: currentDoc.title || 'Document',
@@ -1872,7 +1878,7 @@ ${currentDoc.summary}
                       </div>
 
                       {/* Smart Audio Scrubbing Navigation Bar */}
-                      <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-cognify-bg-dark/95 border border-cognify-border-dark/60 flex-wrap text-xs font-bold">
+                      <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-rafiqi-bg-dark/95 border border-rafiqi-border-dark/60 flex-wrap text-xs font-bold">
                         <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
@@ -1903,13 +1909,13 @@ ${currentDoc.summary}
                           >
                             <FastForward className="w-4 h-4" />
                           </button>
-                          <span className="text-slate-400 font-mono text-[11px] ml-2">
+                          <span className="text-slate-400 font-mono text-xs ml-2">
                             {companionLang === 'ar' ? `فقرة ${currentParagraphIdx + 1} من ${paragraphs.length || 1}` : `Paragraph ${currentParagraphIdx + 1} / ${paragraphs.length || 1}`}
                           </span>
                         </div>
 
                         {/* Playback Speed selector */}
-                        <div className="flex items-center gap-1.5 bg-cognify-bg-dark p-1 rounded-xl border border-cognify-border-dark/60 text-[11px]">
+                        <div className="flex items-center gap-1.5 bg-rafiqi-bg-dark p-1 rounded-xl border border-rafiqi-border-dark/60 text-xs">
                           <span className="text-slate-500 px-1">⚡ {companionLang === 'ar' ? 'السرعة:' : 'Speed:'}</span>
                           {[0.8, 1.0, 1.25, 1.5].map((rate) => (
                             <button
@@ -1931,7 +1937,7 @@ ${currentDoc.summary}
 
                       {/* 3D Sign Avatar Video Floating Panel */}
                       {showSignAvatarInDoc && (
-                        <div className="p-4 rounded-3xl bg-cognify-surface-dark border border-purple-500/40 relative space-y-3">
+                        <div className="p-4 rounded-3xl bg-rafiqi-surface-dark border border-purple-500/40 relative space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-purple-300 flex items-center gap-2">
                               <Accessibility className="w-4 h-4 text-purple-400" />
@@ -1945,7 +1951,7 @@ ${currentDoc.summary}
                               <X className="w-4 h-4" />
                             </button>
                           </div>
-                          <div className="h-64 rounded-2xl overflow-hidden bg-cognify-bg-dark flex items-center justify-center border border-cognify-border-dark/60">
+                          <div className="h-64 rounded-2xl overflow-hidden bg-rafiqi-bg-dark flex items-center justify-center border border-rafiqi-border-dark/60">
                             <React.Suspense fallback={<div className="text-xs text-purple-300 font-bold animate-pulse">جاري تحميل مجسم الإشارة ثلاثي الأبعاد...</div>}>
                               <SignAvatar3D
                                 words={avatarSigningWords}
@@ -1958,7 +1964,7 @@ ${currentDoc.summary}
                       )}
 
                       {/* Content Viewer Box */}
-                      <div className="p-4 sm:p-5 rounded-2xl bg-cognify-surface-dark border border-cognify-border-dark/60 max-h-80 overflow-y-auto leading-relaxed text-sm sm:text-base text-slate-100 font-medium">
+                      <div className="p-4 sm:p-5 rounded-2xl bg-rafiqi-surface-dark border border-rafiqi-border-dark/60 max-h-80 overflow-y-auto leading-relaxed text-sm sm:text-base text-slate-100 font-medium">
                         {docViewMode === 'summary' && (
                           <div className="space-y-2">
                             <span className="text-xs font-bold text-amber-400 block mb-1">
@@ -1970,7 +1976,7 @@ ${currentDoc.summary}
 
                         {docViewMode === 'full' && (
                           <div className="space-y-2">
-                            <span className="text-xs font-bold text-cognify-focus block mb-1">
+                            <span className="text-xs font-bold text-rafiqi-focus block mb-1">
                               {companionLang === 'ar' ? '📝 تفاصيل النص المستخرج كاملاً:' : '📝 Full Extracted Content:'}
                             </span>
                             <p className="whitespace-pre-wrap font-mono text-xs sm:text-sm break-words">
@@ -1981,7 +1987,7 @@ ${currentDoc.summary}
 
                         {docViewMode === 'quiz' && (
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-2">
+                            <div className="flex items-center justify-between border-b border-rafiqi-border-dark/60 pb-2">
                               <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
                                 <HelpCircle className="w-4 h-4" />
                                 {companionLang === 'ar' ? '📝 بنك أسئلة واختبار فهم المحاضرة:' : '📝 Interactive Lecture Quiz:'}
@@ -2015,7 +2021,7 @@ ${currentDoc.summary}
                             ) : (
                               <div className="space-y-4">
                                 {docQuiz.map((q, qIdx) => (
-                                  <div key={qIdx} className="p-4 rounded-2xl bg-cognify-bg-dark/60 border border-cognify-border-dark/60 space-y-3">
+                                  <div key={qIdx} className="p-4 rounded-2xl bg-rafiqi-bg-dark/60 border border-rafiqi-border-dark/60 space-y-3">
                                     <p className="font-bold text-sm text-white">
                                       س {qIdx + 1}: {q.question}
                                     </p>
@@ -2025,7 +2031,7 @@ ${currentDoc.summary}
                                         const isAnswer = optIdx === q.answerIndex;
                                         const hasAnswered = q.selectedOption !== undefined;
 
-                                        let btnClass = 'border-cognify-border-dark/60 bg-cognify-surface-dark text-slate-300 hover:bg-slate-850';
+                                        let btnClass = 'border-rafiqi-border-dark/60 bg-rafiqi-surface-dark text-slate-300 hover:bg-slate-850';
                                         if (hasAnswered) {
                                           if (isAnswer) btnClass = 'border-emerald-500 bg-emerald-950/50 text-emerald-200 ring-2 ring-emerald-500/50';
                                           else if (isSelected && !isAnswer) btnClass = 'border-red-500 bg-red-950/50 text-red-200 ring-2 ring-red-500/50';
@@ -2046,7 +2052,7 @@ ${currentDoc.summary}
                                       })}
                                     </div>
                                     {q.selectedOption !== undefined && (
-                                      <p className="text-xs text-indigo-300 bg-indigo-950/40 p-2.5 rounded-xl border border-cognify-border-dark/60">
+                                      <p className="text-xs text-indigo-300 bg-indigo-950/40 p-2.5 rounded-xl border border-rafiqi-border-dark/60">
                                         💡 {q.explanation}
                                       </p>
                                     )}
@@ -2059,7 +2065,7 @@ ${currentDoc.summary}
 
                         {docViewMode === 'flashcards' && (
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-2">
+                            <div className="flex items-center justify-between border-b border-rafiqi-border-dark/60 pb-2">
                               <span className="text-xs font-bold text-purple-400 flex items-center gap-1.5">
                                 <Sparkles className="w-4 h-4" />
                                 {companionLang === 'ar' ? '🗂️ بطاقات المراجعة السريعة (Spaced Flashcards):' : '🗂️ Spaced Repetition Flashcards:'}
@@ -2108,16 +2114,16 @@ ${currentDoc.summary}
                                     className={`p-5 rounded-2xl border cursor-pointer select-none transition-all shadow-lg min-h-[120px] flex flex-col justify-between ${
                                       card.flipped
                                         ? 'bg-purple-950/70 border-purple-500/60 text-purple-100'
-                                        : 'bg-cognify-bg-dark border-cognify-border-dark/60 text-slate-200 hover:border-cognify-border-dark/50'
+                                        : 'bg-rafiqi-bg-dark border-rafiqi-border-dark/60 text-slate-200 hover:border-rafiqi-border-dark/50'
                                     }`}
                                   >
-                                    <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 block mb-1">
+                                    <span className="text-xs uppercase tracking-wider font-bold text-slate-400 block mb-1">
                                       {card.flipped ? (companionLang === 'ar' ? '💡 الحل / المفهوم' : 'Answer / Concept') : (companionLang === 'ar' ? `بطاقة ${cIdx + 1} (اضغط للقلب والحل)` : `Card ${cIdx + 1} (Tap to Flip)`)}
                                     </span>
                                     <p className="font-bold text-sm sm:text-base my-auto leading-relaxed">
                                       {card.flipped ? card.back : card.front}
                                     </p>
-                                    <span className="text-[10px] text-slate-500 text-left mt-2 font-mono">
+                                    <span className="text-xs text-slate-500 text-left mt-2 font-mono">
                                       {card.flipped ? '🔊 منطوق' : '🔄 اضغط للاستماع للحل'}
                                     </span>
                                   </div>
@@ -2129,9 +2135,9 @@ ${currentDoc.summary}
                       </div>
 
                       {/* Interactive Q&A Mid-reading Section */}
-                      <div className="space-y-3 pt-3 border-t border-cognify-border-dark/60">
+                      <div className="space-y-3 pt-3 border-t border-rafiqi-border-dark/60">
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                          <MessageSquare className="w-4 h-4 text-cognify-focus" />
+                          <MessageSquare className="w-4 h-4 text-rafiqi-focus" />
                           <span>
                             {companionLang === 'ar'
                               ? 'اسأل المعلم الذكي عن أي نقطة في هذه المحاضرة / المستند:'
@@ -2146,11 +2152,11 @@ ${currentDoc.summary}
                               key={idx}
                               className={`p-3 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                                 msg.role === 'user'
-                                  ? 'bg-indigo-600/30 border border-cognify-focus/30 text-indigo-100 mr-auto max-w-[85%]'
-                                  : 'bg-cognify-surface-dark border border-cognify-border-dark/60 text-slate-200 ml-auto max-w-[85%]'
+                                  ? 'bg-indigo-600/30 border border-rafiqi-focus/30 text-indigo-100 mr-auto max-w-[85%]'
+                                  : 'bg-rafiqi-surface-dark border border-rafiqi-border-dark/60 text-slate-200 ml-auto max-w-[85%]'
                               }`}
                             >
-                              <span className="font-bold text-[10px] text-slate-400 block mb-0.5">
+                              <span className="font-bold text-xs text-slate-400 block mb-0.5">
                                 {msg.role === 'user'
                                   ? (companionLang === 'ar' ? 'أنت' : 'You')
                                   : (companionLang === 'ar' ? 'المعلم الذكي' : 'Rafiqi Tutor')}
@@ -2175,7 +2181,7 @@ ${currentDoc.summary}
                                 ? 'مثلاً: ما هي أهم معادلة في المحاضرة؟ أو اشرح لي النقطة الثانية...'
                                 : 'Ask anything about this document...'
                             }
-                            className="flex-1 px-4 py-2.5 rounded-xl border border-cognify-border-dark/50 bg-cognify-bg-dark text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="flex-1 px-4 py-2.5 rounded-xl border border-rafiqi-border-dark/50 bg-rafiqi-bg-dark text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-indigo-500"
                           />
                           <button
                             type="button"
@@ -2205,10 +2211,10 @@ ${currentDoc.summary}
                   id="doc-panel-audio-rec"
                   aria-labelledby="doc-tab-audio-rec"
                   tabIndex={0}
-                  className="space-y-6 focus:outline-none"
+                  className="space-y-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   {/* Audio Lecture Header */}
-                  <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-3 flex-wrap gap-2">
+                  <div className="flex items-center justify-between border-b border-rafiqi-border-dark/60 pb-3 flex-wrap gap-2">
                     <div>
                       <h4 className="font-black text-lg text-white flex items-center gap-2">
                         <Headphones className="w-5 h-5 text-indigo-400" aria-hidden="true" />
@@ -2242,7 +2248,7 @@ ${currentDoc.summary}
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Card 1: Upload Audio File */}
-                        <div className="border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 rounded-3xl p-6 bg-cognify-bg-dark/50 text-center flex flex-col items-center justify-center space-y-3 transition-all">
+                        <div className="border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 rounded-3xl p-6 bg-rafiqi-bg-dark/50 text-center flex flex-col items-center justify-center space-y-3 transition-all">
                           <input
                             type="file"
                             id="audio-lecture-file-input"
@@ -2265,7 +2271,7 @@ ${currentDoc.summary}
                             <span className="font-black text-sm text-white">
                               {companionLang === 'ar' ? 'رفع ملف محاضرة صوتية' : 'Upload Audio Lecture File'}
                             </span>
-                            <span className="text-[11px] text-slate-400 max-w-xs">
+                            <span className="text-xs text-slate-400 max-w-xs">
                               {companionLang === 'ar'
                                 ? 'يدعم MP3, WAV, M4A, WEBM, OGG, FLAC (حتى 3.2 ميجابايت للنقل المباشر، أو سجّل بالميكروفون)'
                                 : companionLang === 'fr'
@@ -2279,7 +2285,7 @@ ${currentDoc.summary}
                         </div>
 
                         {/* Card 2: Live Recording */}
-                        <div className="border-2 border-dashed border-red-500/40 hover:border-red-400 rounded-3xl p-6 bg-cognify-bg-dark/50 text-center flex flex-col items-center justify-center space-y-3 transition-all">
+                        <div className="border-2 border-dashed border-red-500/40 hover:border-red-400 rounded-3xl p-6 bg-rafiqi-bg-dark/50 text-center flex flex-col items-center justify-center space-y-3 transition-all">
                           <button
                             type="button"
                             onClick={() => {
@@ -2309,7 +2315,7 @@ ${currentDoc.summary}
                               {(audioRecordDuration % 60).toString().padStart(2, '0')}
                             </span>
                           ) : (
-                            <span className="text-[11px] text-slate-400 max-w-xs">
+                            <span className="text-xs text-slate-400 max-w-xs">
                               {companionLang === 'ar' ? 'تسجيل مباشر من الميكروفون داخل قاعة المحاضرات' : 'Direct microphone recording inside lecture room'}
                             </span>
                           )}
@@ -2318,7 +2324,7 @@ ${currentDoc.summary}
 
                       {/* Live speech preview if available */}
                       {liveSpeechTranscript && (
-                        <div className="p-4 rounded-2xl bg-cognify-bg-dark/80 border border-red-500/30 text-start space-y-1">
+                        <div className="p-4 rounded-2xl bg-rafiqi-bg-dark/80 border border-red-500/30 text-start space-y-1">
                           <span className="text-xs font-bold text-red-400">
                             {companionLang === 'ar' ? 'تفريغ حي أثناء التسجيل:' : 'Live Recording Preview:'}
                           </span>
@@ -2330,7 +2336,7 @@ ${currentDoc.summary}
 
                   {/* Section B: Transcribing / Processing Progress */}
                   {(audioLectureState.status === 'transcribing' || audioLectureState.status === 'uploading') && (
-                    <div className="p-8 rounded-3xl bg-cognify-bg-dark/80 border border-indigo-500/40 text-center space-y-4 max-w-lg mx-auto shadow-2xl">
+                    <div className="p-8 rounded-3xl bg-rafiqi-bg-dark/80 border border-indigo-500/40 text-center space-y-4 max-w-lg mx-auto shadow-2xl">
                       <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mx-auto" />
                       <div className="space-y-1">
                         <h5 className="font-black text-white text-base">
@@ -2352,7 +2358,7 @@ ${currentDoc.summary}
                           aria-valuemax={100}
                         />
                       </div>
-                      <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                      <div className="flex justify-between text-xs font-mono text-slate-400">
                         <span>{formatBytes(audioLectureState.file?.size || 0)}</span>
                         <span className="font-bold text-indigo-300">{audioLectureState.progressPct}%</span>
                       </div>
@@ -2397,7 +2403,7 @@ ${currentDoc.summary}
                   {audioLectureState.status === 'ready' && (
                     <div className="space-y-5">
                       {/* Audio Player Component */}
-                      <div className="p-4 sm:p-5 rounded-3xl bg-cognify-bg-dark/80 border border-cognify-border-dark/80 shadow-xl space-y-3">
+                      <div className="p-4 sm:p-5 rounded-3xl bg-rafiqi-bg-dark/80 border border-rafiqi-border-dark/80 shadow-xl space-y-3">
                         {audioLectureState.file?.url && (
                           <audio
                             ref={audioPlayerRef}
@@ -2432,14 +2438,14 @@ ${currentDoc.summary}
                               <h5 className="font-black text-sm text-white truncate max-w-xs sm:max-w-md">
                                 {audioLectureState.file?.name}
                               </h5>
-                              <span className="text-[11px] font-mono text-slate-400">
+                              <span className="text-xs font-mono text-slate-400">
                                 {formatBytes(audioLectureState.file?.size || 0)} &bull; {audioLectureState.segments.length} {companionLang === 'ar' ? 'فقرة زمنية' : 'segments'}
                               </span>
                             </div>
                           </div>
 
                           {/* Playback speed switcher */}
-                          <div className="flex items-center gap-1 bg-cognify-surface-dark p-1 rounded-xl border border-cognify-border-dark/60 text-xs font-bold">
+                          <div className="flex items-center gap-1 bg-rafiqi-surface-dark p-1 rounded-xl border border-rafiqi-border-dark/60 text-xs font-bold">
                             {[0.75, 1.0, 1.25, 1.5, 2.0].map((rate) => (
                               <button
                                 key={rate}
@@ -2466,7 +2472,7 @@ ${currentDoc.summary}
                             className="w-full accent-indigo-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
                             aria-label="Seek audio lecture"
                           />
-                          <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                          <div className="flex justify-between text-xs font-mono text-slate-400">
                             <span>
                               {Math.floor(audioCurrentTime / 60)}:
                               {String(Math.floor(audioCurrentTime % 60)).padStart(2, '0')}
@@ -2482,8 +2488,8 @@ ${currentDoc.summary}
                       {/* Dual Panels: Left = Interactive Timestamped Transcript | Right = Decoupled Summaries */}
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                         {/* Transcript Panel (7 cols) */}
-                        <div className="lg:col-span-7 rounded-3xl bg-cognify-bg-dark/70 border border-cognify-border-dark/70 p-4 sm:p-5 space-y-3 flex flex-col">
-                          <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-3 flex-wrap gap-2">
+                        <div className="lg:col-span-7 rounded-3xl bg-rafiqi-bg-dark/70 border border-rafiqi-border-dark/70 p-4 sm:p-5 space-y-3 flex flex-col">
+                          <div className="flex items-center justify-between border-b border-rafiqi-border-dark/60 pb-3 flex-wrap gap-2">
                             <div className="flex flex-wrap items-center gap-2">
                               <FileText className="w-4 h-4 text-indigo-400" />
                               <h5 className="font-black text-sm text-white">
@@ -2535,13 +2541,13 @@ ${currentDoc.summary}
                                   className={`p-3 rounded-2xl border transition-all text-start flex items-start gap-2.5 ${
                                     isActive
                                       ? 'bg-indigo-950/60 border-indigo-400 shadow-md ring-1 ring-indigo-500'
-                                      : 'bg-cognify-surface-dark/60 border-cognify-border-dark/50 hover:border-slate-600'
+                                      : 'bg-rafiqi-surface-dark/60 border-rafiqi-border-dark/50 hover:border-slate-600'
                                   }`}
                                 >
                                   <button
                                     type="button"
                                     onClick={() => handleSeekAudio(seg.seconds)}
-                                    className="px-2 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-800 text-indigo-300 font-mono text-[11px] font-bold whitespace-nowrap border border-indigo-500/40 flex-shrink-0 active:scale-95"
+                                    className="px-2 py-1 rounded-lg bg-indigo-900/60 hover:bg-indigo-800 text-indigo-300 font-mono text-xs font-bold whitespace-nowrap border border-indigo-500/40 flex-shrink-0 active:scale-95"
                                     aria-label={`${companionLang === 'ar' ? 'انتقل إلى الدقيقة' : 'Seek to'} ${seg.timestamp}`}
                                   >
                                     ▶ [{seg.timestamp}]
@@ -2556,8 +2562,8 @@ ${currentDoc.summary}
                         </div>
 
                         {/* Summaries Panel (5 cols) */}
-                        <div className="lg:col-span-5 rounded-3xl bg-cognify-bg-dark/70 border border-cognify-border-dark/70 p-4 sm:p-5 space-y-3 flex flex-col">
-                          <div className="flex items-center justify-between border-b border-cognify-border-dark/60 pb-3">
+                        <div className="lg:col-span-5 rounded-3xl bg-rafiqi-bg-dark/70 border border-rafiqi-border-dark/70 p-4 sm:p-5 space-y-3 flex flex-col">
+                          <div className="flex items-center justify-between border-b border-rafiqi-border-dark/60 pb-3">
                             <div className="flex flex-wrap items-center gap-2">
                               <Sparkles className="w-4 h-4 text-amber-400" />
                               <h5 className="font-black text-sm text-white">
@@ -2567,7 +2573,7 @@ ${currentDoc.summary}
                           </div>
 
                           {/* Summary Sub-Tabs */}
-                          <div className="grid grid-cols-2 gap-1.5 p-1 bg-cognify-surface-dark rounded-2xl border border-cognify-border-dark/60 text-xs font-bold">
+                          <div className="grid grid-cols-2 gap-1.5 p-1 bg-rafiqi-surface-dark rounded-2xl border border-rafiqi-border-dark/60 text-xs font-bold">
                             <button
                               type="button"
                               onClick={() => handleSelectSummaryTab('short')}
@@ -2615,7 +2621,7 @@ ${currentDoc.summary}
                           </div>
 
                           {/* Summary Content Body */}
-                          <div className="flex-1 overflow-y-auto max-h-[350px] p-3 rounded-2xl bg-cognify-surface-dark/70 border border-cognify-border-dark/50">
+                          <div className="flex-1 overflow-y-auto max-h-[350px] p-3 rounded-2xl bg-rafiqi-surface-dark/70 border border-rafiqi-border-dark/50">
                             {isGeneratingAudioSummary ? (
                               <div className="py-12 text-center space-y-2">
                                 <Loader2 className="w-6 h-6 text-amber-400 animate-spin mx-auto" />
@@ -2652,7 +2658,7 @@ ${currentDoc.summary}
 
                           {/* Summary Action Bar */}
                           {audioLectureState.summaries[audioLectureState.activeSummaryTab] && (
-                            <div className="flex items-center justify-between gap-2 pt-1 border-t border-cognify-border-dark/60">
+                            <div className="flex items-center justify-between gap-2 pt-1 border-t border-rafiqi-border-dark/60">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -2689,10 +2695,10 @@ ${currentDoc.summary}
                   id="doc-panel-speech-to-text"
                   aria-labelledby="doc-tab-speech-to-text"
                   tabIndex={0}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 focus:outline-none"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   {/* Panel A: Speech to Text (Voice Dictation) */}
-                  <div className="p-4 sm:p-5 rounded-3xl bg-cognify-bg-dark/70 border border-cognify-border-dark/60 space-y-3 flex flex-col">
+                  <div className="p-4 sm:p-5 rounded-3xl bg-rafiqi-bg-dark/70 border border-rafiqi-border-dark/60 space-y-3 flex flex-col">
                     <div className="flex items-center justify-between">
                       <h4 className="font-black text-sm text-emerald-400 flex items-center gap-1.5">
                         <Mic className="w-4 h-4" aria-hidden="true" />
@@ -2724,7 +2730,7 @@ ${currentDoc.summary}
                           ? 'اضغط على "تحدث الآن" وابدأ الكلام، وسيتم كتابة كل ما تقوله بدقة هنا...'
                           : 'Click "Dictate" and start speaking. Your speech will appear here...'
                       }
-                      className="w-full flex-1 p-3 rounded-2xl bg-cognify-surface-dark border border-cognify-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed resize-none"
+                      className="w-full flex-1 p-3 rounded-2xl bg-rafiqi-surface-dark border border-rafiqi-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-emerald-500 leading-relaxed resize-none"
                     />
 
                     <div className="flex gap-2 flex-wrap">
@@ -2764,7 +2770,7 @@ ${currentDoc.summary}
                   </div>
 
                   {/* Panel B: Text to Speech (Text Reader) */}
-                  <div className="p-4 sm:p-5 rounded-3xl bg-cognify-bg-dark/70 border border-cognify-border-dark/60 space-y-3 flex flex-col">
+                  <div className="p-4 sm:p-5 rounded-3xl bg-rafiqi-bg-dark/70 border border-rafiqi-border-dark/60 space-y-3 flex flex-col">
                     <div className="flex items-center justify-between">
                       <h4 className="font-black text-sm text-blue-400 flex items-center gap-1.5">
                         <Volume2 className="w-4 h-4" aria-hidden="true" />
@@ -2782,7 +2788,7 @@ ${currentDoc.summary}
                           ? 'الصق أو اكتب أي نص هنا لسماعه فوراً بصوت طبيعي واضح...'
                           : 'Paste or type any text here to hear it read aloud...'
                       }
-                      className="w-full flex-1 p-3 rounded-2xl bg-cognify-surface-dark border border-cognify-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed resize-none"
+                      className="w-full flex-1 p-3 rounded-2xl bg-rafiqi-surface-dark border border-rafiqi-border-dark/50 text-white placeholder-slate-500 text-xs sm:text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-blue-500 leading-relaxed resize-none"
                     />
 
                     <div className="flex gap-2">
@@ -2829,11 +2835,11 @@ ${currentDoc.summary}
                   id="doc-panel-history"
                   aria-labelledby="doc-tab-history"
                   tabIndex={0}
-                  className="space-y-3 focus:outline-none"
+                  className="space-y-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
-                  <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-cognify-border-dark/60">
+                  <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-rafiqi-border-dark/60">
                     <span>{companionLang === 'ar' ? 'المستندات والمحاضرات التي تم تلخيصها سابقاً' : 'Previously Summarized Documents'}</span>
-                    <span className="font-mono text-cognify-focus font-bold">{docHistory.length} items</span>
+                    <span className="font-mono text-rafiqi-focus font-bold">{docHistory.length} items</span>
                   </div>
 
                   {docHistory.length === 0 ? (
@@ -2854,11 +2860,11 @@ ${currentDoc.summary}
                     docHistory.map((item) => (
                       <div
                         key={item.id}
-                        className="p-4 rounded-2xl bg-cognify-bg-dark/60 border border-cognify-border-dark/60 flex items-center justify-between gap-3 hover:border-cognify-border-dark/50 transition-all flex-wrap sm:flex-nowrap"
+                        className="p-4 rounded-2xl bg-rafiqi-bg-dark/60 border border-rafiqi-border-dark/60 flex items-center justify-between gap-3 hover:border-rafiqi-border-dark/50 transition-all flex-wrap sm:flex-nowrap"
                       >
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-md bg-indigo-600/30 text-indigo-300 font-mono text-[10px] uppercase font-bold">
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-600/30 text-indigo-300 font-mono text-xs uppercase font-bold">
                               {item.sourceType}
                             </span>
                             <h5 className="font-bold text-sm text-white truncate">{item.title}</h5>
@@ -2866,7 +2872,7 @@ ${currentDoc.summary}
                           <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                             {item.summary}
                           </p>
-                          <span className="text-[10px] text-slate-500 block">
+                          <span className="text-xs text-slate-500 block">
                             {new Date(item.createdAt).toLocaleDateString(companionLang === 'ar' ? 'ar-EG' : 'en-US')}
                           </span>
                         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { L } from '../lib/translations';
 import {
   Shield,
   Download,
@@ -134,7 +135,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
       );
       setAuditChain(prev => [...prev, auditEntry]);
     } catch (err: any) {
-      toast.error(err.message || 'DP Budget Error', isArabic ? 'خطأ في ميزانية الخصوصية' : 'Differential Privacy Error');
+      toast.error(err.message || 'DP Budget Error', isArabic ? 'خطأ في ميزانية الخصوصية' : L('Differential Privacy Error'));
     }
   };
 
@@ -175,7 +176,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         const keysToRemove: string[] = [];
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && (k.startsWith('cognify_') || k.startsWith('firebase:') || k.includes(activeStudent.uid))) {
+          if (k && (k.startsWith('rafiqi_') || k.startsWith('firebase:') || k.includes(activeStudent.uid))) {
             keysToRemove.push(k);
           }
         }
@@ -278,7 +279,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
         toast.error(
           isArabic
             ? 'تم حذف بيانات Firestore لكن تعذر حذف حساب تسجيل الدخول. لم يكتمل المحو.'
-            : 'Firestore data was deleted, but the authentication account could not be deleted. Erasure is partial.'
+            : L('Firestore data was deleted, but the authentication account could not be deleted. Erasure is partial.')
         );
         return;
       }
@@ -329,44 +330,56 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
       <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
+        {/* Plain-language disclosure: who can see what */}
+        <div className="bg-[#0E0610]/95 border border-[#4A1224]/40 rounded-2xl p-4 sm:p-5 text-xs leading-relaxed text-slate-300 space-y-1.5">
+          <p className="font-bold text-slate-100">
+            {isArabic ? 'مين يقدر يشوف بياناتك؟' : L('Who can see your data?')}
+          </p>
+          <p>
+            {isArabic
+              ? 'محادثاتك وذاكرة الكاميرا المكانية ليك إنت بس. فريق الدعم (الأدمن) يقدر يشوف بيانات الحساب والذاكرة التعليمية عند حل مشكلة، وده بيتسجل في سجل التدقيق. ممنوع أي حد تاني يقرا بياناتك.'
+              : L('Your chats and spatial camera memory are visible to you alone. Support admins can view account and learning-memory data when resolving an issue, and this is recorded in the audit trail. No one else can read your data.')}
+          </p>
+        </div>
+
         {/* Header Cockpit */}
-        <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+        <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-4 sm:p-8 backdrop-blur-xl shadow-2xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-[#4A1224]/30 border border-[#E5A93C]/30 rounded-2xl text-[#E5A93C]">
+                <div className="p-3 bg-[#4A1224]/30 border border-[#5BB0F0]/30 rounded-2xl text-[#5BB0F0]">
                   <Shield className="w-7 h-7" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                    {isArabic ? 'مركز ذكاء الخصوصية والأمان' : 'Privacy & Security Intelligence'}
+                  <h1 className="text-lg sm:text-3xl font-bold tracking-tight text-white">
+                    {isArabic ? 'مركز ذكاء الخصوصية والأمان' : L('Privacy & Security Intelligence')}
                   </h1>
-                  <p className="text-sm text-slate-400 mt-1">
+                  <p className="hidden sm:block text-sm text-slate-400 mt-1">
                     {isArabic
                       ? 'الخصوصية التفاضلية، محو البيانات الشامل GDPR/FERPA، وسجل تدقيق غير قابل للتلاعب'
-                      : 'Epsilon-Differential Privacy, GDPR Article 17 Cascade Erasure, and Cryptographic Chained Audit Logging'}
+                      : L('Epsilon-Differential Privacy, GDPR Article 17 Cascade Erasure, and Cryptographic Chained Audit Logging')}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Lock className="w-3.5 h-3.5" /> FERPA / GDPR Compliant
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#4A1224]/30 text-[#E5A93C] border border-[#E5A93C]/20">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#4A1224]/30 text-[#5BB0F0] border border-[#5BB0F0]/20">
                 <Cpu className="w-3.5 h-3.5" /> SHA-256 Guarded
               </span>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex flex-wrap gap-2 mt-8 border-b border-[#4A1224]/60 pb-4">
+          <div className="flex flex-nowrap overflow-x-auto custom-scrollbar gap-2 mt-4 sm:mt-8 border-b border-[#4A1224]/60 pb-4">
             {[
-              { id: 'dp', label: isArabic ? 'الخصوصية التفاضلية' : 'Differential Privacy', icon: Cpu },
-              { id: 'export', label: isArabic ? 'تصدير البيانات المستقل' : 'Self-Service Export', icon: Download },
-              { id: 'erasure', label: isArabic ? 'محو البيانات (الحق في النسيان)' : 'Cascade Erasure', icon: Trash2 },
-              { id: 'audit', label: isArabic ? 'سجل التدقيق المشفر' : 'Chained Audit Trail', icon: FileCheck }
+              { id: 'dp', label: isArabic ? 'الخصوصية التفاضلية' : L('Differential Privacy'), icon: Cpu },
+              { id: 'export', label: isArabic ? 'تصدير البيانات المستقل' : L('Self-Service Export'), icon: Download },
+              { id: 'erasure', label: isArabic ? 'محو البيانات (الحق في النسيان)' : L('Cascade Erasure'), icon: Trash2 },
+              { id: 'audit', label: isArabic ? 'سجل التدقيق المشفر' : L('Chained Audit Trail'), icon: FileCheck }
             ].map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -374,9 +387,9 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-2 shrink-0 whitespace-nowrap min-h-[44px] px-4 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold shadow-lg shadow-[#E5A93C]/20'
+                      ? 'bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold shadow-lg shadow-[#5BB0F0]/20'
                       : 'bg-[#080409] text-slate-300 border border-[#4A1224]/60 hover:border-[#4A1224]/50 hover:text-white'
                   }`}
                 >
@@ -394,8 +407,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="lg:col-span-2 bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 backdrop-blur-xl shadow-2xl space-y-6">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-[#E5A93C]" />
-                  {isArabic ? 'محاكي الخصوصية التفاضلية (Laplace Mechanism)' : 'Laplace Mechanism Simulator'}
+                  <Cpu className="w-5 h-5 text-[#5BB0F0]" />
+                  {isArabic ? 'محاكي الخصوصية التفاضلية (Laplace Mechanism)' : L('Laplace Mechanism Simulator')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Perturbs raw aggregate analytics with controlled calibrated noise ($b = \Delta f / \epsilon$) so individual student records can never be reconstructed.
@@ -407,24 +420,24 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1 text-slate-300">
                     <span>Target Metric Value (e.g. Class Pointers Mastery %)</span>
-                    <span className="text-[#E5A93C] font-mono">{testMetric}%</span>
+                    <span className="text-[#5BB0F0] font-mono">{testMetric}%</span>
                   </div>
                   <input
                     type="range"
                     min="0"
                     max="100"
                     value={testMetric}
-                    aria-label={isArabic ? 'القيمة الخام الأصلية' : 'Raw query test metric'}
+                    aria-label={isArabic ? 'القيمة الخام الأصلية' : L('Raw query test metric')}
                     aria-valuetext={`${testMetric}%`}
                     onChange={e => setTestMetric(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#5BB0F0]"
                   />
                 </div>
 
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1 text-slate-300">
                     <span>Privacy Parameter ($\epsilon$): Smaller = More Noise / Greater Privacy</span>
-                    <span className="text-[#E5A93C] font-mono">ε = {epsilon}</span>
+                    <span className="text-[#5BB0F0] font-mono">ε = {epsilon}</span>
                   </div>
                   <input
                     type="range"
@@ -432,12 +445,12 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                     max="2.0"
                     step="0.1"
                     value={epsilon}
-                    aria-label={isArabic ? 'معامل الخصوصية التفاضلية إبسيلون' : 'Differential privacy parameter epsilon'}
+                    aria-label={isArabic ? 'معامل الخصوصية التفاضلية إبسيلون' : L('Differential privacy parameter epsilon')}
                     aria-valuetext={`epsilon ${epsilon}`}
                     onChange={e => setEpsilon(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E5A93C]"
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#5BB0F0]"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                  <div className="flex justify-between text-xs text-slate-500 mt-1">
                     <span>0.1 (High Anonymity / Strong Noise)</span>
                     <span>2.0 (High Precision / Low Noise)</span>
                   </div>
@@ -445,28 +458,28 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
                 <button
                   onClick={handleApplyDP}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold rounded-2xl hover:opacity-95 transition shadow-lg shadow-[#E5A93C]/20 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold rounded-2xl hover:opacity-95 transition shadow-lg shadow-[#5BB0F0]/20 flex items-center justify-center gap-2"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  {isArabic ? 'تطبيق ضوضاء الخصوصية وخصم الميزانية' : 'Apply Laplace Noise & Query Anonymized Aggregate'}
+                  {isArabic ? 'تطبيق ضوضاء الخصوصية وخصم الميزانية' : L('Apply Laplace Noise & Query Anonymized Aggregate')}
                 </button>
               </div>
 
               {/* Perturbation Result Box */}
               {lastPerturbation && (
-                <div className="p-4 bg-[#080409] border border-[#E5A93C]/30 rounded-2xl grid grid-cols-3 gap-4 text-center">
+                <div className="p-4 bg-[#080409] border border-[#5BB0F0]/30 rounded-2xl grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <span className="text-[11px] text-slate-400 uppercase font-bold block">Raw True Value</span>
+                    <span className="text-xs text-slate-400 uppercase font-bold block">Raw True Value</span>
                     <span className="text-xl font-bold font-mono text-slate-200">{testMetric}%</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#E5A93C] uppercase font-bold block">Laplace Noise</span>
-                    <span className={`text-xl font-bold font-mono ${lastPerturbation.noise >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    <span className="text-xs text-[#5BB0F0] uppercase font-bold block">Laplace Noise</span>
+                    <span className={`text-xl font-bold font-mono ${lastPerturbation.noise >= 0 ? 'text-emerald-400' : 'text-sky-400'}`}>
                       {lastPerturbation.noise > 0 ? `+${lastPerturbation.noise}` : lastPerturbation.noise}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-emerald-400 uppercase font-bold block">DP Published Value</span>
+                    <span className="text-xs text-emerald-400 uppercase font-bold block">DP Published Value</span>
                     <span className="text-xl font-bold font-mono text-white">{lastPerturbation.perturbed}%</span>
                   </div>
                 </div>
@@ -477,8 +490,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="bg-[#0E0610]/95 border border-[#4A1224]/60 rounded-3xl p-6 backdrop-blur-xl shadow-2xl flex flex-col justify-between">
               <div>
                 <h3 className="text-md font-bold text-white flex items-center gap-2">
-                  <Key className="w-4 h-4 text-amber-400" />
-                  {isArabic ? 'ميزانية الخصوصية الإجمالية' : 'Differential Privacy Budget'}
+                  <Key className="w-4 h-4 text-sky-400" />
+                  {isArabic ? 'ميزانية الخصوصية الإجمالية' : L('Differential Privacy Budget')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Limits aggregate queries to prevent cumulative database reconstruction attacks.
@@ -487,7 +500,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <div className="mt-6 space-y-4">
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs text-slate-400">Remaining Budget</span>
-                    <span className="text-2xl font-bold font-mono text-[#E5A93C]">
+                    <span className="text-2xl font-bold font-mono text-[#5BB0F0]">
                       {dpBudget.remainingBudget.toFixed(2)} / {dpBudget.totalBudget.toFixed(1)} ε
                     </span>
                   </div>
@@ -499,14 +512,14 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                         dpBudget.remainingBudget > 4
                           ? 'bg-emerald-500'
                           : dpBudget.remainingBudget > 1.5
-                          ? 'bg-amber-500'
+                          ? 'bg-sky-500'
                           : 'bg-rose-500'
                       }`}
                       style={{ width: `${(dpBudget.remainingBudget / dpBudget.totalBudget) * 100}%` }}
                     />
                   </div>
 
-                  <div className="text-[11px] text-slate-400 space-y-1">
+                  <div className="text-xs text-slate-400 space-y-1">
                     <div className="flex justify-between">
                       <span>Consumed Budget:</span>
                       <span className="font-mono text-white">{dpBudget.consumedBudget.toFixed(2)} ε</span>
@@ -535,8 +548,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Download className="w-5 h-5 text-[#E5A93C]" />
-                  {isArabic ? 'تصدير البيانات الشخصية (GDPR Article 20)' : 'Self-Service Data Portability'}
+                  <Download className="w-5 h-5 text-[#5BB0F0]" />
+                  {isArabic ? 'تصدير البيانات الشخصية (GDPR Article 20)' : L('Self-Service Data Portability')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Export complete student history: state, cognitive stage, concept mastery, spaced retention, and spatial memories in signed JSON.
@@ -545,10 +558,10 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
               <button
                 onClick={handleGenerateExport}
-                className="py-2.5 px-5 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 font-bold rounded-2xl hover:bg-[#E5A93C] transition shadow-lg shadow-[#E5A93C]/20 flex items-center gap-2 text-sm"
+                className="py-2.5 px-5 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white font-bold rounded-2xl hover:bg-[#5BB0F0] transition shadow-lg shadow-[#5BB0F0]/20 flex items-center gap-2 text-sm"
               >
                 <Download className="w-4 h-4" />
-                {isArabic ? 'إنشاء حزمة التصدير الآن' : 'Generate Export Package'}
+                {isArabic ? 'إنشاء حزمة التصدير الآن' : L('Generate Export Package')}
               </button>
             </div>
 
@@ -572,11 +585,11 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `cognify_export_${activeStudent.uid}.json`;
+                      a.download = `rafiqi_export_${activeStudent.uid}.json`;
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
-                    className="text-[#E5A93C] hover:underline font-semibold"
+                    className="text-[#5BB0F0] hover:underline font-semibold"
                   >
                     Download .json file
                   </button>
@@ -595,7 +608,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div>
               <h3 className="text-lg font-bold text-rose-400 flex items-center gap-2">
                 <Trash2 className="w-5 h-5" />
-                {isArabic ? 'الحق في المحو الكامل (GDPR Article 17)' : 'Right to be Forgotten (Cascade Erasure)'}
+                {isArabic ? 'الحق في المحو الكامل (GDPR Article 17)' : L('Right to be Forgotten (Cascade Erasure)')}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
                 Irreversibly deletes student state, cascades redactions across event logs, wipes spatial 2.0 object memories, and issues a cryptographic receipt.
@@ -614,7 +627,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 <label className="flex items-center gap-3 cursor-pointer text-xs text-slate-300">
                   <input
                     type="checkbox"
-                    aria-label={isArabic ? 'تأكيد الرغبة في محو جميع بيانات الطالب بشكل نهائي لا رجعة فيه' : 'Confirm irrevocable erasure of all student data'}
+                    aria-label={isArabic ? 'تأكيد الرغبة في محو جميع بيانات الطالب بشكل نهائي لا رجعة فيه' : L('Confirm irrevocable erasure of all student data')}
                     checked={erasureConfirmed}
                     onChange={e => setErasureConfirmed(e.target.checked)}
                     className="w-4 h-4 rounded bg-slate-800 border-[#4A1224]/50 text-rose-500 focus:ring-0"
@@ -634,7 +647,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                   }`}
                 >
                   <Trash2 className="w-4 h-4" />
-                  {isArabic ? 'تنفيذ المحو الشامل وإصدار الإيصال المشفر' : 'Execute Cascade Erasure & Generate Receipt'}
+                  {isArabic ? 'تنفيذ المحو الشامل وإصدار الإيصال المشفر' : L('Execute Cascade Erasure & Generate Receipt')}
                 </button>
               </div>
             ) : (
@@ -646,21 +659,21 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Profile Wiped</span>
+                    <span className="text-xs text-slate-400 block font-bold">Profile Wiped</span>
                     <span className="text-sm font-bold text-emerald-400">
                       {erasureManifest.recordsWiped.profileState ? 'Yes' : 'No'}
                     </span>
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Events Redacted</span>
+                    <span className="text-xs text-slate-400 block font-bold">Events Redacted</span>
                     <span className="text-sm font-bold text-emerald-400">{erasureManifest.recordsWiped.learningEventsRedacted}</span>
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Spatial Memories</span>
+                    <span className="text-xs text-slate-400 block font-bold">Spatial Memories</span>
                     <span className="text-sm font-bold text-emerald-400">{erasureManifest.recordsWiped.spatialMemoriesWiped}</span>
                   </div>
                   <div className="p-3 bg-[#0E0610] rounded-xl border border-[#4A1224]/60">
-                    <span className="text-[10px] text-slate-400 block font-bold">Presence Cleaned</span>
+                    <span className="text-xs text-slate-400 block font-bold">Presence Cleaned</span>
                     <span className="text-sm font-bold text-emerald-400">
                       {erasureManifest.recordsWiped.presenceCleaned ? 'Yes' : 'No'}
                     </span>
@@ -668,8 +681,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 </div>
 
                 <div className="pt-2 border-t border-[#4A1224]/60">
-                  <span className="text-[11px] text-slate-400 block font-semibold">Cryptographic Erasure Receipt Hash</span>
-                  <span className="text-xs font-mono text-[#E5A93C] break-all">{erasureManifest.receiptHash}</span>
+                  <span className="text-xs text-slate-400 block font-semibold">Cryptographic Erasure Receipt Hash</span>
+                  <span className="text-xs font-mono text-[#5BB0F0] break-all">{erasureManifest.receiptHash}</span>
                 </div>
               </div>
             )}
@@ -682,8 +695,8 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-[#E5A93C]" />
-                  {isArabic ? 'سجل التدقيق المشفر بالسلاسل' : 'Tamper-Resistant Chained Audit Trail'}
+                  <FileCheck className="w-5 h-5 text-[#5BB0F0]" />
+                  {isArabic ? 'سجل التدقيق المشفر بالسلاسل' : L('Tamper-Resistant Chained Audit Trail')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Every security action is cryptographically chained to previous entries via SHA-256 block hashing.
@@ -701,7 +714,7 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 ) : (
                   <button
                     onClick={repairChain}
-                    className="py-2 px-3.5 bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 rounded-xl text-xs font-bold hover:bg-[#E5A93C] transition"
+                    className="py-2 px-3.5 bg-gradient-to-r from-[#1769AA] to-[#1769AA] text-white rounded-xl text-xs font-bold hover:bg-[#5BB0F0] transition"
                   >
                     Restore & Recalculate Chain
                   </button>
@@ -741,27 +754,27 @@ export const PrivacySecurityCenter: React.FC<PrivacySecurityCenterProps> = ({
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-[#E5A93C] font-mono font-bold">
+                      <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-[#5BB0F0] font-mono font-bold">
                         Block #{index}
                       </span>
-                      <span className="px-2 py-0.5 rounded-lg bg-[#4A1224]/40 text-[#E5A93C] font-semibold">
+                      <span className="px-2 py-0.5 rounded-lg bg-[#4A1224]/40 text-[#5BB0F0] font-semibold">
                         {entry.action}
                       </span>
                       <span className="text-slate-400 font-mono">actor: {entry.actorUid}</span>
                     </div>
-                    <span className="text-slate-500 font-mono text-[11px]">
+                    <span className="text-slate-500 font-mono text-xs">
                       {new Date(entry.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
                     <div className="truncate">
                       <span className="text-slate-500">prevHash: </span>
                       <span className="text-slate-400">{entry.prevHash.slice(0, 24)}...</span>
                     </div>
                     <div className="truncate">
                       <span className="text-slate-500">entryHash: </span>
-                      <span className="text-[#E5A93C]">{entry.entryHash.slice(0, 24)}...</span>
+                      <span className="text-[#5BB0F0]">{entry.entryHash.slice(0, 24)}...</span>
                     </div>
                   </div>
                 </div>

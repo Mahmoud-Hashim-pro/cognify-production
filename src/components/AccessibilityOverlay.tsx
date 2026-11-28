@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { prepareArabicForSpeech } from "../lib/tts";
 import { createPortal } from "react-dom";
 import { AccessibilityMode, UserProfile } from "../types";
 import { toast } from "./Toast";
@@ -61,11 +62,17 @@ export default function AccessibilityOverlay({
   const [isVisionAnalyzing, setIsVisionAnalyzing] = useState(false);
   // Lets the user hide the floating mic / camera / voice controls (remembered).
   const [controlsHidden, setControlsHidden] = useState<boolean>(() => {
-    try { return localStorage.getItem("cognify_a11y_hidden") === "1"; } catch { return false; }
+    // Default: collapsed into one small launcher so the controls never sit on
+    // page content. One tap on the launcher opens them (same buttons, same logic).
+    try {
+      const v2 = localStorage.getItem("rafiqi_a11y_hidden_v2");
+      if (v2 !== null) return v2 === "1";
+    } catch { /* ignore */ }
+    return true;
   });
   const toggleControlsHidden = (next: boolean) => {
     setControlsHidden(next);
-    try { localStorage.setItem("cognify_a11y_hidden", next ? "1" : "0"); } catch { /* ignore */ }
+    try { localStorage.setItem("rafiqi_a11y_hidden_v2", next ? "1" : "0"); } catch { /* ignore */ }
   };
   const [isAvatarSigning, setIsAvatarSigning] = useState(false);
   const [detectionConfidence, setDetectionConfidence] = useState(0);
@@ -107,7 +114,7 @@ export default function AccessibilityOverlay({
       return profile.studentState.accessibilityState.vision.ttsAutoNarration;
     }
     try {
-      const stored = localStorage.getItem(`cognify_a11y_tts_${profile?.uid || 'anon'}`);
+      const stored = localStorage.getItem(`rafiqi_a11y_tts_${profile?.uid || 'anon'}`);
       if (stored !== null) return stored === '1';
     } catch { /* ignore */ }
     return mode === "Visual";
@@ -133,7 +140,7 @@ export default function AccessibilityOverlay({
           true
         );
       }
-      localStorage.setItem(`cognify_a11y_tts_${profile?.uid || 'anon'}`, nextVal ? '1' : '0');
+      localStorage.setItem(`rafiqi_a11y_tts_${profile?.uid || 'anon'}`, nextVal ? '1' : '0');
     } catch {
       /* ignore */
     }
@@ -239,7 +246,10 @@ export default function AccessibilityOverlay({
               cleanText.includes("يا باشا") ||
               cleanText.includes("تمام") ||
               cleanText.includes("ازيك");
-            const defaultLang = isEgyptian ? "ar-EG" : "ar-SA";
+            const defaultLang = "ar-EG"; // Egyptian voice first for all Arabic
+            void isEgyptian;
+            utterance.text = prepareArabicForSpeech(cleanText);
+            utterance.rate = 0.97;
             utterance.lang = defaultLang;
 
             const voices = window.speechSynthesis.getVoices();
@@ -698,7 +708,8 @@ export default function AccessibilityOverlay({
       <button
         onClick={() => toggleControlsHidden(false)}
         title="Show accessibility controls"
-        className="fixed bottom-24 start-3 md:start-6 z-50 w-8 h-8 rounded-full bg-[#0E0610]/90 text-[#E5A93C]/80 shadow-md border border-[#4A1224]/50 backdrop-blur-md flex items-center justify-center hover:bg-[#4A1224]/30 hover:text-white active:scale-95 pointer-events-auto transition-all"
+        aria-label="Show accessibility controls"
+        className="fixed bottom-[7px] start-3 md:bottom-20 md:start-24 z-50 w-11 h-11 rounded-full bg-[#112C4F]/90 text-[#4B9FE1] shadow-md border border-[#24476F] backdrop-blur-md flex items-center justify-center hover:bg-[#24476F] hover:text-white active:scale-95 pointer-events-auto transition-all"
       >
         <Eye className="w-4 h-4" />
       </button>
@@ -718,13 +729,14 @@ export default function AccessibilityOverlay({
       }}
       dragElastic={0.2}
       dragMomentum={false}
-      className="fixed bottom-32 start-4 md:start-8 z-50 flex flex-col gap-6 pointer-events-none max-w-[calc(100vw-1.5rem)]"
+      className="fixed bottom-32 start-4 md:bottom-28 md:start-24 z-50 flex flex-col gap-6 pointer-events-none max-w-[calc(100vw-1.5rem)]"
     >
       {/* Hide all accessibility controls */}
       <button
         onClick={() => toggleControlsHidden(true)}
         title="Hide accessibility controls"
-        className="self-start pointer-events-auto w-9 h-9 rounded-full bg-bg-card/90 backdrop-blur border border-border text-text-muted shadow flex items-center justify-center hover:text-text-main active:scale-95"
+        aria-label="Hide accessibility controls"
+        className="self-start pointer-events-auto w-9 h-9 rounded-full bg-[#112C4F]/90 backdrop-blur border border-[#24476F] text-slate-300 shadow flex items-center justify-center hover:text-white active:scale-95"
       >
         <EyeOff className="w-4 h-4" />
       </button>
@@ -792,8 +804,9 @@ export default function AccessibilityOverlay({
                   className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl transition-all active:scale-95 border-2 ${
                     isListening
                       ? "bg-rose-500 border-rose-400 text-white animate-pulse"
-                      : "bg-[#0E0610] border-[#4A1224]/50 text-white hover:bg-[#1A0C1D]"
+                      : "bg-[#112C4F] border-[#24476F] text-white hover:bg-[#17355C]"
                   }`}
+                  aria-pressed={isListening}
                   title={isListening ? "Stop listening" : "Start listening"}
                   aria-label={isListening ? "Stop listening" : "Start listening"}
                 >
@@ -821,11 +834,11 @@ export default function AccessibilityOverlay({
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[9px] font-black uppercase text-primary tracking-widest">
+                    <span className="text-xs font-black uppercase text-primary tracking-widest">
                       {localize(profile.language, "Fingerspelling", "تهجئة بالأصابع")}
                     </span>
                     {liveLetter && (
-                      <span className="text-[9px] font-mono font-bold text-faint">
+                      <span className="text-xs font-mono font-bold text-faint">
                         {liveLetter}
                       </span>
                     )}
@@ -835,7 +848,7 @@ export default function AccessibilityOverlay({
                       onClick={() => setTranscription((p) => p.slice(0, -1))}
                       disabled={!transcription}
                       title={localize(profile.language, "Backspace", "مسح حرف")}
-                      className="px-2 py-1 bg-surface-3 text-text-muted text-[9px] font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
+                      className="px-2 py-1 bg-surface-3 text-text-muted text-xs font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
                     >
                       ⌫
                     </button>
@@ -844,7 +857,7 @@ export default function AccessibilityOverlay({
                         setTranscription("");
                       }}
                       disabled={!transcription}
-                      className="px-2 py-1 bg-surface-3 text-text-muted text-[9px] font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
+                      className="px-2 py-1 bg-surface-3 text-text-muted text-xs font-black uppercase rounded-lg hover:bg-surface-3 disabled:opacity-40"
                     >
                       {localize(profile.language, "Clear", "مسح")}
                     </button>
@@ -852,7 +865,7 @@ export default function AccessibilityOverlay({
                       onClick={interpretWithAI}
                       disabled={!isVisionActive || isVisionAnalyzing}
                       title={localize(profile.language, "Interpret a full word/gesture with AI", "ترجمة كلمة/إشارة كاملة بالذكاء الاصطناعي")}
-                      className="px-2 py-1 bg-primary text-white text-[9px] font-black uppercase rounded-lg hover:bg-primary disabled:opacity-40 flex items-center gap-1"
+                      className="px-2 py-1 bg-primary text-white text-xs font-black uppercase rounded-lg hover:bg-primary disabled:opacity-40 flex items-center gap-1"
                     >
                       {isVisionAnalyzing ? (
                         <RefreshCw className="w-3 h-3 animate-spin" />
@@ -868,7 +881,7 @@ export default function AccessibilityOverlay({
                         setTranscription("");
                       }}
                       disabled={!transcription.trim()}
-                      className="px-2 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase rounded-lg hover:bg-emerald-600 disabled:opacity-40"
+                      className="px-2 py-1 bg-emerald-500 text-white text-xs font-black uppercase rounded-lg hover:bg-emerald-600 disabled:opacity-40"
                     >
                       {localize(profile.language, "Send", "إرسال")}
                     </button>
@@ -935,7 +948,7 @@ export default function AccessibilityOverlay({
               {isVisionActive && (
                 <div className="absolute top-4 right-4 z-20 flex gap-2">
                   {isVisionAnalyzing && (
-                    <div className="bg-accent text-black text-[8px] font-black uppercase px-2 py-1 rounded-full animate-bounce">
+                    <div className="bg-accent text-black text-xs font-black uppercase px-2 py-1 rounded-full animate-bounce">
                       Analyzing...
                     </div>
                   )}
@@ -962,7 +975,7 @@ export default function AccessibilityOverlay({
 
               {isVisionActive && (
                 <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
-                  <div className="px-3 py-1 bg-primary/90 text-white text-[9px] font-black uppercase tracking-widest rounded-full flex items-center gap-2">
+                  <div className="px-3 py-1 bg-primary/90 text-white text-xs font-black uppercase tracking-widest rounded-full flex items-center gap-2">
                     <RefreshCw className="w-3 h-3 animate-spin" />{" "}
                     {visionStatus}
                   </div>
@@ -977,7 +990,7 @@ export default function AccessibilityOverlay({
               <button
                 onClick={isVisionActive ? stopVision : startVision}
                 className={`p-5 rounded-3xl shadow-2xl transition-all active:scale-95 flex items-center gap-3 ${
-                  isVisionActive ? "bg-emerald-500 scale-105" : "bg-[#0E0610]"
+                  isVisionActive ? "bg-emerald-500 scale-105" : "bg-[#112C4F]"
                 }`}
               >
                 {isVisionActive ? (

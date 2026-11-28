@@ -72,12 +72,12 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           <div
             className={cn(
               'w-5 h-5 rounded-lg border flex items-center justify-center transition-all duration-150',
-              'bg-cognify-surface-light dark:bg-cognify-surface-dark border-cognify-border-light dark:border-cognify-border-dark',
+              'bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark border-rafiqi-border-light dark:border-rafiqi-border-dark',
               'peer-checked:bg-rafiqi-primary peer-checked:border-rafiqi-primary peer-checked:text-white',
               'peer-indeterminate:bg-rafiqi-primary peer-indeterminate:border-rafiqi-primary peer-indeterminate:text-white',
               'group-hover:border-rafiqi-primary/60 dark:group-hover:border-rafiqi-primary/60',
-              'peer-focus-visible:ring-2 peer-focus-visible:ring-cognify-focus peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-cognify-surface-light dark:peer-focus-visible:ring-offset-cognify-bg-dark',
-              errorMessage && 'border-cognify-error-text-light dark:border-cognify-error-text-dark'
+              'peer-focus-visible:ring-2 peer-focus-visible:ring-rafiqi-focus peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-rafiqi-surface-light dark:peer-focus-visible:ring-offset-rafiqi-bg-dark',
+              errorMessage && 'border-rafiqi-error-text-light dark:border-rafiqi-error-text-dark'
             )}
             aria-hidden="true"
           >
@@ -92,17 +92,17 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         {(label || description) && (
           <div className="space-y-0.5 min-w-0">
             {label && (
-              <span className="block text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary leading-tight">
+              <span className="block text-sm font-semibold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary leading-tight">
                 {label}
               </span>
             )}
             {description && (
-              <span id={descId} className="block text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-normal">
+              <span id={descId} className="block text-xs text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary leading-normal">
                 {description}
               </span>
             )}
             {errorMessage && (
-              <span className="block text-xs text-cognify-error-text-light dark:text-cognify-error-text-dark font-medium pt-0.5" role="alert">
+              <span className="block text-xs text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark font-medium pt-0.5" role="alert">
                 {errorMessage}
               </span>
             )}

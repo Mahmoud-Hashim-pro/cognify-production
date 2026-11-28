@@ -4,6 +4,7 @@
  * spatial extraction from vision descriptions, location history,
  * and epistemically honest spatial queries across English, Arabic, and French.
  */
+import { L } from './translations';
 
 import { SpatialObjectRecord } from '../types';
 import {
@@ -24,7 +25,7 @@ export type {
   SpatialCorrection,
 };
 
-const STORAGE_PREFIX = 'cognify_spatial_memory_';
+const STORAGE_PREFIX = 'rafiqi_spatial_memory_';
 
 // In-memory per-user cache for rapid query responses
 const userSpatialCache: Map<string, SpatialObjectRecord[]> = new Map();
@@ -247,7 +248,7 @@ export function extractSpatialObjectsFromVision(
           : detectedRoom?.roomEn;
 
       const objName =
-        lang === 'ar' ? objDef.nameAr : lang === 'fr' ? objDef.nameFr : objDef.nameEn;
+        lang === 'ar' ? objDef.nameAr : lang === 'fr' ? objDef.nameFr : L(objDef.nameEn);
 
       detected.push({
         id: `sp_${objDef.category}_${uid.substring(0, 6)}`,
@@ -649,7 +650,7 @@ export function formatSpatialMemoryForAI(uid: string, lang: 'en' | 'ar' | 'fr' =
 // Multi-instance Object Identity, Disambiguation, Movement Trajectory & Correction
 // ══════════════════════════════════════════════════════════════════════════════
 
-const STORAGE_PREFIX_V2 = 'cognify_spatial_memory_v2_';
+const STORAGE_PREFIX_V2 = 'rafiqi_spatial_memory_v2_';
 
 // In-memory user-isolated cache for Spatial Memory 2.0
 const userSpatialV2Cache: Map<string, SpatialObjectIdentity[]> = new Map();

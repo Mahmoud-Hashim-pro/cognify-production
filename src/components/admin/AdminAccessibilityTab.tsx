@@ -135,7 +135,7 @@ export default function AdminAccessibilityTab({
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `cognify-accessibility-users-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `rafiqi-accessibility-users-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
     toast.success(`${a11yAll.length} user(s) exported.`, 'CSV downloaded');
@@ -237,7 +237,7 @@ export default function AdminAccessibilityTab({
               >
                 <Mail className="w-3.5 h-3.5 text-amber-400" />
                 {u.name || u.email?.split('@')[0]}
-                <span className="text-[10px] font-black text-amber-400 font-mono">{Math.floor(daysSinceActive(u))}d</span>
+                <span className="text-xs font-black text-amber-400 font-mono">{Math.floor(daysSinceActive(u))}d</span>
               </a>
             ))}
             {idleUsers.length > 8 && (
@@ -276,7 +276,7 @@ export default function AdminAccessibilityTab({
             {modeCounts.map(({ mode, count }) => (
               <span key={mode} className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black ${MODE_META[mode].cls}`}>
                 {MODE_META[mode].label}
-                <span className="bg-[#061A33]/60 px-2 py-0.5 rounded-lg font-mono text-white">{count}</span>
+                <span className="bg-[#0A2342]/60 px-2 py-0.5 rounded-lg font-mono text-white">{count}</span>
               </span>
             ))}
           </div>
@@ -295,7 +295,7 @@ export default function AdminAccessibilityTab({
             placeholder="Search accessibility users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-rose-500 outline-none"
+            className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-rose-500 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
           />
         </div>
         <button

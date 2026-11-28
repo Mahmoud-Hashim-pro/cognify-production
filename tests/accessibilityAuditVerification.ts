@@ -80,9 +80,7 @@ export async function runAccessibilityAuditVerification(): Promise<{ passed: num
     const modalFiles = [
       'DocumentStudioModal.tsx',
       'AccessibilityPassportModal.tsx',
-      'AccessibilityPreferencesModal.tsx',
       'ParentalConsentModal.tsx',
-      'VisualComfortModal.tsx',
       'AdminPasswordResetModal.tsx',
       'AdminUserDetailModal.tsx',
     ];
@@ -163,17 +161,6 @@ export async function runAccessibilityAuditVerification(): Promise<{ passed: num
       'UnifiedHearingCenter speech dictate button exposes boolean aria-pressed'
     );
 
-    const visualComfortPath = path.join(componentsDir, 'VisualComfortModal.tsx');
-    assert(fs.existsSync(visualComfortPath), 'VisualComfortModal.tsx exists');
-    const comfortContent = fs.readFileSync(visualComfortPath, 'utf8');
-    assert(
-      comfortContent.includes('role="switch"') && comfortContent.includes('aria-checked={settings.isDyslexiaFont}'),
-      'VisualComfortModal dyslexia font toggle exposes role="switch" and aria-checked'
-    );
-    assert(
-      comfortContent.includes('aria-checked={settings.showReadingRuler}'),
-      'VisualComfortModal reading ruler toggle exposes role="switch" and aria-checked'
-    );
   }
 
   // 5. Radiogroups & Radio Options
@@ -270,11 +257,11 @@ export async function runAccessibilityAuditVerification(): Promise<{ passed: num
   {
     const passportContent = fs.readFileSync(path.join(componentsDir, 'AccessibilityPassportModal.tsx'), 'utf8');
     assert(
-      passportContent.includes('cognify_font_scale'),
+      passportContent.includes('rafiqi_font_scale'),
       'AccessibilityPassportModal persists font scale preference'
     );
     assert(
-      passportContent.includes('cognify_reduce_motion'),
+      passportContent.includes('rafiqi_reduce_motion'),
       'AccessibilityPassportModal persists reduce motion preference'
     );
   }

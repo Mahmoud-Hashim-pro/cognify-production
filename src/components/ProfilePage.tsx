@@ -1,4 +1,4 @@
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import React, { useState, useEffect, useMemo } from 'react';
 import { UserProfile, EducationLevel, AccessibilityMode, LanguagePreference } from '../types';
 import { 
@@ -107,14 +107,14 @@ function getInitials(name?: string, email?: string): string {
 function formatActivityDate(dateVal: any, isAr: boolean): string {
   try {
     const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return isAr ? 'تاريخ سابق' : 'Previous date';
+    if (isNaN(d.getTime())) return isAr ? 'تاريخ سابق' : L('Previous date');
     return d.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
   } catch {
-    return isAr ? 'تاريخ سابق' : 'Previous date';
+    return isAr ? 'تاريخ سابق' : L('Previous date');
   }
 }
 
@@ -200,7 +200,7 @@ export default function ProfilePage({
         if (active && events && events.length > 0) {
           const mapped = events.map(e => ({
             date: formatActivityDate(e.timestamp, isAr),
-            activity: e.payload?.topic || e.payload?.subject || (isAr ? 'جلسة تقييم تفاعلية' : 'Interactive Assessment'),
+            activity: e.payload?.topic || e.payload?.subject || (isAr ? 'جلسة تقييم تفاعلية' : L('Interactive Assessment')),
             result: e.payload?.isCorrect ? '90%' : 'Completed',
             resultType: e.payload?.isCorrect ? 'score' : 'completed',
           }));
@@ -217,8 +217,8 @@ export default function ProfilePage({
     if (profile.chatThreads && profile.chatThreads.length > 0) {
       return profile.chatThreads.slice(-4).reverse().map((t, idx) => ({
         date: formatActivityDate(t.updatedAt || Date.now() - idx * 86400000 * 2, isAr),
-        activity: t.title || (isAr ? 'جلسة إرشاد ذكي' : 'AI Tutor Session'),
-        result: isAr ? 'مكتمل' : 'Completed',
+        activity: t.title || (isAr ? 'جلسة إرشاد ذكي' : L('AI Tutor Session')),
+        result: isAr ? 'مكتمل' : L('Completed'),
         resultType: 'completed',
       }));
     }
@@ -367,7 +367,7 @@ export default function ProfilePage({
                   });
                   setIsEditing(true);
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#1769AA] hover:bg-[#18C6C3] text-[#061A33] font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 cursor-pointer active:scale-95"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#1769AA] hover:bg-[#18C6C3] text-[#0A2342] font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 cursor-pointer active:scale-95"
               >
                 <Edit3 className="w-3.5 h-3.5" /> 
                 <span>{localize(profile.language, 'Edit Profile', 'تعديل الملف')}</span>
@@ -386,7 +386,7 @@ export default function ProfilePage({
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-5 py-2 bg-[#1769AA] hover:bg-[#18C6C3] text-[#061A33] rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 active:scale-95 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-5 py-2 bg-[#1769AA] hover:bg-[#18C6C3] text-[#0A2342] rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 active:scale-95 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
                 >
                   {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} 
                   <span>{saving ? localize(profile.language, 'Saving...', 'جاري الحفظ...') : localize(profile.language, 'Save Changes', 'حفظ التعديلات')}</span>
@@ -402,10 +402,6 @@ export default function ProfilePage({
             <h1 className="text-2xl sm:text-3xl font-black text-[#F4F7FB] tracking-tight">
               {localize(profile.language, 'Academic Profile', 'الملف الأكاديمي')}
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#1769AA]/25 text-[#18C6C3] border border-[#1769AA]/40 shadow-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#18C6C3]" />
-              <span>{localize(profile.language, 'Verified Scholar', 'طالب موثّق')}</span>
-            </span>
           </div>
           <p className="text-xs sm:text-sm text-[#B8C7D9] font-medium leading-relaxed">
             {localize(
@@ -431,7 +427,7 @@ export default function ProfilePage({
               <h3 className="text-lg sm:text-xl font-black text-[#F4F7FB] tracking-tight truncate mt-0.5">
                 {displayLevel}
               </h3>
-              <p className="text-[11px] font-semibold text-[#4B9FE1] mt-0.5 truncate">
+              <p className="text-xs font-semibold text-[#4B9FE1] mt-0.5 truncate">
                 {displayPace}
               </p>
             </div>
@@ -456,7 +452,7 @@ export default function ProfilePage({
                   style={{ width: `${computedMastery}%` }}
                 />
               </div>
-              <p className="text-[10px] text-[#B8C7D9] truncate">
+              <p className="text-xs text-[#B8C7D9] truncate">
                 {localize(profile.language, 'Progress toward your goals', 'التقدم نحو أهدافك')}
               </p>
             </div>
@@ -474,7 +470,7 @@ export default function ProfilePage({
               <h3 className="text-lg sm:text-xl font-black text-[#F4F7FB] tracking-tight truncate mt-0.5">
                 {knowledgePoints.toLocaleString()}
               </h3>
-              <p className="text-[11px] font-semibold text-[#18C6C3] mt-0.5 truncate flex items-center gap-1">
+              <p className="text-xs font-semibold text-[#18C6C3] mt-0.5 truncate flex items-center gap-1">
                 <span>↑ +12 {localize(profile.language, 'this week', 'هذا الأسبوع')}</span>
               </p>
             </div>
@@ -492,7 +488,7 @@ export default function ProfilePage({
               <h3 className="text-lg sm:text-xl font-black text-[#F4F7FB] tracking-tight truncate mt-0.5">
                 {sessionCount}
               </h3>
-              <p className="text-[11px] text-[#B8C7D9] mt-0.5 truncate">
+              <p className="text-xs text-[#B8C7D9] mt-0.5 truncate">
                 {localize(profile.language, 'Total sessions this month', 'إجمالي الجلسات هذا الشهر')}
               </p>
             </div>
@@ -528,7 +524,7 @@ export default function ProfilePage({
                   value={editedProfile.name || ''}
                   onChange={(e) => handleChange('name', e.target.value)}
                   placeholder={studentDisplayName}
-                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#18C6C3]"
+                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#18C6C3]"
                 />
               </div>
 
@@ -539,7 +535,7 @@ export default function ProfilePage({
                 <select 
                   value={editedProfile.educationLevel || 'University'}
                   onChange={(e) => handleChange('educationLevel', e.target.value as EducationLevel)}
-                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#18C6C3] cursor-pointer"
+                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#18C6C3] cursor-pointer"
                 >
                   <option value="University">University Level (مرحلة جامعية)</option>
                   <option value="Secondary">Secondary Education (ثانوية عامة)</option>
@@ -555,7 +551,7 @@ export default function ProfilePage({
                 <select 
                   value={editedProfile.university || displayUniversity}
                   onChange={(e) => handleChange('university', e.target.value)}
-                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#18C6C3] cursor-pointer"
+                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#18C6C3] cursor-pointer"
                 >
                   {EGYPTIAN_UNIVERSITIES.map(u => (
                     <option key={u} value={u}>{u}</option>
@@ -570,7 +566,7 @@ export default function ProfilePage({
                 <select 
                   value={editedProfile.faculty || displayFaculty}
                   onChange={(e) => handleChange('faculty', e.target.value)}
-                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#18C6C3] cursor-pointer"
+                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#18C6C3] cursor-pointer"
                 >
                   {POPULAR_FACULTIES.map(f => (
                     <option key={f} value={f}>{f}</option>
@@ -585,10 +581,10 @@ export default function ProfilePage({
                 <select 
                   value={editedProfile.language || 'Arabic'}
                   onChange={(e) => handleChange('language', e.target.value as LanguagePreference)}
-                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#18C6C3] cursor-pointer"
+                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#18C6C3] cursor-pointer"
                 >
                   {LANGUAGE_OPTIONS.map(opt => (
-                    <option key={opt.id} value={opt.id}>{opt.flag} {isAr ? opt.nameAr : opt.nameEn}</option>
+                    <option key={opt.id} value={opt.id}>{opt.flag} {isAr ? opt.nameAr : L(opt.nameEn)}</option>
                   ))}
                 </select>
               </div>
@@ -600,7 +596,7 @@ export default function ProfilePage({
                 <select 
                   value={editedProfile.accessibilityMode || 'None'}
                   onChange={(e) => handleChange('accessibilityMode', e.target.value as AccessibilityMode)}
-                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#18C6C3] cursor-pointer"
+                  className="w-full bg-[#082344] border border-[#16395E] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#18C6C3] cursor-pointer"
                 >
                   <option value="None">{localize(profile.language, 'Standard (Standard AI)', 'قياسي (عام)')}</option>
                   <option value="Visual">{localize(profile.language, 'Visual Companion (Audio & Camera)', 'بصري (كاميرا وصوت)')}</option>
@@ -642,18 +638,11 @@ export default function ProfilePage({
                 {isEditing && (
                   <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity text-white">
                     <Camera className="w-5 h-5 text-[#18C6C3] mb-1" />
-                    <span className="text-[10px] font-bold">{localize(profile.language, 'Change', 'تغيير')}</span>
+                    <span className="text-xs font-bold">{localize(profile.language, 'Change', 'تغيير')}</span>
                     <input id="profile-photo-upload" type="file" accept="image/*" className="hidden" aria-label={localize(profile.language, 'Upload profile photo', 'رفع صورة الملف الشخصي')} onChange={handlePhotoUpload} />
                   </label>
                 )}
 
-                {/* Verified Shield Check Badge at Bottom Right */}
-                <div 
-                  className="absolute bottom-0 end-0 w-7 h-7 rounded-full bg-[#1769AA] border-2 border-[#0D2542] flex items-center justify-center text-white shadow-md z-10"
-                  title="Verified Scholar"
-                >
-                  <ShieldCheck className="w-4 h-4 text-white" />
-                </div>
               </div>
 
               {/* Student Name */}
@@ -681,7 +670,7 @@ export default function ProfilePage({
                     <GraduationCap className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#B8C7D9]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#B8C7D9]">
                       {localize(profile.language, 'University', 'الجامعة')}
                     </p>
                     <p className="text-xs font-bold text-[#F4F7FB] mt-0.5 truncate" title={displayUniversity}>
@@ -696,7 +685,7 @@ export default function ProfilePage({
                     <BookOpen className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#B8C7D9]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#B8C7D9]">
                       {localize(profile.language, 'Faculty / Major', 'الكلية / التخصص')}
                     </p>
                     <p className="text-xs font-bold text-[#F4F7FB] mt-0.5 truncate" title={displayFaculty}>
@@ -711,7 +700,7 @@ export default function ProfilePage({
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#B8C7D9]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#B8C7D9]">
                       {localize(profile.language, 'Enrollment Status', 'حالة القيد والانتظام')}
                     </p>
                     <p className="text-xs font-bold text-[#F4F7FB] mt-0.5 truncate">
@@ -726,7 +715,7 @@ export default function ProfilePage({
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#B8C7D9]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#B8C7D9]">
                       {localize(profile.language, 'Member Since', 'تاريخ الانضمام')}
                     </p>
                     <p className="text-xs font-bold text-[#F4F7FB] mt-0.5 truncate">
@@ -814,7 +803,7 @@ export default function ProfilePage({
                       <span className="text-3xl font-black text-[#F4F7FB] tracking-tight">
                         {computedMastery}%
                       </span>
-                      <span className="text-[11px] font-semibold text-[#B8C7D9] mt-0.5">
+                      <span className="text-xs font-semibold text-[#B8C7D9] mt-0.5">
                         {hasMasteryData
                           ? localize(profile.language, 'Overall Progress', 'التقدم العام')
                           : localize(profile.language, 'No Data Yet', 'لا توجد بيانات بعد')}
@@ -829,7 +818,7 @@ export default function ProfilePage({
                     <div key={idx} className="space-y-1.5 text-start">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-[#F4F7FB] truncate">
-                          {isAr ? sub.nameAr : sub.nameEn}
+                          {isAr ? sub.nameAr : L(sub.nameEn)}
                         </span>
                         <span className="font-bold text-[#F4F7FB] ms-2">
                           {sub.percentage}%
@@ -875,7 +864,7 @@ export default function ProfilePage({
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full text-start text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-[#16395E]/80 text-[#B8C7D9] text-[11px] font-bold uppercase tracking-wider">
+                    <tr className="border-b border-[#16395E]/80 text-[#B8C7D9] text-xs font-bold uppercase tracking-wider">
                       <th className="py-3 px-3 text-start">{localize(profile.language, 'Date', 'التاريخ')}</th>
                       <th className="py-3 px-3 text-start">{localize(profile.language, 'Activity', 'النشاط')}</th>
                       <th className="py-3 px-3 text-end">{localize(profile.language, 'Result', 'النتيجة')}</th>

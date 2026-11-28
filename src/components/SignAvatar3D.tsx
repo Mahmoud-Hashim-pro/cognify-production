@@ -931,7 +931,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
       {/* Current fingerspelled letter — strictly Arabic only, zero English letters */}
       {glyph && /[\u0600-\u06FF]/.test(glyph) && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1 bg-black/75 backdrop-blur-md rounded-xl border border-amber-500/30 shadow-xl pointer-events-none flex items-center gap-1.5 animate-fadeIn">
-          <span className="text-[11px] text-amber-400 font-bold">هجاء إشاري:</span>
+          <span className="text-xs text-amber-400 font-bold">هجاء إشاري:</span>
           <span className="text-2xl font-black text-white tracking-wide font-sans">{glyph}</span>
         </div>
       )}
@@ -939,7 +939,7 @@ export default function SignAvatar3D({ words, playing, onProgress, onDone, class
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center px-4">
           <span className="text-3xl">🤟</span>
           <span className="text-text-muted text-xs font-bold">المجسم ثلاثي الأبعاد غير مدعوم على هذا الجهاز.</span>
-          <span className="text-faint text-[11px]">النص المترجم للغة الإشارة يظهر بالأسفل.</span>
+          <span className="text-faint text-xs">النص المترجم للغة الإشارة يظهر بالأسفل.</span>
         </div>
       ) : !ready && (
         <div className="absolute inset-0 flex items-center justify-center text-text-muted text-xs font-bold tracking-wider">

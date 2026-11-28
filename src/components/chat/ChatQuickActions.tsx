@@ -76,14 +76,14 @@ export default function ChatQuickActions({
 
   return (
     <div className="w-full flex items-center justify-center pb-2">
-      <div className="flex items-center gap-1.5 p-1 bg-[#0D2542] border border-[#22354E] rounded-2xl shadow-xl backdrop-blur-2xl overflow-x-auto no-scrollbar scrollbar-none max-w-full">
+      <div className="flex items-center gap-1.5 p-1 bg-[#0D2542] border border-[#24476F] rounded-2xl shadow-xl backdrop-blur-2xl overflow-x-auto no-scrollbar scrollbar-none max-w-full">
         {actions.map((act) => (
           <button
             key={act.id}
             type="button"
             disabled={disabled}
             onClick={act.onClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0A203A] hover:bg-[#0D4564] border border-[#22354E] hover:border-[#1685B5] text-[#B7C8DA] hover:text-[#F4F7FB] text-[11px] font-bold tracking-wide transition-all shrink-0 active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0A203A] hover:bg-[#0D4564] border border-[#24476F] hover:border-[#1685B5] text-[#B7C8DA] hover:text-[#F4F7FB] text-xs font-bold tracking-wide transition-all shrink-0 active:scale-95 disabled:opacity-50"
           >
             {act.icon}
             <span>{act.label}</span>

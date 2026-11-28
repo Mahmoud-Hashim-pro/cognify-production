@@ -56,11 +56,11 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
   ];
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="flex-1 h-screen overflow-y-auto bg-cognify-bg-dark text-slate-100 relative selection:bg-cognify-focus/30 selection:text-cognify-focus overflow-x-hidden font-sans flex flex-col custom-scrollbar p-6 md:p-10 gap-6">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="tool-auto flex-1 h-screen overflow-y-auto bg-rafiqi-bg-dark text-slate-100 relative selection:bg-rafiqi-focus/30 selection:text-rafiqi-focus overflow-x-hidden font-sans flex flex-col custom-scrollbar p-6 md:p-10 gap-6">
       {/* Ambient Lighting Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-cognify-surface-elevated/30 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 -right-40 w-[600px] h-[600px] bg-rafiqi-surface-elevated/30 rounded-full blur-[140px]" />
         <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[140px]" />
       </div>
 
@@ -68,7 +68,7 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
         {onNavigateBack && (
           <button
             onClick={onNavigateBack}
-            className="p-2.5 mt-1 text-slate-300 hover:text-white bg-cognify-bg-dark/95 shadow-md border border-cognify-border-dark/60 hover:border-cognify-border-dark/50 hover:bg-cognify-surface-dark rounded-2xl active:scale-95 transition-all flex items-center gap-2 shrink-0"
+            className="p-2.5 mt-1 text-slate-300 hover:text-white bg-rafiqi-bg-dark/95 shadow-md border border-rafiqi-border-dark/60 hover:border-rafiqi-border-dark/50 hover:bg-rafiqi-surface-dark rounded-2xl active:scale-95 transition-all flex items-center gap-2 shrink-0"
             title={t('Back to Assistant', 'العودة للمساعد')}
           >
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -76,13 +76,13 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
           </button>
         )}
         {onMenuClick && (
-          <button onClick={onMenuClick} aria-label={t('Open menu', 'افتح القائمة')} title={t('Open Menu', 'فتح القائمة')} className="p-2.5 mt-1 text-slate-300 hover:text-white bg-cognify-bg-dark/95 shadow-md border border-cognify-border-dark/60 hover:border-cognify-border-dark/50 hover:bg-cognify-surface-dark rounded-2xl active:scale-95 shrink-0 transition-all">
+          <button onClick={onMenuClick} aria-label={t('Open menu', 'افتح القائمة')} title={t('Open Menu', 'فتح القائمة')} className="p-2.5 mt-1 text-slate-300 hover:text-white bg-rafiqi-bg-dark/95 shadow-md border border-rafiqi-border-dark/60 hover:border-rafiqi-border-dark/50 hover:bg-rafiqi-surface-dark rounded-2xl active:scale-95 shrink-0 transition-all">
             <Menu className="w-5 h-5" />
           </button>
         )}
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <span className="p-2 rounded-2xl bg-cognify-surface-elevated/30 border border-cognify-focus/20 text-cognify-focus">
+            <span className="p-2 rounded-2xl bg-rafiqi-surface-elevated/30 border border-rafiqi-focus/20 text-rafiqi-focus">
               <LifeBuoy className="w-6 h-6" />
             </span>
             {t('Support Center', 'مركز الدعم')}
@@ -93,38 +93,38 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
 
       <div className="max-w-3xl w-full space-y-6 pb-10">
         {/* Contact card */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-amber-400/90 via-blue-600/90 to-indigo-600/90 border border-cognify-focus/30 text-white rounded-[28px] p-6 md:p-8 shadow-2xl shadow-[#E5A93C]/10 flex flex-col md:flex-row md:items-center gap-5">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#1769AA] via-[#1769AA] to-[#0D4778] border border-rafiqi-focus/30 text-white rounded-[28px] p-6 md:p-8 shadow-2xl shadow-[#1769AA]/10 flex flex-col md:flex-row md:items-center gap-5">
           <div className="flex-1">
             <h2 className="font-display text-xl font-bold tracking-tight">{t('Need a hand?', 'محتاج مساعدة؟')}</h2>
-            <p className="text-sm text-cognify-focus/90 mt-1 font-medium">{t('Email our team and we’ll get back to you.', 'ابعتلنا إيميل وهنرد عليك في أقرب وقت.')}</p>
+            <p className="text-sm text-rafiqi-focus/90 mt-1 font-medium">{t('Email our team and we’ll get back to you.', 'ابعتلنا إيميل وهنرد عليك في أقرب وقت.')}</p>
           </div>
           <a
             href={SUPPORT_MAILTO}
             className="inline-flex items-center justify-center gap-2 bg-white text-slate-900 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-2xl hover:bg-slate-100 shadow-xl shadow-black/20 active:scale-95 transition-all shrink-0"
           >
-            <Mail className="w-4 h-4 text-cognify-focus" /> {t('Email our team', 'ابعتلنا إيميل')}
+            <Mail className="w-4 h-4 text-rafiqi-focus" /> {t('Email our team', 'ابعتلنا إيميل')}
           </a>
         </div>
 
         {/* FAQ */}
-        <div className="bg-cognify-bg-dark/95 border border-cognify-border-dark/60 rounded-[28px] overflow-hidden backdrop-blur-xl shadow-2xl">
-          <div className="px-6 py-4 border-b border-cognify-border-dark/60 bg-cognify-surface-dark/40">
+        <div className="bg-rafiqi-bg-dark/95 border border-rafiqi-border-dark/60 rounded-[28px] overflow-hidden backdrop-blur-xl shadow-2xl">
+          <div className="px-6 py-4 border-b border-rafiqi-border-dark/60 bg-rafiqi-surface-dark/40">
             <h2 className="font-display text-sm font-bold uppercase tracking-wider text-slate-300">{t('Frequently asked', 'الأسئلة الشائعة')}</h2>
           </div>
           {faqs.map((f, i) => {
             const isOpen = open === i;
             return (
-              <div key={i} className="border-b border-cognify-border-dark/50 last:border-b-0 transition-colors">
+              <div key={i} className="border-b border-rafiqi-border-dark/50 last:border-b-0 transition-colors">
                 <button
                   onClick={() => setOpen(isOpen ? null : i)}
                   aria-expanded={isOpen}
                   className="w-full flex items-center gap-3.5 px-6 py-4.5 text-start hover:bg-slate-800/30 transition-all"
                 >
-                  <span className="w-9 h-9 rounded-xl bg-cognify-surface-elevated/30 border border-cognify-focus/20 text-cognify-focus flex items-center justify-center shrink-0">
+                  <span className="w-9 h-9 rounded-xl bg-rafiqi-surface-elevated/30 border border-rafiqi-focus/20 text-rafiqi-focus flex items-center justify-center shrink-0">
                     <f.icon className="w-4 h-4" />
                   </span>
                   <span className="flex-1 text-sm font-semibold text-slate-200">{f.q}</span>
-                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-cognify-focus' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-rafiqi-focus' : ''}`} />
                 </button>
                 {isOpen && (
                   <div className="px-6 pb-5 ps-16 pt-1 text-[13.5px] leading-relaxed text-slate-400 animate-in fade-in duration-200">
@@ -137,16 +137,16 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
         </div>
 
         {/* 🛡️ Public Trust, Audit & Transparency Framework */}
-        <div className="bg-cognify-bg-dark/95 border border-cognify-focus/30 rounded-[28px] p-6 md:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+        <div className="bg-rafiqi-bg-dark/95 border border-rafiqi-focus/30 rounded-[28px] p-6 md:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-cognify-surface-elevated/50 border border-cognify-focus/40 flex items-center justify-center text-cognify-focus">
+              <div className="w-10 h-10 rounded-2xl bg-rafiqi-surface-elevated/50 border border-rafiqi-focus/40 flex items-center justify-center text-rafiqi-focus">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
                 <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
                   <span>{t('Trust & Transparency Portal', 'بوابة الشفافية والتدقيق المعتمد')}</span>
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
                     {t('Audited v11.0', 'مدقق ومعتمد')}
                   </span>
                 </h2>
@@ -158,26 +158,26 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
-            <div className="p-3.5 rounded-2xl bg-cognify-bg-dark/95 border border-cognify-border-dark/60 text-start">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('Automated Test Suite', 'حزمة الاختبارات الآلية')}</span>
-              <span className="text-lg font-black text-cognify-focus block mt-1">3,546+ Tests</span>
-              <span className="text-[11px] text-emerald-400 font-semibold block mt-0.5">100% Invariants Passing</span>
+            <div className="p-3.5 rounded-2xl bg-rafiqi-bg-dark/95 border border-rafiqi-border-dark/60 text-start">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('Automated Test Suite', 'حزمة الاختبارات الآلية')}</span>
+              <span className="text-lg font-black text-rafiqi-focus block mt-1">3,546+ Tests</span>
+              <span className="text-xs text-emerald-400 font-semibold block mt-0.5">100% Invariants Passing</span>
             </div>
-            <div className="p-3.5 rounded-2xl bg-cognify-bg-dark/95 border border-cognify-border-dark/60 text-start">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('Adversarial Defense', 'صد الهجمات والاختراق')}</span>
+            <div className="p-3.5 rounded-2xl bg-rafiqi-bg-dark/95 border border-rafiqi-border-dark/60 text-start">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('Adversarial Defense', 'صد الهجمات والاختراق')}</span>
               <span className="text-lg font-black text-purple-400 block mt-1">42 / 42 Threats</span>
-              <span className="text-[11px] text-purple-300 font-semibold block mt-0.5">100% Defense Rate</span>
+              <span className="text-xs text-purple-300 font-semibold block mt-0.5">100% Defense Rate</span>
             </div>
-            <div className="p-3.5 rounded-2xl bg-cognify-bg-dark/95 border border-cognify-border-dark/60 text-start">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('Zero-Knowledge Privacy', 'الخصوصية الصفرية')}</span>
+            <div className="p-3.5 rounded-2xl bg-rafiqi-bg-dark/95 border border-rafiqi-border-dark/60 text-start">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('Zero-Knowledge Privacy', 'الخصوصية الصفرية')}</span>
               <span className="text-lg font-black text-emerald-400 block mt-1">0% Retention</span>
-              <span className="text-[11px] text-slate-400 font-semibold block mt-0.5">No video/audio saved to disk</span>
+              <span className="text-xs text-slate-400 font-semibold block mt-0.5">No video/audio saved to disk</span>
             </div>
           </div>
 
-          <div className="space-y-2 mt-4 pt-4 border-t border-cognify-border-dark/60 text-xs text-slate-300 text-start leading-relaxed">
+          <div className="space-y-2 mt-4 pt-4 border-t border-rafiqi-border-dark/60 text-xs text-slate-300 text-start leading-relaxed">
             <div className="flex items-start gap-2">
-              <span className="text-cognify-focus font-bold shrink-0">🤟 {t('Sign Language Strategy:', 'استراتيجية لغة الإشارة:')}</span>
+              <span className="text-rafiqi-focus font-bold shrink-0">🤟 {t('Sign Language Strategy:', 'استراتيجية لغة الإشارة:')}</span>
               <span className="text-slate-400">{t('Currently operating on fingerspelling approximation; expanding to a verified 50-word ArSL lexical dictionary in partnership with accredited Deaf associations.', 'نعتمد حالياً على التهجئة الحرفية الدقيقة، وجاري التوسع لمعجم معتمد يضم 50+ كلمة إشارية أساسية بالشراكة مع جمعيات رعاية الصم.')}</span>
             </div>
             <div className="flex items-start gap-2">
@@ -188,7 +188,7 @@ export default function SupportCenter({ profile, onMenuClick, onNavigateBack }: 
         </div>
 
         <p className="text-center text-xs text-slate-500 font-medium">
-          {t('Still stuck?', 'لسه محتاج مساعدة؟')} <a href={SUPPORT_MAILTO} className="text-cognify-focus hover:text-cognify-focus font-semibold underline underline-offset-4 transition-colors">{t('Email the admin team', 'ابعت لفريق الأدمن')}</a>
+          {t('Still stuck?', 'لسه محتاج مساعدة؟')} <a href={SUPPORT_MAILTO} className="text-rafiqi-focus hover:text-rafiqi-focus font-semibold underline underline-offset-4 transition-colors">{t('Email the admin team', 'ابعت لفريق الأدمن')}</a>
         </p>
       </div>
     </div>

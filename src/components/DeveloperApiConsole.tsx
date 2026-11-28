@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { L } from '../lib/translations';
 import {
   Terminal,
   Key,
@@ -119,12 +120,12 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                 </div>
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                    {isArabic ? 'وحدة تحكم مطوري المنصة وخطافات الويب' : 'Open Developer API & Webhooks Console'}
+                    {isArabic ? 'وحدة تحكم مطوري المنصة وخطافات الويب' : L('Open Developer API & Webhooks Console')}
                   </h1>
                   <p className="text-sm text-slate-400 mt-1">
                     {isArabic
                       ? 'مفاتيح API مشفرة، توقيعات HMAC-SHA256 لخطافات الويب، ومواصفات OpenAPI 3.1 القياسية'
-                      : 'Cryptographic API Key Lifecycle, RFC 2104 HMAC Webhook Stamping, and OpenAPI 3.1 Spec'}
+                      : L('Cryptographic API Key Lifecycle, RFC 2104 HMAC Webhook Stamping, and OpenAPI 3.1 Spec')}
                   </p>
                 </div>
               </div>
@@ -188,7 +189,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                 placeholder="Key Name (e.g. Canvas LMS Sync)"
                 value={keyName}
                 onChange={e => setKeyName(e.target.value)}
-                className="flex-1 px-3.5 py-2.5 bg-[#0E0610] border border-[#4A1224]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:border-[#E5A93C]/50 outline-none"
+                className="flex-1 px-3.5 py-2.5 bg-[#0E0610] border border-[#4A1224]/60 rounded-xl text-xs text-white placeholder-slate-500 focus:border-[#E5A93C]/50 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               />
               <button
                 type="submit"
@@ -200,7 +201,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
 
             {/* Scope Checkboxes */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <span className="text-[11px] text-slate-500 uppercase font-bold">Permissions:</span>
+              <span className="text-xs text-slate-500 uppercase font-bold">Permissions:</span>
               {(['read:analytics', 'write:events', 'admin:sync', 'ai:query'] as ApiKeyScope[]).map(sc => (
                 <label key={sc} className="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
                   <input
@@ -220,7 +221,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead>
-                <tr className="border-b border-[#4A1224]/60 text-slate-500 uppercase text-[10px]">
+                <tr className="border-b border-[#4A1224]/60 text-slate-500 uppercase text-xs">
                   <th className="pb-3 font-semibold">Key Name</th>
                   <th className="pb-3 font-semibold">Prefix</th>
                   <th className="pb-3 font-semibold">Scopes</th>
@@ -236,14 +237,14 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                     <td className="py-3">
                       <div className="flex flex-wrap gap-1">
                         {k.scopes.map(s => (
-                          <span key={s} className="px-2 py-0.5 rounded-md bg-slate-800 font-mono text-[10px] text-slate-300">
+                          <span key={s} className="px-2 py-0.5 rounded-md bg-slate-800 font-mono text-xs text-slate-300">
                             {s}
                           </span>
                         ))}
                       </div>
                     </td>
                     <td className="py-3">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${
                         k.status === 'active' ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-500 bg-slate-800'
                       }`}>
                         {k.status}
@@ -253,7 +254,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                       {k.status === 'active' && (
                         <button
                           onClick={() => handleRevokeKey(k.keyId)}
-                          className="text-rose-400 hover:text-rose-300 font-semibold text-[11px]"
+                          className="text-rose-400 hover:text-rose-300 font-semibold text-xs"
                         >
                           Revoke
                         </button>
@@ -298,7 +299,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
               onChange={e => setWebhookUrl(e.target.value)}
               aria-label="Webhook Endpoint URL"
               placeholder="https://api.example.com/webhook"
-              className="w-full p-2.5 bg-[#0E0610] border border-[#4A1224]/60 rounded-xl text-xs font-mono text-white outline-none focus:border-purple-500/50"
+              className="w-full p-2.5 bg-[#0E0610] border border-[#4A1224]/60 rounded-xl text-xs font-mono text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-purple-500/50"
             />
           </div>
 
@@ -314,15 +315,15 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold">HTTP Header: X-Rafiqi-Signature</span>
-                <pre className="p-2.5 bg-[#0E0610] rounded-xl border border-[#4A1224]/60 text-[11px] font-mono text-[#E5A93C] overflow-x-auto">
+                <span className="text-xs text-slate-500 uppercase font-bold">HTTP Header: X-Rafiqi-Signature</span>
+                <pre className="p-2.5 bg-[#0E0610] rounded-xl border border-[#4A1224]/60 text-xs font-mono text-[#E5A93C] overflow-x-auto">
                   {lastWebhookDelivery.signature}
                 </pre>
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold">Body JSON Payload</span>
-                <pre className="p-2.5 bg-[#0E0610] rounded-xl border border-[#4A1224]/60 text-[11px] font-mono text-slate-300 overflow-x-auto">
+                <span className="text-xs text-slate-500 uppercase font-bold">Body JSON Payload</span>
+                <pre className="p-2.5 bg-[#0E0610] rounded-xl border border-[#4A1224]/60 text-xs font-mono text-slate-300 overflow-x-auto">
                   {lastWebhookDelivery.payload}
                 </pre>
               </div>
@@ -349,7 +350,7 @@ export const DeveloperApiConsole: React.FC<DeveloperApiConsoleProps> = ({
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'cognify-openapi-v2.0.json';
+                a.download = 'rafiqi-openapi-v2.0.json';
                 a.click();
                 URL.revokeObjectURL(url);
               }}

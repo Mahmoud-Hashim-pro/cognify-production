@@ -44,9 +44,9 @@ export interface ProactiveOpportunity {
 }
 
 // In-Memory & LocalStorage Agency State
-const STORAGE_DISMISSED_KEY = 'cognify_proactive_dismissed';
-const STORAGE_SNOOZED_KEY = 'cognify_proactive_snoozed';
-const STORAGE_ENABLED_KEY = 'cognify_proactive_enabled';
+const STORAGE_DISMISSED_KEY = 'rafiqi_proactive_dismissed';
+const STORAGE_SNOOZED_KEY = 'rafiqi_proactive_snoozed';
+const STORAGE_ENABLED_KEY = 'rafiqi_proactive_enabled';
 
 let memoryDismissed = new Set<string>();
 let memorySnoozed = new Map<string, number>(); // id -> un-snooze timestamp

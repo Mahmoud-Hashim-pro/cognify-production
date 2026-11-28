@@ -16,7 +16,7 @@
  */
 import {
   guard, readBody, buildPersona, threadsSummary, buildContents,
-  buildOpenAIMessages, geminiFetch, providerFor, orderedFallbackKeys, stripReasoning, validateAttachmentMimeAndName,
+  buildOpenAIMessages, geminiFetch, aiBusyMessage, providerFor, orderedFallbackKeys, stripReasoning, validateAttachmentMimeAndName,
 } from '../_lib/ai.js';
 import { classifyRequest, type TaskCategory } from '../_lib/router.js';
 import { logTelemetry } from '../_lib/telemetry.js';
@@ -199,9 +199,15 @@ export default async function handler(req: any, res: any) {
         if (att.data) {
           const approxBytes = Math.round((att.data.length * 3) / 4);
           const isAudio = (att.type || '').startsWith('audio/') || /\.(mp3|wav|m4a|webm|ogg|aac|flac)$/i.test(att.name || '');
-          const maxLimit = isAudio ? 50 * 1024 * 1024 : 25 * 1024 * 1024;
+          // Vercel serverless truncates bodies at ~4.5MB; keep binary under 3MB
+          // (about 4MB base64) so this check runs before the platform 413.
+          const maxLimit = 3 * 1024 * 1024;
           if (approxBytes > maxLimit) {
-            res.status(413).json({ error: `Payload too large: attachment "${att.name || 'file'}" exceeds limit` });
+            res.status(413).json({
+              error: `Payload too large: attachment "${att.name || 'file'}" exceeds the 3MB limit. Use a shorter recording or compress the file.`,
+              code: 'PAYLOAD_TOO_LARGE',
+              maxBytes: 3 * 1024 * 1024,
+            });
             return;
           }
         }
@@ -275,9 +281,7 @@ export default async function handler(req: any, res: any) {
     full = stripReasoning(full);
     const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';
     if (!full) {
-      full = isAr
-        ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني بعد لحظات 🙏'
-        : '⚠️ The AI is busy right now. Please try again in a moment 🙏';
+      full = aiBusyMessage(isAr);
     }
 
     // Shared Output Quality Guard: sanitize output, redact sensitive secrets, repair markdown & latex

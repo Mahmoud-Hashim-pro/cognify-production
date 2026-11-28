@@ -15,6 +15,57 @@ export interface EmergencyDispatchResult {
   channels?: string[];
   message: string;
   fallbackDirectCall?: boolean;
+  queuedOffline?: boolean;
+}
+
+// ── Offline SOS outbox ──────────────────────────────────────────────────────
+// When the network is down the SOS cannot reach the server. Queue it locally
+// and flush automatically as soon as connectivity returns, so no cry for help
+// is silently lost.
+const SOS_OUTBOX_KEY = 'rafiqi_sos_outbox_v1';
+
+type QueuedSOS = Parameters<typeof dispatchServerEmergencySOS>[0];
+
+function loadOutbox(): QueuedSOS[] {
+  try {
+    const raw = localStorage.getItem(SOS_OUTBOX_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveOutbox(items: QueuedSOS[]): void {
+  try {
+    localStorage.setItem(SOS_OUTBOX_KEY, JSON.stringify(items));
+  } catch { /* storage unavailable */ }
+}
+
+export function queueOfflineSOS(params: QueuedSOS): void {
+  const outbox = loadOutbox();
+  outbox.push(params);
+  saveOutbox(outbox);
+}
+
+export async function flushOfflineSOSOutbox(): Promise<number> {
+  const outbox = loadOutbox();
+  if (outbox.length === 0) return 0;
+  const remaining: QueuedSOS[] = [];
+  let sent = 0;
+  for (const item of outbox) {
+    const res = await dispatchServerEmergencySOS(item);
+    if (res.success) sent += 1;
+    else remaining.push(item);
+  }
+  saveOutbox(remaining);
+  return sent;
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    void flushOfflineSOSOutbox();
+  });
 }
 
 export async function dispatchServerEmergencySOS(params: {
@@ -73,6 +124,17 @@ export async function dispatchServerEmergencySOS(params: {
     };
   } catch (err: any) {
     console.error('[Emergency Dispatch Failed]:', err);
+    // Offline or unreachable: queue the SOS so it is retried automatically when
+    // connectivity returns (see flushOfflineSOSOutbox on the 'online' event).
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      queueOfflineSOS(params);
+      return {
+        success: false,
+        message: 'No network right now. The SOS was saved on this device and will be sent automatically the moment the connection returns.',
+        fallbackDirectCall: true,
+        queuedOffline: true,
+      };
+    }
     return {
       success: false,
       message: err.message || 'Network error while contacting emergency dispatch.',

@@ -5,6 +5,7 @@
  * Rafiqi Inclusive Platform — Central Navigation, Routing & History Orchestrator
  * (Phase 5: Seamless Navigation, Android/Browser Back Sync, Session Restoration)
  */
+import { L } from './translations';
 
 import { AppView, isAccessibilityUser, homeViewFor } from './access';
 import { UserProfile } from '../types';
@@ -35,9 +36,8 @@ export interface RouteState {
 
 export const VALID_VIEWS: readonly AppView[] = [
   'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'communication', 'admin', 'support', 'privacy_security',
-  'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
-  'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
-  'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
+ 'goals', 'analytics', 'planner', 'gym', 'privacy', 'intelligence', 'blind_home', 'voice_navigation', 'daily_aids', 'known_people',
+  'privacy_policy', 'terms',
 ] as const;
 
 export const VALID_DISABILITY_TABS: readonly DisabilityTab[] = [
@@ -45,12 +45,12 @@ export const VALID_DISABILITY_TABS: readonly DisabilityTab[] = [
 ] as const;
 
 export const STORAGE_KEYS = {
-  RETURN_DESTINATION: 'cognify_return_destination',
-  SESSION_EXPIRED: 'cognify_session_expired',
-  DEFAULT_TAB: 'cognify_default_disability_tab',
-  CHAT_DRAFT: 'cognify_chat_draft_input',
-  VISION_OBSERVATION: 'cognify_vision_last_observation',
-  DOC_STUDIO_DRAFT: 'cognify_doc_studio_active',
+  RETURN_DESTINATION: 'rafiqi_return_destination',
+  SESSION_EXPIRED: 'rafiqi_session_expired',
+  DEFAULT_TAB: 'rafiqi_default_disability_tab',
+  CHAT_DRAFT: 'rafiqi_chat_draft_input',
+  VISION_OBSERVATION: 'rafiqi_vision_last_observation',
+  DOC_STUDIO_DRAFT: 'rafiqi_doc_studio_active',
 } as const;
 
 /**
@@ -73,6 +73,8 @@ export function parseRoute(hashString: string): RouteState {
 
   // Handle direct aliases
   if (clean === 'privacy') return { view: 'privacy_security' };
+  if (clean === 'privacy-policy' || clean === 'privacy_policy' || clean === 'policy') return { view: 'privacy_policy' };
+  if (clean === 'terms' || clean === 'terms-of-service' || clean === 'terms_of_service') return { view: 'terms' };
   if (clean === 'intelligence') return { view: 'profile' };
   if (clean === 'admin' || clean === 'users' || clean === 'database') return { view: 'admin' };
   if (clean === 'productivity' || clean.startsWith('productivity/')) {
@@ -334,52 +336,56 @@ export function getRouteTitle(route: RouteState, lang?: string): string {
   if (route.view === 'disability') {
     switch (route.tab) {
       case 'vision':
-        return isAr ? 'الرفيق البصري' : 'Visual Companion';
+        return isAr ? 'الرفيق البصري' : L('Visual Companion');
       case 'deaf':
       case 'bridge':
       case 'radar':
-        return isAr ? 'استوديو لغة الإشارة والسمع 3D' : '3D Sign & Hearing Studio';
+        return isAr ? 'استوديو لغة الإشارة والسمع 3D' : L('3D Sign & Hearing Studio');
       case 'caregiver':
-        return isAr ? 'بوابة المعلم والأسرة' : 'Caregiver & Educator Hub';
+        return isAr ? 'بوابة المعلم والأسرة' : L('Caregiver & Educator Hub');
       case 'orchestrator':
-        return isAr ? 'منسق الإعاقات المتعددة' : 'Cross-Disability Orchestrator';
+        return isAr ? 'منسق الإعاقات المتعددة' : L('Cross-Disability Orchestrator');
       case 'chat':
-        return isAr ? 'المعلم الذكي المهيأ' : 'Accessible AI Tutor';
+        return isAr ? 'المعلم الذكي المهيأ' : L('Accessible AI Tutor');
       case 'hub':
       default:
-        return isAr ? 'لوحة الميزات الرئيسية' : 'Dashboard Hub';
+        return isAr ? 'لوحة الميزات الرئيسية' : L('Dashboard Hub');
     }
   }
 
   switch (route.view) {
     case 'communication':
     case 'communicate':
-      return isAr ? 'مساعد التواصل الشامل' : 'Communicate — Accessible Communication Assistant';
+      return isAr ? 'مساعد التواصل الشامل' : L('Communicate — Accessible Communication Assistant');
     case 'mobility':
-      return isAr ? 'مساعد الحركة واستكشاف الأماكن' : 'Mobility & Place Assistant';
+      return isAr ? 'مساعد الحركة واستكشاف الأماكن' : L('Mobility & Place Assistant');
     case 'productivity':
-      return isAr ? 'مساحة الإنتاجية ومساعد العمل والإبداع' : 'Productivity Workspace & Assistant';
+      return isAr ? 'مساحة الإنتاجية ومساعد العمل والإبداع' : L('Productivity Workspace & Assistant');
     case 'book_studio':
-      return isAr ? 'استوديو الكتب والمستندات' : 'Accessible Book Studio';
+      return isAr ? 'استوديو الكتب والمستندات' : L('Accessible Book Studio');
     case 'toolkit':
-      return isAr ? 'منظومة أدوات الوصول' : 'Accessibility Toolkit';
+      return isAr ? 'منظومة أدوات الوصول' : L('Accessibility Toolkit');
     case 'chat':
-      return isAr ? 'المعلم الذكي المهيأ' : 'Accessible AI Tutor';
+      return isAr ? 'المعلم الذكي المهيأ' : L('Accessible AI Tutor');
     case 'profile':
-      return isAr ? 'جواز الإتاحة والملف الشخصي' : 'Accommodation Passport';
+      return isAr ? 'جواز الإتاحة والملف الشخصي' : L('Accommodation Passport');
     case 'settings':
-      return isAr ? 'إعدادات النظام واللغة' : 'System Settings';
+      return isAr ? 'إعدادات النظام واللغة' : L('System Settings');
     case 'privacy_security':
     case 'privacy':
-      return isAr ? 'الخصوصية وأمان البيانات' : 'Privacy & Security';
+      return isAr ? 'الخصوصية وأمان البيانات' : L('Privacy & Security');
+    case 'privacy_policy':
+      return isAr ? 'سياسة الخصوصية' : L('Privacy Policy');
+    case 'terms':
+      return isAr ? 'شروط الاستخدام' : L('Terms of Use');
     case 'support':
-      return isAr ? 'الدعم والمساعدة' : 'Accessible Support';
+      return isAr ? 'الدعم والمساعدة' : L('Accessible Support');
     case 'admin':
-      return isAr ? 'لوحة الإدارة' : 'Admin Portal';
+      return isAr ? 'لوحة الإدارة' : L('Admin Portal');
     case 'video':
-      return isAr ? 'استوديو لغة الإشارة 3D' : '3D Sign Video Studio';
+      return isAr ? 'استوديو لغة الإشارة 3D' : L('3D Sign Video Studio');
     default:
-      return isAr ? 'لوحة الميزات الرئيسية' : 'Dashboard Hub';
+      return isAr ? 'لوحة الميزات الرئيسية' : L('Dashboard Hub');
   }
 }
 
@@ -401,7 +407,7 @@ export function getRouteAnnouncement(route: RouteState, lang?: string): string {
  */
 export function getRouteBreadcrumbs(route: RouteState, lang?: string): BreadcrumbItem[] {
   const isAr = lang === 'Arabic' || lang === 'Egyptian Ammiya' || lang === 'ar';
-  const hubLabel = isAr ? 'لوحة الميزات' : 'Dashboard Hub';
+  const hubLabel = isAr ? 'لوحة الميزات' : L('Dashboard Hub');
   
   const rootBreadcrumb: BreadcrumbItem = {
     id: 'hub',

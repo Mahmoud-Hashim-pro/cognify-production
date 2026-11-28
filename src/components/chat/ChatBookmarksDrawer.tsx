@@ -70,7 +70,7 @@ export default function ChatBookmarksDrawer({
                   <h3 className="text-sm font-bold text-white">
                     {localize(language, 'Saved Insights & Notes', 'بنك الأفكار والإجابات المحفوظة')}
                   </h3>
-                  <p className="text-[11px] text-[0A96A5]/80">
+                  <p className="text-xs text-[0A96A5]/80">
                     {bookmarks.length} {localize(language, 'saved key points', 'نقاط محفوظة للمراجعة')}
                   </p>
                 </div>
@@ -106,13 +106,13 @@ export default function ChatBookmarksDrawer({
                     key={b.id}
                     className="p-3.5 rounded-2xl bg-[071B33] border border-[16395E]/50 hover:border-[0A96A5]/50 transition-all space-y-2 group shadow-md"
                   >
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 border-b border-[16395E]/40 pb-1.5">
+                    <div className="flex items-center justify-between text-xs text-slate-400 border-b border-[16395E]/40 pb-1.5">
                       <span className="flex items-center gap-1 font-mono text-[0A96A5]/80">
                         <Sparkles className="w-3 h-3 text-[0A96A5]" />
                         {new Date(b.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       {b.pedagogyStyle && (
-                        <span className="px-1.5 py-0.5 rounded bg-[#2D0B16] text-[0A96A5] border border-[16395E]/60 font-semibold text-[9px]">
+                        <span className="px-1.5 py-0.5 rounded bg-[#2D0B16] text-[0A96A5] border border-[16395E]/60 font-semibold text-xs">
                           {b.pedagogyStyle}
                         </span>
                       )}
@@ -125,7 +125,7 @@ export default function ChatBookmarksDrawer({
                         <button
                           type="button"
                           onClick={() => handleCopy(b.content)}
-                          className="p-1 rounded hover:text-[0A96A5] hover:bg-[16395E]/30 transition-colors text-[11px] flex items-center gap-1"
+                          className="p-1 rounded hover:text-[0A96A5] hover:bg-[16395E]/30 transition-colors text-xs flex items-center gap-1"
                           title="Copy"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -138,7 +138,7 @@ export default function ChatBookmarksDrawer({
                               onJumpToMessage(b.messageId);
                               onClose();
                             }}
-                            className="p-1 rounded hover:text-[0A96A5] hover:bg-[16395E]/30 transition-colors text-[11px] flex items-center gap-1"
+                            className="p-1 rounded hover:text-[0A96A5] hover:bg-[16395E]/30 transition-colors text-xs flex items-center gap-1"
                             title="Jump to message"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />

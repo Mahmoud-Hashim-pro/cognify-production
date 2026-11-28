@@ -56,7 +56,7 @@ export interface StudentDataExportPackage {
   exportId: string;
   exportedAt: string;        // ISO 8601 string
   studentUid: string;
-  formatVersion: string;     // e.g. "cognify-export-v2.0"
+  formatVersion: string;     // e.g. "rafiqi-export-v2.0"
   data: {
     studentState: StudentState;
     learningEventsCount: number;

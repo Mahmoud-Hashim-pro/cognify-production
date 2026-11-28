@@ -21,6 +21,8 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { ThemeSelector } from './ui/ThemeSelector';
+import { speak } from '../lib/tts';
+import { frOf, L } from '../lib/translations';
 
 interface LoginProps {
   onLoginSuccess?: () => void;
@@ -29,7 +31,7 @@ interface LoginProps {
 }
 
 export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = 'email-login' }: LoginProps = {}) {
-  const [lang, setLang] = useState<'en' | 'ar'>(() => {
+  const [lang, setLang] = useState<'en' | 'ar' | 'fr'>(() => {
     if (typeof navigator !== 'undefined' && /^ar/i.test(navigator.language || '')) {
       return 'ar';
     }
@@ -64,7 +66,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
   
   const [email, setEmail] = useState(() => {
     try {
-      return localStorage.getItem('cognify_saved_email') || '';
+      return localStorage.getItem('rafiqi_saved_email') || '';
     } catch {
       return '';
     }
@@ -76,7 +78,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
   
   const [rememberMe, setRememberMe] = useState(() => {
     try {
-      return localStorage.getItem('cognify_remember_me') === 'true';
+      return localStorage.getItem('rafiqi_remember_me') === 'true';
     } catch {
       return false;
     }
@@ -88,7 +90,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
   const [showRedirectOption, setShowRedirectOption] = useState(false);
 
   const isRtl = lang === 'ar';
-  const t = (en: string, ar: string) => (lang === 'ar' ? ar : en);
+  const t = (en: string, ar: string) => (lang === 'ar' ? ar : lang === 'fr' ? frOf(en) : en);
 
   const isMountedRef = useRef(true);
   const authTimeoutRef = useRef<any>(null);
@@ -110,16 +112,25 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' as any });
     }, 60);
 
-    getRedirectResult(auth).catch((err: any) => {
-      console.warn('Google Redirect Result:', err);
-      if (isMountedRef.current && err) {
-        if (err.code === 'auth/unauthorized-domain') {
-          setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
-        } else if (err.code !== 'auth/credential-already-in-use') {
-          setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please try again or use Email.', 'تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد.'));
+    // getRedirectResult boots the auth iframe (~95KB) plus gapi, so only pay
+    // that cost when a redirect sign-in was actually started. First-time
+    // visitors never trigger it and the landing page stays light.
+    const redirectPending = (() => {
+      try { return sessionStorage.getItem('rafiqi_auth_redirect_pending') === '1'; } catch { return false; }
+    })();
+    if (redirectPending) {
+      try { sessionStorage.removeItem('rafiqi_auth_redirect_pending'); } catch {}
+      getRedirectResult(auth).catch((err: any) => {
+        console.warn('Google Redirect Result:', err);
+        if (isMountedRef.current && err) {
+          if (err.code === 'auth/unauthorized-domain') {
+            setError(t('Google Login requires an authorized domain. Please use Email & Password below.', 'تسجيل جوجل يتطلب نطاقاً مصرحاً. يرجى استخدام البريد وكلمة المرور أدناه.'));
+          } else if (err.code !== 'auth/credential-already-in-use') {
+            setError(err?.message?.replace('Firebase: ', '') || t('Google Sign-In failed. Please try again or use Email.', 'تعذر تسجيل الدخول عبر جوجل. يرجى المحاولة مرة أخرى أو استخدام البريد.'));
+          }
         }
-      }
-    });
+      });
+    }
 
     return () => {
       isMountedRef.current = false;
@@ -133,6 +144,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
     setError(null);
     setLoading(true);
     try {
+      try { sessionStorage.setItem('rafiqi_auth_redirect_pending', '1'); } catch {}
       await signInWithGoogleRedirect();
     } catch (err: any) {
       if (!isMountedRef.current) return;
@@ -214,13 +226,13 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
       if (mode === 'email-login') {
         if (rememberMe) {
           try {
-            localStorage.setItem('cognify_saved_email', normalizedEmail);
-            localStorage.setItem('cognify_remember_me', 'true');
+            localStorage.setItem('rafiqi_saved_email', normalizedEmail);
+            localStorage.setItem('rafiqi_remember_me', 'true');
           } catch {}
         } else {
           try {
-            localStorage.removeItem('cognify_saved_email');
-            localStorage.setItem('cognify_remember_me', 'false');
+            localStorage.removeItem('rafiqi_saved_email');
+            localStorage.setItem('rafiqi_remember_me', 'false');
           } catch {}
         }
         await loginWithEmail(normalizedEmail, password.trim());
@@ -302,15 +314,49 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
     }
   };
 
+  // First-launch spoken welcome: for blind users the real hook is the first
+  // spoken word, not the artwork. Speaks once per browser session; browsers
+  // that require a user gesture first simply skip it.
+  const welcomedRef = useRef(false);
+  useEffect(() => {
+    if (welcomedRef.current) return;
+    welcomedRef.current = true;
+    try {
+      if (sessionStorage.getItem('rafiqi_welcomed')) return;
+      sessionStorage.setItem('rafiqi_welcomed', '1');
+    } catch { /* storage unavailable - still try once */ }
+    speak(
+      isRtl
+        ? 'أهلاً بيكي في رفيقي. موبايلك يشوفلك الدنيا. سجلي دخولك بجوجل أو بالإيميل، أو اعملي حساب جديد.'
+        : L('Welcome to Rafiqi. Your phone sees the world for you. Sign in with Google or email, or create a new account.'),
+      isRtl ? 'Arabic' : 'English'
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div
       className="min-h-screen bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-[#F8FAFC] flex flex-col items-center justify-between p-3 sm:p-6 font-sans relative selection:bg-[#1769AA]/50 selection:text-white"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
-      {/* Deep-blue atmospheric background glow — subtle and non-intrusive */}
+      {/* Chosen full-page sign-in artwork behind everything, with a readability scrim.
+          Mobile crops to the woman (her face, phone and the sonar waves); from md up the
+          frame centers, so wide screens show the full scene including the bus. */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute top-1/4 -start-32 w-96 h-96 bg-[#1769AA]/15 dark:bg-[#1769AA]/20 rounded-full blur-[140px]" />
-        <div className="absolute bottom-1/4 -end-32 w-96 h-96 bg-[#00C2FF]/10 dark:bg-[#0D4778]/30 rounded-full blur-[140px]" />
+        <img
+          src="/assets/signin-bg-street.webp"
+          alt=""
+          width={1280}
+          height={720}
+          className="absolute inset-0 w-full h-full object-cover object-[35%_center] md:object-center select-none"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+        />
+        {/* Mobile: light scrim so the artwork shows through; a short top gradient keeps the
+            white header text readable. Desktop keeps the original even scrim (md+ unchanged). */}
+        <div className="absolute inset-0 bg-slate-950/20 dark:bg-slate-950/40 md:bg-slate-950/45 md:dark:bg-slate-950/60" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-slate-950/55 to-transparent md:hidden" />
       </div>
 
       {/* ── TOP HEADER: Brand Identity + Language Switcher + Theme Selector ── */}
@@ -328,10 +374,10 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                 R
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {isRtl ? 'رفيقى' : 'Rafiqi'}
+                <span className="text-base sm:text-xl font-black text-white drop-shadow-md tracking-tight">
+                  {isRtl ? 'رفيقى' : L('Rafiqi')}
                 </span>
-                <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] font-bold text-[9px] uppercase">
+                <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
                   A11y
                 </span>
               </div>
@@ -341,12 +387,17 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-[#1769AA] to-[#00C2FF] flex items-center justify-center shadow-md shadow-[#00C2FF]/20 text-white font-black text-base sm:text-lg shrink-0">
                 R
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {isRtl ? 'رفيقى' : 'Rafiqi'}
-                </span>
-                <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] font-bold text-[9px] uppercase">
-                  A11y
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  <span className="text-base sm:text-xl font-black text-white drop-shadow-md tracking-tight">
+                    {isRtl ? 'رفيقى' : L('Rafiqi')}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#1769AA]/15 text-[#0D4778] dark:text-[#4B9FE1] font-bold text-xs uppercase">
+                    A11y
+                  </span>
+                </div>
+                <span className="text-xs sm:text-xs font-bold text-sky-200 dark:text-[#7CB8E8] leading-tight drop-shadow-sm">
+                  {t('Your phone sees the world for you.', 'موبايلك يشوفلك الدنيا.')}
                 </span>
               </div>
             </div>
@@ -390,20 +441,33 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
             >
               EN
             </button>
+            <button
+              type="button"
+              onClick={() => setLang('fr')}
+              aria-pressed={lang === 'fr'}
+              className={`px-2.5 py-1 rounded-full text-xs font-black transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
+                lang === 'fr'
+                  ? 'bg-[#1769AA] text-white shadow-xs'
+                  : 'text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              FR
+            </button>
           </div>
         </div>
       </header>
 
       {/* ── MAIN UNIFIED COMPOSITION: Natural, Centered Authentication Card (No Split-Screen) ── */}
-      <main className="w-full max-w-md my-auto z-10 py-3 sm:py-8">
-        <div className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-3xl p-4 sm:p-8 shadow-xl shadow-slate-900/5 dark:shadow-black/40 text-start transition-colors">
+      <main className="w-full max-w-md my-auto z-10 py-2 sm:py-8">
+        {/* Solid, readable authentication card over the full-page artwork. */}
+        <div className="w-full bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] rounded-3xl p-3.5 sm:p-8 shadow-xl shadow-slate-900/5 dark:shadow-black/40 text-start transition-colors">
           
           {/* Segmented Mode Selector: Sign In vs Create Account */}
           {mode !== 'reset-password' && (
             <div 
               role="tablist"
               aria-label={t('Authentication Options', 'خيارات تسجيل الدخول')}
-              className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-[#0B1523] border border-slate-200 dark:border-[#22354E] rounded-2xl mb-6"
+              className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-[#0B1523] border border-slate-200 dark:border-[#22354E] rounded-2xl mb-4 sm:mb-6"
             >
               <button
                 type="button"
@@ -439,7 +503,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
           )}
 
           {/* Form Card Header */}
-          <div className="space-y-1 mb-5">
+          <div className="space-y-1 mb-4 sm:mb-5">
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               {mode === 'email-login'
                 ? t('Welcome Back', 'أهلاً بك مجدداً')
@@ -473,7 +537,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
             </div>
           ) : mode === 'reset-password' ? (
             /* Password Reset Form */
-            <form onSubmit={handleResetPassword} className="space-y-4">
+            <form onSubmit={handleResetPassword} className="space-y-3 sm:space-y-4">
               <div className="space-y-1.5">
                 <label htmlFor="reset-email" className="text-xs font-bold text-slate-700 dark:text-[#F8FAFC]">
                   {t('Email Address', 'البريد الإلكتروني')}
@@ -490,7 +554,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                 </div>
               </div>
@@ -523,7 +587,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
             <form 
               id={mode === 'email-login' ? 'panel-login' : 'panel-register'} 
               onSubmit={handleManualAuth} 
-              className="space-y-4"
+              className="space-y-3 sm:space-y-4"
             >
               {/* Email Field */}
               <div className="space-y-1.5">
@@ -542,7 +606,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-4 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                 </div>
               </div>
@@ -564,7 +628,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                     placeholder={t('Enter password (min 8 chars)', 'أدخل كلمة المرور (8 خانات على الأقل)')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                    className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                   />
                   <button
                     type="button"
@@ -596,7 +660,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                       placeholder={t('Re-enter your password', 'أعد إدخال كلمة المرور للتأكيد')}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
+                      className="w-full bg-slate-50 dark:bg-[#0B1523] border border-slate-300 dark:border-[#22354E] text-slate-900 dark:text-[#F8FAFC] placeholder-slate-400 text-xs sm:text-sm font-medium rounded-xl py-3 ps-10 pe-11 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all focus:ring-2 focus:ring-[#1769AA] focus:border-[#1769AA]"
                     />
                   </div>
                 </div>
@@ -605,7 +669,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               {/* Remember me & Forgot Password Options (Login Mode) */}
               {mode === 'email-login' && (
                 <div className="flex items-center justify-between text-xs pt-0.5">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white transition-colors font-bold">
                     <input
                       type="checkbox"
                       checked={rememberMe}
@@ -630,7 +694,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               {error && (
                 <div role="alert" className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />
-                  <span className="text-[11px] leading-tight line-clamp-2">{error}</span>
+                  <span className="text-xs leading-tight line-clamp-2">{error}</span>
                 </div>
               )}
 
@@ -653,7 +717,7 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
               {/* "or" Divider */}
               <div className="relative flex items-center justify-center my-3">
                 <div className="border-t border-slate-200 dark:border-[#22354E] w-full" />
-                <span className="bg-white dark:bg-[#131E2E] px-3 text-[10px] sm:text-[11px] font-bold text-slate-400 dark:text-[#94A3B8] uppercase tracking-wider">
+                <span className="bg-white dark:bg-[#131E2E] px-3 text-xs sm:text-xs font-bold text-slate-400 dark:text-[#94A3B8] uppercase tracking-wider">
                   {t('or', 'أو')}
                 </span>
               </div>
@@ -674,11 +738,12 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
                   type="button"
                   onClick={handleGoogleRedirectAuth}
                   disabled={loading}
-                  className="w-full py-1 text-center text-[11px] text-amber-600 dark:text-amber-300 hover:underline font-semibold cursor-pointer"
+                  className="w-full py-1 text-center text-xs text-amber-600 dark:text-amber-300 hover:underline font-semibold cursor-pointer"
                 >
                   {t('Direct Google Sign-In (No Pop-ups)', 'تسجيل جوجل المباشر (بدون نوافذ منبثقة)')}
                 </button>
               )}
+
             </form>
           )}
 
@@ -701,12 +766,12 @@ export default function Login({ onLoginSuccess, onBackToWelcome, initialMode = '
 
       {/* ── FOOTER: Universal Accessibility Assurance ── */}
       <footer className="max-w-5xl mx-auto w-full z-10 py-2 text-center px-2">
-        <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-[#131E2E]/80 border border-slate-200 dark:border-[#22354E] text-[10px] sm:text-[11px] text-slate-500 dark:text-[#94A3B8] shadow-xs max-w-full">
+        <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-[#131E2E]/80 border border-slate-200 dark:border-[#22354E] text-xs sm:text-xs text-slate-500 dark:text-[#94A3B8] shadow-xs max-w-full">
           <Accessibility className="w-3.5 h-3.5 text-[#1769AA] shrink-0" aria-hidden="true" />
           <span className="truncate sm:whitespace-normal">
             {t(
-              'Rafiqi Universal Access: WCAG 2.1 AAA high-contrast and screen-reader ready.',
-              'رفيقى للإتاحة الشاملة: تباين فائق WCAG 2.1 AAA ومتوافق مع قارئات الشاشة.'
+              'Rafiqi Universal Access: built toward WCAG 2.2 AA conformance and screen-reader ready.',
+              'رفيقى للإتاحة الشاملة: بنسعى للتوافق مع WCAG 2.2 AA ومتوافق مع قارئات الشاشة.'
             )}
           </span>
         </div>

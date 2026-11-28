@@ -45,10 +45,10 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Auto-heal chunk mismatches caused by fresh deployments
     if (isChunkError(error)) {
-      const lastReload = Number(sessionStorage.getItem('cognify_eb_chunk_reload') || '0');
+      const lastReload = Number(sessionStorage.getItem('rafiqi_eb_chunk_reload') || '0');
       const now = Date.now();
       if (now - lastReload > 12000) {
-        sessionStorage.setItem('cognify_eb_chunk_reload', String(now));
+        sessionStorage.setItem('rafiqi_eb_chunk_reload', String(now));
         this.clearCachesAndReload();
         return;
       }
@@ -56,10 +56,10 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Auto-heal DOM reconciliation collisions caused by Google Translate or accessibility extensions
     if (isDOMNotFoundError(error)) {
-      const lastRecover = Number(sessionStorage.getItem('cognify_eb_dom_recover') || '0');
+      const lastRecover = Number(sessionStorage.getItem('rafiqi_eb_dom_recover') || '0');
       const now = Date.now();
       if (now - lastRecover > 3000) {
-        sessionStorage.setItem('cognify_eb_dom_recover', String(now));
+        sessionStorage.setItem('rafiqi_eb_dom_recover', String(now));
         setTimeout(() => {
           this.setState({ hasError: false, error: undefined });
         }, 80);
@@ -124,7 +124,7 @@ class ErrorBoundary extends Component<Props, State> {
                 Update & Reload
               </button>
 
-              <p className="mt-6 text-[10px] text-slate-500 tracking-wide font-mono">
+              <p className="mt-6 text-xs text-slate-500 tracking-wide font-mono">
                 Auto-update standby
               </p>
             </div>
@@ -159,7 +159,7 @@ class ErrorBoundary extends Component<Props, State> {
             <div className="mt-5 text-xs text-rose-300 tracking-wide font-mono bg-[#080409]/80 p-3 rounded-xl border border-rose-500/20 text-left select-all" dir="ltr">
               <div className="font-bold text-rose-400">Ref: {this.state.error?.name || "APP_ERROR"}: {this.state.error?.message}</div>
               {this.state.error?.stack && (
-                <div className="mt-2 text-[10px] text-slate-400 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                <div className="mt-2 text-xs text-slate-400 whitespace-pre-wrap max-h-24 overflow-y-auto">
                   {this.state.error.stack.split('\n').slice(0, 3).join('\n')}
                 </div>
               )}

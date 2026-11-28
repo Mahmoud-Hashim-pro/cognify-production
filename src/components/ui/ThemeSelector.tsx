@@ -1,3 +1,4 @@
+import { L } from '../../lib/translations';
 import React, { useState, useEffect } from 'react';
 import { Sun, Moon, Laptop } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -85,7 +86,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
       <div
         role="group"
         aria-label={isAr ? 'اختيار مظهر التطبيق' : 'Theme mode selector'}
-        className={cn('inline-flex items-center gap-1 p-1 rounded-xl bg-rafiqi-primary-light/40 dark:bg-rafiqi-surface-elevated border border-rafiqi-primary/20 dark:border-rafiqi-border-dark', className)}
+        className={cn('inline-flex items-center gap-1 max-sm:gap-0 p-1 max-sm:p-0.5 rounded-xl bg-rafiqi-primary-light/40 dark:bg-rafiqi-surface-elevated border border-rafiqi-primary/20 dark:border-rafiqi-border-dark', className)}
       >
         {options.map((opt) => {
           const isSelected = activeMode === opt.id;
@@ -95,17 +96,17 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               type="button"
               onClick={() => handleSelect(opt.id)}
               aria-pressed={isSelected}
-              title={isAr ? opt.labelAr : opt.labelEn}
+              title={isAr ? opt.labelAr : L(opt.labelEn)}
               className={cn(
-                'min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none select-none',
-                'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2',
+                'min-h-[44px] min-w-[44px] max-sm:min-w-[36px] rounded-lg flex items-center justify-center transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] select-none',
+                'focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2',
                 isSelected
                   ? 'bg-rafiqi-primary text-white shadow-xs font-bold'
-                  : 'text-cognify-text-secondary dark:text-cognify-text-dark-secondary hover:text-cognify-text-primary dark:hover:text-white hover:bg-rafiqi-primary-light/60 dark:hover:bg-rafiqi-surface-dark'
+                  : 'text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary hover:text-rafiqi-text-primary dark:hover:text-white hover:bg-rafiqi-primary-light/60 dark:hover:bg-rafiqi-surface-dark'
               )}
             >
               {opt.icon}
-              <span className="sr-only">{isAr ? opt.labelAr : opt.labelEn}</span>
+              <span className="sr-only">{isAr ? opt.labelAr : L(opt.labelEn)}</span>
             </button>
           );
         })}
@@ -132,15 +133,15 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
             aria-checked={isSelected}
             onClick={() => handleSelect(opt.id)}
             className={cn(
-              'min-h-[48px] px-3 py-2 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer outline-none',
-              'focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#131E2E]',
+              'min-h-[48px] px-3 py-2 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]',
+              'focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#131E2E]',
               isSelected
                 ? 'bg-rafiqi-primary text-white shadow-sm font-bold scale-[1.02]'
-                : 'text-cognify-text-secondary dark:text-cognify-text-dark-secondary hover:text-cognify-text-primary dark:hover:text-white hover:bg-rafiqi-primary-light/60 dark:hover:bg-rafiqi-surface-elevated'
+                : 'text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary hover:text-rafiqi-text-primary dark:hover:text-white hover:bg-rafiqi-primary-light/60 dark:hover:bg-rafiqi-surface-elevated'
             )}
           >
             {opt.icon}
-            <span>{isAr ? opt.labelAr : opt.labelEn}</span>
+            <span>{isAr ? opt.labelAr : L(opt.labelEn)}</span>
           </button>
         );
       })}

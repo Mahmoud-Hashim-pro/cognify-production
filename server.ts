@@ -10,7 +10,7 @@ import { geminiRouter } from "./server/routes";
 import securityAuditHandler from "./api/telemetry/securityAudit";
 import emergencyDispatchHandler from "./api/emergency/dispatch";
 import learningProfileHandler from "./api/student/learningProfile";
-import proxyImageHandler from "./api/proxy-image";
+import proxyImageHandler from "./api/_lib/proxy/proxy-image";
 import healthHandler from "./api/system/health";
 import deleteUserHandler from "./api/admin/deleteUser";
 import usageHandler from "./api/usage";

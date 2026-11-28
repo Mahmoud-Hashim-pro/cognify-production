@@ -5,6 +5,7 @@
  * concepts at risk of memory decay (due for review). Surfaces a 30-second
  * contextual warm-up before new topics.
  */
+import { L } from '../../lib/translations';
 
 import React, { useState, useMemo } from 'react';
 import { Clock, RotateCcw, X, Brain, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
@@ -54,7 +55,7 @@ export default function RetentionWarmupBanner({
         seen.add(cid);
         const node = getConcept(cid);
         const name = node
-          ? (isAr ? node.nameAr : isFr ? node.nameEn : node.nameEn)
+          ? (isAr ? node.nameAr : isFr ? node.nameEn : L(node.nameEn))
           : cid.replace(/_/g, ' ');
         const dueDaysAgo = Math.max(0, Math.floor((now - sched.nextReviewDate) / 86400000));
         const prof = plm?.conceptProfiles?.[cid];
@@ -75,7 +76,7 @@ export default function RetentionWarmupBanner({
           seen.add(cid);
           const node = getConcept(cid);
           const name = node
-            ? (isAr ? node.nameAr : isFr ? node.nameEn : node.nameEn)
+            ? (isAr ? node.nameAr : isFr ? node.nameEn : L(node.nameEn))
             : cid.replace(/_/g, ' ');
           list.push({
             conceptId: cid,
@@ -106,7 +107,7 @@ export default function RetentionWarmupBanner({
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className="mx-4 my-2 p-3.5 rounded-2xl bg-gradient-to-r bg-[#0D2542] border border-[#22354E] shadow-xl flex items-center justify-between gap-3 text-slate-100 backdrop-blur-xl animate-fade-in relative z-20"
+      className="mx-4 my-2 p-3.5 rounded-2xl bg-gradient-to-r bg-[#0D2542] border border-[#24476F] shadow-xl flex items-center justify-between gap-3 text-slate-100 backdrop-blur-xl animate-fade-in relative z-20"
     >
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-8 h-8 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center shrink-0 text-[#4B9FE1]">
@@ -114,10 +115,10 @@ export default function RetentionWarmupBanner({
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#4B9FE1]">
+            <span className="text-xs font-black uppercase tracking-wider text-[#4B9FE1]">
               {isAr ? 'إنعاش الذاكرة التباعدية (SM-2)' : isFr ? 'Rappel Espacé Actif (SM-2)' : 'Spaced Retention Due (SM-2)'}
             </span>
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-md border ${
               primeConcept.riskLevel === 'high'
                 ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 animate-pulse'
                 : 'bg-amber-500/20 border-amber-500/40 text-amber-300'

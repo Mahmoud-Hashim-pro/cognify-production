@@ -14,6 +14,7 @@
  * 10. Accessible Voice Interaction: Pause, Resume, Replay, Stop, Verbosity, Screen-Reader Announcements
  * 11. Assistive Safety & Privacy Guards
  */
+import { L } from './translations';
 
 import { cleanVisionDescription } from './visionCleaner.js';
 
@@ -1531,9 +1532,9 @@ export function parseObjectFinderResult(
 
   // Relative location
   let location: string | undefined;
-  if (/على اليمين|on your right/i.test(text)) location = lang === 'ar' ? 'جهة اليمين' : 'on the right';
-  else if (/على اليسار|on your left/i.test(text)) location = lang === 'ar' ? 'جهة اليسار' : 'on the left';
-  else if (/أمامك|in front/i.test(text)) location = lang === 'ar' ? 'أمامك في المتناول' : 'in front';
+  if (/على اليمين|on your right/i.test(text)) location = lang === 'ar' ? 'جهة اليمين' : L('on the right');
+  else if (/على اليسار|on your left/i.test(text)) location = lang === 'ar' ? 'جهة اليسار' : L('on the left');
+  else if (/أمامك|in front/i.test(text)) location = lang === 'ar' ? 'أمامك في المتناول' : L('in front');
 
   const pathClear = !/عائق|مانع|حاجز|obstacle|blocked/i.test(text);
 
@@ -1612,29 +1613,29 @@ export function parseCurrencyResult(text: string, lang: 'ar' | 'en' | 'fr' = 'ar
   // EGP checks
   if (/مائتا|مئتا|200\s*(?:جنيه|egp)/i.test(text)) {
     denomination = '200';
-    currency = lang === 'ar' ? 'جنيه مصري' : 'Egyptian Pounds';
+    currency = lang === 'ar' ? 'جنيه مصري' : L('Egyptian Pounds');
   } else if (/مائة|100\s*(?:جنيه|egp)/i.test(text)) {
     denomination = '100';
-    currency = lang === 'ar' ? 'جنيه مصري' : 'Egyptian Pounds';
+    currency = lang === 'ar' ? 'جنيه مصري' : L('Egyptian Pounds');
   } else if (/خمسون|50\s*(?:جنيه|egp)/i.test(text)) {
     denomination = '50';
-    currency = lang === 'ar' ? 'جنيه مصري' : 'Egyptian Pounds';
+    currency = lang === 'ar' ? 'جنيه مصري' : L('Egyptian Pounds');
   } else if (/عشرون|20\s*(?:جنيه|egp)/i.test(text)) {
     denomination = '20';
-    currency = lang === 'ar' ? 'جنيه مصري' : 'Egyptian Pounds';
+    currency = lang === 'ar' ? 'جنيه مصري' : L('Egyptian Pounds');
   } else if (/عشرة|10\s*(?:جنيه|egp)/i.test(text)) {
     denomination = '10';
-    currency = lang === 'ar' ? 'جنيه مصري' : 'Egyptian Pounds';
+    currency = lang === 'ar' ? 'جنيه مصري' : L('Egyptian Pounds');
   } else if (/خمسة|5\s*(?:جنيه|egp)/i.test(text)) {
     denomination = '5';
-    currency = lang === 'ar' ? 'جنيه مصري' : 'Egyptian Pounds';
+    currency = lang === 'ar' ? 'جنيه مصري' : L('Egyptian Pounds');
   }
 
   // USD / EUR / SAR checks
   if (!currency) {
-    if (/dollar|دولار/i.test(text)) currency = lang === 'ar' ? 'دولار أمريكي' : 'US Dollars';
-    else if (/euro|يورو/i.test(text)) currency = lang === 'ar' ? 'يورو' : 'Euros';
-    else if (/riyal|ريال/i.test(text)) currency = lang === 'ar' ? 'ريال سعودي' : 'Saudi Riyals';
+    if (/dollar|دولار/i.test(text)) currency = lang === 'ar' ? 'دولار أمريكي' : L('US Dollars');
+    else if (/euro|يورو/i.test(text)) currency = lang === 'ar' ? 'يورو' : L('Euros');
+    else if (/riyal|ريال/i.test(text)) currency = lang === 'ar' ? 'ريال سعودي' : L('Saudi Riyals');
   }
 
   const confidence = isUncertain ? 'uncertain' : denomination ? 'high' : 'moderate';
@@ -2620,12 +2621,12 @@ ${safetyDisclaimer}`;
     basePrompt +=
       lang === 'ar'
         ? '\nمستوى الإيجاز: لخص النتيجة في جملة واحدة فقط واضحة تركز على المسار والأمان.'
-        : '\nDetail level: Summarize in 1 concise sentence focusing on safety and clear pathway.';
+        : L('\nDetail level: Summarize in 1 concise sentence focusing on safety and clear pathway.');
   } else if (detailLevel === 'detailed') {
     basePrompt +=
       lang === 'ar'
         ? '\nمستوى التفصيل: قدم وصفاً وافياً في 3 إلى 4 جمل تشمل توزيع المكان والإضاءة والمواقع بالساعة.'
-        : '\nDetail level: Provide a comprehensive 3-4 sentence description detailing spatial layout, lighting, and relative clock positions.';
+        : L('\nDetail level: Provide a comprehensive 3-4 sentence description detailing spatial layout, lighting, and relative clock positions.');
   }
 
   return basePrompt;

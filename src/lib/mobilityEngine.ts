@@ -1,3 +1,4 @@
+import { L } from './translations';
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -348,7 +349,7 @@ export function analyzePlaceEnvironment(
 
   const overviewEn = landmarks.length > 0
     ? `Identified ${landmarks.length} landmarks: ${landmarks.map((l) => `${l.labelEn} (${l.positionTextEn})`).join(', ')}.`
-    : 'Open space; no high-confidence landmarks currently identified in direct view.';
+    : L('Open space; no high-confidence landmarks currently identified in direct view.');
 
   const spokenSummaryAr = `${overviewAr} ${uncertaintyNotesAr} يرجى فحص المسار بالعصا البيضاء بحذر.`.trim();
   const spokenSummaryEn = `${overviewEn} ${uncertaintyNotesEn} Please verify your path tactilely with caution.`.trim();

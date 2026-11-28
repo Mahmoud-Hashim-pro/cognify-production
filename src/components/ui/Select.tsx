@@ -46,11 +46,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-xs sm:text-sm font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary"
+            className="block text-xs sm:text-sm font-semibold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary"
           >
             {label}
             {required && (
-              <span className="text-cognify-error-text-light dark:text-cognify-error-text-dark ms-1" aria-hidden="true">
+              <span className="text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark ms-1" aria-hidden="true">
                 *
               </span>
             )}
@@ -59,7 +59,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
         <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute start-3.5 pointer-events-none text-cognify-text-secondary dark:text-cognify-text-dark-secondary flex items-center justify-center" aria-hidden="true">
+            <div className="absolute start-3.5 pointer-events-none text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary flex items-center justify-center" aria-hidden="true">
               {leftIcon}
             </div>
           )}
@@ -73,15 +73,15 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             aria-describedby={isInvalid ? errorId : helperText ? helperId : undefined}
             className={cn(
               'w-full min-h-[48px] appearance-none rounded-2xl text-sm transition-all duration-150 cursor-pointer',
-              'bg-cognify-surface-light dark:bg-cognify-surface-dark',
-              'text-cognify-text-primary dark:text-cognify-text-dark-primary',
+              'bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark',
+              'text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary',
               'border',
               leftIcon ? 'ps-10' : 'ps-4',
               'pe-10 py-2.5',
               isInvalid
-                ? 'border-cognify-error-text-light dark:border-cognify-error-text-dark focus:ring-cognify-error-text-light dark:focus:ring-cognify-error-text-dark'
-                : 'border-cognify-border-light dark:border-cognify-border-dark hover:border-rafiqi-primary/50 dark:hover:border-rafiqi-primary/50 focus:border-rafiqi-primary dark:focus:border-rafiqi-primary',
-              'outline-none focus:ring-2 focus:ring-cognify-focus focus:ring-offset-2 focus:ring-offset-cognify-surface-light dark:focus:ring-offset-cognify-bg-dark',
+                ? 'border-rafiqi-error-text-light dark:border-rafiqi-error-text-dark focus:ring-rafiqi-error-text-light dark:focus:ring-rafiqi-error-text-dark'
+                : 'border-rafiqi-border-light dark:border-rafiqi-border-dark hover:border-rafiqi-primary/50 dark:hover:border-rafiqi-primary/50 focus:border-rafiqi-primary dark:focus:border-rafiqi-primary',
+              'outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-rafiqi-focus focus:ring-offset-2 focus:ring-offset-rafiqi-surface-light dark:focus:ring-offset-rafiqi-bg-dark',
               'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100 dark:disabled:bg-slate-900',
               className
             )}
@@ -101,20 +101,20 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               : children}
           </select>
 
-          <div className="absolute end-3.5 pointer-events-none text-cognify-text-secondary dark:text-cognify-text-dark-secondary flex items-center justify-center" aria-hidden="true">
+          <div className="absolute end-3.5 pointer-events-none text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary flex items-center justify-center" aria-hidden="true">
             <ChevronDown className="w-4 h-4" />
           </div>
         </div>
 
         {isInvalid && (
-          <div id={errorId} className="flex items-center gap-1.5 text-xs text-cognify-error-text-light dark:text-cognify-error-text-dark font-medium" role="alert">
+          <div id={errorId} className="flex items-center gap-1.5 text-xs text-rafiqi-error-text-light dark:text-rafiqi-error-text-dark font-medium" role="alert">
             <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {!isInvalid && helperText && (
-          <p id={helperId} className="text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary">
+          <p id={helperId} className="text-xs text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary">
             {helperText}
           </p>
         )}

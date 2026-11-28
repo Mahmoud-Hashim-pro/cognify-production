@@ -9,6 +9,7 @@
  * 6. Distinct export pipelines for transcript vs summaries (.docx & .txt)
  * 7. Resilient retry logic preserving completed chunks without re-processing
  */
+import { L } from './translations';
 
 import { generateAdaptiveResponse } from '../services/gemini';
 import { parseAudioSegments, AudioTranscriptSegment, formatBytes, MAX_AUDIO_SIZE_BYTES, MAX_DIRECT_ATTACHMENT_BYTES } from './documentExtractor';
@@ -75,7 +76,7 @@ export async function transcribeAudioLecture(
   const isAr = language === 'ar';
   const isFr = language === 'fr';
 
-  onProgress?.(15, isAr ? 'قراءة وتحضير الملف الصوتي...' : 'Preparing audio file...');
+  onProgress?.(15, isAr ? 'قراءة وتحضير الملف الصوتي...' : L('Preparing audio file...'));
 
   // Avoid unnecessary buffering and prevent Vercel 4.5MB payload overflow
   if (file.size > MAX_DIRECT_ATTACHMENT_BYTES) {
@@ -102,7 +103,7 @@ export async function transcribeAudioLecture(
 
   if (signal?.aborted) throw new Error('ABORTED');
 
-  onProgress?.(35, isAr ? 'فحص جودة التسجيل وتحديد لغة المحاضرة...' : 'Checking audio clarity and language...');
+  onProgress?.(35, isAr ? 'فحص جودة التسجيل وتحديد لغة المحاضرة...' : L('Checking audio clarity and language...'));
 
   let mimeType = file.type || '';
   if (!mimeType || mimeType === 'application/octet-stream') {
@@ -117,7 +118,7 @@ export async function transcribeAudioLecture(
     else mimeType = 'audio/mp3';
   }
 
-  onProgress?.(55, isAr ? 'جاري التفريغ الصوتي الدقيق مع وضع الطوابع الزمنية [MM:SS]...' : 'Transcribing speech with exact timestamps [MM:SS]...');
+  onProgress?.(55, isAr ? 'جاري التفريغ الصوتي الدقيق مع وضع الطوابع الزمنية [MM:SS]...' : L('Transcribing speech with exact timestamps [MM:SS]...'));
 
   const prompt = isAr
     ? `أنت مفرغ صوتي أكاديمي محترف وخبير في المحاضرات الجامعية لخدمة الطلاب المكفوفين وضعاف البصر.
@@ -155,13 +156,13 @@ Strict transcription rules:
     signal
   );
 
-  onProgress?.(85, isAr ? 'معالجة الطوابع الزمنية وتقسيم الفقرات...' : 'Parsing timestamped segments...');
+  onProgress?.(85, isAr ? 'معالجة الطوابع الزمنية وتقسيم الفقرات...' : L('Parsing timestamped segments...'));
 
   // Clean description and parse segments
   const cleanTranscript = cleanVisionDescription(aiResult, language);
   const segments = parseAudioSegments(cleanTranscript || aiResult);
 
-  onProgress?.(100, isAr ? 'اكتمل التفريغ الصوتي بنجاح!' : 'Transcription complete!');
+  onProgress?.(100, isAr ? 'اكتمل التفريغ الصوتي بنجاح!' : L('Transcription complete!'));
 
   return {
     transcript: cleanTranscript || aiResult,
@@ -265,10 +266,10 @@ export async function exportTranscriptToDocx(
   }));
 
   return generateNativeDocxBlob({
-    title: `${title} - ${isAr ? 'التفريغ الصوتي الكامل' : 'Verbatim Lecture Transcript'}`,
+    title: `${title} - ${isAr ? 'التفريغ الصوتي الكامل' : L('Verbatim Lecture Transcript')}`,
     summary: isAr
       ? `تفريغ نصي دقيق وشامل لكافة الكلمات المنطوقة في المحاضرة مع الطوابع الزمنية الدقيقة لكل فقرة.`
-      : `Complete verbatim audio transcript with chronological timestamp markers for each spoken paragraph.`,
+      : L(`Complete verbatim audio transcript with chronological timestamp markers for each spoken paragraph.`),
     fullText: transcript,
     lang,
     customQuestions: customQuestions.length > 0 ? customQuestions : undefined,
@@ -287,12 +288,12 @@ export async function exportSummaryToDocx(
   const isAr = lang === 'ar';
   const typeLabel =
     summaryType === 'short'
-      ? (isAr ? 'الزبدة والملخص المركز' : 'Executive Summary')
+      ? (isAr ? 'الزبدة والملخص المركز' : L('Executive Summary'))
       : summaryType === 'detailed'
-      ? (isAr ? 'الملخص الأكاديمي المفصل' : 'Comprehensive Detailed Breakdown')
+      ? (isAr ? 'الملخص الأكاديمي المفصل' : L('Comprehensive Detailed Breakdown'))
       : summaryType === 'key_points'
-      ? (isAr ? 'أهم النقاط والتكليفات' : 'Essential Key Takeaways')
-      : (isAr ? 'المذكرة الدراسية وأسئلة المراجعة' : 'Study Notes & Exam Questions');
+      ? (isAr ? 'أهم النقاط والتكليفات' : L('Essential Key Takeaways'))
+      : (isAr ? 'المذكرة الدراسية وأسئلة المراجعة' : L('Study Notes & Exam Questions'));
 
   return generateNativeDocxBlob({
     title: `${title} - ${typeLabel}`,

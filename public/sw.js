@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cognify-v13-clean-cache';
+const CACHE_NAME = 'rafiqi-v17';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -6,12 +6,25 @@ const STATIC_ASSETS = [
   '/assets/icon.svg'
 ];
 
+// Blind-first offline support: the shell above loads offline; last-read texts,
+// emergency contacts and the SOS outbox live in localStorage on the client
+// (see emergencyDispatcher.ts), so the most critical info survives with no network.
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
-    }).then(() => self.skipWaiting())
+    }).then(() => {
+      // Wait for the client's go-ahead before activating: index.html shows an
+      // update toast and sends SKIP_WAITING only after the user confirms.
+    })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {

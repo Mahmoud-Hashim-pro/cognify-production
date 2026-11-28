@@ -29,7 +29,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import type { ProactiveOpportunity } from '../lib/proactiveAssistantEngine';
 import type { LearningInsight } from '../lib/learningInsightsEngine';
 import {
@@ -118,7 +118,7 @@ export default function ProactiveSuggestionCard({
     border: 'border-amber-500/30 hover:border-amber-500/50',
     glow: 'bg-amber-500/10',
     badgeBg: 'bg-amber-500/15 border-amber-500/30 text-amber-300',
-    badgeText: isAr ? 'مراجعة تثبيت' : 'Retention Review',
+    badgeText: isAr ? 'مراجعة تثبيت' : L('Retention Review'),
     icon: RotateCcw,
     iconColor: 'text-amber-400',
     actionBtn: 'from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-amber-500/20',
@@ -130,7 +130,7 @@ export default function ProactiveSuggestionCard({
       border: 'border-rose-500/30 hover:border-rose-500/50',
       glow: 'bg-rose-500/10',
       badgeBg: 'bg-rose-500/15 border-rose-500/30 text-rose-300',
-      badgeText: isAr ? 'مساعدة مستهدفة' : 'Targeted Support',
+      badgeText: isAr ? 'مساعدة مستهدفة' : L('Targeted Support'),
       icon: AlertTriangle,
       iconColor: 'text-rose-400',
       actionBtn: 'from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white shadow-rose-500/20',
@@ -141,7 +141,7 @@ export default function ProactiveSuggestionCard({
       border: 'border-emerald-500/30 hover:border-emerald-500/50',
       glow: 'bg-emerald-500/10',
       badgeBg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300',
-      badgeText: isAr ? 'تحدٍ معرفي متقدم' : 'Growth Challenge',
+      badgeText: isAr ? 'تحدٍ معرفي متقدم' : L('Growth Challenge'),
       icon: Sparkles,
       iconColor: 'text-emerald-400',
       actionBtn: 'from-emerald-500 to-rose-600 hover:from-emerald-400 hover:to-rose-600 text-slate-950 shadow-emerald-500/20',
@@ -152,7 +152,7 @@ export default function ProactiveSuggestionCard({
       border: 'border-[#E5A93C]/30 hover:border-[#E5A93C]/50',
       glow: 'bg-[#4A1224]/30',
       badgeBg: 'bg-[#4A1224]/40 border-[#E5A93C]/30 text-[#E5A93C]',
-      badgeText: isAr ? 'استراتيجية عالية الفاعلية' : 'Optimal Strategy',
+      badgeText: isAr ? 'استراتيجية عالية الفاعلية' : L('Optimal Strategy'),
       icon: Zap,
       iconColor: 'text-[#E5A93C]',
       actionBtn: 'from-amber-400 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white shadow-[#E5A93C]/20',
@@ -180,11 +180,11 @@ export default function ProactiveSuggestionCard({
           <div className="w-8 h-8 rounded-xl bg-[#0E0610]/90 border border-[#4A1224]/50 flex items-center justify-center shrink-0">
             <IconComponent className={`w-4 h-4 ${themeStyles.iconColor}`} />
           </div>
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${themeStyles.badgeBg}`}>
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border ${themeStyles.badgeBg}`}>
             {themeStyles.badgeText}
           </span>
           {(opportunity?.metadata?.daysOverdue || insight?.metricDelta) && (
-            <span className="text-[11px] font-medium text-slate-400 bg-[#0E0610]/70 px-2 py-0.5 rounded-lg border border-[#4A1224]/60">
+            <span className="text-xs font-medium text-slate-400 bg-[#0E0610]/70 px-2 py-0.5 rounded-lg border border-[#4A1224]/60">
               {insight?.metricDelta || `${opportunity?.metadata?.daysOverdue}d overdue`}
             </span>
           )}
@@ -226,7 +226,7 @@ export default function ProactiveSuggestionCard({
             </div>
             <button
               onClick={handleToggleGlobal}
-              className={`px-3 py-1 rounded-xl font-semibold text-[11px] transition-all border ${
+              className={`px-3 py-1 rounded-xl font-semibold text-xs transition-all border ${
                 proactiveEnabled
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
                   : 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
@@ -246,10 +246,10 @@ export default function ProactiveSuggestionCard({
         {opportunity && (
           <div>
             <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-              {isAr ? opportunity.titleAr : opportunity.titleEn}
+              {isAr ? opportunity.titleAr : L(opportunity.titleEn)}
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-              {isAr ? opportunity.messageAr : opportunity.messageEn}
+              {isAr ? opportunity.messageAr : L(opportunity.messageEn)}
             </p>
           </div>
         )}
@@ -259,7 +259,7 @@ export default function ProactiveSuggestionCard({
           <div className="space-y-3">
             <div>
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                {isAr ? insight.headlineAr : insight.headlineEn}
+                {isAr ? insight.headlineAr : L(insight.headlineEn)}
               </h3>
             </div>
 
@@ -267,23 +267,23 @@ export default function ProactiveSuggestionCard({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
               {/* Pillar 1: Evidence */}
               <div className="p-3 rounded-2xl bg-[#150917]/70 border border-[#4A1224]/60 space-y-1">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C]" />
                   {localize(language, '1. Empirical Evidence', '١. الدليل التجريبي')}
                 </div>
                 <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                  {isAr ? insight.evidenceAr : insight.evidenceEn}
+                  {isAr ? insight.evidenceAr : L(insight.evidenceEn)}
                 </p>
               </div>
 
               {/* Pillar 2: Interpretation */}
               <div className="p-3 rounded-2xl bg-[#150917]/70 border border-[#4A1224]/60 space-y-1">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
                   {localize(language, '2. Pedagogical Meaning', '٢. التفسير التربوي')}
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  {isAr ? insight.interpretationAr : insight.interpretationEn}
+                  {isAr ? insight.interpretationAr : L(insight.interpretationEn)}
                 </p>
               </div>
             </div>

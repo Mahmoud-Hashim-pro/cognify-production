@@ -1,4 +1,4 @@
-import { localize, isArabicLocale, getTranslation } from '../lib/translations';
+import { localize, isArabicLocale, getTranslation, L } from '../lib/translations';
 import React, { useState, useEffect } from "react";
 import { UserProfile, CognitiveLevel, UserRole, ChatThread } from "../types";
 import { 
@@ -77,7 +77,10 @@ export default function Sidebar({
   // Collapsible sidebar state for desktop
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('cognify_sidebar_collapsed') === 'true';
+      const stored = localStorage.getItem('rafiqi_sidebar_collapsed');
+      // First visit on a wide screen: start slim so the page has room (the Sections menu in the top bar covers navigation)
+      if (stored === null) return typeof window !== 'undefined' && window.innerWidth >= 1280;
+      return stored === 'true';
     } catch {
       return false;
     }
@@ -87,7 +90,7 @@ export default function Sidebar({
     setIsCollapsed((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem('cognify_sidebar_collapsed', String(next));
+        localStorage.setItem('rafiqi_sidebar_collapsed', String(next));
       } catch {}
       return next;
     });
@@ -103,12 +106,12 @@ export default function Sidebar({
 
   const isAdmin = isAdminUser(profile);
   const isAr = isArabicLocale(profile.language);
-  const t = (en: string, ar: string) => (isAr ? ar : en);
+  const t = (en: string, ar: string) => (isAr ? ar : L(en));
 
   const navigateToDisabilityTab = (tab: DisabilityTab) => {
     onClose?.();
     try {
-      localStorage.setItem('cognify_default_disability_tab', tab);
+      localStorage.setItem('rafiqi_default_disability_tab', tab);
     } catch {}
     if (onSelectDisabilityTab) {
       onSelectDisabilityTab(tab);
@@ -150,7 +153,7 @@ export default function Sidebar({
     id: sec.id,
     numericOrder: sec.numericOrder,
     label: isAr ? `${sec.numericOrder}. ${sec.titleAr}` : `${sec.numericOrder}. ${sec.titleEn}`,
-    shortTitle: isAr ? sec.titleAr : sec.titleEn,
+    shortTitle: isAr ? sec.titleAr : L(sec.titleEn),
     icon: getSectionIconComponent(sec.iconName),
     action: () => {
       onClose?.();
@@ -216,7 +219,7 @@ export default function Sidebar({
           ? 'bg-[#1769AA]/20 border border-[#1769AA]/50 text-white font-bold shadow-xs'
           : 'bg-[#1769AA]/10 border border-[#1769AA]/30 text-rafiqi-primary-dark font-bold shadow-xs'
         : isDarkMode
-          ? 'text-slate-300 hover:bg-[#1A283D] hover:text-white border border-transparent hover:border-[#22354E]'
+          ? 'text-slate-300 hover:bg-[#17355C] hover:text-white border border-transparent hover:border-[#24476F]'
           : 'text-slate-700 hover:bg-[#1769AA]/5 hover:text-slate-950 border border-transparent hover:border-[#1769AA]/20'
     }`;
 
@@ -234,7 +237,7 @@ export default function Sidebar({
         isCollapsed ? 'w-[74px]' : 'w-[280px]'
       } max-w-[85vw] h-full shrink-0 ${
         isDarkMode 
-          ? 'bg-[#0B1523] text-slate-200 border-[#1E2E44]' 
+          ? 'bg-[#0E2745] text-slate-200 border-[#1E2E44]' 
           : 'bg-white text-slate-800 border-slate-200'
       } border-e backdrop-blur-2xl flex flex-col px-3 py-4 select-none transition-[width] duration-200`}
     >
@@ -308,7 +311,7 @@ export default function Sidebar({
         {/* ── 1. MAIN (HOME ONLY) ── */}
         <div className="flex flex-col gap-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
               {t('Main', 'الرئيسية')}
             </div>
           )}
@@ -327,9 +330,9 @@ export default function Sidebar({
         {/* ── 2. OFFICIAL SECTIONS (EXACTLY SIX) ── */}
         <div className="pt-2 pb-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase flex items-center justify-between`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase flex items-center justify-between`}>
               <span>{t('Official Sections', 'أقسام رفيقي الستة')}</span>
-              <span className="text-[10px] font-mono text-[#1769AA] dark:text-[#4B9FE1] font-bold">1–6</span>
+              <span className="text-xs font-mono text-[#1769AA] dark:text-[#4B9FE1] font-bold">1–6</span>
             </div>
           )}
 
@@ -360,7 +363,7 @@ export default function Sidebar({
         {/* ── 3. WORKSPACE (MY PROGRESS & RECENTS) ── */}
         <div className="pt-2 pb-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
               {t('Workspace', 'مساحة العمل')}
             </div>
           )}
@@ -385,7 +388,7 @@ export default function Sidebar({
         {/* ── 4. SUPPORT & SYSTEM (HELP, SETTINGS, ADMIN) ── */}
         <div className="pt-2 pb-0.5">
           {!isCollapsed && (
-            <div className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
+            <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider px-3 pb-1 uppercase`}>
               {t('Support & System', 'الدعم والنظام')}
             </div>
           )}
@@ -422,7 +425,7 @@ export default function Sidebar({
                 {!isCollapsed && (
                   <>
                     <span className="truncate">{t('Users & Database', 'إدارة المستخدمين وقاعدة البيانات')}</span>
-                    <span className={`ms-auto text-[9px] font-bold ${isDarkMode ? 'text-amber-300 bg-amber-950/40 border-amber-800' : 'text-amber-800 bg-amber-50 border-amber-300'} border px-1.5 py-0.5 rounded`}>
+                    <span className={`ms-auto text-xs font-bold ${isDarkMode ? 'text-amber-300 bg-amber-950/40 border-amber-800' : 'text-amber-800 bg-amber-50 border-amber-300'} border px-1.5 py-0.5 rounded`}>
                       {t('Admin', 'مشرف')}
                     </span>
                   </>
@@ -436,7 +439,7 @@ export default function Sidebar({
         {!isCollapsed && (profile.chatThreads?.length || 0) > 0 && (
           <div className="pt-2">
             <div className="flex items-center justify-between px-3 pb-1">
-              <span className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider uppercase`}>
+              <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} tracking-wider uppercase`}>
                 {getTranslation(profile.language, 'chatHistory')}
               </span>
               <button
@@ -451,7 +454,7 @@ export default function Sidebar({
                   }
                 }}
                 aria-label={t('Clear all chats', 'مسح جميع المحادثات')}
-                className="text-[10px] font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-1 focus-visible:ring-rose-400 focus:outline-none rounded"
+                className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer focus-visible:ring-1 focus-visible:ring-rose-400 focus:outline-none rounded"
                 title="Clear all chats"
               >
                 {getTranslation(profile.language, 'clearAll')}
@@ -463,7 +466,7 @@ export default function Sidebar({
                 <div key={th.id} className={`group flex items-center gap-1 rounded-xl transition-all ${
                   active 
                     ? isDarkMode ? 'bg-[#1769AA]/20 border border-[#1769AA]/50' : 'bg-[#1769AA]/10 border border-[#1769AA]/30'
-                    : isDarkMode ? 'hover:bg-[#1A283D] border border-transparent' : 'hover:bg-slate-100 border border-transparent'
+                    : isDarkMode ? 'hover:bg-[#17355C] border border-transparent' : 'hover:bg-slate-100 border border-transparent'
                 }`}>
                   <button
                     type="button"
@@ -472,7 +475,7 @@ export default function Sidebar({
                     aria-current={active ? 'true' : undefined}
                   >
                     <span className={`text-xs font-semibold truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-200' : 'text-slate-900'}`}>{th.title}</span>
-                    <span className={`text-[10px] truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{th.lastMessageSnippet || t('No messages yet', 'لا توجد رسائل بعد')}</span>
+                    <span className={`text-xs truncate w-full max-w-[190px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{th.lastMessageSnippet || t('No messages yet', 'لا توجد رسائل بعد')}</span>
                   </button>
                   <button
                     type="button"
@@ -502,7 +505,7 @@ export default function Sidebar({
       <div className={`border-t ${isDarkMode ? 'border-[#1E2E44]' : 'border-slate-200'} pt-2.5 flex flex-col gap-2`}>
         {/* Profile Card & Settings Quick Trigger */}
         <div className={`flex items-center ${isCollapsed ? 'justify-center p-1' : 'gap-2.5 px-2.5'} w-full min-h-[48px] py-1 rounded-2xl border ${
-          isDarkMode ? 'bg-[#131E2E] border-[#22354E]' : 'bg-slate-50 border-slate-200'
+          isDarkMode ? 'bg-[#112C4F] border-[#24476F]' : 'bg-slate-50 border-slate-200'
         } backdrop-blur-md transition-all ${
           currentView === 'profile' || currentView === 'settings' 
             ? 'border-[#1769AA] shadow-xs'
@@ -523,15 +526,26 @@ export default function Sidebar({
               <div className="w-[32px] h-[32px] rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 overflow-hidden shadow-xs bg-gradient-to-br from-[#0D4778] to-[#1769AA] group-hover:scale-105 transition-transform ring-1 ring-[#1769AA]/30">
                 {profile.photoURL ? <img src={profile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : userInitial}
               </div>
-              <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ${isDarkMode ? 'ring-[#0B1523]' : 'ring-white'}`} aria-hidden="true" />
+              <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ${isDarkMode ? 'ring-[#0E2745]' : 'ring-white'}`} aria-hidden="true" />
             </div>
             {!isCollapsed && (
               <div className="leading-tight overflow-hidden flex-1">
                 <div className={`text-xs font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'} truncate`}>
                   {profile.name || profile.email?.split('@')[0] || 'User'}
                 </div>
-                <div className={`text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'} truncate`}>
-                  {profile.disabilityType || profile.accessibilityMode || t('Assistive Learning', 'التعلم الميسر')}
+                <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'} truncate`}>
+                  {(() => {
+                    const raw = profile.disabilityType || profile.accessibilityMode || '';
+                    if (!raw || raw === 'None') return t('Assistive Learning', 'التعلم الميسر');
+                    const labels: Record<string, [string, string]> = {
+                      Visual: ['Visual', 'إعاقة بصرية'],
+                      Hearing: ['Hearing', 'إعاقة سمعية'],
+                      Motor: ['Motor', 'إعاقة حركية'],
+                      Cognitive: ['Cognitive', 'إعاقة ذهنية'],
+                    };
+                    const l = labels[raw];
+                    return l ? t(l[0], l[1]) : raw;
+                  })()}
                 </div>
               </div>
             )}
@@ -567,7 +581,7 @@ export default function Sidebar({
             title={t('Open Live Captions', 'فتح الكابشن المباشر')}
             className={`flex-1 flex items-center justify-center gap-1.5 min-h-[44px] py-2 px-2 rounded-xl border ${
               isDarkMode 
-                ? 'border-[#22354E] bg-[#131E2E] text-slate-200 hover:bg-slate-800' 
+                ? 'border-[#24476F] bg-[#112C4F] text-slate-200 hover:bg-slate-800' 
                 : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
             } text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none`}
           >

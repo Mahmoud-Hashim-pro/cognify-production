@@ -30,7 +30,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   teal: 'bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white shadow-sm active:scale-[0.98]',
   secondary: 'bg-rafiqi-primary-light hover:bg-[#DCE7F3] text-rafiqi-primary-dark dark:bg-rafiqi-surface-elevated dark:hover:bg-rafiqi-surface-dark dark:text-rafiqi-primary-muted border border-rafiqi-primary/20 dark:border-rafiqi-border-dark shadow-sm',
   outline: 'border border-rafiqi-primary/40 dark:border-rafiqi-border-dark bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-rafiqi-primary-dark dark:text-rafiqi-primary-muted',
-  ghost: 'bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
+  ghost: 'bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary',
   danger: 'bg-rafiqi-error hover:brightness-90 text-white shadow-sm active:scale-[0.98]',
   success: 'bg-rafiqi-success hover:brightness-90 text-white shadow-sm active:scale-[0.98]',
 };
@@ -38,7 +38,7 @@ const variantStyles: Record<ButtonVariant, string> = {
 const sizeStyles: Record<ButtonSize, string> = {
   sm: 'min-h-[44px] px-3.5 py-2 text-xs font-bold rounded-xl gap-2',
   md: 'min-h-[48px] px-5 py-2.5 text-sm font-bold rounded-2xl gap-2.5',
-  lg: 'min-h-[56px] px-6 py-3.5 text-base font-black rounded-2xl gap-3',
+  lg: 'min-h-[52px] px-6 py-3.5 text-base font-black rounded-2xl gap-3',
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -66,7 +66,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={(renderProps) =>
           cn(
             'inline-flex items-center justify-center font-sans transition-all duration-150 cursor-pointer select-none motion-reduce:transition-none motion-reduce:active:scale-100',
-            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-cognify-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-cognify-surface-light dark:data-[focus-visible]:ring-offset-cognify-bg-dark',
+            'outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-rafiqi-focus data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-rafiqi-surface-light dark:data-[focus-visible]:ring-offset-rafiqi-bg-dark',
             'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none',
             variantStyles[variant],
             sizeStyles[size],

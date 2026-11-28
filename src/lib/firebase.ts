@@ -7,7 +7,8 @@ import {
   getRedirectResult,
   signOut, 
   createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword 
+  signInWithEmailAndPassword,
+  signInAnonymously
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -51,7 +52,7 @@ const isIndexedDBSupported = (): boolean => {
     }
     // Fast-fail if previous run detected broken IndexedDB in this environment
     try {
-      if (window.localStorage && window.localStorage.getItem('__cognify_idb_failed__') === '1') {
+      if (window.localStorage && window.localStorage.getItem('__rafiqi_idb_failed__') === '1') {
         return false;
       }
     } catch {}
@@ -71,19 +72,19 @@ const isIndexedDBSupported = (): boolean => {
       try {
         e.preventDefault();
         e.stopPropagation?.();
-        window.localStorage?.setItem('__cognify_idb_failed__', '1');
+        window.localStorage?.setItem('__rafiqi_idb_failed__', '1');
       } catch {}
     };
     req.onblocked = (e) => {
       try {
         e.preventDefault();
-        window.localStorage?.setItem('__cognify_idb_failed__', '1');
+        window.localStorage?.setItem('__rafiqi_idb_failed__', '1');
       } catch {}
     };
     return true;
   } catch {
     try {
-      window.localStorage?.setItem('__cognify_idb_failed__', '1');
+      window.localStorage?.setItem('__rafiqi_idb_failed__', '1');
     } catch {}
     return false;
   }
@@ -99,7 +100,7 @@ export const probeIndexedDBAsync = (): Promise<boolean> =>
         return resolve(false);
       }
       try {
-        if (window.localStorage && window.localStorage.getItem('__cognify_idb_failed__') === '1') {
+        if (window.localStorage && window.localStorage.getItem('__rafiqi_idb_failed__') === '1') {
           return resolve(false);
         }
       } catch {}
@@ -113,7 +114,7 @@ export const probeIndexedDBAsync = (): Promise<boolean> =>
       };
       req.onerror = (e) => {
         e.preventDefault();
-        try { window.localStorage?.setItem('__cognify_idb_failed__', '1'); } catch {}
+        try { window.localStorage?.setItem('__rafiqi_idb_failed__', '1'); } catch {}
         resolve(false);
       };
     } catch {
@@ -185,7 +186,7 @@ try {
   console.warn("Firestore custom initialization failed, falling back to memory cache", error);
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem('__cognify_idb_failed__', '1');
+      window.localStorage.setItem('__rafiqi_idb_failed__', '1');
     }
   } catch {}
   try {
@@ -239,6 +240,7 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
 export const registerWithEmail = (email: string, pass: string) => createUserWithEmailAndPassword(auth, email, pass);
 export const loginWithEmail = (email: string, pass: string) => signInWithEmailAndPassword(auth, email, pass);
+export const signInAsGuest = () => signInAnonymously(auth);
 
 // Session-scoped choices made on the login screen (account path / disability /
 // org code). These MUST be cleared on logout — they are per-sign-in, not
@@ -260,9 +262,9 @@ export const PRE_LOGIN_KEYS = [
 // user's spoken phrases, personal dictionaries and speech calibration — on a
 // shared device the next person would otherwise inherit (and hear) them.
 const PER_USER_LOCAL_KEYS = [
-  'cognify_speech_history', 'cognify_speech_presets', 'cognify_euphonia_patterns',
-  'cognify_pron_dict', 'cognify_speech_profile', 'cognify_pause_threshold',
-  'cognify_speech_rate', 'cognify_speech_pitch', 'cognify_a11y_hidden',
+  'rafiqi_speech_history', 'rafiqi_speech_presets', 'rafiqi_euphonia_patterns',
+  'rafiqi_pron_dict', 'rafiqi_speech_profile', 'rafiqi_pause_threshold',
+  'rafiqi_speech_rate', 'rafiqi_speech_pitch', 'rafiqi_a11y_hidden', 'rafiqi_a11y_hidden_v2',
 ];
 
 export function clearPreLoginState() {
@@ -278,7 +280,7 @@ export const logout = async () => {
     sessionStorage.clear();
     // Purge memory cache prefixes to prevent cross-user cache leakage
     Object.keys(localStorage).forEach((k) => {
-      if (k.startsWith('cognify_student_memory_') || k.startsWith('cognify_spatial_v2_') || k.startsWith('cognify_learning_events_')) {
+      if (k.startsWith('rafiqi_student_memory_') || k.startsWith('rafiqi_spatial_v2_') || k.startsWith('rafiqi_learning_events_')) {
         localStorage.removeItem(k);
       }
     });

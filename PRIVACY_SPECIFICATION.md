@@ -9,16 +9,16 @@
 ## 1. Core Privacy Architecture Principles
 
 1. **Ephemeral Media Processing & Edge-First Privacy**:
-   - **Microphone Audio Streams & MediaPipe Models (Zero-Knowledge Media Processing)**: Audio streams and real-time hand/face landmarks are processed **purely on the client device** in volatile browser memory (Web Audio API, MediaPipe). **NO raw audio samples or landmark data are ever written to disk, sent across the network, or saved to any database — NEVER PERSISTED (0% Disk / 0% Cloud).**
+   - **Microphone Audio Streams & MediaPipe Models**: Real-time hand/face landmarks (MediaPipe) are processed purely on the client device in volatile browser memory and are never persisted or transmitted. **Voice commands and dictation are different**: they use the browser's built-in speech recognition (`SpeechRecognition`/`webkitSpeechRecognition`), which — depending on the browser — may send the microphone audio to Google (Chrome/Android) or Apple (Safari) servers for transcription. Raw audio is never written to our disk or database by us, but the browser vendor's processing is outside our control. Recordings the user explicitly makes for AI transcription are sent to the AI endpoint over TLS and are not stored by us.
    - **Vision Companion (Ephemeral Cloud Multimodal Inference)**: Camera snapshots captured for scene understanding and obstacle recognition are transmitted securely over TLS as transient in-memory base64 payloads directly to the official inference endpoint (`/api/gemini/generateAdaptiveResponse`).
-   - **Zero-Persistence Invariant for Visual Data**: **0% Disk / 0% Database Persistence**. Vision frames are never saved to cloud storage buckets, never written to server disks, never logged in audit trails, and never stored in any database. The visual payload exists purely in volatile server memory during the inference turn (~500ms) and is immediately garbage-collected upon response completion.
+   - **Zero-Persistence Invariant for Visual Data (on our side)**: **0% Disk / 0% Database Persistence on Rafiqi infrastructure**. Vision frames are never saved to our cloud storage buckets, never written to our server disks, never logged in our audit trails, and never stored in our database. The visual payload exists purely in volatile server memory during the inference turn (~500ms) and is immediately garbage-collected upon response completion. **Provider retention**: frames are analyzed by Google's Gemini API; whether Google retains them depends on the API tier and Google's own data-use policy (paid tiers do not use inputs to improve products; free tiers may). We do not control Google's retention and disclose it here rather than claim otherwise.
 
 2. **Strict Multi-Tenant Isolation**:
    - Every piece of personal learning data is strictly partitioned by the user's authenticated UID (`users/{uid}`).
    - Cross-account access is strictly prevented at both the application layer (memory cache partitioning) and the database security layer (`firestore.rules`).
 
 3. **User Sovereignty & Right to Erasure**:
-   - Students have complete control to inspect, export (full JSON archive), or permanently erase their entire account data at any time through the **Student Privacy Center** (`src/components/StudentPrivacyCenter.tsx`).
+   - Students have complete control to inspect, export (full JSON archive), or permanently erase their entire account data at any time through the **Privacy & Security Center** (`src/components/PrivacySecurityCenter.tsx`, reachable from Settings > Privacy & Security).
 
 ---
 
@@ -31,6 +31,7 @@
 | **Learning Event Stream** | Audit trail of practice answers, time-stamped learning milestones, feedback. | Firestore (5s debounce) + Local Cache | `/users/{uid}/learningEvents/{eventId}` | Persisted for longitudinal learning analytics. Purged completely upon account erasure. |
 | **Conversational Threads** | Chat history with AI assistant, explanations, and practice transcripts. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}/threads/{threadId}` | Encrypted at rest. Deletable per thread or full wipe via Privacy Center. |
 | **Spatial Object Locations** | Observed physical item names, rooms, surfaces, and 10-item movement history. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}/spatialObjects/{id}` | Encrypted at rest. Strictly isolated per UID. Can be cleared directly in Vision Companion or Privacy Center. |
+| **Vision Memories** | User-labeled camera snapshot descriptions ("remember this as..."), text-only. | Firestore (AES-256-GCM Encrypted) | `/users/{uid}` field `visionMemories` | Encrypted at rest with the same device-vault key as threads and spatial objects. Auto-deleted after 90 days; instant wipe via "Clear all camera memory" in the Vision Companion. |
 | **Camera Video Frames** | Real-time object and hazard detection for visually impaired students. | **Ephemeral Cloud Multimodal Inference (0% Disk / 0% Database Persistence)** | In-Memory WebGL Canvas -> Transient TLS API Payload | **Ephemeral**: Discarded immediately after inference. Zero disk, database, or bucket persistence. |
 | **Microphone Audio Streams** | Voice input and Speech-to-Text translation. | **NEVER PERSISTED (0% Disk / 0% Cloud)** | In-Memory AudioBuffer Only | **Ephemeral**: Audio stream tracks are closed immediately upon speech termination. |
 | **DevTools Security Probes** | Detection of DOM tampering and unauthorized console inspection. | Firestore (Founder Only) | `/securityAudits/{auditId}` | Retained for system security integrity. Read-only strictly by primary founder. |
@@ -83,5 +84,43 @@ In the client-side single-page app, memory stores (`userSpatialCache`, `managerC
 1. **Server-Side Isolation by Default**:
    - Cognify production AI queries execute through secure `/api/gemini/*` endpoints using server environment variables. API tokens are never sent to the browser.
 2. **Web Crypto API AES-GCM for Client Secrets**:
-   - For user-supplied Bring-Your-Own-Key (BYOK) configurations, Cognify uses the standard browser **Web Crypto API AES-GCM** (256-bit key derived with PBKDF2) for async encryption and integrity protection in local storage.
+   - For user-supplied Bring-Your-Own-Key (BYOK) configurations, Cognify uses the standard browser **Web Crypto API AES-GCM** (256-bit key derived with PBKDF2) for async encryption and integrity protection. **BYOK keys are stored only in `sessionStorage`: they exist for the current browser tab session, are never persisted in `localStorage`, and are deleted when the tab closes.** Older versions stored them in local storage; a built-in migration moves any legacy copy to session storage and deletes the persisted one.
    - Synchronous reads utilize a client-side stream obfuscation cipher with randomized per-device salt to prevent plain-text memory inspection and shoulder-surfing.
+   - **Honest boundary**: browser storage encryption protects against casual inspection and cross-device dumps, not against malware or a compromised browser on the same device. Users who need stronger guarantees should use the default server-side mode, where keys never reach the browser at all.
+
+---
+
+## 6. Data Retention & Media Consent
+
+1. **Vision camera memories**: retained for a maximum of **90 days** from creation. Expired records are pruned automatically on every load of the Vision Companion, and the "Clear all camera memory" button on the camera page wipes the entire store immediately. Both paths are also reflected in the `/users/{uid}` document.
+2. **Chat threads, learning events, spatial objects**: retained until the user deletes them individually, resets memory from the Privacy Center, or erases the account (cascade deletion).
+3. **Ephemeral media**: camera frames and microphone audio are never written to our disk or database (see the taxonomy table); browser speech-recognition vendors (Google/Apple) and the Gemini API have their own retention, disclosed in Section 1.
+4. **Informed media consent**: before the first camera or microphone use, a one-time consent screen (also read aloud for blind users) explains exactly what is sent where and what is stored. Consent is recorded with the date and policy version in the user profile (`mediaConsent`); guests keep it in device-local storage. A material change to the consent text bumps the version and re-asks everyone.
+5. **Caregiver numbers**: a caregiver's phone number is the caregiver's personal data. It is saved only after an explicit in-app confirmation that the caregiver agreed, is used solely for emergency SOS alerts, and can be deleted anytime.
+
+---
+
+## 7. Third-Party Network Services (Complete Disclosure)
+
+Every external service the app contacts, directly from the browser or from our serverless API:
+
+| Service | Endpoint(s) | What is sent | When |
+|---|---|---|---|
+| **Google Gemini API** | `generativelanguage.googleapis.com` | Chat prompts, attached files, camera frames for scene analysis | Every AI answer (server-side by default) |
+| **Groq** | `api.groq.com` | Chat prompts | Only when the user selects Groq (BYOK or configured provider) |
+| **OpenAI** | `api.openai.com` | Chat prompts | Only when selected as provider |
+| **NVIDIA NIM** | `integrate.api.nvidia.com` | Chat prompts | Only when selected as provider |
+| **xAI** | `api.x.ai` | Chat prompts | Only when selected as provider |
+| **OpenRouter** | `openrouter.ai` | Chat prompts | Only when selected as provider |
+| **Firebase (Google)** | `firestore.googleapis.com`, `securetoken.google.com`, `googleapis.com` | Auth tokens, profile and learning data reads/writes | Continuous (account data) |
+| **api.ipify.org** | `api.ipify.org?format=json` | Nothing beyond the request itself; the service sees the user's public IP | Only when the security audit needs the user's own public IP as a fallback lookup (used for login/security diagnostics; the IP is shown to the user and may be stored in `/securityAudits`) |
+| **api.country.is** | `api.country.is` | Nothing beyond the request; the service sees the user's public IP | Country detection for regional fallbacks |
+| **Pollinations** | `image.pollinations.ai` | Image generation prompt text | Only when the user generates an image |
+| **Unsplash** | `images.unsplash.com` | None (image fetch) | Illustrative images in content |
+| **jsDelivr CDN** | `cdn.jsdelivr.net` | None (static asset/model fetch) | Loading ML model assets (e.g. MediaPipe) |
+| **OpenStreetMap / OSRM / Waze / Google Maps** | `openstreetmap.org`, `router.project-osrm.org`, `maps.google.com`, `waze.com` | Coordinates only, and only when the user taps a navigation link | Blind navigation directions |
+| **Google Translate** | `translate.google.com` | Page URL | Only if the user opens the translate link |
+| **WhatsApp** | `wa.me` | Prefilled SOS text | Only when the user sends an SOS to their caregiver |
+| **Browser speech recognition** | (browser vendor: Google on Chrome/Android, Apple on Safari) | Microphone audio for transcription | Only while voice input is active; governed by the browser vendor's policy |
+
+No analytics trackers, advertising SDKs, or fingerprinting services are embedded.

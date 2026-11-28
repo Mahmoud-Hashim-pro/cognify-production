@@ -42,14 +42,14 @@ export function getGeminiKeys(): string[] {
   // honour encrypted user-pasted BYOK key first, or VITE_GEMINI_API_KEY configured in environment.
   const localKey = secureLoadKeySync('gemini');
   if (localKey) return splitKeys(localKey);
-  const envKey = (typeof import.meta !== 'undefined' && ((import.meta as any).env?.VITE_GEMINI_API_KEY || (import.meta as any).env?.GEMINI_API_KEY)) || '';
+  const envKey = (typeof import.meta !== 'undefined' && ('')) || '';
   return splitKeys(envKey);
 }
 
 export function getGroqKeys(): string[] {
   const localKey = secureLoadKeySync('groq');
   if (localKey) return splitKeys(localKey);
-  const envKey = (typeof import.meta !== 'undefined' && ((import.meta as any).env?.VITE_GROQ_API_KEY || (import.meta as any).env?.GROQ_API_KEY)) || '';
+  const envKey = (typeof import.meta !== 'undefined' && ('')) || '';
   return splitKeys(envKey);
 }
 
@@ -833,6 +833,18 @@ ${otherThreadsSummary}
     }
     const rawData = typeof file.data === 'string' ? file.data.replace(/^data:[^;]+;base64,/, '') : file.data;
     if (rawData) {
+      // Vercel serverless rejects bodies above ~4.5MB with a bare platform 413,
+      // so stop oversized media here with a message the user actually sees
+      // instead of letting the request die at the platform.
+      const approxBytes = Math.round((rawData.length * 3) / 4);
+      if (approxBytes > 3 * 1024 * 1024) {
+        const isAudio = (mime || '').startsWith('audio/');
+        throw new Error(
+          isAudio
+            ? 'التسجيل طويل، جرّب مقطع أقصر (أقل من ٣ ميجا تقريبًا).'
+            : 'الملف كبير، جرّب ملف أصغر (أقل من ٣ ميجا تقريبًا).'
+        );
+      }
       currentParts.push({
         inlineData: {
           mimeType: mime || 'application/pdf',
@@ -846,10 +858,10 @@ ${otherThreadsSummary}
   const body = JSON.stringify({
     contents,
     systemInstruction: { parts: [{ text: systemInstruction }] },
-    generationConfig: {
-      temperature: 0.7,
-      topP: 0.95
-    }
+    generationConfig: attachments.length > 0
+      // Vision/OCR reads numbers and text: low temperature avoids invented values.
+      ? { temperature: 0.2, topP: 0.8 }
+      : { temperature: 0.7, topP: 0.95 }
   });
 
   // Try each known-good model until one responds. A wrong model 404s, so this
@@ -1255,6 +1267,21 @@ export async function generateAdaptiveResponse(
     const isHtml = res.headers.get('Content-Type')?.includes('text/html');
     if (!res.ok || isHtml) {
       if (isHtml || res.status === 404) backendUp = false;
+      // The server already knows why it failed (provider overloaded, usage limit, setup problem).
+      // Say that, kindly, instead of falling to a browser-side path that has no keys and only says "busy".
+      if (!isHtml && (res.status === 503 || res.status === 429)) {
+        let code = '';
+        try { code = (await res.clone().json())?.code || ''; } catch {}
+        if (res.status === 429) {
+          return isAr ? '⚠️ وصلنا للحد المسموح للذكاء الاصطناعي دلوقتي. جرّب تاني بعد شوية 🙏' : '⚠️ The AI has reached its usage limit for now. Please try again in a little while 🙏';
+        }
+        if (code === 'PROVIDER_OVERLOADED') {
+          return isAr ? '⚠️ مزود الذكاء الاصطناعي عليه ضغط كبير دلوقتي. جرّب تاني بعد دقيقة 🙏' : '⚠️ The AI provider is under heavy load right now. Please try again in a minute 🙏';
+        }
+        if (code === 'SERVER_CONFIG_MISSING') {
+          return isAr ? '⚠️ فيه مشكلة في إعدادات الذكاء الاصطناعي عندنا. الفريق هيصلحها، جرّب بعد شوية 🙏' : '⚠️ There is a problem with our AI setup. The team will fix it, please try again later 🙏';
+        }
+      }
       return direct();
     }
     const data = await res.json();

@@ -32,7 +32,7 @@ import {
   Check
 } from "lucide-react";
 import { auth, logout } from "../lib/firebase";
-import { getTranslation, isRTL, localize, isArabicLocale } from "../lib/translations";
+import { getTranslation, isRTL, localize, isArabicLocale, frOf, L } from "../lib/translations";
 import { speak } from "../lib/tts";
 import { PRODUCT_SECTIONS, getSectionIconComponent } from "../lib/sections";
 import { ThemeSelector, ThemeMode } from "./ui/ThemeSelector";
@@ -69,7 +69,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
   const [optionalAssistiveMode, setOptionalAssistiveMode] = useState<'Visual' | 'Vocal-Deaf' | 'Speech' | 'None'>('None');
 
   const isRtl = isArabicLocale(language);
-  const t = (en: string, ar: string) => (isRtl ? ar : en);
+  const t = (en: string, ar: string) => (isRtl ? ar : language === 'French' ? frOf(en) : en);
 
   // Apply real-time visual changes so the user sees the preview immediately
   useEffect(() => {
@@ -94,12 +94,12 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
     try {
       // Save local caches
       try {
-        localStorage.setItem('cognify_font_scale', fontSizeScale);
-        localStorage.setItem('cognify_high_contrast', String(highContrast));
-        localStorage.setItem('cognify_reduce_motion', String(reduceMotion));
-        localStorage.setItem('cognify_tts_rate', String(speechRate));
-        localStorage.setItem('cognify_dialect', dialect);
-        localStorage.setItem('cognify_desc_depth', descriptionDetail);
+        localStorage.setItem('rafiqi_font_scale', fontSizeScale);
+        localStorage.setItem('rafiqi_high_contrast', String(highContrast));
+        localStorage.setItem('rafiqi_reduce_motion', String(reduceMotion));
+        localStorage.setItem('rafiqi_tts_rate', String(speechRate));
+        localStorage.setItem('rafiqi_dialect', dialect);
+        localStorage.setItem('rafiqi_desc_depth', descriptionDetail);
       } catch {}
 
       const passport: AccessibilityPassport = {
@@ -142,6 +142,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           optionalAssistiveMode === 'Vocal-Deaf' ? 'Hearing Impairment' : 'Speech & Communication'
         ),
         accessibilityPassport: passport,
+        voiceFirstMode: optionalAssistiveMode === 'Visual',
         level: formData.level || 'Intermediate',
         points: 150,
         onboardingComplete: true,
@@ -179,12 +180,13 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         {[
           { id: 'Arabic', label: 'العربية (Arabic)', badge: 'موصى به' },
           { id: 'English', label: 'English', badge: 'Full Support' },
+          { id: 'French', label: 'Français', badge: 'Support complet' },
         ].map((langOpt) => (
           <button
             key={langOpt.id}
             type="button"
             onClick={() => setLanguage(langOpt.id as LanguagePreference)}
-            className={`min-h-[56px] p-4 rounded-2xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+            className={`min-h-[48px] p-4 rounded-2xl border-2 transition-all flex items-center justify-between cursor-pointer ${
               language === langOpt.id
                 ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] font-bold shadow-xs'
                 : 'border-slate-200 dark:border-[#22354E] bg-white dark:bg-[#131E2E] text-slate-700 dark:text-slate-300 hover:border-[#1769AA]/40'
@@ -213,7 +215,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               }`}
             >
               <span>اللهجة المصرية (Egyptian Arabic)</span>
-              <span className="text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">شروحات وأوصاف مبسطة ودارجة</span>
+              <span className="text-xs font-normal text-slate-500 dark:text-[#94A3B8]">شروحات وأوصاف مبسطة ودارجة</span>
             </button>
             <button
               type="button"
@@ -225,7 +227,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               }`}
             >
               <span>الفصحى المعاصرة (Modern Standard)</span>
-              <span className="text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">لغة رسمية وأكاديمية دقيقة</span>
+              <span className="text-xs font-normal text-slate-500 dark:text-[#94A3B8]">لغة رسمية وأكاديمية دقيقة</span>
             </button>
           </div>
         </div>
@@ -254,7 +256,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             <span>{t('Test Voice', 'تجربة الصوت')}</span>
           </button>
         </div>
-        <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-relaxed">
+        <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">
           {t(
             'Rafiqi vocalizes visual scenes, reads books, and announces actions in your preferred dialect.',
             'يقوم رفيقي بنطق أوصاف المشاهد وقراءة الكتب والمستندات وإعلان التنبيهات بلهجتك وصوتك المفضل.'
@@ -317,7 +319,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-slate-900 dark:text-white block">
             {t('High Contrast Mode (WCAG AAA)', 'وضع التباين العالي الفائق')}
           </span>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
             {t('Enhances text borders and outlines for maximum readability.', 'يبرز حواف النصوص والعناصر لضمان أقصى وضوح بصري.')}
           </span>
         </div>
@@ -343,7 +345,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
             <Type className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
             <span>{t('Text Size Scale', 'حجم الخط في المنصة')}</span>
           </label>
-          <span className="text-[11px] font-bold text-[#1769AA] dark:text-[#4B9FE1] capitalize">
+          <span className="text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1] capitalize">
             {fontSizeScale}
           </span>
         </div>
@@ -356,7 +358,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 fontSizeScale === scale
                   ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
-                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-[#31486B] bg-slate-50 dark:bg-[#0B1523] text-slate-700 dark:text-slate-200'
               }`}
             >
               {scale === 'normal' ? t('Normal', 'عادي') :
@@ -373,7 +375,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-slate-900 dark:text-white block">
             {t('Reduce Motion & Animations', 'تقليل الحركة والانتقالات')}
           </span>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
             {t('Simplifies page transitions for vestibular and sensory comfort.', 'يلغي المؤثرات الحركية السريعة لراحة الحواس.')}
           </span>
         </div>
@@ -455,7 +457,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 speechRate === rate
                   ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
-                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-[#31486B] bg-slate-50 dark:bg-[#0B1523] text-slate-700 dark:text-slate-200'
               }`}
             >
               {rate}x
@@ -482,7 +484,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
               className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
                 descriptionDetail === item.id
                   ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
-                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+                  : 'border-slate-300 dark:border-[#31486B] bg-slate-50 dark:bg-[#0B1523] text-slate-700 dark:text-slate-200'
               }`}
             >
               <span>{t(item.labelEn, item.labelAr)}</span>
@@ -497,7 +499,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-slate-900 dark:text-white block">
             {t('Auto-Read Screen Descriptions', 'القراءة الصوتية التلقائية للمشاهد')}
           </span>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+          <span className="text-xs text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
             {t('Automatically vocalizes visual summaries upon capture.', 'ينطق ملخص الكاميرا والمستندات تلقائياً عند الالتقاط.')}
           </span>
         </div>
@@ -567,7 +569,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
           <span className="text-xs font-bold text-emerald-800 dark:text-emerald-200 block">
             {t('Universal Access & Privacy Guarantee', 'ضمان الخصوصية والإتاحة الشاملة')}
           </span>
-          <span className="text-[11px] text-emerald-900/80 dark:text-emerald-200/80 block leading-relaxed">
+          <span className="text-xs text-emerald-900/80 dark:text-emerald-200/80 block leading-relaxed">
             {t(
               'You are never required to disclose a disability. All features are always available and can be customized at any time in Settings.',
               'لست ملزماً بالإفصاح عن أي حالة صحية. جميع أقسام رفيقي الستة متاحة بالكامل وتستطيع تغيير اختياراتك متى شئت.'
@@ -636,7 +638,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
                 </div>
                 {isSelected && <CheckCircle className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />}
               </div>
-              <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] leading-tight ps-9">
+              <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-tight ps-9">
                 {t(profileOpt.descEn, profileOpt.descAr)}
               </p>
             </button>
@@ -692,17 +694,25 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
       <div className="w-full bg-slate-50 dark:bg-[#0B1523] p-4 rounded-2xl border border-slate-200 dark:border-[#22354E] text-start space-y-2.5 text-xs">
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Language', 'اللغة')}</span>
-          <span className="font-bold text-slate-900 dark:text-white">{language} ({dialect})</span>
+          <span className="font-bold text-slate-900 dark:text-white">
+            {language === 'Arabic' ? t('Arabic', 'العربية') : t('English', 'الإنجليزية')}
+            {dialect ? ` (${dialect === 'ar-EG' ? t('Egyptian', 'مصري') : dialect})` : ''}
+          </span>
         </div>
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Appearance', 'المظهر والتباين')}</span>
           <span className="font-bold text-slate-900 dark:text-white capitalize">
-            {themeMode} · {highContrast ? t('High Contrast', 'تباين عالي') : t('Standard', 'قياسي')}
+            {themeMode === 'dark' ? t('Dark', 'داكن') : themeMode === 'light' ? t('Light', 'فاتح') : t('System', 'تلقائي')} · {highContrast ? t('High Contrast', 'تباين عالي') : t('Standard', 'قياسي')}
           </span>
         </div>
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Text Scale', 'حجم الخط')}</span>
-          <span className="font-bold text-slate-900 dark:text-white capitalize">{fontSizeScale}</span>
+          <span className="font-bold text-slate-900 dark:text-white capitalize">
+            {fontSizeScale === 'normal' ? t('Normal', 'عادي')
+              : fontSizeScale === 'medium' ? t('Medium', 'متوسط')
+              : fontSizeScale === 'large' ? t('Large', 'كبير')
+              : t('Extra Large', 'كبير جداً')}
+          </span>
         </div>
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Speech Speed', 'سرعة النطق')}</span>
@@ -710,12 +720,19 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-slate-500 dark:text-[#94A3B8]">{t('Assistive Focus', 'محور المساعدة')}</span>
-          <span className="font-bold text-[#1769AA] dark:text-[#4B9FE1]">{optionalAssistiveMode}</span>
+          <span className="font-bold text-[#1769AA] dark:text-[#4B9FE1]">
+            {!optionalAssistiveMode || optionalAssistiveMode === 'None'
+              ? t('General access', 'الوصول الشامل')
+              : optionalAssistiveMode === 'Visual' ? t('Visual', 'إعاقة بصرية')
+              : optionalAssistiveMode === 'Vocal-Deaf' ? t('Hearing', 'إعاقة سمعية')
+              : optionalAssistiveMode === 'Speech' ? t('Speech', 'صعوبات النطق')
+              : optionalAssistiveMode}
+          </span>
         </div>
       </div>
 
       {/* Note about editing in Section 6 */}
-      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-start flex items-center gap-2.5 text-[11px] text-blue-800 dark:text-blue-200">
+      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-start flex items-center gap-2.5 text-xs text-blue-800 dark:text-blue-200">
         <Info className="w-4 h-4 shrink-0 text-[#1769AA] dark:text-[#4B9FE1]" />
         <span>{t('You can change any of these settings anytime from Section 6 (Personalize).', 'يمكنك تغيير أي من هذه الإعدادات لاحقاً في أي وقت من قسم التخصيص.')}</span>
       </div>
@@ -774,9 +791,9 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
         {/* Brand identity pill */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-black text-slate-900 dark:text-white">
-            {isRtl ? 'رفيقي' : 'Rafiqi'}
+            {isRtl ? 'رفيقي' : L('Rafiqi')}
           </span>
-          <span className="text-[10px] text-slate-400 dark:text-[#94A3B8]">
+          <span className="text-xs text-slate-400 dark:text-[#94A3B8]">
             {t('Onboarding', 'إعداد البداية')}
           </span>
         </div>
@@ -823,7 +840,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
                 >
                   {step > s.id ? <Check className="w-4 h-4" /> : s.id}
                 </button>
-                <span className={`text-[10px] font-bold mt-1.5 whitespace-nowrap transition-colors ${
+                <span className={`text-xs font-bold mt-1.5 whitespace-nowrap transition-colors ${
                   step >= s.id ? 'text-[#1769AA] dark:text-[#4B9FE1]' : 'text-slate-400'
                 }`}>
                   {s.label}
@@ -851,7 +868,7 @@ export default function Onboarding({ onComplete, user }: OnboardingProps) {
       </div>
 
       {/* Footer Branding Note */}
-      <div className="text-[11px] text-slate-400 dark:text-[#94A3B8] font-mono tracking-widest uppercase pb-4">
+      <div className="text-xs text-slate-400 dark:text-[#94A3B8] font-mono tracking-widest uppercase pb-4">
         Rafiqi · Universal Accessibility
       </div>
     </div>

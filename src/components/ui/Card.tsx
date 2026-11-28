@@ -13,13 +13,13 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           'rounded-2xl transition-all duration-200 font-sans',
-          'bg-cognify-surface-light dark:bg-cognify-surface-dark border border-cognify-border-light dark:border-cognify-border-dark text-cognify-text-primary dark:text-cognify-text-dark-primary',
+          'bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark border border-rafiqi-border-light dark:border-rafiqi-border-dark text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary',
           variant === 'default' && 'shadow-sm',
-          variant === 'elevated' && 'shadow-md border-cognify-border-light dark:border-cognify-border-dark dark:bg-cognify-surface-elevated',
+          variant === 'elevated' && 'shadow-md border-rafiqi-border-light dark:border-rafiqi-border-dark dark:bg-rafiqi-surface-elevated',
           variant === 'interactive' &&
-            'cursor-pointer hover:border-rafiqi-primary/60 dark:hover:border-rafiqi-primary/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus focus-visible:ring-offset-2 focus-visible:ring-offset-cognify-surface-light dark:focus-visible:ring-offset-cognify-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
+            'cursor-pointer hover:border-rafiqi-primary/60 dark:hover:border-rafiqi-primary/60 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-focus focus-visible:ring-offset-2 focus-visible:ring-offset-rafiqi-surface-light dark:focus-visible:ring-offset-rafiqi-bg-dark motion-reduce:transition-none motion-reduce:active:scale-100',
           variant === 'highlighted' &&
-            'border-rafiqi-primary/40 dark:border-rafiqi-primary/60 bg-rafiqi-primary-light/40 dark:bg-cognify-surface-elevated shadow-sm',
+            'border-rafiqi-primary/40 dark:border-rafiqi-primary/60 bg-rafiqi-primary-light/40 dark:bg-rafiqi-surface-elevated shadow-sm',
           className
         )}
         {...props}
@@ -42,7 +42,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttribut
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-base sm:text-lg font-bold tracking-tight text-cognify-text-primary dark:text-cognify-text-dark-primary', className)}
+      className={cn('text-base sm:text-lg font-bold tracking-tight text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary', className)}
       {...props}
     />
   )
@@ -53,7 +53,7 @@ export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTML
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn('text-xs sm:text-sm text-cognify-text-secondary dark:text-cognify-text-dark-secondary leading-relaxed', className)}
+      className={cn('text-xs sm:text-sm text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary leading-relaxed', className)}
       {...props}
     />
   )
@@ -71,7 +71,7 @@ export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('p-5 sm:p-6 pt-0 border-t border-cognify-border-light dark:border-cognify-border-dark mt-4 flex items-center justify-between', className)}
+      className={cn('p-5 sm:p-6 pt-0 border-t border-rafiqi-border-light dark:border-rafiqi-border-dark mt-4 flex items-center justify-between', className)}
       {...props}
     />
   )

@@ -1506,7 +1506,7 @@ async function run() {
     assert(fs.existsSync(specPath), 'PRIVACY_SPECIFICATION.md exists in project root');
 
     const specContent = fs.readFileSync(specPath, 'utf8');
-    assert(specContent.includes('Zero-Knowledge Media Processing'), 'Spec documents Zero-Knowledge media processing');
+    assert(specContent.includes('Ephemeral Media Processing'), 'Spec documents ephemeral media processing');
     assert(specContent.includes('NEVER PERSISTED'), 'Spec guarantees camera and mic streams are never persisted');
     assert(specContent.includes('Strict Multi-Tenant Isolation'), 'Spec defines strict multi-tenant boundary rules');
 
@@ -1618,7 +1618,7 @@ async function run() {
     const spec = fs.readFileSync(specPath, 'utf8');
     assert(!spec.includes('AES-grade dynamic scrambling'), 'Spec removed inaccurate AES claims for synchronous obfuscation');
     assert(spec.includes('Web Crypto API AES-GCM'), 'Spec accurately documents Web Crypto API AES-GCM for async BYOK tokens');
-    assert(spec.includes('StudentPrivacyCenter.tsx'), 'Spec references canonical StudentPrivacyCenter component');
+    assert(spec.includes('PrivacySecurityCenter.tsx'), 'Spec references the live PrivacySecurityCenter component');
     assert(spec.includes('Export Full Learning Archive'), 'Spec documents full data portability archive');
     assert(spec.includes('Cascade Account Deletion'), 'Spec documents full cascade deletion across subcollections and Auth');
 

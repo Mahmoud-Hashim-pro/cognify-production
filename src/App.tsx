@@ -17,7 +17,7 @@ import { Loader2, Settings, Layers, Menu, Moon, Sun, AlertCircle, RefreshCw, Mai
 import { toast, ToastContainer } from "./components/Toast";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
-import { isRTL, isArabicLocale, getTranslation, localize } from "./lib/translations";
+import { isRTL, isArabicLocale, getTranslation, localize, setActiveUiLanguage } from "./lib/translations";
 import { applySeoMetadata } from "./lib/seoEngine";
 import { canAccessSection } from "./lib/academics";
 import { canAccessView, homeViewFor, isAccessibilityUser, AppView } from "./lib/access";
@@ -38,7 +38,8 @@ import { RouteAnnouncer } from "./components/ui/RouteAnnouncer";
 import { isAdminUser } from "./lib/roles";
 import { subscribeToStudentMemory, clearStudentMemory, getCachedStudentMemory, DEFAULT_STUDENT_MEMORY } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
-import { ProductSectionId } from "./lib/sections";
+import { ProductSectionId, PRODUCT_SECTIONS, SectionFeatureItem, getProductSection } from "./lib/sections";
+import SectionToolBar, { featureKey, sectionToolButtons } from "./components/SectionToolBar";
 import { initSecurityTracker } from "./lib/securityTracker";
 import { getVisitorCountryCode } from "./lib/geo";
 import { recordUserLoginSession } from "./lib/loginHistory";
@@ -51,10 +52,10 @@ function lazyWithRetry<T extends React.ComponentType<any>>(
     try {
       return await factory();
     } catch (err: any) {
-      const lastReload = Number(sessionStorage.getItem('cognify_lazy_reload') || '0');
+      const lastReload = Number(sessionStorage.getItem('rafiqi_lazy_reload') || '0');
       const now = Date.now();
       if (now - lastReload > 12000) {
-        sessionStorage.setItem('cognify_lazy_reload', String(now));
+        sessionStorage.setItem('rafiqi_lazy_reload', String(now));
         if (typeof caches !== 'undefined') {
           try {
             const keys = await caches.keys();
@@ -93,14 +94,18 @@ const HearAndExpressView = lazyWithRetry(() => import("./components/HearAndExpre
 const AccessibleProductivityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleProductivityWorkspaceView"));
 const AccessibleMobilityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleMobilityWorkspaceView"));
 const AccessibleCommunicateWorkspaceView = lazyWithRetry(() => import("./components/AccessibleCommunicateWorkspaceView"));
+const BlindHomeView = lazyWithRetry(() => import("./components/BlindHomeView"));
+const VoiceNavigationView = lazyWithRetry(() => import("./components/VoiceNavigationView"));
+const DailyAidsView = lazyWithRetry(() => import("./components/DailyAidsView"));
+const KnownPeopleView = lazyWithRetry(() => import("./components/KnownPeopleView"));
+const GlobalVoiceControls = lazyWithRetry(() => import("./components/GlobalVoiceControls"));
+const PrivacyPolicyPage = lazyWithRetry(() => import("./components/LegalPages").then(m => ({ default: m.PrivacyPolicyPage })));
+const TermsOfServicePage = lazyWithRetry(() => import("./components/LegalPages").then(m => ({ default: m.TermsOfServicePage })));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
   'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'communication', 'admin', 'support', 'privacy_security',
-  'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
-  'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
-  'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
-] as const;
+ 'goals', 'analytics', 'planner', 'gym', 'privacy', 'intelligence', ] as const;
 
 export default function App() {
   const [user, loading, authError] = useAuthState(auth);
@@ -159,7 +164,7 @@ export default function App() {
     if (initialRouteRef.current.tab) return initialRouteRef.current.tab;
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('cognify_default_disability_tab');
+        const saved = localStorage.getItem('rafiqi_default_disability_tab');
         if (saved && (VALID_DISABILITY_TABS as readonly string[]).includes(saved)) {
           return saved as DisabilityTab;
         }
@@ -288,6 +293,7 @@ export default function App() {
     ? { ...profile, memory: memoryState || undefined }
     : null;
 
+  setActiveUiLanguage(profile?.language);
   const direction = isRTL(profile?.language) ? 'rtl' : 'ltr';
 
   // Keep the document root's dir/lang in sync so screen readers pronounce correctly
@@ -386,16 +392,16 @@ export default function App() {
       const root = document.documentElement;
 
       // Font size scaling
-      const fontScale = savedPassport?.fontSizeScale || (localStorage.getItem('cognify_font_scale') as any) || 'normal';
+      const fontScale = savedPassport?.fontSizeScale || (localStorage.getItem('rafiqi_font_scale') as any) || 'normal';
       root.classList.remove('font-scale-normal', 'font-scale-medium', 'font-scale-large', 'font-scale-extra-large');
       root.classList.add(`font-scale-${fontScale}`);
 
       // High contrast mode
-      const isHighContrast = Boolean(savedPassport?.highContrast || localStorage.getItem('cognify_high_contrast') === 'true');
+      const isHighContrast = Boolean(savedPassport?.highContrast || localStorage.getItem('rafiqi_high_contrast') === 'true');
       root.classList.toggle('high-contrast', isHighContrast);
 
       // Reduce motion
-      const isReduceMotion = Boolean(savedPassport?.reduceMotion || localStorage.getItem('cognify_reduce_motion') === 'true');
+      const isReduceMotion = Boolean(savedPassport?.reduceMotion || localStorage.getItem('rafiqi_reduce_motion') === 'true');
       root.classList.toggle('reduce-motion', isReduceMotion);
     } catch (e) {
       console.warn('Failed to apply global accessibility attributes:', e);
@@ -455,6 +461,10 @@ export default function App() {
 
     const SECTION_IDS: ProductSectionId[] = ['see_understand', 'read_learn', 'work_create', 'move_explore', 'personalize'];
     if (SECTION_IDS.includes(view as ProductSectionId) || (view === 'communicate' && (tab === 'hub' || section === 'communicate'))) {
+      if (SECTION_IDS.includes(view as ProductSectionId) || view === 'communicate') {
+        handleSelectSection((view === 'communicate' ? 'communicate' : view) as ProductSectionId);
+        return;
+      }
       targetView = 'disability';
       targetTab = 'hub';
       targetSection = view as ProductSectionId;
@@ -523,9 +533,40 @@ export default function App() {
     }, 50);
   };
 
-  const handleSelectSection = (sectionId: ProductSectionId) => {
-    navigateTo('disability', 'hub', sectionId);
+  // A section no longer opens a grid page: it opens its first tool, with every tool of the
+  // section as a button row on top (SectionToolBar).
+  const [toolbarSection, setToolbarSection] = useState<ProductSectionId | null>(null);
+  const openSectionFeature = (sectionId: ProductSectionId, f: SectionFeatureItem) => {
+    setToolbarSection(sectionId);
+    const view = (f.targetView === 'communicate' ? 'communication' : f.targetView) as AppView;
+    navigateTo(view, f.targetTab as DisabilityTab | undefined, null);
   };
+  const handleSelectSection = (sectionId: ProductSectionId) => {
+    const section = getProductSection(sectionId);
+    const first = section ? (section.features.find((f) => f.isPrimaryAction) || section.features[0]) : undefined;
+    if (!first) {
+      navigateTo('disability', 'hub', sectionId);
+      return;
+    }
+    openSectionFeature(sectionId, first);
+  };
+  const isFeatureActive = (f: SectionFeatureItem) => {
+    if (f.targetView === 'disability') return currentView === 'disability' && disabilityTab === f.targetTab;
+    if (f.targetView === 'communicate' || f.targetView === 'communication') {
+      return currentView === 'communicate' || currentView === 'communication';
+    }
+    return currentView === f.targetView;
+  };
+  const barSection: ProductSectionId | null = (() => {
+    if (currentView === 'disability' && (disabilityTab === 'hub' || !disabilityTab)) return null;
+    const matches = (id: ProductSectionId) => sectionToolButtons(id).some(isFeatureActive);
+    let id: ProductSectionId | null = null;
+    if (toolbarSection && matches(toolbarSection)) id = toolbarSection;
+    else id = (PRODUCT_SECTIONS.find((sec) => matches(sec.id))?.id as ProductSectionId | undefined) || null;
+    // The Visual Assistant page already has its own tool row.
+    if (id === 'see_understand' && currentView === 'disability' && disabilityTab === 'vision') return null;
+    return id;
+  })();
 
   const handleBack = () => {
     smartNavigateBack(navigateTo, 'disability', 'hub');
@@ -632,7 +673,7 @@ export default function App() {
           data.accessibilityMode = 'None';
           data.disabilityType = '';
           try {
-            localStorage.removeItem('cognify_default_disability_tab');
+            localStorage.removeItem('rafiqi_default_disability_tab');
             localStorage.removeItem('preLoginAccessibilityMode');
             localStorage.removeItem('preLoginDisability');
           } catch {}
@@ -643,7 +684,7 @@ export default function App() {
           if (preLoginDis) data.disabilityType = preLoginDis;
           try {
             const mappedTab = preLoginMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-            localStorage.setItem('cognify_default_disability_tab', mappedTab);
+            localStorage.setItem('rafiqi_default_disability_tab', mappedTab);
           } catch {}
           setDoc(doc(db, path), cleanDataForFirestore({ 
             accountPath: 'Special Needs', 
@@ -748,7 +789,7 @@ export default function App() {
 
           try {
             const mappedTab = accessibilityMode === 'Vocal-Deaf' ? 'deaf' : 'vision';
-            localStorage.setItem('cognify_default_disability_tab', mappedTab);
+            localStorage.setItem('rafiqi_default_disability_tab', mappedTab);
           } catch {}
 
           let visitorCountry: string | undefined;
@@ -799,7 +840,7 @@ export default function App() {
         } else {
           // If the student already completed onboarding on this device (or cached in localStorage),
           // preserve the local profile state instead of clobbering to null and looping back to step 1!
-          const cachedProfileJson = typeof window !== 'undefined' ? localStorage.getItem(`cognify_profile_${user.uid}`) : null;
+          const cachedProfileJson = typeof window !== 'undefined' ? localStorage.getItem(`rafiqi_profile_${user.uid}`) : null;
           if (cachedProfileJson) {
             try {
               const cached = JSON.parse(cachedProfileJson);
@@ -922,8 +963,8 @@ export default function App() {
 
     // Cache locally immediately to eliminate any race condition or snapshot reset loop
     try {
-      localStorage.setItem(`cognify_profile_${user.uid}`, JSON.stringify(newProfile));
-      localStorage.setItem(`cognify_onboarded_${user.uid}`, 'true');
+      localStorage.setItem(`rafiqi_profile_${user.uid}`, JSON.stringify(newProfile));
+      localStorage.setItem(`rafiqi_onboarded_${user.uid}`, 'true');
     } catch {}
 
     const cleanedProfile = cleanDataForFirestore(newProfile);
@@ -1068,7 +1109,7 @@ export default function App() {
           >
             <RefreshCw className="w-4 h-4" /> Retry · إعادة المحاولة
           </button>
-          <button onClick={() => logout()} className="text-[11px] text-slate-500 underline">
+          <button onClick={() => logout()} className="text-xs text-slate-500 underline">
             Sign out · تسجيل الخروج
           </button>
         </div>
@@ -1083,8 +1124,55 @@ export default function App() {
 
   const renderView = () => {
     const activeProfile = fullProfile || profile;
+    // Public legal pages: reachable by guests too (linked from the consent gate).
+    if (currentView === 'privacy_policy') {
+      return (
+        <Suspense fallback={null}>
+          <PrivacyPolicyPage language={activeProfile?.language} onBack={handleBack} />
+        </Suspense>
+      );
+    }
+    if (currentView === 'terms') {
+      return (
+        <Suspense fallback={null}>
+          <TermsOfServicePage language={activeProfile?.language} onBack={handleBack} />
+        </Suspense>
+      );
+    }
     if (!activeProfile) return null;
     switch (currentView) {
+      case 'blind_home':
+        return (
+          <BlindHomeView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigate={navigateTo}
+          />
+        );
+      case 'voice_navigation':
+        return (
+          <VoiceNavigationView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigateBack={handleBack}
+          />
+        );
+      case 'daily_aids':
+        return (
+          <DailyAidsView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigateBack={handleBack}
+          />
+        );
+      case 'known_people':
+        return (
+          <KnownPeopleView
+            profile={activeProfile}
+            isArabic={isArabicLocale(activeProfile.language)}
+            onNavigateBack={handleBack}
+          />
+        );
       case 'chat':
         return (
           <>
@@ -1147,6 +1235,7 @@ export default function App() {
           }}
           initialSection={currentSection}
           onSectionChange={setCurrentSection}
+          onOpenSectionTool={handleSelectSection}
           setProfile={setProfile}
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
@@ -1160,7 +1249,11 @@ export default function App() {
             isDarkMode={isDarkMode}
           />
         );
+      case 'gym':
       case 'toolkit':
+        if (currentView === 'gym') {
+          try { sessionStorage.setItem('rafiqi_toolkit_category', 'cognitive_gym'); } catch {}
+        }
         return (
           <UnifiedAccessibilityToolkitView
             profile={activeProfile}
@@ -1169,7 +1262,7 @@ export default function App() {
             onOpenBookStudio={(content, title) => {
               if (content) {
                 try {
-                  sessionStorage.setItem('cognify_book_studio_import', JSON.stringify({ text: content, title }));
+                  sessionStorage.setItem('rafiqi_book_studio_import', JSON.stringify({ text: content, title }));
                 } catch {}
               }
               navigateTo('book_studio');
@@ -1200,18 +1293,11 @@ export default function App() {
           <AccessibleProductivityWorkspaceView
             profile={activeProfile}
             onMenuClick={handleOpenMobileMenu}
-            onNavigateBack={() => {
-              if (currentSection === 'work_create') {
-                handleSelectSection('work_create');
-              } else {
-                handleBack();
-              }
-            }}
-            initialTool={disabilityTab as any}
+            onNavigateBack={handleBack}
             onOpenBookStudio={(content, title) => {
               if (content) {
                 try {
-                  sessionStorage.setItem('cognify_book_studio_import', JSON.stringify({ text: content, title }));
+                  sessionStorage.setItem('rafiqi_book_studio_import', JSON.stringify({ text: content, title }));
                 } catch {}
               }
               navigateTo('book_studio');
@@ -1224,14 +1310,7 @@ export default function App() {
           <AccessibleMobilityWorkspaceView
             profile={activeProfile}
             onMenuClick={handleOpenMobileMenu}
-            onNavigateBack={() => {
-              if (currentSection === 'move_explore') {
-                handleSelectSection('move_explore');
-              } else {
-                handleBack();
-              }
-            }}
-            initialTool={disabilityTab as any}
+            onNavigateBack={handleBack}
             isDarkMode={isDarkMode}
           />
         );
@@ -1241,15 +1320,8 @@ export default function App() {
           <AccessibleCommunicateWorkspaceView
             profile={activeProfile}
             onMenuClick={handleOpenMobileMenu}
-            onNavigateBack={() => {
-              if (currentSection === 'communicate') {
-                handleSelectSection('communicate');
-              } else {
-                handleBack();
-              }
-            }}
+            onNavigateBack={handleBack}
             onOpenHearingSuite={() => navigateTo('hear_express')}
-            initialTool={disabilityTab as any}
             isDarkMode={isDarkMode}
           />
         );
@@ -1283,7 +1355,7 @@ export default function App() {
       case 'privacy_security':
       case 'privacy':
         return (
-          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
+          <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-[#0A2342] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} overflow-y-auto custom-scrollbar p-4 md:p-8`}>
             <header className="flex items-center gap-3 mb-6">
               <button
                 type="button"
@@ -1390,7 +1462,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <div
-        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0B131E] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} font-sans overflow-hidden selection:bg-[#1769AA]/25 transition-all duration-300 ${
+        className={`app-navy flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0A2342] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} font-sans overflow-hidden selection:bg-[#1769AA]/25 transition-all duration-300 ${
           profile?.accessibilityMode === 'Visual' ? 'text-lg contrast-125' : ''
         }`}
         dir={direction}
@@ -1492,6 +1564,7 @@ export default function App() {
             currentSection={currentSection}
             activeTab={disabilityTab}
             onMenuClick={handleOpenMobileMenu}
+            onSelectSection={(sec) => navigateTo(sec)}
             onNavigate={(view, tab) => {
               if (view === 'disability') {
                 if (tab) {
@@ -1514,10 +1587,20 @@ export default function App() {
             onLogout={handleLogout}
           />
 
-          <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
+          {barSection && (
+            <SectionToolBar
+              sectionId={barSection}
+              isAr={direction === 'rtl'}
+              isDarkMode={isDarkMode}
+              isActive={isFeatureActive}
+              onSelect={(f) => openSectionFeature(barSection, f)}
+            />
+          )}
+
+          <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]">
             <Suspense
               fallback={
-                <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
+                <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0A2342] text-teal-400">
                   <Loader2 className="w-8 h-8 text-teal-400 animate-spin" aria-hidden="true" />
                   <span className="sr-only">Loading view...</span>
                 </div>
@@ -1526,6 +1609,20 @@ export default function App() {
               {renderView()}
             </Suspense>
           </main>
+
+          {/* Global blind-first controls: floating hold-to-talk voice button,
+            triple-tap / shake SOS, and the SOS modal — available on EVERY screen
+            for blind and low-vision users. */}
+        {user && profile?.accessibilityMode === 'Visual' && (
+          <Suspense fallback={null}>
+            <GlobalVoiceControls
+              profile={profile}
+              isArabic={isArabicLocale(profile?.language)}
+              onNavigate={(view, tab) => navigateTo(view, tab)}
+              setProfile={setProfile}
+            />
+          </Suspense>
+        )}
         </div>
 
         {/* The floating accessibility overlay (sign avatar / mic / vision) is ONLY for
@@ -1569,6 +1666,7 @@ export default function App() {
             </Suspense>
           )}
         </AnimatePresence>
+
 
 
       </div>

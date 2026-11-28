@@ -10,6 +10,7 @@ import {
   buildOpenAIMessages,
   buildContents,
   geminiFetch,
+  aiBusyMessage,
   fallbackChat,
 } from '../_lib/ai.js';
 import { applyCorsHeaders } from '../_lib/cors.js';
@@ -40,7 +41,7 @@ The assistant (Rafiqi) replied: "${originalMessage}"
 
 Write an independent, higher-quality answer for this learner (Level: ${profile.level || 'Basic'}, Field: ${profile.field || 'General'}).
 
-Respond in this EXACT format, in ${isAr ? 'Arabic' : 'English'}:
+Respond in this EXACT format, in ${isAr ? 'Arabic' : (profile?.language === 'French' ? 'French' : 'English')}:
 ## Improved Answer
 [Your own stronger answer — structured, clear, accurate.]
 
@@ -92,7 +93,7 @@ export async function logicResponseHandler(req: any, res: any) {
     const txt = await fallbackChat(buildOpenAIMessages(message, system, safeHistory));
     const isAr = profile?.language === 'Arabic' || profile?.language === 'Egyptian Ammiya';
     res.status(200).json({
-      result: txt || (isAr ? '⚠️ الذكاء مشغول دلوقتي. جرّب تاني 🙏' : '⚠️ The AI is busy right now. Please try again 🙏'),
+      result: txt || aiBusyMessage(isAr),
     });
   } catch (err) {
     console.error('[api] generateLogicResponse:', err);
@@ -121,7 +122,7 @@ export async function proactiveInsightsHandler(req: any, res: any) {
 
     const prompt = `Based on this student's recent study conversation, give 2-3 short, specific, actionable insights about what to focus on next.
 Student: Level ${profile.level || 'Basic'}, Field ${profile.field || 'General'}.
-Write in ${isAr ? 'Arabic' : 'English'}. Be concrete — no generic advice, no preamble.
+Write in ${isAr ? 'Arabic' : (profile?.language === 'French' ? 'French' : 'English')}. Be concrete — no generic advice, no preamble.
 
 Conversation:
 ${convo || '(no recent messages)'}`;

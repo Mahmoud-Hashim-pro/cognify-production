@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { L } from '../../../../lib/translations';
 import {
   Mic,
   MicOff,
@@ -90,7 +91,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
         setErrorMessage(
           isArabic
             ? 'تعذر الوصول إلى الميكروفون. يرجى التأكد من منح الإذن للمتصفح.'
-            : 'Could not access microphone. Please ensure microphone permissions are granted.'
+            : L('Could not access microphone. Please ensure microphone permissions are granted.')
         );
       }
     }
@@ -167,12 +168,12 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
             </div>
             <div>
               <h1 className="text-2xl font-black text-white">
-                {isArabic ? 'نظام الانتباه للأصوات البيئية' : 'Sound Awareness Engine'}
+                {isArabic ? 'نظام الانتباه للأصوات البيئية' : L('Sound Awareness Engine')}
               </h1>
               <p className="text-sm text-slate-400">
                 {isArabic
                   ? 'رصد ذكي للأصوات المهمة للأفراد الصم وضعاف السمع'
-                  : 'Smart acoustic awareness for Deaf & Hard of Hearing individuals'}
+                  : L('Smart acoustic awareness for Deaf & Hard of Hearing individuals')}
               </p>
             </div>
           </div>
@@ -181,7 +182,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsSettingsOpen(true)}
-            aria-label={isArabic ? 'فتح الإعدادات' : 'Open Settings'}
+            aria-label={isArabic ? 'فتح الإعدادات' : L('Open Settings')}
             className="p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all focus:ring-2 focus:ring-indigo-500"
           >
             <Settings className="w-5 h-5" />
@@ -189,7 +190,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
 
           <button
             onClick={handleToggleListening}
-            className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg focus:outline-none focus:ring-4 ${
+            className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-4 ${
               isListening
                 ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500/50'
                 : 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500/50'
@@ -198,12 +199,12 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
             {isListening ? (
               <>
                 <MicOff className="w-5 h-5" />
-                <span>{isArabic ? 'إيقاف الاستماع' : 'Stop Listening'}</span>
+                <span>{isArabic ? 'إيقاف الاستماع' : L('Stop Listening')}</span>
               </>
             ) : (
               <>
                 <Mic className="w-5 h-5" />
-                <span>{isArabic ? 'بدء الاستماع' : 'Start Listening'}</span>
+                <span>{isArabic ? 'بدء الاستماع' : L('Start Listening')}</span>
               </>
             )}
           </button>
@@ -231,25 +232,25 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
               {isListening
                 ? isArabic
                   ? 'مستوى الصوت البيئي المباشر'
-                  : 'Live Environmental Sound Level'
+                  : L('Live Environmental Sound Level')
                 : isArabic
                 ? 'الاستماع متوقف'
-                : 'Listening Inactive'}
+                : L('Listening Inactive')}
             </span>
           </div>
 
           <div className="flex items-center gap-3 text-xs text-slate-400">
             <span>
-              {isArabic ? 'الضجيج الأساسي:' : 'Noise Floor:'}{' '}
+              {isArabic ? 'الضجيج الأساسي:' : L('Noise Floor:')}{' '}
               <strong className="text-slate-200">
                 {currentMeasurement ? `${Math.round(db - 15)} dB` : '--'}
               </strong>
             </span>
             <span>•</span>
             <span>
-              {isArabic ? 'النمط:' : 'Pattern:'}{' '}
+              {isArabic ? 'النمط:' : L('Pattern:')}{' '}
               <strong className="text-indigo-300">
-                {currentMeasurement?.detectedPattern || (isArabic ? 'سكون' : 'Idle')}
+                {currentMeasurement?.detectedPattern || (isArabic ? 'سكون' : L('Idle'))}
               </strong>
             </span>
           </div>
@@ -266,14 +267,14 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
               {db >= 85
                 ? isArabic
                   ? 'صوت حرج / خطر 🚨'
-                  : 'Critical / Loud 🚨'
+                  : L('Critical / Loud 🚨')
                 : db >= 70
                 ? isArabic
                   ? 'صوت متوسط / تنبيه ⚠️'
-                  : 'Moderate / Alert ⚠️'
+                  : L('Moderate / Alert ⚠️')
                 : isArabic
                 ? 'صوت هادئ ومستقر 🟢'
-                : 'Normal / Quiet 🟢'}
+                : L('Normal / Quiet 🟢')}
             </span>
           </div>
 
@@ -292,7 +293,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
         <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800 text-xs">
           <div className="p-3 rounded-2xl bg-slate-800/50 border border-slate-700/50 text-center">
             <span className="text-slate-400 block mb-1">
-              {isArabic ? 'التردد المنخفض (باس)' : 'Low Bass (<300Hz)'}
+              {isArabic ? 'التردد المنخفض (باس)' : L('Low Bass (<300Hz)')}
             </span>
             <span className="text-base font-bold text-white">
               {currentMeasurement ? `${Math.round(currentMeasurement.frequencyBand.low * 100)}%` : '--'}
@@ -301,7 +302,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
 
           <div className="p-3 rounded-2xl bg-slate-800/50 border border-slate-700/50 text-center">
             <span className="text-slate-400 block mb-1">
-              {isArabic ? 'التردد المتوسط (صوت)' : 'Mid Vocal (300-2500Hz)'}
+              {isArabic ? 'التردد المتوسط (صوت)' : L('Mid Vocal (300-2500Hz)')}
             </span>
             <span className="text-base font-bold text-white">
               {currentMeasurement ? `${Math.round(currentMeasurement.frequencyBand.mid * 100)}%` : '--'}
@@ -310,7 +311,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
 
           <div className="p-3 rounded-2xl bg-slate-800/50 border border-slate-700/50 text-center">
             <span className="text-slate-400 block mb-1">
-              {isArabic ? 'التردد العالي (صفارات)' : 'High Pitch (>2500Hz)'}
+              {isArabic ? 'التردد العالي (صفارات)' : L('High Pitch (>2500Hz)')}
             </span>
             <span className="text-base font-bold text-white">
               {currentMeasurement ? `${Math.round(currentMeasurement.frequencyBand.high * 100)}%` : '--'}
@@ -323,10 +324,10 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
       <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-white">
-            {isArabic ? 'حالة الأصوات الـ 11 المدعومة' : 'Supported Sound Event Categories (11)'}
+            {isArabic ? 'حالة الأصوات الـ 11 المدعومة' : L('Supported Sound Event Categories (11)')}
           </h2>
           <span className="text-xs text-slate-400">
-            {isArabic ? 'شفافية منهجية الرصد' : 'Authentic Detection Disclosure'}
+            {isArabic ? 'شفافية منهجية الرصد' : L('Authentic Detection Disclosure')}
           </span>
         </div>
 
@@ -349,18 +350,18 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                     </div>
                     <div>
                       <span className="text-sm font-bold text-white block">
-                        {isArabic ? cat.nameAr : cat.nameEn}
+                        {isArabic ? cat.nameAr : L(cat.nameEn)}
                       </span>
                       {isSnoozed && (
-                        <span className="text-[10px] text-amber-400 font-semibold">
-                          {isArabic ? 'موقوف مؤقتاً' : 'Snoozed'}
+                        <span className="text-xs text-amber-400 font-semibold">
+                          {isArabic ? 'موقوف مؤقتاً' : L('Snoozed')}
                         </span>
                       )}
                     </div>
                   </div>
 
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                    className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                       cat.modelStatus === 'active_verified'
                         ? 'bg-emerald-500/20 text-emerald-300'
                         : cat.modelStatus === 'user_configured'
@@ -371,19 +372,19 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                     {cat.modelStatus === 'active_verified'
                       ? isArabic
                         ? 'توقيع معتمد'
-                        : 'Verified Cadence'
+                        : L('Verified Cadence')
                       : cat.modelStatus === 'user_configured'
                       ? isArabic
                         ? 'معايرة'
-                        : 'Configured'
+                        : L('Configured')
                       : isArabic
                       ? 'نموذج مطلوب'
-                      : 'Weights Req'}
+                      : L('Weights Req')}
                   </span>
                 </div>
 
-                <p className="text-[11px] text-slate-400 line-clamp-2">
-                  {isArabic ? cat.descriptionAr : cat.descriptionEn}
+                <p className="text-xs text-slate-400 line-clamp-2">
+                  {isArabic ? cat.descriptionAr : L(cat.descriptionEn)}
                 </p>
               </div>
             );
@@ -397,7 +398,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-indigo-400" />
             <h2 className="text-lg font-bold text-white">
-              {isArabic ? 'سجل التنبيهات الأخيرة' : 'Recent Alert History'}
+              {isArabic ? 'سجل التنبيهات الأخيرة' : L('Recent Alert History')}
             </h2>
           </div>
           {alertHistory.length > 0 && (
@@ -406,7 +407,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
               className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-400 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>{isArabic ? 'مسح السجل' : 'Clear History'}</span>
+              <span>{isArabic ? 'مسح السجل' : L('Clear History')}</span>
             </button>
           )}
         </div>
@@ -415,7 +416,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
           <div className="py-8 text-center text-slate-500 text-sm">
             {isArabic
               ? 'لم يتم تسجيل أي تنبيهات صوتية حتى الآن.'
-              : 'No acoustic alerts detected yet.'}
+              : L('No acoustic alerts detected yet.')}
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -434,7 +435,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                   <div className="p-2 rounded-xl bg-white/5">{getCategoryIcon(alert.category)}</div>
                   <div>
                     <span className="text-sm font-bold text-white block">
-                      {isArabic ? alert.labelAr : alert.labelEn}
+                      {isArabic ? alert.labelAr : L(alert.labelEn)}
                     </span>
                     <span className="text-xs text-slate-400">
                       {new Date(alert.timestamp).toLocaleTimeString(isArabic ? 'ar-EG' : 'en-US')} •{' '}
@@ -448,7 +449,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
                     onClick={() => handleDismissAlert(alert.id)}
                     className="text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all"
                   >
-                    {isArabic ? 'تم' : 'Dismiss'}
+                    {isArabic ? 'تم' : L('Dismiss')}
                   </button>
                 )}
               </div>
@@ -461,7 +462,7 @@ export const SoundAwarenessInterface: React.FC<SoundAwarenessInterfaceProps> = (
       <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 space-y-3">
         <div className="flex items-center gap-2.5 text-amber-300 font-bold text-sm">
           <ShieldAlert className="w-5 h-5 flex-shrink-0" />
-          <span>{isArabic ? 'إخلاء مسؤولية وتنبيه سلامة حرج' : 'Critical Safety Notice'}</span>
+          <span>{isArabic ? 'إخلاء مسؤولية وتنبيه سلامة حرج' : L('Critical Safety Notice')}</span>
         </div>
         <p className="text-xs leading-relaxed text-amber-200/90">
           {isArabic ? SAFETY_LIMITATION_NOTICE.ar : SAFETY_LIMITATION_NOTICE.en}

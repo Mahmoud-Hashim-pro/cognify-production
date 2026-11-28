@@ -515,7 +515,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     const a = document.createElement('a');
     const url = URL.createObjectURL(blob);
     a.href = url;
-    a.download = `cognify-all-users-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `rafiqi-all-users-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast.success(`Exported ${users.length} full user records as JSON.`, 'Backup Downloaded');
@@ -546,7 +546,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
     const a = document.createElement('a');
     const url = URL.createObjectURL(blob);
     a.href = url;
-    a.download = `cognify-directory-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `rafiqi-directory-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast.success(`Exported ${users.length} users to CSV.`, 'Excel file ready');
@@ -604,7 +604,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
 
   if (!isAdmin) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#061A33] text-slate-100 p-6">
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0A2342] text-slate-100 p-6">
         <ShieldAlert className="w-16 h-16 text-rose-500 mb-4" />
         <h2 className="text-2xl font-black uppercase tracking-tighter">Access Denied</h2>
         <p className="text-slate-400 font-medium text-sm mt-2">You do not have administrative privileges.</p>
@@ -615,7 +615,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
   return (
     <div
       data-security-zone={adminView === 'database' ? 'database-dashboard' : 'admin-dashboard'}
-      className="flex-1 flex flex-col bg-[#061A33] text-slate-100 relative overflow-hidden custom-scrollbar font-sans selection:bg-emerald-500/30 selection:text-emerald-300 min-h-screen"
+      className="flex-1 flex flex-col bg-[#0A2342] text-slate-100 relative overflow-hidden custom-scrollbar font-sans selection:bg-emerald-500/30 selection:text-emerald-300 min-h-screen"
     >
       {/* Background Nagm Gradient Accents */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -669,7 +669,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
       )}
 
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
-      <header className="flex items-center gap-4 p-5 md:p-8 shrink-0 border-b border-[#16395E]/60 bg-[#061A33]/80 backdrop-blur-xl shadow-lg z-20">
+      <header className="flex items-center gap-4 p-5 md:p-8 shrink-0 border-b border-[#16395E]/60 bg-[#0A2342]/80 backdrop-blur-xl shadow-lg z-20">
         {onNavigateBack && (
           <button
             onClick={onNavigateBack}
@@ -716,12 +716,12 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   Rafiqi Admin Hub
                 </h2>
                 {isSuperAdmin && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-amber-500/15 text-amber-400 border border-amber-500/30">
                     <Crown className="w-3 h-3" /> Super Admin
                   </span>
                 )}
               </div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
                 {adminView === 'database' ? 'Infrastructure & Database Operations (Frankfurt europe-west1)' :
                  adminView === 'security' ? 'Security & DevTools Inspect Telemetry Stream' :
                  adminView === 'accessibility' ? 'Accessibility Center · Special Needs Command' :
@@ -785,7 +785,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 >
                   <ShieldAlert className="w-3.5 h-3.5" /> Inspect Tracker
                   {securityAudits.length > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500/40 text-white border border-rose-400/50 font-mono">
+                    <span className="px-1.5 py-0.2 rounded-full text-xs bg-rose-500/40 text-white border border-rose-400/50 font-mono">
                       {securityAudits.length}
                     </span>
                   )}
@@ -830,7 +830,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                 </span>
                 <span>Frankfurt europe-west1</span>
                 {dbHealth && (
-                  <span className={`font-mono text-[11px] font-bold ${
+                  <span className={`font-mono text-xs font-bold ${
                     dbHealth.latencyMs < 300
                       ? 'text-emerald-400'
                       : dbHealth.latencyMs < 600
@@ -916,11 +916,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-white text-sm truncate">{a.name || a.email?.split('@')[0]}</span>
-                            {isMe && <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">(you)</span>}
+                            {isMe && <span className="text-xs font-black text-slate-400 uppercase tracking-wider">(you)</span>}
                           </div>
                           <div className="text-xs text-slate-400 truncate" title={a.email}>{a.email}</div>
                         </div>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black uppercase tracking-wider shrink-0 bg-amber-500/20 text-amber-300 border border-amber-500/40">
                           <Crown className="w-3 h-3" />
                           Super Admin
                         </span>
@@ -967,7 +967,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   <div>
                     <div className="text-2xl md:text-3xl font-black text-white leading-none">{users.length}</div>
                     <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">Total Users</div>
-                    <div className="text-[10px] text-slate-500 mt-1 font-mono">
+                    <div className="text-xs text-slate-500 mt-1 font-mono">
                       {sectionCounts['Normal']} N · {sectionCounts['Special Needs']} SN · {sectionCounts['Graduation Project']} G
                     </div>
                   </div>
@@ -1009,7 +1009,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                       placeholder="Search by name, email, UID, faculty, disability..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#1769AA]/30 focus:border-[#1769AA] outline-none transition-all"
+                      className="w-full pl-11 pr-4 py-3 bg-[#082344]/90 border border-[#16395E]/60 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-[#1769AA]/30 focus:border-[#1769AA] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] transition-all"
                     />
                   </div>
                   <div className="flex items-center gap-1.5 p-1 bg-[#082344]/95 border border-[#16395E]/60 rounded-2xl overflow-x-auto custom-scrollbar">
@@ -1102,7 +1102,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-[#082344]/95 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-[#16395E]/60">
+                        <tr className="bg-[#082344]/95 text-xs uppercase font-black tracking-widest text-slate-400 border-b border-[#16395E]/60">
                           <th className="p-4">User &amp; Profile Photo</th>
                           <th className="p-4">Section &amp; Disability</th>
                           <th className="p-4">System Role</th>
@@ -1157,14 +1157,14 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                   <div className="font-bold text-white group-hover:text-[#4B9FE1] transition-colors flex items-center gap-1.5 truncate">
                                     <span className="truncate">{u.name || u.email?.split('@')[0] || 'Unnamed User'}</span>
                                     {presence.status === 'online' && (
-                                      <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                      <span className="px-1.5 py-0.2 rounded text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                                         Live
                                       </span>
                                     )}
                                     <Sliders className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                                   </div>
                                   <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="font-mono text-[10px] text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-[#16395E]/50/50" title={u.uid}>
+                                    <span className="font-mono text-xs text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded border border-[#16395E]/50/50" title={u.uid}>
                                       {u.uid.slice(0, 8)}…
                                     </span>
                                     <button
@@ -1183,11 +1183,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                 const meta = SECTION_META[sectionOf(u)] || SECTION_META['Normal'];
                                 return (
                                   <div className="flex flex-col gap-1">
-                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider max-w-fit ${meta.cls}`}>
+                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider max-w-fit ${meta.cls}`}>
                                       <meta.Icon className="w-3 h-3" /> {meta.label}
                                     </span>
                                     {sectionOf(u) === 'Special Needs' && u.disabilityType && (
-                                      <span className="text-[10px] font-bold text-rose-400">
+                                      <span className="text-xs font-bold text-rose-400">
                                         {u.disabilityType}
                                       </span>
                                     )}
@@ -1198,15 +1198,15 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                             <td className="p-4">
                               <div className="flex flex-col gap-1.5 items-start">
                                 {isSuperAdminUser(u) ? (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10">
                                     <Crown className="w-3 h-3 text-amber-400" /> Super Admin User
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-800/90 text-slate-300 border border-[#16395E]/50/70">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-800/90 text-slate-300 border border-[#16395E]/50/70">
                                     <UserIcon className="w-3 h-3 text-slate-400" /> Normal User
                                   </span>
                                 )}
-                                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
+                                <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
                                   <span>{u.role || 'Student'}</span>
                                   <span>•</span>
                                   <span className="uppercase">{u.level || 'Intermediate'}</span>
@@ -1223,11 +1223,11 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                             <td className="p-4 font-black text-slate-300">{u.iqScore || '--'}</td>
                             <td className="p-4">
                               <div className="flex flex-col gap-1 items-start">
-                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${presence.badgeCls}`}>
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider ${presence.badgeCls}`}>
                                   <span className={`w-1.5 h-1.5 rounded-full ${presence.dotCls}`} />
                                   {presence.label}
                                 </span>
-                                <span className="text-[10px] text-slate-500 font-mono">
+                                <span className="text-xs text-slate-500 font-mono">
                                   {formatDate(newestActiveIso(u))}
                                 </span>
                               </div>
@@ -1238,7 +1238,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                 <button
                                   onClick={() => setSelectedUserForModal(u)}
                                   title="Inspect full profile &amp; details"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-[#16395E]/50 transition-colors"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg border border-[#16395E]/50 transition-colors"
                                 >
                                   <Sliders className="w-3 h-3" /> Details
                                 </button>
@@ -1248,7 +1248,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                     onClick={() => setPasswordModalUser(u)}
                                     disabled={busyUid === u.uid}
                                     title={`Change / Reset Password for ${u.name || u.email}`}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50"
                                   >
                                     <Key className="w-3 h-3" /> Reset Pass
                                   </button>
@@ -1257,13 +1257,13 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                 {isSuperAdminUser(u) ? (
                                   isFounderSuperAdmin(u.email) ? (
                                     <span
-                                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/25 text-[10px] font-black uppercase tracking-widest rounded-lg"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/25 text-xs font-black uppercase tracking-widest rounded-lg"
                                       title="Founder Super Admin (Permanent)"
                                     >
                                       <Crown className="w-3 h-3 text-amber-400" /> Founder
                                     </span>
                                   ) : norm(profile.email) === norm(u.email) ? (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 text-slate-400 border border-[#16395E]/50 text-[10px] font-bold uppercase tracking-widest rounded-lg">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 text-slate-400 border border-[#16395E]/50 text-xs font-bold uppercase tracking-widest rounded-lg">
                                       (You)
                                     </span>
                                   ) : canManageSuperAdmin(profile, u) ? (
@@ -1271,12 +1271,12 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                       onClick={() => handleToggleSuperAdmin(u, false)}
                                       disabled={busyUid === u.uid}
                                       title="Demote to Normal User"
-                                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50"
                                     >
                                       {busyUid === u.uid ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserMinus className="w-3 h-3" />} Make Normal
                                     </button>
                                   ) : (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold uppercase tracking-widest rounded-lg">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold uppercase tracking-widest rounded-lg">
                                       <Crown className="w-3 h-3" /> Super Admin
                                     </span>
                                   )
@@ -1285,7 +1285,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
                                     onClick={() => handleToggleSuperAdmin(u, true)}
                                     disabled={busyUid === u.uid}
                                     title="Promote to Super Admin User"
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50"
                                   >
                                     {busyUid === u.uid ? <Loader2 className="w-3 h-3 animate-spin" /> : <Crown className="w-3 h-3" />} Make Super Admin
                                   </button>
@@ -1421,7 +1421,7 @@ export default function AdminDashboard({ profile, onMenuClick, onNavigateBack }:
               </button>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden bg-[#061A33] border border-[#16395E]/60 flex items-center justify-center p-2 min-h-[280px]">
+            <div className="relative rounded-2xl overflow-hidden bg-[#0A2342] border border-[#16395E]/60 flex items-center justify-center p-2 min-h-[280px]">
               {photoLightboxUrl && !failedAvatarUrls[photoLightboxUrl] ? (
                 <img
                   src={photoLightboxUrl}

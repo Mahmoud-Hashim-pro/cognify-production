@@ -14,6 +14,8 @@
  * 7. Unified Navigation to Deaf/Hearing Suite for cross-disability inclusion
  */
 
+import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
+import { ClampedNotice } from './ui/ClampedNotice';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Users,
@@ -48,7 +50,7 @@ import {
   Info,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, stopSpeaking } from '../lib/tts';
 import { toast } from './Toast';
 import {
@@ -84,6 +86,9 @@ export type CommunicateToolId =
   | 'payment_guidance'
   | 'hearing_suite_link';
 
+const VALID_COMMUNICATE_TOOLS: readonly CommunicateToolId[] = ['human_assist', 'handwriting', 'form_reader', 'voice_notes', 'social_assistant', 'payment_guidance', 'hearing_suite_link'];
+
+
 interface AccessibleCommunicateWorkspaceViewProps {
   profile: UserProfile;
   onMenuClick: () => void;
@@ -104,7 +109,9 @@ export default function AccessibleCommunicateWorkspaceView({
   const isAr = isArabicLocale(profile.language);
 
   // Active Tool state
-  const [activeTool, setActiveTool] = useState<CommunicateToolId>(initialTool);
+  const [activeTool, setActiveTool] = useState<CommunicateToolId>(() =>
+    VALID_COMMUNICATE_TOOLS.includes(initialTool) ? initialTool : 'human_assist'
+  );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
@@ -195,47 +202,37 @@ export default function AccessibleCommunicateWorkspaceView({
     if (!consentCheck.isApproved) {
       const msg = isAr
         ? 'يرجى تحديد الموافقة الصريحة على مشاركة الكاميرا والميكروفون قبل بدء الاتصال.'
-        : 'Please provide explicit consent to share camera and microphone before connecting.';
+        : L('Please provide explicit consent to share camera and microphone before connecting.');
       toast.error(msg);
       speakText(msg);
       return;
     }
 
-    // Update state to connecting
-    let updated = updateAssistanceSessionState(session, 'connecting');
-    updated.consent = {
+    // Human assistance is NOT a live service yet. Never fake a connection:
+    // a blind user must never believe a real human is watching their camera.
+    // Record that consent was reviewed, keep the session idle, and say plainly
+    // that the service is under development and nothing is being shared.
+    const reviewed = updateAssistanceSessionState(session, 'idle');
+    reviewed.consent = {
       userAgreed: true,
-      shareCamera: consentCamera,
-      shareMicrophone: consentMic,
+      shareCamera: false,
+      shareMicrophone: false,
       shareLocation: false,
       consentTimestamp: Date.now(),
     };
-    updated.providerType = selectedProvider;
-    setSession(updated);
+    setSession(reviewed);
 
-    const connectingMsg = isAr
-      ? 'جاري إنشاء الاتصال الآمن مع المرافق المعتمد... الكاميرا لم تبث بعد.'
-      : 'Initiating secure stream with verified companion... video not yet broadcasting.';
-    toast.loading(connectingMsg, { id: 'connect_toast' });
-    speakText(connectingMsg);
-
-    // Simulate verified connection establishment
-    setTimeout(() => {
-      toast.dismiss('connect_toast');
-      const connectedSession = updateAssistanceSessionState(updated, 'connected', true);
-      setSession(connectedSession);
-      const successMsg = isAr
-        ? `تم الاتصال بنجاح. البث الحي نشط الآن وتشارك الكاميرا والميكروفون مع (${connectedSession.providerNameAr}). زر القطع الفوري متاح دائماً.`
-        : `Connected successfully. Live sharing is active with (${connectedSession.providerNameEn}). Instant disconnect button is always accessible.`;
-      toast.success(successMsg);
-      speakText(successMsg);
-    }, 1800);
+    const unavailableMsg = isAr
+      ? 'خدمة المساعدة البشرية المباشرة لسه قيد التطوير ومش متاحة دلوقتي. مفيش أي شخص حقيقي متصل، والكاميرا والميكروفون مش بتبث أي حاجة. هنعلمك أول ما الخدمة تشتغل فعلاً.'
+      : L('Live human assistance is still under development and not available yet. No real person is connected, and your camera and microphone are not broadcasting anything. We will let you know once the service is truly live.');
+    toast.info(unavailableMsg, isAr ? 'الخدمة قيد التطوير' : L('Under development'), 8000);
+    speakText(unavailableMsg);
   };
 
   const handleDisconnectAssistance = () => {
     const disconnectedSession = updateAssistanceSessionState(session, 'disconnected');
     setSession(disconnectedSession);
-    const msg = isAr ? 'تم إنهاء جلسة المساعدة وقطع بث الكاميرا والميكروفون فوراً.' : 'Assistance stream terminated immediately. Camera and audio stopped.';
+    const msg = isAr ? 'تم إنهاء جلسة المساعدة وقطع بث الكاميرا والميكروفون فوراً.' : L('Assistance stream terminated immediately. Camera and audio stopped.');
     toast.success(msg);
     speakText(msg);
   };
@@ -252,28 +249,28 @@ export default function AccessibleCommunicateWorkspaceView({
 
   return (
     <div
-      className={`min-h-screen flex flex-col ${
-        isDarkMode ? 'bg-[#061A33] text-[#F8FAFC]' : 'bg-[#F5F9FD] text-[#061A33]'
+      className={`w-full min-w-0 max-w-full overflow-x-hidden min-h-screen flex flex-col ${
+        isDarkMode ? 'bg-[#0A2342] text-[#F8FAFC]' : 'tool-light bg-[#F5F9FD] text-[#0A2342]'
       } font-sans selection:bg-[#1769AA]/30`}
       dir={isAr ? 'rtl' : 'ltr'}
     >
       {/* Screen reader live announcements */}
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : 'Speaking communication guidance...') : ''}
+        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : L('Speaking communication guidance...')) : ''}
         {session.sharingNoticeAr}
       </div>
 
       {/* ── HEADER ── */}
       <header
         role="banner"
-        className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#131E2E]/95 backdrop-blur-md border-b border-[#22354E] shadow-md"
+        className="sticky top-0 z-30 flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#112C4F]/95 backdrop-blur-md border-b border-[#24476F] shadow-md"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={onNavigateBack}
             aria-label={localize(profile.language, 'Back to Move & Explore', 'الرجوع للقسم السابق')}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] border border-[#24476F] text-[#94A3B8] hover:text-white hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
           >
             <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
           </button>
@@ -282,50 +279,57 @@ export default function AccessibleCommunicateWorkspaceView({
             type="button"
             onClick={onMenuClick}
             aria-label={localize(profile.language, 'Open navigation menu', 'فتح القائمة الرئيسية')}
-            className="md:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-white cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
+            className="hidden min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] border border-[#24476F] text-[#94A3B8] hover:text-white cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
+              <span className="hidden text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
                 {localize(profile.language, 'Section 5 · Communication', 'القسم 5 · التواصل والتعبير')}
               </span>
               {session.state === 'connected' && (
-                <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-600/30 text-red-400 border border-red-500 animate-pulse">
+                <span className="flex items-center gap-1 text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-600/30 text-red-400 border border-red-500 animate-pulse">
                   <span className="w-2 h-2 rounded-full bg-red-500" />
                   {localize(profile.language, 'Live Stream Active', 'بث حي نشط')}
                 </span>
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC]">
-              {localize(profile.language, 'Accessible Communication Assistant', 'مساعد التواصل الشامل')}
+            <h1 className="text-base sm:text-lg font-black text-[#F8FAFC] truncate">
+              <span>{localize(profile.language, 'Communication', 'التواصل')}</span>
+              <span className="hidden">{localize(profile.language, 'Accessible Communication Assistant', 'مساعد التواصل الشامل')}</span>
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {isSpeaking && (
-            <button
-              type="button"
-              onClick={stopAudio}
-              aria-label={localize(profile.language, 'Stop Voice', 'إيقاف نطق الصوت')}
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-red-500/30 transition-all focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
-            >
-              <Square className="w-3.5 h-3.5 fill-current" />
-              <span className="hidden sm:inline">{localize(profile.language, 'Stop Audio', 'إيقاف الصوت')}</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowPrivacyModal(true)}
-            aria-label={localize(profile.language, 'Communication Safety & Privacy Guidelines', 'إرشادات أمان وخصوصية التواصل')}
-            className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#1A283D] border border-[#22354E] text-[#4B9FE1] hover:border-[#1769AA] transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
-          >
-            <ShieldCheck className="w-5 h-5" />
-          </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
+          <HeaderMenu
+            ariaLabel={localize(profile.language, 'More actions', 'المزيد')}
+            isDarkMode={isDarkMode}
+            items={[
+              {
+                key: 'privacy',
+                label: localize(profile.language, 'Privacy rules', 'إرشادات الخصوصية'),
+                ariaLabel: localize(profile.language, 'Communication Safety & Privacy Guidelines', 'إرشادات أمان وخصوصية التواصل'),
+                icon: <ShieldCheck className="w-4 h-4" />,
+                onSelect: () => setShowPrivacyModal(true),
+              },
+              ...(isSpeaking
+                ? [
+                    {
+                      key: 'stop',
+                      label: localize(profile.language, 'Stop Audio', 'إيقاف الصوت'),
+                      ariaLabel: localize(profile.language, 'Stop Voice', 'إيقاف نطق الصوت'),
+                      icon: <Square className="w-3.5 h-3.5 fill-current" />,
+                      danger: true,
+                      onSelect: stopAudio,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </div>
       </header>
 
@@ -333,10 +337,11 @@ export default function AccessibleCommunicateWorkspaceView({
       <section
         role="region"
         aria-label={localize(profile.language, 'Privacy and Assistance Boundary Notice', 'تنبيه الخصوصية وحدود المساعدة')}
-        className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#0D4778]/50 via-[#131E2E] to-[#0D4778]/50 border-b border-[#22354E] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs"
+        className="px-4 sm:px-6 py-2.5 bg-[#0D2542] border-b border-[#24476F] flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs"
       >
         <div className="flex items-center gap-2.5 text-[#94A3B8]">
           <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0" />
+          <ClampedNotice isAr={isAr}>
           <p className="leading-relaxed">
             <strong className="text-[#F8FAFC]">
               {localize(profile.language, 'Strict Privacy Invariant:', 'مبدأ الخصوصية الصارم:')}
@@ -347,6 +352,7 @@ export default function AccessibleCommunicateWorkspaceView({
               'لن يتم مشاركة أي فيديو حي أو صوت أو بيانات شخصية دون موافقتك الصريحة. يُمنع إرسال الرسائل تلقائياً.'
             )}
           </p>
+          </ClampedNotice>
         </div>
         <button
           type="button"
@@ -361,7 +367,7 @@ export default function AccessibleCommunicateWorkspaceView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Communication Tools', 'أدوات التواصل')}
-        className="sticky top-[69px] z-20 flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-[#0D4778]/80 backdrop-blur-md border-b border-[#22354E] overflow-x-auto custom-scrollbar"
+        className="z-20 shrink-0 flex items-center flex-nowrap overflow-x-auto custom-scrollbar gap-2 px-3 sm:px-6 py-2 bg-[#0D2542] border-b border-[#24476F]"
       >
         {tools.map((t) => {
           const IconComponent = t.icon;
@@ -373,29 +379,45 @@ export default function AccessibleCommunicateWorkspaceView({
               aria-selected={isSelected}
               onClick={() => {
                 setActiveTool(t.id);
-                speakText(isAr ? t.titleAr : t.titleEn);
+                speakText(isAr ? t.titleAr : L(t.titleEn));
               }}
-              className={`flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] shrink-0 ${
+              className={`shrink-0 whitespace-nowrap flex items-center justify-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] ${
                 isSelected
                   ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/40 border border-[#4B9FE1]'
-                  : 'bg-[#1A283D] text-[#94A3B8] border border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]/50'
+                  : 'bg-[#17355C] text-[#94A3B8] border border-[#24476F] hover:text-[#F8FAFC] hover:border-[#1769AA]/50'
               }`}
             >
               <IconComponent className="w-4 h-4 text-[#4B9FE1]" />
-              <span>{isAr ? t.titleAr : t.titleEn}</span>
+              <span>{isAr ? t.titleAr : L(t.titleEn)}</span>
             </button>
           );
         })}
       </nav>
 
       {/* ── MAIN WORKSPACE CONTENT ── */}
-      <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-5 pb-24 space-y-4">
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* TOOL 1: HUMAN & LIVE VIDEO ASSISTANCE                              */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'human_assist' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+          <div className="space-y-4">
+            {/* Persistent honesty notice: this service is not live yet */}
+            <div
+              role="status"
+              className="p-4 rounded-2xl bg-[#1F1A0D] border border-amber-500/50 text-amber-100 text-sm font-bold flex items-start gap-3"
+            >
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+              <ClampedNotice isAr={isAr}>
+              <p className="leading-relaxed">
+                {localize(
+                  profile.language,
+                  'Under development: live human assistance is not available yet. No real person can connect, and your camera and microphone never broadcast from this screen. The controls below are a preview of how it will work.',
+                  'قيد التطوير: خدمة المساعدة البشرية المباشرة لسه مش متاحة. مفيش أي شخص حقيقي يقدر يتصل، والكاميرا والميكروفون مش بتبث أي حاجة من الشاشة دي. الأزرار اللي تحت معاينة لشكل الخدمة لما تشتغل.'
+                )}
+              </p>
+              </ClampedNotice>
+            </div>
+            <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4 text-start shadow-xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
@@ -423,7 +445,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                         : session.state === 'connecting'
                         ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
-                        : 'bg-[#1A283D] text-[#94A3B8] border-[#22354E]'
+                        : 'bg-[#17355C] text-[#94A3B8] border-[#24476F]'
                     }`}
                   >
                     {session.state === 'connected'
@@ -474,13 +496,13 @@ export default function AccessibleCommunicateWorkspaceView({
                         className={`p-3.5 rounded-2xl border text-start flex items-center gap-3 transition-all cursor-pointer ${
                           selectedProvider === 'trusted_contact'
                             ? 'bg-[#1769AA]/20 border-[#1769AA] text-white shadow-md'
-                            : 'bg-[#1A283D] border-[#22354E] text-[#94A3B8]'
+                            : 'bg-[#17355C] border-[#24476F] text-[#94A3B8]'
                         }`}
                       >
                         <Users className="w-5 h-5 text-[#4B9FE1]" />
                         <div>
                           <h4 className="text-xs font-bold">{localize(profile.language, 'Trusted Contact (Family / Guide)', 'مرافق موثوق (الأسرة / صديق)')}</h4>
-                          <p className="text-[11px] text-[#94A3B8]">{localize(profile.language, 'Direct connection with a known person', 'اتصال مباشر بشخص تعرفه ومعتمد في حسابك')}</p>
+                          <p className="text-xs text-[#94A3B8]">{localize(profile.language, 'Direct connection with a known person', 'اتصال مباشر بشخص تعرفه ومعتمد في حسابك')}</p>
                         </div>
                       </button>
 
@@ -490,20 +512,20 @@ export default function AccessibleCommunicateWorkspaceView({
                         className={`p-3.5 rounded-2xl border text-start flex items-center gap-3 transition-all cursor-pointer ${
                           selectedProvider === 'verified_volunteer'
                             ? 'bg-[#1769AA]/20 border-[#1769AA] text-white shadow-md'
-                            : 'bg-[#1A283D] border-[#22354E] text-[#94A3B8]'
+                            : 'bg-[#17355C] border-[#24476F] text-[#94A3B8]'
                         }`}
                       >
                         <ShieldCheck className="w-5 h-5 text-[#4B9FE1]" />
                         <div>
                           <h4 className="text-xs font-bold">{localize(profile.language, 'Verified Volunteer Network', 'شبكة المتطوعين المعتمدة')}</h4>
-                          <p className="text-[11px] text-[#94A3B8]">{localize(profile.language, 'Vetted assistance partner network', 'شبكة متطوعين مدربة ومسجلة رسمياً')}</p>
+                          <p className="text-xs text-[#94A3B8]">{localize(profile.language, 'Vetted assistance partner network', 'شبكة متطوعين مدربة ومسجلة رسمياً')}</p>
                         </div>
                       </button>
                     </div>
                   </div>
 
                   {/* Informed Consent Checkboxes */}
-                  <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-3">
+                  <div className="p-4 rounded-2xl bg-[#17355C] border border-[#24476F] space-y-3">
                     <h4 className="text-xs font-bold text-[#F8FAFC] flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-[#4B9FE1]" />
                       <span>{localize(profile.language, 'Explicit Privacy Consent (Mandatory)', 'الموافقة الصريحة على مشاركة الوسائط (إلزامية)')}</span>
@@ -515,7 +537,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         checked={consentCamera}
                         onChange={(e) => setConsentCamera(e.target.checked)}
                         aria-label={localize(profile.language, 'Share camera feed with companion', 'بث كاميرا الهاتف للمرافق')}
-                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#22354E] bg-[#131E2E]"
+                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#24476F] bg-[#112C4F]"
                       />
                       <span>{localize(profile.language, 'I explicitly agree to share my real-time camera feed with the sighted companion.', 'أوافق صراحة على بث كاميرا الهاتف للمرافق المبصر أثناء المكالمة فقط.')}</span>
                     </label>
@@ -526,7 +548,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         checked={consentMic}
                         onChange={(e) => setConsentMic(e.target.checked)}
                         aria-label={localize(profile.language, 'Share microphone for voice conversation', 'مشاركة الميكروفون للمحادثة الصوتية')}
-                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#22354E] bg-[#131E2E]"
+                        className="w-4 h-4 rounded text-[#1769AA] focus:ring-[#1769AA] border-[#24476F] bg-[#112C4F]"
                       />
                       <span>{localize(profile.language, 'I explicitly agree to share my microphone audio for two-way voice conversation.', 'أوافق صراحة على فتح الميكروفون للتحدث الصوتي المتبادل أثناء المكالمة.')}</span>
                     </label>
@@ -556,8 +578,8 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 2: HANDWRITING READER                                        */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'handwriting' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+          <div className="space-y-4">
+            <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <FileText className="w-6 h-6" />
@@ -585,7 +607,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   value={handwritingInput}
                   onChange={(e) => setHandwritingInput(e.target.value)}
                   rows={3}
-                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-sm text-[#F8FAFC] focus:border-[#1769AA] focus:ring-1 focus:ring-[#1769AA] outline-none"
+                  className="w-full p-4 rounded-2xl bg-[#17355C] border border-[#24476F] text-sm text-[#F8FAFC] focus:border-[#1769AA] focus:ring-1 focus:ring-[#1769AA] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -603,7 +625,7 @@ export default function AccessibleCommunicateWorkspaceView({
 
               {/* Results Breakdown */}
               {handwritingResult && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-4">
+                <div className="p-5 rounded-2xl bg-[#17355C] border border-[#24476F] space-y-4">
                   {handwritingResult.hasUncertainty && (
                     <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/40 flex items-center gap-2.5 text-amber-300 text-xs">
                       <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
@@ -622,7 +644,7 @@ export default function AccessibleCommunicateWorkspaceView({
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                             token.isUncertain
                               ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
-                              : 'bg-[#131E2E] text-[#F8FAFC] border border-[#22354E]'
+                              : 'bg-[#112C4F] text-[#F8FAFC] border border-[#24476F]'
                           }`}
                         >
                           {token.isUncertain ? `[${token.word}?]` : token.word}
@@ -647,7 +669,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         setIsInspectingSource(!isInspectingSource);
                         speakText(handwritingResult.sourceReplayNoticeAr);
                       }}
-                      className="px-4 py-2 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all"
+                      className="px-4 py-2 rounded-xl bg-[#112C4F] border border-[#24476F] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all"
                     >
                       <ZoomIn className="w-4 h-4" />
                       <span>
@@ -659,9 +681,9 @@ export default function AccessibleCommunicateWorkspaceView({
                   </div>
 
                   {isInspectingSource && (
-                    <div className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] space-y-2">
+                    <div className="p-4 rounded-xl bg-[#112C4F] border border-[#24476F] space-y-2">
                       <p className="text-xs text-[#94A3B8]">{handwritingResult.sourceReplayNoticeAr}</p>
-                      <div className="p-6 rounded-lg bg-[#061A33] border border-[#22354E] text-center font-mono text-sm text-[#4B9FE1]">
+                      <div className="p-6 rounded-lg bg-[#0A2342] border border-[#24476F] text-center font-mono text-sm text-[#4B9FE1]">
                         [عالية التباين: صورة الوثيقة اليدوية مكبرة 200%]
                       </div>
                     </div>
@@ -676,8 +698,8 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 3: FORM & INVOICE ASSISTANT                                   */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'form_reader' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+          <div className="space-y-4">
+            <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <CheckCircle2 className="w-6 h-6" />
@@ -697,7 +719,7 @@ export default function AccessibleCommunicateWorkspaceView({
               </div>
 
               {/* Anti-Fabrication Notice */}
-              <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] flex items-center gap-3 text-xs text-[#94A3B8]">
+              <div className="p-4 rounded-2xl bg-[#17355C] border border-[#24476F] flex items-center gap-3 text-xs text-[#94A3B8]">
                 <ShieldCheck className="w-5 h-5 text-[#4B9FE1] shrink-0" />
                 <p>{formResult?.safetyAntiFabricationRuleAr}</p>
               </div>
@@ -713,13 +735,13 @@ export default function AccessibleCommunicateWorkspaceView({
                     {formResult.fields.map((field) => (
                       <div
                         key={field.id}
-                        className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start"
+                        className="p-4 rounded-2xl bg-[#17355C] border border-[#24476F] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start"
                       >
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-bold text-[#F8FAFC]">{field.labelAr}</span>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                              className={`text-xs font-bold px-2 py-0.5 rounded-md ${
                                 field.isRequired
                                   ? 'bg-red-500/20 text-red-300 border border-red-500/30'
                                   : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
@@ -748,7 +770,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         speakText(
                           isAr
                             ? 'تمت مراجعة الحقول الإلزامية. تذكر: لا يتم اعتماد أو إرسال الاستمارة دون موافقتك الصريحة.'
-                            : 'Required fields reviewed. Remember: no form is submitted without your explicit confirmation.'
+                            : L('Required fields reviewed. Remember: no form is submitted without your explicit confirmation.')
                         );
                       }}
                       className="px-5 py-3 rounded-2xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-md focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
@@ -767,8 +789,8 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 4: VOICE MESSAGE TOOLS                                       */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'voice_notes' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+          <div className="space-y-4">
+            <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <Volume2 className="w-6 h-6" />
@@ -788,15 +810,15 @@ export default function AccessibleCommunicateWorkspaceView({
               </div>
 
               {/* Privacy Disclosure */}
-              <div className="p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-xs text-[#94A3B8] flex items-center gap-3">
+              <div className="p-4 rounded-2xl bg-[#17355C] border border-[#24476F] text-xs text-[#94A3B8] flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-[#4B9FE1] shrink-0" />
                 <p>{voiceResult?.externalProcessingNoticeAr}</p>
               </div>
 
               {/* Voice Message Content Card */}
               {voiceResult && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#22354E]">
+                <div className="p-5 rounded-2xl bg-[#17355C] border border-[#24476F] space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#24476F]">
                     <div>
                       <h4 className="text-sm font-bold text-[#F8FAFC]">{voiceResult.fileName}</h4>
                       <p className="text-xs text-[#94A3B8]">
@@ -824,7 +846,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   </div>
 
                   {/* Summary Box */}
-                  <div className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] space-y-1.5">
+                  <div className="p-4 rounded-xl bg-[#112C4F] border border-[#24476F] space-y-1.5">
                     <h5 className="text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>{localize(profile.language, 'AI Summary', 'ملخص الرسالة الذكي')}</span>
@@ -837,7 +859,7 @@ export default function AccessibleCommunicateWorkspaceView({
                     <h5 className="text-xs font-bold text-[#94A3B8]">
                       {localize(profile.language, 'Full Transcript', 'النص الكامل المفرغ:')}
                     </h5>
-                    <p className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC] leading-relaxed">
+                    <p className="p-4 rounded-xl bg-[#112C4F] border border-[#24476F] text-xs text-[#F8FAFC] leading-relaxed">
                       {voiceResult.transcriptText}
                     </p>
                   </div>
@@ -851,8 +873,8 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 5: SOCIAL & MESSAGING ASSISTANT                               */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'social_assistant' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+          <div className="space-y-4">
+            <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <ImageIcon className="w-6 h-6" />
@@ -873,7 +895,7 @@ export default function AccessibleCommunicateWorkspaceView({
 
               {/* Image Description Box */}
               {socialImageDescription && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-3">
+                <div className="p-5 rounded-2xl bg-[#17355C] border border-[#24476F] space-y-3">
                   <h4 className="text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5">
                     <Eye className="w-4 h-4" />
                     <span>{localize(profile.language, 'Image Description in Message:', 'وصف الصورة المرفقة في الرسالة:')}</span>
@@ -882,7 +904,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   <button
                     type="button"
                     onClick={() => speakText(socialImageDescription.descriptionAr)}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#112C4F] border border-[#24476F] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                     <span>{localize(profile.language, 'Listen to Description', 'استمع للوصف')}</span>
@@ -891,7 +913,7 @@ export default function AccessibleCommunicateWorkspaceView({
               )}
 
               {/* Reply Drafter */}
-              <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-4">
+              <div className="p-5 rounded-2xl bg-[#17355C] border border-[#24476F] space-y-4">
                 <h4 className="text-xs font-bold text-[#F8FAFC] flex items-center gap-1.5">
                   <Send className="w-4 h-4 text-[#4B9FE1]" />
                   <span>{localize(profile.language, 'Draft Suggested Reply', 'صياغة رد مقترح:')}</span>
@@ -912,7 +934,7 @@ export default function AccessibleCommunicateWorkspaceView({
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         replyTone === t
                           ? 'bg-[#1769AA] text-white shadow-sm'
-                          : 'bg-[#131E2E] text-[#94A3B8] border border-[#22354E]'
+                          : 'bg-[#112C4F] text-[#94A3B8] border border-[#24476F]'
                       }`}
                     >
                       {t === 'polite'
@@ -930,7 +952,7 @@ export default function AccessibleCommunicateWorkspaceView({
                       value={replyDraft.draftText}
                       onChange={(e) => setReplyDraft({ ...replyDraft, draftText: e.target.value })}
                       rows={3}
-                      className="w-full p-4 rounded-xl bg-[#131E2E] border border-[#22354E] text-xs text-[#F8FAFC] leading-relaxed outline-none"
+                      className="w-full p-4 rounded-xl bg-[#112C4F] border border-[#24476F] text-xs text-[#F8FAFC] leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                     />
 
                     {/* Strict review-before-send disclaimer */}
@@ -945,7 +967,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         onClick={() => {
                           navigator.clipboard.writeText(replyDraft.draftText);
                           setIsCopied(true);
-                          const msg = isAr ? 'تم نسخ الرد المقترح إلى الحافظة بنجاح.' : 'Reply copied to clipboard.';
+                          const msg = isAr ? 'تم نسخ الرد المقترح إلى الحافظة بنجاح.' : L('Reply copied to clipboard.');
                           toast.success(msg);
                           speakText(msg);
                           setTimeout(() => setIsCopied(false), 2500);
@@ -959,7 +981,7 @@ export default function AccessibleCommunicateWorkspaceView({
                       <button
                         type="button"
                         onClick={() => speakText(replyDraft.draftText)}
-                        className="px-4 py-2.5 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl bg-[#112C4F] border border-[#24476F] text-[#4B9FE1] hover:text-white text-xs font-bold flex items-center gap-2 cursor-pointer"
                       >
                         <Volume2 className="w-4 h-4" />
                         <span>{localize(profile.language, 'Listen to Draft', 'استمع للمسودة')}</span>
@@ -976,8 +998,8 @@ export default function AccessibleCommunicateWorkspaceView({
         {/* TOOL 6: PAYMENT & CURRENCY GUIDANCE                                */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {activeTool === 'payment_guidance' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-[#131E2E] border border-[#22354E] space-y-4 text-start shadow-xl">
+          <div className="space-y-4">
+            <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4 text-start shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                   <Banknote className="w-6 h-6" />
@@ -1018,7 +1040,7 @@ export default function AccessibleCommunicateWorkspaceView({
                   value={paymentOcrText}
                   onChange={(e) => setPaymentOcrText(e.target.value)}
                   rows={2}
-                  className="w-full p-4 rounded-2xl bg-[#1A283D] border border-[#22354E] text-xs text-[#F8FAFC] outline-none"
+                  className="w-full p-4 rounded-2xl bg-[#17355C] border border-[#24476F] text-xs text-[#F8FAFC] outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 />
                 <button
                   type="button"
@@ -1036,31 +1058,31 @@ export default function AccessibleCommunicateWorkspaceView({
 
               {/* Payment Guidance Breakdown */}
               {paymentResult && (
-                <div className="p-5 rounded-2xl bg-[#1A283D] border border-[#22354E] space-y-3.5">
+                <div className="p-5 rounded-2xl bg-[#17355C] border border-[#24476F] space-y-3.5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
-                      <span className="text-[10px] font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Service Provider', 'جهة الخدمة')}</span>
+                    <div className="p-3.5 rounded-xl bg-[#112C4F] border border-[#24476F]">
+                      <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Service Provider', 'جهة الخدمة')}</span>
                       <p className="text-sm font-bold text-[#4B9FE1] mt-0.5">
                         {paymentResult.paymentProviderDetected?.toUpperCase() || 'إشعار عام'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
-                      <span className="text-[10px] font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Reference Code', 'رقم الكود / المرجع')}</span>
+                    <div className="p-3.5 rounded-xl bg-[#112C4F] border border-[#24476F]">
+                      <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Reference Code', 'رقم الكود / المرجع')}</span>
                       <p className="text-sm font-bold text-[#F8FAFC] mt-0.5">
                         {paymentResult.referenceNumber || 'غير مذكور'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#131E2E] border border-[#22354E]">
-                      <span className="text-[10px] font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Amount Due', 'المبلغ المطلوب')}</span>
+                    <div className="p-3.5 rounded-xl bg-[#112C4F] border border-[#24476F]">
+                      <span className="text-xs font-bold text-[#94A3B8] uppercase">{localize(profile.language, 'Amount Due', 'المبلغ المطلوب')}</span>
                       <p className="text-sm font-bold text-emerald-400 mt-0.5">
                         {paymentResult.dueAmount || 'غير محدد'}
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-[#131E2E] border border-[#22354E] space-y-1.5">
+                  <div className="p-4 rounded-xl bg-[#112C4F] border border-[#24476F] space-y-1.5">
                     <h5 className="text-xs font-bold text-[#F8FAFC]">{localize(profile.language, 'Guidance Summary:', 'ملخص الإرشادات:')}</h5>
                     <p className="text-xs text-[#94A3B8] leading-relaxed">{paymentResult.guidanceTextAr}</p>
                   </div>
@@ -1088,7 +1110,7 @@ export default function AccessibleCommunicateWorkspaceView({
           aria-label={localize(profile.language, 'Communication Privacy & Safety Principles', 'مبادئ أمان وخصوصية التواصل')}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
         >
-          <div className="max-w-lg w-full rounded-3xl bg-[#131E2E] border border-[#22354E] p-6 space-y-5 text-start shadow-2xl">
+          <div className="max-w-lg w-full rounded-3xl bg-[#112C4F] border border-[#24476F] p-6 space-y-5 text-start shadow-2xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#4B9FE1]">
                 <ShieldCheck className="w-6 h-6" />
@@ -1104,17 +1126,17 @@ export default function AccessibleCommunicateWorkspaceView({
             </div>
 
             <div className="space-y-3 text-xs text-[#94A3B8] leading-relaxed">
-              <div className="p-3.5 rounded-xl bg-[#1A283D] border border-[#22354E] space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#17355C] border border-[#24476F] space-y-1">
                 <strong className="text-[#F8FAFC] block">1. لا محاكاة لمساعدين بشريين وهميين:</strong>
                 <p>نلتزم بالشفافية الكاملة وتوضيح ما إذا كانت المساعدة آلية أو بشرية حقيقية، مع اشتراط الموافقة الصريحة قبل فتح الكاميرا.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#1A283D] border border-[#22354E] space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#17355C] border border-[#24476F] space-y-1">
                 <strong className="text-[#F8FAFC] block">2. حظر تنفيذ المعاملات المالية المباشرة:</strong>
                 <p>التطبيق إرشادي فقط ولا ينفذ أي مدفوعات أو تحويلات، ولا يدعي قدرة الكاميرا على كشف الأوراق النقدية المزيفة.</p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#1A283D] border border-[#22354E] space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#17355C] border border-[#24476F] space-y-1">
                 <strong className="text-[#F8FAFC] block">3. منع الإرسال التلقائي دون مراجعة:</strong>
                 <p>لن يتم إرسال أو نشر أي رسالة نصية أو بريد إلكتروني دون مراجعتك ونقرك الصريح على زر الإرسال أو النسخ.</p>
               </div>

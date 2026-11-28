@@ -146,8 +146,8 @@ async function run() {
     'DisabilityModeView.tsx completely removed the rogue recursive onTabChange effect'
   );
   assert(
-    dmvContent.includes('key="progress-profile-view"\n                initial={{ opacity: 0 }}') &&
-    dmvContent.includes('key="settings-view"\n                initial={{ opacity: 0 }}'),
+    dmvContent.includes('key="progress-profile-view"\n                initial={reduceMotion ? false : { opacity: 0 }}') &&
+    dmvContent.includes('key="settings-view"\n                initial={reduceMotion ? false : { opacity: 0 }}'),
     'DisabilityModeView.tsx uses non-displacing cross-fades for progress and settings to eliminate layout shifts'
   );
 

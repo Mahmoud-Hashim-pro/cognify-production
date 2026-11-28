@@ -8,6 +8,7 @@
  * - Dysgraphia (عسر الكتابة): Voice-to-essay structured scaffolding, academic transition guides
  * - Cognitive Reading Comprehension: Academic text simplification, jargon glossaries, readability metrics
  */
+import { L } from './translations';
 
 export interface BionicToken {
   prefix: string; // The bolded fixation part
@@ -286,17 +287,17 @@ export function structureSpokenThoughtsIntoEssay(
     .map((s) => s.trim())
     .filter((s) => s.length > 5);
 
-  const rawTopic = sentences[0] || (isAr ? 'القضية الأكاديمية المطروحة' : 'The Investigated Topic');
+  const rawTopic = sentences[0] || (isAr ? 'القضية الأكاديمية المطروحة' : L('The Investigated Topic'));
   const title = isAr ? `مخطط مقال تحليلي: ${rawTopic.slice(0, 45)}` : `Structured Essay Scaffold: ${rawTopic.slice(0, 45)}`;
 
   // Distribute sentences across academic components
-  const hookSentence = sentences[0] || (isAr ? 'طرح تمهيدي لجذب انتباه القارئ حول جوهر المسألة.' : 'An introductory hook introducing the core question.');
-  const thesisSentence = sentences[1] || (isAr ? 'الأطروحة المركزية: تلخيص الموقف العلمي الواضح الذي يتبناه المقال.' : 'Central Thesis: Stating the explicit analytical stance of this essay.');
-  const arg1 = sentences[2] || (isAr ? 'الحجة الأولى: تقديم الدليل الأساسي الأول مع شرح تأثيره.' : 'First Argument: Core evidence supporting the primary thesis.');
-  const arg2 = sentences[3] || (isAr ? 'الحجة الثانية: توسيع التحليل بمثال تطبيقي أو تجربة ملموسة.' : 'Second Argument: Supporting case study or empirical rationale.');
-  const arg3 = sentences[4] || (isAr ? 'الحجة الثالثة: ربط الأسباب بالنتائج لتعزيز مصداقية الطرح.' : 'Third Argument: Linking foundational premises to logical outcomes.');
-  const counter = sentences[5] || (isAr ? 'مناقشة الرأي المعارض: تفنيد الشبهات أو الاستثناءات المحتملة بموضوعية.' : 'Counter-argument: Fairly addressing objections and demonstrating their limitations.');
-  const concludingThought = sentences.slice(6).join(' ') || (isAr ? 'الخاتمة: إعادة صياغة الأطروحة بنظرة أعمق واستشراف التوصيات المستقبلية.' : 'Conclusion: Synthesizing premises into a forward-looking resolution.');
+  const hookSentence = sentences[0] || (isAr ? 'طرح تمهيدي لجذب انتباه القارئ حول جوهر المسألة.' : L('An introductory hook introducing the core question.'));
+  const thesisSentence = sentences[1] || (isAr ? 'الأطروحة المركزية: تلخيص الموقف العلمي الواضح الذي يتبناه المقال.' : L('Central Thesis: Stating the explicit analytical stance of this essay.'));
+  const arg1 = sentences[2] || (isAr ? 'الحجة الأولى: تقديم الدليل الأساسي الأول مع شرح تأثيره.' : L('First Argument: Core evidence supporting the primary thesis.'));
+  const arg2 = sentences[3] || (isAr ? 'الحجة الثانية: توسيع التحليل بمثال تطبيقي أو تجربة ملموسة.' : L('Second Argument: Supporting case study or empirical rationale.'));
+  const arg3 = sentences[4] || (isAr ? 'الحجة الثالثة: ربط الأسباب بالنتائج لتعزيز مصداقية الطرح.' : L('Third Argument: Linking foundational premises to logical outcomes.'));
+  const counter = sentences[5] || (isAr ? 'مناقشة الرأي المعارض: تفنيد الشبهات أو الاستثناءات المحتملة بموضوعية.' : L('Counter-argument: Fairly addressing objections and demonstrating their limitations.'));
+  const concludingThought = sentences.slice(6).join(' ') || (isAr ? 'الخاتمة: إعادة صياغة الأطروحة بنظرة أعمق واستشراف التوصيات المستقبلية.' : L('Conclusion: Synthesizing premises into a forward-looking resolution.'));
 
   const sections: EssayScaffoldSection[] = [
     {
@@ -393,7 +394,7 @@ export function structureSpokenThoughtsIntoEssay(
     title,
     sections,
     totalWordCount,
-    readabilityLevel: isAr ? 'مستوى أكاديمي واضح (B2)' : 'Clear Academic Tier (B2)',
+    readabilityLevel: isAr ? 'مستوى أكاديمي واضح (B2)' : L('Clear Academic Tier (B2)'),
     executiveTipsAr: [
       'لا تحاول كتابة المقال دفعة واحدة؛ املأ قسماً واحداً فقط في كل جلسة (جلسات 10 دقائق).',
       'استخدم أدوات الربط المقترحة في بداية كل فقرة لضمان تدفق الأفكار بسلاسة.',
@@ -483,7 +484,7 @@ export function simplifyAcademicText(
   });
 
   if (keyPoints.length === 0) {
-    keyPoints.push(isAr ? '• النص قصير جداً؛ يرجى إدخال فقرة أطول لتحليلها.' : '• Input text too brief for analytical chunking.');
+    keyPoints.push(isAr ? '• النص قصير جداً؛ يرجى إدخال فقرة أطول لتحليلها.' : L('• Input text too brief for analytical chunking.'));
   }
 
   // Detect jargon
@@ -493,19 +494,19 @@ export function simplifyAcademicText(
     if (lowerText.includes(term.toLowerCase())) {
       glossary.push({
         term,
-        definition: isAr ? data.definitionAr : data.definitionEn,
-        example: isAr ? data.exampleAr : data.exampleEn,
+        definition: isAr ? data.definitionAr : L(data.definitionEn),
+        example: isAr ? data.exampleAr : L(data.exampleEn),
       });
     }
   }
 
   // Provide synthetic glossary item if none triggered
   if (glossary.length === 0 && sentences.length > 0) {
-    const candidateWord = text.split(/\s+/).find((w) => w.length >= 6) || (isAr ? 'المفهوم المحوري' : 'Central Concept');
+    const candidateWord = text.split(/\s+/).find((w) => w.length >= 6) || (isAr ? 'المفهوم المحوري' : L('Central Concept'));
     glossary.push({
       term: candidateWord,
-      definition: isAr ? 'المصطلح الأكاديمي الأساسي الذي تدور حوله فكرة الفقرة.' : 'Core academic concept anchoring this paragraph.',
-      example: isAr ? 'يرجى مراجعة السياق لفهم التطبيق العملي.' : 'Refer to the context for empirical implementation.',
+      definition: isAr ? 'المصطلح الأكاديمي الأساسي الذي تدور حوله فكرة الفقرة.' : L('Core academic concept anchoring this paragraph.'),
+      example: isAr ? 'يرجى مراجعة السياق لفهم التطبيق العملي.' : L('Refer to the context for empirical implementation.'),
     });
   }
 

@@ -28,11 +28,13 @@ import {
   TrendingUp,
   BarChart2,
   Printer,
-  ShieldCheck
+  ShieldCheck,
+  Pencil
 } from 'lucide-react';
 import { UserProfile, SensoryEmotionLog } from '../types';
 import { EmergencyContact } from '../lib/contacts';
-import { loadContacts, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
+import { decryptVisionMemory } from '../lib/userCryptoEngine';
+import { loadContacts, saveContacts, syncContactsToCloud, restoreContactsFromCloud, sendWhatsAppMessage, isValidContactPhone } from '../lib/contacts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import {
   listenPendingCaregiverRequests,
@@ -48,7 +50,7 @@ import {
   VisualScheduleItem,
   SensoryPatternAnalysis,
 } from '../lib/neurodiversityEngine';
-import { isArabicLocale } from '../lib/translations';
+import { isArabicLocale, L } from '../lib/translations';
 import { toast } from './Toast';
 
 interface CaregiverHubProps {
@@ -65,6 +67,52 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   const isFr = lang === 'French';
 
   const [contacts, setContacts] = useState<EmergencyContact[]>(loadContacts);
+  // Caregiver number editing + third-party consent: a caregiver's phone is
+  // THEIR personal data, so saving a number requires the user to confirm the
+  // caregiver agreed to receive the number and the emergency location.
+  const [editingContact, setEditingContact] = useState<EmergencyContact | null>(null);
+  const [editingPhone, setEditingPhone] = useState('');
+  const [consentChecked, setConsentChecked] = useState(false);
+
+  const openEditContact = (c: EmergencyContact) => {
+    setEditingContact(c);
+    setEditingPhone(c.phone || '');
+    setConsentChecked(Boolean(c.consentConfirmedAt));
+  };
+
+  const handleSaveContactPhone = async () => {
+    if (!editingContact) return;
+    const phone = editingPhone.trim();
+    if (phone && !isValidContactPhone(phone)) {
+      toast.error(t('Please enter a valid phone number with country code', 'اكتب الرقم صحيح بكود الدولة'));
+      return;
+    }
+    // Public emergency lines (like 123 ambulance) need no consent; personal
+    // numbers always do.
+    const isPublicLine = /^\d{3}$/.test(phone);
+    if (phone && !isPublicLine && !consentChecked) {
+      toast.warning(t('Please confirm the caregiver agreed to share their number', 'لازم تتأكد إن المرافق موافق على تسجيل رقمه'));
+      return;
+    }
+    const updated = contacts.map((c) =>
+      c.id === editingContact.id
+        ? {
+            ...c,
+            phone,
+            consentConfirmedAt: phone && !isPublicLine ? new Date().toISOString() : undefined,
+          }
+        : c
+    );
+    setContacts(updated);
+    saveContacts(updated);
+    if (profile.uid) void syncContactsToCloud(profile.uid, updated);
+    setEditingContact(null);
+    toast.success(
+      phone
+        ? t('Number saved. You can remove it anytime from here.', 'الرقم اتسجل. تقدر تمسحه من هنا في أي وقت.')
+        : t('Number removed.', 'الرقم اتمسح.')
+    );
+  };
   const [sensoryLogs, setSensoryLogs] = useState<SensoryEmotionLog[]>([]);
   const [schedule, setSchedule] = useState<VisualScheduleItem[]>([]);
 
@@ -148,14 +196,25 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
   };
 
   // Export Accessibility Profile JSON
-  const handleExportConfig = () => {
+  const handleExportConfig = async () => {
+    // Vision memories may be stored AES-GCM encrypted; export them readable.
+    let exportableMemories = profile.visionMemories;
+    try {
+      if (profile.visionMemories?.length) {
+        exportableMemories = (
+          await Promise.all(profile.visionMemories.map((m) => decryptVisionMemory(m, profile.uid)))
+        ).filter((m): m is NonNullable<typeof m> => !!m);
+      }
+    } catch (err) {
+      console.error('Failed to decrypt vision memories for export:', err);
+    }
     const backup = {
       uid: profile.uid,
       name: profile.name,
       language: profile.language,
       accessibilityMode: profile.accessibilityMode,
       accessibilityPassport: profile.accessibilityPassport,
-      visionMemories: profile.visionMemories,
+      visionMemories: exportableMemories,
       contacts: loadContacts(),
       sensoryLogs: sensoryLogs,
       exportedAt: new Date().toISOString(),
@@ -166,7 +225,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cognify-access-profile-${profile.name || 'user'}.json`;
+    a.download = `rafiqi-access-profile-${profile.name || 'user'}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(t('Profile exported successfully', 'تم تصدير ملف الإعدادات بنجاح'));
@@ -179,7 +238,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     if (primary && isValidContactPhone(primary.phone)) {
       const testMsg = isAr
         ? '🔔 تجربة نظام الطوارئ من Rafiqi: نداء الاستغاثة يعمل بنجاح!'
-        : '🔔 Rafiqi Emergency SOS Test: Alert system is functioning correctly!';
+        : L('🔔 Rafiqi Emergency SOS Test: Alert system is functioning correctly!');
       sendWhatsAppMessage(primary.phone, testMsg);
       setTestSent(true);
       toast.success(t('Test message opened for primary contact', 'تم تجهيز رسالة التجربة للمرافق'));
@@ -204,11 +263,11 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       day: 'numeric',
     });
 
-    const studentName = profile.name || (isAr ? 'الطالب' : 'Student');
+    const studentName = profile.name || (isAr ? 'الطالب' : L('Student'));
     const totalEpisodes = patternAnalysis.totalMeltdowns;
     const topTriggerText = patternAnalysis.topTriggers.length > 0
       ? patternAnalysis.topTriggers.map((tr) => `${tr.trigger} (${tr.count}x - ${tr.percentage}%)`).join(', ')
-      : (isAr ? 'لا توجد مثيرات متكررة مسجلة' : 'No recurring triggers logged');
+      : (isAr ? 'لا توجد مثيرات متكررة مسجلة' : L('No recurring triggers logged'));
 
     const recommendation = isAr
       ? patternAnalysis.scheduleCorrelation?.clinicalRecommendation || 'الاستمرار في مراقبة الروتين اليومي وتقديم فترات استراحة منتظمة.'
@@ -218,8 +277,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 8px 12px; font-family: monospace;">${new Date(l.timestamp).toLocaleString(isAr ? 'ar-EG' : 'en-US')}</td>
         <td style="padding: 8px 12px; font-weight: bold; color: ${l.intensity >= 4 ? '#e11d48' : '#0284c7'};">${l.intensity}/5 (${l.level})</td>
-        <td style="padding: 8px 12px;">${l.sensoryTrigger || (isAr ? 'غير محدد' : 'Not specified')}</td>
-        <td style="padding: 8px 12px;">${l.comfortActivityUsed || (isAr ? 'لم يُطلب' : 'None')}</td>
+        <td style="padding: 8px 12px;">${l.sensoryTrigger || (isAr ? 'غير محدد' : L('Not specified'))}</td>
+        <td style="padding: 8px 12px;">${l.comfortActivityUsed || (isAr ? 'لم يُطلب' : L('None'))}</td>
       </tr>
     `).join('');
 
@@ -327,7 +386,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           <div>
             <h1 style="margin: 0; font-size: 20px; color: #1e1b4b;">Rafiqi Assistive Platform • Clinical ABA & Sensory Progress Report</h1>
             <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12px;">
-              ${isAr ? 'تقرير تحليلي سريري لجلسات التكامل الحسي والتواصل البديل والمعزز (AAC)' : 'Clinical ABA, SLP & Occupational Therapy Progress Summary'}
+              ${isAr ? 'تقرير تحليلي سريري لجلسات التكامل الحسي والتواصل البديل والمعزز (AAC)' : L('Clinical ABA, SLP & Occupational Therapy Progress Summary')}
             </p>
           </div>
           <div style="text-align: ${isAr ? 'left' : 'right'};">
@@ -339,9 +398,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
         <div class="metric-card">
           <table style="margin: 0;">
             <tr>
-              <td><strong>${isAr ? 'اسم الطالب:' : 'Student Name:'}</strong> ${studentName}</td>
-              <td><strong>${isAr ? 'معرف الملف:' : 'Profile UID:'}</strong> ${profile.uid ? profile.uid.substring(0, 12) + '...' : 'Local'}</td>
-              <td><strong>${isAr ? 'إجمالي السجلات:' : 'Total Logs:'}</strong> ${sensoryLogs.length}</td>
+              <td><strong>${isAr ? 'اسم الطالب:' : L('Student Name:')}</strong> ${studentName}</td>
+              <td><strong>${isAr ? 'معرف الملف:' : L('Profile UID:')}</strong> ${profile.uid ? profile.uid.substring(0, 12) + '...' : 'Local'}</td>
+              <td><strong>${isAr ? 'إجمالي السجلات:' : L('Total Logs:')}</strong> ${sensoryLogs.length}</td>
             </tr>
           </table>
         </div>
@@ -349,67 +408,67 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
         <div class="grid">
           <div class="stat-box">
             <div class="num">${totalEpisodes}</div>
-            <div class="lbl">${isAr ? 'نوبات الضغط الشديد / Meltdowns' : 'High Overload / Meltdowns'}</div>
+            <div class="lbl">${isAr ? 'نوبات الضغط الشديد / Meltdowns' : L('High Overload / Meltdowns')}</div>
           </div>
           <div class="stat-box">
             <div class="num">${patternAnalysis.timeOfDayDistribution.morning}</div>
-            <div class="lbl">${isAr ? 'فترة الصباح (06:00 - 12:00)' : 'Morning Window'}</div>
+            <div class="lbl">${isAr ? 'فترة الصباح (06:00 - 12:00)' : L('Morning Window')}</div>
           </div>
           <div class="stat-box">
             <div class="num">${patternAnalysis.timeOfDayDistribution.afternoon}</div>
-            <div class="lbl">${isAr ? 'بعد الظهر (12:00 - 17:00)' : 'Afternoon Window'}</div>
+            <div class="lbl">${isAr ? 'بعد الظهر (12:00 - 17:00)' : L('Afternoon Window')}</div>
           </div>
           <div class="stat-box">
             <div class="num">${patternAnalysis.timeOfDayDistribution.evening + patternAnalysis.timeOfDayDistribution.night}</div>
-            <div class="lbl">${isAr ? 'المساء والليل' : 'Evening & Night'}</div>
+            <div class="lbl">${isAr ? 'المساء والليل' : L('Evening & Night')}</div>
           </div>
         </div>
 
         <div class="recommendation-box">
           <h4 style="margin: 0 0 6px 0; color: #92400e; font-size: 13px;">
-            ${isAr ? 'توصيات التحليل السلوكي التطبيقي (ABA) والتكامل الحسي (OT):' : 'ABA & Sensory Diet Clinical Recommendations:'}
+            ${isAr ? 'توصيات التحليل السلوكي التطبيقي (ABA) والتكامل الحسي (OT):' : L('ABA & Sensory Diet Clinical Recommendations:')}
           </h4>
           <p style="margin: 0; color: #78350f; font-size: 12px; line-height: 1.6;">
             ${recommendation}
           </p>
           <p style="margin: 6px 0 0 0; font-size: 11px; color: #b45309;">
-            <strong>${isAr ? 'أبرز المثيرات المسجلة:' : 'Top Recurring Triggers:'}</strong> ${topTriggerText}
+            <strong>${isAr ? 'أبرز المثيرات المسجلة:' : L('Top Recurring Triggers:')}</strong> ${topTriggerText}
           </p>
         </div>
 
         <h4 style="margin: 16px 0 8px 0; font-size: 13px; color: #1e293b;">
-          ${isAr ? 'سجل الرصد الحسي الحديث (آخر 20 رصد):' : 'Recent Sensory Baseline Records (Last 20 Logs):'}
+          ${isAr ? 'سجل الرصد الحسي الحديث (آخر 20 رصد):' : L('Recent Sensory Baseline Records (Last 20 Logs):')}
         </h4>
         <table>
           <thead>
             <tr>
-              <th>${isAr ? 'التاريخ والوقت' : 'Date / Time'}</th>
-              <th>${isAr ? 'المستوى والشدة' : 'Level & Intensity'}</th>
-              <th>${isAr ? 'المثير الحسي المرصود' : 'Observed Sensory Trigger'}</th>
-              <th>${isAr ? 'تدخل التهدئة المستخدم' : 'Intervention Applied'}</th>
+              <th>${isAr ? 'التاريخ والوقت' : L('Date / Time')}</th>
+              <th>${isAr ? 'المستوى والشدة' : L('Level & Intensity')}</th>
+              <th>${isAr ? 'المثير الحسي المرصود' : L('Observed Sensory Trigger')}</th>
+              <th>${isAr ? 'تدخل التهدئة المستخدم' : L('Intervention Applied')}</th>
             </tr>
           </thead>
           <tbody>
-            ${tableRows || `<tr><td colspan="4" style="text-align: center; padding: 12px; color: #94a3b8;">${isAr ? 'لا توجد سجلات مسجلة' : 'No records logged'}</td></tr>`}
+            ${tableRows || `<tr><td colspan="4" style="text-align: center; padding: 12px; color: #94a3b8;">${isAr ? 'لا توجد سجلات مسجلة' : L('No records logged')}</td></tr>`}
           </tbody>
         </table>
 
         <div class="footer-sign">
           <div style="width: 48%;">
-            <div style="font-size: 11px; color: #64748b;">${isAr ? 'اعتماد أخصائي التخاطب / التحليل السلوكي (SLP / BCBA):' : 'Therapist / BCBA Sign-off:'}</div>
+            <div style="font-size: 11px; color: #64748b;">${isAr ? 'اعتماد أخصائي التخاطب / التحليل السلوكي (SLP / BCBA):' : L('Therapist / BCBA Sign-off:')}</div>
             <div class="sign-field"></div>
-            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'التوقيع والتاريخ' : 'Signature & Date'}</div>
+            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'التوقيع والتاريخ' : L('Signature & Date')}</div>
           </div>
           <div style="width: 48%;">
-            <div style="font-size: 11px; color: #64748b;">${isAr ? 'ملاحظات الجلسة القادمة:' : 'Notes for Next Session:'}</div>
+            <div style="font-size: 11px; color: #64748b;">${isAr ? 'ملاحظات الجلسة القادمة:' : L('Notes for Next Session:')}</div>
             <div class="sign-field"></div>
-            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'ملاحظات إضافية' : 'Additional Observations'}</div>
+            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'ملاحظات إضافية' : L('Additional Observations')}</div>
           </div>
         </div>
 
         <div class="no-print" style="margin-top: 24px; text-align: center;">
           <button onclick="window.print()" style="background: #4f46e5; color: white; border: none; padding: 10px 24px; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer;">
-            ${isAr ? '🖨️ طباعة التقرير أو حفظ كملف PDF' : '🖨️ Print Report or Save as PDF'}
+            ${isAr ? '🖨️ طباعة التقرير أو حفظ كملف PDF' : L('🖨️ Print Report or Save as PDF')}
           </button>
         </div>
       </body>
@@ -432,7 +491,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     }`} dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <header className={`pb-4 border-b flex items-center justify-between gap-3 mb-6 flex-wrap transition-colors duration-300 ${
-        isDarkMode ? 'border-[#4A1224]/60' : 'border-amber-200/80'
+        isDarkMode ? 'border-[#4A1224]/60' : 'border-sky-200/80'
       }`}>
         <div className="flex items-center gap-2.5">
           {onNavigateBack && (
@@ -442,7 +501,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               className={`min-w-[44px] min-h-[44px] p-2.5 rounded-xl border transition-all flex items-center justify-center cursor-pointer ${
                 isDarkMode
                   ? 'bg-[#150917] hover:bg-slate-800 text-slate-200 hover:text-white border-[#4A1224]/50'
-                  : 'bg-amber-50 hover:bg-amber-100 text-slate-700 hover:text-slate-950 border-amber-200'
+                  : 'bg-sky-50 hover:bg-sky-100 text-slate-700 hover:text-slate-950 border-sky-200'
               }`}
             >
               <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
@@ -451,8 +510,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           <div className="flex items-center gap-2">
             <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center shadow-lg ${
               isDarkMode
-                ? 'bg-amber-500/15 border-amber-500/30 text-amber-400 shadow-amber-950/40'
-                : 'bg-amber-100 border-amber-300 text-amber-800 shadow-amber-200/50'
+                ? 'bg-sky-500/15 border-sky-500/30 text-sky-400 shadow-sky-950/40'
+                : 'bg-sky-100 border-sky-300 text-sky-800 shadow-sky-200/50'
             }`}>
               <Shield className="w-5 h-5" />
             </div>
@@ -460,7 +519,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <h1 className={`font-black text-sm sm:text-base leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                 {t('Caregiver & Specialist Command Hub', 'لوحة تحكم المرافق والمختص الطبي', 'Centre Accompagnant & Spécialiste')}
               </h1>
-              <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+              <p className={`hidden sm:block text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {t('Telemetry, safety controls, sensory pattern analytics and clinical insights', 'متابعة المؤشرات الحيوية، التحليل السريري للأنماط الحسية، تجربة الطوارئ وجواز الوصول')}
               </p>
             </div>
@@ -471,9 +530,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           {onOpenPassport && (
             <button
               onClick={onOpenPassport}
-              className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-950/40 active:scale-95 transition-all cursor-pointer"
+              className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#1769AA] to-[#1769AA] hover:from-[#1f7bc4] hover:to-[#1f7bc4] text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-950/40 active:scale-95 transition-all cursor-pointer"
             >
-              <ShieldCheck className="w-4 h-4 text-slate-950" />
+              <ShieldCheck className="w-4 h-4 text-white" />
               <span>{t('Accessibility Passport', 'جواز السفر الميسر', 'Passeport Accessibilité')}</span>
             </button>
           )}
@@ -481,9 +540,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             onClick={() => {
               window.location.hash = '#parent';
             }}
-            className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#4A1224]/60 hover:bg-[#831843]/60 text-[#E5A93C] border border-[#E5A93C]/40 font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#2D0B16]/50 active:scale-95 transition-all cursor-pointer"
+            className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#4A1224]/60 hover:bg-[#831843]/60 text-[#5BB0F0] border border-[#5BB0F0]/40 font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#2D0B16]/50 active:scale-95 transition-all cursor-pointer"
           >
-            <Heart className="w-4 h-4 text-[#E5A93C]" />
+            <Heart className="w-4 h-4 text-[#5BB0F0]" />
             <span>{t('Parent Intelligence & Growth', 'بوابة ولي الأمر والنمو الإدراكي', 'Portail Parental & Croissance')}</span>
           </button>
         </div>
@@ -493,8 +552,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       <div className="max-w-5xl mx-auto w-full space-y-6">
         {/* Pending Caregiver Link Requests */}
         {pendingLinkRequests.length > 0 && (
-          <div className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-lg space-y-3">
-            <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
+          <div className="p-4 rounded-3xl bg-sky-500/10 border border-sky-500/30 shadow-lg space-y-3">
+            <div className="flex items-center gap-2 text-sky-300 font-bold text-sm">
               <Shield className="w-5 h-5" />
               <span>
                 {t('Caregiver access requests', 'طلبات ربط مرافق/ولي أمر', "Demandes de liaison d'accompagnant")}
@@ -507,7 +566,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               >
                 <div className="min-w-0">
                   <div className="font-bold text-sm text-white truncate">{req.parentName}</div>
-                  <div className="text-[11px] text-slate-400 truncate">
+                  <div className="text-xs text-slate-400 truncate">
                     {t(
                       'wants to view your progress and accessibility settings',
                       'عايز يشوف تقدمك وإعدادات الوصول الميسر بتاعتك',
@@ -540,12 +599,12 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           <div className="p-4 rounded-3xl bg-[#150917] border border-[#4A1224]/50 shadow-lg space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-slate-200 font-bold text-sm">
-                <Users className="w-5 h-5 text-amber-400" />
+                <Users className="w-5 h-5 text-sky-400" />
                 <span>
                   {t('Linked caregivers & specialists', 'المرافقين والمختصين المرتبطين', 'Accompagnants et spécialistes liés')}
                 </span>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              <span className="px-2.5 py-1 rounded-full text-xs font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">
                 {linkedCaregivers.length}
               </span>
             </div>
@@ -556,7 +615,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               >
                 <div className="min-w-0">
                   <div className="font-bold text-sm text-white truncate">{c.name}</div>
-                  <div className="text-[11px] text-slate-400 truncate">
+                  <div className="text-xs text-slate-400 truncate">
                     {c.email}
                     {c.uid === profile.linkedParentUid ? ` · ${t('Primary', 'أساسي', 'Principal')}` : ''}
                   </div>
@@ -580,7 +639,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <Eye className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Visual Memories', 'ذاكرة الأشخاص والأشياء')}</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">{t('Visual Memories', 'ذاكرة الأشخاص والأشياء')}</div>
               <div className="text-xl font-black text-white">{profile.visionMemories?.length || 0} {t('Items', 'عنصر')}</div>
             </div>
           </div>
@@ -591,10 +650,10 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <Activity className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Sensory State', 'الحالة والضغط الحسي')}</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">{t('Sensory State', 'الحالة والضغط الحسي')}</div>
               <div className="text-base font-black text-white flex items-center gap-1.5">
                 <span>{latestSensory ? `${latestSensory.intensity}/5` : 'هادئ'}</span>
-                <span className="text-[10px] text-purple-300 font-normal truncate">
+                <span className="text-xs text-purple-300 font-normal truncate">
                   ({latestSensory ? latestSensory.level : 'Calm'})
                 </span>
               </div>
@@ -607,7 +666,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <Phone className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] text-slate-400 font-bold uppercase">{t('Emergency Contacts', 'أرقام الطوارئ')}</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">{t('Emergency Contacts', 'أرقام الطوارئ')}</div>
               <div className="text-xl font-black text-white">{contacts.length} {t('Saved', 'مسجل')}</div>
             </div>
           </div>
@@ -623,7 +682,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
               <div>
                 <h3 className="font-black text-base text-white flex items-center gap-2">
                   <span>{t('Clinical Sensory & Meltdown Analytics (ABA / OT)', 'التحليل السريري للأنماط ونوبات الضغط الحسي (ABA / OT)')}</span>
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 font-normal">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 font-normal">
                     {patternAnalysis.totalMeltdowns} {t('Episodes Tracked', 'نوبة مرصودة')}
                   </span>
                 </h3>
@@ -635,12 +694,12 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
             <div className="flex items-center gap-3 text-xs font-mono text-slate-400 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-400" />
-                <span>{t('Peak Overload Window:', 'ذروة نوبات الضغط:')} <strong className="text-amber-300 font-bold">{isAr ? patternAnalysis.peakTimeWindow : patternAnalysis.peakTimeWindowEn}</strong></span>
+                <Clock className="w-4 h-4 text-sky-400" />
+                <span>{t('Peak Overload Window:', 'ذروة نوبات الضغط:')} <strong className="text-sky-300 font-bold">{isAr ? patternAnalysis.peakTimeWindow : L(patternAnalysis.peakTimeWindowEn)}</strong></span>
               </div>
               <button
                 onClick={handlePrintWeeklyClinicalReport}
-                className="min-h-[40px] px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 hover:text-white border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="min-h-[40px] px-3.5 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 hover:text-white border border-sky-500/40 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
                 title={t('Print Clinical Summary for SLP / ABA Therapist', 'طباعة التقرير السريري لأخصائي التخاطب والسلوك')}
               >
                 <Printer className="w-3.5 h-3.5" />
@@ -651,13 +710,13 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
 
           {/* ABA Routine Correlation Alert Banner */}
           {patternAnalysis.scheduleCorrelation && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-purple-500/15 to-indigo-500/15 border border-amber-500/40 space-y-1.5 shadow-lg">
-              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs">
-                <Lightbulb className="w-4 h-4 text-amber-400" />
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-500/15 via-purple-500/15 to-indigo-500/15 border border-sky-500/40 space-y-1.5 shadow-lg">
+              <div className="flex items-center gap-2 text-sky-300 font-bold text-xs">
+                <Lightbulb className="w-4 h-4 text-sky-400" />
                 <span>{t('Actionable Clinical Insight & Routine Correlation:', 'اكتشاف ارتباط سريري بالروتين اليومي (ABA Insight):')}</span>
               </div>
               <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                {isAr ? patternAnalysis.scheduleCorrelation.clinicalRecommendation : patternAnalysis.scheduleCorrelation.clinicalRecommendationEn}
+                {isAr ? patternAnalysis.scheduleCorrelation.clinicalRecommendation : L(patternAnalysis.scheduleCorrelation.clinicalRecommendationEn)}
               </p>
             </div>
           )}
@@ -668,12 +727,12 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             <div className="p-4 rounded-2xl bg-[#111622] border border-[#4A1224]/60 space-y-3">
               <h4 className="font-bold text-xs text-slate-300 flex items-center justify-between">
                 <span>{t('Meltdown Time-of-Day Distribution:', 'توزيع النوبات خلال ساعات اليوم:')}</span>
-                <span className="text-[10px] text-slate-400 font-normal">{patternAnalysis.totalMeltdowns} {t('Total', 'إجمالي')}</span>
+                <span className="text-xs text-slate-400 font-normal">{patternAnalysis.totalMeltdowns} {t('Total', 'إجمالي')}</span>
               </h4>
 
               <div className="space-y-2 text-xs">
                 {[
-                  { label: t('Morning (06:00 - 12:00)', 'الصباح (06:00 - 12:00)'), count: patternAnalysis.timeOfDayDistribution.morning, color: 'bg-amber-400' },
+                  { label: t('Morning (06:00 - 12:00)', 'الصباح (06:00 - 12:00)'), count: patternAnalysis.timeOfDayDistribution.morning, color: 'bg-sky-400' },
                   { label: t('Afternoon (12:00 - 17:00)', 'بعد الظهر (12:00 - 17:00)'), count: patternAnalysis.timeOfDayDistribution.afternoon, color: 'bg-rose-400' },
                   { label: t('Evening (17:00 - 22:00)', 'المساء (17:00 - 22:00)'), count: patternAnalysis.timeOfDayDistribution.evening, color: 'bg-purple-400' },
                   { label: t('Night (22:00 - 06:00)', 'الليل (22:00 - 06:00)'), count: patternAnalysis.timeOfDayDistribution.night, color: 'bg-blue-400' },
@@ -681,7 +740,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                   const pct = patternAnalysis.totalMeltdowns > 0 ? Math.round((item.count / patternAnalysis.totalMeltdowns) * 100) : 0;
                   return (
                     <div key={idx} className="space-y-1">
-                      <div className="flex justify-between text-[11px] text-slate-400">
+                      <div className="flex justify-between text-xs text-slate-400">
                         <span>{item.label}</span>
                         <span className="font-mono font-bold text-slate-200">{item.count} ({pct}%)</span>
                       </div>
@@ -698,7 +757,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             <div className="p-4 rounded-2xl bg-[#111622] border border-[#4A1224]/60 space-y-3">
               <h4 className="font-bold text-xs text-slate-300 flex items-center justify-between">
                 <span>{t('Most Frequent Sensory Triggers:', 'أبرز المثيرات الحسية المتكررة:')}</span>
-                <span className="text-[10px] text-slate-400 font-normal">{patternAnalysis.topTriggers.length} {t('Identified', 'محددة')}</span>
+                <span className="text-xs text-slate-400 font-normal">{patternAnalysis.topTriggers.length} {t('Identified', 'محددة')}</span>
               </h4>
 
               {patternAnalysis.topTriggers.length === 0 ? (
@@ -709,7 +768,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                 <div className="space-y-2 text-xs">
                   {patternAnalysis.topTriggers.map((tr, idx) => (
                     <div key={idx} className="space-y-1">
-                      <div className="flex justify-between text-[11px] text-slate-300">
+                      <div className="flex justify-between text-xs text-slate-300">
                         <span className="truncate">{tr.trigger}</span>
                         <span className="font-mono font-bold text-rose-300 shrink-0">{tr.count}x ({tr.percentage}%)</span>
                       </div>
@@ -749,16 +808,31 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
 
           {/* Registered Emergency Contacts List */}
+          <p className="text-xs leading-relaxed text-slate-400 bg-[#111622] border border-[#4A1224]/40 rounded-xl p-3">
+            {t(
+              'A caregiver\'s number is their personal data: in an emergency, their number and your location are sent to them. Only save a number after the person agrees, and you can delete it anytime.',
+              'رقم المرافق بيانات شخصية بتاعته: وقت الطوارئ رقمه وموقعك بيتبعتوا له. سجّل الرقم بس بعد ما يوافق، وتقدر تمسحه في أي وقت.'
+            )}
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-2">
             {contacts.map((c) => (
               <div key={c.id} className="p-3.5 rounded-2xl bg-[#111622] border border-[#4A1224]/60 flex items-center justify-between">
                 <div>
                   <div className="font-bold text-xs text-white flex items-center gap-1.5">
-                    <span>{isAr ? (c.nameAr || c.nameEn) : c.nameEn}</span>
-                    {c.isPrimaryEmergency && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-rose-900 text-rose-300 font-bold">{t('Primary', 'أساسي')}</span>}
+                    <span>{isAr ? (c.nameAr || c.nameEn) : L(c.nameEn)}</span>
+                    {c.isPrimaryEmergency && <span className="text-xs px-1.5 py-0.5 rounded-full bg-rose-900 text-rose-300 font-bold">{t('Primary', 'أساسي')}</span>}
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{c.phone || t('No number', 'بدون رقم')}</div>
+                  <div className="text-xs text-slate-400 font-mono mt-0.5">{c.phone || t('No number', 'بدون رقم')}</div>
                 </div>
+                <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => openEditContact(c)}
+                  className="min-w-[40px] min-h-[40px] p-2.5 rounded-xl bg-[#17355C] text-slate-300 hover:bg-[#24344D] transition-all flex items-center justify-center cursor-pointer"
+                  title={t('Edit number', 'تعديل الرقم')}
+                  aria-label={t('Edit number for', 'تعديل رقم') + ' ' + (isAr ? (c.nameAr || c.nameEn) : L(c.nameEn))}
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
                 {c.phone && (
                   <button
                     onClick={() => sendWhatsAppMessage(c.phone, t('Test message from Rafiqi Caregiver Hub', 'رسالة تجربة من لوحة مرافق Rafiqi'))}
@@ -769,6 +843,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
                     <MessageCircle className="w-4 h-4" />
                   </button>
                 )}
+                </div>
               </div>
             ))}
           </div>
@@ -778,7 +853,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
         <div className="p-5 rounded-3xl bg-[#150917] border border-[#4A1224]/50 space-y-4 shadow-xl">
           <div>
             <h3 className="font-black text-base flex items-center gap-2 text-white">
-              <FileJson className="w-5 h-5 text-amber-400" />
+              <FileJson className="w-5 h-5 text-sky-400" />
               <span>{t('Configuration Backup & Clinical Export', 'النسخ الاحتياطي وتصدير التقرير للمختص')}</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -796,7 +871,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
             </button>
             <button
               onClick={handlePrintWeeklyClinicalReport}
-              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 font-bold text-xs flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>{t('Print Weekly Clinical Report (ABA/SLP)', 'طباعة التقرير السريري الأسبوعي (ABA/SLP)')}</span>
@@ -804,6 +879,68 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           </div>
         </div>
       </div>
+
+      {/* Caregiver number edit + third-party consent modal */}
+      {editingContact && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="caregiver-consent-title"
+          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/70 p-4"
+        >
+          <div className="w-full max-w-md rounded-3xl bg-[#150917] border border-[#4A1224] p-6 space-y-4 shadow-2xl">
+            <h3 id="caregiver-consent-title" className="font-black text-base text-white">
+              {t('Edit contact number', 'تعديل رقم جهة الاتصال')}: {isAr ? (editingContact.nameAr || editingContact.nameEn) : L(editingContact.nameEn)}
+            </h3>
+            <label className="block text-xs text-slate-400 font-bold">
+              {t('Phone number with country code', 'رقم التليفون بكود الدولة')}
+              <input
+                type="tel"
+                dir="ltr"
+                value={editingPhone}
+                onChange={(e) => setEditingPhone(e.target.value)}
+                placeholder="+2010XXXXXXXX"
+                className="mt-1.5 w-full min-h-[44px] rounded-xl bg-[#111622] border border-[#4A1224]/60 px-3 py-2 text-white font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-rose-400"
+              />
+            </label>
+            <p className="text-xs leading-relaxed text-slate-400">
+              {t(
+                'In an emergency, Rafiqi sends this number an alert with your location. Their number is their personal data, so only save it if they agreed. You can delete it anytime.',
+                'وقت الطوارئ، رفيقي بيبعت للرقم ده تنبيه فيه موقعك. الرقم ده بيانات شخصية بتاعته، فمتسجلوش غير لو هو موافق. وتقدر تمسحه في أي وقت.'
+              )}
+            </p>
+            <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
+              <input
+                type="checkbox"
+                aria-label={t('I confirm this person agreed to store their number and receive emergency alerts', 'أؤكد إن الشخص موافق على تسجيل رقمه واستقبال تنبيهات الطوارئ')}
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                className="mt-1 w-5 h-5 accent-rose-500"
+              />
+              <span className="text-xs text-slate-200 font-bold leading-relaxed">
+                {t(
+                  'I confirm this person agreed that Rafiqi stores their number and sends it alerts with my location in an emergency.',
+                  'أؤكد إن الشخص ده موافق إن رفيقي يسجّل رقمه ويبعت له تنبيهات فيها موقعي وقت الطوارئ.'
+                )}
+              </span>
+            </label>
+            <div className="flex gap-2.5 pt-1">
+              <button
+                onClick={handleSaveContactPhone}
+                className="flex-1 min-h-[48px] rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-sm active:scale-95 transition-all cursor-pointer"
+              >
+                {editingPhone.trim() ? t('Save number', 'حفظ الرقم') : t('Remove number', 'مسح الرقم')}
+              </button>
+              <button
+                onClick={() => setEditingContact(null)}
+                className="min-h-[48px] px-5 rounded-2xl bg-[#17355C] text-slate-300 font-bold text-sm active:scale-95 transition-all cursor-pointer"
+              >
+                {t('Cancel', 'إلغاء')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

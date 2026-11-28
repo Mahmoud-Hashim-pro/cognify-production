@@ -25,7 +25,7 @@ export const DEFAULT_STUDENT_MEMORY: StudentMemory = {
   updatedAt: new Date().toISOString(),
 };
 
-const MEMORY_CACHE_PREFIX = 'cognify_student_memory_';
+const MEMORY_CACHE_PREFIX = 'rafiqi_student_memory_';
 
 export function getCachedStudentMemory(uid?: string | null): StudentMemory | null {
   if (!uid || typeof window === 'undefined') return null;

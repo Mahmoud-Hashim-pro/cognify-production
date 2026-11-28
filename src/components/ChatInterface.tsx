@@ -1,10 +1,11 @@
-import { localize, isArabicLocale, getTranslation } from '../lib/translations';
+import { localize, isArabicLocale, getTranslation, L, isFrenchActive } from '../lib/translations';
+import { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useRef, useEffect } from "react";
 import { Message, UserProfile, Task, PedagogyStyle } from "../types";
 import { generateAdaptiveResponseStream, generateBenchmarkComparison, generateProactiveInsights, generateChatTitle } from "../services/gemini";
 import { geminiService } from "../services/geminiService";
 import { PEDAGOGY_STYLES } from "../lib/adaptiveLearning";
-import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Menu, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, ArrowLeft, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, BrainCircuit, Paperclip, ImageIcon, FileText, X, Accessibility, Download, Mic, MicOff, RefreshCw, Volume2, ListTodo, Plus, Trash2, CheckCircle2, Circle, Scale, Lightbulb, ThumbsUp, ThumbsDown, Copy, Square, FolderGit2, Compass, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Layers, ArrowLeft, RotateCcw, Zap, Bookmark, Search, Eye, HelpCircle, Cpu, Code } from "lucide-react";
 
 import ChatBookmarksDrawer, { BookmarkedInsight } from "./chat/ChatBookmarksDrawer";
 import ChatErgonomicsBar, { FontScale } from "./chat/ChatErgonomicsBar";
@@ -155,7 +156,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const [input, setInput] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        return sessionStorage.getItem('cognify_chat_draft_input') || '';
+        return sessionStorage.getItem('rafiqi_chat_draft_input') || '';
       } catch {}
     }
     return '';
@@ -165,9 +166,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   useEffect(() => {
     try {
       if (input) {
-        sessionStorage.setItem('cognify_chat_draft_input', input);
+        sessionStorage.setItem('rafiqi_chat_draft_input', input);
       } else {
-        sessionStorage.removeItem('cognify_chat_draft_input');
+        sessionStorage.removeItem('rafiqi_chat_draft_input');
       }
     } catch {}
   }, [input]);
@@ -208,14 +209,14 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   // Dynamic visual ergonomics & accessibility states
   const [fontScale, setFontScale] = useState<FontScale>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('cognify_chat_font_scale') as FontScale) || 'base';
+      return (localStorage.getItem('rafiqi_chat_font_scale') as FontScale) || 'base';
     }
     return 'base';
   });
 
   const [isEyeComfort, setIsEyeComfort] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('cognify_chat_eye_comfort') === 'true';
+      return localStorage.getItem('rafiqi_chat_eye_comfort') === 'true';
     }
     return false;
   });
@@ -224,7 +225,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const [bookmarkedInsights, setBookmarkedInsights] = useState<BookmarkedInsight[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`);
+        const saved = localStorage.getItem(`rafiqi_chat_bookmarks_${profile.uid || 'guest'}`);
         return saved ? JSON.parse(saved) : [];
       } catch {
         return [];
@@ -239,7 +240,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   const handleChangeFontScale = (scale: FontScale) => {
     setFontScale(scale);
     try {
-      localStorage.setItem('cognify_chat_font_scale', scale);
+      localStorage.setItem('rafiqi_chat_font_scale', scale);
     } catch {}
   };
 
@@ -247,7 +248,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     setIsEyeComfort((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem('cognify_chat_eye_comfort', String(next));
+        localStorage.setItem('rafiqi_chat_eye_comfort', String(next));
       } catch {}
       return next;
     });
@@ -276,7 +277,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         );
       }
       try {
-        localStorage.setItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
+        localStorage.setItem(`rafiqi_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
       } catch {}
       return updated;
     });
@@ -286,7 +287,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     setBookmarkedInsights((prev) => {
       const updated = prev.filter((b) => b.id !== bookmarkId);
       try {
-        localStorage.setItem(`cognify_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
+        localStorage.setItem(`rafiqi_chat_bookmarks_${profile.uid || 'guest'}`, JSON.stringify(updated));
       } catch {}
       return updated;
     });
@@ -305,7 +306,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     const isAr = isArabicLocale(profile.language);
     const simplifyPrompt = isAr
       ? `من فضلك اشرح الرد السابق بأسلوب مبسط جداً وبخطوات واضحة بدون أي تعقيد (ELI5) مع تشبيه من الحياة اليومية.`
-      : `Please simplify the previous explanation in very clear, straightforward steps (ELI5) with an intuitive real-world analogy.`;
+      : L(`Please simplify the previous explanation in very clear, straightforward steps (ELI5) with an intuitive real-world analogy.`);
     handleSubmit(undefined, simplifyPrompt);
   };
 
@@ -549,12 +550,26 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       onEnd: () => setSpeakingMessageId((prev) => (prev === messageId ? null : prev)),
       onError: (err) => {
         setSpeakingMessageId((prev) => (prev === messageId ? null : prev));
-        if (err === 'silent-fail' || err === 'synth-error' || err === 'unsupported') {
+        if (err === 'audio-play-blocked') {
+          toast.warning(
+            isAr
+              ? 'المتصفح منع تشغيل الصوت تلقائياً. اضغط زر الاستماع مرة تانية عشان يشتغل.'
+              : L('The browser blocked automatic audio playback. Tap the listen button again to play it.'),
+            isAr ? 'الصوت متوقف' : L('Playback blocked'),
+          );
+        } else if (err === 'audio-fallback-fail') {
+          toast.warning(
+            isAr
+              ? 'معرفتش أوصل لخدمة الصوت البديلة. اتأكد من اتصالك بالإنترنت وحاول تاني.'
+              : L('Could not reach the backup speech service. Check your internet connection and try again.'),
+            isAr ? 'تعذّر النطق' : L('Speech unavailable'),
+          );
+        } else if (err === 'silent-fail' || err === 'synth-error' || err === 'unsupported') {
           toast.warning(
             isAr
               ? 'معرفتش أشغّل الصوت. جرّب تاكد إن صوت اللغة دي متثبت على جهازك، أو استخدم قارئ الشاشة.'
-              : "Couldn't play audio for this reply. Check that a voice for this language is installed, or use a screen reader.",
-            isAr ? 'تعذّر النطق' : 'Speech unavailable',
+              : L("Couldn't play audio for this reply. Check that a voice for this language is installed, or use a screen reader."),
+            isAr ? 'تعذّر النطق' : L('Speech unavailable'),
           );
         }
       },
@@ -655,8 +670,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           setIsListening(false);
           toast.error(
             isAr ? 'مفيش إذن للمايك. اسمح للموقع باستخدام الميكروفون من إعدادات المتصفح.'
-                 : 'Microphone permission is blocked. Allow mic access in your browser settings.',
-            isAr ? 'الميكروفون مقفول' : 'Mic blocked',
+                 : L('Microphone permission is blocked. Allow mic access in your browser settings.'),
+            isAr ? 'الميكروفون مقفول' : L('Mic blocked'),
           );
         } else if (err !== 'no-speech' && err !== 'aborted') {
           // no-speech/aborted are normal; onend will auto-restart if needed.
@@ -692,8 +707,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!recognitionRef.current) {
       const isAr = isArabicLocale(profile.language);
       toast.warning(
-        isAr ? 'الإدخال الصوتي مش مدعوم في المتصفح ده. جرّب Chrome.' : 'Voice input isn’t supported in this browser. Try Chrome.',
-        isAr ? 'غير مدعوم' : 'Unsupported',
+        isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : L('Voice input isn’t supported in this browser. Try Chrome on Android or a recent Safari.'),
+        isAr ? 'غير مدعوم' : L('Unsupported'),
       );
       return;
     }
@@ -748,8 +763,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!profile.uid || !profile.activeThreadId) {
       const isArabic = isArabicLocale(profile.language);
       const welcomeMsg = isArabic 
-        ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
-        : `Rafiqi Ready. How can I assist your ${profile.field} studies today?`;
+        ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field || "دراستك"} اليوم؟`
+        : (isFrenchActive() ? `Rafiqi est prêt. Comment puis-je vous aider dans vos études${profile.field ? ' de ' + profile.field : ''} aujourd'hui ?` : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`);
         
       setMessages([
         {
@@ -795,8 +810,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             // If thread exists in metadata but no messages
             const isArabic = isArabicLocale(profile.language);
             const welcomeMsg = isArabic 
-              ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
-              : `Rafiqi Ready. How can I assist your ${profile.field} studies today?`;
+              ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field || "دراستك"} اليوم؟`
+              : (isFrenchActive() ? `Rafiqi est prêt. Comment puis-je vous aider dans vos études${profile.field ? ' de ' + profile.field : ''} aujourd'hui ?` : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`);
             setMessages([
               {
                 id: 'welcome',
@@ -816,7 +831,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               role: 'assistant',
               content: isArabic
                 ? 'تعذّر فك تشفير المحادثات السابقة من هذا الجهاز لاختلاف مفتاح التشفير المحلي. يمكنك متابعة التعلم في محادثة جديدة.'
-                : 'Could not decrypt previous messages from this device due to a different local device key. You can continue learning in a new conversation.',
+                : L('Could not decrypt previous messages from this device due to a different local device key. You can continue learning in a new conversation.'),
               timestamp: new Date().toISOString()
             }
           ]);
@@ -826,8 +841,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         // If thread document does not exist yet
         const isArabic = isArabicLocale(profile.language);
         const welcomeMsg = isArabic 
-          ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field} اليوم؟`
-          : `Rafiqi Ready. How can I assist your ${profile.field} studies today?`;
+          ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field || "دراستك"} اليوم؟`
+          : (isFrenchActive() ? `Rafiqi est prêt. Comment puis-je vous aider dans vos études${profile.field ? ' de ' + profile.field : ''} aujourd'hui ?` : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`);
         setMessages([
           {
             id: 'welcome',
@@ -862,7 +877,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!files) return;
 
     if (!profile.uid) {
-         toast.warning(isArabicLocale(profile.language) ? 'يرجى تسجيل الدخول أولاً لإرفاق المستندات والملفات.' : 'Please log in first to attach files.', isArabicLocale(profile.language) ? 'مطلوب تسجيل الدخول' : 'Authentication Required');
+         toast.warning(isArabicLocale(profile.language) ? 'يرجى تسجيل الدخول أولاً لإرفاق المستندات والملفات.' : L('Please log in first to attach files.'), isArabicLocale(profile.language) ? 'مطلوب تسجيل الدخول' : L('Authentication Required'));
          return;
     }
 
@@ -884,7 +899,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           isAr
             ? `ملفات Word (.doc/.docx) مش مقروءة للذكاء الاصطناعي. من فضلك حوّل "${file.name}" لـ PDF وارفعه تاني.`
             : `Word files (.doc/.docx) can't be read by the AI. Please convert "${file.name}" to PDF and upload it again.`,
-          isAr ? 'حوّله لـ PDF' : 'Convert to PDF',
+          isAr ? 'حوّله لـ PDF' : L('Convert to PDF'),
         );
         continue;
       }
@@ -893,7 +908,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       if (file.size > 10 * 1024 * 1024) {
         toast.warning(
           isAr ? `الملف "${file.name}" كبير جداً، الحد الأقصى 10 ميجا.` : `"${file.name}" is too large — the max is 10 MB.`,
-          isAr ? 'ملف كبير' : 'File too large',
+          isAr ? 'ملف كبير' : L('File too large'),
         );
         continue;
       }
@@ -912,7 +927,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       if (mimeType.startsWith('image/')) {
         const { data, type } = await compressImage(file);
         if (!data) {
-          toast.warning(isAr ? `تعذّر قراءة "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : 'Error');
+          toast.warning(isAr ? `تعذّر قراءة "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : L('Error'));
           continue;
         }
         newFiles.push({ name: file.name, type: type || 'image/jpeg', data, url: '', localId });
@@ -928,7 +943,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       });
       const dataStr = base64.split(',')[1];
       if (!dataStr) {
-        toast.warning(isAr ? `تعذّر قراءة الملف "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : 'Error');
+        toast.warning(isAr ? `تعذّر قراءة الملف "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : L('Error'));
         continue;
       }
 
@@ -1007,7 +1022,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         : isFr
         ? `Adaptation pédagogique automatique vers (${effectivePedagogy}) pour faciliter la compréhension.`
         : `Automatically adapted pedagogical style to (${PEDAGOGY_STYLES.find(s => s.id === effectivePedagogy)?.labelEn || effectivePedagogy}) to simplify understanding.`;
-      toast.info(toastMsg, isAr ? 'تكييف بيداغوجي ذكي' : 'Adaptive Pivot');
+      toast.info(toastMsg, isAr ? 'تكييف بيداغوجي ذكي' : L('Adaptive Pivot'));
     }
 
     const qualityScore = evaluateQuestionQuality(finalInput);
@@ -1166,7 +1181,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           isAr
             ? 'الرد جه من مزوّد احتياطي نصّي مش بيشوف الصور/الملفات، فالمرفقات اتجاهلت. جرّب تاني بعد شوية عشان يتقري المرفق.'
             : "The answer came from a text-only fallback that can't see images/files, so your attachment was ignored. Try again shortly to have it read.",
-          isAr ? 'المرفق اتجاهل' : 'Attachment skipped',
+          isAr ? 'المرفق اتجاهل' : L('Attachment skipped'),
         );
       }
       const assistantMessage: Message = {
@@ -1176,7 +1191,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         // friendly note instead of a blank bubble — never wipe the conversation.
         content: lastText || (isAr
           ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني بعد لحظات 🙏'
-          : '⚠️ The AI is busy right now. Please try again in a moment 🙏'),
+          : L('⚠️ The AI is busy right now. Please try again in a moment 🙏')),
         timestamp: new Date().toISOString(),
         attachments: streamedAttachments,
         pedagogyStyle: effectivePedagogy,
@@ -1274,10 +1289,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         id: `assistant-err-${Date.now()}`,
         role: 'assistant',
         content: lastText
-          ? lastText + (isArabic ? '\n\n⚠️ (الرد اتقطع قبل ما يكمل)' : '\n\n⚠️ (response was cut off)')
+          ? lastText + (isArabic ? '\n\n⚠️ (الرد اتقطع قبل ما يكمل)' : L('\n\n⚠️ (response was cut off)'))
           : (isArabic
             ? '⚠️ حصلت مشكلة في الاتصال بالذكاء الاصطناعي. جرّب تاني 🙏'
-            : '⚠️ Something went wrong connecting to the AI. Please try again 🙏'),
+            : L('⚠️ Something went wrong connecting to the AI. Please try again 🙏')),
         timestamp: new Date().toISOString(),
         attachments: streamedAttachments,
         pedagogyStyle: effectivePedagogy,
@@ -1439,7 +1454,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   };
 
   return (
-    <div className={`flex-1 flex flex-col bg-[#0B131E] text-[#F8FAFC] overflow-hidden relative selection:bg-[#1769AA]/25 selection:text-white ${isEmbedded ? 'h-full' : 'h-[var(--app-h,100dvh)]'}`}>
+    <div className={`tool-auto flex-1 flex flex-col bg-[#0A2342] text-[#F8FAFC] overflow-hidden relative selection:bg-[#1769AA]/25 selection:text-white ${isEmbedded ? 'h-full' : 'h-[var(--app-h,100dvh)]'}`}>
 
       {/* File Preview Modal */}
       <AnimatePresence>
@@ -1459,7 +1474,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                   <button 
                     title="Narrate Document" 
                     onClick={() => readDocument(previewFile)} 
-                    className="text-[#F8FAFC] hover:text-white transition-colors bg-[#131E2E] hover:bg-[#0D4778] p-2.5 rounded-xl border border-[#22354E] flex items-center gap-2 px-3.5 shadow-lg text-xs font-semibold"
+                    className="text-[#F8FAFC] hover:text-white transition-colors bg-[#112C4F] hover:bg-[#0D4778] p-2.5 rounded-xl border border-[#24476F] flex items-center gap-2 px-3.5 shadow-lg text-xs font-semibold"
                   >
                     <Volume2 className="w-4 h-4 text-[#4B9FE1]" />
                     <span className="hidden sm:inline">{localize(profile.language, 'Hear Content', 'استماع للمحتوى')}</span>
@@ -1467,7 +1482,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                   <button 
                     title="Download" 
                     onClick={() => handleDownload(previewFile)} 
-                    className="text-[#F8FAFC] hover:text-white transition-colors bg-[#131E2E] hover:bg-[#0D4778] p-2.5 rounded-xl border border-[#22354E] shadow-lg"
+                    className="text-[#F8FAFC] hover:text-white transition-colors bg-[#112C4F] hover:bg-[#0D4778] p-2.5 rounded-xl border border-[#24476F] shadow-lg"
                   >
                     <Download className="w-4 h-4" />
                   </button>
@@ -1476,7 +1491,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               <button 
                 title="Close" 
                 onClick={() => setPreviewFile(null)} 
-                className="text-[#94A3B8] hover:text-white transition-colors bg-[#131E2E] hover:bg-rose-600/80 p-2.5 rounded-xl border border-[#22354E] shadow-lg"
+                className="text-[#94A3B8] hover:text-white transition-colors bg-[#112C4F] hover:bg-rose-600/80 p-2.5 rounded-xl border border-[#24476F] shadow-lg"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1485,18 +1500,18 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               <img
                 src={attSrc(previewFile)}
                 alt={previewFile.name}
-                className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-2xl border border-[#22354E] bg-[#1A283D]"
+                className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-2xl border border-[#24476F] bg-[#17355C]"
               />
             ) : previewFile.type.startsWith('video/') ? (
               <video
                 src={attSrc(previewFile)}
                 controls
                 autoPlay
-                className="max-w-full max-h-[85vh] shadow-2xl rounded-2xl border border-[#22354E] bg-[#1A283D]"
+                className="max-w-full max-h-[85vh] shadow-2xl rounded-2xl border border-[#24476F] bg-[#17355C]"
               />
             ) : (previewFile.type === 'application/pdf' || previewFile.name.toLowerCase().endsWith('.pdf')) && previewFile.data ? (
-              <div className="w-full max-w-4xl h-[84vh] flex flex-col bg-[#131E2E] border border-[#22354E] rounded-2xl overflow-hidden shadow-2xl">
-                <div className="p-3 bg-[#1A283D] border-b border-[#22354E] flex items-center justify-between gap-3 shrink-0">
+              <div className="w-full max-w-4xl h-[84vh] flex flex-col bg-[#112C4F] border border-[#24476F] rounded-2xl overflow-hidden shadow-2xl">
+                <div className="p-3 bg-[#17355C] border-b border-[#24476F] flex items-center justify-between gap-3 shrink-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-xs font-bold">PDF</span>
                     <span className="text-xs font-semibold text-[#F8FAFC] truncate max-w-md">{previewFile.name}</span>
@@ -1512,14 +1527,14 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     </button>
                     <button 
                       onClick={() => handleDownload(previewFile)} 
-                      className="p-1.5 bg-[#131E2E] hover:bg-[#0D4778] text-[#94A3B8] hover:text-white rounded-xl border border-[#22354E] transition-colors"
+                      className="p-1.5 bg-[#112C4F] hover:bg-[#0D4778] text-[#94A3B8] hover:text-white rounded-xl border border-[#24476F] transition-colors"
                       title="Download"
                     >
                       <Download className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => setPreviewFile(null)} 
-                      className="p-1.5 bg-[#131E2E] hover:bg-rose-600/80 text-[#94A3B8] hover:text-white rounded-xl border border-[#22354E] transition-colors"
+                      className="p-1.5 bg-[#112C4F] hover:bg-rose-600/80 text-[#94A3B8] hover:text-white rounded-xl border border-[#24476F] transition-colors"
                       title="Close"
                     >
                       <X className="w-4 h-4" />
@@ -1529,11 +1544,11 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 <iframe
                   src={`data:application/pdf;base64,${previewFile.data}`}
                   title={previewFile.name}
-                  className="w-full flex-1 border-0 bg-[#0B131E]"
+                  className="w-full flex-1 border-0 bg-[#0A2342]"
                 />
               </div>
             ) : (
-              <div className="bg-[#131E2E] border border-[#22354E] p-6 sm:p-10 rounded-2xl max-w-lg w-full text-center space-y-4 shadow-2xl">
+              <div className="bg-[#112C4F] border border-[#24476F] p-6 sm:p-10 rounded-2xl max-w-lg w-full text-center space-y-4 shadow-2xl">
                 <div className="w-16 h-16 rounded-2xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center mx-auto text-[#4B9FE1]">
                   <FileText className="w-8 h-8" />
                 </div>
@@ -1556,7 +1571,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                   </button>
                   <button 
                     onClick={() => setPreviewFile(null)} 
-                    className="px-4 py-2 bg-[#1A283D] border border-[#22354E] text-[#94A3B8] hover:text-[#F8FAFC] rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                    className="px-4 py-2 bg-[#17355C] border border-[#24476F] text-[#94A3B8] hover:text-[#F8FAFC] rounded-xl font-bold text-xs transition-colors cursor-pointer"
                   >
                     {localize(profile.language, 'Close', 'إغلاق')}
                   </button>
@@ -1567,14 +1582,14 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         )}
       </AnimatePresence>
 
-      {/* A. Compact Page Header */}
-      <header className="bg-[#0B131E] border-b border-[#22354E] text-[#F8FAFC] h-[58px] px-3 sm:px-6 flex justify-between items-center z-10 shrink-0">
+      {/* A. Compact module toolbar (the app shell's GlobalHeader owns navigation chrome) */}
+      <header className="bg-white dark:bg-[#0A2342] border-b border-slate-200 dark:border-[#24476F] text-slate-900 dark:text-[#F8FAFC] h-12 px-3 sm:px-6 flex justify-between items-center z-10 shrink-0 transition-colors">
         <div className="flex items-center gap-3">
           {/* Back to Hub Button */}
           <button
             type="button"
             onClick={handleBackToHub}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#131E2E] hover:bg-[#1769AA]/20 border border-[#22354E] hover:border-[#1769AA] text-[#F8FAFC] text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] focus:outline-none cursor-pointer"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#112C4F] hover:bg-[#1769AA]/20 border border-[#24476F] hover:border-[#1769AA] text-[#F8FAFC] text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] focus:outline-none cursor-pointer"
             aria-label={localize(profile.language, 'Back to Hub', 'رجوع للرئيسية')}
             title={localize(profile.language, 'Back to Hub', 'رجوع للرئيسية')}
           >
@@ -1589,11 +1604,11 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               <h1 className="font-bold text-sm sm:text-base text-[#F8FAFC] leading-none truncate">
                 {localize(profile.language, 'AI Tutor', 'المعلم الذكي')}
               </h1>
-              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40 shrink-0">
+              <span className="text-xs font-bold px-1.5 py-0.2 rounded bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40 shrink-0">
                 Rafiqi
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] hidden sm:block truncate mt-0.5">
+            <p className="text-xs text-[#64748B] hidden sm:block truncate mt-0.5">
               {localize(profile.language, 'Calm, adaptive study copilot', 'رفيق دراسي ذكي ومخصص وبدون مشتتات')}
             </p>
           </div>
@@ -1601,12 +1616,13 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
         {/* Header Right Actions */}
         <div className="flex items-center gap-2">
+          <ToolSwitcherSlot />
           {/* Search Toggle */}
           <button
             type="button"
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             className={`p-2 rounded-xl border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
-              isSearchOpen ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]' : 'bg-[#131E2E] border-[#22354E] text-[#64748B] hover:text-[#F8FAFC]'
+              isSearchOpen ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]' : 'bg-[#112C4F] border-[#24476F] text-[#64748B] hover:text-[#F8FAFC]'
             }`}
             aria-label={localize(profile.language, 'Search within this conversation', 'بحث داخل هذه المحادثة')}
             title={localize(profile.language, 'Search within this conversation', 'بحث داخل هذه المحادثة')}
@@ -1618,13 +1634,13 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           <button
             type="button"
             onClick={() => setIsBookmarksOpen(true)}
-            className="relative p-2 rounded-xl bg-[#131E2E] border border-[#22354E] hover:border-[#1769AA] text-[#64748B] hover:text-[#F8FAFC] transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+            className="relative p-2 rounded-xl bg-[#112C4F] border border-[#24476F] hover:border-[#1769AA] text-[#64748B] hover:text-[#F8FAFC] transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
             aria-label={localize(profile.language, 'Saved insights', 'بنك الأفكار المحفوظة')}
             title={localize(profile.language, 'Saved insights', 'بنك الأفكار المحفوظة')}
           >
             <Bookmark className="w-4 h-4" />
             {bookmarkedInsights.length > 0 && (
-              <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-[#1769AA] text-white text-[9px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-[#1769AA] text-white text-xs font-bold flex items-center justify-center">
                 {bookmarkedInsights.length}
               </span>
             )}
@@ -1642,7 +1658,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 try { recognitionRef.current.lang = next; } catch {}
               }
             }}
-            className="px-2.5 py-1.5 rounded-xl bg-[#131E2E] border border-[#22354E] hover:border-[#1769AA] text-[#94A3B8] hover:text-[#F8FAFC] text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+            className="px-2.5 py-1.5 rounded-xl bg-[#112C4F] border border-[#24476F] hover:border-[#1769AA] text-[#94A3B8] hover:text-[#F8FAFC] text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
             title={localize(profile.language, 'Click to switch dictation language (FR/EN/AR)', 'اضغط لتبديل لغة الاستماع')}
           >
             {dictationLang === 'fr-FR' ? '🇫🇷 FR' : dictationLang === 'ar-EG' ? '🇪🇬 AR' : '🇬🇧 EN'}
@@ -1655,7 +1671,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               onClick={handleDisableAccessibility}
               title={localize(profile.language, 'Accessibility mode is on — click to turn it off', 'وضع الإتاحة شغّال — اضغط لإيقافه')}
               aria-label={localize(profile.language, 'Turn off accessibility mode', 'إيقاف وضع الإتاحة')}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-[#1769AA]/15 text-[#4B9FE1] border border-[#1769AA]/40 hover:bg-[#0D4778]/25 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-[#1769AA]/15 text-[#4B9FE1] border border-[#1769AA]/40 hover:bg-[#0D4778]/25 rounded-full text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
             >
               <Accessibility className="w-3.5 h-3.5" />
               <span>{profile.accessibilityMode}</span>
@@ -1663,17 +1679,6 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             </button>
           )}
 
-          {/* Mobile Menu Button */}
-          {onMenuClick && (
-            <button
-              type="button"
-              onClick={onMenuClick}
-              className="p-2 rounded-xl bg-[#131E2E] border border-[#22354E] text-[#64748B] hover:text-[#F8FAFC] lg:hidden cursor-pointer"
-              aria-label="Toggle Sidebar Menu"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </header>
 
@@ -1702,7 +1707,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         </div>
 
         {/* Center Column: Conversation Area & Composer */}
-        <div className="flex flex-col flex-1 min-w-0 h-full relative overflow-hidden bg-[#0B131E]">
+        <div className="flex flex-col flex-1 min-w-0 h-full relative overflow-hidden bg-[#0A2342]">
           
           {/* In-Session Search Bar */}
           <AnimatePresence>
@@ -1711,7 +1716,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="px-4 py-2.5 bg-[#131E2E] border-b border-[#22354E] flex items-center justify-between gap-3 shadow-md z-20 shrink-0"
+                className="px-4 py-2.5 bg-[#112C4F] border-b border-[#24476F] flex items-center justify-between gap-3 shadow-md z-20 shrink-0"
               >
                 <div className="flex items-center gap-2 flex-1">
                   <Search className="w-4 h-4 text-[#4B9FE1] shrink-0" />
@@ -1721,12 +1726,12 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={localize(profile.language, 'Search within this conversation...', 'بحث داخل هذه المحادثة...')}
-                    className="bg-transparent text-[#F8FAFC] text-xs sm:text-sm w-full outline-none placeholder:text-[#64748B] font-medium"
+                    className="bg-transparent text-[#F8FAFC] text-xs sm:text-sm w-full outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] placeholder:text-[#64748B] font-medium"
                     autoFocus
                   />
                 </div>
                 {searchQuery.trim() && (
-                  <span className="text-[11px] font-mono text-[#4B9FE1] bg-[#1A283D] border border-[#22354E] px-2 py-0.5 rounded-lg shrink-0">
+                  <span className="text-xs font-mono text-[#4B9FE1] bg-[#17355C] border border-[#24476F] px-2 py-0.5 rounded-lg shrink-0">
                     {messages.filter(m => m.content?.toLowerCase().includes(searchQuery.toLowerCase())).length}{' '}
                     {localize(profile.language, 'results', 'نتيجة')}
                   </span>
@@ -1737,7 +1742,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     setIsSearchOpen(false);
                     setSearchQuery('');
                   }}
-                  className="text-[#64748B] hover:text-[#F8FAFC] p-1 rounded-lg hover:bg-[#1A283D] transition-colors cursor-pointer"
+                  className="text-[#64748B] hover:text-[#F8FAFC] p-1 rounded-lg hover:bg-[#17355C] transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1754,7 +1759,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
 
           {/* B. Main Conversation Surface Card */}
           <div className="flex-1 min-h-0 flex flex-col max-w-4xl w-full mx-auto p-2 sm:p-4 overflow-hidden">
-            <div className="flex-1 min-h-0 flex flex-col bg-[#1A283D] border border-[#22354E] rounded-2xl shadow-xl overflow-hidden relative">
+            <div className="flex-1 min-h-0 flex flex-col bg-[#17355C] border border-[#24476F] rounded-2xl shadow-xl overflow-hidden relative">
 
               {/* Scroll Container */}
               <div 
@@ -1774,7 +1779,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     {messages.filter((m) => m.role === 'user').length === 0 ? (
                       <div className="flex flex-col items-center justify-center text-center py-8 sm:py-14 space-y-6 w-full animate-fadeIn select-none">
                         {/* Calm Bot Avatar */}
-                        <div className="w-14 h-14 rounded-2xl bg-[#131E2E] border border-[#22354E] flex items-center justify-center text-[#4B9FE1] shadow-lg">
+                        <div className="w-14 h-14 rounded-2xl bg-[#112C4F] border border-[#24476F] flex items-center justify-center text-[#4B9FE1] shadow-lg">
                           <Bot className="w-7 h-7 text-[#4B9FE1]" />
                         </div>
 
@@ -1826,7 +1831,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                             : [
                                 { 
                                   title: 'Explain a Lesson', 
-                                  desc: `Step-by-step guidance in ${f}`, 
+                                  desc: isFrenchActive() ? `Guidage pas à pas en ${f}` : `Step-by-step guidance in ${f}`, 
                                   prompt: `Explain an important lesson in ${f} in a clear, step-by-step manner with intuitive analogies.`, 
                                   icon: <Lightbulb className="w-4 h-4 text-[#4B9FE1]" /> 
                                 },
@@ -1856,14 +1861,14 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   key={c.title}
                                   type="button"
                                   onClick={() => handleSubmit(undefined, c.prompt)}
-                                  className="p-3.5 rounded-xl border border-[#22354E] bg-[#131E2E] hover:bg-[#131E2E]/80 hover:border-[#1769AA] text-[#F8FAFC] transition-all flex items-center gap-3 text-start cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] active:scale-[0.99]"
+                                  className="p-3.5 rounded-xl border border-[#24476F] bg-[#112C4F] hover:bg-[#112C4F]/80 hover:border-[#1769AA] text-[#F8FAFC] transition-all flex items-center gap-3 text-start cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] active:scale-[0.99]"
                                 >
-                                  <span className="p-2 rounded-lg bg-[#1A283D] border border-[#22354E] shrink-0">
+                                  <span className="p-2 rounded-lg bg-[#17355C] border border-[#24476F] shrink-0">
                                     {c.icon}
                                   </span>
                                   <div className="min-w-0 flex-1">
-                                    <h4 className="font-semibold text-xs sm:text-sm text-[#F8FAFC]">{c.title}</h4>
-                                    <p className="text-[11px] text-[#64748B] truncate mt-0.5">{c.desc}</p>
+                                    <h4 className="font-semibold text-xs sm:text-sm text-[#F8FAFC]">{L(c.title)}</h4>
+                                    <p className="text-xs text-[#64748B] truncate mt-0.5">{L(c.desc)}</p>
                                   </div>
                                 </button>
                               ))}
@@ -1941,20 +1946,20 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <div key={`${m.id}-att-${idx}`} className="relative group max-w-sm">
                                   <button 
                                     onClick={() => file.data && setPreviewFile(file)}
-                                    className={`w-full flex items-center gap-3 p-2.5 bg-[#131E2E] border border-[#22354E] rounded-xl transition-all ${file.data ? 'hover:border-[#1769AA] hover:bg-[#1A283D] cursor-pointer' : 'opacity-80 cursor-default'}`}
+                                    className={`w-full flex items-center gap-3 p-2.5 bg-[#112C4F] border border-[#24476F] rounded-xl transition-all ${file.data ? 'hover:border-[#1769AA] hover:bg-[#17355C] cursor-pointer' : 'opacity-80 cursor-default'}`}
                                   >
-                                    <div className="w-9 h-9 shrink-0 rounded-lg overflow-hidden bg-[#1A283D] border border-[#22354E] flex items-center justify-center">
+                                    <div className="w-9 h-9 shrink-0 rounded-lg overflow-hidden bg-[#17355C] border border-[#24476F] flex items-center justify-center">
                                       {file.type.startsWith('image/') && file.data ? (
                                         <img src={`data:${file.type};base64,${file.data}`} className="w-full h-full object-cover" alt="" />
                                       ) : (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')) ? (
-                                        <span className="text-[10px] font-bold text-rose-400">PDF</span>
+                                        <span className="text-xs font-bold text-rose-400">PDF</span>
                                       ) : (
                                         <FileText className="w-4 h-4 text-[#4B9FE1]" />
                                       )}
                                     </div>
                                     <div className="text-left flex-1 min-w-0">
                                       <p className="text-xs font-semibold text-[#F8FAFC] truncate w-full">{file.name}</p>
-                                      <p className="text-[10px] text-[#64748B]">
+                                      <p className="text-xs text-[#64748B]">
                                         {file.data ? 'Click to View' : 'Media Expired'}
                                       </p>
                                     </div>
@@ -1966,7 +1971,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                             <div className="space-y-3 max-w-[94%] sm:max-w-[90%] w-full">
                               {/* Assistant Header Row */}
                               <div className="flex items-center gap-2 flex-wrap">
-                                <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#131E2E] border border-[#22354E] rounded-lg text-[#4B9FE1] text-[11px] font-bold">
+                                <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#112C4F] border border-[#24476F] rounded-lg text-[#4B9FE1] text-xs font-bold">
                                   <Bot className="w-3.5 h-3.5 text-[#4B9FE1]" />
                                   <span>{localize(profile.language, 'AI Tutor', 'المعلم الذكي')}</span>
                                 </div>
@@ -1978,7 +1983,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   return (
                                     <span
                                       title={localize(profile.language, pMeta.descriptionEn, pMeta.descriptionAr)}
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#22354E] bg-[#1A283D] text-[#94A3B8] text-[10px] font-medium"
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#24476F] bg-[#17355C] text-[#94A3B8] text-xs font-medium"
                                     >
                                       <span>{pMeta.id === 'analogies' ? '💡' : pMeta.id === 'scaffolded' ? '🪜' : '⚡'}</span>
                                       <span>{localize(profile.language, pMeta.labelEn, pMeta.labelAr)}</span>
@@ -1989,10 +1994,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 {'speechSynthesis' in window && (
                                   <button 
                                     onClick={() => handleSpeak(m)}
-                                    className={`text-[10px] font-bold transition-all px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                    className={`text-xs font-bold transition-all px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                       speakingMessageId === m.id
                                         ? 'bg-rose-600 text-white border-rose-500 shadow-sm animate-pulse'
-                                        : 'bg-[#131E2E] text-[#94A3B8] hover:text-[#F8FAFC] border-[#22354E] hover:border-[#1769AA]'
+                                        : 'bg-[#112C4F] text-[#94A3B8] hover:text-[#F8FAFC] border-[#24476F] hover:border-[#1769AA]'
                                     }`}
                                   >
                                     <Volume2 className="w-3.5 h-3.5" />
@@ -2002,7 +2007,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                               </div>
 
                               {/* Assistant Message Bubble */}
-                              <div className="p-5 sm:p-6 rounded-2xl bg-[#131E2E] border border-[#22354E] text-[#F8FAFC] leading-relaxed text-sm sm:text-base space-y-4 shadow-md hover:border-[#1769AA] transition-colors w-full">
+                              <div className="p-5 sm:p-6 rounded-2xl bg-[#112C4F] border border-[#24476F] text-[#F8FAFC] leading-relaxed text-sm sm:text-base space-y-4 shadow-md hover:border-[#1769AA] transition-colors w-full">
                                 {(profile.accessibilityMode === 'Vocal-Deaf' || profile.accessibilityMode === 'Sign-Only') && m.id !== 'welcome' && m.content?.trim() && (
                                   <div className="mb-3">
                                     <button
@@ -2015,7 +2020,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                         : localize(profile.language, 'Show in sign language', 'اعرض بلغة الإشارة')}
                                     </button>
                                     {signingId === m.id && (
-                                      <div className="mt-2 h-64 sm:h-72 rounded-xl overflow-hidden bg-[#0B131E] border border-[#22354E] relative">
+                                      <div className="mt-2 h-64 sm:h-72 rounded-xl overflow-hidden bg-[#0A2342] border border-[#24476F] relative">
                                         <React.Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#64748B] text-xs font-bold">Loading avatar…</div>}>
                                           <SignAvatar3D words={wordsForSigning(m.content)} playing={true} onDone={() => {}} />
                                         </React.Suspense>
@@ -2047,15 +2052,15 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                     <div key={`${m.id}-gen-att-${idx}`} className="relative group">
                                       <button
                                         onClick={() => attSrc(file) && setPreviewFile(file)}
-                                        className={`flex flex-col items-center gap-1.5 p-2 bg-[#131E2E] border border-[#22354E] rounded-xl transition-all overflow-hidden ${attSrc(file) ? 'hover:border-[#1769AA] cursor-pointer' : 'opacity-80 cursor-default'}`}
+                                        className={`flex flex-col items-center gap-1.5 p-2 bg-[#112C4F] border border-[#24476F] rounded-xl transition-all overflow-hidden ${attSrc(file) ? 'hover:border-[#1769AA] cursor-pointer' : 'opacity-80 cursor-default'}`}
                                       >
                                         {file.type.startsWith('image/') && attSrc(file) ? (
-                                          <div className="w-40 h-40 rounded-lg overflow-hidden bg-[#1A283D]">
+                                          <div className="w-40 h-40 rounded-lg overflow-hidden bg-[#17355C]">
                                             <img src={attSrc(file)} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="" />
                                           </div>
                                         ) : null}
                                         <div className="text-center w-full px-1">
-                                          <p className="text-[11px] font-semibold text-[#F8FAFC] truncate max-w-[160px]">{file.name}</p>
+                                          <p className="text-xs font-semibold text-[#F8FAFC] truncate max-w-[160px]">{file.name}</p>
                                         </div>
                                       </button>
                                     </div>
@@ -2068,10 +2073,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleReactToMessage(m.id, 'up')}
-                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                     m.reaction === 'up'
                                       ? 'bg-[#1769AA]/20 text-[#4B9FE1] border-[#1769AA]'
-                                      : 'text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]'
+                                      : 'text-[#64748B] bg-[#17355C] border-[#24476F] hover:text-[#F8FAFC] hover:border-[#1769AA]'
                                   }`}
                                   title={localize(profile.language, 'Helpful', 'مفيد')}
                                 >
@@ -2081,10 +2086,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleReactToMessage(m.id, 'down')}
-                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                     m.reaction === 'down'
                                       ? 'bg-rose-500/20 text-rose-300 border-rose-500/50'
-                                      : 'text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA]'
+                                      : 'text-[#64748B] bg-[#17355C] border-[#24476F] hover:text-[#F8FAFC] hover:border-[#1769AA]'
                                   }`}
                                   title={localize(profile.language, 'Unhelpful', 'غير مفيد')}
                                 >
@@ -2098,7 +2103,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                       () => toast.success(localize(profile.language, 'Copied', 'تم النسخ'))
                                     );
                                   }}
-                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
+                                  className="text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#17355C] border-[#24476F] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
                                   title={localize(profile.language, 'Copy answer', 'نسخ الإجابة')}
                                 >
                                   <Copy className="w-3.5 h-3.5" />
@@ -2107,7 +2112,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleSimplify(m)}
-                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#4B9FE1] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
+                                  className="text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#17355C] border-[#24476F] hover:text-[#4B9FE1] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166]"
                                   title={localize(profile.language, 'Explain this in simpler terms (ELI5)', 'شرح مبسط بدون أي تعقيد')}
                                 >
                                   <Zap className="w-3.5 h-3.5 text-[#4B9FE1]" />
@@ -2116,10 +2121,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 <button
                                   type="button"
                                   onClick={() => handleToggleBookmark(m)}
-                                  className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] ${
                                     bookmarkedInsights.some((b) => b.messageId === m.id)
                                       ? 'bg-[#1769AA]/20 text-[#4B9FE1] border-[#1769AA]'
-                                      : 'text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#4B9FE1] hover:border-[#1769AA]'
+                                      : 'text-[#64748B] bg-[#17355C] border-[#24476F] hover:text-[#4B9FE1] hover:border-[#1769AA]'
                                   }`}
                                   title={localize(profile.language, 'Pin to saved insights', 'تثبيت في بنك الأفكار')}
                                 >
@@ -2130,7 +2135,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   type="button"
                                   onClick={() => handleCompareAI(m)}
                                   disabled={comparingId === m.id}
-                                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#1A283D] border-[#22354E] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] disabled:opacity-50"
+                                  className="text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 text-[#64748B] bg-[#17355C] border-[#24476F] hover:text-[#F8FAFC] hover:border-[#1769AA] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FFD166] disabled:opacity-50"
                                 >
                                   <Scale className="w-3.5 h-3.5" />
                                   <span>{comparingId === m.id ? localize(profile.language, 'Reviewing…', 'جاري المراجعة…') : localize(profile.language, 'Second opinion', 'رأي تانٍ')}</span>
@@ -2147,11 +2152,11 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                     {isLoading && (
                       <div className="space-y-3 w-full animate-fadeIn">
                         {streamingText ? (
-                          <div className="p-5 sm:p-6 rounded-2xl bg-[#131E2E] border border-[#22354E] text-[#F8FAFC] leading-relaxed text-sm sm:text-base space-y-4 shadow-md">
+                          <div className="p-5 sm:p-6 rounded-2xl bg-[#112C4F] border border-[#24476F] text-[#F8FAFC] leading-relaxed text-sm sm:text-base space-y-4 shadow-md">
                             <MarkdownMessage content={streamingText} />
                           </div>
                         ) : (
-                          <div className="flex items-center gap-3 p-4 bg-[#131E2E] rounded-2xl border border-[#22354E] text-[#94A3B8] text-xs font-semibold">
+                          <div className="flex items-center gap-3 p-4 bg-[#112C4F] rounded-2xl border border-[#24476F] text-[#94A3B8] text-xs font-semibold">
                             <span className="flex items-center gap-1.5" aria-label="Assistant is typing">
                               <span className="w-2 h-2 rounded-full bg-[#1769AA] animate-bounce [animation-delay:-0.3s]" />
                               <span className="w-2 h-2 rounded-full bg-[#1769AA] animate-bounce [animation-delay:-0.15s]" />
@@ -2168,7 +2173,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               </div>
 
               {/* C. Fixed Conversation Composer (Anchored at Bottom) */}
-              <div className="shrink-0 p-2 sm:p-3 bg-[#1A283D] border-t border-[#22354E]">
+              <div className="shrink-0 p-2 sm:p-3 bg-[#17355C] border-t border-[#24476F]">
                 <div className="w-full space-y-2">
 
                   {/* Selected Files Preview Chips */}
@@ -2181,7 +2186,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                         className="flex flex-wrap gap-2 px-1"
                       >
                         {selectedFiles.map((file, i) => (
-                          <div key={i} className="flex items-center gap-2 px-2.5 py-1 bg-[#131E2E] rounded-xl border border-[#22354E] shadow-sm">
+                          <div key={i} className="flex items-center gap-2 px-2.5 py-1 bg-[#112C4F] rounded-xl border border-[#24476F] shadow-sm">
                             <FileText className="w-3.5 h-3.5 text-[#4B9FE1] shrink-0" />
                             <span className="text-xs font-medium text-[#F8FAFC] truncate max-w-[140px]">{file.name}</span>
                             <button 
@@ -2223,7 +2228,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                       accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.webp,.txt"
                     />
 
-                    <div className={`relative w-full rounded-2xl bg-[#131E2E] border border-[#22354E] focus-within:border-[#1769AA] focus-within:ring-2 focus-within:ring-[#1685B5]/20 transition-all p-2 flex flex-col justify-between ${isListening ? 'ring-2 ring-rose-500/50' : ''}`}>
+                    <div className={`relative w-full rounded-2xl bg-[#112C4F] border border-[#24476F] focus-within:border-[#1769AA] focus-within:ring-2 focus-within:ring-[#1685B5]/20 transition-all p-2 flex flex-col justify-between ${isListening ? 'ring-2 ring-rose-500/50' : ''}`}>
                       
                       {/* Upper Row: Attachment Button, Textarea, Mic Button, Send Button */}
                       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -2233,7 +2238,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           onClick={() => fileInputRef.current?.click()}
                           aria-label={localize(profile.language, 'Attach images or PDF files', 'إرفاق صور أو مستندات')}
                           title={localize(profile.language, 'Attach images or PDF files', 'إرفاق صور أو مستندات')}
-                          className="w-10 h-10 min-w-[40px] rounded-xl flex items-center justify-center text-[#64748B] hover:text-[#F8FAFC] hover:bg-[#1A283D] transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+                          className="w-10 h-10 min-w-[40px] rounded-xl flex items-center justify-center text-[#64748B] hover:text-[#F8FAFC] hover:bg-[#17355C] transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
                         >
                           <Paperclip className="w-4 h-4" />
                         </button>
@@ -2259,7 +2264,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                             }
                           }}
                           disabled={isLoading}
-                          className="flex-1 bg-transparent text-[#F8FAFC] placeholder-[#64748B] border-0 px-2 py-1.5 outline-none resize-none min-h-[36px] max-h-32 text-sm leading-relaxed custom-scrollbar disabled:opacity-50"
+                          className="flex-1 bg-transparent text-[#F8FAFC] placeholder-[#64748B] border-0 px-2 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] resize-none min-h-[36px] max-h-32 text-sm leading-relaxed custom-scrollbar disabled:opacity-50"
                         />
 
                         {/* Microphone Button (min 44x44px target) */}
@@ -2271,7 +2276,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           className={`w-10 h-10 min-w-[40px] rounded-xl flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
                             isListening 
                               ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse' 
-                              : 'text-[#64748B] hover:text-[#F8FAFC] hover:bg-[#1A283D]'
+                              : 'text-[#64748B] hover:text-[#F8FAFC] hover:bg-[#17355C]'
                           }`}
                         >
                           {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -2284,7 +2289,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                             onClick={() => { stopRef.current = true; abortRef.current?.abort(); }}
                             title={localize(profile.language, "Stop generating", "إيقاف التوليد")}
                             aria-label={localize(profile.language, "Stop generating", "إيقاف التوليد")}
-                            className="w-10 h-10 min-w-[40px] rounded-xl bg-[#0D4564] text-[#F8FAFC] hover:bg-[#1A283D] border border-[#22354E] flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
+                            className="w-10 h-10 min-w-[40px] rounded-xl bg-[#0D4564] text-[#F8FAFC] hover:bg-[#17355C] border border-[#24476F] flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer"
                           >
                             <Square className="w-3.5 h-3.5 fill-current" />
                           </button>
@@ -2311,10 +2316,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 setShowPedagogyPopover(!showPedagogyPopover);
                                 setShowQuickActionsPopover(false);
                               }}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
                                 showPedagogyPopover
                                   ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]'
-                                  : 'bg-[#1A283D] border-[#22354E] hover:border-[#1769AA] text-[#94A3B8]'
+                                  : 'bg-[#17355C] border-[#24476F] hover:border-[#1769AA] text-[#94A3B8]'
                               }`}
                               title={localize(profile.language, "Change teaching style", "تغيير أسلوب الشرح")}
                             >
@@ -2333,9 +2338,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
                                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
                                   transition={{ duration: 0.15 }}
-                                  className="absolute bottom-full mb-2 start-0 w-64 bg-[#131E2E] border border-[#22354E] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
+                                  className="absolute bottom-full mb-2 start-0 w-64 bg-[#112C4F] border border-[#24476F] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
                                 >
-                                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#22354E] pb-1 mb-1">
+                                  <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#24476F] pb-1 mb-1">
                                     {localize(profile.language, 'Pedagogy Style', 'أسلوب الشرح')}
                                   </div>
                                   {PEDAGOGY_STYLES.map((st) => {
@@ -2351,14 +2356,14 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                         className={`w-full text-start px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex flex-col gap-0.5 cursor-pointer ${
                                           isSelected
                                             ? 'bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40'
-                                            : 'text-[#94A3B8] hover:bg-[#1A283D] hover:text-[#F8FAFC]'
+                                            : 'text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC]'
                                         }`}
                                       >
                                         <div className="flex items-center justify-between">
                                           <span>{localize(profile.language, st.labelEn, st.labelAr)}</span>
                                           {isSelected && <span className="text-[#4B9FE1] text-xs">✓</span>}
                                         </div>
-                                        <span className="text-[10px] text-[#64748B] font-normal leading-tight">
+                                        <span className="text-xs text-[#64748B] font-normal leading-tight">
                                           {localize(profile.language, st.descriptionEn, st.descriptionAr)}
                                         </span>
                                       </button>
@@ -2377,10 +2382,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                 setShowQuickActionsPopover(!showQuickActionsPopover);
                                 setShowPedagogyPopover(false);
                               }}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors focus-visible:ring-2 focus-visible:ring-[#FFD166] cursor-pointer ${
                                 showQuickActionsPopover
                                   ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]'
-                                  : 'bg-[#1A283D] border-[#22354E] hover:border-[#1769AA] text-[#94A3B8]'
+                                  : 'bg-[#17355C] border-[#24476F] hover:border-[#1769AA] text-[#94A3B8]'
                               }`}
                               title={localize(profile.language, "Quick study tools", "أدوات دراسية سريعة")}
                             >
@@ -2397,9 +2402,9 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
                                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
                                   transition={{ duration: 0.15 }}
-                                  className="absolute bottom-full mb-2 start-0 w-64 bg-[#131E2E] border border-[#22354E] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
+                                  className="absolute bottom-full mb-2 start-0 w-64 bg-[#112C4F] border border-[#24476F] rounded-2xl p-2 shadow-2xl z-40 space-y-1"
                                 >
-                                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#22354E] pb-1 mb-1">
+                                  <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[#4B9FE1] border-b border-[#24476F] pb-1 mb-1">
                                     {localize(profile.language, 'Quick AI Tools', 'أدوات الذكاء الاصطناعي')}
                                   </div>
                                   <button
@@ -2408,7 +2413,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                       fileInputRef.current?.click();
                                       setShowQuickActionsPopover(false);
                                     }}
-                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#1A283D] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
                                   >
                                     <FileText className="w-4 h-4 text-[#4B9FE1] shrink-0" />
                                     <span>{localize(profile.language, 'Analyze Document / PDF', 'تحليل مستند / PDF')}</span>
@@ -2416,10 +2421,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'أنشئ بطاقات استذكار تفاعلية (Flashcards) مع أسئلة وإجابات مركزة تلخص أهم المفاهيم التي شرحتها لي الآن.' : 'Generate active recall flashcards with clear questions and answers summarizing the key concepts we just discussed.');
+                                      handleSubmit(undefined, isArabic ? 'أنشئ بطاقات استذكار تفاعلية (Flashcards) مع أسئلة وإجابات مركزة تلخص أهم المفاهيم التي شرحتها لي الآن.' : L('Generate active recall flashcards with clear questions and answers summarizing the key concepts we just discussed.'));
                                       setShowQuickActionsPopover(false);
                                     }}
-                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#1A283D] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
                                   >
                                     <Layers className="w-4 h-4 text-[#4B9FE1] shrink-0" />
                                     <span>{localize(profile.language, 'Generate Flashcards', 'إنشاء بطاقات استذكار')}</span>
@@ -2427,10 +2432,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'أعطني 3 مسائل تدريبية متدرجة الصعوبة لاختبار فهمي لما تعلمته للتو، مع تلميحات توجيهية لحل كل مسألة.' : 'Give me 3 progressive practice exercises/problems based on this topic, with guided hints for solving each one.');
+                                      handleSubmit(undefined, isArabic ? 'أعطني 3 مسائل تدريبية متدرجة الصعوبة لاختبار فهمي لما تعلمته للتو، مع تلميحات توجيهية لحل كل مسألة.' : L('Give me 3 progressive practice exercises/problems based on this topic, with guided hints for solving each one.'));
                                       setShowQuickActionsPopover(false);
                                     }}
-                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#1A283D] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
                                   >
                                     <BrainCircuit className="w-4 h-4 text-[#4B9FE1] shrink-0" />
                                     <span>{localize(profile.language, 'Practice Problems', 'مسائل تدريبية')}</span>
@@ -2438,10 +2443,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'أعد شرح الفكرة الأخيرة بأسلوب مبسط جداً ومن زاوية مختلفة، واستخدم تشبيهاً واقعياً من الحياة اليومية.' : 'Please re-explain the last concept using a fresh perspective and an intuitive, real-world analogy.');
+                                      handleSubmit(undefined, isArabic ? 'أعد شرح الفكرة الأخيرة بأسلوب مبسط جداً ومن زاوية مختلفة، واستخدم تشبيهاً واقعياً من الحياة اليومية.' : L('Please re-explain the last concept using a fresh perspective and an intuitive, real-world analogy.'));
                                       setShowQuickActionsPopover(false);
                                     }}
-                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#1A283D] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
                                   >
                                     <RotateCcw className="w-4 h-4 text-[#4B9FE1] shrink-0" />
                                     <span>{localize(profile.language, 'Re-explain', 'إعادة الشرح بأسلوب آخر')}</span>
@@ -2449,10 +2454,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'لخص لي هذا الموضوع في 3 نقاط جوهرية مركزة وواضحة جداً (Key Takeaways).' : 'Summarize the core takeaways of this topic into 3 crisp, essential bullet points.');
+                                      handleSubmit(undefined, isArabic ? 'لخص لي هذا الموضوع في 3 نقاط جوهرية مركزة وواضحة جداً (Key Takeaways).' : L('Summarize the core takeaways of this topic into 3 crisp, essential bullet points.'));
                                       setShowQuickActionsPopover(false);
                                     }}
-                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#1A283D] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
+                                    className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
                                   >
                                     <Lightbulb className="w-4 h-4 text-[#4B9FE1] shrink-0" />
                                     <span>{localize(profile.language, 'Key Takeaways', 'الخلاصة وأهم النقاط')}</span>
@@ -2466,10 +2471,10 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           <button
                             type="button"
                             onClick={() => setShowWorkspace(!showWorkspace)}
-                            className={`hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                            className={`hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
                               showWorkspace
                                 ? 'bg-[#1769AA]/20 border-[#1769AA] text-[#F8FAFC]'
-                                : 'bg-[#1A283D] border-[#22354E] text-[#64748B] hover:text-[#94A3B8]'
+                                : 'bg-[#17355C] border-[#24476F] text-[#64748B] hover:text-[#94A3B8]'
                             }`}
                             title={localize(profile.language, 'Open Study Workspace', 'فتح مساحة الدراسة')}
                           >
@@ -2484,7 +2489,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                           <button
                             type="button"
                             onClick={() => setShowFrenchTravelAssistant(true)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#1A283D] border border-[#22354E] hover:border-[#1769AA] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold bg-[#17355C] border border-[#24476F] hover:border-[#1769AA] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors cursor-pointer"
                             title={localize(profile.language, 'Open France Travel Assistant', 'دليل ومترجم فرنسا')}
                           >
                             <span>🇫🇷</span>
@@ -2497,7 +2502,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                   </form>
 
                   {/* Disclaimer */}
-                  <p className="text-center text-[10px] text-[#64748B] tracking-wide">
+                  <p className="text-center text-xs text-[#64748B] tracking-wide">
                     {localize(profile.language, 'Rafiqi can make mistakes. Check important information.', 'رفيقي ممكن يخطئ. راجِع المعلومات المهمة.')}
                   </p>
                 </div>
@@ -2542,7 +2547,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       {/* French Travel & Voice Assistant Modal */}
       {showFrenchTravelAssistant && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
-          <div className="bg-[#131E2E] rounded-2xl border border-[#22354E] shadow-2xl ring-1 ring-[#1685B5]/20 w-full max-w-5xl h-[92vh] flex flex-col overflow-hidden relative">
+          <div className="bg-[#112C4F] rounded-2xl border border-[#24476F] shadow-2xl ring-1 ring-[#1685B5]/20 w-full max-w-5xl h-[92vh] flex flex-col overflow-hidden relative">
             <React.Suspense fallback={<div className="p-8 text-center text-[#4B9FE1]">Chargement...</div>}>
               <FrenchTravelVoiceAssistant
                 profile={profile}

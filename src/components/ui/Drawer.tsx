@@ -120,7 +120,7 @@ export const Drawer: React.FC<DrawerProps> = ({
             transition={{ type: 'spring', damping: 26, stiffness: 280 }}
             className={cn(
               'relative z-10 flex flex-col font-sans shadow-2xl',
-              'bg-cognify-surface-light dark:bg-cognify-surface-dark border-cognify-border-light dark:border-cognify-border-dark',
+              'bg-rafiqi-surface-light dark:bg-rafiqi-surface-dark border-rafiqi-border-light dark:border-rafiqi-border-dark',
               isBottom
                 ? 'w-full mt-auto border-t rounded-t-3xl'
                 : isEnd
@@ -132,12 +132,12 @@ export const Drawer: React.FC<DrawerProps> = ({
           >
             {/* Header */}
             {(title || onClose) && (
-              <div className="flex items-center justify-between p-5 border-b border-cognify-border-light dark:border-cognify-border-dark">
+              <div className="flex items-center justify-between p-5 border-b border-rafiqi-border-light dark:border-rafiqi-border-dark">
                 <div className="space-y-0.5 text-start min-w-0">
                   {title && (
                     <h2
                       id="drawer-title"
-                      className="text-base sm:text-lg font-bold text-cognify-text-primary dark:text-cognify-text-dark-primary truncate"
+                      className="text-base sm:text-lg font-bold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary truncate"
                     >
                       {title}
                     </h2>
@@ -145,7 +145,7 @@ export const Drawer: React.FC<DrawerProps> = ({
                   {description && (
                     <p
                       id="drawer-desc"
-                      className="text-xs text-cognify-text-secondary dark:text-cognify-text-dark-secondary"
+                      className="text-xs text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary"
                     >
                       {description}
                     </p>
@@ -155,7 +155,7 @@ export const Drawer: React.FC<DrawerProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-2 min-h-[44px] min-w-[44px] rounded-xl text-cognify-text-secondary dark:text-cognify-text-dark-secondary hover:text-cognify-text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-cognify-focus"
+                  className="p-2 min-h-[44px] min-w-[44px] rounded-xl text-rafiqi-text-secondary dark:text-rafiqi-text-dark-secondary hover:text-rafiqi-text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-rafiqi-focus"
                   aria-label="Close drawer"
                 >
                   <X className="w-5 h-5" aria-hidden="true" />
@@ -170,7 +170,7 @@ export const Drawer: React.FC<DrawerProps> = ({
 
             {/* Footer */}
             {footer && (
-              <div className="p-4 border-t border-cognify-border-light dark:border-cognify-border-dark bg-slate-50/50 dark:bg-slate-900/40">
+              <div className="p-4 border-t border-rafiqi-border-light dark:border-rafiqi-border-dark bg-slate-50/50 dark:bg-slate-900/40">
                 {footer}
               </div>
             )}

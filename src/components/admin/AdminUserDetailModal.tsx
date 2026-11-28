@@ -93,7 +93,7 @@ export default function AdminUserDetailModal({
         className="bg-[#0D2542] border border-[#16395E]/60 rounded-[32px] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"
       >
         {/* Modal Header */}
-        <div className="p-6 border-b border-[#16395E]/60 flex items-center justify-between bg-[#061A33]/60">
+        <div className="p-6 border-b border-[#16395E]/60 flex items-center justify-between bg-[#0A2342]/60">
           <div className="flex items-center gap-3.5 min-w-0">
             {/* User Avatar with Zoom Lightbox Trigger */}
             <div
@@ -135,7 +135,7 @@ export default function AdminUserDetailModal({
                 <button
                   type="button"
                   onClick={() => copyToClipboard(user.uid, `Firebase UID copied: ${user.uid}`)}
-                  className="inline-flex items-center gap-1 font-mono text-[10px] text-slate-400 hover:text-[#00AEB8] bg-slate-800/80 px-2 py-0.5 rounded transition-colors"
+                  className="inline-flex items-center gap-1 font-mono text-xs text-slate-400 hover:text-[#00AEB8] bg-slate-800/80 px-2 py-0.5 rounded transition-colors"
                   title="Copy Firebase UID"
                 >
                   <span>UID: {user.uid.slice(0, 12)}…</span>
@@ -192,7 +192,7 @@ export default function AdminUserDetailModal({
                     <span className="text-xs font-black uppercase tracking-wider block">
                       Real-Time Presence: {modalPresence.label}
                     </span>
-                    <span className="text-[11px] text-slate-300 font-normal">
+                    <span className="text-xs text-slate-300 font-normal">
                       {modalPresence.status === 'online'
                         ? 'User is actively on Rafiqi right now.'
                         : modalPresence.status === 'away'
@@ -213,27 +213,27 @@ export default function AdminUserDetailModal({
 
               {/* Key Stats Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Points</div>
                   <div className="text-xl font-black text-[#00AEB8] mt-1 font-mono">{user.points || 0}</div>
                 </div>
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Cognitive Score</div>
                   <div className="text-xl font-black text-white mt-1 font-mono">{user.iqScore || '--'}</div>
                 </div>
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Cognitive Level</div>
                   <div className="text-sm font-black text-white mt-1.5 uppercase">{user.level || 'Intermediate'}</div>
                 </div>
-                <div className="bg-[#061A33] p-4 rounded-2xl border border-[#16395E]/60">
+                <div className="bg-[#0A2342] p-4 rounded-2xl border border-[#16395E]/60">
                   <div className="text-xs font-bold text-slate-400 uppercase">Section</div>
                   <div className="text-sm font-black text-white mt-1.5">{sectionOf(user)}</div>
                 </div>
               </div>
 
               {/* Academic & Bio Info */}
-              <div className="bg-[#061A33] p-5 rounded-2xl border border-[#16395E]/60 space-y-3.5 text-xs font-medium">
-                <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Academic &amp; System Info</h4>
+              <div className="bg-[#0A2342] p-5 rounded-2xl border border-[#16395E]/60 space-y-3.5 text-xs font-medium">
+                <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">Academic &amp; System Info</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div><span className="text-slate-400">University:</span> <span className="font-bold text-white">{user.university || 'N/A'}</span></div>
                   <div><span className="text-slate-400">Faculty:</span> <span className="font-bold text-white">{user.faculty || 'N/A'}</span></div>
@@ -277,7 +277,7 @@ export default function AdminUserDetailModal({
                   {user.lastIp && (
                     <div>
                       <span className="text-slate-400">Last IP:</span>{' '}
-                      <span className="font-mono text-[#00AEB8] font-bold text-[11px] bg-[#0D2542] px-2 py-0.5 rounded border border-[#16395E]/60">
+                      <span className="font-mono text-[#00AEB8] font-bold text-xs bg-[#0D2542] px-2 py-0.5 rounded border border-[#16395E]/60">
                         {user.lastIp}
                       </span>
                     </div>
@@ -285,7 +285,7 @@ export default function AdminUserDetailModal({
                   {user.passwordResetRequestedAt && (
                     <div>
                       <span className="text-slate-400">Last Pass Reset:</span>{' '}
-                      <span className="font-bold text-amber-300 font-mono text-[11px]">
+                      <span className="font-bold text-amber-300 font-mono text-xs">
                         {formatDate(user.passwordResetRequestedAt)}
                       </span>
                     </div>
@@ -303,8 +303,8 @@ export default function AdminUserDetailModal({
               </div>
 
               {/* Admin Actions */}
-              <div className="bg-[#061A33] p-5 rounded-2xl border border-[#16395E]/60 space-y-3">
-                <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Admin Adjustments</h4>
+              <div className="bg-[#0A2342] p-5 rounded-2xl border border-[#16395E]/60 space-y-3">
+                <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">Admin Adjustments</h4>
                 <div className="flex flex-wrap items-center gap-2.5">
                   {/* Role Promotion / Demotion */}
                   {canManageSuperAdmin(callerProfile, user) && (
@@ -358,7 +358,7 @@ export default function AdminUserDetailModal({
                         value={user.level || 'Intermediate'}
                         onChange={(e) => onUpdateCognitiveLevel(user, e.target.value as CognitiveLevel)}
                         disabled={busyUid === user.uid}
-                        className="bg-[#0D2542] border border-[#16395E]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+                        className="bg-[#0D2542] border border-[#16395E]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] cursor-pointer"
                       >
                         <option value="Basic">Level: Basic</option>
                         <option value="Intermediate">Level: Intermediate</option>
@@ -370,7 +370,7 @@ export default function AdminUserDetailModal({
                     value={user.country && user.country !== 'Unknown' && user.country !== 'N/A' ? user.country : ''}
                     onChange={(e) => onUpdateCountry(user, e.target.value)}
                     disabled={busyUid === user.uid}
-                    className="bg-[#0D2542] border border-[#16395E]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+                    className="bg-[#0D2542] border border-[#16395E]/50 text-white text-xs font-bold rounded-xl px-3 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] cursor-pointer"
                     title="Set or update user's country"
                   >
                     <option value="" disabled>Set Country...</option>
@@ -395,7 +395,7 @@ export default function AdminUserDetailModal({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">
+                  <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">
                     Login &amp; Geolocation History
                   </h4>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -420,7 +420,7 @@ export default function AdminUserDetailModal({
                         className={`p-4 rounded-2xl border transition-all ${
                           isLatest
                             ? 'bg-emerald-950/20 border-emerald-500/30'
-                            : 'bg-[#061A33] border-[#16395E]/60'
+                            : 'bg-[#0A2342] border-[#16395E]/60'
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
@@ -429,28 +429,28 @@ export default function AdminUserDetailModal({
                               {formatCountryName(record.country)}
                             </span>
                             {record.city && (
-                              <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-md text-[11px]">
+                              <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-md text-xs">
                                 {record.city}{record.region ? `, ${record.region}` : ''}
                               </span>
                             )}
                             {isLatest && (
-                              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-md text-xs font-bold uppercase tracking-wider">
                                 Latest Session
                               </span>
                             )}
                           </div>
-                          <span className="font-mono text-[11px] text-slate-400">
+                          <span className="font-mono text-xs text-slate-400">
                             {formatDate(record.timestamp)}
                           </span>
                         </div>
 
-                        <div className="mt-2.5 pt-2.5 border-t border-slate-900 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+                        <div className="mt-2.5 pt-2.5 border-t border-slate-900 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <Cpu className="w-3 h-3 text-slate-500" />
                             {record.device || 'Standard Web Client'}
                           </span>
                           {record.ip && (
-                            <span className="font-mono text-slate-500 text-[10px]">
+                            <span className="font-mono text-slate-500 text-xs">
                               IP: {record.ip}
                             </span>
                           )}
@@ -460,40 +460,40 @@ export default function AdminUserDetailModal({
                   })}
                 </div>
               ) : (
-                <div className="p-6 bg-[#061A33] border border-[#16395E]/60 rounded-2xl space-y-3">
+                <div className="p-6 bg-[#0A2342] border border-[#16395E]/60 rounded-2xl space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-[#16395E]/30 text-[#00AEB8] border border-[#00AEB8]/20">
                       <Globe className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="text-white font-bold text-xs">Primary Recorded Location</div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-xs text-slate-400">
                         Captured from user profile telemetry (available even when offline).
                       </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 pt-2 text-xs border-t border-slate-900">
                     <div>
-                      <span className="text-slate-500 block text-[10px] uppercase">Last Known Country</span>
+                      <span className="text-slate-500 block text-xs uppercase">Last Known Country</span>
                       <span className="font-bold text-emerald-400">
                         {formatCountryName(user.country)}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block text-[10px] uppercase">Last Active Timestamp</span>
-                      <span className="font-mono text-slate-300 text-[11px]">
+                      <span className="text-slate-500 block text-xs uppercase">Last Active Timestamp</span>
+                      <span className="font-mono text-slate-300 text-xs">
                         {formatDate(newestActiveIso(user))}
                       </span>
                     </div>
                     {user.city && (
                       <div>
-                        <span className="text-slate-500 block text-[10px] uppercase">Last Known City</span>
+                        <span className="text-slate-500 block text-xs uppercase">Last Known City</span>
                         <span className="font-bold text-white">{user.city}</span>
                       </div>
                     )}
                     {user.lastLoginDevice && (
                       <div>
-                        <span className="text-slate-500 block text-[10px] uppercase">Last Device</span>
+                        <span className="text-slate-500 block text-xs uppercase">Last Device</span>
                         <span className="text-slate-300">{user.lastLoginDevice}</span>
                       </div>
                     )}
@@ -505,14 +505,14 @@ export default function AdminUserDetailModal({
 
           {modalTab === 'chats' && (
             <div className="space-y-3">
-              <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Saved Chat Sessions</h4>
+              <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">Saved Chat Sessions</h4>
               {user.chatThreads && user.chatThreads.length > 0 ? (
                 <div className="space-y-2">
                   {user.chatThreads.map((thread) => (
-                    <div key={thread.id} className="p-4 bg-[#061A33] border border-[#16395E]/60 rounded-2xl space-y-1">
+                    <div key={thread.id} className="p-4 bg-[#0A2342] border border-[#16395E]/60 rounded-2xl space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-white">{thread.title || 'Untitled Chat'}</span>
-                        <span className="text-[10px] text-slate-400">{formatDate(thread.updatedAt)}</span>
+                        <span className="text-xs text-slate-400">{formatDate(thread.updatedAt)}</span>
                       </div>
                       {thread.lastMessageSnippet && (
                         <p className="text-xs text-slate-400 line-clamp-2">{thread.lastMessageSnippet}</p>
@@ -528,16 +528,16 @@ export default function AdminUserDetailModal({
 
           {modalTab === 'tasks' && (
             <div className="space-y-3">
-              <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Tasks &amp; Objectives</h4>
+              <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">Tasks &amp; Objectives</h4>
               {user.tasks && user.tasks.length > 0 ? (
                 <div className="space-y-2">
                   {user.tasks.map((task) => (
-                    <div key={task.id} className="flex items-center gap-3 p-3.5 bg-[#061A33] border border-[#16395E]/60 rounded-2xl text-xs">
+                    <div key={task.id} className="flex items-center gap-3 p-3.5 bg-[#0A2342] border border-[#16395E]/60 rounded-2xl text-xs">
                       <div className={`p-1.5 rounded-lg ${task.completed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
                         {task.completed ? <Check className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                       </div>
                       <div className="flex-1 font-medium text-white">{task.content}</div>
-                      <span className={`text-[10px] font-black uppercase ${task.completed ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      <span className={`text-xs font-black uppercase ${task.completed ? 'text-emerald-400' : 'text-amber-400'}`}>
                         {task.completed ? 'Completed' : 'Pending'}
                       </span>
                     </div>
@@ -552,7 +552,7 @@ export default function AdminUserDetailModal({
           {modalTab === 'raw' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="font-black uppercase tracking-wider text-slate-400 text-[11px]">Firestore Document JSON</h4>
+                <h4 className="font-black uppercase tracking-wider text-slate-400 text-xs">Firestore Document JSON</h4>
                 <button
                   onClick={() => copyToClipboard(JSON.stringify(user, null, 2), 'JSON copied to clipboard')}
                   className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white rounded-lg transition-colors border border-[#16395E]/50"
@@ -560,7 +560,7 @@ export default function AdminUserDetailModal({
                   <Copy className="w-3 h-3" /> Copy JSON
                 </button>
               </div>
-              <pre className="p-4 bg-[#061A33] text-emerald-400 font-mono text-xs rounded-2xl overflow-x-auto border border-[#16395E]/60 max-h-96 custom-scrollbar">
+              <pre className="p-4 bg-[#0A2342] text-emerald-400 font-mono text-xs rounded-2xl overflow-x-auto border border-[#16395E]/60 max-h-96 custom-scrollbar">
                 {JSON.stringify(user, null, 2)}
               </pre>
             </div>

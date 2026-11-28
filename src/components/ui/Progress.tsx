@@ -38,7 +38,7 @@ export const Progress: React.FC<ProgressProps> = ({
   return (
     <div className={cn('w-full space-y-1.5 font-sans', className)} {...props}>
       {(label || showLabel) && (
-        <div className="flex items-center justify-between text-xs font-semibold text-cognify-text-primary dark:text-cognify-text-dark-primary">
+        <div className="flex items-center justify-between text-xs font-semibold text-rafiqi-text-primary dark:text-rafiqi-text-dark-primary">
           {label && <span>{label}</span>}
           {showLabel && <span className="tabular-nums ms-auto">{percentage}%</span>}
         </div>

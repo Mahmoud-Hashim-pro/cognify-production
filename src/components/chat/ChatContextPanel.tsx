@@ -138,7 +138,7 @@ export default function ChatContextPanel({
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-100 flex items-center gap-1.5">
                 {localize(profile.language, 'Context & Citations', 'السياق والمصادر')}
               </h3>
-              <p className="text-[10px] text-[0A96A5]/80 font-semibold">
+              <p className="text-xs text-[0A96A5]/80 font-semibold">
                 {localize(profile.language, 'Live Grounding Sources', 'مصادر التوثيق الحية')}
               </p>
             </div>
@@ -157,7 +157,7 @@ export default function ChatContextPanel({
 
         {/* Citation Source Cards */}
         <div className="space-y-2">
-          <div className="text-[10px] font-black uppercase tracking-wider text-[0A96A5] px-1">
+          <div className="text-xs font-black uppercase tracking-wider text-[0A96A5] px-1">
             {localize(profile.language, 'Grounding & Evidence', 'المراجع والأدلة')}
           </div>
 
@@ -175,11 +175,11 @@ export default function ChatContextPanel({
                     {source.name}
                   </span>
                 </div>
-                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#2D0B16] border border-[16395E]/60 text-[0A96A5] shrink-0">
+                <span className="text-xs font-black uppercase px-2 py-0.5 rounded-full bg-[#2D0B16] border border-[16395E]/60 text-[0A96A5] shrink-0">
                   {source.tag}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-snug line-clamp-2 ps-7">
+              <p className="text-xs text-slate-400 leading-snug line-clamp-2 ps-7">
                 {source.description}
               </p>
             </div>
@@ -191,17 +191,17 @@ export default function ChatContextPanel({
       <div className="mt-4 pt-4 border-t border-[16395E]/50">
         <div className="bg-[0A203A]/90 border border-[16395E]/60 rounded-2xl p-3.5 shadow-xl backdrop-blur-xl space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-[0A96A5]" />
               {localize(profile.language, 'Knowledge Map Progress', 'تقدم خارطة المعرفة')}
             </span>
-            <span className="text-[10px] font-mono font-black text-[0A96A5]">
+            <span className="text-xs font-mono font-black text-[0A96A5]">
               {masteredConcepts > 0 ? `+${masteredConcepts} Mastered` : 'Live Grounding'}
             </span>
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
               <span>{localize(profile.language, 'Curriculum Mastery', 'إتقان المنهج')}</span>
               <span className="font-mono text-[0A96A5] font-bold">{curriculumMastery}%</span>
             </div>
@@ -216,13 +216,13 @@ export default function ChatContextPanel({
           <div className="grid grid-cols-2 gap-2 pt-1">
             <div className="flex items-center gap-2 p-2 bg-[0D2542] border border-[16395E]/50 rounded-xl">
               <div className="w-2 h-2 rounded-full bg-[0A96A5] animate-pulse" />
-              <div className="text-[10px] text-slate-300 font-semibold truncate">
+              <div className="text-xs text-slate-300 font-semibold truncate">
                 {totalConcepts > 0 ? `${masteredConcepts}/${totalConcepts} Mastered` : `${masteredConcepts} Mastered`}
               </div>
             </div>
             <div className="flex items-center gap-2 p-2 bg-[0D2542] border border-[16395E]/50 rounded-xl">
               <div className="w-2 h-2 rounded-full bg-amber-400" />
-              <div className="text-[10px] text-slate-300 font-semibold truncate">
+              <div className="text-xs text-slate-300 font-semibold truncate">
                 {retentionRate > 0 ? `${retentionRate}% Retention` : '4 Verified Sources'}
               </div>
             </div>

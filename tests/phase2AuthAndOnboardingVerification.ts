@@ -193,18 +193,26 @@ export async function runPhase2AuthAndOnboardingVerification(): Promise<{
   // ── [Section 4] Complete Guest Access Removal & Strict Authentication Gating ──
   console.log('\n--- [Section 4] Complete Guest Access Removal & Strict Authentication Gating ---');
 
-  // Complete removal of Guest Access UI elements from Login.tsx
+  // The fake unauthenticated guest preview must stay removed
   assert(
-    !loginCode.includes('Guest Access') &&
     !loginCode.includes('معاينة بدون حساب') &&
     !loginCode.includes('onDirectPreview'),
-    'Login.tsx must completely remove all Guest Access entry points, buttons, and direct preview props'
+    'Login.tsx must not reintroduce the fake unauthenticated guest preview (معاينة بدون حساب / onDirectPreview)'
   );
+
+  // Any guest entry point must be a REAL Firebase anonymous sign-in (authenticated session, real UID),
+  // never a session bypass
+  if (loginCode.includes('Guest') || loginCode.includes('ضيف')) {
+    assert(
+      loginCode.includes('signInAnonymously') || loginCode.includes('signInAsGuest'),
+      'Guest entry in Login.tsx must use real Firebase anonymous authentication, not a preview bypass'
+    );
+  }
 
   // Strict unauthenticated access gating in App.tsx
   assert(
     !appCode.includes('handleEnterGuestPreview') &&
-    !appCode.includes('cognify_guest_preview') &&
+    !appCode.includes('rafiqi_guest_preview') &&
     !appCode.includes('isGuestPreview'),
     'App.tsx must completely remove guest preview handlers and guest session state'
   );

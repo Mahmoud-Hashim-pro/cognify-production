@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { isSafeImageUrl } from '../api/proxy-image.js';
+import { isSafeImageUrl } from '../api/_lib/proxy/proxy-image.js';
 import {
   sha256,
   sampleLaplace,
@@ -161,7 +161,7 @@ export async function runPrivacySecurityVerification(): Promise<{ passed: number
   });
 
   assert(exportPkg.studentUid === 'stu_export_test_01', 'Export package contains correct student UID');
-  assert(exportPkg.formatVersion === 'cognify-export-v2.0', 'Export package uses standardized format version');
+  assert(exportPkg.formatVersion === 'rafiqi-export-v2.0', 'Export package uses standardized format version');
   assert(exportPkg.integrityChecksum.length === 64, 'Export package has valid 64-character SHA-256 checksum');
 
   // Verify integrity by recalculating

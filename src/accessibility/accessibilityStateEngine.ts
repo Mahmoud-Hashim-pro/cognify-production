@@ -190,7 +190,7 @@ export const setManualAccessibilityPreference = setManualPreference;
  * Loads stored accessibility state from device storage, falling back to defaults.
  */
 export function loadStoredAccessibilityState(userId: string): AccessibilityState {
-  const key = `cognify_a11y_state_v2_${userId || 'anonymous'}`;
+  const key = `rafiqi_a11y_state_v2_${userId || 'anonymous'}`;
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const raw = window.localStorage.getItem(key);
@@ -209,7 +209,7 @@ export function loadStoredAccessibilityState(userId: string): AccessibilityState
  * Persists accessibility state to device storage.
  */
 export function persistAccessibilityState(state: AccessibilityState): void {
-  const key = `cognify_a11y_state_v2_${state.userId || 'anonymous'}`;
+  const key = `rafiqi_a11y_state_v2_${state.userId || 'anonymous'}`;
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem(key, JSON.stringify(state));

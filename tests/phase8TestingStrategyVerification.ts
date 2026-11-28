@@ -12,7 +12,7 @@
  * 8. Duplicate submissions & retry storm defense (jittered backoff)
  * 9. Safe error handling when AI providers are unavailable
  * 10. Preservation of user records (zero destructive deletes/cascades)
- * 11. Database query bounding & memory limits (GDPR export, loginHistory, goals)
+ * 11. Database query bounding & memory limits (GDPR export, loginHistory)
  */
 
 import assert from 'assert';
@@ -113,9 +113,9 @@ console.log('\n[Area 2: Cross-User Database Isolation & Session Cache Purging]')
 
 it('Logout implementation purges user-specific memory, spatial, and event caches', () => {
   const firebaseFile = fs.readFileSync('src/lib/firebase.ts', 'utf8');
-  assert.ok(firebaseFile.includes('cognify_student_memory_'), 'Must purge student memory prefix');
-  assert.ok(firebaseFile.includes('cognify_spatial_v2_'), 'Must purge spatial memory prefix');
-  assert.ok(firebaseFile.includes('cognify_learning_events_'), 'Must purge learning event store prefix');
+  assert.ok(firebaseFile.includes('rafiqi_student_memory_'), 'Must purge student memory prefix');
+  assert.ok(firebaseFile.includes('rafiqi_spatial_v2_'), 'Must purge spatial memory prefix');
+  assert.ok(firebaseFile.includes('rafiqi_learning_events_'), 'Must purge learning event store prefix');
 });
 
 it('Spatial memory cache partitions physical objects strictly by UID', () => {
@@ -216,19 +216,9 @@ it('Login history prune query is strictly bounded with limit(100)', () => {
   assert.ok(loginHistoryFile.includes('limit(100)'), 'pruneOldLoginHistory must include limit(100)');
 });
 
-it('Goals queries in goals.ts are strictly bounded with limit(100)', () => {
-  const goalsFile = fs.readFileSync('src/lib/goals.ts', 'utf8');
-  assert.ok(goalsFile.includes('limit(100)'), 'goalsCol queries must include limit(100)');
-});
-
 it('Spatial memory hydration is strictly bounded with limit(150)', () => {
   const spatialFile = fs.readFileSync('src/lib/spatialMemoryEngine.ts', 'utf8');
   assert.ok(spatialFile.includes('limit(150)'), 'loadSpatialObjectsFromFirestore must include limit(150)');
-});
-
-it('GDPR full data export queries in StudentPrivacyCenter are bounded with limit(500)', () => {
-  const privacyFile = fs.readFileSync('src/components/StudentPrivacyCenter.tsx', 'utf8');
-  assert.ok(privacyFile.includes('limit(500)'), 'Archive exporter must bound threads and goals with limit(500)');
 });
 
 // -----------------------------------------------------------------------------

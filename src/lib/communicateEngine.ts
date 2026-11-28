@@ -21,6 +21,7 @@
  * 5. Never invent missing personal information when explaining or filling forms.
  * 6. Never send, post, or forward messages without explicit user review and confirmation.
  */
+import { L } from './translations';
 
 // ═════════════════════════════════════════════════════════════════════════════
 // 1. HUMAN ASSISTANCE & LIVE VIDEO INTEGRATION BOUNDARIES
@@ -390,7 +391,7 @@ export function transcribeVoiceMessage(
     uncertainSegments.push({
       timestampStart: 4.5,
       timestampEnd: 7.2,
-      textSnippet: isArabic ? 'يوم الثلاثاء الساعة عشرة' : 'Tuesday at 10 AM',
+      textSnippet: isArabic ? 'يوم الثلاثاء الساعة عشرة' : L('Tuesday at 10 AM'),
       confidence: confidenceScore,
     });
   }

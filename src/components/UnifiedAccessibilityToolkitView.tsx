@@ -6,6 +6,7 @@
  * (Phase 7: Integrated Visual Assistant, Document Scanner, PDF Evidence Assistant & Sticker Explainer)
  */
 
+import { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -43,10 +44,15 @@ import {
   Palette,
   Users,
   ScanLine,
+  Leaf,
+  Brain,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { toast } from './Toast';
+import { AdaptiveEnvironmentPanel } from './AdaptiveEnvironmentPanel';
+import { ReadingSupportPanel } from './ReadingSupportPanel';
+import { CognitiveGymPanel } from './CognitiveGymPanel';
 import { Breadcrumbs } from './ui/Breadcrumbs';
 import { getRouteBreadcrumbs } from '../lib/navigation';
 import { speak, cancelSpeech } from '../lib/tts';
@@ -90,7 +96,20 @@ export default function UnifiedAccessibilityToolkitView({
   isDarkMode = true,
 }: UnifiedAccessibilityToolkitViewProps) {
   const isAr = isArabicLocale(profile.language);
-  const [activeCategory, setActiveCategory] = useState<ToolkitCategory>('see_understand');
+  const [activeCategory, setActiveCategory] = useState<ToolkitCategory>(() => {
+    try {
+      const c = sessionStorage.getItem('rafiqi_toolkit_category');
+      if (c) {
+        sessionStorage.removeItem('rafiqi_toolkit_category');
+        return c as ToolkitCategory;
+      }
+    } catch {}
+    return 'see_understand';
+  });
+  useEffect(() => {
+    document.querySelector(`[data-toolkit-cat="${activeCategory}"]`)?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [activeCategory]);
+
 
   // Screen-reader live announcement region
   const [announcement, setAnnouncement] = useState('');
@@ -156,7 +175,7 @@ export default function UnifiedAccessibilityToolkitView({
         // Save to persistent activity
         saveToolkitActivity({
           type: 'sticker_image',
-          title: file.name.replace(/\.[^/.]+$/, '') || (isAr ? 'ملصق صورة' : 'Image Sticker'),
+          title: file.name.replace(/\.[^/.]+$/, '') || (isAr ? 'ملصق صورة' : L('Image Sticker')),
           snippet: result.summary,
           fullContent: result.detailedDescription,
           mediaUrl: dataUrl,
@@ -171,7 +190,7 @@ export default function UnifiedAccessibilityToolkitView({
     } catch (err: any) {
       console.error('Failed to process sticker file:', err);
       setIsAnalyzingSticker(false);
-      toast.error(isAr ? 'فشل فحص الملصق' : 'Failed to analyze sticker');
+      toast.error(isAr ? 'فشل فحص الملصق' : L('Failed to analyze sticker'));
     }
   };
 
@@ -203,10 +222,19 @@ export default function UnifiedAccessibilityToolkitView({
         await scanVideoRef.current.play();
       }
       setIsCameraActive(true);
-      announceToScreenReader(isAr ? 'تم تشغيل كاميرا مسح المستندات' : 'Document scanner camera ready');
+      announceToScreenReader(isAr ? 'تم تشغيل كاميرا مسح المستندات' : L('Document scanner camera ready'));
     } catch (err: any) {
       console.error('Camera access denied:', err);
-      toast.error(isAr ? 'تعذر الوصول للكاميرا' : 'Camera access denied');
+      const camName = err?.name || '';
+      if (camName === 'NotFoundError' || camName === 'DevicesNotFoundError') {
+        toast.error(isAr ? 'مفيش كاميرا متوصلة بالجهاز.' : L('No camera was found on this device.'));
+      } else if (camName === 'NotReadableError' || camName === 'TrackStartError') {
+        toast.error(isAr ? 'الكاميرا مستخدمة في برنامج تاني. اقفليه وجربي تاني.' : L('The camera is in use by another app. Close it and try again.'));
+      } else if (camName === 'NotAllowedError' || camName === 'PermissionDeniedError') {
+        toast.error(isAr ? 'الكاميرا محظورة: اضغطي رمز القفل جنب العنوان، Site settings، Camera، Allow، وحدّثي الصفحة.' : L('Camera is blocked: click the lock icon, Site settings, Camera, Allow, then reload.'));
+      } else {
+        toast.error(isAr ? 'تعذر الوصول للكاميرا' : L('Camera access denied'));
+      }
     }
   };
 
@@ -266,7 +294,7 @@ export default function UnifiedAccessibilityToolkitView({
           height: p.height,
           pageNumber: p.pageNumber,
         })),
-        isAr ? 'مستند ممسوح ضوئياً - رفيقي' : 'Rafiqi Scanned Document'
+        isAr ? 'مستند ممسوح ضوئياً - رفيقي' : L('Rafiqi Scanned Document')
       );
 
       const url = URL.createObjectURL(pdfBlob);
@@ -278,7 +306,7 @@ export default function UnifiedAccessibilityToolkitView({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success(isAr ? 'تم تصدير ملف PDF بنجاح 📄' : 'PDF exported successfully 📄');
+      toast.success(isAr ? 'تم تصدير ملف PDF بنجاح 📄' : L('PDF exported successfully 📄'));
 
       // Save to Activity Store
       saveToolkitActivity({
@@ -289,7 +317,7 @@ export default function UnifiedAccessibilityToolkitView({
       });
     } catch (err: any) {
       console.error('Failed to compile PDF:', err);
-      toast.error(isAr ? 'فشل تصدير ملف PDF' : 'Failed to export PDF');
+      toast.error(isAr ? 'فشل تصدير ملف PDF' : L('Failed to export PDF'));
     } finally {
       setIsCompilingPdf(false);
     }
@@ -322,19 +350,19 @@ export default function UnifiedAccessibilityToolkitView({
           toast.success(isAr ? `تم تحميل ${res.pageCount} صفحة بنجاح!` : `Loaded ${res.pageCount} pages!`);
           announceToScreenReader(isAr ? `تم فتح مستند ${file.name}` : `Opened document ${file.name}`);
         } else {
-          toast.error(res.errorMessage || (isAr ? 'تعذر قراءة ملف PDF' : 'Failed to read PDF'));
+          toast.error(res.errorMessage || (isAr ? 'تعذر قراءة ملف PDF' : L('Failed to read PDF')));
         }
       } else if (file.name.endsWith('.docx')) {
         const res = await extractTextFromDocx(buffer);
         if (res.valid) {
           setPdfTextContent(res.text);
           setPdfPages([res.text]);
-          toast.success(isAr ? 'تم استخراج نصوص المستند' : 'Document text extracted');
+          toast.success(isAr ? 'تم استخراج نصوص المستند' : L('Document text extracted'));
         }
       }
     } catch (err: any) {
       console.error('Failed to load PDF for evidence assistant:', err);
-      toast.error(isAr ? 'فشل معالجة المستند' : 'Failed to process document');
+      toast.error(isAr ? 'فشل معالجة المستند' : L('Failed to process document'));
     }
   };
 
@@ -348,7 +376,7 @@ export default function UnifiedAccessibilityToolkitView({
       setIsSearchingEvidence(false);
 
       // Announce answer and quote
-      const speakText = `${result.answer}. ${isAr ? 'الدليل من صفحة' : 'Evidence from page'} ${result.pageNumber}: ${result.evidenceQuote}`;
+      const speakText = `${result.answer}. ${isAr ? 'الدليل من صفحة' : L('Evidence from page')} ${result.pageNumber}: ${result.evidenceQuote}`;
       announceToScreenReader(speakText);
       speak(speakText, isAr ? 'Arabic' : 'English');
 
@@ -363,7 +391,7 @@ export default function UnifiedAccessibilityToolkitView({
     } catch (err: any) {
       console.error('Evidence query error:', err);
       setIsSearchingEvidence(false);
-      toast.error(isAr ? 'فشل البحث عن الدليل' : 'Failed to search evidence');
+      toast.error(isAr ? 'فشل البحث عن الدليل' : L('Failed to search evidence'));
     }
   };
 
@@ -399,7 +427,7 @@ export default function UnifiedAccessibilityToolkitView({
   return (
     <div
       dir={isAr ? 'rtl' : 'ltr'}
-      className={`flex-1 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
+      className={`flex-1 flex flex-col h-full overflow-hidden tool-blue transition-colors duration-300 ${
         isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'
       }`}
     >
@@ -414,33 +442,41 @@ export default function UnifiedAccessibilityToolkitView({
           isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200 shadow-sm'
         }`}
       >
-        <div className="flex items-center gap-3">
-          <Breadcrumbs
-            items={getRouteBreadcrumbs({ view: 'toolkit' }, profile?.language)}
-            onNavigate={(v) => {
-              if (v === 'disability' && onNavigateBack) onNavigateBack();
-            }}
-            onNavigateBack={onNavigateBack}
-            backLabel={isAr ? 'لوحة الميزات' : 'Hub'}
-            isDarkMode={isDarkMode}
-          />
-
-          <div className="flex items-center gap-2.5 hidden md:flex">
-            <div className="w-9 h-9 rounded-xl bg-teal-600/20 border border-teal-500/40 text-teal-400 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-            </div>
-            <div>
-              <h1 className="text-sm sm:text-base font-black leading-tight">
-                {localize(profile.language, 'Integrated Accessibility Toolkit', 'منظومة الوصول المتكاملة والمساعد البصري')}
-              </h1>
-              <p className="text-[11px] text-stone-400">
-                {localize(profile.language, 'Unified Vision, Document Scanner, PDF Assistant & Sticker Explainer', 'الرؤية، الماسح الضوئي، ومساعد المستندات وشرح الملصقات')}
-              </p>
-            </div>
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="hidden">
+            <Breadcrumbs
+              items={getRouteBreadcrumbs({ view: 'toolkit' }, profile?.language)}
+              onNavigate={(v) => {
+                if (v === 'disability' && onNavigateBack) onNavigateBack();
+              }}
+              onNavigateBack={onNavigateBack}
+              backLabel={isAr ? 'لوحة الميزات' : L('Hub')}
+              isDarkMode={isDarkMode}
+            />
           </div>
+          {onNavigateBack && (
+            <button
+              type="button"
+              onClick={onNavigateBack}
+              aria-label={isAr ? 'الرجوع للوحة الميزات' : L('Back')}
+              className={`min-h-[44px] min-w-[44px] p-2.5 rounded-xl border flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
+                isDarkMode ? 'bg-stone-800/80 border-stone-700 text-teal-400' : 'bg-stone-100 border-stone-200 text-teal-700'
+              }`}
+            >
+              <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+          <h1 className="text-base font-black leading-tight truncate">
+            <span>{localize(profile.language, 'Vision & Tools', 'الرؤية والأدوات')}</span>
+            <span className="hidden">{localize(profile.language, 'Integrated Accessibility Toolkit', 'منظومة الوصول المتكاملة والمساعد البصري')}</span>
+          </h1>
+          <p className="hidden">
+            {localize(profile.language, 'Unified Vision, Document Scanner, PDF Assistant & Sticker Explainer', 'الرؤية، الماسح الضوئي، ومساعد المستندات وشرح الملصقات')}
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          <ToolSwitcherSlot />
           <button
             type="button"
             onClick={() => setShowUsageModal(true)}
@@ -463,20 +499,38 @@ export default function UnifiedAccessibilityToolkitView({
       <nav
         role="tablist"
         aria-label={localize(profile.language, 'Toolkit Categories', 'أقسام المنظومة الميسرة')}
-        className={`px-3 py-2 border-b flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 ${
-          isDarkMode ? 'bg-cognify-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
+        onKeyDown={(e) => {
+          // Arrow / Home / End move focus between tabs (focus only; Enter or Space still selects).
+          const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+          if (!keys.includes(e.key)) return;
+          const tabs = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]'));
+          const i = tabs.indexOf(document.activeElement as HTMLElement);
+          if (i < 0) return;
+          const rtl = getComputedStyle(e.currentTarget).direction === 'rtl';
+          let n = i;
+          if (e.key === 'Home') n = 0;
+          else if (e.key === 'End') n = tabs.length - 1;
+          else n = (i + (e.key === 'ArrowRight' ? 1 : -1) * (rtl ? -1 : 1) + tabs.length) % tabs.length;
+          e.preventDefault();
+          tabs[n]?.focus();
+        }}
+        className={`px-3 py-2 border-b flex flex-nowrap overflow-x-auto custom-scrollbar items-center gap-1.5 shrink-0 ${
+          isDarkMode ? 'bg-rafiqi-surface-dark border-stone-800' : 'bg-stone-50 border-stone-200'
         }`}
       >
         {[
-          { id: 'see_understand' as const, labelAr: '👁️ شاهد وافهم (ملصقات ومشاهد)', labelEn: '👁️ See & Understand (Stickers & Scene)' },
-          { id: 'read_scan' as const, labelAr: '📄 اقرأ وامسح (سكانر و PDF)', labelEn: '📄 Read & Scan (Scanner & PDF)' },
-          { id: 'listen_transcribe' as const, labelAr: '🎙️ استمع وفرّغ (المحاضرات)', labelEn: '🎙️ Listen & Transcribe' },
-          { id: 'format_edu' as const, labelAr: '📖 استوديو الكتب والامتحانات', labelEn: '📖 Educational Book Studio' },
-          { id: 'saved_activity' as const, labelAr: '🕒 السجل والنتائج المحفوظة', labelEn: '🕒 Saved Results & Activity' },
+          { id: 'see_understand' as const, labelAr: 'شاهد وافهم (ملصقات ومشاهد)', labelEn: 'See & Understand (Stickers & Scene)', Icon: Eye },
+          { id: 'read_scan' as const, labelAr: 'اقرأ وامسح (سكانر و PDF)', labelEn: 'Read & Scan (Scanner & PDF)', Icon: ScanLine },
+          { id: 'listen_transcribe' as const, labelAr: 'استمع وفرّغ (المحاضرات)', labelEn: 'Listen & Transcribe', Icon: Headphones },
+          { id: 'format_edu' as const, labelAr: 'استوديو الكتب والامتحانات', labelEn: 'Educational Book Studio', Icon: BookOpen },
+          { id: 'environment' as const, labelAr: 'مساعد البيئة (إضاءة وضوضاء)', labelEn: 'Environment Assistant (Light & Noise)', Icon: Leaf },
+          { id: 'cognitive_gym' as const, labelAr: 'صالة التفكير والتركيز', labelEn: 'Thinking & Focus Gym', Icon: Brain },
+          { id: 'saved_activity' as const, labelAr: 'السجل والنتائج المحفوظة', labelEn: 'Saved Results & Activity', Icon: Clock },
         ].map((cat) => {
           const isSelected = activeCategory === cat.id;
           return (
             <button
+              data-toolkit-cat={cat.id}
               key={cat.id}
               role="tab"
               aria-selected={isSelected}
@@ -484,7 +538,7 @@ export default function UnifiedAccessibilityToolkitView({
                 setActiveCategory(cat.id);
                 announceToScreenReader(localize(profile.language, cat.labelEn, cat.labelAr));
               }}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center text-center gap-1.5 shrink-0 whitespace-nowrap min-h-[44px] sm:basis-auto sm:flex-none min-h-[44px] ${
                 isSelected
                   ? 'bg-teal-700 text-white shadow-sm font-black'
                   : isDarkMode
@@ -492,6 +546,7 @@ export default function UnifiedAccessibilityToolkitView({
                   : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200'
               }`}
             >
+              <cat.Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
               <span>{localize(profile.language, cat.labelEn, cat.labelAr)}</span>
             </button>
           );
@@ -499,14 +554,14 @@ export default function UnifiedAccessibilityToolkitView({
       </nav>
 
       {/* ── TAB CONTENT REGION ── */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-6 md:p-8">
-        <div className="max-w-5xl mx-auto space-y-6">
+      <main className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 md:p-5 pb-24">
+        <div className="max-w-5xl mx-auto space-y-4">
 
           {/* ═════════════════════════════════════════════════════════════════
               CATEGORY 1: SEE AND UNDERSTAND (IMAGES, WHATSAPP STICKERS & SCENES)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'see_understand' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Visual Assistant Live Camera Tools Suite Card */}
               <div
                 className={`p-6 rounded-3xl border ${
@@ -539,7 +594,7 @@ export default function UnifiedAccessibilityToolkitView({
                     onClick={() => {
                       window.location.hash = '#disability/vision/scene';
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 min-h-[44px]"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 min-h-[44px]"
                     aria-label={localize(profile.language, 'Launch full camera vision companion', 'فتح المساعد البصري الكامل بالكاميرا')}
                   >
                     <Eye className="w-4 h-4" />
@@ -632,8 +687,8 @@ export default function UnifiedAccessibilityToolkitView({
                             <span className="p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
                               <ToolIcon className="w-5 h-5" />
                             </span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400">
-                              {tool.badge}
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                              {L(tool.badge)}
                             </span>
                           </div>
                           <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 mb-1">
@@ -648,7 +703,7 @@ export default function UnifiedAccessibilityToolkitView({
                           onClick={() => {
                             window.location.hash = `#disability/vision/${tool.id}`;
                           }}
-                          className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-teal-600/15 hover:bg-teal-600 hover:text-white text-teal-600 dark:text-teal-400 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 min-h-[44px]"
+                          className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-teal-600/15 hover:bg-teal-600 hover:text-white text-teal-600 dark:text-teal-400 text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-teal-400 min-h-[44px]"
                           aria-label={localize(profile.language, tool.btnEn, tool.btnAr)}
                         >
                           <Camera className="w-4 h-4" />
@@ -710,7 +765,7 @@ export default function UnifiedAccessibilityToolkitView({
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   className="hidden"
                   id="pecs-sticker-upload"
-                  aria-label={isAr ? 'رفع صورة لبطاقة التواصل المرئي' : 'Upload PECS card image'}
+                  aria-label={isAr ? 'رفع صورة لبطاقة التواصل المرئي' : L('Upload PECS card image')}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) handleProcessStickerFile(f);
@@ -769,7 +824,7 @@ export default function UnifiedAccessibilityToolkitView({
                       <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="px-2.5 py-1 rounded-xl bg-teal-500/20 border border-teal-500/40 text-teal-400 text-xs font-bold">
-                            {localize(profile.language, 'Tone / Emotion', 'المشاعر والنبرة')}: {stickerResult.emotionOrVibe || (isAr ? 'عفوية' : 'Neutral')}
+                            {localize(profile.language, 'Tone / Emotion', 'المشاعر والنبرة')}: {stickerResult.emotionOrVibe || (isAr ? 'عفوية' : L('Neutral'))}
                           </span>
                           {stickerResult.inscribedText && (
                             <span className="px-2.5 py-1 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold">
@@ -805,7 +860,7 @@ export default function UnifiedAccessibilityToolkitView({
                             type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(stickerResult.detailedDescription);
-                              toast.success(isAr ? 'تم نسخ الوصف' : 'Description copied');
+                              toast.success(isAr ? 'تم نسخ الوصف' : L('Description copied'));
                             }}
                             className="px-3 py-1.5 rounded-xl border border-stone-700 hover:bg-stone-800 text-stone-300 font-bold text-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
                           >
@@ -825,7 +880,7 @@ export default function UnifiedAccessibilityToolkitView({
               CATEGORY 2: READ AND SCAN (MULTI-PAGE SCANNER & PDF CREATOR)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'read_scan' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -942,7 +997,7 @@ export default function UnifiedAccessibilityToolkitView({
                           className="relative rounded-2xl overflow-hidden border border-stone-700 group bg-black/40"
                         >
                           <img src={p.thumbnailUrl} alt={`Page ${idx + 1}`} className="w-full h-32 object-cover" />
-                          <div className="absolute top-2 start-2 px-2 py-0.5 rounded-md bg-black/80 text-white text-[10px] font-bold">
+                          <div className="absolute top-2 start-2 px-2 py-0.5 rounded-md bg-black/80 text-white text-xs font-bold">
                             #{idx + 1}
                           </div>
                           <button
@@ -992,7 +1047,7 @@ export default function UnifiedAccessibilityToolkitView({
                             'Ask any question (e.g. "What is the passing grade according to page 2?")...',
                             'اطرح سؤالاً عن المستند (مثال: ما هي شروط النجاح وفقاً للصفحة 2؟)...'
                           )}
-                          className={`flex-1 px-4 py-2.5 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-indigo-500 ${
+                          className={`flex-1 px-4 py-2.5 rounded-xl border text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-indigo-500 ${
                             isDarkMode ? 'bg-[#121B1E] border-stone-700 text-white' : 'bg-white border-stone-300 text-stone-900'
                           }`}
                         />
@@ -1008,14 +1063,14 @@ export default function UnifiedAccessibilityToolkitView({
                       </div>
 
                       {evidenceResult && (
-                        <div className={`p-4 rounded-xl ${isDarkMode ? 'bg-cognify-surface-dark' : 'bg-white border border-stone-200'} space-y-2`}>
+                        <div className={`p-4 rounded-xl ${isDarkMode ? 'bg-rafiqi-surface-dark' : 'bg-white border border-stone-200'} space-y-2`}>
                           <p className="text-sm font-bold text-white">{evidenceResult.answer}</p>
                           {evidenceResult.evidenceQuote && (
                             <blockquote className="border-s-2 border-indigo-500 ps-3 text-xs italic text-stone-300 my-2">
                               "{evidenceResult.evidenceQuote}"
                             </blockquote>
                           )}
-                          <div className="flex items-center gap-3 text-[11px] text-stone-400">
+                          <div className="flex items-center gap-3 text-xs text-stone-400">
                             <span>
                               {localize(profile.language, 'Page', 'الصفحة')}: <strong className="text-indigo-400">{evidenceResult.pageNumber}</strong>
                             </span>
@@ -1034,6 +1089,10 @@ export default function UnifiedAccessibilityToolkitView({
                   )}
                 </div>
               </div>
+              <ReadingSupportPanel
+                isArabic={isArabicLocale(profile.language)}
+                isDarkMode={isDarkMode}
+              />
             </div>
           )}
 
@@ -1041,7 +1100,7 @@ export default function UnifiedAccessibilityToolkitView({
               CATEGORY 3: LISTEN AND TRANSCRIBE (AUDIO LECTURES & SPEECH)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'listen_transcribe' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -1091,7 +1150,7 @@ export default function UnifiedAccessibilityToolkitView({
               CATEGORY 4: FORMAT EDUCATIONAL DOCUMENTS (BOOK STUDIO LINK)
              ═════════════════════════════════════════════════════════════════ */}
           {activeCategory === 'format_edu' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -1138,8 +1197,40 @@ export default function UnifiedAccessibilityToolkitView({
           {/* ═════════════════════════════════════════════════════════════════
               CATEGORY 5: SAVED RESULTS AND RECENT ACTIVITY HUB
              ═════════════════════════════════════════════════════════════════ */}
+          {activeCategory === 'environment' && (
+            <div className="space-y-4">
+              <div
+                className={`p-6 rounded-3xl border ${
+                  isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
+                }`}
+              >
+                <h2
+                  className={`text-lg font-black mb-3 ${
+                    isDarkMode ? 'text-stone-100' : 'text-stone-900'
+                  }`}
+                >
+                  {localize(profile.language, 'Environment Assistant', 'مساعد البيئة')}
+                </h2>
+                <AdaptiveEnvironmentPanel
+                  isArabic={isArabicLocale(profile.language)}
+                  isDarkMode={isDarkMode}
+                  currentA11y={profile.disabilityType ?? ''}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeCategory === 'cognitive_gym' && (
+            <div className="space-y-4">
+              <CognitiveGymPanel
+                isArabic={isArabicLocale(profile.language)}
+                isDarkMode={isDarkMode}
+              />
+            </div>
+          )}
+
           {activeCategory === 'saved_activity' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div
                 className={`p-6 rounded-3xl border ${
                   isDarkMode ? 'bg-[#121B1E] border-stone-800' : 'bg-white border-stone-200'
@@ -1166,7 +1257,7 @@ export default function UnifiedAccessibilityToolkitView({
                       onClick={() => {
                         clearToolkitActivities();
                         setActivityList([]);
-                        toast.info(isAr ? 'تم مسح السجل' : 'Activity cleared');
+                        toast.info(isAr ? 'تم مسح السجل' : L('Activity cleared'));
                       }}
                       className="px-3 py-1.5 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs font-bold cursor-pointer"
                     >
@@ -1190,11 +1281,11 @@ export default function UnifiedAccessibilityToolkitView({
                       >
                         <div className="space-y-1 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-400 text-[10px] font-bold uppercase">
+                            <span className="px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-400 text-xs font-bold uppercase">
                               {item.type}
                             </span>
                             <h4 className="text-xs sm:text-sm font-bold text-white">{item.title}</h4>
-                            <span className="text-[10px] text-stone-400">
+                            <span className="text-xs text-stone-400">
                               {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
@@ -1215,7 +1306,7 @@ export default function UnifiedAccessibilityToolkitView({
                             type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(item.fullContent || item.snippet);
-                              toast.success(isAr ? 'تم النسخ' : 'Copied');
+                              toast.success(isAr ? 'تم النسخ' : L('Copied'));
                             }}
                             className="p-2 rounded-xl border border-stone-700 hover:bg-stone-800 text-stone-300 cursor-pointer"
                             aria-label={localize(profile.language, 'Copy Text', 'نسخ النص')}
