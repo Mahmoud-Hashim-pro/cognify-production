@@ -54,7 +54,7 @@ export default function UnifiedHearingCenter({
 }: UnifiedHearingCenterProps) {
   // Dialect / Language
   const [dialect, setDialect] = useState<Dialect>(() => {
-    if (profile.language === 'English') return 'English';
+    if (profile.language === 'English' || profile.language === 'French') return 'English';
     if (profile.language === 'Arabic') return 'Arabic';
     return 'Egyptian Ammiya';
   });
@@ -68,7 +68,7 @@ export default function UnifiedHearingCenter({
 
   // Helper for dialect-responsive localization
   const loc = useCallback(
-    (en: string, ar: string) => (dialect === 'English' ? en : ar),
+    (en: string, ar: string) => (dialect === 'English' ? L(en) : ar),
     [dialect]
   );
 
@@ -417,8 +417,8 @@ Question: "${q}"`;
           className="flex items-center gap-1.5 p-1 rounded-full bg-[#0D2542] border border-[#12CFE0]/20 self-start sm:self-auto shrink-0 shadow-inner"
         >
           {([
-            { id: 'Egyptian Ammiya' as const, labelEn: '🇪🇬 Egyptian', labelAr: 'مصري', icon: true },
-            { id: 'Arabic' as const, labelEn: '🇸🇦 Arabic', labelAr: 'عربي', icon: false },
+            { id: 'Egyptian Ammiya' as const, labelEn: L('🇪🇬 Egyptian'), labelAr: 'مصري', icon: true },
+            { id: 'Arabic' as const, labelEn: L('🇸🇦 Arabic'), labelAr: 'عربي', icon: false },
             { id: 'English' as const, labelEn: 'us EN', labelAr: 'us EN', icon: false },
           ]).map((item) => {
             const isSelected = dialect === item.id;
