@@ -12,6 +12,7 @@
  * 5. Chart Description Engine with honest grounded trends, comparisons, and tabular equivalents without hallucination.
  * 6. Smart Form Filling with required/optional explanations, sensitive field guards, and explicit confirmation.
  */
+import { L } from './translations';
 
 import { createZip, ZipEntry } from './zipWriter';
 
@@ -454,7 +455,7 @@ export function generateEmailDraft(input: EmailAssistantInput): GeneratedEmailDr
   const points = (input.keyPoints || []).filter(Boolean);
   if (points.length > 0) {
     if (input.length === 'short') {
-      const joined = points.join(isAr ? '، مع ' : ', as well as ');
+      const joined = points.join(isAr ? '، مع ' : L(', as well as '));
       bodyParagraphs.push(isAr ? `الموضوع يرتكز على: ${joined}.` : `The core aspects include: ${joined}.`);
     } else {
       points.forEach((pt, idx) => {
@@ -496,7 +497,7 @@ export function generateEmailDraft(input: EmailAssistantInput): GeneratedEmailDr
 
   // Combine full text
   const fullDraftText = [
-    `${isAr ? 'الموضوع:' : 'Subject:'} ${subject}`,
+    `${isAr ? 'الموضوع:' : L('Subject:')} ${subject}`,
     '',
     salutation,
     '',
@@ -549,7 +550,7 @@ export function createPresentationFromTopic(
   lang: 'ar' | 'en' = 'ar'
 ): PresentationModel {
   const isAr = lang === 'ar';
-  const cleanTopic = topic.trim() || (isAr ? 'الموضوع العام' : 'General Topic');
+  const cleanTopic = topic.trim() || (isAr ? 'الموضوع العام' : L('General Topic'));
 
   const slides: SlideItem[] = [];
 
@@ -598,7 +599,7 @@ export function createPresentationFromTopic(
   // Slide 3: Practical Implementation & Analysis
   slides.push({
     slideNumber: 3,
-    title: isAr ? 'خطوات التنفيذ والتحليل العملي' : 'Implementation & Practical Analysis',
+    title: isAr ? 'خطوات التنفيذ والتحليل العملي' : L('Implementation & Practical Analysis'),
     bulletPoints: isAr
       ? [
           'المرحلة الأولى: جمع البيانات وحصر المتطلبات بدقة',
@@ -612,14 +613,14 @@ export function createPresentationFromTopic(
         ],
     speakerNotes: isAr
       ? 'نشرح هنا خطة العمل ثلاثية المراحل لتطبيق هذا الموضوع على أرض الواقع بكفاءة وأمان.'
-      : 'Explaining the 3-phase execution roadmap to ensure reliable, high-integrity implementation.',
+      : L('Explaining the 3-phase execution roadmap to ensure reliable, high-integrity implementation.'),
     layout: 'content',
   });
 
   // Slide 4: Summary & Recommendations
   slides.push({
     slideNumber: 4,
-    title: isAr ? 'الخلاصة والتوصيات المستقبلية' : 'Summary & Strategic Recommendations',
+    title: isAr ? 'الخلاصة والتوصيات المستقبلية' : L('Summary & Strategic Recommendations'),
     bulletPoints: isAr
       ? [
           'الالتزام بالتوثيق الشفاف وحفظ السجلات',
@@ -633,14 +634,14 @@ export function createPresentationFromTopic(
         ],
     speakerNotes: isAr
       ? 'نختتم بتقديم التوصيات النهائية ونفتح المجال للاستفسارات والمناقشة البناءة.'
-      : 'Concluding with actionable recommendations and opening the floor for constructive Q&A.',
+      : L('Concluding with actionable recommendations and opening the floor for constructive Q&A.'),
     layout: 'summary',
   });
 
   return {
     id: `pres_${Date.now()}`,
     title: cleanTopic,
-    subtitle: isAr ? 'عرض ميسر وشامل' : 'Accessible Comprehensive Presentation',
+    subtitle: isAr ? 'عرض ميسر وشامل' : L('Accessible Comprehensive Presentation'),
     slides: slides.slice(0, Math.max(1, slideCount)),
     createdAt: new Date().toISOString(),
   };
@@ -654,7 +655,7 @@ export function createPresentationFromOutline(outlineText: string, lang: 'ar' | 
   const lines = outlineText.split('\n').map((l) => l.trim()).filter(Boolean);
 
   if (lines.length === 0) {
-    return createPresentationFromTopic(isAr ? 'عرض تقديمي جديد' : 'New Presentation', 3, lang);
+    return createPresentationFromTopic(isAr ? 'عرض تقديمي جديد' : L('New Presentation'), 3, lang);
   }
 
   const slides: SlideItem[] = [];
@@ -679,7 +680,7 @@ export function createPresentationFromOutline(outlineText: string, lang: 'ar' | 
       };
     } else if (line.startsWith('-') || line.startsWith('•') || line.startsWith('*')) {
       if (!currentSlide) {
-        currentSlide = { title: isAr ? 'مقدمة' : 'Introduction', bulletPoints: [], speakerNotes: '' };
+        currentSlide = { title: isAr ? 'مقدمة' : L('Introduction'), bulletPoints: [], speakerNotes: '' };
       }
       currentSlide.bulletPoints?.push(line.replace(/^[-•*]\s*/, '').trim());
     } else if (line.toLowerCase().startsWith('notes:') || line.startsWith('ملاحظات:')) {
@@ -707,7 +708,7 @@ export function createPresentationFromOutline(outlineText: string, lang: 'ar' | 
 
   return {
     id: `pres_${Date.now()}`,
-    title: slides[0]?.title || (isAr ? 'عرض تقديمي ميسر' : 'Accessible Presentation'),
+    title: slides[0]?.title || (isAr ? 'عرض تقديمي ميسر' : L('Accessible Presentation')),
     slides: slides.length > 0 ? slides : createPresentationFromTopic('Presentation', 3, lang).slides,
     createdAt: new Date().toISOString(),
   };

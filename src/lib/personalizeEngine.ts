@@ -8,6 +8,7 @@
  * speech/voice controls, description defaults, personal shortcuts, reading history,
  * privacy-first assistant memory, and offline capability classification.
  */
+import { L } from './translations';
 
 // ═════════════════════════════════════════════════════════════════════════════
 // 1. TYPES & DATA STRUCTURES
@@ -323,15 +324,15 @@ export function explainUnsupportedVoiceSetting(
     case 'pitch':
       return isAr
         ? 'ملاحظة: بعض المتصفحات وأنظمة الهواتف تتجاهل ضبط طبقة الصوت (Pitch) وتطبق الطبقة الطبيعية للمحرك الصوتي.'
-        : 'Note: Certain browsers and operating systems ignore pitch adjustment and speak using the engine standard pitch.';
+        : L('Note: Certain browsers and operating systems ignore pitch adjustment and speak using the engine standard pitch.');
     case 'voice':
       return isAr
         ? 'الصوت المختار غير مثبت محلياً على جهازك؛ يتم استخدام الصوت الافتراضي للنظام تلقائياً.'
-        : 'Selected voice is not installed locally on your system; falling back to the default OS synthesizer voice.';
+        : L('Selected voice is not installed locally on your system; falling back to the default OS synthesizer voice.');
     case 'volume':
       return isAr
         ? 'يتم التحكم في مستوى الصوت من خلال المتصفح، مع مراعاة ألا يتجاوز حد أمان الأذن لمستخدمي سماعات الرأس.'
-        : 'Volume is regulated by browser audio constraints, adhering to headphone safety levels.';
+        : L('Volume is regulated by browser audio constraints, adhering to headphone safety levels.');
   }
 }
 
@@ -526,7 +527,7 @@ export function announceShortcutAction(
   if (found) {
     return isAr ? `تم تفعيل: ${found.labelAr}` : `Activated: ${found.labelEn}`;
   }
-  return isAr ? 'تم تفعيل الاختصار' : 'Shortcut activated';
+  return isAr ? 'تم تفعيل الاختصار' : L('Shortcut activated');
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -536,7 +537,7 @@ export function announceShortcutAction(
 export function getReadingHistoryStorageExplanation(lang: SupportedInterfaceLanguage = 'Arabic'): string {
   return lang === 'Arabic'
     ? 'تنبيه الخصوصية وحجم التخزين: يحتفظ سجل القراءة فقط بالعناوين وعلامات توقف القراءة (رقم الصفحة أو الدقيقة الصوتية) محلياً داخل متصفحك. لا يتم تخزين الملفات الصوتية الأصلية أو الكتب الضخمة لضمان خصوصيتك وتوفير مساحة جهازك.'
-    : 'Privacy & Storage Notice: Reading history stores only titles and bookmark timestamps (page number or audio second) locally in your browser. Original book files or heavy audio streams are never stored unnecessarily, ensuring privacy and storage efficiency.';
+    : L('Privacy & Storage Notice: Reading history stores only titles and bookmark timestamps (page number or audio second) locally in your browser. Original book files or heavy audio streams are never stored unnecessarily, ensuring privacy and storage efficiency.');
 }
 
 export function parseReadingHistory(rawJson?: string | null): ReadingHistoryItem[] {
@@ -605,13 +606,13 @@ export function clearAllReadingHistory(): void {
 export function getMemoryPrivacyNotice(lang: SupportedInterfaceLanguage = 'Arabic'): string {
   return lang === 'Arabic'
     ? 'مبدأ الخصوصية الصارم: ميزة ذاكرة المساعد الشخصي اختيارية وتتطلب موافقتك الصريحة (Opt-In). جميع المعلومات المحفوظة مشفرة ومحفوظة محلياً داخل جهازك فقط. يتذكر رفيقي فقط اهتماماتك وتفضيلات التيسير المصرح بها، ويحظر تماماً حفظ بطاقات الهوية القومية أو أرقام البطاقات المصرفية أو كلمات المرور.'
-    : 'Strict Privacy Principle: Personal Assistant Memory is strictly opt-in and requires your explicit consent. All saved memory entries are encrypted locally on your device. Rafiqi only remembers authorized topics and accessibility preferences, and strictly forbids storing National IDs, bank cards, or passwords.';
+    : L('Strict Privacy Principle: Personal Assistant Memory is strictly opt-in and requires your explicit consent. All saved memory entries are encrypted locally on your device. Rafiqi only remembers authorized topics and accessibility preferences, and strictly forbids storing National IDs, bank cards, or passwords.');
 }
 
 export function getMemoryErasureDisclaimer(lang: SupportedInterfaceLanguage = 'Arabic'): string {
   return lang === 'Arabic'
     ? 'إقرار الحذف والنسخ الاحتياطي: عند حذف أي معلومة من الذاكرة، يتم مسحها فورياً وبشكل كامل من وحدة التخزين النشطة لجهازك. رفيقي صادق ولا يدعي محو البيانات من النسخ الاحتياطية للكوارث أو البنى التحتية الخارجية إلا بعد التحقق الفعلي.'
-    : 'Erasure & Backup Disclosure: Deleted memory entries are immediately removed from active device storage. Rafiqi does not misleadingly claim data is wiped from disaster recovery backups or external provider clouds unless independently verified.';
+    : L('Erasure & Backup Disclosure: Deleted memory entries are immediately removed from active device storage. Rafiqi does not misleadingly claim data is wiped from disaster recovery backups or external provider clouds unless independently verified.');
 }
 
 export interface MemorySanitizationResult {

@@ -3,6 +3,7 @@
  * "where am I", "street name", "what's around me", weather, time, date, battery.
  * All geography goes through the authenticated /api proxies (rate limited server-side).
  */
+import { L } from './translations';
 
 import { getAuthHeaders } from '../services/gemini';
 
@@ -104,7 +105,7 @@ export async function answerQuickQuestion(q: QuickQuestion, isArabic: boolean): 
             : `Battery is at ${pct} percent${charging ? ' and charging' : ''}`;
         }
       } catch { /* fall through */ }
-      return isArabic ? 'مقدرش أعرف حالة البطارية من المتصفح ده' : 'I cannot read the battery status in this browser';
+      return isArabic ? 'مقدرش أعرف حالة البطارية من المتصفح ده' : L('I cannot read the battery status in this browser');
     }
     case 'where_am_i':
     case 'street_name': {
@@ -112,7 +113,7 @@ export async function answerQuickQuestion(q: QuickQuestion, isArabic: boolean): 
       if (!pos) {
         return isArabic
           ? 'مقدرش أحدد مكانك. اتأكد إن الموقع متفعل للمتصفح.'
-          : 'I cannot determine your location. Please allow location access.';
+          : L('I cannot determine your location. Please allow location access.');
       }
       const geo = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
       const desc = geo && describeAddress(geo, isArabic);
@@ -126,26 +127,26 @@ export async function answerQuickQuestion(q: QuickQuestion, isArabic: boolean): 
     case 'whats_around': {
       const pos = await getPosition();
       if (!pos) {
-        return isArabic ? 'مقدرش أحدد مكانك عشان أعرف اللي حواليك' : 'I cannot locate you to see what is around';
+        return isArabic ? 'مقدرش أحدد مكانك عشان أعرف اللي حواليك' : L('I cannot locate you to see what is around');
       }
       const places = await fetchNearby(pos.coords.latitude, pos.coords.longitude);
       if (places.length === 0) {
-        return isArabic ? 'مفيش أماكن معروفة قريبة منك واضحة دلوقتي' : 'No known places found nearby right now';
+        return isArabic ? 'مفيش أماكن معروفة قريبة منك واضحة دلوقتي' : L('No known places found nearby right now');
       }
       return isArabic ? `حواليك: ${places.join('، ')}` : `Around you: ${places.join(', ')}`;
     }
     case 'weather': {
       const pos = await getPosition();
       if (!pos) {
-        return isArabic ? 'محتاج مكانك عشان أجيب الطقس' : 'I need your location to get the weather';
+        return isArabic ? 'محتاج مكانك عشان أجيب الطقس' : L('I need your location to get the weather');
       }
       const w = await fetchWeather(pos.coords.latitude, pos.coords.longitude);
-      if (!w) return isArabic ? 'الطقس مش متاح دلوقتي' : 'Weather is unavailable right now';
+      if (!w) return isArabic ? 'الطقس مش متاح دلوقتي' : L('Weather is unavailable right now');
       return isArabic
         ? `درجة الحرارة ${Math.round(w.temp)} درجة، والجو ${w.description}`
         : `It is ${Math.round(w.temp)} degrees, ${w.description}`;
     }
     default:
-      return isArabic ? 'مش قادر أجاوب دلوقتي' : 'I cannot answer right now';
+      return isArabic ? 'مش قادر أجاوب دلوقتي' : L('I cannot answer right now');
   }
 }

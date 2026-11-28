@@ -6,6 +6,7 @@
  * app is open or installed and running; a web app cannot replace the phone's
  * built-in alarm clock when the screen is off.
  */
+import { L } from './translations';
 
 export interface Reminder {
   id: string;
@@ -82,9 +83,9 @@ export function msUntilNextFire(r: Reminder, now = new Date()): number | null {
 
 export function describeReminder(r: Reminder, isArabic: boolean): string {
   const kindLabel = {
-    medication: isArabic ? 'دواء' : 'medication',
-    alarm: isArabic ? 'منبه' : 'alarm',
-    appointment: isArabic ? 'موعد' : 'appointment',
+    medication: isArabic ? 'دواء' : L('medication'),
+    alarm: isArabic ? 'منبه' : L('alarm'),
+    appointment: isArabic ? 'موعد' : L('appointment'),
   }[r.kind];
   const when = r.kind === 'appointment' && r.dateISO ? `${r.dateISO} ${r.time}` : r.time;
   return isArabic ? `${kindLabel}: ${r.title} الساعة ${when}` : `${kindLabel}: ${r.title} at ${when}`;

@@ -5,6 +5,7 @@
  * whole app by voice: open any vision tool, navigate, go back, read the screen,
  * repeat, stop, control speech speed, and trigger the emergency SOS.
  */
+import { L } from './translations';
 
 import { isFrenchActive } from './translations.js';
 
@@ -136,5 +137,5 @@ export function voiceCommandsHelp(isArabic: boolean): string {
   }
   return isArabic
     ? 'تقدر تقول: افتح الكاميرا، اقرالي نص، العملة دي بكام، الباركود، تنقل، أنا فين، إيه حواليا، اسم الشارع، الوقت، الطقس، تذكيراتي، ارجع، اقرا الشاشة، اعد، وقف، وأسرع أو أبطئ الصوت. وللطوارئ قول ساعدوني.'
-    : 'You can say: open the camera, read text, what banknote is this, barcode, navigate, where am I, what is around me, street name, time, weather, my reminders, go back, read the screen, repeat, stop, faster or slower speech. For an emergency say help me.';
+    : L('You can say: open the camera, read text, what banknote is this, barcode, navigate, where am I, what is around me, street name, time, weather, my reminders, go back, read the screen, repeat, stop, faster or slower speech. For an emergency say help me.');
 }

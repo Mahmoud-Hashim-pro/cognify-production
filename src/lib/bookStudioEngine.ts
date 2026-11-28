@@ -5,6 +5,7 @@
  * Rafiqi Accessible Educational Book & Document Studio Engine
  * (Phase 6: Professional Word Formatting, Semantic Outline, and Question Recognition)
  */
+import { L } from './translations';
 
 import {
   Document,
@@ -583,7 +584,7 @@ export async function buildAccessibleBookDocx(
 ): Promise<Blob> {
   const sections = typeof input === 'string' ? parseDocumentStructure(input) : input;
   const isAr = metadata.language === 'ar' || metadata.language === 'mixed';
-  const fontName = metadata.fontFamily || (isAr ? 'Segoe UI' : 'Calibri');
+  const fontName = metadata.fontFamily || (isAr ? 'Segoe UI' : L('Calibri'));
   const alignment = isAr ? AlignmentType.RIGHT : AlignmentType.LEFT;
 
   // Font sizing scale (half-points: 24 = 12pt)
@@ -630,7 +631,7 @@ export async function buildAccessibleBookDocx(
         spacing: { before: 240, after: 200 },
         children: [
           new TextRun({
-            text: metadata.title || (isAr ? 'المستند التعليمي الشامل' : 'Rafiqi Educational Document'),
+            text: metadata.title || (isAr ? 'المستند التعليمي الشامل' : L('Rafiqi Educational Document')),
             font: fontName,
             size: sizes.title,
             bold: true,
@@ -720,7 +721,7 @@ export async function buildAccessibleBookDocx(
         spacing: { before: 120, after: 120 },
         children: [
           new TextRun({
-            text: metadata.title || (isAr ? 'اختبار تقييمي فصلي' : 'Assessment Examination'),
+            text: metadata.title || (isAr ? 'اختبار تقييمي فصلي' : L('Assessment Examination')),
             font: fontName,
             size: sizes.h1,
             bold: true,
@@ -742,7 +743,7 @@ export async function buildAccessibleBookDocx(
                 alignment,
                 children: [
                   new TextRun({
-                    text: isAr ? 'اسم الطالب: .................................................' : 'Student Name: .................................................',
+                    text: isAr ? 'اسم الطالب: .................................................' : L('Student Name: .................................................'),
                     font: fontName,
                     size: sizes.body,
                     bold: true,
@@ -843,7 +844,7 @@ export async function buildAccessibleBookDocx(
         spacing: { before: 240, after: 200 },
         children: [
           new TextRun({
-            text: isAr ? '📑 فهرس المحتويات والأبواب' : '📑 Table of Contents',
+            text: isAr ? '📑 فهرس المحتويات والأبواب' : L('📑 Table of Contents'),
             font: fontName,
             size: sizes.h1,
             bold: true,
@@ -855,7 +856,7 @@ export async function buildAccessibleBookDocx(
     );
 
     docChildren.push(
-      new TableOfContents(isAr ? 'فهرس المحتويات' : 'Table of Contents', {
+      new TableOfContents(isAr ? 'فهرس المحتويات' : L('Table of Contents'), {
         hyperlink: true,
         headingStyleRange: '1-3',
       })
@@ -957,7 +958,7 @@ export async function buildAccessibleBookDocx(
         spacing: { before: 240, after: 160 },
         children: [
           new TextRun({
-            text: isAr ? '🔑 ملحق نموذج الإجابات والشروح الإرشادية' : '🔑 Model Answer Key & Explanations Appendix',
+            text: isAr ? '🔑 ملحق نموذج الإجابات والشروح الإرشادية' : L('🔑 Model Answer Key & Explanations Appendix'),
             font: fontName,
             size: sizes.h1,
             bold: true,
@@ -999,7 +1000,7 @@ export async function buildAccessibleBookDocx(
                 alignment,
                 children: [
                   new TextRun({
-                    text: isAr ? 'الإجابة النموذجية' : 'Model Answer',
+                    text: isAr ? 'الإجابة النموذجية' : L('Model Answer'),
                     font: fontName,
                     size: sizes.body,
                     bold: true,
@@ -1017,7 +1018,7 @@ export async function buildAccessibleBookDocx(
                 alignment,
                 children: [
                   new TextRun({
-                    text: isAr ? 'التوضيح والأساس العلمي' : 'Explanation & Rationale',
+                    text: isAr ? 'التوضيح والأساس العلمي' : L('Explanation & Rationale'),
                     font: fontName,
                     size: sizes.body,
                     bold: true,
@@ -1059,7 +1060,7 @@ export async function buildAccessibleBookDocx(
                   alignment,
                   children: [
                     new TextRun({
-                      text: q.correctAnswer || (isAr ? 'انظر الشرح' : 'See explanation'),
+                      text: q.correctAnswer || (isAr ? 'انظر الشرح' : L('See explanation')),
                       font: fontName,
                       size: sizes.body,
                       bold: true,
@@ -1077,7 +1078,7 @@ export async function buildAccessibleBookDocx(
                   alignment,
                   children: [
                     new TextRun({
-                      text: q.explanation || (isAr ? 'لا يوجد شرح إضافي' : 'Standard definition'),
+                      text: q.explanation || (isAr ? 'لا يوجد شرح إضافي' : L('Standard definition')),
                       font: fontName,
                       size: sizes.small,
                       color: '475569',
@@ -1134,7 +1135,7 @@ export async function buildAccessibleBookDocx(
         alignment: AlignmentType.CENTER,
         children: [
           new TextRun({
-            text: isAr ? 'صفحة ' : 'Page ',
+            text: isAr ? 'صفحة ' : L('Page '),
             font: fontName,
             size: sizes.small,
             color: '64748B',
@@ -1147,7 +1148,7 @@ export async function buildAccessibleBookDocx(
             color: '64748B',
           }),
           new TextRun({
-            text: isAr ? ' من ' : ' of ',
+            text: isAr ? ' من ' : L(' of '),
             font: fontName,
             size: sizes.small,
             color: '64748B',
@@ -1268,7 +1269,7 @@ function renderDocxQuestionItem(
           new TextRun({
             text: isAr
               ? '(    ) صـح                      (    ) خـطـأ'
-              : '(    ) True                      (    ) False',
+              : L('(    ) True                      (    ) False'),
             font: fontName,
             size: sizes.body,
             bold: true,
@@ -1312,7 +1313,7 @@ function renderDocxQuestionItem(
             children: [
               new Paragraph({
                 alignment,
-                children: [new TextRun({ text: isAr ? 'العمود (أ)' : 'Column A', font: fontName, bold: true, rightToLeft: isAr })],
+                children: [new TextRun({ text: isAr ? 'العمود (أ)' : L('Column A'), font: fontName, bold: true, rightToLeft: isAr })],
               }),
             ],
           }),
@@ -1322,7 +1323,7 @@ function renderDocxQuestionItem(
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
-                children: [new TextRun({ text: isAr ? 'التوصيل' : 'Match', font: fontName, bold: true })],
+                children: [new TextRun({ text: isAr ? 'التوصيل' : L('Match'), font: fontName, bold: true })],
               }),
             ],
           }),
@@ -1332,7 +1333,7 @@ function renderDocxQuestionItem(
             children: [
               new Paragraph({
                 alignment,
-                children: [new TextRun({ text: isAr ? 'العمود (ب)' : 'Column B', font: fontName, bold: true, rightToLeft: isAr })],
+                children: [new TextRun({ text: isAr ? 'العمود (ب)' : L('Column B'), font: fontName, bold: true, rightToLeft: isAr })],
               }),
             ],
           }),
@@ -1494,7 +1495,7 @@ export function buildPrintableHtmlDocument(
               .join('')}</div>`;
           } else if (q.type === 'true_false') {
             qBody = `<div class="tf-options">${
-              isAr ? '( &nbsp; ) صـح &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ( &nbsp; ) خـطـأ' : '( &nbsp; ) True &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ( &nbsp; ) False'
+              isAr ? '( &nbsp; ) صـح &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ( &nbsp; ) خـطـأ' : L('( &nbsp; ) True &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ( &nbsp; ) False')
             }</div>`;
           } else if (q.type === 'essay' || q.type === 'short_answer') {
             if (metadata.answerSpaceStyle === 'dots') {
@@ -1512,7 +1513,7 @@ export function buildPrintableHtmlDocument(
             <div class="question-block">
               <div class="question-title">
                 <b>${isAr ? 'س ' + (qIdx + 1) : 'Q ' + (qIdx + 1)}:</b> ${q.prompt}
-                ${q.points ? `<span class="points-badge">[${q.points} ${isAr ? 'درجات' : 'Marks'}]</span>` : ''}
+                ${q.points ? `<span class="points-badge">[${q.points} ${isAr ? 'درجات' : L('Marks')}]</span>` : ''}
               </div>
               ${qBody}
             </div>
@@ -1590,9 +1591,9 @@ export function buildPrintableHtmlDocument(
           <div class="cover-title">${metadata.title || 'كتاب تعليمي ميسر'}</div>
           ${metadata.subtitle ? `<div class="cover-subtitle">${metadata.subtitle}</div>` : ''}
           <div class="cover-divider"></div>
-          ${metadata.author ? `<div class="cover-meta">${isAr ? 'إعداد: ' : 'Author: '}${metadata.author}</div>` : ''}
-          ${metadata.subject ? `<div class="cover-meta">${isAr ? 'المادة: ' : 'Subject: '}${metadata.subject}</div>` : ''}
-          ${metadata.gradeLevel ? `<div class="cover-meta">${isAr ? 'المرحلة: ' : 'Level: '}${metadata.gradeLevel}</div>` : ''}
+          ${metadata.author ? `<div class="cover-meta">${isAr ? 'إعداد: ' : L('Author: ')}${metadata.author}</div>` : ''}
+          ${metadata.subject ? `<div class="cover-meta">${isAr ? 'المادة: ' : L('Subject: ')}${metadata.subject}</div>` : ''}
+          ${metadata.gradeLevel ? `<div class="cover-meta">${isAr ? 'المرحلة: ' : L('Level: ')}${metadata.gradeLevel}</div>` : ''}
           <div class="cover-meta">${metadata.date || new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}</div>
         </div>
       `

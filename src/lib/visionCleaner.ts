@@ -6,6 +6,7 @@
  * - Removes spoken symbol words (asterisk, star, استريك, نجمة)
  * - Preserves math operators (+, -, =), numbers, currency symbols, and programming terms
  */
+import { L } from './translations';
 export function cleanVisionDescription(raw: string, lang: 'ar' | 'en' | 'fr' = 'en'): string {
   if (!raw) return '';
   return raw
@@ -38,8 +39,8 @@ export function cleanVisionDescription(raw: string, lang: 'ar' | 'en' | 'fr' = '
     .replace(/\*\*(Résumé du cours|Résumé|Points clés):\*\*/gi, '')
     .replace(/(Résumé du cours|Résumé|Points clés):/gi, '')
     // Preserve programming languages with + or #
-    .replace(/\bC\+\+/gi, lang === 'ar' ? 'سي بلس بلس' : 'C plus plus')
-    .replace(/\bC#/gi, lang === 'ar' ? 'سي شارب' : 'C sharp')
+    .replace(/\bC\+\+/gi, lang === 'ar' ? 'سي بلس بلس' : L('C plus plus'))
+    .replace(/\bC#/gi, lang === 'ar' ? 'سي شارب' : L('C sharp'))
     // Spoken symbol artifacts
     .replace(/(?:^|\s+)(asterisk|استريك|نجمة|بوليت)(?=\s+|$)/giu, ' ')
     // Technical HTTP status codes & error numbers (never utter status codes via TTS)
