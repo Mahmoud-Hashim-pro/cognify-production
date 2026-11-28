@@ -754,7 +754,7 @@ Database Systems,90,3,270`);
                 <span className="text-xs font-bold text-[#94A3B8] uppercase">
                   {localize(
                     profile.language,
-                    `Document Content (${voiceDoc.blocks.length} blocks)`,
+                    `${L('Document Content')} (${voiceDoc.blocks.length} ${L('blocks')})`,
                     `محتوى المستند (${voiceDoc.blocks.length} فقرات وعناصر)`
                   )}
                 </span>
