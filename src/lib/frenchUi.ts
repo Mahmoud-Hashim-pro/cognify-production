@@ -872,5 +872,20 @@ export const FR_UI: Record<string, string> = {
  "Real-time captions and verified sign dictionary": "Sous-titres en temps réel et dictionnaire de signes vérifié",
  "AAC communication boards and symbol-to-speech": "Tableaux de communication CAA et symboles vers la voix",
  "Full access to all six product sections": "Accès complet aux six sections du produit",
- "Balanced": "Équilibré"
+ "Balanced": "Équilibré",
+ "Before first use": "Avant la première utilisation",
+ "I agree": "J'accepte",
+ "If you choose \"No\" we cannot turn on the camera or microphone; the rest of the app keeps working.": "Si vous choisissez « Non », nous ne pouvons pas activer la caméra ni le microphone ; le reste de l'application continue de fonctionner.",
+ "Read the full details in our ": "Lisez les détails complets dans notre ",
+ "Terms of Use": "Conditions d'utilisation",
+ "Privacy Policy": "Politique de confidentialité",
+ "No": "Non",
+ "• Camera photos are sent to Google Gemini AI to be described. We do not store the photos.": "• Les photos de la caméra sont envoyées à l'IA Gemini de Google pour être décrites. Nous ne les stockons pas.",
+ "• Location is used only for emergencies, to send it to your caregivers if you trigger SOS.": "• La position n'est utilisée qu'en cas d'urgence, pour l'envoyer à vos accompagnants si vous déclenchez le SOS.",
+ "• Voice commands may be processed by Google or Apple, depending on your browser, to be transcribed.": "• Les commandes vocales peuvent être traitées par Google ou Apple, selon votre navigateur, pour être transcrites.",
+ "• What we store: the object memories you ask to save and your chats. You can delete them anytime in Settings or with the \"Clear all camera memory\" button.": "• Ce que nous stockons : les mémoires d'objets que vous demandez d'enregistrer et vos discussions. Vous pouvez les supprimer à tout moment dans les Paramètres ou avec le bouton « Supprimer toute la mémoire de la caméra ».",
+ " and ": " et ",
+ "or": "ou",
+ "Or": "ou",
+ "OR": "OU"
 };
