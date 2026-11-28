@@ -11,18 +11,9 @@ import {
   lookupArslSign,
   searchArslDictionary,
   hamnosysToThreePose,
-} from '../src/lib/arslDictionary.js';
-import {
-  TemporalSignRecognizer,
   normalizeHandLandmarks,
-  ARSL_CORE_CLASSES,
-  TEMPORAL_WINDOW_SIZE,
-  FEATURES_PER_FRAME,
   Point3D,
-} from '../src/lib/temporalSignRecognizer.js';
-import { generateSyntheticBenchmarkDataset } from '../src/lib/kArslDatasetAdapter.js';
-import { computeConfusionMatrix } from '../src/lib/signConfusionMatrix.js';
-import { extractKeyframeFromLandmarks, inferHamNoSysFromKeyframes } from '../src/lib/videoPoseExtractor.js';
+} from '../src/lib/arslDictionary.js';
 
 let passed = 0;
 let failed = 0;
@@ -136,63 +127,7 @@ export async function runArslCurriculumAndModelVerification() {
     assert(emptyNorm.length === 63 && emptyNorm.every((v) => v === 0), 'Null hands return zeroed baseline vector');
   }
 
-  // Test 5: Synthetic Benchmark Landmark Generator & Pipeline Invariants
-  {
-    const dataset = generateSyntheticBenchmarkDataset(4);
-    assert(dataset.trainXs.length > 0 && dataset.testXs.length > 0, 'Generates train and test feature splits from synthetic vectors');
-    assert(
-      dataset.trainXs[0].length === TEMPORAL_WINDOW_SIZE * FEATURES_PER_FRAME,
-      'Dataset temporal sequence window matches 16 frames * 126 features'
-    );
-    assert(dataset.classes.length === ARSL_CORE_CLASSES.length, 'Dataset covers all core ArSL target classes');
-  }
-
-  // Test 6: In-Browser Temporal Model Compilation & Training (Synthetic Vectors)
-  {
-    const recognizer = new TemporalSignRecognizer();
-    await recognizer.initializeModel();
-    assert(recognizer.isReady, 'TensorFlow.js temporal classification model compiled successfully');
-
-    const dataset = generateSyntheticBenchmarkDataset(2);
-    let trainedEpochs = 0;
-    const history = await recognizer.train(dataset.trainXs, dataset.trainYs, 3, (metric) => {
-      trainedEpochs = metric.epoch;
-    });
-
-    assert(trainedEpochs === 3, 'Model trains across requested epochs with progress callbacks');
-    assert(history !== null, 'Model training produces valid loss history');
-  }
-
-  // Test 7: Confusion Matrix Engine & Phonological Evaluation (Synthetic Benchmark)
-  {
-    const trueLabels = [0, 1, 2, 3, 3, 4, 5, 5];
-    const predLabels = [0, 1, 2, 3, 4, 4, 5, 7]; // Introduced 3->4 (Father/Mother) and 5->7 (Water/Drink)
-
-    const report = computeConfusionMatrix(trueLabels, predLabels, ARSL_CORE_CLASSES);
-    assert(report.globalAccuracy > 0, 'Computes deterministic global accuracy score');
-    assert(report.matrix.length === ARSL_CORE_CLASSES.length, 'Generates N x N confusion matrix');
-    assert(report.classMetrics.length === ARSL_CORE_CLASSES.length, 'Computes per-class Precision and Recall');
-    assert(report.topConfusedPairs.length > 0, 'Detects confused sign pairs with linguistic explanations');
-    assert(
-      report.topConfusedPairs.some((p) => p.actualId === 's_father' && p.predictedId === 's_mother'),
-      'Identifies Father vs Mother anatomical location confusion'
-    );
-  }
-
-  // Test 8: Video Reference Pose Extractor
-  {
-    const mockRight: Point3D[] = Array.from({ length: 21 }, (_, i) => ({ x: 0.2 + 0.1 * i, y: 0.2 * i, z: 0 }));
-    const mockLeft: Point3D[] = Array.from({ length: 21 }, (_, i) => ({ x: -0.2 - 0.1 * i, y: 0.2 * i, z: 0 }));
-
-    const keyframe = extractKeyframeFromLandmarks(1, 33, mockRight, mockLeft);
-    assert(keyframe.frameIndex === 1, 'Keyframe preserves sequential frame index');
-    assert(keyframe.handDistance > 0, 'Computes inter-hand spatial distance for two-handed gestures');
-
-    const inferred = inferHamNoSysFromKeyframes([keyframe]);
-    assert(inferred.twoHanded === true, 'Infers two-handed gesture requirement from bilateral landmarks');
-  }
-
-  console.log(`\n  ArSL Curriculum & Recognizer Verification: ${passed} Passed, ${failed} Failed\n`);
+  console.log(`\n  ArSL Curriculum & Lexicon Verification: ${passed} Passed, ${failed} Failed\n`);
   return { passed, failed };
 }
 

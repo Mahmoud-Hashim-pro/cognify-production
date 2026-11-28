@@ -28,7 +28,7 @@ test('Button: Standardizes variants, touch ergonomics, and WCAG focus visible ri
   assert.ok(code.includes('min-h-[44px]'), 'Small buttons must have at least 44px min-height');
   assert.ok(code.includes('min-h-[48px]'), 'Medium buttons must have at least 48px min-height');
   assert.ok(code.includes('min-h-[56px]'), 'Large buttons must have at least 56px min-height');
-  assert.ok(code.includes('#F59E0B'), 'Buttons must use high-contrast focus indicator');
+  assert.ok(code.includes('#F59E0B') || code.includes('ring-cognify-focus'), 'Buttons must use high-contrast focus indicator');
   assert.ok(code.includes('data-[disabled]:opacity-50'), 'Disabled buttons must have distinct visual feedback');
   assert.ok(code.includes('aria-busy={isLoading}'), 'Loading state must expose aria-busy to assistive tech');
 });
@@ -50,7 +50,7 @@ test('Card: Enforces consistent surface variants, borders, and tactile feedback'
   const code = fs.readFileSync(path.join(rootDir, 'src/components/ui/Card.tsx'), 'utf-8');
   assert.ok(code.includes('variant === \'interactive\''), 'Interactive cards must be distinctly typed');
   assert.ok(code.includes('variant === \'elevated\''), 'Elevated cards must provide depth');
-  assert.ok(code.includes('focus-visible:ring-2 focus-visible:ring-[#F59E0B]'), 'Interactive cards must have focus indicator');
+  assert.ok(code.includes('focus-visible:ring-2 focus-visible:ring-[#F59E0B]') || code.includes('focus-visible:ring-2 focus-visible:ring-cognify-focus'), 'Interactive cards must have focus indicator');
   assert.ok(code.includes('motion-reduce:active:scale-100'), 'Must suppress scale micro-animations when motion is reduced');
 });
 

@@ -34,7 +34,7 @@ test('Tool Architecture: All 6 visual tools registered in VISUAL_TOOLS with comp
   assert.ok(code.includes('export const VISUAL_TOOLS: VisualToolConfig[]'), 'Must export VISUAL_TOOLS array');
   
   // Verify each tool id is present with capture, open cam, and upload labels
-  const requiredTools = ['scene', 'currency', 'read', 'color', 'object', 'face'];
+  const requiredTools = ['scene', 'currency', 'read', 'color', 'object', 'face', 'product'];
   for (const tool of requiredTools) {
     assert.ok(code.includes(`id: '${tool}'`), `Must declare tool: ${tool}`);
   }
@@ -68,7 +68,7 @@ test('Dashboard Integration: DisabilityModeView maps visual cards to openVisualT
   assert.ok(code.includes("openVisualTool('face')"), 'person_recognition must open face');
   assert.ok(code.includes('initialTool={selectedVisualTool}'), 'Must pass initialTool to VisionCompanionView');
   assert.ok(code.includes('onToolChange={setSelectedVisualTool}'), 'Must pass onToolChange to VisionCompanionView');
-  assert.ok(code.includes("window.addEventListener('hashchange', handleSyncHashTool)"), 'Must sync on hashchange');
+  assert.ok(code.includes("window.addEventListener('hashchange', handleSyncHash)"), 'Must sync on hashchange');
 });
 
 // 3. Floating In-Viewfinder Shutter Control Bar

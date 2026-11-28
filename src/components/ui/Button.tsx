@@ -26,13 +26,13 @@ export interface ButtonProps extends ReactAriaButtonProps {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-cognify-indigo hover:bg-cognify-indigo-dark text-white shadow-sm active:scale-[0.98]',
-  teal: 'bg-cognify-teal hover:bg-cognify-teal-dark text-white shadow-sm active:scale-[0.98]',
-  secondary: 'bg-cognify-bg-light hover:bg-cognify-border-light text-cognify-text-primary dark:bg-cognify-surface-elevated dark:hover:bg-cognify-surface-dark dark:text-cognify-text-dark-primary shadow-sm',
-  outline: 'border border-cognify-border-light dark:border-cognify-border-dark bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-primary dark:text-cognify-text-dark-primary',
-  ghost: 'bg-transparent hover:bg-cognify-bg-light dark:hover:bg-cognify-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
-  danger: 'bg-cognify-error-text-light hover:brightness-90 dark:bg-cognify-error-text-dark dark:hover:brightness-110 text-white shadow-sm active:scale-[0.98]',
-  success: 'bg-cognify-success-text-light hover:brightness-90 dark:bg-cognify-success-text-dark dark:hover:brightness-110 text-white shadow-sm active:scale-[0.98]',
+  primary: 'bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white shadow-sm active:scale-[0.98]',
+  teal: 'bg-rafiqi-primary hover:bg-rafiqi-primary-dark text-white shadow-sm active:scale-[0.98]',
+  secondary: 'bg-rafiqi-primary-light hover:bg-[#DCE7F3] text-rafiqi-primary-dark dark:bg-rafiqi-surface-elevated dark:hover:bg-rafiqi-surface-dark dark:text-rafiqi-primary-muted border border-rafiqi-primary/20 dark:border-rafiqi-border-dark shadow-sm',
+  outline: 'border border-rafiqi-primary/40 dark:border-rafiqi-border-dark bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-rafiqi-primary-dark dark:text-rafiqi-primary-muted',
+  ghost: 'bg-transparent hover:bg-rafiqi-primary-light dark:hover:bg-rafiqi-surface-elevated text-cognify-text-secondary dark:text-cognify-text-dark-secondary',
+  danger: 'bg-rafiqi-error hover:brightness-90 text-white shadow-sm active:scale-[0.98]',
+  success: 'bg-rafiqi-success hover:brightness-90 text-white shadow-sm active:scale-[0.98]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

@@ -43,11 +43,11 @@ console.log('===============================================================\n')
 
 // ── 1. TOOL ARCHITECTURE & COMPLETE METADATA ──
 console.log('--- 1. TOOL ARCHITECTURE & LOCALIZATION ---');
-assert(VISUAL_TOOLS.length === 6, 'All 6 visual tools are registered in VISUAL_TOOLS');
+assert(VISUAL_TOOLS.length >= 6 && VISUAL_TOOLS.length === 7, 'All 7 visual tools are registered in VISUAL_TOOLS');
 const toolIds = VISUAL_TOOLS.map(t => t.id);
 assert(
-  ['scene', 'currency', 'read', 'color', 'object', 'face'].every(id => toolIds.includes(id as any)),
-  'Registered tools include scene, currency, read, color, object, face'
+  ['scene', 'currency', 'read', 'color', 'object', 'face', 'product'].every(id => toolIds.includes(id as any)),
+  'Registered tools include scene, currency, read, color, object, face, product'
 );
 
 let allToolsHaveLocalization = true;

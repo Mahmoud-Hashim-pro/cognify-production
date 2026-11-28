@@ -29,6 +29,7 @@ export interface SeoMetadata {
 export interface SeoContext {
   readonly view: string;
   readonly subTab?: string;
+  readonly section?: string;
   readonly language?: string;
 }
 
@@ -61,11 +62,77 @@ const ROUTE_SEO_REGISTRY: Record<string, RouteSeoEntry> = {
     titleAr: 'رفيقي (Rafiqi) — منصة التعلّم الشامل والتقنيات المساندة لذوي الهمم',
     titleFr: 'Rafiqi — Centre d’Accessibilité Universelle & Technologies d’Assistance',
     descEn:
-      'Explore Rafiqi’s universal accessibility suite featuring real-time AI visual companion, 3D sign language interpreter, live captions, and motor/Euphonia voice control.',
+      'Explore Rafiqi’s universal accessibility suite featuring real-time AI visual companion, 3D sign language interpreter, live captions, and accessible document studio.',
     descAr:
-      'استكشف منظومة رفيقي الشاملة لذوي الهمم: المساعد البصري الذكي للمكفوفين، مترجم لغة الإشارة ثلاثي الأبعاد للصم، والتحكم الصوتي الحركي.',
+      'استكشف منظومة رفيقي الشاملة لذوي الهمم: المساعد البصري الذكي للمكفوفين، مترجم لغة الإشارة ثلاثي الأبعاد للصم، واستوديو المستندات الميسرة.',
     descFr:
-      'Découvrez la suite d’accessibilité Rafiqi : compagnon visuel IA, interprète en langue des signes 3D et contrôle vocal.',
+      'Découvrez la suite d’accessibilité Rafiqi : compagnon visuel IA, interprète en langue des signes 3D et studio de lecture accessible.',
+  },
+  see_understand: {
+    titleEn: 'Rafiqi | See & Understand — Real-Time Visual Companion & Object Finder',
+    titleAr: 'رفيقي | الرؤية والفهم — المساعد البصري الذكي وقارئ النصوص والعملات',
+    titleFr: 'Rafiqi | Voir & Comprendre — Compagnon Visuel IA en Temps Réel',
+    descEn:
+      'Describe surroundings, read signs and Egyptian banknotes, detect colors, scan products, and locate personal items with Rafiqi Visual Companion.',
+    descAr:
+      'وصف فوري للمشهد المحيط، قراءة النصوص واللافتات والعملات، تمييز الألوان، وفحص المنتجات والبحث عن الأغراض عبر المساعد البصري في رفيقي.',
+    descFr:
+      'Décrivez votre environnement, lisez des textes et billets, identifiez les couleurs et retrouvez vos objets avec Rafiqi.',
+  },
+  read_learn: {
+    titleEn: 'Rafiqi | Read & Learn — Accessible Books, Audio & Document Intelligence',
+    titleAr: 'رفيقي | القراءة والتعلّم — الكتب الميسرة، استوديو المستندات، والصوتيات',
+    titleFr: 'Rafiqi | Lire & Apprendre — Livres Accessibles & Intelligence Documentaire',
+    descEn:
+      'Convert PDFs, Word files, and lecture recordings into clear accessible study material with smart bookmarks, summaries, and Q&A.',
+    descAr:
+      'حوّل ملفات PDF وWord والمحاضرات الصوتية إلى محتوى تعليمي ميسر مع التلخيص والأسئلة الصوتية واستوديو الكتب الميسرة في رفيقي.',
+    descFr:
+      'Transformez vos documents et cours audio en supports d’étude accessibles avec résumés et questions-réponses.',
+  },
+  work_create: {
+    titleEn: 'Rafiqi | Work & Create — Accessible Productivity & Task Workspace',
+    titleAr: 'رفيقي | العمل والإبداع — مساحة الإنتاجية وتنظيم المهام الميسرة',
+    titleFr: 'Rafiqi | Travailler & Créer — Espace de Productivité Accessible',
+    descEn:
+      'Draft accessible documents, organize structured study workflows, and execute daily productivity tasks with adaptive AI guidance.',
+    descAr:
+      'أنشئ مستنداتك ونظم مهامك الدراسية والمهنية بسهولة كاملة بدعم الذكاء الاصطناعي الميسر في رفيقي.',
+    descFr:
+      'Rédigez des documents accessibles et organisez vos tâches quotidiennes avec l’assistance IA de Rafiqi.',
+  },
+  move_explore: {
+    titleEn: 'Rafiqi | Move & Explore — Safe Mobility, Transit & Route Guidance',
+    titleAr: 'رفيقي | الحركة والاستكشاف — إرشادات التنقل الآمن والمواصلات والمكان',
+    titleFr: 'Rafiqi | Se Déplacer & Explorer — Assistance Mobilité & Transport',
+    descEn:
+      'Accessible route planning, public transit navigation hints, hazard cues, and nearby landmark orientation built for independent mobility.',
+    descAr:
+      'دعم التوجّه في الأماكن العامة والمواصلات وتنبيهات العوائق لتعزيز استقلالية الحركة بأمان مع رفيقي.',
+    descFr:
+      'Planification d’itinéraires accessibles, repères urbains et guidance sécurisée pour une mobilité autonome.',
+  },
+  communicate: {
+    titleEn: 'Rafiqi | Communicate & Express — Hear & Express, Sign Language & AAC',
+    titleAr: 'رفيقي | التواصل والتعبير — التفريغ المباشر، لغة الإشارة، والتواصل البديل',
+    titleFr: 'Rafiqi | Communiquer & S’Exprimer — Sous-titres, LSF/ArSL & CAA',
+    descEn:
+      'Two-way accessible communication hub uniting live captions, sound awareness radar, Egyptian Sign Language resources, and AAC boards.',
+    descAr:
+      'مركز التواصل الميسر: تفريغ فوري للكلام، تنبيهات الأصوات المحيطة، قاموس لغة الإشارة، ولوحة التواصل البديل AAC.',
+    descFr:
+      'Centre de communication bidirectionnelle réunissant sous-titres en direct, détection sonore et tableaux CAA.',
+  },
+  personalize: {
+    titleEn: 'Rafiqi | Personalize — Accessibility Profile & Accommodation Passport',
+    titleAr: 'رفيقي | التخصيص والإعدادات — الملف الشخصي وجواز الإتاحة الموحد',
+    titleFr: 'Rafiqi | Personnaliser — Profil d’Accessibilité & Passeport d’Accueil',
+    descEn:
+      'Configure visual, auditory, motor, and cognitive accommodations and generate your portable Rafiqi Accessibility Passport.',
+    descAr:
+      'اضبط تفضيلات اللغة والصوت والتباين والحجم، وأصدر جواز الإتاحة الموحد الخاص بك في منصة رفيقي.',
+    descFr:
+      'Configurez vos préférences d’accessibilité et générez votre Passeport d’Accessibilité Rafiqi.',
   },
   vision: {
     titleEn: 'Rafiqi Visual Companion — Real-Time AI Scene, OCR, Currency & Hazard Assistant',
@@ -79,15 +146,35 @@ const ROUTE_SEO_REGISTRY: Record<string, RouteSeoEntry> = {
       'Perception caméra IA en temps réel pour les utilisateurs aveugles et malvoyants : description de scène, OCR et mémoire spatiale.',
   },
   deaf: {
-    titleEn: 'Rafiqi Deaf & Hearing Center — 3D Sign Avatar, ArSL/ASL & Live Captions',
-    titleAr: 'رفيقي للصم وضعاف السمع — مترجم لغة الإشارة 3D والتسميات الحية',
-    titleFr: 'Rafiqi Centre Auditif — Avatar Langue des Signes 3D & Sous-titres',
+    titleEn: 'Rafiqi Hear & Express — Sign Language, Sound Awareness & Live Captions',
+    titleAr: 'رفيقي للصم وضعاف السمع — التفريغ النصي الحي ولغة الإشارة والتنبيهات الصوتية',
+    titleFr: 'Rafiqi Centre Auditif — Sous-titres Live, Signes & Conscience Sonore',
     descEn:
-      'Two-way communication bridge for Deaf and Hard-of-Hearing learners with 3D Arabic & American Sign Language avatars and live speech transcription.',
+      'Two-way communication bridge for Deaf and Hard-of-Hearing learners with live speech transcription, sound alerts, and AAC communication.',
     descAr:
-      'منظومة تواصل ثنائية الاتجاه للصم وضعاف السمع مع مترجم لغة الإشارة ثلاثي الأبعاد (العربية والأمريكية) وتحويل الكلام إلى نص حي.',
+      'منظومة تواصل متكاملة للصم وضعاف السمع تشمل التفريغ المباشر للكلام، وتنبيهات الأصوات، ولوحة التواصل ولغة الإشارة.',
     descFr:
-      'Passerelle de communication bidirectionnelle avec avatar 3D en langue des signes et transcription vocale en direct.',
+      'Passerelle de communication bidirectionnelle avec transcription vocale en direct et alertes sonores.',
+  },
+  toolkit: {
+    titleEn: 'Rafiqi | Document & Audio Intelligence — Smart Extraction & Q&A',
+    titleAr: 'رفيقي | ذكاء المستندات والصوتيات — القراءة والتحليل الصوتي الذكي',
+    titleFr: 'Rafiqi | Intelligence Documentaire & Audio',
+    descEn:
+      'Upload documents and audio lectures for accessible transcription, structured formatting, and evidence-grounded Q&A.',
+    descAr:
+      'استخرج وحلّل ملفاتك التعليمية والملفات الصوتية بأعلى معايير الإتاحة عبر منصة رفيقي.',
+    descFr: 'Extrayez et analysez vos documents et fichiers audio de façon accessible.',
+  },
+  book_studio: {
+    titleEn: 'Rafiqi | Accessible Book Studio — Formatted Study Material & DOCX Export',
+    titleAr: 'رفيقي | استوديو الكتب الميسرة — تجهيز الكتب وتصدير Word الميسر',
+    titleFr: 'Rafiqi | Studio Livres Accessibles & Export DOCX',
+    descEn:
+      'Build screen-reader friendly textbooks and accessible exams with customizable spacing, headings, and instant Word/HTML export.',
+    descAr:
+      'حوّل المقررات الدراسية إلى كتب واختبارات متوافقة مع قارئات الشاشة بتصدير مباشر إلى Word وHTML.',
+    descFr: 'Créez des manuels et examens compatibles avec les lecteurs d’écran.',
   },
   academics: {
     titleEn: 'Rafiqi Academic Cockpit — GPA Calculator, Planner & Attendance Tracker',
@@ -156,21 +243,23 @@ const ROUTE_SEO_REGISTRY: Record<string, RouteSeoEntry> = {
       'Obtenez de l’aide sur les outils d’étude adaptatifs et les fonctionnalités d’accessibilité de Rafiqi.',
   },
   login: {
-    titleEn: 'Sign In to Rafiqi (رفيقي) — Inclusive AI Learning & Accessibility Platform',
-    titleAr: 'تسجيل الدخول إلى رفيقي (Rafiqi) — منصة التعلم الشامل والمساعد الذكي',
+    titleEn: 'Sign In to Rafiqi (رفيقي) — Inclusive Learning & Assistive Technology Platform',
+    titleAr: 'تسجيل الدخول إلى رفيقي (Rafiqi) — منصة التعلم الشامل والتقنيات المساندة',
     titleFr: 'Connexion à Rafiqi — Plateforme d’Apprentissage IA Inclusive & Accessible',
     descEn: BRAND_CONFIG.descriptionEn,
     descAr: BRAND_CONFIG.descriptionAr,
-    descFr: 'Connectez-vous à Rafiqi pour accéder à votre mentor IA adaptatif et vos outils d’accessibilité.',
+    descFr: 'Connectez-vous à Rafiqi pour accéder à vos outils d’apprentissage inclusif et d’accessibilité.',
   },
 };
 
 /**
- * Pure function that resolves complete SEO metadata for a given view and locale.
+ * Pure function that resolves complete SEO metadata for a given view, section, and locale.
  */
 export function resolveSeoMetadata(context: SeoContext): SeoMetadata {
   const effectiveKey =
-    context.view === 'disability' && context.subTab && ROUTE_SEO_REGISTRY[context.subTab]
+    context.section && ROUTE_SEO_REGISTRY[context.section]
+      ? context.section
+      : context.view === 'disability' && context.subTab && ROUTE_SEO_REGISTRY[context.subTab]
       ? context.subTab
       : context.view;
 
@@ -184,10 +273,12 @@ export function resolveSeoMetadata(context: SeoContext): SeoMetadata {
   const lang = isAr ? 'ar' : isFr ? 'fr' : 'en';
   const dir: 'rtl' | 'ltr' = isAr ? 'rtl' : 'ltr';
 
-  const pathSuffix =
-    context.view && context.view !== 'chat' && context.view !== 'login'
-      ? `/#${context.view}${context.subTab ? `/${context.subTab}` : ''}`
-      : '/';
+  let pathSuffix = '/';
+  if (context.section && ROUTE_SEO_REGISTRY[context.section]) {
+    pathSuffix = `/#${context.section}`;
+  } else if (context.view && context.view !== 'chat' && context.view !== 'login') {
+    pathSuffix = `/#${context.view}${context.subTab ? `/${context.subTab}` : ''}`;
+  }
 
   return {
     title,

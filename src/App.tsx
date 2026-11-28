@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import Sidebar from "./components/Sidebar";
+import GlobalHeader from "./components/GlobalHeader";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ReadAloudSelection from "./components/ReadAloudSelection";
 import { motion, AnimatePresence } from "motion/react";
@@ -37,6 +38,7 @@ import { RouteAnnouncer } from "./components/ui/RouteAnnouncer";
 import { isAdminUser } from "./lib/roles";
 import { subscribeToStudentMemory, clearStudentMemory, getCachedStudentMemory, DEFAULT_STUDENT_MEMORY } from "./lib/memory";
 import { StudentMemory, LanguagePreference } from "./types";
+import { ProductSectionId } from "./lib/sections";
 import { initSecurityTracker } from "./lib/securityTracker";
 import { getVisitorCountryCode } from "./lib/geo";
 import { recordUserLoginSession } from "./lib/loginHistory";
@@ -78,7 +80,6 @@ import type { DisabilityTab } from "./components/DisabilityModeView";
 const Login = lazyWithRetry(() => import("./components/Login"));
 const Onboarding = lazyWithRetry(() => import("./components/Onboarding"));
 const ProfilePage = lazyWithRetry(() => import("./components/ProfilePage"));
-const SignVideoStudio = lazyWithRetry(() => import("./components/SignVideoStudio"));
 const AdminDashboard = lazyWithRetry(() => import("./components/AdminDashboard"));
 const SupportCenter = lazyWithRetry(() => import("./components/SupportCenter"));
 const ChatInterface = lazyWithRetry(() => import("./components/ChatInterface"));
@@ -87,82 +88,32 @@ const AccessibilityOverlay = lazyWithRetry(() => import("./components/Accessibil
 const LiveCaptions = lazyWithRetry(() => import("./components/LiveCaptions"));
 const AccessibleBookStudioView = lazyWithRetry(() => import("./components/AccessibleBookStudioView"));
 const UnifiedAccessibilityToolkitView = lazyWithRetry(() => import("./components/UnifiedAccessibilityToolkitView"));
+const AudioDocumentIntelligenceView = lazyWithRetry(() => import("./components/AudioDocumentIntelligenceView"));
+const HearAndExpressView = lazyWithRetry(() => import("./components/HearAndExpressView"));
+const AccessibleProductivityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleProductivityWorkspaceView"));
+const AccessibleMobilityWorkspaceView = lazyWithRetry(() => import("./components/AccessibleMobilityWorkspaceView"));
+const AccessibleCommunicateWorkspaceView = lazyWithRetry(() => import("./components/AccessibleCommunicateWorkspaceView"));
 
 /** Every hash route the app answers to — single source of truth */
 const VALID_VIEWS = [
-  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'admin', 'support', 'privacy_security',
+  'disability', 'video', 'chat', 'profile', 'settings', 'book_studio', 'toolkit', 'audio_document_intelligence', 'hear_express', 'productivity', 'mobility', 'communication', 'admin', 'support', 'privacy_security',
   'goals', 'gpa', 'analytics', 'planner', 'memory', 'gym', 'iq',
   'institution', 'france', 'privacy', 'intelligence', 'teacher', 'parent',
   'evaluation', 'ai_quality', 'resilience', 'tenancy', 'developer_api', 'retention',
 ] as const;
 
-function createGuestProfile(): UserProfile {
-  let mode: AccessibilityMode = 'Visual';
-  let disLabel = 'Visual Impairment';
-  try {
-    const savedMode = localStorage.getItem('preLoginAccessibilityMode') as AccessibilityMode;
-    const savedDis = localStorage.getItem('preLoginDisability');
-    if (savedMode) mode = savedMode;
-    if (savedDis) disLabel = savedDis;
-    if (!localStorage.getItem('cognify_default_disability_tab') || localStorage.getItem('cognify_default_disability_tab') === 'hub') {
-      localStorage.setItem('cognify_default_disability_tab', 'chat');
-    }
-  } catch {}
-  return {
-    uid: 'guest-explorer',
-    email: 'student@cognify.demo',
-    name: 'عزيزي الطالب',
-    role: 'Student',
-    accountPath: 'Special Needs',
-    disabilityType: disLabel,
-    accessibilityMode: mode,
-    points: 250,
-    level: 'Intermediate',
-    educationLevel: 'University',
-    field: 'General',
-    language: 'Arabic',
-    questionScore: 100,
-    questionHistory: [],
-    onboardingComplete: true,
-  };
-}
-
 export default function App() {
   const [user, loading, authError] = useAuthState(auth);
   const chatRef = useRef<any>(null);
-  
-  const [isGuestPreview, setIsGuestPreview] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    if (sessionStorage.getItem('cognify_exit_preview') === 'true') return false;
-    return sessionStorage.getItem('cognify_guest_preview') === 'disability';
-  });
-
-  const handleEnterGuestPreview = () => {
-    try {
-      sessionStorage.removeItem('cognify_exit_preview');
-      sessionStorage.setItem('cognify_guest_preview', 'disability');
-      localStorage.setItem('preLoginAccountPath', 'Special Needs');
-      localStorage.setItem('cognify_default_disability_tab', 'hub');
-      window.location.hash = '#disability/hub';
-    } catch {}
-    setIsGuestPreview(true);
-    setProfile(createGuestProfile());
-    setProfileLoading(false);
-    setCurrentView('disability');
-    setDisabilityTab('hub');
-  };
 
   const handleLogout = async () => {
     resetInAppNavigationCount();
     setIsMobileMenuOpen(false);
     try {
-      sessionStorage.removeItem('cognify_guest_preview');
-      sessionStorage.setItem('cognify_exit_preview', 'true');
       await logout();
     } catch (err) {
       console.error('Logout error:', err);
     }
-    setIsGuestPreview(false);
     setProfile(null);
     setProfileLoading(false);
     setCurrentView('disability');
@@ -185,18 +136,8 @@ export default function App() {
   );
 
   const [currentView, setCurrentView] = useState<AppView>(initialRouteRef.current.view);
-  
-  const [profile, setProfile] = useState<UserProfile | null>(() => {
-    if (typeof window !== 'undefined') {
-      if (sessionStorage.getItem('cognify_exit_preview') === 'true') return null;
-      const isExplicit = sessionStorage.getItem('cognify_guest_preview') === 'disability';
-      if (isExplicit) {
-        return createGuestProfile();
-      }
-    }
-    return null;
-  });
-  const [profileLoading, setProfileLoading] = useState(!isGuestPreview);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
   // True once a profile snapshot has actually been applied for the current user.
   // Guards the "ignore our own pending writes" rule so it can only skip AFTER we
   // have real data — otherwise the very first snapshot can be skipped and the
@@ -227,6 +168,38 @@ export default function App() {
     return 'hub';
   });
 
+  const [currentSection, setCurrentSection] = useState<ProductSectionId | null>(
+    initialRouteRef.current.section || (initialRouteRef.current.params?.section as ProductSectionId) || null
+  );
+
+  // Unauthenticated routing: Sign-In Page vs Register Page
+  // The splash is handled once at root (main.tsx) via <SplashScreen />, not here.
+  const [unauthRoute, setUnauthRoute] = useState<'login' | 'register'>(() => {
+    if (typeof window === 'undefined') return 'login';
+    const hash = (window.location.hash || '').toLowerCase();
+    if (hash.includes('register') || hash.includes('signup')) return 'register';
+    return 'login';
+  });
+
+  useEffect(() => {
+    const handleAuthHashSync = () => {
+      const hash = (window.location.hash || '').toLowerCase();
+      if (hash.includes('register') || hash.includes('signup')) {
+        setUnauthRoute('register');
+      } else {
+        setUnauthRoute('login');
+      }
+    };
+    window.addEventListener('hashchange', handleAuthHashSync);
+    window.addEventListener('popstate', handleAuthHashSync);
+    return () => {
+      window.removeEventListener('hashchange', handleAuthHashSync);
+      window.removeEventListener('popstate', handleAuthHashSync);
+    };
+  }, []);
+
+
+
   // Rafiqi Memory (Phase 2) state
   const [memoryState, setMemoryState] = useState<StudentMemory | null>(() => {
     if (typeof window !== 'undefined') {
@@ -255,7 +228,7 @@ export default function App() {
 
   // Subscribe to Rafiqi Memory snapshot from Firestore (Single Source of Truth)
   useEffect(() => {
-    const activeUid = user?.uid || (profile?.uid === 'guest-explorer' ? 'guest-explorer' : profile?.uid);
+    const activeUid = user?.uid;
     if (!activeUid) {
       setMemoryState(null);
       setMemoryLoading(false);
@@ -277,8 +250,8 @@ export default function App() {
     }
     setMemoryError(null);
 
-    // 2. If guest or local demo profile, use default/cached memory immediately without remote call
-    if (activeUid === 'guest-explorer' || activeUid.startsWith('demo-')) {
+    // 2. If local demo profile, use default/cached memory immediately without remote call
+    if (activeUid.startsWith('demo-')) {
       setMemoryState(cached || DEFAULT_STUDENT_MEMORY);
       setMemoryLoading(false);
       setMemoryError(null);
@@ -336,11 +309,12 @@ export default function App() {
     };
     document.documentElement.lang = (profile?.language && langMap[profile.language]) || (direction === 'rtl' ? 'ar' : 'en');
     applySeoMetadata({
-      view: !user && !isGuestPreview ? 'login' : currentView,
+      view: !user ? 'login' : currentView,
       subTab: currentView === 'disability' ? disabilityTab : undefined,
+      section: currentSection ?? undefined,
       language: profile?.language,
     });
-  }, [direction, profile?.language, currentView, disabilityTab, user, isGuestPreview]);
+  }, [direction, profile?.language, currentView, disabilityTab, currentSection, user]);
 
   // Theme management: Default to system, but respect manual override if present
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -444,7 +418,7 @@ export default function App() {
 
     // If there's no hash on load, only set canonical hash if the user is already authenticated or in preview
     if (!window.location.hash || window.location.hash === '#') {
-      if (isGuestPreview || user) {
+      if (user) {
         window.history.replaceState({ view: route.view, tab: route.tab }, '', canonicalHash);
       }
     }
@@ -456,6 +430,7 @@ export default function App() {
         if (event.state.tab) {
           setDisabilityTab(event.state.tab);
         }
+        setCurrentSection(event.state.section || null);
         return;
       }
 
@@ -465,6 +440,7 @@ export default function App() {
       if (parsed.tab) {
         setDisabilityTab(parsed.tab);
       }
+      setCurrentSection(parsed.section || (parsed.params?.section as ProductSectionId) || null);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -472,14 +448,29 @@ export default function App() {
   }, []);
 
   // Custom navigation function that updates URL and history state without duplicates
-  const navigateTo = (view: AppView, tab?: DisabilityTab) => {
+  const navigateTo = (view: AppView | ProductSectionId, tab?: DisabilityTab, section?: ProductSectionId | null) => {
+    let targetView: AppView = view as AppView;
+    let targetTab: DisabilityTab | undefined = tab;
+    let targetSection: ProductSectionId | null = section !== undefined ? section : null;
+
+    const SECTION_IDS: ProductSectionId[] = ['see_understand', 'read_learn', 'work_create', 'move_explore', 'personalize'];
+    if (SECTION_IDS.includes(view as ProductSectionId) || (view === 'communicate' && (tab === 'hub' || section === 'communicate'))) {
+      targetView = 'disability';
+      targetTab = 'hub';
+      targetSection = view as ProductSectionId;
+    }
+
     const targetRoute: RouteState = {
-      view,
-      tab: tab || (view === 'disability' ? (disabilityTab || 'hub') : undefined),
+      view: targetView,
+      tab: targetTab || (targetView === 'disability' ? (disabilityTab || 'hub') : undefined),
+      section: targetSection || undefined,
+      params: targetSection ? { section: targetSection } : undefined,
     };
     const currentRoute: RouteState = {
       view: currentView,
       tab: currentView === 'disability' ? (disabilityTab || 'hub') : undefined,
+      section: currentSection || undefined,
+      params: currentSection ? { section: currentSection } : undefined,
     };
 
     // Avoid duplicate history entries
@@ -489,12 +480,13 @@ export default function App() {
     }
 
     const newHash = buildHash(targetRoute);
-    window.history.pushState({ view: targetRoute.view, tab: targetRoute.tab }, '', newHash);
+    window.history.pushState({ view: targetRoute.view, tab: targetRoute.tab, section: targetSection }, '', newHash);
     recordInAppNavigation();
     setCurrentView(targetRoute.view);
     if (targetRoute.tab) {
       setDisabilityTab(targetRoute.tab);
     }
+    setCurrentSection(targetSection);
     setIsMobileMenuOpen(false);
   };
 
@@ -529,6 +521,10 @@ export default function App() {
     setTimeout(() => {
       lastFocusedTriggerRef.current?.focus();
     }, 50);
+  };
+
+  const handleSelectSection = (sectionId: ProductSectionId) => {
+    navigateTo('disability', 'hub', sectionId);
   };
 
   const handleBack = () => {
@@ -569,10 +565,8 @@ export default function App() {
   // Sync profile from Firestore
   useEffect(() => {
     if (!user) {
-      if (!isGuestPreview) {
-        setProfile(null);
-        setProfileLoading(false);
-      }
+      setProfile(null);
+      setProfileLoading(false);
       return;
     }
 
@@ -1026,7 +1020,7 @@ export default function App() {
     }
   };
 
-  if ((!isGuestPreview && loading) || profileLoading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center" role="status" aria-live="polite">
           <div className="flex flex-col items-center gap-4">
@@ -1039,23 +1033,26 @@ export default function App() {
     );
   }
 
-  if (!user && !isGuestPreview) {
-    // Preserve unauthenticated deep-link destination before presenting Login (only if an explicit non-root deep link was requested)
+  if (!user) {
+    // Preserve unauthenticated deep-link destination before presenting Login
     const rawHash = typeof window !== 'undefined' ? window.location.hash : '';
     const cleanHash = rawHash.replace(/^[#/]+/, '').trim();
-    if (cleanHash && cleanHash !== 'disability/hub' && cleanHash !== 'hub' && cleanHash !== 'login') {
+    if (cleanHash && cleanHash !== 'disability/hub' && cleanHash !== 'hub' && cleanHash !== 'login' && cleanHash !== 'register') {
       const currentRoute: RouteState = { view: currentView, tab: disabilityTab };
       saveReturnDestination(currentRoute, rawHash);
     }
 
-    return <Login onDirectPreview={handleEnterGuestPreview} />;
+    {/* Enforce authenticated access for protected views: <Login /> */}
+    return (
+      <Login />
+    );
   }
 
   // Sync failed/timed out (not "no profile yet"). NEVER fall through to
   // Onboarding here: its Special-Needs branch auto-submits on mount and would
   // overwrite a real profile's points/level/history with defaults. Offer a
   // retry (and a way out) instead — the data is safe on the server.
-  if (profileSyncFailed && !profile && !isGuestPreview) {
+  if (profileSyncFailed && !profile) {
     // The profile never loaded, so we don't know the user's language — show both.
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
@@ -1080,7 +1077,7 @@ export default function App() {
   }
 
   // If user exists but no profile, show Onboarding
-  if ((!profile && !isGuestPreview) || (!profile?.onboardingComplete && !isGuestPreview)) {
+  if (!profile || !profile.onboardingComplete) {
     return <Onboarding user={user} onComplete={handleOnboardingComplete} />;
   }
 
@@ -1148,6 +1145,8 @@ export default function App() {
               window.history.pushState({ view: 'disability', tab: newTab }, '', newHash);
             }
           }}
+          initialSection={currentSection}
+          onSectionChange={setCurrentSection}
           setProfile={setProfile}
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
@@ -1175,6 +1174,82 @@ export default function App() {
               }
               navigateTo('book_studio');
             }}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'audio_document_intelligence':
+        return (
+          <AudioDocumentIntelligenceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={handleBack}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'hear_express':
+        return (
+          <HearAndExpressView
+            profile={activeProfile}
+            onNavigateBack={handleBack}
+            onOpenSignStudio={() => navigateTo('disability', 'deaf')}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'productivity':
+        return (
+          <AccessibleProductivityWorkspaceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={() => {
+              if (currentSection === 'work_create') {
+                handleSelectSection('work_create');
+              } else {
+                handleBack();
+              }
+            }}
+            initialTool={disabilityTab as any}
+            onOpenBookStudio={(content, title) => {
+              if (content) {
+                try {
+                  sessionStorage.setItem('cognify_book_studio_import', JSON.stringify({ text: content, title }));
+                } catch {}
+              }
+              navigateTo('book_studio');
+            }}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'mobility':
+        return (
+          <AccessibleMobilityWorkspaceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={() => {
+              if (currentSection === 'move_explore') {
+                handleSelectSection('move_explore');
+              } else {
+                handleBack();
+              }
+            }}
+            initialTool={disabilityTab as any}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'communication':
+      case 'communicate':
+        return (
+          <AccessibleCommunicateWorkspaceView
+            profile={activeProfile}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigateBack={() => {
+              if (currentSection === 'communicate') {
+                handleSelectSection('communicate');
+              } else {
+                handleBack();
+              }
+            }}
+            onOpenHearingSuite={() => navigateTo('hear_express')}
+            initialTool={disabilityTab as any}
             isDarkMode={isDarkMode}
           />
         );
@@ -1314,31 +1389,14 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      {isGuestPreview && (
-        <div className="fixed top-0 left-0 right-0 h-9 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between text-xs text-slate-300 z-[99999] shadow-sm">
-          <div className="flex items-center gap-2">
-            <Accessibility className="w-4 h-4 text-emerald-400" />
-            <span className="font-bold text-white text-[11px] sm:text-xs">
-              {direction === 'rtl' ? 'معاينة حية: منصة رفيقي التعليمية الشاملة' : 'Live Preview: Rafiqi Inclusive Learning Platform'}
-            </span>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] sm:text-[11px] transition-all shadow-sm active:scale-95 cursor-pointer"
-          >
-            {direction === 'rtl' ? 'تسجيل الدخول / خروج من المعاينة' : 'Sign in / Exit Preview'}
-          </button>
-        </div>
-      )}
-
       <div
-        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0E1416] text-stone-100' : 'bg-[#FAF8F5] text-stone-900'} font-sans overflow-hidden selection:bg-teal-500/30 transition-all duration-300 ${isGuestPreview ? 'pt-9' : ''} ${
+        className={`flex w-full h-[100dvh] ${isDarkMode ? 'bg-[#0B131E] text-stone-100' : 'bg-[#F5F9FD] text-stone-900'} font-sans overflow-hidden selection:bg-[#1769AA]/25 transition-all duration-300 ${
           profile?.accessibilityMode === 'Visual' ? 'text-lg contrast-125' : ''
         }`}
         dir={direction}
       >
         <ToastContainer rtl={direction === 'rtl'} />
-        <RouteAnnouncer route={{ view: currentView, tab: disabilityTab }} language={profile?.language} />
+        <RouteAnnouncer route={{ view: currentView, tab: disabilityTab, section: currentSection || undefined }} language={profile?.language} />
 
         {/* WCAG 2.4.1 Skip to main content link */}
         <a
@@ -1354,26 +1412,22 @@ export default function App() {
         {/* Mobile menu backdrop */}
         {isMobileMenuOpen && (
           <div
-            className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm lg:hidden"
             onClick={handleCloseMobileMenu}
           />
         )}
 
-        {/* Sidebar — an off-canvas drawer at EVERY width, opened by the hamburger.
-            It is mounted on every view (including 'disability'): it is the only
-            <Sidebar> in the app and the only route to account/settings/Sign Out,
-            and the access guard bounces accessibility users back from every other
-            view, so skipping it here would trap them.
-            `invisible` while closed removes it from the tab order and the
-            accessibility tree — a pure transform leaves it focusable, so
-            keyboard/screen-reader users would hit a phantom menu (and could
-            trigger Sign Out blind) before reaching the visible page. */}
+        {/* Sidebar — persistent on desktop (lg:static), off-canvas drawer on mobile */}
         <div
             ref={sidebarRef}
             role="dialog"
-            aria-modal="true"
+            aria-modal={isMobileMenuOpen ? "true" : undefined}
             aria-label={localize(profile?.language, 'Main menu', 'القائمة الرئيسية')}
-            className={`fixed inset-y-0 start-0 z-50 transform ${isMobileMenuOpen ? 'translate-x-0' : (direction === 'rtl' ? 'translate-x-full invisible' : '-translate-x-full invisible')} transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-2xl`}>
+            className={`fixed lg:static inset-y-0 start-0 z-50 lg:z-auto h-full shrink-0 transform lg:transform-none ${
+              isMobileMenuOpen 
+                ? 'translate-x-0 visible' 
+                : (direction === 'rtl' ? 'translate-x-full invisible lg:visible lg:translate-x-0' : '-translate-x-full invisible lg:visible lg:translate-x-0')
+            } transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-2xl lg:shadow-none`}>
             <Sidebar 
               profile={fullProfile || profile}
               setProfile={async (p) => {
@@ -1409,7 +1463,17 @@ export default function App() {
               setCurrentView={navigateTo}
               activeDisabilityTab={disabilityTab}
               onSelectDisabilityTab={(tab) => {
+                setCurrentSection(null);
                 setDisabilityTab(tab);
+                setIsMobileMenuOpen(false);
+              }}
+              currentSection={currentSection}
+              onSelectSection={(sec) => {
+                if (sec) {
+                  navigateTo(sec);
+                } else {
+                  navigateTo('disability', 'hub');
+                }
                 setIsMobileMenuOpen(false);
               }}
               isDarkMode={isDarkMode}
@@ -1420,19 +1484,49 @@ export default function App() {
             />
         </div>
 
+        {/* Main Application Content Container */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+          <GlobalHeader
+            profile={fullProfile || profile}
+            currentView={currentView}
+            currentSection={currentSection}
+            activeTab={disabilityTab}
+            onMenuClick={handleOpenMobileMenu}
+            onNavigate={(view, tab) => {
+              if (view === 'disability') {
+                if (tab) {
+                  setDisabilityTab(tab as DisabilityTab);
+                  navigateTo('disability', tab as DisabilityTab);
+                } else {
+                  setCurrentSection(null);
+                  navigateTo('disability', 'hub');
+                }
+              } else if (view === 'home') {
+                setCurrentSection(null);
+                navigateTo('disability', 'hub');
+              } else {
+                navigateTo(view as any, tab as any);
+              }
+            }}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
+            setProfile={setProfile}
+            onLogout={handleLogout}
+          />
 
-        <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
-          <Suspense
-            fallback={
-              <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
-                <Loader2 className="w-8 h-8 text-teal-400 animate-spin" aria-hidden="true" />
-                <span className="sr-only">Loading view...</span>
-              </div>
-            }
-          >
-            {renderView()}
-          </Suspense>
-        </main>
+          <main id="main-content" tabIndex={-1} className="flex-1 relative overflow-hidden flex flex-col md:flex-row focus:outline-none">
+            <Suspense
+              fallback={
+                <div role="status" aria-live="polite" className="flex-1 flex items-center justify-center bg-[#0E1416] text-teal-400">
+                  <Loader2 className="w-8 h-8 text-teal-400 animate-spin" aria-hidden="true" />
+                  <span className="sr-only">Loading view...</span>
+                </div>
+              }
+            >
+              {renderView()}
+            </Suspense>
+          </main>
+        </div>
 
         {/* The floating accessibility overlay (sign avatar / mic / vision) is ONLY for
             users who actually need it — a real accessibility mode or the Special Needs

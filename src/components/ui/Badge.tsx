@@ -12,11 +12,11 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  primary: 'bg-cognify-indigo/10 text-cognify-indigo border-cognify-indigo/30 dark:bg-cognify-indigo-light/20 dark:text-cognify-text-dark-primary dark:border-cognify-indigo-light/40',
-  teal: 'bg-cognify-teal/10 text-cognify-teal border-cognify-teal/30 dark:bg-cognify-teal/20 dark:text-cognify-teal-light dark:border-cognify-teal/40',
-  success: 'bg-cognify-success-light text-cognify-success-text-light border-cognify-success-text-light/20 dark:bg-cognify-success-dark dark:text-cognify-success-text-dark dark:border-cognify-success-text-dark/30',
-  warning: 'bg-cognify-warning-light text-cognify-warning-text-light border-cognify-warning-text-light/20 dark:bg-cognify-warning-dark dark:text-cognify-warning-text-dark dark:border-cognify-warning-text-dark/30',
-  danger: 'bg-cognify-error-light text-cognify-error-text-light border-cognify-error-text-light/20 dark:bg-cognify-error-dark dark:text-cognify-error-text-dark dark:border-cognify-error-text-dark/30',
+  primary: 'bg-rafiqi-primary-light text-rafiqi-primary-dark border-rafiqi-primary/30 dark:bg-rafiqi-surface-elevated dark:text-rafiqi-primary-muted dark:border-rafiqi-primary/40',
+  teal: 'bg-rafiqi-primary-light text-rafiqi-primary-dark border-rafiqi-primary/30 dark:bg-rafiqi-surface-elevated dark:text-rafiqi-primary-muted dark:border-rafiqi-primary/40',
+  success: 'bg-[#EBF7F1] text-rafiqi-success border-rafiqi-success/30 dark:bg-[#0A261A] dark:text-[#22C55E] dark:border-rafiqi-success/40',
+  warning: 'bg-[#FEF8EE] text-[#9A5B0B] border-rafiqi-warning/30 dark:bg-[#2D1B04] dark:text-[#FBBF24] dark:border-rafiqi-warning/40',
+  danger: 'bg-[#FDF1F2] text-rafiqi-error border-rafiqi-error/30 dark:bg-[#2D0D12] dark:text-[#F87171] dark:border-rafiqi-error/40',
   neutral: 'bg-cognify-bg-light text-cognify-text-secondary border-cognify-border-light dark:bg-cognify-surface-elevated dark:text-cognify-text-dark-secondary dark:border-cognify-border-dark',
 };
 

@@ -93,11 +93,11 @@ test('Mobile Inputs: Prevents unexpected iOS Safari auto-zoom on input focus (< 
 // ============================================================================
 // 5. Dashboard Grid & Layout Responsiveness
 // ============================================================================
-test('Dashboard: Quick Action Bar gracefully spans 2-column mobile grid without orphaned buttons', () => {
-  const code = fs.readFileSync(path.join(rootDir, 'src/components/DisabilityModeView.tsx'), 'utf-8');
-  assert.ok(code.includes('grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'), 'Must scale grid from 2 cols on mobile to 5 on desktop');
-  assert.ok(code.includes('last:col-span-2 sm:last:col-span-1'), 'Last item must span full width on 2-col mobile viewports to avoid clipping');
-  assert.ok(code.includes('flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto'), 'Header welcome buttons must wrap smoothly');
+test('Dashboard: Home Dashboard and Feature Cards scale cleanly across mobile, tablet, and desktop', () => {
+  const homeCode = fs.readFileSync(path.join(rootDir, 'src/components/HomeDashboard.tsx'), 'utf-8');
+  assert.ok(homeCode.includes('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'), 'Home sections must scale from 1 col on mobile to 2 on tablet and 3 on desktop');
+  assert.ok(homeCode.includes('grid grid-cols-1 sm:grid-cols-3'), 'Home quick actions must stack on mobile and arrange across desktop');
+  assert.ok(homeCode.includes('min-h-[44px]'), 'Home quick action controls must maintain accessible touch target height');
 });
 
 test('Feature Cards: Adapt cleanly from 1 column on mobile to 3 columns on desktop', () => {

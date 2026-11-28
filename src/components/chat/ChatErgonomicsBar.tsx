@@ -51,14 +51,14 @@ export default function ChatErgonomicsBar({
   };
 
   return (
-    <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#0D2542] border border-[rgba(72,139,190,0.22)] shadow-md backdrop-blur-md">
+    <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#0D2542] border border-[#22354E] shadow-md backdrop-blur-md">
       {/* Font Scaler Controls */}
-      <div className="flex items-center bg-[#0A203A] border border-[rgba(72,139,190,0.22)] rounded-xl p-0.5">
+      <div className="flex items-center bg-[#0A203A] border border-[#22354E] rounded-xl p-0.5">
         <button
           type="button"
           onClick={handleDecreaseFont}
           disabled={currentIndex === 0}
-          className="p-1 rounded-lg text-slate-400 hover:text-[#0A96A5] disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+          className="p-1 rounded-lg text-slate-400 hover:text-[#4B9FE1] disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
           title={localize(language, 'Decrease font size (A-)', 'تصغير حجم الخط (A-)')}
           aria-label="Decrease font size"
         >
@@ -66,7 +66,7 @@ export default function ChatErgonomicsBar({
         </button>
 
         <span
-          className="px-1.5 text-[10px] font-bold text-[#0A96A5] font-mono select-none"
+          className="px-1.5 text-[10px] font-bold text-[#4B9FE1] font-mono select-none"
           title={localize(language, scaleLabels[fontScale].en, scaleLabels[fontScale].ar)}
         >
           {fontScale === 'sm' ? '85%' : fontScale === 'base' ? '100%' : fontScale === 'lg' ? '115%' : '130%'}
@@ -76,7 +76,7 @@ export default function ChatErgonomicsBar({
           type="button"
           onClick={handleIncreaseFont}
           disabled={currentIndex === SCALE_ORDER.length - 1}
-          className="p-1 rounded-lg text-slate-400 hover:text-[#0A96A5] disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+          className="p-1 rounded-lg text-slate-400 hover:text-[#4B9FE1] disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
           title={localize(language, 'Increase font size (A+)', 'تكبير حجم الخط (A+)')}
           aria-label="Increase font size"
         >
@@ -90,8 +90,8 @@ export default function ChatErgonomicsBar({
         onClick={onToggleEyeComfort}
         className={`flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all border ${
           isEyeComfort
-            ? 'bg-[#4A1224]/60 border-[#E5A93C]/60 text-[#0A96A5] shadow-md shadow-[#4A1224]/20'
-            : 'bg-[#1A0C1D] border-[rgba(72,139,190,0.22)]/50 text-slate-400 hover:text-[#0A96A5] hover:border-[#E5A93C]/40'
+            ? 'bg-[#1A283D]/60 border-[#E5A93C]/60 text-[#4B9FE1] shadow-md shadow-[#1A283D]/20'
+            : 'bg-[#131E2E] border-[#22354E]/50 text-slate-400 hover:text-[#4B9FE1] hover:border-[#E5A93C]/40'
         }`}
         title={localize(
           language,
@@ -99,7 +99,7 @@ export default function ChatErgonomicsBar({
           isEyeComfort ? 'تعطيل وضع القراءة الدافئ' : 'تفعيل وضع القراءة الدافئ المريح للعين (تقليل الضوء الأزرق)'
         )}
       >
-        <Eye className={`w-3.5 h-3.5 ${isEyeComfort ? 'text-[#0A96A5] fill-[#E5A93C]/20' : 'text-slate-400'}`} />
+        <Eye className={`w-3.5 h-3.5 ${isEyeComfort ? 'text-[#4B9FE1] fill-[#E5A93C]/20' : 'text-slate-400'}`} />
         <span className="hidden md:inline text-[10px]">
           {isEyeComfort
             ? localize(language, 'Warm Hue', 'قراءة دافئة')
@@ -111,7 +111,7 @@ export default function ChatErgonomicsBar({
       <button
         type="button"
         onClick={onOpenSearch}
-        className="p-1.5 rounded-xl bg-[#1A0C1D] border border-[rgba(72,139,190,0.22)]/50 text-slate-400 hover:text-[#0A96A5] hover:border-[#E5A93C]/40 transition-colors"
+        className="p-1.5 rounded-xl bg-[#131E2E] border border-[#22354E]/50 text-slate-400 hover:text-[#4B9FE1] hover:border-[#E5A93C]/40 transition-colors"
         title={localize(language, 'Search within this chat session', 'بحث داخل هذه المحادثة')}
         aria-label="Search within chat"
       >
@@ -124,14 +124,14 @@ export default function ChatErgonomicsBar({
         onClick={onOpenBookmarks}
         className={`flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all border ${
           bookmarksCount > 0
-            ? 'bg-[#4A1224]/40 border-[#E5A93C]/40 text-[#0A96A5] hover:bg-[#4A1224]/60'
-            : 'bg-[#1A0C1D] border-[rgba(72,139,190,0.22)]/50 text-slate-400 hover:text-[#0A96A5]'
+            ? 'bg-[#1A283D]/40 border-[#E5A93C]/40 text-[#4B9FE1] hover:bg-[#1A283D]/60'
+            : 'bg-[#131E2E] border-[#22354E]/50 text-slate-400 hover:text-[#4B9FE1]'
         }`}
         title={localize(language, 'Open saved key takeaways', 'فتح بنك الأفكار والإجابات المحفوظة')}
       >
-        <Bookmark className={`w-3.5 h-3.5 ${bookmarksCount > 0 ? 'fill-[#E5A93C] text-[#0A96A5]' : 'text-slate-400'}`} />
+        <Bookmark className={`w-3.5 h-3.5 ${bookmarksCount > 0 ? 'fill-[#E5A93C] text-[#4B9FE1]' : 'text-slate-400'}`} />
         {bookmarksCount > 0 && (
-          <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-[#E5A93C]/20 text-[#0A96A5]">
+          <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-[#E5A93C]/20 text-[#4B9FE1]">
             {bookmarksCount}
           </span>
         )}

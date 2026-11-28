@@ -167,25 +167,25 @@ export default function ProfilePage({
         nameEn: 'Computer Science Fundamentals',
         nameAr: 'أسس علوم الحاسب والبرمجة',
         percentage: getAvgAccuracy(['variables_types', 'control_flow', 'functions']),
-        gradient: 'from-[#087F8C] to-[#18C6C3]',
+        gradient: 'from-[#1769AA] to-[#18C6C3]',
       },
       {
         nameEn: 'Data Structures & Algorithms',
         nameAr: 'هياكل البيانات والخوارزميات',
         percentage: getAvgAccuracy(['memory_addresses', 'data_structures', 'binary_trees', 'algorithmic_complexity']),
-        gradient: 'from-[#1769B0] to-[#00AEB8]',
+        gradient: 'from-[#1769B0] to-[#1769AA]',
       },
       {
         nameEn: 'Web Development',
         nameAr: 'تطوير تطبيقات الويب والواجهات',
         percentage: getAvgAccuracy(['web_development', 'http_protocols', 'dom_manipulation']),
-        gradient: 'from-[#087F8C] to-[#18C6C3]',
+        gradient: 'from-[#1769AA] to-[#18C6C3]',
       },
       {
         nameEn: 'Database Systems',
         nameAr: 'أنظمة قواعد البيانات وإدارتها',
         percentage: getAvgAccuracy(['database_systems', 'sql_queries', 'normalization']),
-        gradient: 'from-[#00AEB8] to-[#18C6C3]',
+        gradient: 'from-[#1769AA] to-[#18C6C3]',
       },
     ];
   }, [masteryRecords]);
@@ -319,7 +319,7 @@ export default function ProfilePage({
     >
       {/* Ambient Deep Navy Glowing Backdrops */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute -top-32 -left-32 w-[520px] h-[520px] bg-[#087F8C]/10 rounded-full blur-[140px]" />
+        <div className="absolute -top-32 -left-32 w-[520px] h-[520px] bg-[#1769AA]/10 rounded-full blur-[140px]" />
         <div className="absolute top-1/2 -right-32 w-[520px] h-[520px] bg-[#1769B0]/10 rounded-full blur-[140px]" />
       </div>
 
@@ -367,7 +367,7 @@ export default function ProfilePage({
                   });
                   setIsEditing(true);
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#00AEB8] hover:bg-[#18C6C3] text-[#061A33] font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#00AEB8]/20 cursor-pointer active:scale-95"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-[#1769AA] hover:bg-[#18C6C3] text-[#061A33] font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 cursor-pointer active:scale-95"
               >
                 <Edit3 className="w-3.5 h-3.5" /> 
                 <span>{localize(profile.language, 'Edit Profile', 'تعديل الملف')}</span>
@@ -386,7 +386,7 @@ export default function ProfilePage({
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-5 py-2 bg-[#00AEB8] hover:bg-[#18C6C3] text-[#061A33] rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#00AEB8]/20 active:scale-95 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-5 py-2 bg-[#1769AA] hover:bg-[#18C6C3] text-[#061A33] rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#1769AA]/20 active:scale-95 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
                 >
                   {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} 
                   <span>{saving ? localize(profile.language, 'Saving...', 'جاري الحفظ...') : localize(profile.language, 'Save Changes', 'حفظ التعديلات')}</span>
@@ -402,7 +402,7 @@ export default function ProfilePage({
             <h1 className="text-2xl sm:text-3xl font-black text-[#F4F7FB] tracking-tight">
               {localize(profile.language, 'Academic Profile', 'الملف الأكاديمي')}
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#087F8C]/25 text-[#18C6C3] border border-[#087F8C]/40 shadow-xs">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#1769AA]/25 text-[#18C6C3] border border-[#1769AA]/40 shadow-xs">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#18C6C3]" />
               <span>{localize(profile.language, 'Verified Scholar', 'طالب موثّق')}</span>
             </span>
@@ -421,7 +421,7 @@ export default function ProfilePage({
           
           {/* Card 1: Academic Level */}
           <div className="bg-[#0D2542] border border-[#16395E] rounded-2xl p-5 shadow-sm hover:border-[#18C6C3]/40 transition-all flex items-center gap-4 text-start">
-            <div className="w-12 h-12 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
               <GraduationCap className="w-6 h-6" />
             </div>
             <div className="min-w-0 flex-1">
@@ -431,7 +431,7 @@ export default function ProfilePage({
               <h3 className="text-lg sm:text-xl font-black text-[#F4F7FB] tracking-tight truncate mt-0.5">
                 {displayLevel}
               </h3>
-              <p className="text-[11px] font-semibold text-[#00AEB8] mt-0.5 truncate">
+              <p className="text-[11px] font-semibold text-[#4B9FE1] mt-0.5 truncate">
                 {displayPace}
               </p>
             </div>
@@ -439,7 +439,7 @@ export default function ProfilePage({
 
           {/* Card 2: Academic Mastery */}
           <div className="bg-[#0D2542] border border-[#16395E] rounded-2xl p-5 shadow-sm hover:border-[#18C6C3]/40 transition-all flex items-center gap-4 text-start">
-            <div className="w-12 h-12 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
               <Target className="w-6 h-6" />
             </div>
             <div className="min-w-0 flex-1">
@@ -452,7 +452,7 @@ export default function ProfilePage({
               {/* Horizontal mini progress bar */}
               <div className="h-1.5 w-full bg-[#102C4D] rounded-full overflow-hidden mt-1.5 mb-1">
                 <div 
-                  className="h-full bg-gradient-to-r from-[#087F8C] to-[#18C6C3] rounded-full transition-all duration-700"
+                  className="h-full bg-gradient-to-r from-[#1769AA] to-[#18C6C3] rounded-full transition-all duration-700"
                   style={{ width: `${computedMastery}%` }}
                 />
               </div>
@@ -464,7 +464,7 @@ export default function ProfilePage({
 
           {/* Card 3: Knowledge Points */}
           <div className="bg-[#0D2542] border border-[#16395E] rounded-2xl p-5 shadow-sm hover:border-[#18C6C3]/40 transition-all flex items-center gap-4 text-start">
-            <div className="w-12 h-12 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
               <Sparkles className="w-6 h-6" />
             </div>
             <div className="min-w-0 flex-1">
@@ -482,7 +482,7 @@ export default function ProfilePage({
 
           {/* Card 4: Study Sessions */}
           <div className="bg-[#0D2542] border border-[#16395E] rounded-2xl p-5 shadow-sm hover:border-[#18C6C3]/40 transition-all flex items-center gap-4 text-start">
-            <div className="w-12 h-12 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 flex items-center justify-center text-[#18C6C3] shrink-0">
               <Clock className="w-6 h-6" />
             </div>
             <div className="min-w-0 flex-1">
@@ -624,7 +624,7 @@ export default function ProfilePage({
             <div className="bg-[#0D2542] border border-[#16395E] rounded-[28px] p-6 sm:p-8 flex flex-col items-center text-center shadow-lg relative">
               
               {/* Circular Avatar with Monogram & Verified Badge */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-[#087F8C] to-[#18C6C3] flex items-center justify-center relative shadow-lg shadow-[#087F8C]/25 border-2 border-[#16395E] group overflow-hidden">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-[#1769AA] to-[#18C6C3] flex items-center justify-center relative shadow-lg shadow-[#1769AA]/25 border-2 border-[#16395E] group overflow-hidden">
                 {profile.photoURL ? (
                   <img 
                     src={profile.photoURL} 
@@ -649,7 +649,7 @@ export default function ProfilePage({
 
                 {/* Verified Shield Check Badge at Bottom Right */}
                 <div 
-                  className="absolute bottom-0 end-0 w-7 h-7 rounded-full bg-[#087F8C] border-2 border-[#0D2542] flex items-center justify-center text-white shadow-md z-10"
+                  className="absolute bottom-0 end-0 w-7 h-7 rounded-full bg-[#1769AA] border-2 border-[#0D2542] flex items-center justify-center text-white shadow-md z-10"
                   title="Verified Scholar"
                 >
                   <ShieldCheck className="w-4 h-4 text-white" />
@@ -761,7 +761,7 @@ export default function ProfilePage({
               {/* Header */}
               <div className="flex items-center justify-between pb-4 border-b border-[#16395E]">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 text-[#18C6C3]">
+                  <div className="p-2 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 text-[#18C6C3]">
                     <BarChart2 className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-bold text-[#F4F7FB]">
@@ -781,7 +781,7 @@ export default function ProfilePage({
                     <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
                       <defs>
                         <linearGradient id="academicDonutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#087F8C" />
+                          <stop offset="0%" stopColor="#1769AA" />
                           <stop offset="100%" stopColor="#18C6C3" />
                         </linearGradient>
                       </defs>
@@ -853,7 +853,7 @@ export default function ProfilePage({
               {/* Header */}
               <div className="flex items-center justify-between pb-4 border-b border-[#16395E]">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-[#087F8C]/20 border border-[#087F8C]/40 text-[#18C6C3]">
+                  <div className="p-2 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 text-[#18C6C3]">
                     <Clock className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-bold text-[#F4F7FB]">
@@ -899,11 +899,11 @@ export default function ProfilePage({
                           </td>
                           <td className="py-3.5 px-3 text-end whitespace-nowrap">
                             {act.resultType === 'completed' ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#087F8C]/25 text-[#18C6C3] border border-[#087F8C]/40">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1769AA]/25 text-[#18C6C3] border border-[#1769AA]/40">
                                 {act.result}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#00AEB8]/20 text-[#10B8B0] border border-[#00AEB8]/30">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/30">
                                 {act.result}
                               </span>
                             )}

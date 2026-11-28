@@ -1,1085 +1,858 @@
-import { localize, isArabicLocale } from '../lib/translations';
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { UserProfile, UserRole, EducationLevel, CognitiveDomainScores, IqAssessmentRecord, CognitiveLevel } from "../types";
+import React, { useState, useEffect } from "react";
+import { 
+  UserProfile, 
+  UserRole, 
+  EducationLevel, 
+  AccessibilityPassport,
+  LanguagePreference 
+} from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import {
+  Globe,
+  Sparkles,
+  ArrowRight,
+  ChevronLeft,
+  CheckCircle,
+  Eye,
+  Ear,
+  MessageSquare,
+  Volume2,
+  Sliders,
+  Type,
+  Sun,
+  Moon,
+  Laptop,
+  ShieldCheck,
   GraduationCap,
   Briefcase,
-  ArrowRight,
-  CheckCircle,
-  Sprout,
-  Globe,
-  Heart,
-  LogOut,
-  Brain,
-  Clock,
-  Zap,
-  BarChart3,
   Layers,
-  ChevronRight,
-  ChevronLeft,
-  Flame,
-  Award,
-  Sparkles,
-  Check,
+  LogOut,
+  HelpCircle,
+  Info,
+  Check
 } from "lucide-react";
 import { auth, logout } from "../lib/firebase";
-import { getTranslation, isRTL } from "../lib/translations";
-import {
-  IQ_QUESTION_BATTERY,
-  calculateStandardizedIq,
-  IqQuestion,
-  COGNITIVE_ASSESSMENT_DISCLAIMER_EN,
-  COGNITIVE_ASSESSMENT_DISCLAIMER_AR,
-} from "../lib/iqAssessment";
+import { getTranslation, isRTL, localize, isArabicLocale } from "../lib/translations";
+import { speak } from "../lib/tts";
+import { PRODUCT_SECTIONS, getSectionIconComponent } from "../lib/sections";
+import { ThemeSelector, ThemeMode } from "./ui/ThemeSelector";
 
 interface OnboardingProps {
   onComplete: (data: Partial<UserProfile>) => void | Promise<void>;
   user?: any;
 }
 
-const UNIVERSITIES = [
-  "Ain Shams University", "Al-Azhar University", "Alexandria University", "Arish University", "Assiut University",
-  "Aswan University", "Benha University", "Beni-Suef University", "Cairo University", "Damanhour University",
-  "Damietta University", "Fayoum University", "Helwan University", "Hurghada University", "Kafrelsheikh University",
-  "Luxor University", "Mansoura University", "Matrouh University", "Menoufia University", "Minia University",
-  "New Valley University", "Port Said University", "Sohag University", "South Valley University", "Suez Canal University",
-  "Suez University", "Tanta University", "University of Sadat City", "Zagazig University", "Other"
-];
-
-const FACULTIES = [
-  "Artificial Intelligence", "Business / Commerce", "Computer Science & IT", "Dentistry", "Engineering",
-  "Mass Communication", "Medicine", "Pharmacy", "Physical Therapy", "Science", "Other"
-];
-
-// Only the languages that fully translate the entire UI are offered, so users
-// never land on a half-English screen. (The AI chat still replies in any
-// language the user types.)
-const LANGUAGES = [
-  "English", "Arabic", "Egyptian Ammiya", "French", "Spanish"
-];
-
-const SUSTAINABILITY_GOALS = [
-  { id: 'climate', labelEn: 'Climate Action', labelAr: 'العمل المناخي والاستدامة', icon: <Globe className="w-5 h-5 text-emerald-500" /> },
-  { id: 'health', labelEn: 'Good Health & Well-being', labelAr: 'الصحة الجيدة والرفاه', icon: <Heart className="w-5 h-5 text-red-500" /> },
-  { id: 'quality-edu', labelEn: 'Quality Education', labelAr: 'التعليم الجيد المنصف', icon: <GraduationCap className="w-5 h-5 text-primary" /> },
-  { id: 'zero-hunger', labelEn: 'Zero Hunger / Sustainable Food', labelAr: 'القضاء على الجوع والغذاء المستدام', icon: <Sprout className="w-5 h-5 text-accent" /> }
-];
-
 export default function Onboarding({ onComplete, user }: OnboardingProps) {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Preference states
+  const [language, setLanguage] = useState<LanguagePreference>('Arabic');
+  const [dialect, setDialect] = useState<'ar-EG' | 'ar-MSA' | 'en-US'>('ar-EG');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+  const [highContrast, setHighContrast] = useState(false);
+  const [fontSizeScale, setFontSizeScale] = useState<'normal' | 'medium' | 'large' | 'extra-large'>('medium');
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [speechRate, setSpeechRate] = useState<number>(1.0);
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [descriptionDetail, setDescriptionDetail] = useState<'concise' | 'balanced' | 'detailed'>('balanced');
+  const [readingPronounceTashkeel, setReadingPronounceTashkeel] = useState(false);
+  
+  // Optional profile info (strictly non-mandatory)
   const [formData, setFormData] = useState<Partial<UserProfile>>({
-    email: user?.email || auth.currentUser?.email || "",
-    accountPath: (localStorage.getItem('preLoginAccountPath') as any) || "Normal",
-    universityEmail: localStorage.getItem('preLoginUniEmail') || "",
-    // University/Faculty <select> elements fall back to displaying "Other"
-    // whenever the stored value isn't in the list (see the value= logic on
-    // each <select> below). Starting them at "" made the dropdown SHOW
-    // "Other" pre-selected while formData.university/faculty stayed "" —
-    // the Next button (disabled={!formData.university || !formData.faculty})
-    // then stayed permanently disabled until the user reselected a value,
-    // which looked like "Create" was just broken. Defaulting to the literal
-    // "Other" keeps the two in sync from the first render.
-    faculty: localStorage.getItem('preLoginFaculty') || "Other",
-    department: localStorage.getItem('preLoginDepartment') || "",
-    disabilityType: localStorage.getItem('preLoginDisability') || "",
-    role: "Student",
-    educationLevel: "University",
-    university: "Other",
-    work: "",
-    jobTitle: "",
-    points: 100,
-    questionHistory: [],
-    onboardingComplete: false,
-    sustainabilityGoal: "quality-edu"
+    level: 'Intermediate',
+    role: 'Student',
+    educationLevel: 'University',
   });
+  const [userRole, setUserRole] = useState<UserRole>('Student');
+  const [educationLevel, setEducationLevel] = useState<EducationLevel>('University');
+  const [optionalAssistiveMode, setOptionalAssistiveMode] = useState<'Visual' | 'Vocal-Deaf' | 'Speech' | 'None'>('None');
 
-  // Cognitive Baseline & IQ Assessment state for Normal Mode (10 Questions · 10 Minutes)
-  const [iqStep, setIqStep] = useState<'intro' | 'active' | 'result'>('intro');
-  const [currentIqIdx, setCurrentIqIdx] = useState(0);
-  const [iqAnswers, setIqAnswers] = useState<Record<string, string>>({});
-  const [iqTotalSecondsLeft, setIqTotalSecondsLeft] = useState(600); // 10 minutes total timer (600s)
-  const [iqStartTime, setIqStartTime] = useState<number | null>(null);
-  const [computedIq, setComputedIq] = useState<{
-    score: number;
-    level: CognitiveLevel;
-    domains: CognitiveDomainScores;
-    persona: 'Foundational' | 'Balanced' | 'Socratic';
-  } | null>(null);
+  const isRtl = isArabicLocale(language);
+  const t = (en: string, ar: string) => (isRtl ? ar : en);
 
-  const iqAnswersRef = useRef(iqAnswers);
-  const iqStartTimeRef = useRef<number | null>(null);
+  // Apply real-time visual changes so the user sees the preview immediately
   useEffect(() => {
-    iqAnswersRef.current = iqAnswers;
-  }, [iqAnswers]);
-
-    // 10-Minute Overall Countdown Timer for Cognitive Assessment
-  useEffect(() => {
-    if (step !== 4 || iqStep !== 'active') return;
-
-    const timer = setInterval(() => {
-      setIqTotalSecondsLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          finishIqTest(iqAnswersRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [step, iqStep]);
-
-  const formatTimer = (secs: number) => {
-    const mins = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+    const root = document.documentElement;
+    root.classList.remove('font-scale-normal', 'font-scale-medium', 'font-scale-large', 'font-scale-extra-large');
+    root.classList.add(`font-scale-${fontSizeScale}`);
+    root.classList.toggle('high-contrast', highContrast);
+    root.classList.toggle('reduce-motion', reduceMotion);
+  }, [fontSizeScale, highContrast, reduceMotion]);
 
   const handleNextStep = () => {
-    // Normal mode proceeds through step 4 (Cognitive assessment). Special needs skips directly to completion.
-    if (step === 3 && formData.accountPath === 'Special Needs') {
-      finishOnboarding();
-      return;
-    }
-    setStep(step + 1);
+    setStep((prev) => Math.min(5, prev + 1));
   };
 
-  const handleIqOptionSelect = (optionId: string) => {
-    const q = IQ_QUESTION_BATTERY[currentIqIdx];
-    if (!q) return;
-    const newAnswers = { ...iqAnswers, [q.id]: optionId };
-    setIqAnswers(newAnswers);
-    iqAnswersRef.current = newAnswers;
-
-    // Smoothly auto-advance to next question if not at the end
-    if (currentIqIdx < IQ_QUESTION_BATTERY.length - 1) {
-      setCurrentIqIdx(currentIqIdx + 1);
-    }
-  };
-
-  const finishIqTest = useCallback((answers: Record<string, string>) => {
-    const startTime = iqStartTimeRef.current;
-    const elapsed = startTime ? Math.min(600, Math.max(1, Math.round((Date.now() - startTime) / 1000))) : (600 - iqTotalSecondsLeft);
-    const result = calculateStandardizedIq(answers, elapsed);
-    const studentLevel: CognitiveLevel = formData.level || 'Intermediate';
-
-    const record: IqAssessmentRecord = {
-      id: `iq_onboard_${Date.now()}`,
-      testIndex: 1,
-      date: new Date().toISOString(),
-      iqScore: result.iqScore,
-      domainScores: result.domainScores,
-      durationSeconds: elapsed,
-      recommendedPersona: result.recommendedPersona,
-    };
-
-    setComputedIq({
-      score: result.iqScore,
-      level: studentLevel,
-      domains: result.domainScores,
-      persona: result.recommendedPersona,
-    });
-
-    setFormData((prev) => ({
-      ...prev,
-      iqScore: result.iqScore,
-      cognitiveDomains: result.domainScores,
-      level: prev.level || 'Intermediate',
-      lastIqTestDate: record.date,
-      iqAssessmentHistory: [record],
-      iqAssessmentSkipped: false,
-    }));
-
-    setIqStep('result');
-  }, [formData.level, iqTotalSecondsLeft]);
-
-  const skipIqTest = () => {
-    setFormData((prev) => ({
-      ...prev,
-      iqScore: 100,
-      level: 'Intermediate',
-      iqAssessmentSkipped: true,
-      cognitiveDomains: {
-        fluidReasoning: 70,
-        quantitativeLogic: 70,
-        workingMemory: 70,
-        processingSpeed: 70,
-      },
-    }));
-    setStep(5);
+  const handlePrevStep = () => {
+    setStep((prev) => Math.max(1, prev - 1));
   };
 
   const finishOnboarding = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const isNorm = formData.accountPath === 'Normal' || !formData.accountPath;
-      await onComplete({
-        ...formData,
-        accountPath: isNorm ? 'Normal' : formData.accountPath,
-        accessibilityMode: isNorm ? 'None' : (formData.accessibilityMode || 'None'),
-        disabilityType: isNorm ? '' : (formData.disabilityType || ''),
-        email: user?.email || formData.email || auth.currentUser?.email || "",
-        level: formData.level || 'Intermediate',
-        iqScore: formData.iqScore || 100,
-        cognitiveDomains: formData.cognitiveDomains || {
-          fluidReasoning: 70,
-          quantitativeLogic: 70,
-          workingMemory: 70,
-          processingSpeed: 70,
+      // Save local caches
+      try {
+        localStorage.setItem('cognify_font_scale', fontSizeScale);
+        localStorage.setItem('cognify_high_contrast', String(highContrast));
+        localStorage.setItem('cognify_reduce_motion', String(reduceMotion));
+        localStorage.setItem('cognify_tts_rate', String(speechRate));
+        localStorage.setItem('cognify_dialect', dialect);
+        localStorage.setItem('cognify_desc_depth', descriptionDetail);
+      } catch {}
+
+      const passport: AccessibilityPassport = {
+        primaryMode: optionalAssistiveMode === 'None' ? 'None' : optionalAssistiveMode,
+        highContrast,
+        dyslexiaFont: false,
+        fontSizeScale,
+        reduceMotion,
+        hapticFeedback: true,
+        autoSpeak,
+        audioSpeed: speechRate,
+        allowCameraTriggers: true,
+        visualSupport: {
+          highContrast,
+          autoSpeechReadout: autoSpeak,
+          hapticAssistance: true,
         },
-        lastIqTestDate: formData.lastIqTestDate || new Date().toISOString(),
-        lastQuizDate: new Date().toISOString(),
+        hearingSupport: {
+          visualAcousticRadar: optionalAssistiveMode === 'Vocal-Deaf',
+          reverseSignToSpeech: optionalAssistiveMode === 'Vocal-Deaf',
+          flashingAlerts: optionalAssistiveMode === 'Vocal-Deaf',
+        },
+        neurodiversitySupport: {
+          dyslexiaFont: false,
+          readingRuler: false,
+          sensoryRegulation: true,
+        },
+      };
+
+      const finalProfileData: Partial<UserProfile> = {
+        email: user?.email || auth.currentUser?.email || "",
+        name: user?.displayName || user?.email?.split('@')[0] || "User",
+        language,
+        role: userRole,
+        educationLevel,
+        accountPath: optionalAssistiveMode === 'None' ? 'Normal' : 'Special Needs',
+        accessibilityMode: optionalAssistiveMode,
+        disabilityType: optionalAssistiveMode === 'None' ? '' : (
+          optionalAssistiveMode === 'Visual' ? 'Visual Impairment' :
+          optionalAssistiveMode === 'Vocal-Deaf' ? 'Hearing Impairment' : 'Speech & Communication'
+        ),
+        accessibilityPassport: passport,
+        level: formData.level || 'Intermediate',
+        points: 150,
         onboardingComplete: true,
-      });
+      };
+
+      await onComplete(finalProfileData);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // ── Step 1: Language & Dialect Preferences ──────────────────────────────────
   const renderLanguageStep = () => (
     <motion.div
-      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+      key="step-1"
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -15 }}
       className="flex flex-col gap-6 w-full max-w-lg"
     >
       <div className="space-y-2 text-center">
-        <h2 className="text-3xl font-extrabold tracking-tight text-text-main leading-tight">{getTranslation(formData.language, 'language')}</h2>
-        <p className="text-text-muted">{localize(formData.language, "Pick your preferred cognitive interaction language.", "اختر لغتك المفضّلة للتفاعل.")}</p>
+        <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center mx-auto mb-2">
+          <Globe className="w-6 h-6" />
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          {t('Language & Dialect', 'اللغة واللهجة المفضّلة')}
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#94A3B8]">
+          {t('Choose how Rafiqi reads, speaks, and interacts with you.', 'اختر لغة وتفضيل التفاعل الصوتي والقراءة في رفيقي.')}
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {LANGUAGES.map((lang) => (
+      {/* Language Selection */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {[
+          { id: 'Arabic', label: 'العربية (Arabic)', badge: 'موصى به' },
+          { id: 'English', label: 'English', badge: 'Full Support' },
+        ].map((langOpt) => (
           <button
-            key={lang}
-            onClick={() => setFormData({ ...formData, language: lang as any })}
-            className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-              formData.language === lang
-                ? 'border-primary bg-primary-soft text-primary'
-                : 'border-border bg-white text-text-muted hover:border-primary/20'
+            key={langOpt.id}
+            type="button"
+            onClick={() => setLanguage(langOpt.id as LanguagePreference)}
+            className={`min-h-[56px] p-4 rounded-2xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+              language === langOpt.id
+                ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1] font-bold shadow-xs'
+                : 'border-slate-200 dark:border-[#22354E] bg-white dark:bg-[#131E2E] text-slate-700 dark:text-slate-300 hover:border-[#1769AA]/40'
             }`}
           >
-            <div className={`w-2 h-2 rounded-full ${formData.language === lang ? 'bg-primary' : 'bg-surface-3'}`} />
-            <span className="font-bold text-sm">{lang}</span>
+            <span className="text-sm font-bold">{langOpt.label}</span>
+            {language === langOpt.id && <Check className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />}
           </button>
         ))}
       </div>
 
-      <button
-        onClick={handleNextStep}
-        disabled={!formData.language}
-        className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-primary-press disabled:bg-surface-3 disabled:text-faint transition-all flex items-center justify-center gap-2 group"
-      >
-        {getTranslation(formData.language, 'continue')} <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-      </button>
-    </motion.div>
-  );
-
-  const renderRoleStep = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col gap-6 w-full max-w-lg"
-    >
-      <div className="space-y-2 text-center">
-        <h2 className="text-3xl font-extrabold tracking-tight text-text-main leading-tight">{getTranslation(formData.language, 'userRole')}</h2>
-        <p className="text-text-muted">{localize(formData.language, "How would you describe your current path?", "إزاي توصف مسارك الحالي؟")}</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {(["Professional", "Student"] as UserRole[]).map((r) => (
-          <button
-            key={r}
-            onClick={() => {
-              setFormData({
-                ...formData,
-                role: r,
-                educationLevel: r === 'Professional' ? 'Professional' : 'University'
-              });
-            }}
-            className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
-              formData.role === r
-                ? 'border-primary bg-primary-soft text-primary'
-                : 'border-border bg-white text-faint hover:border-primary/20'
-            }`}
-          >
-            {r === "Student" ? <GraduationCap className="w-8 h-8" /> : <Briefcase className="w-8 h-8" />}
-            <span className="font-bold text-xs uppercase tracking-wider">{getTranslation(formData.language, r.toLowerCase() as any)}</span>
-          </button>
-        ))}
-      </div>
-
-      {formData.role === 'Student' && (
-        <div className="grid grid-cols-3 gap-2">
-          {(['Primary', 'Secondary', 'University'] as EducationLevel[]).map((lvl) => (
+      {/* Dialect Selection (for Arabic) */}
+      {isRtl && (
+        <div className="space-y-2 text-start">
+          <label className="text-xs font-bold text-slate-700 dark:text-[#F8FAFC]">
+            {t('Arabic Dialect / Variety', 'التنوع اللغوي المفضل')}
+          </label>
+          <div className="grid grid-cols-2 gap-2.5">
             <button
-              key={lvl}
-              onClick={() => setFormData({ ...formData, educationLevel: lvl })}
-              className={`p-3 rounded-xl border-2 text-[10px] font-black uppercase transition-all ${
-                formData.educationLevel === lvl
-                  ? 'border-blue-600 bg-surface-3 text-primary'
-                  : 'border-border bg-white text-faint'
+              type="button"
+              onClick={() => setDialect('ar-EG')}
+              className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col gap-1 ${
+                dialect === 'ar-EG'
+                  ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
+                  : 'border-slate-200 dark:border-[#22354E] bg-white dark:bg-[#131E2E] text-slate-600 dark:text-slate-400'
               }`}
             >
-              {getTranslation(formData.language, lvl.toLowerCase() as any)}
+              <span>اللهجة المصرية (Egyptian Arabic)</span>
+              <span className="text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">شروحات وأوصاف مبسطة ودارجة</span>
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setDialect('ar-MSA')}
+              className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex flex-col gap-1 ${
+                dialect === 'ar-MSA'
+                  ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
+                  : 'border-slate-200 dark:border-[#22354E] bg-white dark:bg-[#131E2E] text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              <span>الفصحى المعاصرة (Modern Standard)</span>
+              <span className="text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">لغة رسمية وأكاديمية دقيقة</span>
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-text-muted uppercase tracking-[0.05em]">
-              {formData.educationLevel === "University" ? localize(formData.language, "Educational Institution", "المؤسسة التعليمية") :
-               formData.educationLevel === "Professional" ? localize(formData.language, "Primary Workspace", "مكان العمل") : localize(formData.language, "School Name", "اسم المدرسة")}
-            </label>
-            {formData.educationLevel === 'University' ? (
-              <select
-                className="w-full bg-white border border-border rounded-xl px-4 py-3 shadow-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-sm appearance-none cursor-pointer"
-                value={UNIVERSITIES.includes(formData.university || "") ? formData.university : "Other"}
-                onChange={(e) => {
-                  // Keep the literal "Other" (a valid list member) rather than
-                  // storing "" — an empty value fails the Continue validation and
-                  // there is no text-input fallback in the University branch.
-                  setFormData({ ...formData, university: e.target.value });
-                }}
-              >
-                <option value="" disabled>Select Institution</option>
-                {UNIVERSITIES.map(item => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                placeholder={formData.educationLevel === 'Professional' ? "Company / Organization" : "Enter School Name"}
-                className="w-full bg-white border border-border rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
-                value={formData.role === 'Student' ? formData.university : formData.work}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  [formData.role === 'Student' ? 'university' : 'work']: e.target.value
-                })}
-              />
-            )}
+      {/* Speech Voice & Audio Preview */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start space-y-3 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Volume2 className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
+            <span className="text-xs font-bold text-slate-900 dark:text-white">
+              {t('Speech & Voice Preview', 'الصوت والنطق الصوتي')}
+            </span>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              const testPhrase = isRtl
+                ? (dialect === 'ar-EG' ? 'أهلاً بك في رفيقي. كل ميزات الإتاحة جاهزة لمساعدتك.' : 'أهلاً بك في رفيقي. جميع ميزات الإتاحة والتيسير جاهزة لدعمك.')
+                : 'Welcome to Rafiqi. Your accessibility companion is ready.';
+              speak(testPhrase, language as any);
+            }}
+            className="px-3 py-1.5 rounded-xl bg-[#1769AA] text-white text-xs font-bold hover:bg-[#0D4778] transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+          >
+            <Volume2 className="w-3.5 h-3.5" />
+            <span>{t('Test Voice', 'تجربة الصوت')}</span>
+          </button>
         </div>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-text-muted uppercase tracking-[0.05em]">
-              {formData.educationLevel === "University" ? localize(formData.language, "Academic Faculty", "الكلية") :
-               formData.role === "Professional" ? localize(formData.language, "Operational Role", "الدور الوظيفي") : localize(formData.language, "Current Grade", "الصف الدراسي")}
-            </label>
-            {formData.educationLevel === 'University' ? (
-              <select
-                className="w-full bg-white border border-border rounded-xl px-4 py-3 shadow-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-sm appearance-none cursor-pointer"
-                value={FACULTIES.includes(formData.faculty || "") ? formData.faculty : "Other"}
-                onChange={(e) => {
-                  // See the University field above — keep "Other" verbatim so
-                  // Continue is not permanently disabled.
-                  setFormData({ ...formData, faculty: e.target.value });
-                }}
-              >
-                <option value="" disabled>Select Faculty</option>
-                {FACULTIES.map(item => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                placeholder={formData.role === 'Student' ? "e.g. Grade 5, Year 10" : "Enter Job Title"}
-                className="w-full bg-white border border-border rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all"
-                value={formData.role === 'Student' ? formData.faculty : formData.jobTitle}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  [formData.role === 'Student' ? 'faculty' : 'jobTitle']: e.target.value
-                })}
-              />
-            )}
-          </div>
-        </div>
+        <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-relaxed">
+          {t(
+            'Rafiqi vocalizes visual scenes, reads books, and announces actions in your preferred dialect.',
+            'يقوم رفيقي بنطق أوصاف المشاهد وقراءة الكتب والمستندات وإعلان التنبيهات بلهجتك وصوتك المفضل.'
+          )}
+        </p>
       </div>
 
+      {/* Navigation Buttons */}
       <button
+        type="button"
         onClick={handleNextStep}
-        disabled={formData.role === "Student"
-          ? (!formData.university || !formData.faculty)
-          : (!formData.work || !formData.jobTitle)
-        }
-        className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-primary-press disabled:bg-surface-3 disabled:text-faint transition-all flex items-center justify-center gap-2 group"
+        className="w-full min-h-[48px] bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold py-3 px-6 rounded-xl shadow-md shadow-[#1769AA]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
       >
-        {localize(formData.language, "Next: Personalized Goals", "التالي: الأهداف الشخصية")} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform rtl:rotate-180" />
+        <span>{t('Continue to Display Settings', 'المتابعة لإعدادات العرض')}</span>
+        <ArrowRight className="w-4 h-4 rtl:rotate-180" />
       </button>
     </motion.div>
   );
 
-  const renderSustainabilityStep = () => (
+  // ── Step 2: Display & Appearance Preferences ─────────────────────────────────
+  const renderDisplayStep = () => (
     <motion.div
-      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col gap-6 w-full max-w-lg text-center"
+      key="step-2"
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -15 }}
+      className="flex flex-col gap-6 w-full max-w-lg"
     >
-      <div className="space-y-4">
-        <div className="w-16 h-16 bg-surface-2 rounded-2xl flex items-center justify-center mx-auto border border-border">
-           <Sprout className="w-10 h-10 text-success" />
+      <div className="space-y-2 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center mx-auto mb-2">
+          <Sun className="w-6 h-6" />
         </div>
-        <div className="space-y-2">
-          <h2 className="text-3xl font-extrabold tracking-tight text-text-main leading-tight">{localize(formData.language, "Sustainability & Life Goals", "الاستدامة وأهداف الحياة")}</h2>
-          <p className="text-text-muted">{localize(formData.language, "Rafiqi is built for long-term human growth. Which UN Sustainable Development Goal do you care about most?", "رفيقي مبني للنمو الإنساني طويل المدى. أنهي هدف من أهداف التنمية المستدامة يهمّك أكتر؟")}</p>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          {t('Display & Appearance', 'المظهر وسهولة القراءة')}
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#94A3B8]">
+          {t('Adjust theme, text size, and contrast for visual comfort.', 'اضبط المظهر، وحجم الخط، والتباين لراحة عينيك.')}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
-        {SUSTAINABILITY_GOALS.map((goal) => (
-          <button
-            key={goal.id}
-            onClick={() => setFormData({ ...formData, sustainabilityGoal: goal.id })}
-            className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
-              formData.sustainabilityGoal === goal.id
-                ? 'border-emerald-600 bg-surface-2 text-success'
-                : 'border-border bg-white text-text-muted hover:border-border'
-            }`}
-          >
-            <div className={`p-2 rounded-lg ${formData.sustainabilityGoal === goal.id ? 'bg-white shadow-sm' : 'bg-surface-2'}`}>
-              {goal.icon}
-            </div>
-            <span className="font-bold text-sm">{localize(formData.language, goal.labelEn, goal.labelAr)}</span>
-            {formData.sustainabilityGoal === goal.id && (
-              <CheckCircle className="w-5 h-5 ms-auto text-success" />
-            )}
-          </button>
-        ))}
+      {/* Theme Preference */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start space-y-3 shadow-xs">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-900 dark:text-white">
+            {t('Theme Mode', 'مظهر الواجهة (نهاري / ليلي)')}
+          </label>
+        </div>
+        <ThemeSelector
+          currentTheme={themeMode}
+          onChange={(mode) => setThemeMode(mode)}
+          language={isRtl ? 'Arabic' : 'English'}
+          variant="segmented"
+          className="w-full"
+        />
       </div>
 
-      <button
-        onClick={handleNextStep}
-        className="w-full bg-[#0E0610] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-[#080409] transition-all flex items-center justify-center gap-2 group"
-      >
-        {getTranslation(formData.language, "continue")} <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-      </button>
-    </motion.div>
-  );
-
-  const renderCognitiveStep = () => {
-    const currentQ = IQ_QUESTION_BATTERY[currentIqIdx];
-
-    // ─── 1. INTRO VIEW ──────────────────────────────────────────────────────────
-    if (iqStep === 'intro') {
-      return (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="flex flex-col gap-6 w-full max-w-lg"
+      {/* High Contrast Mode Toggle */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start flex items-center justify-between shadow-xs">
+        <div className="space-y-1 pe-4">
+          <span className="text-xs font-bold text-slate-900 dark:text-white block">
+            {t('High Contrast Mode (WCAG AAA)', 'وضع التباين العالي الفائق')}
+          </span>
+          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+            {t('Enhances text borders and outlines for maximum readability.', 'يبرز حواف النصوص والعناصر لضمان أقصى وضوح بصري.')}
+          </span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={highContrast}
+          onClick={() => setHighContrast(!highContrast)}
+          className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer shrink-0 ${
+            highContrast ? 'bg-[#1769AA]' : 'bg-slate-300 dark:bg-slate-700'
+          }`}
         >
-          <div className="space-y-3 text-center">
-            <div className="w-16 h-16 bg-gradient-to-tr from-[#4A1224] to-[#E5A93C] rounded-3xl flex items-center justify-center mx-auto shadow-lg shadow-[#E5A93C]/10 text-white">
-              <Brain className="w-8 h-8" />
-            </div>
-            <div className="space-y-1">
-              <h2 className="text-2xl md:text-3xl font-black text-text-main tracking-tight">
-                {localize(
-                  formData.language,
-                  "Cognitive Style & AI Personalization",
-                  "استكشاف الأسلوب المعرفي وتخصيص المساعد الذكي"
-                )}
-              </h2>
-              <p className="text-xs md:text-sm text-text-muted leading-relaxed">
-                {localize(
-                  formData.language,
-                  "Rafiqi personalizes its explanation depth and scaffolding to your unique reasoning preferences. Complete this quick 10-question visual puzzle preview, or start with our balanced baseline.",
-                  "يتكيّف رفيقي تلقائياً مع طريقتك في التفكير وأسلوب الشرح المفضل لديك عبر 10 ألغاز بصرية استكشافية سريعة، أو يمكنك البدء بالمستوى المتوازن وممارسة التمارين لاحقاً."
-                )}
-              </p>
-            </div>
-          </div>
+          <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+            highContrast ? (isRtl ? '-translate-x-5' : 'translate-x-5') : 'translate-x-0'
+          }`} />
+        </button>
+      </div>
 
-          {/* Ethical & Non-Clinical Disclaimer Banner */}
-          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-start text-xs leading-relaxed flex items-start gap-2.5">
-            <span className="text-base shrink-0">⚖️</span>
-            <p>
-              {localize(formData.language, COGNITIVE_ASSESSMENT_DISCLAIMER_EN, COGNITIVE_ASSESSMENT_DISCLAIMER_AR)}
-            </p>
-          </div>
-
-          {/* 4 Cognitive Domains Grid */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="p-3 rounded-2xl bg-white border border-border/70 shadow-sm space-y-1">
-              <div className="flex items-center gap-1.5 text-primary font-bold text-xs">
-                <Layers className="w-3.5 h-3.5" />
-                <span>{localize(formData.language, "Fluid Reasoning (3Q)", "الاستدلال المرن (3 أسئلة)")}</span>
-              </div>
-              <p className="text-[10px] text-text-muted leading-tight">
-                {localize(formData.language, "Pattern transformation logic", "تحليل الأنماط والتحولات البصرية")}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-white border border-border/70 shadow-sm space-y-1">
-              <div className="flex items-center gap-1.5 text-indigo-500 font-bold text-xs">
-                <BarChart3 className="w-3.5 h-3.5" />
-                <span>{localize(formData.language, "Quantitative Logic (3Q)", "المنطق الكمي (3 أسئلة)")}</span>
-              </div>
-              <p className="text-[10px] text-text-muted leading-tight">
-                {localize(formData.language, "Relational & numeric deduction", "الاستنتاج الرياضي التتابعي")}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-white border border-border/70 shadow-sm space-y-1">
-              <div className="flex items-center gap-1.5 text-violet-500 font-bold text-xs">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{localize(formData.language, "Working Memory (2Q)", "الذاكرة العاملة (سؤالان)")}</span>
-              </div>
-              <p className="text-[10px] text-text-muted leading-tight">
-                {localize(formData.language, "Spatial & sequence recall", "استبقاء الترتيب المكاني")}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-white border border-border/70 shadow-sm space-y-1">
-              <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs">
-                <Zap className="w-3.5 h-3.5" />
-                <span>{localize(formData.language, "Processing Speed (2Q)", "سرعة المعالجة (سؤالان)")}</span>
-              </div>
-              <p className="text-[10px] text-text-muted leading-tight">
-                {localize(formData.language, "Perceptual discrimination", "التمييز البصري السريع")}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2.5 pt-2">
+      {/* Font Size Scaling */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start space-y-3 shadow-xs">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Type className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />
+            <span>{t('Text Size Scale', 'حجم الخط في المنصة')}</span>
+          </label>
+          <span className="text-[11px] font-bold text-[#1769AA] dark:text-[#4B9FE1] capitalize">
+            {fontSizeScale}
+          </span>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {(['normal', 'medium', 'large', 'extra-large'] as const).map((scale) => (
             <button
-              onClick={() => {
-                setCurrentIqIdx(0);
-                setIqAnswers({});
-                setIqStartTime(Date.now());
-                setIqTotalSecondsLeft(600);
-                setIqStep('active');
-              }}
-              className="w-full py-4 px-6 rounded-2xl bg-primary text-white font-bold text-sm shadow-xl shadow-primary/20 hover:bg-primary-press active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
-            >
-              <span>{localize(formData.language, "Start Learning Style Preview (10 Questions · 10 Mins)", "ابدأ استكشاف أسلوب التعلم (10 أسئلة · 10 دقائق)")}</span>
-              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-            </button>
-
-            <button
-              onClick={skipIqTest}
-              className="w-full py-3.5 px-6 rounded-2xl bg-white hover:bg-surface-3 border border-border text-text-muted hover:text-text-main font-semibold text-xs transition-all"
-            >
-              {localize(
-                formData.language,
-                "Start with Balanced Baseline (Take Later in Gym)",
-                "البدء بالمستوى المتوازن (خوض الاستكشاف لاحقاً من الجيم المعرفي)"
-              )}
-            </button>
-          </div>
-        </motion.div>
-      );
-    }
-
-    // ─── 2. ACTIVE TEST VIEW ──────────────────────────────────────────────────
-    if (iqStep === 'active' && currentQ) {
-      const answeredCount = Object.keys(iqAnswers).length;
-
-      return (
-        <motion.div
-          key={currentQ.id}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="flex flex-col gap-4 w-full max-w-lg bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-border"
-        >
-          {/* Progress Header with 10-Minute Total Timer */}
-          <div className="flex items-center justify-between text-xs text-text-muted pb-3 border-b border-border/60">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-text-main">
-                {localize(
-                  formData.language,
-                  `Question ${currentIqIdx + 1} of ${IQ_QUESTION_BATTERY.length}`,
-                  `السؤال ${currentIqIdx + 1} من ${IQ_QUESTION_BATTERY.length}`
-                )}
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold text-[10px]">
-                {currentQ.domain === 'fluidReasoning'
-                  ? localize(formData.language, 'Fluid (Gf)', 'الاستدلال (Gf)')
-                  : currentQ.domain === 'quantitativeLogic'
-                  ? localize(formData.language, 'Quantitative (Gq)', 'الكمي (Gq)')
-                  : currentQ.domain === 'workingMemory'
-                  ? localize(formData.language, 'Memory (Gwm)', 'الذاكرة (Gwm)')
-                  : localize(formData.language, 'Speed (Gs)', 'السرعة (Gs)')}
-              </span>
-            </div>
-
-            {/* 10-Minute Overall Countdown Clock */}
-            <div
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-mono text-xs font-bold border transition-colors ${
-                iqTotalSecondsLeft <= 60
-                  ? 'text-red-600 bg-red-50 border-red-200 animate-pulse'
-                  : iqTotalSecondsLeft <= 180
-                  ? 'text-amber-600 bg-amber-50 border-amber-200'
-                  : 'text-primary bg-primary/10 border-primary/20'
+              key={scale}
+              type="button"
+              onClick={() => setFontSizeScale(scale)}
+              className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                fontSizeScale === scale
+                  ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
+                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
               }`}
-              title={localize(formData.language, 'Remaining Time (10 minutes total)', 'الوقت المتبقي (10 دقائق إجمالاً)')}
             >
-              <Clock className="w-3.5 h-3.5" />
-              <span>{formatTimer(iqTotalSecondsLeft)}</span>
-            </div>
-          </div>
-
-          {/* 10-Question Quick Jump Navigation Row */}
-          <div className="flex items-center justify-between gap-1 py-1">
-            {IQ_QUESTION_BATTERY.map((q, idx) => {
-              const isAnswered = !!iqAnswers[q.id];
-              const isCurrent = idx === currentIqIdx;
-              return (
-                <button
-                  key={q.id}
-                  onClick={() => setCurrentIqIdx(idx)}
-                  className={`flex-1 h-7 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center border ${
-                    isCurrent
-                      ? 'bg-primary text-white border-primary shadow-sm ring-2 ring-primary/20 scale-105'
-                      : isAnswered
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
-                      : 'bg-surface-2 text-text-muted border-border hover:bg-surface-3'
-                  }`}
-                  title={`Question ${idx + 1}`}
-                >
-                  {idx + 1}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Overall Completion Progress Bar */}
-          <div className="w-full h-1.5 bg-surface-3 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${(answeredCount / IQ_QUESTION_BATTERY.length) * 100}%` }}
-            />
-          </div>
-
-          {/* Question Prompt */}
-          <div className="space-y-3 pt-1">
-            <h3 className="font-bold text-text-main text-sm md:text-base leading-snug">
-              {localize(formData.language, currentQ.promptEn, currentQ.promptAr)}
-            </h3>
-
-            {/* Matrix Visual Grid (if available) */}
-            {currentQ.matrixData && (
-              <div className="p-4 rounded-2xl bg-surface-2 border-2 border-primary/20 shadow-inner flex justify-center my-2">
-                <div className="grid grid-cols-3 gap-2.5 text-center text-xl md:text-2xl font-mono">
-                  {currentQ.matrixData.grid.map((row, rIdx) =>
-                    row.map((cell, cIdx) => {
-                      const isMissing =
-                        rIdx === currentQ.matrixData!.missingCell[0] &&
-                        cIdx === currentQ.matrixData!.missingCell[1];
-                      return (
-                        <div
-                          key={`${rIdx}-${cIdx}`}
-                          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-xl font-bold border transition-all ${
-                            isMissing
-                              ? 'bg-primary/10 border-primary border-dashed text-primary animate-pulse text-2xl font-black'
-                              : 'bg-white border-border/80 text-text-main shadow-sm'
-                          }`}
-                        >
-                          {isMissing ? '?' : cell}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Options Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-            {currentQ.options.map((opt) => {
-              const isSelected = iqAnswers[currentQ.id] === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() => handleIqOptionSelect(opt.id)}
-                  className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-start active:scale-[0.98] ${
-                    isSelected
-                      ? 'border-primary bg-primary-soft text-primary ring-2 ring-primary/20 shadow-sm'
-                      : 'border-border hover:border-primary/40 hover:bg-surface-2 text-text-main'
-                  }`}
-                >
-                  {opt.symbol ? (
-                    <span
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 border transition-colors ${
-                        isSelected
-                          ? 'bg-primary text-white border-primary'
-                          : 'bg-surface-2 border-border/60'
-                      }`}
-                    >
-                      {opt.symbol}
-                    </span>
-                  ) : (
-                    <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
-                        isSelected
-                          ? 'bg-primary text-white'
-                          : 'bg-surface-2 text-text-muted'
-                      }`}
-                    >
-                      {isSelected ? <Check className="w-3.5 h-3.5" /> : '•'}
-                    </span>
-                  )}
-                  <span className="font-semibold text-xs leading-snug flex-1">
-                    {localize(formData.language, opt.labelEn, opt.labelAr)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Navigation & Submit Bar */}
-          <div className="flex items-center justify-between gap-2 pt-3 border-t border-border/60">
-            <button
-              onClick={() => setCurrentIqIdx((prev) => Math.max(0, prev - 1))}
-              disabled={currentIqIdx === 0}
-              className="px-3.5 py-2.5 rounded-xl border border-border text-text-muted hover:text-text-main font-semibold text-xs disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
-            >
-              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
-              <span>{localize(formData.language, "Previous", "السابق")}</span>
+              {scale === 'normal' ? t('Normal', 'عادي') :
+               scale === 'medium' ? t('Medium', 'متوسط') :
+               scale === 'large' ? t('Large', 'كبير') : t('Extra', 'فائق')}
             </button>
+          ))}
+        </div>
+      </div>
 
-            <div className="text-[11px] text-text-muted font-medium">
-              {localize(
-                formData.language,
-                `${answeredCount}/10 answered`,
-                `${answeredCount}/10 تمت الإجابة`
-              )}
-            </div>
-
-            {currentIqIdx < IQ_QUESTION_BATTERY.length - 1 ? (
-              <button
-                onClick={() => setCurrentIqIdx((prev) => Math.min(IQ_QUESTION_BATTERY.length - 1, prev + 1))}
-                className="px-4 py-2.5 rounded-xl bg-primary text-white font-semibold text-xs shadow-md shadow-primary/20 hover:bg-primary-press transition-all flex items-center gap-1"
-              >
-                <span>{localize(formData.language, "Next", "التالي")}</span>
-                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-              </button>
-            ) : (
-              <button
-                onClick={() => finishIqTest(iqAnswersRef.current)}
-                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5"
-              >
-                <span>{localize(formData.language, "Submit Assessment", "تسليم التقييم")}</span>
-                <CheckCircle className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </motion.div>
-      );
-    }
-
-    // ─── 3. RESULTS REVEAL VIEW ───────────────────────────────────────────────
-    if (iqStep === 'result' && computedIq) {
-      return (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col gap-6 w-full max-w-lg bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-border text-center"
+      {/* Reduce Motion */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start flex items-center justify-between shadow-xs">
+        <div className="space-y-1 pe-4">
+          <span className="text-xs font-bold text-slate-900 dark:text-white block">
+            {t('Reduce Motion & Animations', 'تقليل الحركة والانتقالات')}
+          </span>
+          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+            {t('Simplifies page transitions for vestibular and sensory comfort.', 'يلغي المؤثرات الحركية السريعة لراحة الحواس.')}
+          </span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={reduceMotion}
+          onClick={() => setReduceMotion(!reduceMotion)}
+          className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer shrink-0 ${
+            reduceMotion ? 'bg-[#1769AA]' : 'bg-slate-300 dark:bg-slate-700'
+          }`}
         >
-          {/* Header */}
-          <div className="space-y-2">
-            <div className="w-14 h-14 bg-emerald-50 text-success rounded-2xl flex items-center justify-center mx-auto border border-success/30">
-              <Award className="w-8 h-8" />
-            </div>
-            <h2 className="text-2xl font-black text-text-main tracking-tight uppercase">
-              {localize(formData.language, "Cognitive Style Discovered", "اكتمل استكشاف أسلوبك المعرفي")}
-            </h2>
-            <p className="text-xs text-text-muted">
-              {localize(
-                formData.language,
-                "Your reasoning and puzzle preferences have been calibrated into your personal AI mentor.",
-                "تمت مواءمة نمط تفكيرك المفضل وربطه بأسلوب الشرح في معلمك الذكي."
-              )}
-            </p>
-          </div>
+          <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+            reduceMotion ? (isRtl ? '-translate-x-5' : 'translate-x-5') : 'translate-x-0'
+          }`} />
+        </button>
+      </div>
 
-          {/* Ethical Disclaimer Banner */}
-          <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-start text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed flex items-start gap-2">
-            <span className="shrink-0">⚖️</span>
-            <p>{localize(formData.language, COGNITIVE_ASSESSMENT_DISCLAIMER_EN, COGNITIVE_ASSESSMENT_DISCLAIMER_AR)}</p>
-          </div>
-
-          {/* Score & Tier Card */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-surface-2 to-surface-3 border border-border space-y-4">
-            <div className="flex items-center justify-center gap-4">
-              <div className="text-center">
-                <span className="text-[10px] uppercase font-bold text-text-muted tracking-widest block">
-                  {localize(formData.language, "Cognitive Style Index", "مؤشر الأسلوب المعرفي")}
-                </span>
-                <span className="text-4xl font-black text-primary tracking-tight">
-                  {computedIq.score}
-                </span>
-              </div>
-              <div className="h-10 w-px bg-border" />
-              <div className="text-center">
-                <span className="text-[10px] uppercase font-bold text-text-muted tracking-widest block">
-                  {localize(formData.language, "Adaptive Mentorship", "أسلوب التوجيه المفضل")}
-                </span>
-                <span className="text-sm font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full inline-block mt-1">
-                  {computedIq.persona === 'Foundational'
-                    ? localize(formData.language, "Scaffolded Step-by-Step", "تأسيسي متدرج")
-                    : computedIq.persona === 'Socratic'
-                    ? localize(formData.language, "Exploratory Socratic", "استكشافي متعمق")
-                    : localize(formData.language, "Balanced Adaptive", "متوازن متكيف")}
-                </span>
-              </div>
-            </div>
-
-            {/* AI Adaptation Mode Banner */}
-            <div className="p-3 rounded-2xl bg-white border border-border/80 text-start space-y-1">
-              <div className="flex items-center gap-2 text-xs font-bold text-text-main">
-                <Sparkles className="w-4 h-4 text-accent" />
-                <span>
-                  {localize(
-                    formData.language,
-                    `AI Calibrated to: ${computedIq.persona} Pedagogy`,
-                    `تم ضبط الذكاء الاصطناعي على: أسلوب ${
-                      computedIq.persona === 'Socratic'
-                        ? 'الحوار السقراطي المتقدم'
-                        : computedIq.persona === 'Balanced'
-                        ? 'الشرح المتوازن والتطبيقي'
-                        : 'التأسيس والتدرج المفاهيمي'
-                    }`
-                  )}
-                </span>
-              </div>
-              <p className="text-[11px] text-text-muted leading-relaxed">
-                {computedIq.persona === 'Socratic'
-                  ? localize(
-                      formData.language,
-                      'Your AI mentor will challenge you with inquiry-based questions, theoretical rigor, structural proofs, and edge-case deduction.',
-                      'سيتحداك معلمك الذكي بأسئلة استقصائية وتعمق نظري وبراهين هيكلية واستنتاج الحالات الحافة.'
-                    )
-                  : computedIq.persona === 'Balanced'
-                  ? localize(
-                      formData.language,
-                      'Your AI mentor provides clear, structured explanations balancing conceptual intuition with real-world applications and progressive steps.',
-                      'يقدم معلمك الذكي شروحاً واضحة ومتوازنة تجمع بين الفهم الحدسي والأمثلة الواقعية والتدرج المنطقي.'
-                    )
-                  : localize(
-                      formData.language,
-                      'Your AI mentor breaks complex topics down into intuitive, progressive scaffolds with everyday analogies and patient guidance.',
-                      'يقوم معلمك الذكي بتبسيط المفاهيم المعقدة خطوة بخطوة مع أمثلة تشبيهية ميسرة وتأكيد دوري على الفهم.'
-                    )}
-              </p>
-            </div>
-
-            {/* 4 Domains Breakdown */}
-            <div className="space-y-2 text-start pt-1">
-              <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider block">
-                {localize(formData.language, "Cognitive Domain Breakdown", "تفصيل القدرات المعرفية")}
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 rounded-xl bg-white border border-border/80 text-xs">
-                  <div className="flex justify-between font-bold text-text-main text-[11px] mb-1">
-                    <span>{localize(formData.language, "Fluid (Gf)", "الاستدلال (Gf)")}</span>
-                    <span className="text-primary">{computedIq.domains.fluidReasoning}%</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${computedIq.domains.fluidReasoning}%` }} />
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white border border-border/80 text-xs">
-                  <div className="flex justify-between font-bold text-text-main text-[11px] mb-1">
-                    <span>{localize(formData.language, "Quantitative (Gq)", "الكمي (Gq)")}</span>
-                    <span className="text-indigo-500">{computedIq.domains.quantitativeLogic}%</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${computedIq.domains.quantitativeLogic}%` }} />
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white border border-border/80 text-xs">
-                  <div className="flex justify-between font-bold text-text-main text-[11px] mb-1">
-                    <span>{localize(formData.language, "Memory (Gwm)", "الذاكرة (Gwm)")}</span>
-                    <span className="text-violet-500">{computedIq.domains.workingMemory}%</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                    <div className="h-full bg-violet-500 rounded-full transition-all" style={{ width: `${computedIq.domains.workingMemory}%` }} />
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white border border-border/80 text-xs">
-                  <div className="flex justify-between font-bold text-text-main text-[11px] mb-1">
-                    <span>{localize(formData.language, "Speed (Gs)", "السرعة (Gs)")}</span>
-                    <span className="text-amber-500">{computedIq.domains.processingSpeed}%</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${computedIq.domains.processingSpeed}%` }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Exponential Cooldown & Gym Notice */}
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-start space-y-1.5">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-600">
-              <Flame className="w-4 h-4" />
-              <span>{localize(formData.language, "Next Test: 7-Day Cooldown + Daily Gym", "الاختبار القادم: بعد 7 أيام + الجيم المعرفي")}</span>
-            </div>
-            <p className="text-[11px] text-text-muted leading-relaxed">
-              {localize(
-                formData.language,
-                "Standardized IQ re-testing requires an exponential cooldown (7 days) to eliminate practice bias. To train your general thinking skills daily, access the Cognitive Gym from your sidebar!",
-                "إعادة اختبار الذكاء القياسي تتطلب فترة تباعد أسية (7 أيام) لمنع تضخم الدرجات بالاعتياد. لتطوير تفكيرك العام يومياً، يمكنك دخول الجيم المعرفي من القائمة الجانبية!"
-              )}
-            </p>
-          </div>
-
-          <button
-            onClick={() => setStep(5)}
-            className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2 group"
-          >
-            {localize(formData.language, "Continue to Final Review", "المتابعة للمراجعة النهائية")}
-            <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-          </button>
-        </motion.div>
-      );
-    }
-
-    return null;
-  };
-
-  const renderReadyStep = () => {
-    const isRtl = isArabicLocale(formData.language);
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-6 w-full max-w-lg bg-white p-6 md:p-10 rounded-3xl shadow-2xl border border-border text-center"
-      >
-        <div className="w-16 h-16 bg-surface-2 rounded-2xl flex items-center justify-center text-success border border-border">
-          <CheckCircle className="w-9 h-9" />
-        </div>
-
-        <div className="space-y-1">
-          <h2 className="text-3xl font-black text-text-main tracking-tight uppercase">{isRtl ? 'ملفك جاهز' : 'Profile Ready'}</h2>
-          <p className="text-xs text-text-muted font-medium">{isRtl ? 'تم إعداد وضبط تجربتك الشخصية في رفيقي بنجاح.' : 'Your personalized Rafiqi experience is ready to go.'}</p>
-        </div>
-
-        {/* Profile Card Summary */}
-        <div className="w-full bg-surface-2 p-5 rounded-2xl border border-border/60 text-start space-y-3">
-          <div className="flex items-center justify-between text-xs pb-2 border-b border-border/50">
-            <span className="text-text-muted font-medium">{isRtl ? 'المستوى الأكاديمي' : 'Academic Level'}</span>
-            <span className="font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">{formData.level || 'Intermediate'}</span>
-          </div>
-          {formData.iqScore ? (
-            <div className="flex items-center justify-between text-xs pb-2 border-b border-border/50">
-              <span className="text-text-muted font-medium">{isRtl ? 'تمرين الرشاقة الذهنية' : 'Mental Agility Baseline'}</span>
-              <span className="font-bold text-indigo-500 bg-indigo-500/10 px-2.5 py-0.5 rounded-full">
-                {formData.iqAssessmentSkipped
-                  ? (isRtl ? 'تقديري (تم التخطي)' : 'Estimated (Skipped)')
-                  : `${formData.iqScore} pts`}
-              </span>
-            </div>
-          ) : null}
-          <div className="flex items-center justify-between text-xs pb-2 border-b border-border/50">
-            <span className="text-text-muted font-medium">{isRtl ? 'المسار الأكاديمي / المهني' : 'Role & Path'}</span>
-            <span className="font-bold text-text-main">{formData.role} · {formData.university || formData.work || 'Independent'}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-text-muted font-medium">{isRtl ? 'الجيم المعرفي' : 'Cognitive Gym'}</span>
-            <span className="font-bold text-success flex items-center gap-1"><Flame className="w-3.5 h-3.5" /> {isRtl ? 'متاح يومياً' : 'Unlocked Daily'}</span>
-          </div>
-        </div>
+      {/* Navigation Buttons */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handlePrevStep}
+          className="min-h-[48px] px-5 py-3 rounded-xl border border-slate-200 dark:border-[#22354E] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A283D] font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+          <span>{t('Back', 'السابق')}</span>
+        </button>
 
         <button
+          type="button"
+          onClick={handleNextStep}
+          className="flex-1 min-h-[48px] bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold py-3 px-6 rounded-xl shadow-md shadow-[#1769AA]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>{t('Continue to Audio Preferences', 'المتابعة لتفضيلات الصوت')}</span>
+          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  // ── Step 3: Audio & Communication Preferences ────────────────────────────────
+  const renderAudioStep = () => (
+    <motion.div
+      key="step-3"
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -15 }}
+      className="flex flex-col gap-6 w-full max-w-lg"
+    >
+      <div className="space-y-2 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center mx-auto mb-2">
+          <Volume2 className="w-6 h-6" />
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          {t('Audio & Speech', 'الصوت وسرعة النطق')}
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#94A3B8]">
+          {t('Fine-tune speech rate and explanation depth.', 'تخصيص سرعة القراءة وعمق الشرح المسموع.')}
+        </p>
+      </div>
+
+      {/* Speech Rate Controls */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start space-y-3 shadow-xs">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-900 dark:text-white">
+            {t('Speech Rate', 'سرعة النطق الصوتي')}
+          </label>
+          <span className="text-xs font-bold text-[#1769AA] dark:text-[#4B9FE1]">
+            {speechRate}x
+          </span>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {[0.75, 1.0, 1.25, 1.5].map((rate) => (
+            <button
+              key={rate}
+              type="button"
+              onClick={() => setSpeechRate(rate)}
+              className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                speechRate === rate
+                  ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
+                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              {rate}x
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Description Depth Preference */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start space-y-3 shadow-xs">
+        <label className="text-xs font-bold text-slate-900 dark:text-white block">
+          {t('Description Detail Level', 'مستوى تفصيل الأوصاف والشروحات')}
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { id: 'concise', labelEn: 'Concise', labelAr: 'مختصر ومباشر' },
+            { id: 'balanced', labelEn: 'Balanced', labelAr: 'شرح متوازن' },
+            { id: 'detailed', labelEn: 'Detailed', labelAr: 'شامل وتفصيلي' },
+          ].map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setDescriptionDetail(item.id as any)}
+              className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
+                descriptionDetail === item.id
+                  ? 'border-[#1769AA] bg-[#1769AA]/10 text-[#1769AA] dark:text-[#4B9FE1]'
+                  : 'border-slate-200 dark:border-[#22354E] bg-slate-50 dark:bg-[#0B1523] text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              <span>{t(item.labelEn, item.labelAr)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Auto Speech Readout Toggle */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#131E2E] border border-slate-200 dark:border-[#22354E] text-start flex items-center justify-between shadow-xs">
+        <div className="space-y-1 pe-4">
+          <span className="text-xs font-bold text-slate-900 dark:text-white block">
+            {t('Auto-Read Screen Descriptions', 'القراءة الصوتية التلقائية للمشاهد')}
+          </span>
+          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8] block leading-relaxed">
+            {t('Automatically vocalizes visual summaries upon capture.', 'ينطق ملخص الكاميرا والمستندات تلقائياً عند الالتقاط.')}
+          </span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={autoSpeak}
+          onClick={() => setAutoSpeak(!autoSpeak)}
+          className={`w-12 h-7 rounded-full p-1 transition-colors cursor-pointer shrink-0 ${
+            autoSpeak ? 'bg-[#1769AA]' : 'bg-slate-300 dark:bg-slate-700'
+          }`}
+        >
+          <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+            autoSpeak ? (isRtl ? '-translate-x-5' : 'translate-x-5') : 'translate-x-0'
+          }`} />
+        </button>
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handlePrevStep}
+          className="min-h-[48px] px-5 py-3 rounded-xl border border-slate-200 dark:border-[#22354E] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A283D] font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+          <span>{t('Back', 'السابق')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleNextStep}
+          className="flex-1 min-h-[48px] bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold py-3 px-6 rounded-xl shadow-md shadow-[#1769AA]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>{t('Continue to Assistive Mode (Optional)', 'المتابعة لنمط المساعدة (اختياري)')}</span>
+          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  // ── Step 4: Optional Assistive Mode (Non-mandatory!) ──────────────────────────
+  const renderAssistiveModeStep = () => (
+    <motion.div
+      key="step-4"
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -15 }}
+      className="flex flex-col gap-6 w-full max-w-lg"
+    >
+      <div className="space-y-2 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] flex items-center justify-center mx-auto mb-2">
+          <ShieldCheck className="w-6 h-6" />
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          {t('Optional Assistive Profile', 'نمط التيسير المقترح (اختياري تماماً)')}
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#94A3B8]">
+          {t('Select an assistive focus or proceed with general access. No medical proof required.', 'اختر محور المساعدة الأنسب لك أو تابع بالنمط الشامل. لا يلزم أي إثبات طبي.')}
+        </p>
+      </div>
+
+      {/* Non-Disclosing Privacy Notice */}
+      <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-start flex items-start gap-3">
+        <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        <div className="space-y-0.5">
+          <span className="text-xs font-bold text-emerald-800 dark:text-emerald-200 block">
+            {t('Universal Access & Privacy Guarantee', 'ضمان الخصوصية والإتاحة الشاملة')}
+          </span>
+          <span className="text-[11px] text-emerald-900/80 dark:text-emerald-200/80 block leading-relaxed">
+            {t(
+              'You are never required to disclose a disability. All features are always available and can be customized at any time in Settings.',
+              'لست ملزماً بالإفصاح عن أي حالة صحية. جميع أقسام رفيقي الستة متاحة بالكامل وتستطيع تغيير اختياراتك متى شئت.'
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Profile Modes Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {[
+          { 
+            id: 'Visual', 
+            labelEn: 'Visual Companion', 
+            labelAr: 'المساعد البصري', 
+            descEn: 'Camera guidance, object recall, and document reading', 
+            descAr: 'إرشاد الكاميرا، استرجاع الأغراض، وقراءة الكتب', 
+            icon: Eye 
+          },
+          { 
+            id: 'Vocal-Deaf', 
+            labelEn: 'Captions & Sign', 
+            labelAr: 'التفريغ ولغة الإشارة', 
+            descEn: 'Real-time captions and verified sign dictionary', 
+            descAr: 'تفريغ فوري للكلام وقاموس إشارة معتمد', 
+            icon: Ear 
+          },
+          { 
+            id: 'Speech', 
+            labelEn: 'Speech & AAC', 
+            labelAr: 'التواصل والـ AAC', 
+            descEn: 'AAC communication boards and symbol-to-speech', 
+            descAr: 'لوحات التواصل الرمزية وتحويل النص لكلام', 
+            icon: MessageSquare 
+          },
+          { 
+            id: 'None', 
+            labelEn: 'Comprehensive / All', 
+            labelAr: 'الوصول الشامل للجميع', 
+            descEn: 'Full access to all six product sections', 
+            descAr: 'تفعيل متوازن لكافة أقسام المنصة الستة', 
+            icon: Sparkles 
+          },
+        ].map((profileOpt) => {
+          const isSelected = optionalAssistiveMode === profileOpt.id;
+          const Icon = profileOpt.icon;
+          return (
+            <button
+              key={profileOpt.id}
+              type="button"
+              onClick={() => setOptionalAssistiveMode(profileOpt.id as any)}
+              className={`p-3.5 rounded-2xl border-2 text-start transition-all cursor-pointer flex flex-col gap-1.5 ${
+                isSelected
+                  ? 'border-[#1769AA] bg-[#1769AA]/10 text-slate-900 dark:text-white ring-2 ring-[#1769AA]/20 shadow-xs'
+                  : 'border-slate-200 dark:border-[#22354E] bg-white dark:bg-[#131E2E] text-slate-700 dark:text-slate-300 hover:border-[#1769AA]/40'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                    isSelected ? 'bg-[#1769AA] text-white' : 'bg-slate-100 dark:bg-[#0B1523] text-[#1769AA] dark:text-[#4B9FE1]'
+                  }`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="font-bold text-xs">{t(profileOpt.labelEn, profileOpt.labelAr)}</span>
+                </div>
+                {isSelected && <CheckCircle className="w-4 h-4 text-[#1769AA] dark:text-[#4B9FE1]" />}
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] leading-tight ps-9">
+                {t(profileOpt.descEn, profileOpt.descAr)}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handlePrevStep}
+          className="min-h-[48px] px-5 py-3 rounded-xl border border-slate-200 dark:border-[#22354E] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A283D] font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+          <span>{t('Back', 'السابق')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleNextStep}
+          className="flex-1 min-h-[48px] bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold py-3 px-6 rounded-xl shadow-md shadow-[#1769AA]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>{t('Review & Finish', 'مراجعة التفضيلات والبدء')}</span>
+          <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  // ── Step 5: Review & Ready Step ──────────────────────────────────────────────
+  const renderReadyStep = () => (
+    <motion.div
+      key="step-5"
+      initial={{ opacity: 0, scale: 0.95 }} 
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center gap-6 w-full max-w-lg bg-white dark:bg-[#131E2E] p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-[#22354E] text-center"
+    >
+      <div className="w-16 h-16 bg-[#1769AA]/15 text-[#1769AA] dark:text-[#4B9FE1] rounded-2xl flex items-center justify-center mx-auto border border-[#1769AA]/30">
+        <CheckCircle className="w-9 h-9" />
+      </div>
+
+      <div className="space-y-1">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          {t('Your Space is Ready', 'مساحتك في رفيقي جاهزة')}
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#94A3B8]">
+          {t('Your personal preferences have been saved and applied.', 'تم حفظ تفضيلاتك وتطبيقها على تجربة التصفح بنجاح.')}
+        </p>
+      </div>
+
+      {/* Summary Review Card */}
+      <div className="w-full bg-slate-50 dark:bg-[#0B1523] p-4 rounded-2xl border border-slate-200 dark:border-[#22354E] text-start space-y-2.5 text-xs">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
+          <span className="text-slate-500 dark:text-[#94A3B8]">{t('Language', 'اللغة')}</span>
+          <span className="font-bold text-slate-900 dark:text-white">{language} ({dialect})</span>
+        </div>
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
+          <span className="text-slate-500 dark:text-[#94A3B8]">{t('Appearance', 'المظهر والتباين')}</span>
+          <span className="font-bold text-slate-900 dark:text-white capitalize">
+            {themeMode} · {highContrast ? t('High Contrast', 'تباين عالي') : t('Standard', 'قياسي')}
+          </span>
+        </div>
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
+          <span className="text-slate-500 dark:text-[#94A3B8]">{t('Text Scale', 'حجم الخط')}</span>
+          <span className="font-bold text-slate-900 dark:text-white capitalize">{fontSizeScale}</span>
+        </div>
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#22354E]/60">
+          <span className="text-slate-500 dark:text-[#94A3B8]">{t('Speech Speed', 'سرعة النطق')}</span>
+          <span className="font-bold text-slate-900 dark:text-white">{speechRate}x</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-slate-500 dark:text-[#94A3B8]">{t('Assistive Focus', 'محور المساعدة')}</span>
+          <span className="font-bold text-[#1769AA] dark:text-[#4B9FE1]">{optionalAssistiveMode}</span>
+        </div>
+      </div>
+
+      {/* Note about editing in Section 6 */}
+      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-start flex items-center gap-2.5 text-[11px] text-blue-800 dark:text-blue-200">
+        <Info className="w-4 h-4 shrink-0 text-[#1769AA] dark:text-[#4B9FE1]" />
+        <span>{t('You can change any of these settings anytime from Section 6 (Personalize).', 'يمكنك تغيير أي من هذه الإعدادات لاحقاً في أي وقت من قسم التخصيص.')}</span>
+      </div>
+
+      {/* Finish & Start Button */}
+      <div className="w-full flex items-center gap-3 pt-1">
+        <button
+          type="button"
+          onClick={handlePrevStep}
+          className="min-h-[48px] px-5 py-3 rounded-xl border border-slate-200 dark:border-[#22354E] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A283D] font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+          <span>{t('Back', 'السابق')}</span>
+        </button>
+
+        <button
+          type="button"
           onClick={finishOnboarding}
           disabled={isSubmitting}
-          className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2 group mt-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+          className="flex-1 min-h-[48px] bg-[#1769AA] hover:bg-[#0D4778] active:bg-[#09355B] text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-[#1769AA]/25 transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {isRtl ? 'جاري تجهيز مساحتك...' : 'Setting up your space...'}
+              <span>{t('Preparing your space...', 'جاري تجهيز مساحتك...')}</span>
             </span>
           ) : (
             <>
-              {getTranslation(formData.language, 'finish')} <ArrowRight className="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+              <span>{t('Start Exploring Rafiqi', 'ابدأ استكشاف رفيقي')}</span>
+              <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
             </>
           )}
         </button>
-      </motion.div>
-    );
-  };
-
-  const direction = isRTL(formData.language) ? 'rtl' : 'ltr';
+      </div>
+    </motion.div>
+  );
 
   return (
-    <div dir={direction} className="fixed inset-0 bg-surface-2 z-[100] flex flex-col items-center justify-start py-12 px-6 overflow-y-auto custom-scrollbar relative">
-      <button
-        onClick={async () => {
-          try {
-            sessionStorage.removeItem('cognify_guest_preview');
-            sessionStorage.setItem('cognify_exit_preview', 'true');
-            await logout();
-          } catch {}
-          window.location.hash = '';
-          window.location.reload();
-        }}
-        className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-2 px-4 py-2 bg-white hover:bg-surface-3 text-text-muted hover:text-text-main rounded-xl transition-all text-xs font-bold uppercase tracking-widest z-50 shadow-sm border border-border cursor-pointer"
-      >
-        <LogOut className="w-4 h-4" /> {getTranslation(formData.language, "logout")}
-      </button>
+    <div 
+      dir={isRtl ? 'rtl' : 'ltr'} 
+      className="fixed inset-0 bg-slate-50 dark:bg-[#071426] text-slate-900 dark:text-[#F8FAFC] z-[100] flex flex-col items-center justify-start py-8 px-4 sm:px-6 overflow-y-auto custom-scrollbar relative transition-colors"
+    >
+      {/* Top Header: Skip Directly to Dashboard + Log Out */}
+      <div className="w-full max-w-4xl flex items-center justify-between mb-6 z-50">
+        {/* Skip Onboarding Button (Available on every step) */}
+        <button
+          type="button"
+          onClick={finishOnboarding}
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-[#131E2E] hover:bg-slate-100 dark:hover:bg-[#1A283D] text-[#1769AA] dark:text-[#4B9FE1] rounded-xl transition-all text-xs font-bold border border-slate-200 dark:border-[#22354E] shadow-xs cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
+          title={t('Skip setup and go directly to Dashboard', 'تخطي الإعداد والدخول للرئيسية فوراً')}
+        >
+          <span>{t('Skip for now', 'تخطي الآن')}</span>
+          <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+        </button>
 
-      {step < 5 && (
-        <div className="w-full flex justify-center mb-16 pt-4">
-          <div className="flex items-center">
-            {(formData.accountPath === 'Special Needs'
-              ? [
-                  { id: 1, label: localize(formData.language, 'Language', 'اللغة') },
-                  { id: 2, label: localize(formData.language, 'Profile', 'الملف') },
-                  { id: 3, label: localize(formData.language, 'Goals', 'الأهداف') },
-                ]
-              : [
-                  { id: 1, label: localize(formData.language, 'Language', 'اللغة') },
-                  { id: 2, label: localize(formData.language, 'Profile', 'الملف') },
-                  { id: 3, label: localize(formData.language, 'Goals', 'الأهداف') },
-                  { id: 4, label: localize(formData.language, 'Cognitive', 'الذكاء') },
-                ]
-            ).map((s, i, arr) => (
-              <div key={s.id} className="flex items-center">
-                <div className="flex flex-col items-center relative">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-sm z-10 ${
-                    step >= s.id ? 'bg-[#4F46E5] text-white ring-4 ring-[#4F46E5]/10' : 'bg-white border-2 border-border text-faint'
-                  }`}>
-                    {step > s.id ? <CheckCircle className="w-4 h-4" /> : s.id}
-                  </div>
-                  <span className={`absolute -bottom-6 text-[9px] md:text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-colors ${
-                    step >= s.id ? 'text-[#4F46E5]' : 'text-faint'
-                  }`}>
-                    {s.label}
-                  </span>
-                </div>
-                {i < arr.length - 1 && <div className={`w-6 sm:w-10 md:w-16 h-[2px] mx-1 sm:mx-2 md:mx-4 transition-colors ${step > s.id ? 'bg-[#4F46E5]' : 'bg-surface-3'}`} />}
-              </div>
-            ))}
-          </div>
+        {/* Brand identity pill */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black text-slate-900 dark:text-white">
+            {isRtl ? 'رفيقي' : 'Rafiqi'}
+          </span>
+          <span className="text-[10px] text-slate-400 dark:text-[#94A3B8]">
+            {t('Onboarding', 'إعداد البداية')}
+          </span>
         </div>
-      )}
 
-      <div className="flex flex-col items-center justify-center w-full flex-1 max-w-lg">
+        {/* Log Out */}
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await logout();
+            } catch {}
+            window.location.hash = '';
+            window.location.reload();
+          }}
+          className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-[#131E2E] hover:bg-slate-100 dark:hover:bg-[#1A283D] text-slate-500 dark:text-[#94A3B8] hover:text-rose-500 rounded-xl transition-all text-xs font-bold border border-slate-200 dark:border-[#22354E] shadow-xs cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">{t('Log Out', 'تسجيل الخروج')}</span>
+        </button>
+      </div>
+
+      {/* Progressive Step Progress Indicator (5 Steps) */}
+      <div className="w-full max-w-lg mb-8">
+        <div className="flex items-center justify-between">
+          {[
+            { id: 1, label: t('Language', 'اللغة') },
+            { id: 2, label: t('Display', 'المظهر') },
+            { id: 3, label: t('Audio', 'الصوت') },
+            { id: 4, label: t('Mode', 'النمط') },
+            { id: 5, label: t('Done', 'البدء') },
+          ].map((s, i, arr) => (
+            <div key={s.id} className="flex items-center flex-1 last:flex-none">
+              <div className="flex flex-col items-center relative">
+                <button
+                  type="button"
+                  onClick={() => s.id < step && setStep(s.id)}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-xs z-10 ${
+                    step === s.id
+                      ? 'bg-[#1769AA] text-white ring-4 ring-[#1769AA]/20 scale-105'
+                      : step > s.id
+                      ? 'bg-emerald-600 text-white cursor-pointer'
+                      : 'bg-white dark:bg-[#131E2E] border-2 border-slate-200 dark:border-[#22354E] text-slate-400'
+                  }`}
+                >
+                  {step > s.id ? <Check className="w-4 h-4" /> : s.id}
+                </button>
+                <span className={`text-[10px] font-bold mt-1.5 whitespace-nowrap transition-colors ${
+                  step >= s.id ? 'text-[#1769AA] dark:text-[#4B9FE1]' : 'text-slate-400'
+                }`}>
+                  {s.label}
+                </span>
+              </div>
+              {i < arr.length - 1 && (
+                <div className={`flex-1 h-0.5 mx-1 transition-colors ${
+                  step > s.id ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-[#22354E]'
+                }`} />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Step Content Carousel / Animated Switch */}
+      <div className="flex flex-col items-center justify-center w-full flex-1 max-w-lg mb-8">
         <AnimatePresence mode="wait">
           {step === 1 && renderLanguageStep()}
-          {step === 2 && renderRoleStep()}
-          {step === 3 && renderSustainabilityStep()}
-          {step === 4 && renderCognitiveStep()}
+          {step === 2 && renderDisplayStep()}
+          {step === 3 && renderAudioStep()}
+          {step === 4 && renderAssistiveModeStep()}
           {step === 5 && renderReadyStep()}
         </AnimatePresence>
       </div>
 
-      <div className="mt-8 text-[10px] text-faint font-mono tracking-[0.3em] uppercase pb-6">
-        Rafiqi Initialization
+      {/* Footer Branding Note */}
+      <div className="text-[11px] text-slate-400 dark:text-[#94A3B8] font-mono tracking-widest uppercase pb-4">
+        Rafiqi · Universal Accessibility
       </div>
     </div>
   );

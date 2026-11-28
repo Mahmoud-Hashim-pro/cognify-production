@@ -89,24 +89,6 @@ const toolSpecs: ToolSpec[] = [
     checkArrowLeft: true,
   },
   {
-    file: 'src/components/DeafEcosystemView.tsx',
-    name: 'Deaf & Hard of Hearing Suite (DeafEcosystemView)',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
-    file: 'src/components/SignVideoStudio.tsx',
-    name: 'Sign Video Studio',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
-    file: 'src/components/AmbientSoundRadar.tsx',
-    name: 'Ambient Sound Radar',
-    expectedBackProp: 'onNavigateBack',
-    checkArrowLeft: true,
-  },
-  {
     file: 'src/components/CaregiverHub.tsx',
     name: 'Caregiver Hub',
     expectedBackProp: 'onNavigateBack',

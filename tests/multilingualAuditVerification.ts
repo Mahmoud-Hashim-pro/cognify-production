@@ -78,7 +78,8 @@ test('src/index.css includes Arabic typography and font declarations', () => {
 test('Onboarding.tsx uses rtl:rotate-180 and logical properties', () => {
   const content = fs.readFileSync(path.join(rootDir, 'src/components/Onboarding.tsx'), 'utf-8');
   assert.ok(content.includes('rtl:rotate-180'), 'Onboarding.tsx missing rtl:rotate-180 on navigation arrows');
-  assert.ok(content.includes('ms-auto'), 'Onboarding.tsx should use logical ms-auto instead of ml-auto');
+  assert.ok(!content.includes('ml-auto') && !content.includes('mr-auto'), 'Onboarding.tsx should avoid physical ml-auto/mr-auto spacing');
+  assert.ok(content.includes('pe-4') || content.includes('ms-auto'), 'Onboarding.tsx should use logical padding/margin utilities');
 });
 
 test('LiveCaptions.tsx error states and buttons are localized', () => {

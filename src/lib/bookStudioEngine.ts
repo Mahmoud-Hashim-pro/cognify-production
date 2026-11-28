@@ -1397,15 +1397,7 @@ function renderAnswerSpace(
         new Paragraph({
           alignment,
           spacing: { after: 60 },
-          children: [
-            new TextRun({
-              text: '....................................................................................................................................................',
-              font: fontName,
-              size: 20,
-              color: '94A3B8',
-              rightToLeft: isAr,
-            }),
-          ],
+          border: { bottom: { color: '94A3B8', space: 6, style: BorderStyle.DOTTED, size: 6 } }, children: [new TextRun({ text: '\u200B', size: 20 })],
         })
       );
     }

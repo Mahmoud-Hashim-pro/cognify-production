@@ -44,8 +44,8 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
           title={backLabel || 'Go back'}
           className={`min-h-[44px] min-w-[44px] p-2.5 rounded-xl border flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#F59E0B] ${
             isDarkMode
-              ? 'bg-[#162327] border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800'
-              : 'bg-stone-100 border-stone-200 text-stone-700 hover:text-stone-950 hover:bg-stone-200'
+              ? 'bg-rafiqi-surface-dark border-rafiqi-border-dark text-stone-300 hover:text-white hover:bg-rafiqi-surface-elevated'
+              : 'bg-rafiqi-primary-light/60 border-rafiqi-border-dark/20 text-stone-700 hover:text-stone-950 hover:bg-rafiqi-primary-light'
           }`}
         >
           <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
@@ -72,7 +72,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                 <span
                   aria-current="page"
                   className={`min-h-[36px] flex items-center px-2 py-1 font-bold rounded-lg max-w-[150px] sm:max-w-xs md:max-w-md truncate ${
-                    isDarkMode ? 'text-teal-300' : 'text-teal-900'
+                    isDarkMode ? 'text-rafiqi-primary-muted' : 'text-rafiqi-primary-dark'
                   }`}
                   title={item.label}
                 >

@@ -1275,3 +1275,39 @@ export function searchArslDictionary(query: string, chapterId?: number, limit = 
   }
   return results;
 }
+
+export interface Point3D {
+  x: number;
+  y: number;
+  z?: number;
+}
+
+/**
+ * Normalizes 21 MediaPipe hand landmarks to be invariant to user position and hand scale:
+ * 1. Shifts wrist (landmark 0) to (0, 0, 0).
+ * 2. Scales coordinates by the distance between wrist and middle finger base (landmark 9).
+ */
+export function normalizeHandLandmarks(landmarks: Point3D[] | null | undefined): number[] {
+  if (!landmarks || landmarks.length < 21) {
+    return new Array(63).fill(0);
+  }
+
+  const wrist = landmarks[0];
+  const middleBase = landmarks[9];
+
+  // Compute reference hand scale (distance from wrist to middle base)
+  const dx = middleBase.x - wrist.x;
+  const dy = middleBase.y - wrist.y;
+  const dz = (middleBase.z ?? 0) - (wrist.z ?? 0);
+  const scale = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1.0;
+
+  const normalized: number[] = [];
+  for (let i = 0; i < 21; i++) {
+    const pt = landmarks[i];
+    normalized.push((pt.x - wrist.x) / scale);
+    normalized.push((pt.y - wrist.y) / scale);
+    normalized.push(((pt.z ?? 0) - (wrist.z ?? 0)) / scale);
+  }
+
+  return normalized;
+}

@@ -6,7 +6,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Cognify Redesign v2 (final): dark-first, violet primary, Inter, cool neutrals. */
+  /* Rafiqi Typography System */
   --font-sans: "Inter", "IBM Plex Sans Arabic", "Tajawal", "Alexandria", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Inter", "Tajawal", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
   --font-arabic: "IBM Plex Sans Arabic", "Tajawal", "Alexandria", sans-serif;
@@ -14,85 +14,103 @@
   --font-serif: "Instrument Serif", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Master Brand Design Tokens (Phase 2 Specifications) */
-  --color-cognify-indigo: #243B73;
-  --color-cognify-indigo-dark: #1B2D59;
-  --color-cognify-indigo-light: #34529B;
-  --color-cognify-teal: #087F8C;
-  --color-cognify-teal-dark: #06626C;
-  --color-cognify-teal-light: #0AA5B6;
-  --color-cognify-bg-light: #F5F7FB;
+  /* ═════════════════════════════════════════════════════════════════════════
+     RAFIQI UNIFIED BLUE DESIGN SYSTEM (Phase 1 Specification)
+     Primary: #1769AA | Dark: #0D4778 | Light: #EAF4FC | BG: #F5F9FD
+     Success: #16845B | Warning: #C17A16 | Error: #C43D4D
+     ═════════════════════════════════════════════════════════════════════════ */
+  --color-rafiqi-primary: #1769AA;
+  --color-rafiqi-primary-dark: #0D4778;
+  --color-rafiqi-primary-light: #EAF4FC;
+  --color-rafiqi-primary-muted: #4B9FE1;
+  --color-rafiqi-bg: #F5F9FD;
+  --color-rafiqi-bg-dark: #0B131E;
+  --color-rafiqi-surface-dark: #131E2E;
+  --color-rafiqi-surface-elevated: #1A283D;
+  --color-rafiqi-border-dark: #22354E;
+  --color-rafiqi-success: #16845B;
+  --color-rafiqi-warning: #C17A16;
+  --color-rafiqi-error: #C43D4D;
+
+  /* Master Brand Design Tokens (Mapped to Rafiqi Blue) */
+  --color-cognify-indigo: #1769AA;
+  --color-cognify-indigo-dark: #0D4778;
+  --color-cognify-indigo-light: #4B9FE1;
+  --color-cognify-teal: #1769AA;
+  --color-cognify-teal-dark: #0D4778;
+  --color-cognify-teal-light: #4B9FE1;
+  --color-cognify-bg-light: #F5F9FD;
   --color-cognify-surface-light: #FFFFFF;
-  --color-cognify-text-primary: #172033;
-  --color-cognify-text-secondary: #475569;
-  --color-cognify-border-light: #E2E8F0;
+  --color-cognify-text-primary: #0E1726;
+  --color-cognify-text-secondary: #4B5C74;
+  --color-cognify-border-light: #DCE7F3;
   
-  --color-cognify-bg-dark: #111622;
-  --color-cognify-surface-dark: #171E2E;
-  --color-cognify-surface-elevated: #1E273A;
+  --color-cognify-bg-dark: #0B131E;
+  --color-cognify-surface-dark: #131E2E;
+  --color-cognify-surface-elevated: #1A283D;
   --color-cognify-text-dark-primary: #F8FAFC;
   --color-cognify-text-dark-secondary: #94A3B8;
-  --color-cognify-border-dark: #243048;
+  --color-cognify-border-dark: #22354E;
 
   --color-cognify-focus: #F59E0B;
 
-  --color-cognify-success-light: #E6F4EA;
-  --color-cognify-success-text-light: #0E7052;
-  --color-cognify-success-dark: #062B21;
-  --color-cognify-success-text-dark: #34D399;
+  --color-cognify-success-light: #EBF7F1;
+  --color-cognify-success-text-light: #16845B;
+  --color-cognify-success-dark: #0A261A;
+  --color-cognify-success-text-dark: #22C55E;
 
-  --color-cognify-warning-light: #FEF3C7;
-  --color-cognify-warning-text-light: #92400E;
-  --color-cognify-warning-dark: #2E1A05;
+  --color-cognify-warning-light: #FEF8EE;
+  --color-cognify-warning-text-light: #9A5B0B;
+  --color-cognify-warning-dark: #2D1B04;
   --color-cognify-warning-text-dark: #FBBF24;
 
-  --color-cognify-error-light: #FEE2E2;
-  --color-cognify-error-text-light: #B91C1C;
-  --color-cognify-error-dark: #360909;
+  --color-cognify-error-light: #FDF1F2;
+  --color-cognify-error-text-light: #C43D4D;
+  --color-cognify-error-dark: #2D0D12;
   --color-cognify-error-text-dark: #F87171;
 
-  --color-cognify-info-light: #EFF6FF;
-  --color-cognify-info-text-light: #1D4ED8;
-  --color-cognify-info-dark: #0B1E3B;
+  --color-cognify-info-light: #EAF4FC;
+  --color-cognify-info-text-light: #1769AA;
+  --color-cognify-info-dark: #0F2744;
   --color-cognify-info-text-dark: #60A5FA;
 
-  --color-primary: #0D9488;
-  --color-primary-press: #0F766E;
-  --color-primary-soft: #CCFBF1;
-  --color-secondary: #5C5C68;
-  --color-success: #15A06A;
-  --color-warning: #D97706;
-  --color-accent: #0D9488;
-  --color-accent-soft: #CCFBF1;
-  --color-danger: #E5484D;
-  --color-danger-soft: #FCEAEA;
-  --color-bg-main: #F3F3F6;
+  --color-primary: #1769AA;
+  --color-primary-press: #0D4778;
+  --color-primary-soft: #EAF4FC;
+  --color-secondary: #4B5C74;
+  --color-success: #16845B;
+  --color-warning: #C17A16;
+  --color-accent: #1769AA;
+  --color-accent-soft: #EAF4FC;
+  --color-danger: #C43D4D;
+  --color-danger-soft: #FDF1F2;
+  --color-bg-main: #F5F9FD;
   --color-bg-card: #FFFFFF;
-  --color-surface-2: #F7F7FA;
-  --color-surface-3: #ECECF0;
-  --color-text-main: #18181F;
-  --color-text-muted: #5C5C68;
-  --color-faint: #9090A0;
-  --color-border: #E6E6EB;
-  --color-border-2: #D8D8DF;
+  --color-surface-2: #F0F6FC;
+  --color-surface-3: #E1EDF8;
+  --color-text-main: #0E1726;
+  --color-text-muted: #4B5C74;
+  --color-faint: #6B7E98;
+  --color-border: #DCE7F3;
+  --color-border-2: #C5D8EC;
 
   /* Overwrite low-contrast default slate tokens to guarantee WCAG AA (>= 4.5:1 on dark) */
   --color-slate-500: #94A3B8; /* Contrast 6.96:1 - Pass WCAG AA */
   --color-slate-600: #CBD5E1; /* High contrast pass (WCAG AAA) */
 
-  /* Dignified Accessible Brand Palette for People of Determination */
-  --color-brand-warm: #111622;
-  --color-brand-surface: #171E2E;
+  /* Dignified Accessible Brand Palette */
+  --color-brand-warm: #0B131E;
+  --color-brand-surface: #131E2E;
   --color-brand-accent: #F59E0B;
   --color-brand-accent-glow: #FDE68A;
-  --color-brand-calm: #10B981;
+  --color-brand-calm: #16845B;
 
-  /* Serene Teal & Warm Earth Identity */
-  --color-brand-burgundy: #0F766E;
-  --color-brand-wine: #0D9488;
-  --color-brand-ruby: #14B8A6;
-  --color-brand-gold: #0D9488;
-  --color-brand-gold-glow: #99F6E4;
+  /* Rafiqi Blue Theme Identity */
+  --color-brand-burgundy: #0D4778;
+  --color-brand-wine: #1769AA;
+  --color-brand-ruby: #4B9FE1;
+  --color-brand-gold: #1769AA;
+  --color-brand-gold-glow: #BAE6FD;
 }
 
 @layer base {
@@ -180,41 +198,41 @@ bdi,
   }
 }
 
-/* Premium Obsidian & Frosted Glass Design Tokens - Serene Teal & Warm Ambient */
+/* Premium Obsidian & Frosted Glass Design Tokens - Rafiqi Unified Blue */
 .cognify-aurora-bg {
-  background-color: #0E1416;
+  background-color: #0B131E;
   background-image: 
-    radial-gradient(at 15% 15%, rgba(13, 148, 136, 0.18) 0px, transparent 55%),
-    radial-gradient(at 85% 20%, rgba(217, 119, 6, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 85%, rgba(15, 118, 110, 0.2) 0px, transparent 55%);
+    radial-gradient(at 15% 15%, rgba(23, 105, 170, 0.22) 0px, transparent 55%),
+    radial-gradient(at 85% 20%, rgba(13, 71, 120, 0.25) 0px, transparent 50%),
+    radial-gradient(at 50% 85%, rgba(75, 159, 225, 0.12) 0px, transparent 55%);
 }
 
 .aurora-card-glow {
   position: relative;
-  background: rgba(18, 27, 30, 0.85);
+  background: rgba(19, 30, 46, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(13, 148, 136, 0.2);
+  border: 1px solid rgba(23, 105, 170, 0.25);
   box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cognify-burgundy-hero {
   position: relative;
-  background: radial-gradient(circle at 50% 15%, rgba(13, 148, 136, 0.3) 0%, rgba(14, 20, 22, 0.95) 45%, rgba(11, 16, 18, 0.98) 100%);
-  border: 1px solid rgba(13, 148, 136, 0.2);
+  background: radial-gradient(circle at 50% 15%, rgba(23, 105, 170, 0.32) 0%, rgba(13, 71, 120, 0.4) 45%, rgba(11, 19, 30, 0.98) 100%);
+  border: 1px solid rgba(23, 105, 170, 0.25);
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
 }
 
 .aurora-card-glow:hover {
-  border-color: rgba(13, 148, 136, 0.4);
-  box-shadow: 0 8px 24px -4px rgba(13, 148, 136, 0.15);
+  border-color: rgba(23, 105, 170, 0.5);
+  box-shadow: 0 8px 24px -4px rgba(23, 105, 170, 0.2);
   transform: translateY(-1px);
 }
 
 .obsidian-card {
-  background: rgba(18, 27, 30, 0.85);
-  border: 1px solid rgba(13, 148, 136, 0.2);
+  background: rgba(19, 30, 46, 0.88);
+  border: 1px solid rgba(23, 105, 170, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 1.5rem;
@@ -222,8 +240,8 @@ bdi,
 }
 
 .obsidian-card-interactive {
-  background: rgba(18, 27, 30, 0.85);
-  border: 1px solid rgba(13, 148, 136, 0.2);
+  background: rgba(19, 30, 46, 0.88);
+  border: 1px solid rgba(23, 105, 170, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 1.5rem;
@@ -232,21 +250,21 @@ bdi,
 }
 
 .obsidian-card-interactive:hover {
-  border-color: rgba(13, 148, 136, 0.4);
+  border-color: rgba(23, 105, 170, 0.5);
   transform: translateY(-1px);
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
 }
 
 .glass-pill {
-  background: rgba(13, 148, 136, 0.15);
-  border: 1px solid rgba(13, 148, 136, 0.2);
+  background: rgba(23, 105, 170, 0.15);
+  border: 1px solid rgba(23, 105, 170, 0.25);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .glass-pill:hover {
-  background: rgba(13, 148, 136, 0.25);
-  border-color: rgba(13, 148, 136, 0.45);
+  background: rgba(23, 105, 170, 0.28);
+  border-color: rgba(23, 105, 170, 0.5);
 }
 
 /* Universal WCAG 2.4.7 Interactive Focus Visible Indicator */
@@ -334,12 +352,13 @@ html.high-contrast button:focus-visible {
   min-width: 48px;
 }
 
-/* Cognify Reusable Design System Component Utilities (Phase 2) */
+/* Rafiqi Reusable Design System Component Utilities */
+.rafiqi-btn-primary,
 .cognify-btn-primary {
-  min-height: 44px;
-  background-color: var(--color-cognify-indigo, #243B73);
+  min-height: 48px;
+  background-color: var(--color-rafiqi-primary, #1769AA);
   color: #FFFFFF;
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   padding: 0.625rem 1.25rem;
   font-weight: 700;
   display: inline-flex;
@@ -347,25 +366,34 @@ html.high-contrast button:focus-visible {
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 0 16px -2px rgba(23, 105, 170, 0.25);
   cursor: pointer;
 }
+.rafiqi-btn-primary:hover,
 .cognify-btn-primary:hover {
-  background-color: var(--color-cognify-indigo-dark, #1B2D59);
+  background-color: var(--color-rafiqi-primary-dark, #0D4778);
+  box-shadow: 0 4px 12px -2px rgba(23, 105, 170, 0.35);
+  transform: translateY(-1px);
 }
+.rafiqi-btn-primary:active,
 .cognify-btn-primary:active {
   transform: scale(0.98);
 }
+.rafiqi-btn-primary:disabled,
 .cognify-btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
+.rafiqi-btn-secondary,
 .cognify-btn-secondary {
-  min-height: 44px;
-  background-color: var(--color-cognify-teal, #087F8C);
-  color: #FFFFFF;
-  border-radius: 0.75rem;
+  min-height: 48px;
+  background-color: var(--color-rafiqi-primary-light, #EAF4FC);
+  color: var(--color-rafiqi-primary-dark, #0D4778);
+  border: 1px solid var(--color-cognify-border-light, #DCE7F3);
+  border-radius: 0.875rem;
   padding: 0.625rem 1.25rem;
   font-weight: 700;
   display: inline-flex;
@@ -376,24 +404,52 @@ html.high-contrast button:focus-visible {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   cursor: pointer;
 }
-.cognify-btn-secondary:hover {
-  background-color: var(--color-cognify-teal-dark, #06626C);
+.dark .rafiqi-btn-secondary,
+.dark .cognify-btn-secondary {
+  background-color: var(--color-rafiqi-surface-elevated, #1A283D);
+  color: var(--color-rafiqi-primary-muted, #4B9FE1);
+  border-color: var(--color-rafiqi-border-dark, #22354E);
 }
+.rafiqi-btn-secondary:hover,
+.cognify-btn-secondary:hover {
+  background-color: #D8EAF9;
+  border-color: #1769AA;
+}
+.dark .rafiqi-btn-secondary:hover,
+.dark .cognify-btn-secondary:hover {
+  background-color: #22354E;
+  border-color: #4B9FE1;
+}
+.rafiqi-btn-secondary:active,
 .cognify-btn-secondary:active {
   transform: scale(0.98);
 }
 
+.rafiqi-card,
 .cognify-card {
   background-color: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 1rem;
+  border: 1px solid var(--color-cognify-border-light, #DCE7F3);
+  border-radius: 1.25rem;
   padding: 1.25rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
+.dark .rafiqi-card,
 .dark .cognify-card {
-  background-color: #121B1E;
-  border-color: #1F2937;
-  color: #F3F4F6;
+  background-color: var(--color-rafiqi-surface-dark, #131E2E);
+  border-color: var(--color-rafiqi-border-dark, #22354E);
+  color: #F8FAFC;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Restrained Futuristic AI Glow Accents */
+.rafiqi-glow-primary {
+  box-shadow: 0 0 24px -4px rgba(23, 105, 170, 0.25);
+}
+.rafiqi-glow-subtle {
+  box-shadow: 0 0 16px -2px rgba(23, 105, 170, 0.15);
+}
+.rafiqi-glow-accent {
+  box-shadow: 0 0 20px -2px rgba(75, 159, 225, 0.25);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -406,19 +462,19 @@ html.high-contrast button:focus-visible {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #0D9488;
+  background: #1769AA;
   border-radius: 9999px;
-  border: 1px solid rgba(20, 184, 166, 0.2);
+  border: 1px solid rgba(23, 105, 170, 0.25);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #0F766E;
-  border-color: rgba(20, 184, 166, 0.4);
+  background: #0D4778;
+  border-color: rgba(23, 105, 170, 0.5);
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #0D9488 transparent;
+  scrollbar-color: #1769AA transparent;
 }
 
 /* Hide scrollbar completely while maintaining scroll functionality */

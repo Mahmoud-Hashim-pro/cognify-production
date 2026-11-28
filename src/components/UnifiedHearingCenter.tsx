@@ -219,68 +219,12 @@ Question: "${q}"`;
   const streamRef = useRef<MediaStream | null>(null);
   const handsRef = useRef<Hands | null>(null);
   const cameraRef = useRef<MediaPipeCamera | null>(null);
-  const lastDetectedSignRef = useRef<string>('');
-  const lastSignTimeRef = useRef<number>(0);
   const showSkeletonRef = useRef<boolean>(true);
   showSkeletonRef.current = showSkeleton;
   const autoVoiceRef = useRef<boolean>(false);
   autoVoiceRef.current = autoVoice;
 
-  // Gesture heuristic analyzer based on 21 MediaPipe hand landmarks
-  const analyzeLandmarksGesture = useCallback((landmarks: Array<{ x: number; y: number; z: number }>): string | null => {
-    if (!landmarks || landmarks.length < 21) return null;
-
-    const thumbTip = landmarks[4];
-    const thumbBase = landmarks[2];
-    const indexTip = landmarks[8];
-    const indexPip = landmarks[6];
-    const middleTip = landmarks[12];
-    const middlePip = landmarks[10];
-    const ringTip = landmarks[16];
-    const ringPip = landmarks[14];
-    const pinkyTip = landmarks[20];
-    const pinkyPip = landmarks[18];
-
-    const isIndexExtended = indexTip.y < indexPip.y;
-    const isMiddleExtended = middleTip.y < middlePip.y;
-    const isRingExtended = ringTip.y < ringPip.y;
-    const isPinkyExtended = pinkyTip.y < pinkyPip.y;
-    const isThumbUp = thumbTip.y < thumbBase.y && thumbTip.y < indexPip.y;
-
-    // 1. I Love You / Deaf Symbol (🤟): Thumb, Index, Pinky extended; Middle and Ring curled
-    if (isThumbUp && isIndexExtended && !isMiddleExtended && !isRingExtended && isPinkyExtended) {
-      return isEgyptian ? 'أنا أصم' : isAr ? 'أنا أصم' : 'I am deaf';
-    }
-
-    // 2. Thumbs Up (👍): Thumb extended up, all 4 other fingers curled
-    if (isThumbUp && !isIndexExtended && !isMiddleExtended && !isRingExtended && !isPinkyExtended) {
-      return isEgyptian ? 'تمام وموافق' : isAr ? 'نعم أوافق' : 'Yes, OK';
-    }
-
-    // 3. Open Hand / Greeting (👋): All 5 fingers extended
-    if (isIndexExtended && isMiddleExtended && isRingExtended && isPinkyExtended) {
-      return isEgyptian ? 'أهلاً وسهلاً' : isAr ? 'السلام عليكم' : 'Hello';
-    }
-
-    // 4. Index Point / "I / Need" (☝️): Only Index extended
-    if (isIndexExtended && !isMiddleExtended && !isRingExtended && !isPinkyExtended) {
-      return isEgyptian ? 'أنا محتاج مساعدة' : isAr ? 'أحتاج مساعدة' : 'I need help';
-    }
-
-    // 5. Peace / Two (✌️): Index & Middle extended, others curled
-    if (isIndexExtended && isMiddleExtended && !isRingExtended && !isPinkyExtended) {
-      return isEgyptian ? 'لحظة واحدة' : isAr ? 'لحظة واحدة' : 'One moment';
-    }
-
-    // 6. Fist (✊): All fingers curled
-    if (!isIndexExtended && !isMiddleExtended && !isRingExtended && !isPinkyExtended && !isThumbUp) {
-      return isEgyptian ? 'لا شكراً' : isAr ? 'لا شكراً' : 'No thank you';
-    }
-
-    return null;
-  }, [isAr, isEgyptian]);
-
-  // Handle MediaPipe hands results
+  // Handle MediaPipe hands results: tracks hand landmarks reliably without pseudo-heuristic gesture translation
   const onHandsResults = useCallback((results: Results) => {
     if (!canvasRef.current || !videoRef.current) return;
     const canvas = canvasRef.current;
@@ -299,7 +243,7 @@ Question: "${q}"`;
         // Draw skeleton connecting points in sleek cyan
         ctx.strokeStyle = '#12CFE0';
         ctx.lineWidth = 2.5;
-        ctx.fillStyle = '#10B8B0';
+        ctx.fillStyle = '#4B9FE1';
 
         for (let i = 0; i < landmarks.length; i++) {
           const x = landmarks[i].x * canvas.width;
@@ -310,33 +254,15 @@ Question: "${q}"`;
         }
       }
 
-      // Analyze gesture
-      const recognized = analyzeLandmarksGesture(landmarks as any);
-      if (recognized) {
-        setDetectedSign(recognized);
-
-        const now = Date.now();
-        // Debounce repeated emissions: 1.8 seconds cooldown for same sign
-        if (now - lastSignTimeRef.current > 1800 || lastDetectedSignRef.current !== recognized) {
-          lastSignTimeRef.current = now;
-          lastDetectedSignRef.current = recognized;
-          triggerHapticAlert('single-pulse');
-
-          // Append to recognized text
-          setAccumulatedText((prev) => {
-            const separator = prev.trim() ? ' ' : '';
-            return prev + separator + recognized;
-          });
-
-          if (autoVoiceRef.current) {
-            speak(recognized, dialect);
-          }
-        }
-      }
+      setDetectedSign(
+        isAr
+          ? 'تم تتبع معالم اليد (التعرف اللحظي قيد التطوير البحثي)'
+          : 'Hand landmarks tracked (Continuous recognition in empirical development)'
+      );
     } else {
       setDetectedSign('');
     }
-  }, [analyzeLandmarksGesture, dialect]);
+  }, [isAr]);
 
   // Start Camera handler
   const handleStartCamera = async () => {
@@ -504,7 +430,7 @@ Question: "${q}"`;
                 aria-pressed={isSelected}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none ${
                   isSelected
-                    ? 'bg-[#087F8C] text-white shadow-md shadow-[#087F8C]/30'
+                    ? 'bg-[#1769AA] text-white shadow-md shadow-[#1769AA]/30'
                     : 'text-[#A9BDD3] hover:text-[#F4F7FB] hover:bg-[#102D4D]/60'
                 }`}
               >
@@ -685,7 +611,7 @@ Question: "${q}"`;
                 onClick={handleSpeakAccumulatedText}
                 aria-label={loc('Listen to translated voice', 'استمع إلى الترجمة الصوتية')}
                 className={`p-2 rounded-lg text-[#12CFE0] hover:text-white hover:bg-[#102D4D] transition-colors shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none ${
-                  isSpeakingCameraText ? 'animate-bounce text-[#10B8B0]' : ''
+                  isSpeakingCameraText ? 'animate-bounce text-[#4B9FE1]' : ''
                 }`}
                 title={loc('Speak text aloud', 'نطق النص')}
               >
@@ -717,7 +643,7 @@ Question: "${q}"`;
                   ? loc('Stop Camera', 'إيقاف الكاميرا')
                   : loc('Start Camera', 'تشغيل الكاميرا')
               }
-              className="py-2.5 px-3 rounded-xl bg-[#087F8C] hover:bg-[#076D78] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-[#087F8C]/25 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+              className="py-2.5 px-3 rounded-xl bg-[#1769AA] hover:bg-[#076D78] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-[#1769AA]/25 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
             >
               {isCameraActive ? (
                 <>
@@ -927,7 +853,7 @@ Question: "${q}"`;
               onClick={() => handleDirectSignScript()}
               disabled={!aiQuestion.trim()}
               aria-label={loc('Translate text to 3D sign language', 'ترجمة إلى إشارة')}
-              className="py-2.5 px-4 rounded-xl bg-[#087F8C] hover:bg-[#076D78] disabled:opacity-40 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#087F8C]/20 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
+              className="py-2.5 px-4 rounded-xl bg-[#1769AA] hover:bg-[#076D78] disabled:opacity-40 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#1769AA]/20 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#12CFE0] focus:outline-none"
             >
               <Hand className="w-4 h-4 shrink-0" aria-hidden="true" />
               <span className="truncate">{loc('Translate to Sign', 'ترجمة إلى إشارة')}</span>
@@ -996,7 +922,7 @@ Question: "${q}"`;
                   aria-pressed={showSkeleton}
                   aria-label={loc('Toggle Hand Skeleton Overlay', 'تبديل إظهار هيكل اليد')}
                   className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-                    showSkeleton ? 'bg-[#087F8C] justify-end' : 'bg-stone-700 justify-start'
+                    showSkeleton ? 'bg-[#1769AA] justify-end' : 'bg-stone-700 justify-start'
                   }`}
                 >
                   <span className="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform" />
@@ -1022,7 +948,7 @@ Question: "${q}"`;
                   aria-pressed={autoVoice}
                   aria-label={loc('Toggle Auto Voice Recognized Signs', 'تبديل النطق الفوري التلقائي')}
                   className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-                    autoVoice ? 'bg-[#087F8C] justify-end' : 'bg-stone-700 justify-start'
+                    autoVoice ? 'bg-[#1769AA] justify-end' : 'bg-stone-700 justify-start'
                   }`}
                 >
                   <span className="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform" />
@@ -1034,7 +960,7 @@ Question: "${q}"`;
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="py-2 px-5 rounded-xl bg-[#087F8C] hover:bg-[#076D78] text-white font-bold text-xs cursor-pointer shadow-md transition-all"
+                className="py-2 px-5 rounded-xl bg-[#1769AA] hover:bg-[#076D78] text-white font-bold text-xs cursor-pointer shadow-md transition-all"
               >
                 {loc('Done', 'تم')}
               </button>

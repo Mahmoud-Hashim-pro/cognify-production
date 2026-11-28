@@ -32,9 +32,9 @@ export const BRAND_CONFIG: BrandConfig = Object.freeze({
   nameAr: 'رفيقي',
   appNameEn: 'Rafiqi AI',
   appNameAr: 'رفيقي AI',
-  taglineEn: 'Inclusive Learning & Assistive Technology Platform',
-  taglineAr: 'رفيقك للتعلّم الشامل والتقنيات المساندة لذوي الهمم',
-  taglineFr: 'Plateforme d’Apprentissage Inclusif & Technologies d’Assistance',
+  taglineEn: 'Your Everyday Accessibility Companion',
+  taglineAr: 'رفيقك في الحياة، والتعلم، والعمل.',
+  taglineFr: 'Votre Compagnon d’Accessibilité au Quotidien',
   descriptionEn:
     'Rafiqi (رفيقي) is an inclusive learning and assistive technology platform empowering people of determination and learners of all abilities with a real-time AI visual companion, 3D sign language interpreter, accessible document studio, and smart tutor.',
   descriptionAr:

@@ -250,6 +250,129 @@ export function hasFrenchVoice(): boolean {
 // Keep active utterances in memory to prevent Chromium garbage collection mid-speech
 const activeUtterances = new Set<SpeechSynthesisUtterance>();
 
+/**
+ * Phase 4: Audio Priority System
+ * Hierarchy for assistive vocalizations to prevent voice collisions and cognitive overload.
+ */
+export enum AudioPriority {
+  BACKGROUND_STATUS = 1,
+  INTERACTIVE_FEEDBACK = 2,
+  NEW_SCENE_RESULT = 3,
+  CRITICAL_SAFETY = 4,
+}
+
+let activeAudioPriority: AudioPriority = AudioPriority.BACKGROUND_STATUS;
+let isSimulatedSpeaking: boolean = false;
+let lastSpokenText: string = "";
+let lastSpokenTime: number = 0;
+let lastSpokenLang: string = "ar";
+let lastSpokenCallbacks: SpeakCallbacks | undefined = undefined;
+
+export function getCurrentAudioPriority(): AudioPriority {
+  return activeAudioPriority;
+}
+
+export function resetAudioPriority(): void {
+  isSimulatedSpeaking = false;
+  activeAudioPriority = AudioPriority.BACKGROUND_STATUS;
+}
+
+export function getLastSpokenText(): string {
+  return lastSpokenText;
+}
+
+export interface PrioritySpeakOptions extends SpeakCallbacks {
+  priority?: AudioPriority;
+  dedupWindowMs?: number;
+  force?: boolean;
+}
+
+export interface PrioritySpeakResult {
+  spoken: boolean;
+  interrupted: boolean;
+  reason?: 'duplicate' | 'lower-priority' | 'empty' | 'unsupported';
+}
+
+/**
+ * Speaks text using the Audio Priority & Mutex Manager:
+ * 1. Deduplicates repeated announcements within a configurable time window (default 2500ms).
+ * 2. Compares priority against active speech:
+ *    - Lower priority cannot interrupt higher priority.
+ *    - Higher or equal priority interrupts active speech immediately.
+ * 3. Records last spoken text for accessible replay.
+ */
+export function speakWithPriority(
+  text: string,
+  language?: string,
+  opts?: PrioritySpeakOptions
+): PrioritySpeakResult {
+  const priority = opts?.priority ?? AudioPriority.INTERACTIVE_FEEDBACK;
+  const clean = cleanForSpeech(text);
+  if (!clean) {
+    opts?.onError?.("empty");
+    return { spoken: false, interrupted: false, reason: "empty" };
+  }
+
+  const now = Date.now();
+  const dedupWindow = opts?.dedupWindowMs ?? 2500;
+
+  // Deduplication check: if exact same text was spoken within dedupWindow, and not CRITICAL_SAFETY
+  if (!opts?.force && priority < AudioPriority.CRITICAL_SAFETY) {
+    if (clean === cleanForSpeech(lastSpokenText) && (now - lastSpokenTime) < dedupWindow) {
+      return { spoken: false, interrupted: false, reason: "duplicate" };
+    }
+  }
+
+  // Priority and interruption check
+  const currentlySpeaking = isSpeaking();
+  let interrupted = false;
+
+  if (currentlySpeaking) {
+    if (priority < activeAudioPriority) {
+      // Lower priority cannot interrupt an active higher-priority announcement
+      return { spoken: false, interrupted: false, reason: "lower-priority" };
+    }
+    // Equal or higher priority interrupts current utterance
+    cancelSpeech();
+    interrupted = true;
+  }
+
+  activeAudioPriority = priority;
+  isSimulatedSpeaking = true;
+  lastSpokenText = text;
+  lastSpokenTime = now;
+  lastSpokenLang = language || "ar";
+  lastSpokenCallbacks = opts;
+
+  const wrappedCb: SpeakCallbacks = {
+    ...opts,
+    onEnd: () => {
+      isSimulatedSpeaking = false;
+      activeAudioPriority = AudioPriority.BACKGROUND_STATUS;
+      opts?.onEnd?.();
+    },
+    onError: (err) => {
+      isSimulatedSpeaking = false;
+      activeAudioPriority = AudioPriority.BACKGROUND_STATUS;
+      opts?.onError?.(err);
+    },
+  };
+
+  speak(text, language, wrappedCb);
+  return { spoken: true, interrupted };
+}
+
+/** Replays the last spoken utterance at high priority without deduplication. */
+export function replayLastSpeech(opts?: PrioritySpeakOptions): boolean {
+  if (!lastSpokenText) return false;
+  const res = speakWithPriority(lastSpokenText, lastSpokenLang, {
+    ...lastSpokenCallbacks,
+    ...opts,
+    force: true,
+  });
+  return res.spoken;
+}
+
 export function speak(
   text: string,
   language?: string,
@@ -273,7 +396,7 @@ export function speak(
   }
 
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-    cb?.onError?.("unsupported");
+    setTimeout(() => cb?.onError?.("unsupported"), 100);
     return;
   }
   const utterance = buildUtterance(text, language);
@@ -346,10 +469,38 @@ export function speak(
 
 /** Stop any ongoing speech. */
 export function cancelSpeech(): void {
+  isSimulatedSpeaking = false;
+  activeAudioPriority = AudioPriority.BACKGROUND_STATUS;
   if (typeof window !== "undefined" && "speechSynthesis" in window) {
     window.speechSynthesis.cancel();
     activeUtterances.clear();
   }
+}
+
+/** Alias for cancelSpeech */
+export const stopSpeaking = cancelSpeech;
+
+/** Pause ongoing speech synthesis if currently active. */
+export function pauseSpeech(): void {
+  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
+    }
+  }
+}
+
+/** Resume paused speech synthesis. */
+export function resumeSpeech(): void {
+  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+  }
+}
+
+/** Check if speech synthesis is currently paused. */
+export function isSpeechPaused(): boolean {
+  return typeof window !== "undefined" && "speechSynthesis" in window && window.speechSynthesis.paused;
 }
 
 /**
@@ -370,5 +521,6 @@ export function unlockSpeechSynthesis(): void {
 }
 
 export function isSpeaking(): boolean {
+  if (isSimulatedSpeaking) return true;
   return typeof window !== "undefined" && "speechSynthesis" in window && window.speechSynthesis.speaking;
 }

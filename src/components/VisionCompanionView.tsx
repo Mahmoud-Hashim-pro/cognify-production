@@ -49,6 +49,8 @@ import {
   Copy,
   Check,
   ExternalLink,
+  ScanLine,
+  Calendar,
 } from 'lucide-react';
 import { triggerHapticAlert, parseNavGuidance } from '../lib/hapticNavEngine';
 import { doc, setDoc } from 'firebase/firestore';
@@ -65,8 +67,29 @@ import {
   querySpatialMemory,
   loadSpatialObjectsFromFirestore,
 } from '../lib/spatialMemoryEngine';
+import {
+  createVisualCompanionSession,
+  QUICK_VQA_PRESETS,
+  SAFETY_DISCLAIMER_AR,
+  SAFETY_DISCLAIMER_EN,
+  validateUploadedImageFile,
+  detectBarcodeFromCanvasOrImage,
+  parseBarcodeScannerResult,
+  parseExpiryDateResult,
+  parseColorPatternResult,
+  parseClothingAnalysisResult,
+  parseStructuredDocument,
+  parseClutteredObjectFinderResult,
+  type BarcodeScannerResult,
+  type ExpiryDateResult,
+  type ColorPatternResult,
+  type ClothingAnalysisResult,
+  type StructuredDocumentResult,
+  type ClutteredObjectFinderResult,
+  type VisualQueryType,
+} from '../lib/visualCompanionEngine';
 
-export type VisualToolId = 'scene' | 'currency' | 'read' | 'color' | 'object' | 'face';
+export type VisualToolId = 'scene' | 'currency' | 'read' | 'color' | 'object' | 'face' | 'product';
 
 export interface VisualToolConfig {
   id: VisualToolId;
@@ -271,7 +294,7 @@ export const VISUAL_TOOLS: VisualToolConfig[] = [
     badgeEn: 'Person & Proximity',
     badgeAr: 'الأشخاص والوجوه',
     badgeFr: 'Personnes & Proximité',
-    keyboardShortcut: 'P',
+    keyboardShortcut: 'F',
     memoryType: 'person',
     waitingEn: 'Detecting people and matching recognized faces...',
     waitingAr: 'جاري التعرف على الشخص والوجوه الظاهرة...',
@@ -279,6 +302,36 @@ export const VISUAL_TOOLS: VisualToolConfig[] = [
     demoSampleEn: 'A person is standing directly in front of you at about two meters distance, smiling and greeting you, wearing a dark green jacket.',
     demoSampleAr: 'يقف شخص أمامك مباشرة على مسافة مترين تقريباً، يبتسم ويرحب بك، ويرتدي سترة بلون زيتي داكن.',
     demoSampleFr: 'Une personne se tient directement devant vous à environ deux mètres, souriante et portant une veste vert foncé.',
+  },
+  {
+    id: 'product',
+    titleEn: 'Product, Barcode & Expiry',
+    titleAr: 'فاحص المنتجات والباركود والصلاحية',
+    titleFr: 'Produits, Code-barres & Péremption',
+    shortDescEn: 'Scans barcodes, reads labels, and checks manufacturing and expiration dates.',
+    shortDescAr: 'مسح الباركود، قراءة ملصقات العبوات، والتحقق الدقيق من تاريخ الصلاحية والإنتاج.',
+    shortDescFr: 'Scanne les codes-barres, lit les étiquettes et vérifie les dates de péremption.',
+    captureBtnEn: 'Inspect Packaging & Barcode',
+    captureBtnAr: 'فحص العبوة والباركود',
+    captureBtnFr: 'Examiner l\'emballage et code-barres',
+    openCamBtnEn: 'Open Camera for Product Scanner',
+    openCamBtnAr: 'تشغيل الكاميرا لفحص العبوات',
+    openCamBtnFr: 'Activer la caméra pour les produits',
+    uploadBtnEn: 'Upload Product Photo',
+    uploadBtnAr: 'رفع صورة منتج',
+    uploadBtnFr: 'Téléverser un produit',
+    Icon: ShoppingBag,
+    badgeEn: 'Barcode & Expiry',
+    badgeAr: 'باركود وتاريخ الصلاحية',
+    badgeFr: 'Code-barres & Péremption',
+    keyboardShortcut: 'P',
+    memoryType: 'object',
+    waitingEn: 'Scanning product packaging, barcode, and expiry date...',
+    waitingAr: 'جاري فحص العبوة والباركود وتاريخ الصلاحية...',
+    waitingFr: 'Analyse de l\'emballage et date de péremption...',
+    demoSampleEn: 'Product detected: Organic Whole Milk 1L. Barcode: 6223000123456. Expiration date: 15/12/2026. Packaging seal is intact.',
+    demoSampleAr: 'تم فحص المنتج: حليب عضوي كامل الدسم عبوة 1 لتر. الباركود: 6223000123456. تاريخ الانتهاء: 15/12/2026. العبوة مغلقة بإحكام.',
+    demoSampleFr: 'Produit détecté : Lait entier biologique 1L. Code-barres : 6223000123456. Date de péremption : 15/12/2026.',
   },
 ];
 
@@ -315,6 +368,16 @@ export default function VisionCompanionView({
   const [showConsentModal, setShowConsentModal] = useState<boolean>(
     Boolean(isMinorStudent && !profile.parentalConsent?.verified)
   );
+
+  // Phase 2 Visual Companion Session & Speech Accessibility Controls
+  const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
+  const companionSessionRef = useRef(createVisualCompanionSession());
+  const handlePauseSpeech = useCallback(() => {
+    window.speechSynthesis?.pause();
+  }, []);
+  const handleResumeSpeech = useCallback(() => {
+    window.speechSynthesis?.resume();
+  }, []);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -401,6 +464,13 @@ export default function VisionCompanionView({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showGuestAuthCard, setShowGuestAuthCard] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Phase 6: Advanced Visual Intelligence States
+  const [currentBarcodeResult, setCurrentBarcodeResult] = useState<BarcodeScannerResult | null>(null);
+  const [currentExpiryResult, setCurrentExpiryResult] = useState<ExpiryDateResult | null>(null);
+  const [currentColorPatternResult, setCurrentColorPatternResult] = useState<ColorPatternResult | null>(null);
+  const [currentClothingResult, setCurrentClothingResult] = useState<ClothingAnalysisResult | null>(null);
+  const [currentDocumentResult, setCurrentDocumentResult] = useState<StructuredDocumentResult | null>(null);
 
   // Supported languages: Arabic, English, French (Declared early for child callbacks)
   const [companionLang, setCompanionLang] = useState<'ar' | 'en' | 'fr'>(() => {
@@ -902,6 +972,14 @@ export default function VisionCompanionView({
         e.preventDefault();
         handleSwitchTool('color');
         describeScene(companionLang, undefined, undefined, false, 'color');
+      } else if (e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+        describeScene(companionLang);
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        if (lastDescription) {
+          speak(lastDescription, companionLang);
+        }
       } else if (e.key === '?') {
         e.preventDefault();
         setShowShortcutsModal((prev) => !prev);
@@ -1422,6 +1500,24 @@ Deliver 2 crisp sentences without markdown asterisks (**).`;
 2. Expression & Appearance: Note facial expression (smiling, speaking) and clothing color cues.
 Deliver 2 warm, natural sentences without markdown asterisks (**).`;
       }
+    } else if (effectiveTool === 'product') {
+      if (targetLang === 'ar') {
+        prompt = `${langMandate}أنت فاحص وخبير في قراءة وفهم عبوات المنتجات الاستهلاكية والباركود وتاريخ الصلاحية لشخص كفيف.
+المطلوب فحص العبوة وتوضيح ما يلي بدقة:
+1. الباركود والاسم التجاري: اقرأ أرقام الباركود واسم المنتج والعلامة بدقة.
+2. تواريخ الصلاحية والإنتاج: فرّق بوضوح بين تاريخ انتهاء الصلاحية وتاريخ الإنتاج ورقم التشغيلة. إذا كان التاريخ غير واضح اذكر ذلك صراحة.
+3. ملصق العبوة: اقرأ النصوص المطبوعة على الملصق حرفياً. لا تخترع مكونات أو ادعاءات غير مكتوبة.
+4. تنبيه سلامة: وضح أن الفحص البصري استرشادي ولا يضمن صلاحية الاستهلاك.
+تحدث في جملتين أو ثلاث جمل بدون نجوم ماركداون (**).`;
+      } else {
+        prompt = `${langMandate}You are an expert consumer packaging, barcode, and expiration date assistant for a blind user.
+Instructions:
+1. Barcode & Product Name: Read barcode digits and brand/product name verbatim.
+2. Expiry vs. Production Dates: Differentiate expiration date (EXP) from manufacturing date (MFG/PRD) and batch number. If unclear, explicitly state so.
+3. Visible Label: Read printed packaging text verbatim. Never invent ingredients or safety claims.
+4. Safety Notice: State that visual reading is advisory and cannot guarantee consumption safety.
+Deliver 2-3 crisp sentences without markdown asterisks (**).`;
+      }
     } else if (effectiveTool === 'read' || activeReadAction === 'read') {
       if (targetLang === 'ar') {
         prompt = `${langMandate}أنت تساعد شخصاً كفيفاً بقراءة النص المكتوب أو المطبوع في الصورة أمامه (كتاب، ورقة، شاشة، لافتة، منتج، أو مستند).
@@ -1504,6 +1600,34 @@ Examine what is visible in front of the camera right now with utmost precision:
       setLastDescription(cleaned);
       setStatus('ready');
       setAnnounce(cleaned);
+
+      // Phase 6 Parsers
+      if (effectiveTool === 'product' || /باركود|barcode|ean/i.test(cleaned)) {
+        setCurrentBarcodeResult(parseBarcodeScannerResult(cleaned, undefined, targetLang));
+      } else {
+        setCurrentBarcodeResult(null);
+      }
+      if (effectiveTool === 'product' || /صلاحية|انتهاء|exp|mfg|prd/i.test(cleaned)) {
+        setCurrentExpiryResult(parseExpiryDateResult(cleaned, targetLang));
+      } else {
+        setCurrentExpiryResult(null);
+      }
+      if (effectiveTool === 'color') {
+        setCurrentColorPatternResult(parseColorPatternResult(cleaned, targetLang));
+        if (/قميص|بنطال|ملابس|لبس|حذاء|فستان|shirt|trousers|dress|garment|jacket|pants/i.test(cleaned)) {
+          setCurrentClothingResult(parseClothingAnalysisResult(cleaned, targetLang));
+        } else {
+          setCurrentClothingResult(null);
+        }
+      } else {
+        setCurrentColorPatternResult(null);
+        setCurrentClothingResult(null);
+      }
+      if (effectiveTool === 'read' && /فاتورة|إيصال|جدول|نموذج|invoice|receipt|table|form/i.test(cleaned)) {
+        setCurrentDocumentResult(parseStructuredDocument(cleaned, targetLang));
+      } else {
+        setCurrentDocumentResult(null);
+      }
       setObservationType(isUploadedPhoto ? 'uploaded' : forcedFrame ? 'previous' : 'live');
       setObservationTimestamp(captureTimestamp);
       if (!forcedFrame) {
@@ -1561,15 +1685,28 @@ Examine what is visible in front of the camera right now with utmost precision:
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error(companionLang === 'ar' ? 'يرجى اختيار ملف صورة صالح.' : 'Please select a valid image file.');
+
+    // Phase 6 Requirement H: Comprehensive file validation
+    const validation = validateUploadedImageFile(file);
+    if (!validation.isValid) {
+      const msg = companionLang === 'ar' ? validation.errorMessageAr! : validation.errorMessageEn!;
+      toast.error(msg);
+      speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      e.target.value = '';
       return;
     }
+
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
       setLastSnapshot(dataUrl);
       setStatus('ready');
+      const announceText =
+        companionLang === 'ar'
+          ? `تم رفع صورة "${file.name}" بنجاح. جاري فحص الصورة...`
+          : `Image "${file.name}" uploaded successfully. Analyzing image...`;
+      toast.success(announceText);
+      speak(announceText, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
       describeScene(companionLang, dataUrl, undefined, true);
     };
     reader.readAsDataURL(file);
@@ -1684,9 +1821,9 @@ Examine what is visible in front of the camera right now with utmost precision:
               data-testid="vision-navigate-back-btn"
               aria-label={t('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
               title={t('Back to Dashboard Hub', 'الرجوع للوحة الميزات الرئيسية', 'Retour au tableau de bord')}
-              className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#082344] hover:bg-[#0D2542] border border-[#07558A] hover:border-[#00AEB8]/60 text-[#B9CDE3] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+              className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-2xl bg-[#082344] hover:bg-[#0D2542] border border-[#07558A] hover:border-[#1769AA]/60 text-[#B9CDE3] hover:text-white transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
             >
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#00AEB8]" />
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-[#1769AA]" />
               <span className="text-xs font-bold">{t('Back', 'رجوع', 'Retour')}</span>
             </button>
           ) : (
@@ -1707,7 +1844,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               className={`px-3 py-1.5 min-h-[38px] rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 userMode === 'beginner'
                   ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-[#00AEB8]/15 border-[#00AEB8]/40 text-[#00AEB8]'
+                  : 'bg-[#1769AA]/15 border-[#1769AA]/40 text-[#1769AA]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -1756,7 +1893,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => handleDetailLevelChange('concise')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  detailLevel === 'concise' ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                  detailLevel === 'concise' ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
                 }`}
                 title={t('Concise descriptions', 'أوصاف موجزة')}
               >
@@ -1766,7 +1903,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => handleDetailLevelChange('standard')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  detailLevel === 'standard' ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                  detailLevel === 'standard' ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
                 }`}
                 title={t('Standard descriptions', 'أوصاف متوسطة')}
               >
@@ -1776,7 +1913,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => handleDetailLevelChange('detailed')}
                 className={`px-2 py-1 rounded-lg font-bold transition-all ${
-                  detailLevel === 'detailed' ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                  detailLevel === 'detailed' ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
                 }`}
                 title={t('Detailed comprehensive descriptions', 'أوصاف تفصيلية شاملة')}
               >
@@ -1818,7 +1955,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   type="button"
                   onClick={() => handleSelectLang(lang)}
                   className={`px-2 py-1 rounded-lg font-bold uppercase transition-all ${
-                    companionLang === lang ? 'bg-[#00AEB8] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
+                    companionLang === lang ? 'bg-[#1769AA] text-[#061A33]' : 'text-[#B9CDE3] hover:text-white'
                   }`}
                 >
                   {lang}
@@ -1833,7 +1970,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               data-testid="shortcuts-help-btn"
               aria-label={t('Keyboard Shortcuts Help (?)', 'مساعدة اختصارات لوحة المفاتيح (?)')}
               title={t('Keyboard Shortcuts (?)', 'اختصارات لوحة المفاتيح (?)')}
-              className="p-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#00AEB8] hover:text-white hover:border-[#00AEB8] transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#1769AA] hover:text-white hover:border-[#1769AA] transition-all cursor-pointer"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -1848,7 +1985,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative z-10">
             {/* Left Column: Heading, Subtitle, and Tag */}
             <div className="md:col-span-8 lg:col-span-8 space-y-3 text-start">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-[#00AEB8]/15 text-[#00AEB8] border border-[#00AEB8]/30 shadow-xs">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-[#1769AA]/15 text-[#1769AA] border border-[#1769AA]/30 shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{t('Welcome to Visual Assistant', 'مرحبًا بك في المساعد البصري')}</span>
               </div>
@@ -1867,16 +2004,16 @@ Examine what is visible in front of the camera right now with utmost precision:
 
             {/* Right Column: Abstract Glowing Eye Emblem (Completely Non-Human) */}
             <div className="md:col-span-4 lg:col-span-4 flex items-center justify-center md:justify-end relative">
-              <div className="absolute inset-0 bg-radial from-[#00AEB8]/25 via-[#0878BD]/15 to-transparent blur-2xl -z-10 rounded-full scale-125 pointer-events-none" />
+              <div className="absolute inset-0 bg-radial from-[#1769AA]/25 via-[#0878BD]/15 to-transparent blur-2xl -z-10 rounded-full scale-125 pointer-events-none" />
 
               <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
                 {/* Concentric rings */}
                 <div className="absolute inset-0 rounded-full border border-dashed border-[#07558A]/80 animate-spin-slow pointer-events-none" />
-                <div className="absolute inset-2 rounded-full border border-[#00AEB8]/25 pointer-events-none" />
+                <div className="absolute inset-2 rounded-full border border-[#1769AA]/25 pointer-events-none" />
                 
                 {/* Inner circular emblem with glowing eye */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-[#082344] via-[#092747] to-[#0878BD]/40 border-2 border-[#00AEB8] flex items-center justify-center shadow-lg shadow-[#00AEB8]/30 transition-transform duration-300 hover:scale-105">
-                  <Eye className="w-9 h-9 sm:w-11 sm:h-11 text-[#00AEB8] drop-shadow-[0_0_12px_rgba(0,174,184,0.6)]" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-[#082344] via-[#092747] to-[#0878BD]/40 border-2 border-[#1769AA] flex items-center justify-center shadow-lg shadow-[#1769AA]/30 transition-transform duration-300 hover:scale-105">
+                  <Eye className="w-9 h-9 sm:w-11 sm:h-11 text-[#1769AA] drop-shadow-[0_0_12px_rgba(0,174,184,0.6)]" />
                 </div>
               </div>
             </div>
@@ -1888,15 +2025,15 @@ Examine what is visible in front of the camera right now with utmost precision:
           <div
             role="region"
             aria-label={t('Simple Usage Guide', 'دليل الاستخدام السريع')}
-            className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-[#07558A]/30 via-[#082344] to-[#07558A]/30 border-2 border-[#00AEB8]/60 shadow-xl space-y-3.5 text-start"
+            className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-[#07558A]/30 via-[#082344] to-[#07558A]/30 border-2 border-[#1769AA]/60 shadow-xl space-y-3.5 text-start"
           >
-            <div className="flex items-center gap-2 text-sm sm:text-base font-black text-[#00AEB8]">
+            <div className="flex items-center gap-2 text-sm sm:text-base font-black text-[#1769AA]">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>{t('Simple 3-Step Assistive Guide', 'دليل الخطوات الثلاث السريع للرؤية')}</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
-                <span className="w-7 h-7 rounded-xl bg-[#00AEB8] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
                   1
                 </span>
                 <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
@@ -1904,7 +2041,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 </p>
               </div>
               <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
-                <span className="w-7 h-7 rounded-xl bg-[#00AEB8] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
                   2
                 </span>
                 <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
@@ -1912,7 +2049,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 </p>
               </div>
               <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#061A33]/85 border border-[#07558A]/60">
-                <span className="w-7 h-7 rounded-xl bg-[#00AEB8] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
+                <span className="w-7 h-7 rounded-xl bg-[#1769AA] text-[#061A33] font-black text-xs flex items-center justify-center shrink-0">
                   3
                 </span>
                 <p className="text-xs sm:text-sm text-[#F5F8FF] leading-relaxed">
@@ -1929,7 +2066,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           className="space-y-2.5"
         >
           <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#00AEB8]">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#1769AA]">
               <SlidersHorizontal className="w-4 h-4" />
               <span>{t('Select Visual Tool', 'اختر أداة الرؤية المتخصصة', 'Choisir l\'outil visuel')}</span>
             </div>
@@ -1956,21 +2093,21 @@ Examine what is visible in front of the camera right now with utmost precision:
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => handleSwitchTool(tool.id)}
-                  className={`min-h-[64px] p-2.5 sm:p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8] ${
+                  className={`min-h-[64px] p-2.5 sm:p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] ${
                     isSelected
-                      ? 'bg-[#00AEB8]/15 border-[#00AEB8] text-[#F5F8FF] shadow-lg shadow-[#00AEB8]/20 ring-1 ring-[#00AEB8]'
-                      : 'bg-[#082344] border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#00AEB8]/60 hover:bg-[#092747]'
+                      ? 'bg-[#1769AA]/15 border-[#1769AA] text-[#F5F8FF] shadow-lg shadow-[#1769AA]/20 ring-1 ring-[#1769AA]'
+                      : 'bg-[#082344] border-[#07558A] text-[#B9CDE3] hover:text-white hover:border-[#1769AA]/60 hover:bg-[#092747]'
                   }`}
                 >
                   <div className="flex items-center justify-between w-full">
                     <div
                       className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                        isSelected ? 'bg-[#00AEB8] text-[#061A33]' : 'bg-[#092747] text-[#00AEB8]'
+                        isSelected ? 'bg-[#1769AA] text-[#061A33]' : 'bg-[#092747] text-[#1769AA]'
                       }`}
                     >
                       <ToolIcon className="w-4 h-4" />
                     </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#00AEB8] border border-[#07558A]/80">
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#061A33] text-[#1769AA] border border-[#07558A]/80">
                       {tool.keyboardShortcut}
                     </span>
                   </div>
@@ -1990,12 +2127,12 @@ Examine what is visible in front of the camera right now with utmost precision:
             aria-label={t('Item Finder Search', 'البحث عن غرض محدد')}
             className="p-4 sm:p-5 rounded-3xl bg-[#082344] border border-[#07558A] shadow-lg space-y-2 text-start"
           >
-            <label htmlFor="target-item-input" className="block text-xs sm:text-sm font-bold text-[#00AEB8]">
+            <label htmlFor="target-item-input" className="block text-xs sm:text-sm font-bold text-[#1769AA]">
               {t('What item are you looking for?', 'ما هو الغرض أو الشيء الذي تبحث عنه الآن؟')}
             </label>
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="w-4 h-4 text-[#00AEB8] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Search className="w-4 h-4 text-[#1769AA] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="target-item-input"
                   type="text"
@@ -2005,7 +2142,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     'e.g. Keys, wallet, glasses, phone, medication bottle...',
                     'مثال: المفاتيح، المحفظة، النظارة، الهاتف، علبة الدواء...'
                   )}
-                  className="w-full ps-9 pe-4 py-2.5 rounded-2xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#00AEB8] placeholder:text-[#B9CDE3]/50"
+                  className="w-full ps-9 pe-4 py-2.5 rounded-2xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#1769AA] placeholder:text-[#B9CDE3]/50"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       describeScene(companionLang);
@@ -2017,7 +2154,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => describeScene(companionLang)}
                 disabled={status === 'analyzing'}
-                className="px-5 py-2.5 rounded-2xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                className="px-5 py-2.5 rounded-2xl bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
               >
                 {t('Search Scene', 'ابحث في المشهد')}
               </button>
@@ -2031,6 +2168,128 @@ Examine what is visible in front of the camera right now with utmost precision:
           </section>
         )}
 
+        {/* ── VISUAL COMPANION WORKSPACE STATUS & CONTROLS HUD ── */}
+        <section
+          data-testid="visual-companion-hud"
+          aria-label={t('Visual Workspace Controls & Status', 'حالة وتحكم الرفيق البصري')}
+          className="p-4 sm:p-5 rounded-3xl bg-[#082344] border border-[#07558A] shadow-lg flex flex-col md:flex-row items-center justify-between gap-4"
+        >
+          {/* Status Indicators */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            {/* Camera Status */}
+            <div
+              data-testid="camera-status-indicator"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+                status === 'ready' && streamRef.current
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                  : status === 'starting-camera' || status === 'analyzing'
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  status === 'ready' && streamRef.current
+                    ? 'bg-emerald-400 animate-pulse'
+                    : status === 'starting-camera' || status === 'analyzing'
+                    ? 'bg-amber-400 animate-ping'
+                    : 'bg-slate-500'
+                }`}
+              />
+              <span>
+                {status === 'ready' && streamRef.current
+                  ? t('Camera: Live Streaming', 'الكاميرا: بث مباشر نشط')
+                  : status === 'starting-camera'
+                  ? t('Camera: Starting...', 'الكاميرا: قيد التشغيل...')
+                  : status === 'analyzing'
+                  ? t('Camera: Analyzing Frame...', 'الكاميرا: جاري التحليل...')
+                  : t('Camera: Standby / Off', 'الكاميرا: في وضع الاستعداد')}
+              </span>
+            </div>
+
+            {/* Mic Status */}
+            <div
+              data-testid="mic-status-indicator"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+                isVoiceCommandsActive
+                  ? 'bg-red-500/15 border-red-500/40 text-red-300'
+                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+              }`}
+            >
+              {isVoiceCommandsActive ? (
+                <Mic className="w-3.5 h-3.5 text-red-400 animate-bounce" />
+              ) : (
+                <MicOff className="w-3.5 h-3.5 text-slate-500" />
+              )}
+              <span>
+                {isVoiceCommandsActive
+                  ? t('Mic: Listening for Commands', 'الميكروفون: يستمع للأوامر')
+                  : t('Mic: Muted / Standby', 'الميكروفون: غير مفعّل')}
+              </span>
+            </div>
+
+            {/* Speech Status */}
+            <div
+              data-testid="speech-status-indicator"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${
+                isSpeaking
+                  ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
+                  : 'bg-[#061A33] border-[#07558A] text-slate-400'
+              }`}
+            >
+              <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-blue-400 animate-pulse' : 'text-slate-500'}`} />
+              <span>
+                {isSpeaking
+                  ? t('Voice: Speaking Description', 'الصوت: جاري النطق')
+                  : t('Voice: Ready', 'الصوت: جاهز')}
+              </span>
+            </div>
+          </div>
+
+          {/* Large Start / Stop Controls */}
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+            <button
+              type="button"
+              onClick={status === 'ready' && streamRef.current ? stopCamera : () => startCamera()}
+              data-testid="vision-start-stop-cam-btn"
+              aria-label={
+                status === 'ready' && streamRef.current
+                  ? t('Stop Camera Feed', 'إيقاف بث الكاميرا')
+                  : t('Start Camera Feed', 'بدء تشغيل الكاميرا')
+              }
+              className={`px-6 py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-lg active:scale-95 cursor-pointer ${
+                status === 'ready' && streamRef.current
+                  ? 'bg-[#C43D4D] hover:bg-[#A82B3A] text-white shadow-[#C43D4D]/30'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
+              }`}
+            >
+              {status === 'ready' && streamRef.current ? (
+                <>
+                  <CameraOff className="w-4 h-4" />
+                  <span>{t('Stop Camera', 'إيقاف الكاميرا')}</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="w-4 h-4" />
+                  <span>{t('Start Camera', 'تشغيل الكاميرا')}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </section>
+
+        {/* Safety Disclaimer Banner */}
+        <section
+          data-testid="visual-safety-notice"
+          aria-label={t('Safety Notice', 'تنبيه السلامة والأمان')}
+          className="p-3.5 sm:p-4 rounded-2xl bg-[#092747] border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3"
+        >
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed opacity-90">
+            {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN}
+          </p>
+        </section>
+
         {/* ── 2. CAMERA PREVIEW VIEW FINDER ── */}
         <section
           aria-label={t('Camera Viewfinder', 'شاشة الكاميرا')}
@@ -2042,8 +2301,8 @@ Examine what is visible in front of the camera right now with utmost precision:
             const ToolIcon = activeToolConfig.Icon;
             return (
               <div className="absolute top-6 start-6 z-20 pointer-events-none">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/85 border border-[#00AEB8] text-[#F5F8FF] backdrop-blur-md shadow-md">
-                  <ToolIcon className="w-3.5 h-3.5 text-[#00AEB8]" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/85 border border-[#1769AA] text-[#F5F8FF] backdrop-blur-md shadow-md">
+                  <ToolIcon className="w-3.5 h-3.5 text-[#1769AA]" />
                   <span>
                     {companionLang === 'ar'
                       ? activeToolConfig.titleAr
@@ -2056,10 +2315,10 @@ Examine what is visible in front of the camera right now with utmost precision:
             );
           })()}
           {/* Cyan/Teal Corner Viewfinder Brackets */}
-          <div className="absolute top-5 start-5 w-8 h-8 sm:w-10 sm:h-10 border-s-2 border-t-2 border-[#00AEB8] rounded-tl-xl pointer-events-none z-10" />
-          <div className="absolute top-5 end-5 w-8 h-8 sm:w-10 sm:h-10 border-e-2 border-t-2 border-[#00AEB8] rounded-tr-xl pointer-events-none z-10" />
-          <div className="absolute bottom-5 start-5 w-8 h-8 sm:w-10 sm:h-10 border-s-2 border-b-2 border-[#00AEB8] rounded-bl-xl pointer-events-none z-10" />
-          <div className="absolute bottom-5 end-5 w-8 h-8 sm:w-10 sm:h-10 border-e-2 border-b-2 border-[#00AEB8] rounded-br-xl pointer-events-none z-10" />
+          <div className="absolute top-5 start-5 w-8 h-8 sm:w-10 sm:h-10 border-s-2 border-t-2 border-[#1769AA] rounded-tl-xl pointer-events-none z-10" />
+          <div className="absolute top-5 end-5 w-8 h-8 sm:w-10 sm:h-10 border-e-2 border-t-2 border-[#1769AA] rounded-tr-xl pointer-events-none z-10" />
+          <div className="absolute bottom-5 start-5 w-8 h-8 sm:w-10 sm:h-10 border-s-2 border-b-2 border-[#1769AA] rounded-bl-xl pointer-events-none z-10" />
+          <div className="absolute bottom-5 end-5 w-8 h-8 sm:w-10 sm:h-10 border-e-2 border-b-2 border-[#1769AA] rounded-br-xl pointer-events-none z-10" />
 
           {/* Real Video Feed when active */}
           <video
@@ -2075,8 +2334,8 @@ Examine what is visible in front of the camera right now with utmost precision:
           {/* Top Overlays when stream is active */}
           {status === 'ready' && streamRef.current && (
             <div className="absolute top-6 end-6 z-20 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/80 border border-[#07558A] text-[#00AEB8] backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-[#00AEB8] animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#061A33]/80 border border-[#07558A] text-[#1769AA] backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-[#1769AA] animate-pulse" />
                 <span>{t('Live Camera', 'بث مباشر')}</span>
               </span>
               <button
@@ -2132,7 +2391,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   disabled={(status as string) === 'analyzing'}
                   data-testid="floating-capture-shutter-btn"
                   aria-label={primaryBtnLabel}
-                  className="pointer-events-auto px-7 sm:px-9 py-3.5 min-h-[58px] rounded-full bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-2xl shadow-[#00AEB8]/50 flex items-center justify-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md outline-none focus-visible:ring-4 focus-visible:ring-white disabled:opacity-50"
+                  className="pointer-events-auto px-7 sm:px-9 py-3.5 min-h-[58px] rounded-full bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-2xl shadow-[#1769AA]/50 flex items-center justify-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md outline-none focus-visible:ring-4 focus-visible:ring-white disabled:opacity-50"
                 >
                   <ToolIcon className="w-5 h-5 fill-current" />
                   <span>{primaryBtnLabel}</span>
@@ -2145,7 +2404,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   data-testid="floating-upload-btn"
                   aria-label={uploadBtnLabel}
                   title={uploadBtnLabel}
-                  className="pointer-events-auto p-3.5 min-h-[50px] min-w-[50px] rounded-full bg-[#061A33]/85 hover:bg-[#082344] text-[#00AEB8] hover:text-white border border-[#07558A] hover:border-[#00AEB8] shadow-xl flex items-center justify-center transition-all cursor-pointer backdrop-blur-md outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                  className="pointer-events-auto p-3.5 min-h-[50px] min-w-[50px] rounded-full bg-[#061A33]/85 hover:bg-[#082344] text-[#1769AA] hover:text-white border border-[#07558A] hover:border-[#1769AA] shadow-xl flex items-center justify-center transition-all cursor-pointer backdrop-blur-md outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
                   <Upload className="w-5 h-5" />
                 </button>
@@ -2180,7 +2439,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <div className="relative z-10 flex flex-col items-center justify-center p-6 text-center space-y-4 max-w-lg">
                 {status === 'starting-camera' ? (
                   <>
-                    <Loader2 className="w-12 h-12 text-[#00AEB8] animate-spin" />
+                    <Loader2 className="w-12 h-12 text-[#1769AA] animate-spin" />
                     <p className="text-[#F5F8FF] font-bold text-sm sm:text-base">
                       {t('Starting camera stream...', 'جاري تشغيل الكاميرا...')}
                     </p>
@@ -2191,14 +2450,14 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-4 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
                       >
                         {t('Retry Camera', 'إعادة محاولة الكاميرا')}
                       </button>
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#1769AA] transition-all cursor-pointer"
                       >
                         {uploadBtnLabel}
                       </button>
@@ -2222,7 +2481,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{openCamBtnLabel}</span>
@@ -2230,9 +2489,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#1769AA] transition-all cursor-pointer flex items-center gap-2"
                       >
-                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <Upload className="w-4 h-4 text-[#1769AA]" />
                         <span>{uploadBtnLabel}</span>
                       </button>
                     </div>
@@ -2255,7 +2514,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{openCamBtnLabel}</span>
@@ -2263,9 +2522,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#1769AA] transition-all cursor-pointer flex items-center gap-2"
                       >
-                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <Upload className="w-4 h-4 text-[#1769AA]" />
                         <span>{uploadBtnLabel}</span>
                       </button>
                     </div>
@@ -2288,7 +2547,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Upload className="w-4 h-4 text-[#061A33]" />
                         <span>{uploadBtnLabel}</span>
@@ -2313,7 +2572,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{openCamBtnLabel}</span>
@@ -2321,9 +2580,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#1769AA] transition-all cursor-pointer flex items-center gap-2"
                       >
-                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <Upload className="w-4 h-4 text-[#1769AA]" />
                         <span>{uploadBtnLabel}</span>
                       </button>
                     </div>
@@ -2346,7 +2605,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => startCamera()}
-                        className="px-5 py-2.5 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Camera className="w-4 h-4" />
                         <span>{t('Retry Camera', 'إعادة محاولة الكاميرا')}</span>
@@ -2354,16 +2613,16 @@ Examine what is visible in front of the camera right now with utmost precision:
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#00AEB8] transition-all cursor-pointer flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] font-bold text-xs hover:border-[#1769AA] transition-all cursor-pointer flex items-center gap-2"
                       >
-                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <Upload className="w-4 h-4 text-[#1769AA]" />
                         <span>{uploadBtnLabel}</span>
                       </button>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="w-16 h-16 rounded-2xl bg-[#0878BD]/25 border-2 border-[#00AEB8] flex items-center justify-center text-[#00AEB8] shadow-lg shadow-[#00AEB8]/20">
+                    <div className="w-16 h-16 rounded-2xl bg-[#0878BD]/25 border-2 border-[#1769AA] flex items-center justify-center text-[#1769AA] shadow-lg shadow-[#1769AA]/20">
                       <ToolIcon className="w-8 h-8" />
                     </div>
 
@@ -2381,7 +2640,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         type="button"
                         onClick={() => startCamera()}
                         aria-label={openCamBtnLabel}
-                        className="px-6 py-3 min-h-[48px] rounded-2xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-sm flex items-center gap-2.5 shadow-xl shadow-[#00AEB8]/30 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-white"
+                        className="px-6 py-3 min-h-[48px] rounded-2xl bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-sm flex items-center gap-2.5 shadow-xl shadow-[#1769AA]/30 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-white"
                       >
                         <Camera className="w-5 h-5" />
                         <span>{openCamBtnLabel}</span>
@@ -2391,9 +2650,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         aria-label={uploadBtnLabel}
-                        className="px-5 py-3 min-h-[48px] rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                        className="px-5 py-3 min-h-[48px] rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#1769AA] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                       >
-                        <Upload className="w-4 h-4 text-[#00AEB8]" />
+                        <Upload className="w-4 h-4 text-[#1769AA]" />
                         <span>{uploadBtnLabel}</span>
                       </button>
 
@@ -2401,9 +2660,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                         type="button"
                         onClick={() => playDemoSample(companionLang, activeTool)}
                         aria-label={t('Test Audio', 'تجربة الصوت')}
-                        className="px-4 py-3 min-h-[48px] rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] font-bold text-xs flex items-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                        className="px-4 py-3 min-h-[48px] rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#1769AA] text-[#F5F8FF] font-bold text-xs flex items-center gap-2 transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                       >
-                        <Volume2 className="w-4 h-4 text-[#00AEB8]" />
+                        <Volume2 className="w-4 h-4 text-[#1769AA]" />
                         <span>{t('Test Audio', 'تجربة الصوت')}</span>
                       </button>
                     </div>
@@ -2416,13 +2675,31 @@ Examine what is visible in front of the camera right now with utmost precision:
           {/* Analyzing Overlay Spinner */}
           {status === 'analyzing' && (
             <div className="absolute inset-0 bg-[#061A33]/85 backdrop-blur-xs flex flex-col items-center justify-center z-30 space-y-3 p-4">
-              <Loader2 className="w-12 h-12 text-[#00AEB8] animate-spin" />
+              <Loader2 className="w-12 h-12 text-[#1769AA] animate-spin" />
               <p className="text-[#F5F8FF] font-bold text-sm sm:text-base animate-pulse">
                 {announce || t('Analyzing scene in front of you...', 'بحلل اللي قدامك في الكاميرا...')}
               </p>
             </div>
           )}
         </section>
+
+        {/* ── Accessible Safety Notice Banner ── */}
+        <div className="rounded-2xl bg-[#092747]/90 border border-[#07558A] p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#B9CDE3]">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
+            <p className="leading-relaxed">
+              {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => speak(companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN, companionLang)}
+            className="px-3.5 py-1.5 rounded-xl bg-[#07558A] hover:bg-[#1769AA] text-white hover:text-[#061A33] font-bold text-xs whitespace-nowrap cursor-pointer transition-all shrink-0"
+            aria-label={companionLang === 'ar' ? 'قراءة تنبيه الأمان بصوت عالٍ' : 'Read safety notice aloud'}
+          >
+            {companionLang === 'ar' ? 'قراءة تنبيه الأمان' : 'Read safety notice aloud'}
+          </button>
+        </div>
 
         {/* ── 3. PRIMARY & SECONDARY ACTION CONTROLS ROW ── */}
         {(() => {
@@ -2459,9 +2736,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={isCamStreaming ? stopCamera : () => startCamera()}
                 aria-label={isCamStreaming ? t('Stop Camera', 'إيقاف الكاميرا') : openCamBtnLabel}
-                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
-                <Camera className={`w-4 h-4 ${isCamStreaming ? 'text-emerald-400' : 'text-[#00AEB8]'}`} />
+                <Camera className={`w-4 h-4 ${isCamStreaming ? 'text-emerald-400' : 'text-[#1769AA]'}`} />
                 <span>{isCamStreaming ? t('Stop Camera', 'إيقاف الكاميرا') : openCamBtnLabel}</span>
               </button>
 
@@ -2471,7 +2748,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 onClick={() => describeScene(companionLang)}
                 disabled={status === 'analyzing'}
                 aria-label={primaryBtnLabel}
-                className="px-8 sm:px-10 py-3.5 min-h-[58px] rounded-full bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-xl shadow-[#00AEB8]/30 flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50 disabled:pointer-events-none"
+                className="px-8 sm:px-10 py-3.5 min-h-[58px] rounded-full bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-black text-sm sm:text-base shadow-xl shadow-[#1769AA]/30 flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50 disabled:pointer-events-none"
               >
                 <PrimaryToolIcon className="w-5 h-5 fill-current" />
                 <span>{primaryBtnLabel}</span>
@@ -2483,9 +2760,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label={uploadBtnLabel}
-                className="px-6 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                className="px-6 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
-                <Upload className="w-4 h-4 text-[#00AEB8]" />
+                <Upload className="w-4 h-4 text-[#1769AA]" />
                 <span>{uploadBtnLabel}</span>
               </button>
 
@@ -2498,9 +2775,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                     describeScene(companionLang, undefined, undefined, false, 'currency');
                   }}
                   aria-label={t('Identify Banknote / Cash', 'فحص وقراءة العملة')}
-                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
-                  <Banknote className="w-4 h-4 text-[#00AEB8]" />
+                  <Banknote className="w-4 h-4 text-[#1769AA]" />
                   <span>{t('Cash Reader', 'قارئ العملات')}</span>
                 </button>
               ) : (
@@ -2511,9 +2788,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                     describeScene(companionLang, undefined, undefined, false, 'scene');
                   }}
                   aria-label={t('What is in front of me now? Analyze camera scene', 'ماذا أمامي الآن؟ فحص المشهد')}
-                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                  className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                 >
-                  <Eye className="w-4 h-4 text-[#00AEB8]" />
+                  <Eye className="w-4 h-4 text-[#1769AA]" />
                   <span>{t('Scene Assistant', 'المساعد البصري')}</span>
                 </button>
               )}
@@ -2526,9 +2803,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                   describeScene(companionLang, undefined, 'read', false, 'read');
                 }}
                 aria-label={t('Read printed text or signs aloud', 'قراءة النص واللافتات بصوت مسموع')}
-                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
-                <FileText className="w-4 h-4 text-[#00AEB8]" />
+                <FileText className="w-4 h-4 text-[#1769AA]" />
                 <span>{t('Read Text', 'قراءة النص')}</span>
               </button>
 
@@ -2537,9 +2814,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => playDemoSample(companionLang, activeTool)}
                 aria-label={t('Test spoken voice audio sample', 'تجربة الصوت وعينة وصف حية')}
-                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                className="px-5 py-3 min-h-[46px] rounded-full bg-[#092747] border border-[#07558A] hover:border-[#1769AA] hover:bg-[#082344] text-[#F5F8FF] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
               >
-                <Volume2 className="w-4 h-4 text-[#00AEB8]" />
+                <Volume2 className="w-4 h-4 text-[#1769AA]" />
                 <span>{t('Test Audio', 'تجربة الصوت')}</span>
               </button>
             </section>
@@ -2548,12 +2825,13 @@ Examine what is visible in front of the camera right now with utmost precision:
 
         {/* ── 4. LATEST RESULT SECTION ("آخر نتيجة") ── */}
         <section
+          data-testid="live-description-panel"
           aria-label={t('Latest Analysis Result', 'آخر نتيجة')}
           className="p-5 sm:p-6 md:p-7 rounded-3xl bg-[#092747] border border-[#07558A] shadow-xl space-y-5 text-start"
         >
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[#07558A]/50">
-            <div className="flex items-center gap-2.5 text-[#00AEB8]">
+            <div className="flex items-center gap-2.5 text-[#1769AA]">
               <Sparkles className="w-4 h-4" />
               <h2 className="text-base sm:text-lg font-bold text-[#F5F8FF]">
                 {t('Latest Result', 'آخر نتيجة')}
@@ -2569,7 +2847,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                       ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
                       : observationType === 'uncertain'
                       ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                      : 'bg-[#00AEB8]/15 border-[#00AEB8]/40 text-[#00AEB8]'
+                      : observationType === 'previous'
+                      ? 'bg-[#1769AA]/15 border-[#1769AA]/40 text-[#1769AA]'
+                      : 'bg-[#1769AA]/15 border-[#1769AA]/40 text-[#1769AA]'
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -2609,7 +2889,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Camera className="w-10 h-10 text-[#00AEB8]/60" />
+                    <Camera className="w-10 h-10 text-[#1769AA]/60" />
                   )}
                 </div>
 
@@ -2638,7 +2918,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       onClick={() => describeScene(companionLang, lastSnapshot)}
                       disabled={status === 'analyzing'}
                       aria-label={t('Retry analysis on this image', 'إعادة فحص هذه اللقطة')}
-                      className="px-4 py-2.5 rounded-full bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-[#00AEB8] hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
+                      className="px-4 py-2.5 rounded-full bg-[#082344] border border-[#07558A] hover:border-[#1769AA] text-[#1769AA] hover:text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       <span>{t('Retry Analysis', 'إعادة الفحص')}</span>
@@ -2648,14 +2928,15 @@ Examine what is visible in front of the camera right now with utmost precision:
                   <button
                     type="button"
                     onClick={toggleSpeech}
+                    data-testid="speech-replay-pause-btn"
                     aria-label={
                       isSpeaking
                         ? t('Stop speech readout', 'إيقاف الصوت')
                         : t('Listen to description aloud', 'استمع للوصف')
                     }
-                    className="px-5 py-2.5 rounded-full bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] hover:text-[#00AEB8] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#00AEB8]"
+                    className="px-5 py-2.5 rounded-full bg-[#082344] border border-[#07558A] hover:border-[#1769AA] text-[#F5F8FF] hover:text-[#1769AA] font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all shadow-md active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
                   >
-                    <div className="w-7 h-7 rounded-full bg-[#00AEB8] text-[#061A33] flex items-center justify-center font-bold">
+                    <div className="w-7 h-7 rounded-full bg-[#1769AA] text-[#061A33] flex items-center justify-center font-bold">
                       {isSpeaking ? (
                         <span className="w-2.5 h-2.5 bg-[#061A33] rounded-xs" />
                       ) : (
@@ -2670,7 +2951,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     onClick={openSaveDialog}
                     aria-label={t('Remember this scene as a memory', 'حفظ هذا المشهد في الذاكرة')}
                     title={t('Save to Memory', 'حفظ')}
-                    className="p-2.5 rounded-full bg-[#082344] border border-[#07558A] text-[#B9CDE3] hover:text-[#00AEB8] hover:border-[#00AEB8] transition-all cursor-pointer"
+                    className="p-2.5 rounded-full bg-[#082344] border border-[#07558A] text-[#B9CDE3] hover:text-[#1769AA] hover:border-[#1769AA] transition-all cursor-pointer"
                   >
                     <BookmarkPlus className="w-4 h-4" />
                   </button>
@@ -2683,12 +2964,12 @@ Examine what is visible in front of the camera right now with utmost precision:
                   type="button"
                   onClick={compareWithPreviousScene}
                   disabled={isComparingScene || !lastSnapshot}
-                  className="px-4 py-2 rounded-xl bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] hover:text-[#00AEB8] text-xs font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-[#082344] border border-[#07558A] hover:border-[#1769AA] text-[#F5F8FF] hover:text-[#1769AA] text-xs font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isComparingScene ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00AEB8]" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1769AA]" />
                   ) : (
-                    <RefreshCw className="w-3.5 h-3.5 text-[#00AEB8]" />
+                    <RefreshCw className="w-3.5 h-3.5 text-[#1769AA]" />
                   )}
                   <span>{t('Compare with Previous Scene', 'مقارنة مع المشهد السابق')}</span>
                 </button>
@@ -2698,8 +2979,8 @@ Examine what is visible in front of the camera right now with utmost precision:
                   onClick={() => setShowFollowUp((prev) => !prev)}
                   className={`px-4 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                     showFollowUp
-                      ? 'bg-[#00AEB8] text-[#061A33] border-[#00AEB8]'
-                      : 'bg-[#082344] border-[#07558A] text-[#F5F8FF] hover:border-[#00AEB8]'
+                      ? 'bg-[#1769AA] text-[#061A33] border-[#1769AA]'
+                      : 'bg-[#082344] border-[#07558A] text-[#F5F8FF] hover:border-[#1769AA]'
                   }`}
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
@@ -2711,7 +2992,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               {activeTool === 'read' && lastDescription && (
                 <div className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#00AEB8]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#1769AA]">
                       <FileText className="w-4 h-4" />
                       <span>{t('Extracted Text Content', 'النص المستخرج من الصورة')}</span>
                     </div>
@@ -2724,7 +3005,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         const msg = companionLang === 'ar' ? 'تم نسخ النص إلى الحافظة.' : 'Text copied to clipboard.';
                         setAnnounce(msg);
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-[#082344] border border-[#07558A] hover:border-[#00AEB8] text-xs font-bold text-[#F5F8FF] flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-[#082344] border border-[#07558A] hover:border-[#1769AA] text-xs font-bold text-[#F5F8FF] flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       {copiedText ? (
                         <>
@@ -2733,7 +3014,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3.5 h-3.5 text-[#00AEB8]" />
+                          <Copy className="w-3.5 h-3.5 text-[#1769AA]" />
                           <span>{t('Copy Text', 'نسخ النص')}</span>
                         </>
                       )}
@@ -2745,15 +3026,312 @@ Examine what is visible in front of the camera right now with utmost precision:
                 </div>
               )}
 
+              {/* Phase 6 — Barcode & Label Scanner Card */}
+              {currentBarcodeResult?.hasBarcode && (
+                <div
+                  role="region"
+                  aria-label={t('Barcode Scanner Details', 'بيانات ماسح الباركود')}
+                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
+                      <ScanLine className="w-4 h-4" />
+                      <span>{t('Barcode & Product Label Scanner', 'ماسح الباركود وملصق المنتج')}</span>
+                    </div>
+                    {currentBarcodeResult.barcodeValue && (
+                      <span className="px-3 py-1 rounded-full bg-[#1769AA]/15 border border-[#1769AA] text-[#1769AA] text-xs font-mono font-bold">
+                        {currentBarcodeResult.barcodeFormat || 'Code'}: {currentBarcodeResult.barcodeValue}
+                      </span>
+                    )}
+                  </div>
+                  {currentBarcodeResult.visibleLabelText && (
+                    <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50 text-xs">
+                      <span className="text-[#B9CDE3] block text-[10px] font-bold pb-1">
+                        {t('Visible Label Text (OCR):', 'النص المقروء من الملصق:')}
+                      </span>
+                      <p className="text-[#F5F8FF] leading-relaxed select-text">
+                        {currentBarcodeResult.visibleLabelText}
+                      </p>
+                    </div>
+                  )}
+                  {currentBarcodeResult.interpretation && (
+                    <div className="text-xs text-[#B9CDE3] pt-1">
+                      <span className="text-[10px] text-[#1769AA] font-bold block">
+                        {t('AI Product Interpretation:', 'البيان التقديري للمنتج:')}
+                      </span>
+                      <p className="text-[#F5F8FF]/90">{currentBarcodeResult.interpretation}</p>
+                    </div>
+                  )}
+                  <div className="p-2.5 rounded-xl bg-[#082344]/60 border border-[#07558A]/40 text-[11px] text-[#B9CDE3] flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#1769AA] shrink-0 mt-0.5" />
+                    <span>
+                      {companionLang === 'ar'
+                        ? currentBarcodeResult.databaseDisclaimerAr
+                        : currentBarcodeResult.databaseDisclaimerEn}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Phase 6 — Expiry & Manufacturing Date Reader Card */}
+              {currentExpiryResult && (currentExpiryResult.isLegible || currentExpiryResult.expiryDate || activeTool === 'product') && (
+                <div
+                  role="region"
+                  aria-label={t('Expiry Date Details', 'تفاصيل تاريخ الصلاحية والإنتاج')}
+                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
+                      <Calendar className="w-4 h-4" />
+                      <span>{t('Expiry & Production Date Reader', 'فاحص تاريخ الصلاحية والإنتاج')}</span>
+                    </div>
+                    {currentExpiryResult.isLegible ? (
+                      <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+                        {t('Dates Verified', 'تواريخ محددة')}
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold">
+                        {t('Needs Better Angle', 'تحتاج لتعديل الزاوية')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50">
+                      <span className="text-[#B9CDE3] block text-[10px]">{t('Expiry Date (EXP)', 'تاريخ الانتهاء')}</span>
+                      <span className="font-bold text-emerald-400">
+                        {currentExpiryResult.expiryDate || t('Not clearly visible', 'غير ظاهر بوضوح')}
+                      </span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50">
+                      <span className="text-[#B9CDE3] block text-[10px]">{t('Production Date (PRD)', 'تاريخ الإنتاج')}</span>
+                      <span className="font-bold text-[#F5F8FF]">
+                        {currentExpiryResult.productionDate || t('Not clearly visible', 'غير ظاهر بوضوح')}
+                      </span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[#082344]/80 border border-[#07558A]/50">
+                      <span className="text-[#B9CDE3] block text-[10px]">{t('Batch / LOT #', 'رقم التشغيلة')}</span>
+                      <span className="font-mono font-bold text-[#1769AA]">
+                        {currentExpiryResult.batchNumber || t('N/A', 'غير مسجل')}
+                      </span>
+                    </div>
+                  </div>
+                  {currentExpiryResult.repositionGuidanceAr && !currentExpiryResult.isLegible && (
+                    <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-300 flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span>
+                        {companionLang === 'ar'
+                          ? currentExpiryResult.repositionGuidanceAr
+                          : currentExpiryResult.repositionGuidanceEn}
+                      </span>
+                    </div>
+                  )}
+                  <div className="p-2.5 rounded-xl bg-[#082344]/60 border border-amber-500/30 text-[11px] text-amber-400/90 flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <span>
+                      {companionLang === 'ar'
+                        ? currentExpiryResult.safetyDisclaimerAr
+                        : currentExpiryResult.safetyDisclaimerEn}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Phase 6 — Color & Pattern Detector Card */}
+              {currentColorPatternResult && (
+                <div
+                  role="region"
+                  aria-label={t('Color and Pattern Analysis', 'فحص الألوان والأنماط')}
+                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
+                      <Palette className="w-4 h-4" />
+                      <span>{t('Color & Pattern Detector', 'كاشف الألوان والأنماط')}</span>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-[#1769AA]/15 border border-[#1769AA] text-[#1769AA] text-xs font-bold">
+                      {companionLang === 'ar'
+                        ? currentColorPatternResult.patternLabelAr
+                        : currentColorPatternResult.patternLabelEn}
+                    </span>
+                  </div>
+                  {currentColorPatternResult.dominantColors.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="text-[#B9CDE3] text-[11px] me-1">
+                        {t('Dominant Shades:', 'الألوان السائدة:')}
+                      </span>
+                      {currentColorPatternResult.dominantColors.map((col, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-lg bg-[#082344] border border-[#07558A] text-[#F5F8FF] font-semibold text-xs"
+                        >
+                          {col}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-[#F5F8FF]/90">
+                    {companionLang === 'ar'
+                      ? currentColorPatternResult.relationshipsAr
+                      : currentColorPatternResult.relationshipsEn}
+                  </p>
+                  {currentColorPatternResult.lightingWarningAr && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-300 flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span>
+                        {companionLang === 'ar'
+                          ? currentColorPatternResult.lightingWarningAr
+                          : currentColorPatternResult.lightingWarningEn}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Phase 6 — Clothing Assistant & Outfit Matcher Card */}
+              {currentClothingResult && (
+                <div
+                  role="region"
+                  aria-label={t('Clothing Assistant Details', 'تفاصيل مساعد الملابس وتنسيق الإطلالة')}
+                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
+                      <Sparkles className="w-4 h-4" />
+                      <span>{t('Clothing Assistant & Outfit Matcher', 'مساعد الملابس وتنسيق الإطلالة')}</span>
+                    </div>
+                    {currentClothingResult.items.length > 0 && (
+                      <span className="px-3 py-1 rounded-full bg-[#1769AA]/15 border border-[#1769AA] text-[#1769AA] text-xs font-bold">
+                        {currentClothingResult.items.length} {t('Garments', 'قطع')}
+                      </span>
+                    )}
+                  </div>
+                  {currentClothingResult.items.length > 0 && (
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {currentClothingResult.items.map((it, idx) => (
+                        <div
+                          key={idx}
+                          className="p-2.5 rounded-xl bg-[#082344] border border-[#07558A] flex items-center gap-2"
+                        >
+                          <span className="font-bold text-[#F5F8FF]">{it.category}</span>
+                          {it.isCutOff && (
+                            <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-[10px] font-bold">
+                              {t('Partial View', 'عرض جزئي')}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {currentClothingResult.hasCutOffGarments && currentClothingResult.cutOffNoticeAr && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-xs text-amber-300 flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span>
+                        {companionLang === 'ar'
+                          ? currentClothingResult.cutOffNoticeAr
+                          : currentClothingResult.cutOffNoticeEn}
+                      </span>
+                    </div>
+                  )}
+                  {currentClothingResult.pairingSuggestionsAr.length > 0 && (
+                    <div className="p-3 rounded-xl bg-[#082344] border border-[#07558A] text-xs space-y-1">
+                      <span className="text-[10px] text-[#1769AA] font-bold block">
+                        {t('Harmonious Outfit Suggestions:', 'اقتراحات التنسيق المتناسق:')}
+                      </span>
+                      <p className="text-[#F5F8FF]/90">
+                        {companionLang === 'ar'
+                          ? currentClothingResult.pairingSuggestionsAr[0]
+                          : currentClothingResult.pairingSuggestionsEn[0]}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Phase 6 — Structured Document Understanding Card */}
+              {currentDocumentResult && (
+                <div
+                  role="region"
+                  aria-label={t('Document Structure Understanding', 'تحليل وفهم بنية المستند')}
+                  className="p-4 rounded-2xl bg-[#061A33] border border-[#07558A] space-y-3 text-start"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/60">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
+                      <FileText className="w-4 h-4" />
+                      <span>{t('Structured Document Understanding', 'فهم بنية المستند والبيانات')}</span>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-[#1769AA]/15 border border-[#1769AA] text-[#1769AA] text-xs font-bold uppercase">
+                      {currentDocumentResult.documentType.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#082344] border border-[#07558A] text-xs space-y-1">
+                    <span className="text-[10px] text-[#1769AA] font-bold block">
+                      {t('Spoken Summary:', 'الملخص الصوتي:')}
+                    </span>
+                    <p className="text-[#F5F8FF] leading-relaxed">
+                      {companionLang === 'ar'
+                        ? currentDocumentResult.summaryAr
+                        : currentDocumentResult.summaryEn}
+                    </p>
+                  </div>
+                  {currentDocumentResult.invoiceData && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                      {currentDocumentResult.invoiceData.vendor && (
+                        <div className="p-2.5 rounded-xl bg-[#082344] border border-[#07558A]">
+                          <span className="text-[#B9CDE3] block text-[10px]">{t('Vendor / Merchant', 'الجهة / التاجر')}</span>
+                          <span className="font-bold text-[#F5F8FF]">{currentDocumentResult.invoiceData.vendor}</span>
+                        </div>
+                      )}
+                      {currentDocumentResult.invoiceData.total && (
+                        <div className="p-2.5 rounded-xl bg-[#082344] border border-[#07558A]">
+                          <span className="text-[#B9CDE3] block text-[10px]">{t('Total Balance', 'الإجمالي الصافي')}</span>
+                          <span className="font-bold text-emerald-400">{currentDocumentResult.invoiceData.total}</span>
+                        </div>
+                      )}
+                      {currentDocumentResult.invoiceData.date && (
+                        <div className="p-2.5 rounded-xl bg-[#082344] border border-[#07558A]">
+                          <span className="text-[#B9CDE3] block text-[10px]">{t('Date', 'التاريخ')}</span>
+                          <span className="font-bold text-[#F5F8FF]">{currentDocumentResult.invoiceData.date}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {currentDocumentResult.headings.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="text-[#B9CDE3] text-[10px] block me-1">
+                        {t('Headings Detected:', 'العناوين المكتشفة:')}
+                      </span>
+                      {currentDocumentResult.headings.map((h, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-lg bg-[#082344] border border-[#07558A] text-[#1769AA] font-bold text-xs"
+                        >
+                          {h}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {currentDocumentResult.formFields.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {currentDocumentResult.formFields.slice(0, 4).map((f, idx) => (
+                        <div key={idx} className="p-2 rounded-xl bg-[#082344] border border-[#07558A]">
+                          <span className="text-[#B9CDE3] text-[10px] block">{f.label}</span>
+                          <span className="font-bold text-[#F5F8FF]">{f.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Scene Comparison Result Card */}
               {comparisonResult && (
                 <div
                   role="region"
                   aria-label={t('Scene Comparison Result', 'نتيجة مقارنة المشهدين')}
-                  className="p-4 rounded-2xl bg-[#082344] border-2 border-[#00AEB8]/80 space-y-2.5 text-start"
+                  className="p-4 rounded-2xl bg-[#082344] border-2 border-[#1769AA]/80 space-y-2.5 text-start"
                 >
                   <div className="flex items-center justify-between pb-1 border-b border-[#07558A]">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#00AEB8]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#1769AA]">
                       <RefreshCw className="w-4 h-4" />
                       <span>{t('Scene Differences Detected', 'الفروق والتغيرات المكتشفة في المشهد')}</span>
                     </div>
@@ -2776,7 +3354,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         rate: speechRate,
                       })
                     }
-                    className="px-3.5 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#00AEB8] hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#1769AA] hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                     <span>{t('Listen to Comparison', 'استمع للمقارنة')}</span>
@@ -2788,11 +3366,12 @@ Examine what is visible in front of the camera right now with utmost precision:
               {showFollowUp && (
                 <div
                   role="region"
+                  data-testid="scene-conversation-panel"
                   aria-label={t('Follow-up Q&A', 'الأسئلة الاستفسارية')}
                   className="p-4 sm:p-5 rounded-2xl bg-[#082344] border border-[#07558A] space-y-3.5 text-start"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#00AEB8]">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1769AA]">
                       <MessageSquare className="w-4 h-4" />
                       <span>{t('Ask about this scene', 'محادثة واستفسار عن هذه اللقطة')}</span>
                     </div>
@@ -2818,7 +3397,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         type="button"
                         onClick={() => handleAskFollowUp(preset)}
                         disabled={isAnsweringFollowUp}
-                        className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] hover:border-[#00AEB8] text-[11px] text-[#B9CDE3] hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                        className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] hover:border-[#1769AA] text-[11px] text-[#B9CDE3] hover:text-white transition-all cursor-pointer disabled:opacity-50"
                       >
                         {preset}
                       </button>
@@ -2853,7 +3432,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       value={followUpQuestion}
                       onChange={(e) => setFollowUpQuestion(e.target.value)}
                       placeholder={t('Type your question about this image...', 'اكتب سؤالك عن هذه الصورة...')}
-                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#00AEB8]"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs sm:text-sm outline-none focus:border-[#1769AA]"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleAskFollowUp();
@@ -2864,7 +3443,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       type="button"
                       onClick={() => handleAskFollowUp()}
                       disabled={isAnsweringFollowUp || !followUpQuestion.trim()}
-                      className="px-4 py-2.5 rounded-xl bg-[#00AEB8] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                      className="px-4 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0878BD] text-[#061A33] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                     >
                       {isAnsweringFollowUp ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -2879,7 +3458,7 @@ Examine what is visible in front of the camera right now with utmost precision:
             </div>
           ) : (
             <div className="p-8 sm:p-12 text-center rounded-2xl bg-[#082344]/50 border border-dashed border-[#07558A] space-y-2">
-              <Eye className="w-8 h-8 text-[#00AEB8] mx-auto opacity-75" />
+              <Eye className="w-8 h-8 text-[#1769AA] mx-auto opacity-75" />
               <h3 className="text-sm sm:text-base font-bold text-[#F5F8FF]">
                 {t('No scene analyzed yet', 'لم يتم إجراء أي تحليل بعد')}
               </h3>
@@ -2895,16 +3474,17 @@ Examine what is visible in front of the camera right now with utmost precision:
 
         {/* ── 5. SAVED MEMORIES & SPATIAL ASSISTANCE HUB ── */}
         <section
+          data-testid="scene-history-panel"
           aria-label={t('Saved Memories and Locations', 'ذاكرة الأماكن والمقتنيات المحفوظة')}
           className="p-5 sm:p-6 md:p-7 rounded-3xl bg-[#082344] border border-[#07558A] shadow-xl space-y-4 text-start"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#07558A]/50">
-            <div className="flex items-center gap-2 text-[#00AEB8]">
+            <div className="flex items-center gap-2 text-[#1769AA]">
               <BookmarkPlus className="w-5 h-5" />
               <h2 className="text-base sm:text-lg font-bold text-[#F5F8FF]">
                 {t('Saved Memories & Places', 'ذاكرة الأماكن والمقتنيات المحفوظة')}
               </h2>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#061A33] text-[#00AEB8] border border-[#07558A]">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#061A33] text-[#1769AA] border border-[#07558A]">
                 {filteredMemories.length}
               </span>
             </div>
@@ -2914,9 +3494,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => setShowSpatialMemory(true)}
                 data-testid="open-spatial-memory-btn"
-                className="px-3.5 py-1.5 rounded-xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-[#092747] border border-[#07558A] hover:border-[#1769AA] text-[#F5F8FF] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
               >
-                <Compass className="w-3.5 h-3.5 text-[#00AEB8]" />
+                <Compass className="w-3.5 h-3.5 text-[#1769AA]" />
                 <span>{t('Spatial Map', 'المسار المكاني')}</span>
               </button>
 
@@ -2924,9 +3504,9 @@ Examine what is visible in front of the camera right now with utmost precision:
                 type="button"
                 onClick={() => setShowDocStudio(true)}
                 data-testid="open-doc-studio-btn"
-                className="px-3.5 py-1.5 rounded-xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8] text-[#F5F8FF] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-[#092747] border border-[#07558A] hover:border-[#1769AA] text-[#F5F8FF] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
               >
-                <FileText className="w-3.5 h-3.5 text-[#00AEB8]" />
+                <FileText className="w-3.5 h-3.5 text-[#1769AA]" />
                 <span>{t('Doc Studio', 'استوديو المستندات')}</span>
               </button>
             </div>
@@ -2949,7 +3529,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   onClick={() => setSelectedMemoryCategory(cat.id)}
                   className={`px-3 py-1 rounded-lg transition-all ${
                     selectedMemoryCategory === cat.id
-                      ? 'bg-[#00AEB8] text-[#061A33]'
+                      ? 'bg-[#1769AA] text-[#061A33]'
                       : 'text-[#B9CDE3] hover:text-white'
                   }`}
                 >
@@ -2959,14 +3539,14 @@ Examine what is visible in front of the camera right now with utmost precision:
             </div>
 
             <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
-              <Search className="w-3.5 h-3.5 text-[#00AEB8] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-[#1769AA] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={memorySearchQuery}
                 onChange={(e) => setMemorySearchQuery(e.target.value)}
                 placeholder={t('Search saved memories...', 'البحث في الذاكرة...')}
                 aria-label={t('Search saved memories', 'البحث في الذاكرة المحفوظة')}
-                className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#00AEB8]"
+                className="w-full ps-8 pe-3 py-1.5 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#1769AA]"
               />
             </div>
           </div>
@@ -2977,12 +3557,12 @@ Examine what is visible in front of the camera right now with utmost precision:
               {filteredMemories.map((mem) => (
                 <div
                   key={mem.id}
-                  className="p-3.5 rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#00AEB8]/60 transition-all space-y-2.5 flex flex-col justify-between"
+                  className="p-3.5 rounded-2xl bg-[#092747] border border-[#07558A] hover:border-[#1769AA]/60 transition-all space-y-2.5 flex flex-col justify-between"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 truncate">
-                        <span className="w-6 h-6 rounded-lg bg-[#00AEB8]/15 text-[#00AEB8] flex items-center justify-center shrink-0">
+                        <span className="w-6 h-6 rounded-lg bg-[#1769AA]/15 text-[#1769AA] flex items-center justify-center shrink-0">
                           {mem.memoryType === 'person' ? (
                             <Users className="w-3.5 h-3.5" />
                           ) : (
@@ -3012,7 +3592,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         })
                       }
                       aria-label={`${t('Listen to', 'استمع إلى')} ${mem.label}`}
-                      className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] text-[#00AEB8] hover:text-white hover:border-[#00AEB8] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                      className="px-3 py-1 rounded-xl bg-[#061A33] border border-[#07558A] text-[#1769AA] hover:text-white hover:border-[#1769AA] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Volume2 className="w-3 h-3" />
                       <span>{t('Listen', 'استمع')}</span>
@@ -3056,7 +3636,7 @@ Examine what is visible in front of the camera right now with utmost precision:
         >
           <div className="w-full max-w-lg bg-[#082344] border border-[#07558A] rounded-3xl p-6 space-y-4 shadow-2xl text-start">
             <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/50">
-              <div className="flex items-center gap-2 text-[#00AEB8]">
+              <div className="flex items-center gap-2 text-[#1769AA]">
                 <HelpCircle className="w-5 h-5" />
                 <h3 id="shortcuts-modal-title" className="text-base sm:text-lg font-bold text-[#F5F8FF]">
                   {t('Keyboard Shortcuts Cheatsheet', 'دليل اختصارات لوحة المفاتيح')}
@@ -3091,7 +3671,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   <span className="text-xs text-[#F5F8FF] font-medium">
                     {companionLang === 'ar' ? shortcut.titleAr : shortcut.titleEn}
                   </span>
-                  <kbd className="px-2 py-1 rounded bg-[#092747] border border-[#00AEB8]/40 text-[#00AEB8] font-mono text-xs font-bold">
+                  <kbd className="px-2 py-1 rounded bg-[#092747] border border-[#1769AA]/40 text-[#1769AA] font-mono text-xs font-bold">
                     {shortcut.key}
                   </kbd>
                 </div>
@@ -3102,7 +3682,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
-                className="px-5 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
               >
                 {t('Close', 'إغلاق')}
               </button>
@@ -3121,7 +3701,7 @@ Examine what is visible in front of the camera right now with utmost precision:
         >
           <div className="w-full max-w-xl bg-[#082344] border border-[#07558A] rounded-3xl p-6 space-y-4 shadow-2xl text-start">
             <div className="flex items-center justify-between pb-2 border-b border-[#07558A]/50">
-              <div className="flex items-center gap-2 text-[#00AEB8]">
+              <div className="flex items-center gap-2 text-[#1769AA]">
                 <Compass className="w-5 h-5" />
                 <h3 id="spatial-modal-title" className="text-base sm:text-lg font-bold text-[#F5F8FF]">
                   {t('Spatial Memory & Trajectory Navigator', 'خريطة المسار المكاني والذاكرة المكانية')}
@@ -3151,7 +3731,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   value={spatialQueryInput}
                   onChange={(e) => setSpatialQueryInput(e.target.value)}
                   placeholder={t('e.g. Where did I leave my keys?', 'مثال: أين تركت مفاتيحي أو نظارتي؟')}
-                  className="flex-1 px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#00AEB8]"
+                  className="flex-1 px-3.5 py-2 rounded-xl bg-[#061A33] border border-[#07558A] text-[#F5F8FF] text-xs outline-none focus:border-[#1769AA]"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && profile?.uid) {
                       const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang === 'ar' ? 'ar' : 'en');
@@ -3171,15 +3751,15 @@ Examine what is visible in front of the camera right now with utmost precision:
                         speak(res.message, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
                     }
                   }}
-                  className="px-4 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
                 >
                   {t('Query', 'استعلام')}
                 </button>
               </div>
 
               {spatialQueryResult && (
-                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#00AEB8]/40 space-y-1.5">
-                  <span className="text-[11px] font-bold text-[#00AEB8]">
+                <div className="p-3.5 rounded-xl bg-[#061A33] border border-[#1769AA]/40 space-y-1.5">
+                  <span className="text-[11px] font-bold text-[#1769AA]">
                     {t('Spatial Engine Answer:', 'إجابة محرك الذاكرة المكانية:')}
                   </span>
                   <p className="text-xs text-[#F5F8FF] leading-relaxed">{spatialQueryResult}</p>
@@ -3216,7 +3796,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <button
                 type="button"
                 onClick={() => setShowSpatialMemory(false)}
-                className="px-5 py-2 rounded-xl bg-[#00AEB8] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-[#1769AA] text-[#061A33] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
               >
                 {t('Close', 'إغلاق')}
               </button>
@@ -3242,7 +3822,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 role="tab"
                 aria-selected={!isSavingPerson}
                 onClick={() => setIsSavingPerson(false)}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#00AEB8] focus:outline-none ${
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none ${
                   !isSavingPerson ? 'bg-[#0878BD] text-white shadow' : 'text-[#B9CDE3] hover:text-white'
                 }`}
               >
@@ -3253,7 +3833,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                 role="tab"
                 aria-selected={isSavingPerson}
                 onClick={() => setIsSavingPerson(true)}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#00AEB8] focus:outline-none ${
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:outline-none ${
                   isSavingPerson ? 'bg-[#0878BD] text-white shadow' : 'text-[#B9CDE3] hover:text-white'
                 }`}
               >
@@ -3267,7 +3847,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               onChange={(e) => setLabelInput(e.target.value)}
               placeholder={t('e.g. My study desk, Front door key...', 'مثال: مكتبي، مفاتيح الشقة...')}
               aria-label={companionLang === 'ar' ? (isSavingPerson ? 'اسم الشخص أو الصديق' : 'اسم المكان أو الشيء') : (isSavingPerson ? 'Person or friend name' : 'Object or location label')}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] text-sm outline-none focus:border-[#00AEB8]"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#092747] border border-[#07558A] text-[#F5F8FF] text-sm outline-none focus:border-[#1769AA]"
               autoFocus
             />
             <div className="flex justify-end gap-2 pt-2">
@@ -3281,7 +3861,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               <button
                 type="button"
                 onClick={saveMemory}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#00AEB8] text-[#061A33] hover:bg-[#0878BD] hover:text-white transition-colors"
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#1769AA] text-[#061A33] hover:bg-[#0878BD] hover:text-white transition-colors"
               >
                 {t('Save', 'حفظ')}
               </button>
