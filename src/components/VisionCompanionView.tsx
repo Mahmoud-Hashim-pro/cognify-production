@@ -668,12 +668,12 @@ export default function VisionCompanionView({
       }
       if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         setStatus('unsupported');
-        setAnnounce(companionLang === 'ar' ? 'يتطلب تشغيل الكاميرا اتصالاً آمناً (HTTPS).' : 'Camera requires a secure HTTPS connection.');
+        setAnnounce(companionLang === 'ar' ? 'يتطلب تشغيل الكاميرا اتصالاً آمناً (HTTPS).' : L('Camera requires a secure HTTPS connection.'));
         return;
       }
       if (!navigator.mediaDevices?.getUserMedia) {
         setStatus('unsupported');
-        setAnnounce(companionLang === 'ar' ? 'متصفحك الحالي لا يدعم الوصول للكاميرا.' : 'Your browser does not support camera access.');
+        setAnnounce(companionLang === 'ar' ? 'متصفحك الحالي لا يدعم الوصول للكاميرا.' : L('Your browser does not support camera access.'));
         return;
       }
 
@@ -834,28 +834,28 @@ export default function VisionCompanionView({
               setAnnounce(
                 companionLang === 'ar'
                   ? 'تم حظر إذن الكاميرا. اضغط على رمز القفل بالمتصفح للسماح بالكاميرا، أو ارفع صورة.'
-                  : 'Camera permission denied. Please allow access in browser or upload an image.'
+                  : L('Camera permission denied. Please allow access in browser or upload an image.')
               );
             } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError' || errMsg === 'NO_CAMERA_FOUND') {
               setStatus('no-camera');
               setAnnounce(
                 companionLang === 'ar'
                   ? 'لم يتم العثور على كاميرا في هذا الجهاز. يمكنك توصيل كاميرا أو رفع صورة.'
-                  : 'No camera found on this device. You can connect a webcam or upload a photo.'
+                  : L('No camera found on this device. You can connect a webcam or upload a photo.')
               );
             } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
               setStatus('camera-in-use');
               setAnnounce(
                 companionLang === 'ar'
                   ? 'الكاميرا قيد الاستخدام بواسطة تطبيق آخر. يرجى إغلاق التطبيقات الأخرى وإعادة المحاولة.'
-                  : 'Camera is currently in use by another app. Please close other camera apps and retry.'
+                  : L('Camera is currently in use by another app. Please close other camera apps and retry.')
               );
             } else {
               setStatus('camera-denied');
               setAnnounce(
                 companionLang === 'ar'
                   ? 'تعذر تشغيل الكاميرا. يمكنك إعادة المحاولة أو رفع صورة.'
-                  : 'Camera access unavailable. You can retry or upload an image.'
+                  : L('Camera access unavailable. You can retry or upload an image.')
               );
             }
           }
@@ -1123,7 +1123,7 @@ export default function VisionCompanionView({
       ? (next === 'advanced' ? 'تم تفعيل الوضع المتقدم مع كامل الأدوات والتحكم.' : 'تم تفعيل وضع المبتدئ البسيط.')
       : (next === 'advanced' ? 'Advanced mode enabled with all tools and controls.' : 'Beginner mode enabled.');
     setAnnounce(msg);
-    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+    speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
   };
 
   const handleSelectLang = (lang: 'ar' | 'en' | 'fr') => {
@@ -1142,7 +1142,7 @@ export default function VisionCompanionView({
     }
     const msg = companionLang === 'ar' ? `سرعة الصوت: ${newRate}x` : `Speech speed: ${newRate}x`;
     setAnnounce(msg);
-    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: newRate });
+    speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: newRate });
   };
 
   const handleDetailLevelChange = (newLevel: 'concise' | 'standard' | 'detailed') => {
@@ -1158,21 +1158,21 @@ export default function VisionCompanionView({
 
   const compareWithPreviousScene = async () => {
     if (!lastSnapshot) {
-      toast.info(companionLang === 'ar' ? 'يرجى التقاط مشهد أولاً للمقارنة.' : 'Please capture a scene first to compare.');
+      toast.info(companionLang === 'ar' ? 'يرجى التقاط مشهد أولاً للمقارنة.' : L('Please capture a scene first to compare.'));
       return;
     }
     const prevDesc = previousDescriptionRef.current || sessionStorage.getItem('rafiqi_vision_last_observation');
     if (!prevDesc) {
       const msg = companionLang === 'ar'
         ? 'لا يوجد مشهد سابق مسجل للمقارنة معه بعد. التقط مشهداً ثانياً وسأقارنه لك.'
-        : 'No previous scene recorded yet. Capture another frame and I will compare them.';
+        : L('No previous scene recorded yet. Capture another frame and I will compare them.');
       toast.info(msg);
-      speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
       return;
     }
 
     setIsComparingScene(true);
-    setAnnounce(companionLang === 'ar' ? 'جاري مقارنة المشهد الحالي مع المشهد السابق...' : 'Comparing current scene with previous observation...');
+    setAnnounce(companionLang === 'ar' ? 'جاري مقارنة المشهد الحالي مع المشهد السابق...' : L('Comparing current scene with previous observation...'));
 
     const cleanData = lastSnapshot.replace(/^data:[^;]+;base64,/, '');
     const langMandate = companionLang === 'en'
@@ -1205,9 +1205,9 @@ export default function VisionCompanionView({
         onEnd: () => setIsSpeaking(false),
       });
     } catch (err) {
-      const errCompare = companionLang === 'ar' ? 'تعذرت المقارنة حالياً، يرجى المحاولة ثانية.' : 'Could not compare scenes right now.';
+      const errCompare = companionLang === 'ar' ? 'تعذرت المقارنة حالياً، يرجى المحاولة ثانية.' : L('Could not compare scenes right now.');
       setComparisonResult(errCompare);
-      speak(errCompare, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      speak(errCompare, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
     } finally {
       setIsComparingScene(false);
     }
@@ -1250,9 +1250,9 @@ export default function VisionCompanionView({
       const voiceLang = companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English';
       speak(cleaned, voiceLang, { rate: speechRate, onStart: () => setIsSpeaking(true), onEnd: () => setIsSpeaking(false) });
     } catch (err) {
-      const errMsg = companionLang === 'ar' ? 'تعذر الإجابة على السؤال حالياً، يرجى المحاولة ثانية.' : 'Could not answer follow-up question right now.';
+      const errMsg = companionLang === 'ar' ? 'تعذر الإجابة على السؤال حالياً، يرجى المحاولة ثانية.' : L('Could not answer follow-up question right now.');
       setFollowUpHistory((prev) => [...prev, { role: 'assistant', text: errMsg, timestamp: Date.now() }]);
-      speak(errMsg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      speak(errMsg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
     } finally {
       setIsAnsweringFollowUp(false);
     }
@@ -1266,7 +1266,7 @@ export default function VisionCompanionView({
     if (isVoiceCommandsActive) {
       try { voiceRecognitionRef.current?.stop(); } catch {}
       setIsVoiceCommandsActive(false);
-      const stopMsg = companionLang === 'ar' ? 'تم إيقاف الاستماع للأوامر الصوتية.' : 'Voice commands stopped.';
+      const stopMsg = companionLang === 'ar' ? 'تم إيقاف الاستماع للأوامر الصوتية.' : L('Voice commands stopped.');
       setAnnounce(stopMsg);
       toast.info(stopMsg);
       return;
@@ -1274,10 +1274,10 @@ export default function VisionCompanionView({
 
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRec) {
-      const unsuppMsg = companionLang === 'ar' ? 'التعرف الصوتي غير مدعوم في متصفحك.' : 'Speech recognition is not supported in this browser.';
+      const unsuppMsg = companionLang === 'ar' ? 'التعرف الصوتي غير مدعوم في متصفحك.' : L('Speech recognition is not supported in this browser.');
       toast.error(unsuppMsg);
       setAnnounce(unsuppMsg);
-      speak(unsuppMsg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      speak(unsuppMsg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
       return;
     }
 
@@ -1341,7 +1341,7 @@ export default function VisionCompanionView({
       voiceRecognitionRef.current = rec;
       setIsVoiceCommandsActive(true);
       triggerHapticAlert('double-pulse');
-      const startMsg = companionLang === 'ar' ? 'الاستماع للأوامر الصوتية مفعّل. تحدث بأمرك الآن.' : 'Listening for voice commands. Speak now.';
+      const startMsg = companionLang === 'ar' ? 'الاستماع للأوامر الصوتية مفعّل. تحدث بأمرك الآن.' : L('Listening for voice commands. Speak now.');
       setAnnounce(startMsg);
       toast.success(startMsg);
     } catch (err) {
@@ -1354,10 +1354,10 @@ export default function VisionCompanionView({
     if (!profile?.uid || memories.length === 0) return;
     const prevMemories = memories;
     if (setProfile) setProfile({ ...profile, visionMemories: [] });
-    const msg = companionLang === 'ar' ? 'اتمسحت كل ذاكرة الكاميرا.' : 'All camera memories deleted.';
+    const msg = companionLang === 'ar' ? 'اتمسحت كل ذاكرة الكاميرا.' : L('All camera memories deleted.');
     setAnnounce(msg);
     toast.info(msg);
-    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+    speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
     try {
       await setDoc(
         doc(db, `users/${profile.uid}`),
@@ -1374,7 +1374,7 @@ export default function VisionCompanionView({
     if (!profile?.uid) return;
     const updated = memories.filter((m) => m.id !== memoryId);
     if (setProfile) setProfile({ ...profile, visionMemories: updated });
-    const msg = companionLang === 'ar' ? 'تم حذف العنصر من الذاكرة.' : 'Memory deleted.';
+    const msg = companionLang === 'ar' ? 'تم حذف العنصر من الذاكرة.' : L('Memory deleted.');
     setAnnounce(msg);
     toast.info(msg);
     try {
@@ -1489,9 +1489,9 @@ export default function VisionCompanionView({
       const waitMsg =
         targetLang === 'ar'
           ? 'جاري تجهيز الكاميرا، يرجى الانتظار ثوانٍ معدودة ثم المحاولة مجدداً.'
-          : 'Camera is still warming up, please wait a moment and try again.';
+          : L('Camera is still warming up, please wait a moment and try again.');
       toast.info(waitMsg);
-      speak(waitMsg, targetLang === 'ar' ? 'Arabic' : 'English');
+      speak(waitMsg, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
       return;
     }
 
@@ -1499,9 +1499,9 @@ export default function VisionCompanionView({
       const errNoCam =
         targetLang === 'ar'
           ? 'الكاميرا غير متاحة حالياً. يرجى تفعيل إذن الكاميرا وإعادة المحاولة أو استخدام زر رفع صورة يدوياً.'
-          : 'Camera is not available. Please allow camera access, retry, or select Upload Image.';
+          : L('Camera is not available. Please allow camera access, retry, or select Upload Image.');
       toast.info(errNoCam);
-      speak(errNoCam, targetLang === 'ar' ? 'Arabic' : 'English');
+      speak(errNoCam, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
       return;
     }
 
@@ -1515,9 +1515,9 @@ export default function VisionCompanionView({
       const errNoFrame =
         targetLang === 'ar'
           ? 'تعذر التقاط إطار واضح من الكاميرا حالياً. يرجى التأكد من تشغيل الكاميرا وإعادة المحاولة أو رفع صورة.'
-          : 'Could not capture a valid camera frame. Please ensure camera is active and retry or upload an image.';
+          : L('Could not capture a valid camera frame. Please ensure camera is active and retry or upload an image.');
       toast.warning(errNoFrame);
-      speak(errNoFrame, targetLang === 'ar' ? 'Arabic' : 'English');
+      speak(errNoFrame, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English');
       return;
     }
 
@@ -1717,11 +1717,11 @@ Examine what is visible in front of the camera right now with utmost precision:
     if (detailLevel === 'concise') {
       prompt += targetLang === 'ar'
         ? '\nمستوى الإيجاز: لخص النتيجة في جملة واحدة فقط واضحة تركز على السلامة وخلو المسار.'
-        : '\nDetail level: Summarize in 1 concise sentence focusing on safety and clear pathway.';
+        : L('\nDetail level: Summarize in 1 concise sentence focusing on safety and clear pathway.');
     } else if (detailLevel === 'detailed') {
       prompt += targetLang === 'ar'
         ? '\nمستوى التفصيل: قدم وصفاً دقيقاً في 3 إلى 4 جمل تشمل توزيع المكان والألوان والإضاءة والمواقع النسبية بالساعة.'
-        : '\nDetail level: Provide a thorough 3-4 sentence description detailing space, colors, lighting, and relative clock positions.';
+        : L('\nDetail level: Provide a thorough 3-4 sentence description detailing space, colors, lighting, and relative clock positions.');
     }
 
     if (effectiveTool === 'object' && targetItemQuery.trim()) {
@@ -1838,9 +1838,9 @@ Examine what is visible in front of the camera right now with utmost precision:
       const errPrompt =
         targetLang === 'ar'
           ? 'مقدرتش أقرا الصورة دلوقتي، جرب تاني.'
-          : 'I could not read the image right now, please try again.';
+          : L('I could not read the image right now, please try again.');
       setLastDescription(errPrompt);
-      speak(errPrompt, targetLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      speak(errPrompt, targetLang === 'ar' ? 'Arabic' : targetLang === 'fr' ? 'French' : 'English', { rate: speechRate });
     }
   };
 
@@ -1853,7 +1853,7 @@ Examine what is visible in front of the camera right now with utmost precision:
     if (!validation.isValid) {
       const msg = companionLang === 'ar' ? validation.errorMessageAr! : L(validation.errorMessageEn)!;
       toast.error(msg);
-      speak(msg, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
       e.target.value = '';
       return;
     }
@@ -1868,7 +1868,7 @@ Examine what is visible in front of the camera right now with utmost precision:
           ? `تم رفع صورة "${file.name}" بنجاح. جاري فحص الصورة...`
           : `Image "${file.name}" uploaded successfully. Analyzing image...`;
       toast.success(announceText);
-      speak(announceText, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+      speak(announceText, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
       describeScene(companionLang, dataUrl, undefined, true);
     };
     reader.readAsDataURL(file);
@@ -1918,9 +1918,9 @@ Examine what is visible in front of the camera right now with utmost precision:
     if (!labelInput.trim()) { setShowSaveDialog(false); return; }
     if (!profile?.uid) {
       setShowSaveDialog(false);
-      const msg = companionLang === 'ar' ? 'يرجى تسجيل الدخول لحفظ الذاكرة.' : "Please sign in to save memories.";
+      const msg = companionLang === 'ar' ? 'يرجى تسجيل الدخول لحفظ الذاكرة.' : L("Please sign in to save memories.");
       setAnnounce(msg);
-      speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
+      speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
       return;
     }
     const memory: VisionMemory = {
@@ -1937,7 +1937,7 @@ Examine what is visible in front of the camera right now with utmost precision:
     setShowSaveDialog(false);
     const msg = companionLang === 'ar' ? `تم حفظ "${memory.label}".` : `Saved as "${memory.label}".`;
     setAnnounce(msg);
-    speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
+    speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
     try {
       const encrypted = await Promise.all(
         updated.map((m) =>
@@ -2881,10 +2881,10 @@ Examine what is visible in front of the camera right now with utmost precision:
             type="button"
             onClick={() => speak(companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN, companionLang)}
             className="px-3.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#07558A] hover:bg-[#1769AA] text-white hover:text-[#0A2342] font-bold text-xs whitespace-nowrap cursor-pointer transition-all shrink-0"
-            aria-label={companionLang === 'ar' ? 'قراءة تنبيه الأمان بصوت عالٍ' : 'Read safety notice aloud'}
+            aria-label={companionLang === 'ar' ? 'قراءة تنبيه الأمان بصوت عالٍ' : L('Read safety notice aloud')}
           >
             <Volume2 className="w-4 h-4 sm:hidden" aria-hidden="true" />
-            <span className="hidden sm:inline">{companionLang === 'ar' ? 'قراءة تنبيه الأمان' : 'Read safety notice aloud'}</span>
+            <span className="hidden sm:inline">{companionLang === 'ar' ? 'قراءة تنبيه الأمان' : L('Read safety notice aloud')}</span>
           </button>
         </div>
 
@@ -3187,7 +3187,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                         navigator.clipboard?.writeText(lastDescription);
                         setCopiedText(true);
                         setTimeout(() => setCopiedText(false), 2000);
-                        const msg = companionLang === 'ar' ? 'تم نسخ النص إلى الحافظة.' : 'Text copied to clipboard.';
+                        const msg = companionLang === 'ar' ? 'تم نسخ النص إلى الحافظة.' : L('Text copied to clipboard.');
                         setAnnounce(msg);
                       }}
                       className="px-3 py-1.5 rounded-lg bg-[#082344] border border-[#07558A] hover:border-[#1769AA] text-xs font-bold text-[#F5F8FF] flex items-center gap-1.5 transition-all cursor-pointer"
@@ -3535,7 +3535,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   <button
                     type="button"
                     onClick={() =>
-                      speak(comparisonResult, companionLang === 'ar' ? 'Arabic' : 'English', {
+                      speak(comparisonResult, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', {
                         rate: speechRate,
                       })
                     }
@@ -3572,10 +3572,10 @@ Examine what is visible in front of the camera right now with utmost precision:
                   {/* Preset quick questions */}
                   <div className="flex flex-wrap items-center gap-2">
                     {[
-                      companionLang === 'ar' ? 'أين المفاتيح في هذه الصورة؟' : 'Where are keys in this photo?',
-                      companionLang === 'ar' ? 'ما هو النص المكتوب بالضبط؟' : 'What is the exact text written?',
-                      companionLang === 'ar' ? 'هل هناك أي عوائق في طريقي؟' : 'Are there obstacles in my path?',
-                      companionLang === 'ar' ? 'صف ألوان الملابس بالتفصيل' : 'Describe garment colors in detail',
+                      companionLang === 'ar' ? 'أين المفاتيح في هذه الصورة؟' : L('Where are keys in this photo?'),
+                      companionLang === 'ar' ? 'ما هو النص المكتوب بالضبط؟' : L('What is the exact text written?'),
+                      companionLang === 'ar' ? 'هل هناك أي عوائق في طريقي؟' : L('Are there obstacles in my path?'),
+                      companionLang === 'ar' ? 'صف ألوان الملابس بالتفصيل' : L('Describe garment colors in detail'),
                     ].map((preset) => (
                       <button
                         key={preset}
@@ -3783,7 +3783,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                     <button
                       type="button"
                       onClick={() =>
-                        speak(mem.description, companionLang === 'ar' ? 'Arabic' : 'English', {
+                        speak(mem.description, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', {
                           rate: speechRate,
                         })
                       }
@@ -3933,7 +3933,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang === 'ar' ? 'ar' : 'en');
                       setSpatialQueryResult(res.message);
                       if (res.message)
-                        speak(res.message, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+                        speak(res.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
                     }
                   }}
                 />
@@ -3944,7 +3944,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                       const res = querySpatialMemory(profile.uid, spatialQueryInput, companionLang === 'ar' ? 'ar' : 'en');
                       setSpatialQueryResult(res.message);
                       if (res.message)
-                        speak(res.message, companionLang === 'ar' ? 'Arabic' : 'English', { rate: speechRate });
+                        speak(res.message, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English', { rate: speechRate });
                     }
                   }}
                   className="px-4 py-2 rounded-xl bg-[#1769AA] text-[#0A2342] font-bold text-xs hover:bg-[#0878BD] hover:text-white transition-all cursor-pointer"
@@ -4012,7 +4012,7 @@ Examine what is visible in front of the camera right now with utmost precision:
               {t('Enter a name for this item or place to recognize it next time:', 'أدخل اسماً لهذا الشيء أو المكان ليتعرف عليه المساعد في المرات القادمة:')}
             </p>
             {/* Type Switcher: Object vs Person */}
-            <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : 'Memory item type'} className="flex gap-2 p-1 bg-[#0A2342] rounded-xl border border-[#07558A]/60">
+            <div role="tablist" aria-label={companionLang === 'ar' ? 'نوع العنصر المحفوظ' : L('Memory item type')} className="flex gap-2 p-1 bg-[#0A2342] rounded-xl border border-[#07558A]/60">
               <button
                 type="button"
                 role="tab"
@@ -4022,7 +4022,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   !isSavingPerson ? 'bg-[#0878BD] text-white shadow' : 'text-[#B9CDE3] hover:text-white'
                 }`}
               >
-                {companionLang === 'ar' ? '📦 شيء أو غرض' : '📦 Object / Item'}
+                {companionLang === 'ar' ? '📦 شيء أو غرض' : L('📦 Object / Item')}
               </button>
               <button
                 type="button"
@@ -4033,7 +4033,7 @@ Examine what is visible in front of the camera right now with utmost precision:
                   isSavingPerson ? 'bg-[#0878BD] text-white shadow' : 'text-[#B9CDE3] hover:text-white'
                 }`}
               >
-                {companionLang === 'ar' ? '👤 شخص أو صديق' : '👤 Person / Friend'}
+                {companionLang === 'ar' ? '👤 شخص أو صديق' : L('👤 Person / Friend')}
               </button>
             </div>
 
@@ -4093,9 +4093,9 @@ Examine what is visible in front of the camera right now with utmost precision:
             setMediaConsentAction(null);
             const msg = companionLang === 'ar'
               ? 'تمام، مش هنشغل الكاميرا أو المايكروفون. تقدر توافق في أي وقت.'
-              : 'Okay. Camera and microphone will stay off. You can agree anytime.';
+              : L('Okay. Camera and microphone will stay off. You can agree anytime.');
             setAnnounce(msg);
-            speak(msg, companionLang === 'ar' ? 'Arabic' : 'English');
+            speak(msg, companionLang === 'ar' ? 'Arabic' : companionLang === 'fr' ? 'French' : 'English');
           }}
         />
       )}

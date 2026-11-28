@@ -41,7 +41,7 @@ The assistant (Rafiqi) replied: "${originalMessage}"
 
 Write an independent, higher-quality answer for this learner (Level: ${profile.level || 'Basic'}, Field: ${profile.field || 'General'}).
 
-Respond in this EXACT format, in ${isAr ? 'Arabic' : 'English'}:
+Respond in this EXACT format, in ${isAr ? 'Arabic' : (profile?.language === 'French' ? 'French' : 'English')}:
 ## Improved Answer
 [Your own stronger answer — structured, clear, accurate.]
 
@@ -122,7 +122,7 @@ export async function proactiveInsightsHandler(req: any, res: any) {
 
     const prompt = `Based on this student's recent study conversation, give 2-3 short, specific, actionable insights about what to focus on next.
 Student: Level ${profile.level || 'Basic'}, Field ${profile.field || 'General'}.
-Write in ${isAr ? 'Arabic' : 'English'}. Be concrete — no generic advice, no preamble.
+Write in ${isAr ? 'Arabic' : (profile?.language === 'French' ? 'French' : 'English')}. Be concrete — no generic advice, no preamble.
 
 Conversation:
 ${convo || '(no recent messages)'}`;
