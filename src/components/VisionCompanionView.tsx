@@ -2459,12 +2459,12 @@ Examine what is visible in front of the camera right now with utmost precision:
         {/* Safety Disclaimer Banner */}
         <section
           data-testid="visual-safety-notice"
-          aria-label={t('Safety Notice', 'تنبيه السلامة والأمان')}
+          aria-label={t(L('Safety Notice'), 'تنبيه السلامة والأمان')}
           className="hidden p-3.5 sm:p-4 rounded-2xl bg-[#092747] border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3"
         >
           <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <p className="leading-relaxed opacity-90">
-            {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN}
+            {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : L(SAFETY_DISCLAIMER_EN)}
           </p>
         </section>
 
@@ -2873,13 +2873,13 @@ Examine what is visible in front of the camera right now with utmost precision:
             <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-3" aria-hidden="true" />
             <ClampedNotice isAr={companionLang === 'ar'}>
               <p className="leading-relaxed pt-3">
-                {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN}
+                {companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : L(SAFETY_DISCLAIMER_EN)}
               </p>
             </ClampedNotice>
           </div>
           <button
             type="button"
-            onClick={() => speak(companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : SAFETY_DISCLAIMER_EN, companionLang)}
+            onClick={() => speak(companionLang === 'ar' ? SAFETY_DISCLAIMER_AR : L(SAFETY_DISCLAIMER_EN), companionLang)}
             className="px-3.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#07558A] hover:bg-[#1769AA] text-white hover:text-[#0A2342] font-bold text-xs whitespace-nowrap cursor-pointer transition-all shrink-0"
             aria-label={companionLang === 'ar' ? 'قراءة تنبيه الأمان بصوت عالٍ' : L('Read safety notice aloud')}
           >

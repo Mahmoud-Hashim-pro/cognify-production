@@ -891,7 +891,7 @@ export default function AudioDocumentIntelligenceView({
                 <div className="flex items-start gap-2 min-w-0 flex-1">
                   <ShieldCheck className="w-4 h-4 text-[#4B9FE1] shrink-0 mt-0.5" />
                   <ClampedNotice isAr={isAr} className="flex-1">
-                    {isAr ? CLOUD_PROCESSING_PRIVACY_NOTICE_AR : CLOUD_PROCESSING_PRIVACY_NOTICE_EN}
+                    {isAr ? CLOUD_PROCESSING_PRIVACY_NOTICE_AR : L(CLOUD_PROCESSING_PRIVACY_NOTICE_EN)}
                   </ClampedNotice>
                 </div>
               </div>

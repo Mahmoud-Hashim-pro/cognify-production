@@ -426,7 +426,7 @@ export default function AccessibleMobilityWorkspaceView({
           <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <ClampedNotice isAr={isAr}>
             <p className="leading-relaxed font-semibold">
-              {isAr ? MOBILITY_SAFETY_DISCLAIMER_AR : MOBILITY_SAFETY_DISCLAIMER_EN}
+              {isAr ? MOBILITY_SAFETY_DISCLAIMER_AR : L(MOBILITY_SAFETY_DISCLAIMER_EN)}
             </p>
           </ClampedNotice>
         </div>

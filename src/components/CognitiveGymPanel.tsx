@@ -199,7 +199,7 @@ export const CognitiveGymPanel: React.FC<CognitiveGymPanelProps> = ({ isArabic, 
   const textCls = isDarkMode ? 'text-stone-100' : 'text-stone-900';
   const subCls = isDarkMode ? 'text-stone-400' : 'text-stone-500';
 
-  const disclaimer = isArabic ? COGNITIVE_ASSESSMENT_DISCLAIMER_AR : COGNITIVE_ASSESSMENT_DISCLAIMER_EN;
+  const disclaimer = isArabic ? COGNITIVE_ASSESSMENT_DISCLAIMER_AR : L(COGNITIVE_ASSESSMENT_DISCLAIMER_EN);
 
   const startPreview = () => {
     setAnswers({});

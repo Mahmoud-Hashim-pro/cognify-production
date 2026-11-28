@@ -312,7 +312,7 @@ const VoiceNavigationView: React.FC<VoiceNavigationViewProps> = ({ profile, isAr
         <header className="space-y-1">
           <h1 className="text-3xl font-black">{isArabic ? 'التنقل بالصوت' : L('Voice navigation')}</h1>
           <p className="text-base text-amber-300 font-semibold" role="note">
-            {isArabic ? MOBILITY_SAFETY_DISCLAIMER_AR : MOBILITY_SAFETY_DISCLAIMER_EN}
+            {isArabic ? MOBILITY_SAFETY_DISCLAIMER_AR : L(MOBILITY_SAFETY_DISCLAIMER_EN)}
           </p>
         </header>
 

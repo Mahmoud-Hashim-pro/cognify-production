@@ -1768,7 +1768,7 @@ Database Systems,90,3,270`);
               <div className="pt-4 border-t border-[#24476F] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>{isAr ? FORM_SECURITY_DISCLAIMER_AR : FORM_SECURITY_DISCLAIMER_EN}</span>
+                  <span>{isAr ? FORM_SECURITY_DISCLAIMER_AR : L(FORM_SECURITY_DISCLAIMER_EN)}</span>
                 </div>
 
                 <button
