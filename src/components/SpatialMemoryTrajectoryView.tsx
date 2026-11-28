@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { L } from '../lib/translations';
 import {
   Compass,
   MapPin,
@@ -79,19 +80,19 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
           </span>
           <div>
             <h3 className="text-base font-bold text-white">
-              {isAr ? 'الذاكرة المكانية الذكية 2.0 (Spatial Memory)' : 'Spatial Memory 2.0 & Object Trajectory'}
+              {isAr ? 'الذاكرة المكانية الذكية 2.0 (Spatial Memory)' : L('Spatial Memory 2.0 & Object Trajectory')}
             </h3>
             <p className="text-xs text-slate-400">
               {isAr
                 ? 'تتبع الكائنات الفيزيائية متعددة الهويات مع مسار الحركة الزمني وحلقة تصحيح المستخدم.'
-                : 'Multi-instance physical object tracking with movement timeline and user correction loop.'}
+                : L('Multi-instance physical object tracking with movement timeline and user correction loop.')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
           <ShieldCheck className="w-3 h-3" />
-          <span>{isAr ? 'عزل تام للمستخدم' : 'Isolated User State'}</span>
+          <span>{isAr ? 'عزل تام للمستخدم' : L('Isolated User State')}</span>
         </div>
       </div>
 
@@ -140,7 +141,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                   {isAr ? currentObj.labelAr : currentObj.labelEn}
                 </span>
                 <span className="px-2 py-0.5 rounded-md text-xs font-mono bg-slate-800 text-slate-300 border border-[#4A1224]/50">
-                  {Math.round(currentObj.confidence * 100)}% {isAr ? 'دقة' : 'confidence'}
+                  {Math.round(currentObj.confidence * 100)}% {isAr ? 'دقة' : L('confidence')}
                 </span>
                 {currentObj.correctionsCount > 0 && (
                   <span className="px-2 py-0.5 rounded-md text-xs font-mono bg-[#4A1224]/40 text-[#E5A93C] border border-[#4A1224]/60">
@@ -149,7 +150,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                 )}
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                {isAr ? 'الموقع الحالي:' : 'Current Location:'}{' '}
+                {isAr ? 'الموقع الحالي:' : L('Current Location:')}{' '}
                 <span className="text-[#E5A93C] font-semibold">
                   {isAr ? currentObj.surfaceAr : currentObj.surfaceEn}
                 </span>{' '}
@@ -165,7 +166,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-[#4A1224]/50"
             >
               <Edit3 className="w-3.5 h-3.5" />
-              <span>{isAr ? 'تصحيح يدوي' : 'Correct Location'}</span>
+              <span>{isAr ? 'تصحيح يدوي' : L('Correct Location')}</span>
             </button>
           </div>
 
@@ -173,19 +174,19 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
           {isEditing && (
             <div className="p-4 rounded-xl bg-[#161a30] border border-[#4A1224]/50 space-y-3 animate-in fade-in">
               <div className="text-xs font-bold text-slate-200">
-                {isAr ? 'أين يوجد هذا الشيء بالضبط؟' : 'Where is this item actually located?'}
+                {isAr ? 'أين يوجد هذا الشيء بالضبط؟' : L('Where is this item actually located?')}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <input
                   type="text"
-                  placeholder={isAr ? 'الغرفة (مثال: غرفة المعيشة)' : 'Room (e.g. Living Room)'}
+                  placeholder={isAr ? 'الغرفة (مثال: غرفة المعيشة)' : L('Room (e.g. Living Room)')}
                   value={correctedRoom}
                   onChange={(e) => setCorrectedRoom(e.target.value)}
                   className="px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224]/50 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]"
                 />
                 <input
                   type="text"
-                  placeholder={isAr ? 'السطح (مثال: ترابيزة القهوة)' : 'Surface (e.g. Coffee Table)'}
+                  placeholder={isAr ? 'السطح (مثال: ترابيزة القهوة)' : L('Surface (e.g. Coffee Table)')}
                   value={correctedSurface}
                   onChange={(e) => setCorrectedSurface(e.target.value)}
                   className="px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224]/50 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#E5A93C]"
@@ -196,14 +197,14 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
                   onClick={() => setIsEditing(false)}
                   className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200"
                 >
-                  {isAr ? 'إلغاء' : 'Cancel'}
+                  {isAr ? 'إلغاء' : L('Cancel')}
                 </button>
                 <button
                   onClick={handleSaveCorrection}
                   disabled={!correctedRoom.trim() || !correctedSurface.trim()}
                   className="px-4 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 via-[#E5A93C] to-rose-600 text-slate-950 hover:bg-[#E5A93C] disabled:opacity-50 transition-all"
                 >
-                  {isAr ? 'حفظ التصحيح' : 'Save Correction'}
+                  {isAr ? 'حفظ التصحيح' : L('Save Correction')}
                 </button>
               </div>
             </div>
@@ -214,7 +215,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
             <div className="pt-3 border-t border-[#4A1224]/60">
               <div className="flex items-center gap-2 mb-3 text-xs font-bold text-slate-300">
                 <History className="w-3.5 h-3.5 text-[#E5A93C]" />
-                <span>{isAr ? 'سجل مسار الحركة الزمني (Movement History)' : 'Chronological Movement Timeline'}</span>
+                <span>{isAr ? 'سجل مسار الحركة الزمني (Movement History)' : L('Chronological Movement Timeline')}</span>
               </div>
 
               <div className="relative pl-5 space-y-3 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
@@ -249,7 +250,7 @@ export const SpatialMemoryTrajectoryView: React.FC<SpatialMemoryTrajectoryViewPr
         </div>
       ) : (
         <div className="py-8 text-center text-xs text-slate-500">
-          {isAr ? 'لا توجد كائنات مكانية مسجلة حالياً.' : 'No spatial objects recorded yet.'}
+          {isAr ? 'لا توجد كائنات مكانية مسجلة حالياً.' : L('No spatial objects recorded yet.')}
         </div>
       )}
     </div>

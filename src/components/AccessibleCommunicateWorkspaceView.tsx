@@ -50,7 +50,7 @@ import {
   Info,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, stopSpeaking } from '../lib/tts';
 import { toast } from './Toast';
 import {
@@ -202,7 +202,7 @@ export default function AccessibleCommunicateWorkspaceView({
     if (!consentCheck.isApproved) {
       const msg = isAr
         ? 'يرجى تحديد الموافقة الصريحة على مشاركة الكاميرا والميكروفون قبل بدء الاتصال.'
-        : 'Please provide explicit consent to share camera and microphone before connecting.';
+        : L('Please provide explicit consent to share camera and microphone before connecting.');
       toast.error(msg);
       speakText(msg);
       return;
@@ -224,15 +224,15 @@ export default function AccessibleCommunicateWorkspaceView({
 
     const unavailableMsg = isAr
       ? 'خدمة المساعدة البشرية المباشرة لسه قيد التطوير ومش متاحة دلوقتي. مفيش أي شخص حقيقي متصل، والكاميرا والميكروفون مش بتبث أي حاجة. هنعلمك أول ما الخدمة تشتغل فعلاً.'
-      : 'Live human assistance is still under development and not available yet. No real person is connected, and your camera and microphone are not broadcasting anything. We will let you know once the service is truly live.';
-    toast.info(unavailableMsg, isAr ? 'الخدمة قيد التطوير' : 'Under development', 8000);
+      : L('Live human assistance is still under development and not available yet. No real person is connected, and your camera and microphone are not broadcasting anything. We will let you know once the service is truly live.');
+    toast.info(unavailableMsg, isAr ? 'الخدمة قيد التطوير' : L('Under development'), 8000);
     speakText(unavailableMsg);
   };
 
   const handleDisconnectAssistance = () => {
     const disconnectedSession = updateAssistanceSessionState(session, 'disconnected');
     setSession(disconnectedSession);
-    const msg = isAr ? 'تم إنهاء جلسة المساعدة وقطع بث الكاميرا والميكروفون فوراً.' : 'Assistance stream terminated immediately. Camera and audio stopped.';
+    const msg = isAr ? 'تم إنهاء جلسة المساعدة وقطع بث الكاميرا والميكروفون فوراً.' : L('Assistance stream terminated immediately. Camera and audio stopped.');
     toast.success(msg);
     speakText(msg);
   };
@@ -256,7 +256,7 @@ export default function AccessibleCommunicateWorkspaceView({
     >
       {/* Screen reader live announcements */}
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : 'Speaking communication guidance...') : ''}
+        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : L('Speaking communication guidance...')) : ''}
         {session.sharingNoticeAr}
       </div>
 
@@ -770,7 +770,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         speakText(
                           isAr
                             ? 'تمت مراجعة الحقول الإلزامية. تذكر: لا يتم اعتماد أو إرسال الاستمارة دون موافقتك الصريحة.'
-                            : 'Required fields reviewed. Remember: no form is submitted without your explicit confirmation.'
+                            : L('Required fields reviewed. Remember: no form is submitted without your explicit confirmation.')
                         );
                       }}
                       className="px-5 py-3 rounded-2xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-md focus-visible:ring-2 focus-visible:ring-[#F59E0B]"
@@ -967,7 +967,7 @@ export default function AccessibleCommunicateWorkspaceView({
                         onClick={() => {
                           navigator.clipboard.writeText(replyDraft.draftText);
                           setIsCopied(true);
-                          const msg = isAr ? 'تم نسخ الرد المقترح إلى الحافظة بنجاح.' : 'Reply copied to clipboard.';
+                          const msg = isAr ? 'تم نسخ الرد المقترح إلى الحافظة بنجاح.' : L('Reply copied to clipboard.');
                           toast.success(msg);
                           speakText(msg);
                           setTimeout(() => setIsCopied(false), 2500);

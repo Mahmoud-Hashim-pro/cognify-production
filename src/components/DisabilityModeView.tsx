@@ -1,4 +1,4 @@
-import { localize } from '../lib/translations';
+import { localize, L } from '../lib/translations';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { 
   AriaButton, 
@@ -1189,7 +1189,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {/* The Six Official Product Sections */}
             <div className="pt-3 pb-1 px-3">
               <p className="text-xs font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
-                {isAr ? 'الأقسام الرسمية (٦)' : 'Official Sections (6)'}
+                {isAr ? 'الأقسام الرسمية (٦)' : L('Official Sections (6)')}
               </p>
             </div>
 
@@ -1224,7 +1224,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
             {/* Essential Tools & Settings */}
             <div className="pt-3 pb-1 px-3">
               <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
-                {isAr ? 'أدوات وإعدادات' : 'Tools & Settings'}
+                {isAr ? 'أدوات وإعدادات' : L('Tools & Settings')}
               </p>
             </div>
 
@@ -1418,7 +1418,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {/* The Six Official Product Sections */}
                     <div className="pt-3 pb-1 px-3">
                       <p className="text-xs font-extrabold uppercase tracking-wider text-[#1769AA] dark:text-[#4B9FE1]">
-                        {isAr ? 'الأقسام الرسمية (٦)' : 'Official Sections (6)'}
+                        {isAr ? 'الأقسام الرسمية (٦)' : L('Official Sections (6)')}
                       </p>
                     </div>
 
@@ -1456,7 +1456,7 @@ const DisabilityModeView = React.forwardRef<ChatInterfaceRef, DisabilityModeView
                     {/* Essential Tools & Settings */}
                     <div className="pt-3 pb-1 px-3">
                       <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500/70 dark:text-[#94A3B8]/70">
-                        {isAr ? 'أدوات وإعدادات' : 'Tools & Settings'}
+                        {isAr ? 'أدوات وإعدادات' : L('Tools & Settings')}
                       </p>
                     </div>
 

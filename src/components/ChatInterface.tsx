@@ -1,4 +1,4 @@
-import { localize, isArabicLocale, getTranslation } from '../lib/translations';
+import { localize, isArabicLocale, getTranslation, L } from '../lib/translations';
 import { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useRef, useEffect } from "react";
 import { Message, UserProfile, Task, PedagogyStyle } from "../types";
@@ -306,7 +306,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     const isAr = isArabicLocale(profile.language);
     const simplifyPrompt = isAr
       ? `من فضلك اشرح الرد السابق بأسلوب مبسط جداً وبخطوات واضحة بدون أي تعقيد (ELI5) مع تشبيه من الحياة اليومية.`
-      : `Please simplify the previous explanation in very clear, straightforward steps (ELI5) with an intuitive real-world analogy.`;
+      : L(`Please simplify the previous explanation in very clear, straightforward steps (ELI5) with an intuitive real-world analogy.`);
     handleSubmit(undefined, simplifyPrompt);
   };
 
@@ -554,22 +554,22 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           toast.warning(
             isAr
               ? 'المتصفح منع تشغيل الصوت تلقائياً. اضغط زر الاستماع مرة تانية عشان يشتغل.'
-              : 'The browser blocked automatic audio playback. Tap the listen button again to play it.',
-            isAr ? 'الصوت متوقف' : 'Playback blocked',
+              : L('The browser blocked automatic audio playback. Tap the listen button again to play it.'),
+            isAr ? 'الصوت متوقف' : L('Playback blocked'),
           );
         } else if (err === 'audio-fallback-fail') {
           toast.warning(
             isAr
               ? 'معرفتش أوصل لخدمة الصوت البديلة. اتأكد من اتصالك بالإنترنت وحاول تاني.'
-              : 'Could not reach the backup speech service. Check your internet connection and try again.',
-            isAr ? 'تعذّر النطق' : 'Speech unavailable',
+              : L('Could not reach the backup speech service. Check your internet connection and try again.'),
+            isAr ? 'تعذّر النطق' : L('Speech unavailable'),
           );
         } else if (err === 'silent-fail' || err === 'synth-error' || err === 'unsupported') {
           toast.warning(
             isAr
               ? 'معرفتش أشغّل الصوت. جرّب تاكد إن صوت اللغة دي متثبت على جهازك، أو استخدم قارئ الشاشة.'
-              : "Couldn't play audio for this reply. Check that a voice for this language is installed, or use a screen reader.",
-            isAr ? 'تعذّر النطق' : 'Speech unavailable',
+              : L("Couldn't play audio for this reply. Check that a voice for this language is installed, or use a screen reader."),
+            isAr ? 'تعذّر النطق' : L('Speech unavailable'),
           );
         }
       },
@@ -670,8 +670,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           setIsListening(false);
           toast.error(
             isAr ? 'مفيش إذن للمايك. اسمح للموقع باستخدام الميكروفون من إعدادات المتصفح.'
-                 : 'Microphone permission is blocked. Allow mic access in your browser settings.',
-            isAr ? 'الميكروفون مقفول' : 'Mic blocked',
+                 : L('Microphone permission is blocked. Allow mic access in your browser settings.'),
+            isAr ? 'الميكروفون مقفول' : L('Mic blocked'),
           );
         } else if (err !== 'no-speech' && err !== 'aborted') {
           // no-speech/aborted are normal; onend will auto-restart if needed.
@@ -707,8 +707,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
     if (!recognitionRef.current) {
       const isAr = isArabicLocale(profile.language);
       toast.warning(
-        isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : 'Voice input isn’t supported in this browser. Try Chrome on Android or a recent Safari.',
-        isAr ? 'غير مدعوم' : 'Unsupported',
+        isAr ? 'التعرّف على الصوت مش مدعوم في المتصفح ده، جرّب كروم على أندرويد أو سفاري الحديث.' : L('Voice input isn’t supported in this browser. Try Chrome on Android or a recent Safari.'),
+        isAr ? 'غير مدعوم' : L('Unsupported'),
       );
       return;
     }
@@ -831,7 +831,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
               role: 'assistant',
               content: isArabic
                 ? 'تعذّر فك تشفير المحادثات السابقة من هذا الجهاز لاختلاف مفتاح التشفير المحلي. يمكنك متابعة التعلم في محادثة جديدة.'
-                : 'Could not decrypt previous messages from this device due to a different local device key. You can continue learning in a new conversation.',
+                : L('Could not decrypt previous messages from this device due to a different local device key. You can continue learning in a new conversation.'),
               timestamp: new Date().toISOString()
             }
           ]);
@@ -899,7 +899,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           isAr
             ? `ملفات Word (.doc/.docx) مش مقروءة للذكاء الاصطناعي. من فضلك حوّل "${file.name}" لـ PDF وارفعه تاني.`
             : `Word files (.doc/.docx) can't be read by the AI. Please convert "${file.name}" to PDF and upload it again.`,
-          isAr ? 'حوّله لـ PDF' : 'Convert to PDF',
+          isAr ? 'حوّله لـ PDF' : L('Convert to PDF'),
         );
         continue;
       }
@@ -908,7 +908,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       if (file.size > 10 * 1024 * 1024) {
         toast.warning(
           isAr ? `الملف "${file.name}" كبير جداً، الحد الأقصى 10 ميجا.` : `"${file.name}" is too large — the max is 10 MB.`,
-          isAr ? 'ملف كبير' : 'File too large',
+          isAr ? 'ملف كبير' : L('File too large'),
         );
         continue;
       }
@@ -927,7 +927,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       if (mimeType.startsWith('image/')) {
         const { data, type } = await compressImage(file);
         if (!data) {
-          toast.warning(isAr ? `تعذّر قراءة "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : 'Error');
+          toast.warning(isAr ? `تعذّر قراءة "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : L('Error'));
           continue;
         }
         newFiles.push({ name: file.name, type: type || 'image/jpeg', data, url: '', localId });
@@ -943,7 +943,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       });
       const dataStr = base64.split(',')[1];
       if (!dataStr) {
-        toast.warning(isAr ? `تعذّر قراءة الملف "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : 'Error');
+        toast.warning(isAr ? `تعذّر قراءة الملف "${file.name}".` : `Couldn't read "${file.name}".`, isAr ? 'خطأ' : L('Error'));
         continue;
       }
 
@@ -1022,7 +1022,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         : isFr
         ? `Adaptation pédagogique automatique vers (${effectivePedagogy}) pour faciliter la compréhension.`
         : `Automatically adapted pedagogical style to (${PEDAGOGY_STYLES.find(s => s.id === effectivePedagogy)?.labelEn || effectivePedagogy}) to simplify understanding.`;
-      toast.info(toastMsg, isAr ? 'تكييف بيداغوجي ذكي' : 'Adaptive Pivot');
+      toast.info(toastMsg, isAr ? 'تكييف بيداغوجي ذكي' : L('Adaptive Pivot'));
     }
 
     const qualityScore = evaluateQuestionQuality(finalInput);
@@ -1181,7 +1181,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           isAr
             ? 'الرد جه من مزوّد احتياطي نصّي مش بيشوف الصور/الملفات، فالمرفقات اتجاهلت. جرّب تاني بعد شوية عشان يتقري المرفق.'
             : "The answer came from a text-only fallback that can't see images/files, so your attachment was ignored. Try again shortly to have it read.",
-          isAr ? 'المرفق اتجاهل' : 'Attachment skipped',
+          isAr ? 'المرفق اتجاهل' : L('Attachment skipped'),
         );
       }
       const assistantMessage: Message = {
@@ -1191,7 +1191,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         // friendly note instead of a blank bubble — never wipe the conversation.
         content: lastText || (isAr
           ? '⚠️ الذكاء الاصطناعي مشغول دلوقتي. جرّب تاني بعد لحظات 🙏'
-          : '⚠️ The AI is busy right now. Please try again in a moment 🙏'),
+          : L('⚠️ The AI is busy right now. Please try again in a moment 🙏')),
         timestamp: new Date().toISOString(),
         attachments: streamedAttachments,
         pedagogyStyle: effectivePedagogy,
@@ -1292,7 +1292,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
           ? lastText + (isArabic ? '\n\n⚠️ (الرد اتقطع قبل ما يكمل)' : '\n\n⚠️ (response was cut off)')
           : (isArabic
             ? '⚠️ حصلت مشكلة في الاتصال بالذكاء الاصطناعي. جرّب تاني 🙏'
-            : '⚠️ Something went wrong connecting to the AI. Please try again 🙏'),
+            : L('⚠️ Something went wrong connecting to the AI. Please try again 🙏')),
         timestamp: new Date().toISOString(),
         attachments: streamedAttachments,
         pedagogyStyle: effectivePedagogy,
@@ -2421,7 +2421,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'أنشئ بطاقات استذكار تفاعلية (Flashcards) مع أسئلة وإجابات مركزة تلخص أهم المفاهيم التي شرحتها لي الآن.' : 'Generate active recall flashcards with clear questions and answers summarizing the key concepts we just discussed.');
+                                      handleSubmit(undefined, isArabic ? 'أنشئ بطاقات استذكار تفاعلية (Flashcards) مع أسئلة وإجابات مركزة تلخص أهم المفاهيم التي شرحتها لي الآن.' : L('Generate active recall flashcards with clear questions and answers summarizing the key concepts we just discussed.'));
                                       setShowQuickActionsPopover(false);
                                     }}
                                     className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
@@ -2432,7 +2432,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'أعطني 3 مسائل تدريبية متدرجة الصعوبة لاختبار فهمي لما تعلمته للتو، مع تلميحات توجيهية لحل كل مسألة.' : 'Give me 3 progressive practice exercises/problems based on this topic, with guided hints for solving each one.');
+                                      handleSubmit(undefined, isArabic ? 'أعطني 3 مسائل تدريبية متدرجة الصعوبة لاختبار فهمي لما تعلمته للتو، مع تلميحات توجيهية لحل كل مسألة.' : L('Give me 3 progressive practice exercises/problems based on this topic, with guided hints for solving each one.'));
                                       setShowQuickActionsPopover(false);
                                     }}
                                     className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
@@ -2443,7 +2443,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'أعد شرح الفكرة الأخيرة بأسلوب مبسط جداً ومن زاوية مختلفة، واستخدم تشبيهاً واقعياً من الحياة اليومية.' : 'Please re-explain the last concept using a fresh perspective and an intuitive, real-world analogy.');
+                                      handleSubmit(undefined, isArabic ? 'أعد شرح الفكرة الأخيرة بأسلوب مبسط جداً ومن زاوية مختلفة، واستخدم تشبيهاً واقعياً من الحياة اليومية.' : L('Please re-explain the last concept using a fresh perspective and an intuitive, real-world analogy.'));
                                       setShowQuickActionsPopover(false);
                                     }}
                                     className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"
@@ -2454,7 +2454,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      handleSubmit(undefined, isArabic ? 'لخص لي هذا الموضوع في 3 نقاط جوهرية مركزة وواضحة جداً (Key Takeaways).' : 'Summarize the core takeaways of this topic into 3 crisp, essential bullet points.');
+                                      handleSubmit(undefined, isArabic ? 'لخص لي هذا الموضوع في 3 نقاط جوهرية مركزة وواضحة جداً (Key Takeaways).' : L('Summarize the core takeaways of this topic into 3 crisp, essential bullet points.'));
                                       setShowQuickActionsPopover(false);
                                     }}
                                     className="w-full text-start px-2.5 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:bg-[#17355C] hover:text-[#F8FAFC] flex items-center gap-2 transition-all cursor-pointer"

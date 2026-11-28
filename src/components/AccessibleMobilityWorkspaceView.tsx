@@ -46,7 +46,7 @@ import {
   Check,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { toast } from './Toast';
 import {
@@ -112,7 +112,7 @@ export default function AccessibleMobilityWorkspaceView({
   const [sceneInputText, setSceneInputText] = useState(
     isAr
       ? 'مدخل رئيسي واسع أمامي، مكتب استعلامات على اليمين، درج سلالم، ومصعد كهربائي على اليسار.'
-      : 'Spacious main entrance straight ahead, information counter to the right, staircase, and elevator to the left.'
+      : L('Spacious main entrance straight ahead, information counter to the right, staircase, and elevator to the left.')
   );
   const [visibilityQuality, setVisibilityQuality] = useState<'clear' | 'glare' | 'low_light' | 'partially_obstructed'>('clear');
   const [placeAnalysis, setPlaceAnalysis] = useState(() =>
@@ -125,7 +125,7 @@ export default function AccessibleMobilityWorkspaceView({
   // 2. SIGN & DIRECTION READER STATE
   // ─────────────────────────────────────────────────────────────────────────────
   const [signInputText, setSignInputText] = useState(
-    isAr ? 'قاعة 304 — قسم الحاسب الآلي' : 'Room 304 — Computer Science Dept'
+    isAr ? 'قاعة 304 — قسم الحاسب الآلي' : L('Room 304 — Computer Science Dept')
   );
   const [parsedSign, setParsedSign] = useState<ParsedSignResult>(() =>
     parseDirectionalSign(signInputText)
@@ -134,7 +134,7 @@ export default function AccessibleMobilityWorkspaceView({
   // ─────────────────────────────────────────────────────────────────────────────
   // 3. ENTRANCE & DOOR ASSISTANCE STATE
   // ─────────────────────────────────────────────────────────────────────────────
-  const [doorTypeInput, setDoorTypeInput] = useState(isAr ? 'الباب الزجاجي الرئيسي' : 'Main Glass Door');
+  const [doorTypeInput, setDoorTypeInput] = useState(isAr ? 'الباب الزجاجي الرئيسي' : L('Main Glass Door'));
   const [doorClockPos, setDoorClockPos] = useState<RelativeClockPosition>('12_oclock');
   const [doorwayResult, setDoorwayResult] = useState<DoorAssistanceResult>(() =>
     evaluateDoorwayAssistance(doorTypeInput, doorClockPos, false)
@@ -143,7 +143,7 @@ export default function AccessibleMobilityWorkspaceView({
   // ─────────────────────────────────────────────────────────────────────────────
   // 4. PUBLIC TRANSPORT ASSISTANT STATE
   // ─────────────────────────────────────────────────────────────────────────────
-  const [transitSignInput, setTransitSignInput] = useState(isAr ? 'أتوبيس 104 — التحرير' : 'Bus 104 — Tahrir');
+  const [transitSignInput, setTransitSignInput] = useState(isAr ? 'أتوبيس 104 — التحرير' : L('Bus 104 — Tahrir'));
   const [transitConfidence, setTransitConfidence] = useState(0.8);
   const [transitResult, setTransitResult] = useState<TransitMatchResult>(() =>
     parseTransitSign(transitSignInput, transitConfidence)
@@ -205,7 +205,7 @@ export default function AccessibleMobilityWorkspaceView({
     if (!navigator.geolocation) {
       const err = isAr
         ? 'خاصية تحديد الموقع الجغرافي (GPS) غير مدعومة في هذا المتصفح.'
-        : 'Geolocation API is not supported in this browser.';
+        : L('Geolocation API is not supported in this browser.');
       setGpsErrorState(err);
       toast.error(err);
       speakText(err);
@@ -313,7 +313,7 @@ export default function AccessibleMobilityWorkspaceView({
         aria-atomic="true"
         className="sr-only"
       >
-        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : 'Speaking orientation guidance...') : ''}
+        {isSpeaking ? (isAr ? 'جاري القراءة الصوتية للإرشادات...' : L('Speaking orientation guidance...')) : ''}
         {followUpAnswer || ''}
       </div>
 
@@ -500,10 +500,10 @@ export default function AccessibleMobilityWorkspaceView({
                     }}
                     className="min-h-[44px] px-3 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   >
-                    <option value="clear">{isAr ? 'رؤية واضحة' : 'Clear View'}</option>
-                    <option value="glare">{isAr ? 'وهج / انعكاس ضوء' : 'Direct Glare'}</option>
-                    <option value="low_light">{isAr ? 'إضاءة خافتة' : 'Low Light'}</option>
-                    <option value="partially_obstructed">{isAr ? 'حجب جزئي للرؤية' : 'Partially Obstructed'}</option>
+                    <option value="clear">{isAr ? 'رؤية واضحة' : L('Clear View')}</option>
+                    <option value="glare">{isAr ? 'وهج / انعكاس ضوء' : L('Direct Glare')}</option>
+                    <option value="low_light">{isAr ? 'إضاءة خافتة' : L('Low Light')}</option>
+                    <option value="partially_obstructed">{isAr ? 'حجب جزئي للرؤية' : L('Partially Obstructed')}</option>
                   </select>
                 </div>
               </div>
@@ -560,8 +560,8 @@ export default function AccessibleMobilityWorkspaceView({
                         <span>{localize(profile.language, 'Distance:', 'المسافة النوعية:')}</span>
                         <span className="text-[#CBD5E1] font-semibold">
                           {lm.distanceTier === 'near'
-                            ? (isAr ? 'قريب منك' : 'Near')
-                            : (isAr ? 'في المسافة المتوسطة' : 'Mid-ground')}
+                            ? (isAr ? 'قريب منك' : L('Near'))
+                            : (isAr ? 'في المسافة المتوسطة' : L('Mid-ground'))}
                         </span>
                       </div>
                       {lm.accessibilityNotesAr && (
@@ -591,7 +591,7 @@ export default function AccessibleMobilityWorkspaceView({
                     placeholder={
                       isAr
                         ? 'مثال: "أين مكتب الاستقبال؟" أو "هل يوجد درج على يميني؟"'
-                        : 'e.g. "Where is the counter?" or "Are there stairs near me?"'
+                        : L('e.g. "Where is the counter?" or "Are there stairs near me?"')
                     }
                     className="flex-1 min-h-[44px] px-4 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   />
@@ -651,7 +651,7 @@ export default function AccessibleMobilityWorkspaceView({
                   placeholder={
                     isAr
                       ? 'أدخل النص المقروء من اللافتة (مثال: "قاعة 304" أو "مخرج طوارئ ←" أو "الدور الثاني")'
-                      : 'Enter sign text (e.g. "Room 304", "Emergency Exit ->", or "Floor 2")'
+                      : L('Enter sign text (e.g. "Room 304", "Emergency Exit ->", or "Floor 2")')
                   }
                   className="flex-1 min-h-[44px] px-4 py-2.5 bg-[#0A2342] border border-[#24476F] rounded-xl text-sm text-[#F8FAFC]"
                 />
@@ -838,7 +838,7 @@ export default function AccessibleMobilityWorkspaceView({
                     placeholder={
                       isAr
                         ? 'أدخل لافتة الحافلة (مثال: "أتوبيس 104 — التحرير" أو "خط 25")'
-                        : 'Enter bus sign (e.g. "Bus 104 — Tahrir" or "Route 25")'
+                        : L('Enter bus sign (e.g. "Bus 104 — Tahrir" or "Route 25")')
                     }
                     className="w-full min-h-[44px] px-4 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   />
@@ -853,8 +853,8 @@ export default function AccessibleMobilityWorkspaceView({
                     }}
                     className="flex-1 min-h-[44px] px-2 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                   >
-                    <option value={0.95}>{isAr ? 'وضوح عالي (95%)' : 'High Clarity (95%)'}</option>
-                    <option value={0.7}>{isAr ? 'وضوح متوسط/ضبابي (70%)' : 'Blurry/Uncertain (70%)'}</option>
+                    <option value={0.95}>{isAr ? 'وضوح عالي (95%)' : L('High Clarity (95%)')}</option>
+                    <option value={0.7}>{isAr ? 'وضوح متوسط/ضبابي (70%)' : L('Blurry/Uncertain (70%)')}</option>
                   </select>
                   <button
                     type="button"
@@ -876,7 +876,7 @@ export default function AccessibleMobilityWorkspaceView({
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-[#F8FAFC]">
                       {transitResult.routeNumber
-                        ? `${isAr ? 'خط رقم' : 'Route'}: ${transitResult.routeNumber}`
+                        ? `${isAr ? 'خط رقم' : L('Route')}: ${transitResult.routeNumber}`
                         : localize(profile.language, 'Route unverified', 'الرقم غير محدد')}
                     </span>
                     {transitResult.destinationDetected && (
@@ -953,11 +953,11 @@ export default function AccessibleMobilityWorkspaceView({
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="min-h-[44px] px-3 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                 >
-                  <option value="all">{isAr ? 'كافة الفئات' : 'All Categories'}</option>
-                  <option value="university">{isAr ? 'جامعات وتعليم' : 'University'}</option>
-                  <option value="transit">{isAr ? 'محطات ومواصلات' : 'Transit'}</option>
-                  <option value="library">{isAr ? 'مكتبات وبرايل' : 'Libraries'}</option>
-                  <option value="medical">{isAr ? 'مستشفيات ورعاية' : 'Medical'}</option>
+                  <option value="all">{isAr ? 'كافة الفئات' : L('All Categories')}</option>
+                  <option value="university">{isAr ? 'جامعات وتعليم' : L('University')}</option>
+                  <option value="transit">{isAr ? 'محطات ومواصلات' : L('Transit')}</option>
+                  <option value="library">{isAr ? 'مكتبات وبرايل' : L('Libraries')}</option>
+                  <option value="medical">{isAr ? 'مستشفيات ورعاية' : L('Medical')}</option>
                 </select>
               </div>
 

@@ -89,7 +89,7 @@ const ModuleLoadingFallback: React.FC<{ labelAr: string; labelEn: string; isAr: 
     {isAr ? labelAr : labelEn}
   </div>
 );
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { BrandLogo } from './ui/BrandLogo';
 
@@ -298,19 +298,19 @@ export default function HearAndExpressView({
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      announce(isAr ? 'متصفحك لا يدعم التعرف الصوتي المباشر.' : 'Speech recognition is not supported in this browser.');
+      announce(isAr ? 'متصفحك لا يدعم التعرف الصوتي المباشر.' : L('Speech recognition is not supported in this browser.'));
       return;
     }
 
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
-      announce(isAr ? 'تم إيقاف الاستماع للتفريغ.' : 'Caption listening stopped.');
+      announce(isAr ? 'تم إيقاف الاستماع للتفريغ.' : L('Caption listening stopped.'));
     } else {
       try {
         recognitionRef.current.start();
         setIsListening(true);
-        announce(isAr ? 'جاري الاستماع الآن، تحدث بوضوح.' : 'Listening now. Speak clearly.');
+        announce(isAr ? 'جاري الاستماع الآن، تحدث بوضوح.' : L('Listening now. Speak clearly.'));
       } catch (err) {
         console.warn('Start failed:', err);
       }
@@ -320,7 +320,7 @@ export default function HearAndExpressView({
   const clearCaptions = () => {
     setCaptionHistory([]);
     setCaptionText('');
-    announce(isAr ? 'تم مسح النصوص المفرغة.' : 'Captions cleared.');
+    announce(isAr ? 'تم مسح النصوص المفرغة.' : L('Captions cleared.'));
   };
 
   const copyCaptions = () => {
@@ -329,7 +329,7 @@ export default function HearAndExpressView({
     navigator.clipboard?.writeText(full).then(() => {
       setCopiedSuccess(true);
       setTimeout(() => setCopiedSuccess(false), 2000);
-      announce(isAr ? 'تم نسخ النص إلى الحافظة.' : 'Copied to clipboard.');
+      announce(isAr ? 'تم نسخ النص إلى الحافظة.' : L('Copied to clipboard.'));
     });
   };
 
@@ -375,7 +375,7 @@ export default function HearAndExpressView({
 
   const handleClearSentence = () => {
     setSentenceStrip([]);
-    announce(isAr ? 'تم مسح شريط الجملة.' : 'Sentence cleared.');
+    announce(isAr ? 'تم مسح شريط الجملة.' : L('Sentence cleared.'));
   };
 
   return (
@@ -395,7 +395,7 @@ export default function HearAndExpressView({
           <div className="bg-[#0A2342] border-2 border-amber-400 text-amber-300 font-bold px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
             <Zap className="w-6 h-6 text-amber-400 animate-bounce" />
             <span className="text-sm">
-              {isAr ? 'تنبيه بصري: صوت أو مكالمة جديدة!' : 'Visual Alert: New sound or incoming speech!'}
+              {isAr ? 'تنبيه بصري: صوت أو مكالمة جديدة!' : L('Visual Alert: New sound or incoming speech!')}
             </span>
           </div>
         </div>
@@ -412,7 +412,7 @@ export default function HearAndExpressView({
           <button
             type="button"
             onClick={onNavigateBack}
-            aria-label={isAr ? 'الرجوع للوحة الميزات' : 'Back to dashboard'}
+            aria-label={isAr ? 'الرجوع للوحة الميزات' : L('Back to dashboard')}
             className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
           >
             <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
@@ -420,8 +420,8 @@ export default function HearAndExpressView({
         )}
         <span className="hidden"><BrandLogo size="sm" /></span>
         <h1 className="flex-1 min-w-0 truncate text-base font-bold text-white">
-          <span>{isAr ? 'السمع والتعبير' : 'Hear & Express'}</span>
-          <span className="hidden">{isAr ? 'السمع والتعبير (Hear & Express)' : 'Hear & Express Communication'}</span>
+          <span>{isAr ? 'السمع والتعبير' : L('Hear & Express')}</span>
+          <span className="hidden">{isAr ? 'السمع والتعبير (Hear & Express)' : L('Hear & Express Communication')}</span>
         </h1>
 
         <div
@@ -435,31 +435,31 @@ export default function HearAndExpressView({
           />
           <span className="text-[#94A3B8] sr-only sm:not-sr-only">
             {isListening
-              ? (isAr ? 'تفريغ نشط' : 'Listening Active')
-              : (isAr ? 'جاهز للتواصل' : 'Ready')}
+              ? (isAr ? 'تفريغ نشط' : L('Listening Active'))
+              : (isAr ? 'جاهز للتواصل' : L('Ready'))}
           </span>
         </div>
         <ToolSwitcherSlot />
         <div data-testid="speech-controls" className="contents">
         <HeaderMenu
-          ariaLabel={isAr ? 'المزيد' : 'More actions'}
+          ariaLabel={isAr ? 'المزيد' : L('More actions')}
           isDarkMode={isDarkMode}
           items={[
             {
               key: 'stop',
-              label: isAr ? 'إيقاف الصوت' : 'Stop Audio',
-              ariaLabel: isAr ? 'إيقاف نطق الصوت' : 'Stop voice speech',
+              label: isAr ? 'إيقاف الصوت' : L('Stop Audio'),
+              ariaLabel: isAr ? 'إيقاف نطق الصوت' : L('Stop voice speech'),
               icon: <VolumeX className="w-4 h-4" />,
               danger: true,
               onSelect: () => {
                 cancelSpeech();
-                announce(isAr ? 'تم إيقاف الصوت.' : 'Speech stopped.');
+                announce(isAr ? 'تم إيقاف الصوت.' : L('Speech stopped.'));
               },
             },
             {
               key: 'personalize',
-              label: isAr ? 'التخصيص والخصوصية' : 'Personalization & privacy',
-              ariaLabel: isAr ? 'إعدادات التخصيص والخصوصية' : 'Personalization and privacy settings',
+              label: isAr ? 'التخصيص والخصوصية' : L('Personalization & privacy'),
+              ariaLabel: isAr ? 'إعدادات التخصيص والخصوصية' : L('Personalization and privacy settings'),
               icon: <Settings2 className="w-4 h-4" />,
               onSelect: () => setPersonalizationOpen(true),
             },
@@ -471,7 +471,7 @@ export default function HearAndExpressView({
       {/* Module Navigation Tabs */}
       <nav
         role="tablist"
-        aria-label={isAr ? 'أدوات التواصل والتعبير' : 'Communication sub-modules'}
+        aria-label={isAr ? 'أدوات التواصل والتعبير' : L('Communication sub-modules')}
         className="shrink-0 flex flex-nowrap overflow-x-auto custom-scrollbar items-center gap-2 px-3 sm:px-4 py-2 bg-[#112C4F] border-b border-[#24476F]"
       >
         {[
@@ -517,12 +517,12 @@ export default function HearAndExpressView({
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <Mic className="w-5 h-5 text-[#4B9FE1]" />
-                  <span>{isAr ? 'التفريغ الفوري للكلام المنطوق' : 'Live Speech-to-Text Captions'}</span>
+                  <span>{isAr ? 'التفريغ الفوري للكلام المنطوق' : L('Live Speech-to-Text Captions')}</span>
                 </h2>
                 <p className="text-xs text-[#94A3B8]">
                   {isAr
                     ? 'يحول الكلام في المحاضرات والمحادثات إلى نصوص مباشرة متباينة لدعم الصم وضعاف السمع.'
-                    : 'Transcribes spoken words into live high-contrast text for deaf and hard-of-hearing users.'}
+                    : L('Transcribes spoken words into live high-contrast text for deaf and hard-of-hearing users.')}
                 </p>
               </div>
 
@@ -531,7 +531,7 @@ export default function HearAndExpressView({
                 <button
                   type="button"
                   onClick={toggleListening}
-                  aria-label={isListening ? (isAr ? 'إيقاف الاستماع' : 'Stop listening') : (isAr ? 'بدء الاستماع للكلام' : 'Start listening')}
+                  aria-label={isListening ? (isAr ? 'إيقاف الاستماع' : L('Stop listening')) : (isAr ? 'بدء الاستماع للكلام' : L('Start listening'))}
                   className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
                     isListening
                       ? 'bg-[#C43D4D] text-white animate-pulse shadow-md shadow-[#C43D4D]/30'
@@ -539,7 +539,7 @@ export default function HearAndExpressView({
                   }`}
                 >
                   {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  <span>{isListening ? (isAr ? 'إيقاف الاستماع' : 'Stop Captions') : (isAr ? 'بدء التفريغ' : 'Start Captions')}</span>
+                  <span>{isListening ? (isAr ? 'إيقاف الاستماع' : L('Stop Captions')) : (isAr ? 'بدء التفريغ' : L('Start Captions'))}</span>
                 </button>
 
                 {/* Font Scaling Toggle */}
@@ -549,7 +549,7 @@ export default function HearAndExpressView({
                       key={sz}
                       type="button"
                       onClick={() => setFontSize(sz)}
-                      aria-label={`${isAr ? 'حجم الخط' : 'Font size'} ${sz}`}
+                      aria-label={`${isAr ? 'حجم الخط' : L('Font size')} ${sz}`}
                       className={`px-2 py-1 rounded-lg text-xs font-bold ${
                         fontSize === sz ? 'bg-[#1769AA] text-white' : 'text-[#94A3B8]'
                       }`}
@@ -563,20 +563,20 @@ export default function HearAndExpressView({
                   type="button"
                   onClick={toggleListening}
                   data-testid="captions-retry-btn"
-                  aria-label={isAr ? 'إعادة محاولة الاستماع' : 'Retry listening'}
+                  aria-label={isAr ? 'إعادة محاولة الاستماع' : L('Retry listening')}
                   className="px-3 py-2 rounded-xl bg-[#17355C] border border-[#24476F] hover:border-[#1769AA] text-xs font-bold text-[#4B9FE1] flex items-center gap-1.5 transition-all cursor-pointer"
-                  title={isAr ? 'إعادة المحاولة' : 'Retry'}
+                  title={isAr ? 'إعادة المحاولة' : L('Retry')}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{isAr ? 'إعادة المحاولة' : 'Retry'}</span>
+                  <span className="hidden sm:inline">{isAr ? 'إعادة المحاولة' : L('Retry')}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={copyCaptions}
-                  aria-label={isAr ? 'نسخ النصوص' : 'Copy captions'}
+                  aria-label={isAr ? 'نسخ النصوص' : L('Copy captions')}
                   className="p-2 rounded-xl bg-[#17355C] border border-[#24476F] text-[#94A3B8] hover:text-white"
-                  title={isAr ? 'نسخ النص' : 'Copy Text'}
+                  title={isAr ? 'نسخ النص' : L('Copy Text')}
                 >
                   {copiedSuccess ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 </button>
@@ -584,9 +584,9 @@ export default function HearAndExpressView({
                 <button
                   type="button"
                   onClick={clearCaptions}
-                  aria-label={isAr ? 'مسح كل النصوص' : 'Clear all captions'}
+                  aria-label={isAr ? 'مسح كل النصوص' : L('Clear all captions')}
                   className="p-2 rounded-xl bg-[#17355C] border border-[#24476F] text-[#94A3B8] hover:text-rose-400"
-                  title={isAr ? 'مسح' : 'Clear'}
+                  title={isAr ? 'مسح' : L('Clear')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -603,12 +603,12 @@ export default function HearAndExpressView({
                 <div data-testid="captions-empty-state" className="text-center py-16 space-y-3 my-auto">
                   <Mic className="w-10 h-10 text-[#4B9FE1]/50 mx-auto" />
                   <p className="text-sm font-bold text-[#F8FAFC]">
-                    {isAr ? 'لا توجد نصوص مفرغة بعد (التفريغ المباشر جاهز)' : 'No captions recorded yet (Live captions ready)'}
+                    {isAr ? 'لا توجد نصوص مفرغة بعد (التفريغ المباشر جاهز)' : L('No captions recorded yet (Live captions ready)')}
                   </p>
                   <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
                     {isAr
                       ? 'اضغط على زر "بدء التفريغ" وسيبدأ رفيقي في كتابة ما يسمعه فوراً بخط عالي التباين.'
-                      : 'Click "Start Captions" and Rafiqi will immediately display spoken words in high-contrast text.'}
+                      : L('Click "Start Captions" and Rafiqi will immediately display spoken words in high-contrast text.')}
                   </p>
                 </div>
               )}
@@ -617,7 +617,7 @@ export default function HearAndExpressView({
               {isListening && (
                 <div data-testid="captions-loading-progress" className="px-3 py-1.5 rounded-xl bg-[#1769AA]/20 border border-[#1769AA]/40 text-[#4B9FE1] text-xs font-bold flex items-center gap-2 animate-pulse w-fit">
                   <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
-                  <span>{isAr ? 'جاري الاستماع والمعالجة المباشرة...' : 'Loading / Listening in progress...'}</span>
+                  <span>{isAr ? 'جاري الاستماع والمعالجة المباشرة...' : L('Loading / Listening in progress...')}</span>
                 </div>
               )}
 
@@ -648,12 +648,12 @@ export default function HearAndExpressView({
             {/* Full conversation workspace: session history, personal vocabulary, notes */}
             <div className="space-y-3">
               <h3 className="text-sm font-black text-[#F8FAFC]">
-                {isAr ? '🗂️ مساحة المحادثة الكاملة' : '🗂️ Full Conversation Workspace'}
+                {isAr ? '🗂️ مساحة المحادثة الكاملة' : L('🗂️ Full Conversation Workspace')}
               </h3>
               <p className="text-xs text-[#94A3B8] leading-relaxed">
                 {isAr
                   ? 'محادثة متواصلة مع سجل الجمل، قاموس الكلمات الشخصية، والملاحظات - كلها محفوظة على جهازك فقط.'
-                  : 'A continuous conversation with sentence history, your personal vocabulary, and notes - all stored only on your device.'}
+                  : L('A continuous conversation with sentence history, your personal vocabulary, and notes - all stored only on your device.')}
               </p>
               <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل مساحة المحادثة...' labelEn='Loading conversation workspace...' isAr={isAr} />}>
                 <CaptionInterface engine={conversationEngineRef.current} language={isAr ? 'ar' : 'en'} />
@@ -671,12 +671,12 @@ export default function HearAndExpressView({
             <div className="p-5 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Volume2 className="w-4 h-4 text-[#4B9FE1]" />
-                <span>{isAr ? 'كتابة نص لنطقه بصوت مسموع (لغير الناطقين)' : 'Type to Speak Aloud (Non-Speaking Users)'}</span>
+                <span>{isAr ? 'كتابة نص لنطقه بصوت مسموع (لغير الناطقين)' : L('Type to Speak Aloud (Non-Speaking Users)')}</span>
               </h2>
 
               <div className="flex gap-2">
                 <label htmlFor="custom-speech-input" className="sr-only">
-                  {isAr ? 'النص المطلوب نطقه' : 'Text to speak'}
+                  {isAr ? 'النص المطلوب نطقه' : L('Text to speak')}
                 </label>
                 <input
                   id="custom-speech-input"
@@ -690,7 +690,7 @@ export default function HearAndExpressView({
                   placeholder={
                     isAr
                       ? 'اكتب هنا ما تريد أن ينطقه رفيقي نيابة عنك...'
-                      : 'Type here what you want Rafiqi to say for you...'
+                      : L('Type here what you want Rafiqi to say for you...')
                   }
                   className="flex-1 p-3.5 rounded-2xl bg-[#09101A] border border-[#24476F] text-sm text-white placeholder:text-[#94A3B8]/60 outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:border-[#1769AA]"
                 />
@@ -698,11 +698,11 @@ export default function HearAndExpressView({
                   type="button"
                   onClick={() => handleSpeakTyped()}
                   disabled={!typedMessage.trim()}
-                  aria-label={isAr ? 'نطق النص المكتوب' : 'Speak typed message'}
+                  aria-label={isAr ? 'نطق النص المكتوب' : L('Speak typed message')}
                   className="px-5 py-3.5 rounded-2xl bg-[#1769AA] hover:bg-[#0D4778] disabled:bg-[#17355C] disabled:text-[#94A3B8] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
-                  <span>{isAr ? 'انطق' : 'Speak'}</span>
+                  <span>{isAr ? 'انطق' : L('Speak')}</span>
                 </button>
               </div>
             </div>
@@ -711,7 +711,7 @@ export default function HearAndExpressView({
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#4B9FE1]" />
-                <span>{isAr ? 'ردود سريعة بلمسة واحدة (نطق فوري)' : 'One-Touch Quick Responses (Instant Voice)'}</span>
+                <span>{isAr ? 'ردود سريعة بلمسة واحدة (نطق فوري)' : L('One-Touch Quick Responses (Instant Voice)')}</span>
               </h3>
 
               <div data-testid="quick-responses-grid" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -722,7 +722,7 @@ export default function HearAndExpressView({
                       key={item.id}
                       type="button"
                       onClick={() => handleSpeakTyped(text)}
-                      aria-label={`${isAr ? 'نطق عبارة:' : 'Speak phrase:'} ${text}`}
+                      aria-label={`${isAr ? 'نطق عبارة:' : L('Speak phrase:')} ${text}`}
                       className="p-4 rounded-2xl bg-[#17355C] hover:bg-[#1769AA]/20 border border-[#24476F] hover:border-[#1769AA] text-[#F8FAFC] text-start flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-sm active:scale-98"
                     >
                       <span className="text-sm font-bold leading-relaxed">{text}</span>
@@ -744,24 +744,24 @@ export default function HearAndExpressView({
             <div className="p-4 rounded-3xl bg-[#112C4F] border-2 border-[#1769AA] space-y-3 shadow-lg">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-[#4B9FE1] uppercase tracking-wider">
-                  {isAr ? 'شريط بناء الجملة المنطوقة (AAC)' : 'Spoken Sentence Strip'}
+                  {isAr ? 'شريط بناء الجملة المنطوقة (AAC)' : L('Spoken Sentence Strip')}
                 </h3>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={handleSpeakSentence}
                     disabled={sentenceStrip.length === 0}
-                    aria-label={isAr ? 'نطق الجملة الكاملة بصوت مسموع' : 'Speak full sentence'}
+                    aria-label={isAr ? 'نطق الجملة الكاملة بصوت مسموع' : L('Speak full sentence')}
                     className="px-4 py-2 rounded-xl bg-[#16845B] hover:bg-[#126b49] disabled:bg-[#17355C] text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-sm"
                   >
                     <Volume2 className="w-4 h-4" />
-                    <span>{isAr ? 'نطق الجملة' : 'Speak Sentence'}</span>
+                    <span>{isAr ? 'نطق الجملة' : L('Speak Sentence')}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleClearSentence}
                     disabled={sentenceStrip.length === 0}
-                    aria-label={isAr ? 'مسح شريط الجملة' : 'Clear sentence'}
+                    aria-label={isAr ? 'مسح شريط الجملة' : L('Clear sentence')}
                     className="p-2 rounded-xl bg-[#17355C] text-[#94A3B8] hover:text-white"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -775,7 +775,7 @@ export default function HearAndExpressView({
                   <span className="text-xs text-[#94A3B8]/70 px-2">
                     {isAr
                       ? 'اضغط على البطاقات الرمزية أدناه لتكوين جملتك ثم اضغط "نطق الجملة".'
-                      : 'Tap symbol tiles below to build a sentence, then click "Speak Sentence".'}
+                      : L('Tap symbol tiles below to build a sentence, then click "Speak Sentence".')}
                   </span>
                 ) : (
                   sentenceStrip.map((tile, i) => (
@@ -821,7 +821,7 @@ export default function HearAndExpressView({
                     key={tile.id}
                     type="button"
                     onClick={() => handleAddAacTile(tile)}
-                    aria-label={`${isAr ? 'إضافة ونطق رمز:' : 'Add and speak tile:'} ${label}`}
+                    aria-label={`${isAr ? 'إضافة ونطق رمز:' : L('Add and speak tile:')} ${label}`}
                     className="p-4 rounded-2xl bg-[#17355C] hover:bg-[#1769AA]/25 border border-[#24476F] hover:border-[#1769AA] text-center flex flex-col items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-sm group"
                   >
                     <span className="text-3xl group-hover:scale-110 transition-transform">{tile.emoji}</span>
@@ -834,7 +834,7 @@ export default function HearAndExpressView({
             {/* Personal AAC workspace: custom phrases, scenarios, usage stats */}
             <div className="space-y-3">
               <h3 className="text-sm font-black text-[#F8FAFC]">
-                {isAr ? '⭐ لوحاتي الشخصية' : '⭐ My Personal Boards'}
+                {isAr ? '⭐ لوحاتي الشخصية' : L('⭐ My Personal Boards')}
               </h3>
               <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل اللوحات الشخصية...' labelEn='Loading personal boards...' isAr={isAr} />}>
                 <PersonalAacWorkspaceView isArabic={isAr} />
@@ -845,14 +845,14 @@ export default function HearAndExpressView({
             {euphoniaPhrases.length > 0 && (
               <div className="space-y-3" data-testid="euphonia-phrase-bank">
                 <h3 className="text-sm font-black text-[#F8FAFC]">
-                  {isAr ? '🗣️ بنك العبارات الجاهزة' : '🗣️ Ready Phrase Bank'}
+                  {isAr ? '🗣️ بنك العبارات الجاهزة' : L('🗣️ Ready Phrase Bank')}
                 </h3>
                 <p className="text-xs text-[#94A3B8] leading-relaxed">
                   {isAr
                     ? 'عبارات عربية جاهزة مصنفة حسب الحاجة - اضغط على أي عبارة لنطقها فوراً.'
-                    : 'Ready Arabic phrases grouped by need - tap any phrase to speak it instantly.'}
+                    : L('Ready Arabic phrases grouped by need - tap any phrase to speak it instantly.')}
                 </p>
-                <div className="flex flex-wrap gap-2" role="group" aria-label={isAr ? 'تصنيفات العبارات' : 'Phrase categories'}>
+                <div className="flex flex-wrap gap-2" role="group" aria-label={isAr ? 'تصنيفات العبارات' : L('Phrase categories')}>
                   {['all', ...Array.from(new Set(euphoniaPhrases.map((ph) => ph.category)))].map((cat) => (
                     <button
                       key={cat}
@@ -877,7 +877,7 @@ export default function HearAndExpressView({
                         key={ph.id}
                         type="button"
                         onClick={() => speak(ph.text, profile.language)}
-                        aria-label={`${isAr ? 'نطق العبارة:' : 'Speak phrase:'} ${ph.text}`}
+                        aria-label={`${isAr ? 'نطق العبارة:' : L('Speak phrase:')} ${ph.text}`}
                         className="p-3 rounded-2xl bg-[#112C4F] hover:bg-[#1769AA]/20 border border-[#24476F] hover:border-[#1769AA] text-start text-xs font-bold text-[#F8FAFC] transition-all active:scale-95 cursor-pointer flex items-center gap-2"
                       >
                         <span aria-hidden="true">{getCategoryIcon(ph.category)}</span>
@@ -903,21 +903,21 @@ export default function HearAndExpressView({
             <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Radio className="w-5 h-5 text-amber-400" />
-                <span>{isAr ? 'منارة التنبيه البصري واللمسي (للصم وضعاف السمع)' : 'Visual & Vibration Alert Beacon'}</span>
+                <span>{isAr ? 'منارة التنبيه البصري واللمسي (للصم وضعاف السمع)' : L('Visual & Vibration Alert Beacon')}</span>
               </h2>
               <p className="text-xs text-[#94A3B8] leading-relaxed">
                 {isAr
                   ? 'يقوم هذا النظام بإصدار وميض بصري ساطع عبر الشاشة مع نبضات اهتزازية لمسية لتنبيه المستخدم الأصم فور حدوث أصوات هامة، أجهزة إنذار، أو عند تلقي نداءات مباشرة.'
-                  : 'Emits a bright full-screen visual flash and haptic vibration patterns to notify deaf users of incoming calls, alarms, or urgent environmental sounds.'}
+                  : L('Emits a bright full-screen visual flash and haptic vibration patterns to notify deaf users of incoming calls, alarms, or urgent environmental sounds.')}
               </p>
 
               <div className="p-4 rounded-2xl bg-[#09101A] border border-[#24476F] flex items-center justify-between">
                 <div>
                   <h3 className="text-xs font-bold text-white">
-                    {isAr ? 'اختبار منارة التنبيه الآن' : 'Test Alert Beacon Now'}
+                    {isAr ? 'اختبار منارة التنبيه الآن' : L('Test Alert Beacon Now')}
                   </h3>
                   <p className="text-xs text-[#94A3B8]">
-                    {isAr ? 'سيومض ضوء أصفر ذهبي على الشاشة مع اهتزاز الجهاز.' : 'Flashes a golden banner and triggers device vibration.'}
+                    {isAr ? 'سيومض ضوء أصفر ذهبي على الشاشة مع اهتزاز الجهاز.' : L('Flashes a golden banner and triggers device vibration.')}
                   </p>
                 </div>
 
@@ -927,7 +927,7 @@ export default function HearAndExpressView({
                   className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
                 >
                   <Zap className="w-4 h-4" />
-                  <span>{isAr ? 'اختبار التنبيه' : 'Trigger Alert'}</span>
+                  <span>{isAr ? 'اختبار التنبيه' : L('Trigger Alert')}</span>
                 </button>
               </div>
             </div>
@@ -942,19 +942,19 @@ export default function HearAndExpressView({
             <div className="p-6 rounded-3xl bg-[#112C4F] border border-[#24476F] space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#1769AA]/20 text-[#4B9FE1] border border-[#1769AA]/40">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>{isAr ? 'لغة الإشارة المصرية المعتمدة (ESL/ArSL)' : 'Egyptian Sign Language (ESL/ArSL)'}</span>
+                <span>{isAr ? 'لغة الإشارة المصرية المعتمدة (ESL/ArSL)' : L('Egyptian Sign Language (ESL/ArSL)')}</span>
               </div>
 
               <h2 className="text-lg font-bold text-white">
                 {isAr
                   ? 'استوديو وقاموس لغة الإشارة المصرية ثلاثي الأبعاد'
-                  : 'Egyptian Sign Language 3D Avatar & Studio'}
+                  : L('Egyptian Sign Language 3D Avatar & Studio')}
               </h2>
 
               <p className="text-xs text-[#94A3B8] leading-relaxed">
                 {isAr
                   ? 'يتضمن هذا الأساس التكاملي قاموس الإشارات المعتمد لطلاب المدارس والجامعات في مصر، مدعوماً بمجسم ثلاثي الأبعاد (3D Avatar) يحاكي حركات الأصابع والذراعين وفق توصيف HamNoSys العلمي. نؤكد بأمانة أن النظام يعتمد على بيانات معجمية موثقة لتفادي أي ترجمة وهمية غير دقيقة.'
-                  : 'This foundation provides Egyptian Sign Language (ESL) vocabulary mapped from verified curriculum datasets to a 3D avatar using HamNoSys kinematic curl coordinates, with honest integration disclosure.'}
+                  : L('This foundation provides Egyptian Sign Language (ESL) vocabulary mapped from verified curriculum datasets to a 3D avatar using HamNoSys kinematic curl coordinates, with honest integration disclosure.')}
               </p>
 
               <div className="pt-2">
@@ -965,7 +965,7 @@ export default function HearAndExpressView({
                     className="px-5 py-3 rounded-2xl bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
                   >
                     <Sparkles className="w-4 h-4" />
-                    <span>{isAr ? 'فتح استوديو لغة الإشارة 3D' : 'Open 3D Sign Language Studio'}</span>
+                    <span>{isAr ? 'فتح استوديو لغة الإشارة 3D' : L('Open 3D Sign Language Studio')}</span>
                   </button>
                 )}
               </div>
@@ -1001,7 +1001,7 @@ export default function HearAndExpressView({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={isAr ? 'إعدادات التخصيص والخصوصية' : 'Personalization and privacy settings'}
+          aria-label={isAr ? 'إعدادات التخصيص والخصوصية' : L('Personalization and privacy settings')}
           className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
           onClick={() => setPersonalizationOpen(false)}
         >
@@ -1013,10 +1013,10 @@ export default function HearAndExpressView({
               <button
                 type="button"
                 onClick={() => setPersonalizationOpen(false)}
-                aria-label={isAr ? 'إغلاق الإعدادات' : 'Close settings'}
+                aria-label={isAr ? 'إغلاق الإعدادات' : L('Close settings')}
                 className="px-3 py-1.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
               >
-                {isAr ? 'إغلاق' : 'Close'}
+                {isAr ? 'إغلاق' : L('Close')}
               </button>
             </div>
             <React.Suspense fallback={<ModuleLoadingFallback labelAr='جاري تحميل الإعدادات...' labelEn='Loading settings...' isAr={isAr} />}>

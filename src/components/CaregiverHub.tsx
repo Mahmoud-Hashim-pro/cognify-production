@@ -50,7 +50,7 @@ import {
   VisualScheduleItem,
   SensoryPatternAnalysis,
 } from '../lib/neurodiversityEngine';
-import { isArabicLocale } from '../lib/translations';
+import { isArabicLocale, L } from '../lib/translations';
 import { toast } from './Toast';
 
 interface CaregiverHubProps {
@@ -238,7 +238,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
     if (primary && isValidContactPhone(primary.phone)) {
       const testMsg = isAr
         ? '🔔 تجربة نظام الطوارئ من Rafiqi: نداء الاستغاثة يعمل بنجاح!'
-        : '🔔 Rafiqi Emergency SOS Test: Alert system is functioning correctly!';
+        : L('🔔 Rafiqi Emergency SOS Test: Alert system is functioning correctly!');
       sendWhatsAppMessage(primary.phone, testMsg);
       setTestSent(true);
       toast.success(t('Test message opened for primary contact', 'تم تجهيز رسالة التجربة للمرافق'));
@@ -263,11 +263,11 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       day: 'numeric',
     });
 
-    const studentName = profile.name || (isAr ? 'الطالب' : 'Student');
+    const studentName = profile.name || (isAr ? 'الطالب' : L('Student'));
     const totalEpisodes = patternAnalysis.totalMeltdowns;
     const topTriggerText = patternAnalysis.topTriggers.length > 0
       ? patternAnalysis.topTriggers.map((tr) => `${tr.trigger} (${tr.count}x - ${tr.percentage}%)`).join(', ')
-      : (isAr ? 'لا توجد مثيرات متكررة مسجلة' : 'No recurring triggers logged');
+      : (isAr ? 'لا توجد مثيرات متكررة مسجلة' : L('No recurring triggers logged'));
 
     const recommendation = isAr
       ? patternAnalysis.scheduleCorrelation?.clinicalRecommendation || 'الاستمرار في مراقبة الروتين اليومي وتقديم فترات استراحة منتظمة.'
@@ -277,8 +277,8 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 8px 12px; font-family: monospace;">${new Date(l.timestamp).toLocaleString(isAr ? 'ar-EG' : 'en-US')}</td>
         <td style="padding: 8px 12px; font-weight: bold; color: ${l.intensity >= 4 ? '#e11d48' : '#0284c7'};">${l.intensity}/5 (${l.level})</td>
-        <td style="padding: 8px 12px;">${l.sensoryTrigger || (isAr ? 'غير محدد' : 'Not specified')}</td>
-        <td style="padding: 8px 12px;">${l.comfortActivityUsed || (isAr ? 'لم يُطلب' : 'None')}</td>
+        <td style="padding: 8px 12px;">${l.sensoryTrigger || (isAr ? 'غير محدد' : L('Not specified'))}</td>
+        <td style="padding: 8px 12px;">${l.comfortActivityUsed || (isAr ? 'لم يُطلب' : L('None'))}</td>
       </tr>
     `).join('');
 
@@ -386,7 +386,7 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
           <div>
             <h1 style="margin: 0; font-size: 20px; color: #1e1b4b;">Rafiqi Assistive Platform • Clinical ABA & Sensory Progress Report</h1>
             <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12px;">
-              ${isAr ? 'تقرير تحليلي سريري لجلسات التكامل الحسي والتواصل البديل والمعزز (AAC)' : 'Clinical ABA, SLP & Occupational Therapy Progress Summary'}
+              ${isAr ? 'تقرير تحليلي سريري لجلسات التكامل الحسي والتواصل البديل والمعزز (AAC)' : L('Clinical ABA, SLP & Occupational Therapy Progress Summary')}
             </p>
           </div>
           <div style="text-align: ${isAr ? 'left' : 'right'};">
@@ -398,9 +398,9 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
         <div class="metric-card">
           <table style="margin: 0;">
             <tr>
-              <td><strong>${isAr ? 'اسم الطالب:' : 'Student Name:'}</strong> ${studentName}</td>
-              <td><strong>${isAr ? 'معرف الملف:' : 'Profile UID:'}</strong> ${profile.uid ? profile.uid.substring(0, 12) + '...' : 'Local'}</td>
-              <td><strong>${isAr ? 'إجمالي السجلات:' : 'Total Logs:'}</strong> ${sensoryLogs.length}</td>
+              <td><strong>${isAr ? 'اسم الطالب:' : L('Student Name:')}</strong> ${studentName}</td>
+              <td><strong>${isAr ? 'معرف الملف:' : L('Profile UID:')}</strong> ${profile.uid ? profile.uid.substring(0, 12) + '...' : 'Local'}</td>
+              <td><strong>${isAr ? 'إجمالي السجلات:' : L('Total Logs:')}</strong> ${sensoryLogs.length}</td>
             </tr>
           </table>
         </div>
@@ -408,67 +408,67 @@ export default function CaregiverHub({ profile, onNavigateBack, setProfile, onOp
         <div class="grid">
           <div class="stat-box">
             <div class="num">${totalEpisodes}</div>
-            <div class="lbl">${isAr ? 'نوبات الضغط الشديد / Meltdowns' : 'High Overload / Meltdowns'}</div>
+            <div class="lbl">${isAr ? 'نوبات الضغط الشديد / Meltdowns' : L('High Overload / Meltdowns')}</div>
           </div>
           <div class="stat-box">
             <div class="num">${patternAnalysis.timeOfDayDistribution.morning}</div>
-            <div class="lbl">${isAr ? 'فترة الصباح (06:00 - 12:00)' : 'Morning Window'}</div>
+            <div class="lbl">${isAr ? 'فترة الصباح (06:00 - 12:00)' : L('Morning Window')}</div>
           </div>
           <div class="stat-box">
             <div class="num">${patternAnalysis.timeOfDayDistribution.afternoon}</div>
-            <div class="lbl">${isAr ? 'بعد الظهر (12:00 - 17:00)' : 'Afternoon Window'}</div>
+            <div class="lbl">${isAr ? 'بعد الظهر (12:00 - 17:00)' : L('Afternoon Window')}</div>
           </div>
           <div class="stat-box">
             <div class="num">${patternAnalysis.timeOfDayDistribution.evening + patternAnalysis.timeOfDayDistribution.night}</div>
-            <div class="lbl">${isAr ? 'المساء والليل' : 'Evening & Night'}</div>
+            <div class="lbl">${isAr ? 'المساء والليل' : L('Evening & Night')}</div>
           </div>
         </div>
 
         <div class="recommendation-box">
           <h4 style="margin: 0 0 6px 0; color: #92400e; font-size: 13px;">
-            ${isAr ? 'توصيات التحليل السلوكي التطبيقي (ABA) والتكامل الحسي (OT):' : 'ABA & Sensory Diet Clinical Recommendations:'}
+            ${isAr ? 'توصيات التحليل السلوكي التطبيقي (ABA) والتكامل الحسي (OT):' : L('ABA & Sensory Diet Clinical Recommendations:')}
           </h4>
           <p style="margin: 0; color: #78350f; font-size: 12px; line-height: 1.6;">
             ${recommendation}
           </p>
           <p style="margin: 6px 0 0 0; font-size: 11px; color: #b45309;">
-            <strong>${isAr ? 'أبرز المثيرات المسجلة:' : 'Top Recurring Triggers:'}</strong> ${topTriggerText}
+            <strong>${isAr ? 'أبرز المثيرات المسجلة:' : L('Top Recurring Triggers:')}</strong> ${topTriggerText}
           </p>
         </div>
 
         <h4 style="margin: 16px 0 8px 0; font-size: 13px; color: #1e293b;">
-          ${isAr ? 'سجل الرصد الحسي الحديث (آخر 20 رصد):' : 'Recent Sensory Baseline Records (Last 20 Logs):'}
+          ${isAr ? 'سجل الرصد الحسي الحديث (آخر 20 رصد):' : L('Recent Sensory Baseline Records (Last 20 Logs):')}
         </h4>
         <table>
           <thead>
             <tr>
-              <th>${isAr ? 'التاريخ والوقت' : 'Date / Time'}</th>
-              <th>${isAr ? 'المستوى والشدة' : 'Level & Intensity'}</th>
-              <th>${isAr ? 'المثير الحسي المرصود' : 'Observed Sensory Trigger'}</th>
-              <th>${isAr ? 'تدخل التهدئة المستخدم' : 'Intervention Applied'}</th>
+              <th>${isAr ? 'التاريخ والوقت' : L('Date / Time')}</th>
+              <th>${isAr ? 'المستوى والشدة' : L('Level & Intensity')}</th>
+              <th>${isAr ? 'المثير الحسي المرصود' : L('Observed Sensory Trigger')}</th>
+              <th>${isAr ? 'تدخل التهدئة المستخدم' : L('Intervention Applied')}</th>
             </tr>
           </thead>
           <tbody>
-            ${tableRows || `<tr><td colspan="4" style="text-align: center; padding: 12px; color: #94a3b8;">${isAr ? 'لا توجد سجلات مسجلة' : 'No records logged'}</td></tr>`}
+            ${tableRows || `<tr><td colspan="4" style="text-align: center; padding: 12px; color: #94a3b8;">${isAr ? 'لا توجد سجلات مسجلة' : L('No records logged')}</td></tr>`}
           </tbody>
         </table>
 
         <div class="footer-sign">
           <div style="width: 48%;">
-            <div style="font-size: 11px; color: #64748b;">${isAr ? 'اعتماد أخصائي التخاطب / التحليل السلوكي (SLP / BCBA):' : 'Therapist / BCBA Sign-off:'}</div>
+            <div style="font-size: 11px; color: #64748b;">${isAr ? 'اعتماد أخصائي التخاطب / التحليل السلوكي (SLP / BCBA):' : L('Therapist / BCBA Sign-off:')}</div>
             <div class="sign-field"></div>
-            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'التوقيع والتاريخ' : 'Signature & Date'}</div>
+            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'التوقيع والتاريخ' : L('Signature & Date')}</div>
           </div>
           <div style="width: 48%;">
-            <div style="font-size: 11px; color: #64748b;">${isAr ? 'ملاحظات الجلسة القادمة:' : 'Notes for Next Session:'}</div>
+            <div style="font-size: 11px; color: #64748b;">${isAr ? 'ملاحظات الجلسة القادمة:' : L('Notes for Next Session:')}</div>
             <div class="sign-field"></div>
-            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'ملاحظات إضافية' : 'Additional Observations'}</div>
+            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${isAr ? 'ملاحظات إضافية' : L('Additional Observations')}</div>
           </div>
         </div>
 
         <div class="no-print" style="margin-top: 24px; text-align: center;">
           <button onclick="window.print()" style="background: #4f46e5; color: white; border: none; padding: 10px 24px; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer;">
-            ${isAr ? '🖨️ طباعة التقرير أو حفظ كملف PDF' : '🖨️ Print Report or Save as PDF'}
+            ${isAr ? '🖨️ طباعة التقرير أو حفظ كملف PDF' : L('🖨️ Print Report or Save as PDF')}
           </button>
         </div>
       </body>

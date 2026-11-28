@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { L } from '../lib/translations';
 import {
   FileText,
   X,
@@ -163,7 +164,7 @@ export function printAccessibleDocument(
     <html lang="${isAr ? 'ar' : 'en'}" dir="${isAr ? 'rtl' : 'ltr'}">
     <head>
       <meta charset="utf-8">
-      <title>${title || (isAr ? 'مستند رفيقي التعليمي' : 'Rafiqi Educational Document')}</title>
+      <title>${title || (isAr ? 'مستند رفيقي التعليمي' : L('Rafiqi Educational Document'))}</title>
       <style>
         @page { margin: 20mm; size: A4; }
         body {
@@ -179,7 +180,7 @@ export function printAccessibleDocument(
         h2 { font-size: 14pt; color: #312e81; margin-top: 24px; margin-bottom: 10px; }
         .meta { color: #64748b; font-size: 10pt; margin-bottom: 20px; }
         .box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
-        .q-box { border-right: ${isAr ? '4px solid #16a34a' : 'none'}; border-left: ${isAr ? 'none' : '4px solid #16a34a'}; background: #f0fdf4; padding: 12px; margin-bottom: 12px; }
+        .q-box { border-right: ${isAr ? '4px solid #16a34a' : L('none')}; border-left: ${isAr ? 'none' : '4px solid #16a34a'}; background: #f0fdf4; padding: 12px; margin-bottom: 12px; }
         .fc-box { border: 1px solid #e9d5ff; background: #faf5ff; padding: 10px; margin-bottom: 10px; }
         @media print {
           body { padding: 0; }
@@ -187,31 +188,31 @@ export function printAccessibleDocument(
       </style>
     </head>
     <body>
-      <h1>${title || (isAr ? 'مستند رفيقي التعليمي' : 'Rafiqi Educational Document')}</h1>
-      <div class="meta">${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')} • ${isAr ? 'منصة رفيقي التعليمية الميسرة' : 'Rafiqi Inclusive Learning Platform'}</div>
-      <h2>${isAr ? '📌 الزبدة وخلاصة المحتوى' : '📌 Core Takeaways'}</h2>
+      <h1>${title || (isAr ? 'مستند رفيقي التعليمي' : L('Rafiqi Educational Document'))}</h1>
+      <div class="meta">${new Date().toLocaleDateString(isAr ? 'ar-EG' : 'en-US')} • ${isAr ? 'منصة رفيقي التعليمية الميسرة' : L('Rafiqi Inclusive Learning Platform')}</div>
+      <h2>${isAr ? '📌 الزبدة وخلاصة المحتوى' : L('📌 Core Takeaways')}</h2>
       <div class="box">${cleanSummary.replace(/\n/g, '<br/>')}</div>
       ${quiz && quiz.length > 0 ? `
-        <h2>${isAr ? '📝 بنك الأسئلة والتدريبات' : '📝 Practice Questions'}</h2>
+        <h2>${isAr ? '📝 بنك الأسئلة والتدريبات' : L('📝 Practice Questions')}</h2>
         ${quiz.map((q, i) => `
           <div class="q-box">
-            <b>${isAr ? 'سؤال' : 'Question'} ${i + 1}: ${q.question}</b><br/>
+            <b>${isAr ? 'سؤال' : L('Question')} ${i + 1}: ${q.question}</b><br/>
             ${q.options.map((opt, oi) => `&bull; ${opt} ${oi === q.answerIndex ? '<b>(الإجابة الصحيحة ✅)</b>' : ''}`).join('<br/>')}<br/>
-            <span style="color:#4338ca; font-size:10pt;">💡 ${isAr ? 'التوضيح' : 'Explanation'}: ${q.explanation}</span>
+            <span style="color:#4338ca; font-size:10pt;">💡 ${isAr ? 'التوضيح' : L('Explanation')}: ${q.explanation}</span>
           </div>
         `).join('')}
       ` : ''}
       ${flashcards && flashcards.length > 0 ? `
-        <h2>${isAr ? '🗂️ بطاقات المراجعة السريعة' : '🗂️ Flashcards'}</h2>
+        <h2>${isAr ? '🗂️ بطاقات المراجعة السريعة' : L('🗂️ Flashcards')}</h2>
         ${flashcards.map((f, i) => `
           <div class="fc-box">
-            <b>${isAr ? 'بطاقة' : 'Card'} ${i + 1}:</b> ${f.front}<br/>
-            <b>${isAr ? 'المفهوم / الإجابة:' : 'Answer / Concept:'}</b> ${f.back}
+            <b>${isAr ? 'بطاقة' : L('Card')} ${i + 1}:</b> ${f.front}<br/>
+            <b>${isAr ? 'المفهوم / الإجابة:' : L('Answer / Concept:')}</b> ${f.back}
           </div>
         `).join('')}
       ` : ''}
       ${cleanFull ? `
-        <h2>${isAr ? '📝 النص الكامل المستخرج' : '📝 Full Extracted Content'}</h2>
+        <h2>${isAr ? '📝 النص الكامل المستخرج' : L('📝 Full Extracted Content')}</h2>
         <div class="box" style="white-space: pre-wrap; font-size: 11pt;">${cleanFull}</div>
       ` : ''}
     </body>
@@ -486,7 +487,7 @@ export default function DocumentStudioModal({
       },
       status: 'transcribing',
       progressPct: 10,
-      statusMessage: isAr ? 'جاري بدء التفريغ الصوتي للمحاضرة...' : 'Starting lecture transcription...',
+      statusMessage: isAr ? 'جاري بدء التفريغ الصوتي للمحاضرة...' : L('Starting lecture transcription...'),
       transcript: '',
       segments: [],
       currentPlaybackTime: 0,
@@ -516,7 +517,7 @@ export default function DocumentStudioModal({
         ...prev,
         status: 'ready',
         progressPct: 100,
-        statusMessage: isAr ? 'اكتمل التفريغ الصوتي بنجاح!' : 'Transcription complete!',
+        statusMessage: isAr ? 'اكتمل التفريغ الصوتي بنجاح!' : L('Transcription complete!'),
         transcript: result.transcript,
         segments: result.segments,
       }));
@@ -554,7 +555,7 @@ export default function DocumentStudioModal({
       console.error('Audio transcription error:', err);
       const errMsg = isAr
         ? 'تعذر تفريغ المحاضرة الصوتية. يرجى التأكد من جودة الملف والمحاولة مرة أخرى.'
-        : 'Failed to transcribe audio lecture. Please check the file and try again.';
+        : L('Failed to transcribe audio lecture. Please check the file and try again.');
       toast.error(errMsg);
       speak(errMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
       setAudioLectureState((prev) => ({
@@ -755,7 +756,7 @@ export default function DocumentStudioModal({
           directTextContent = pdfInfo.text;
           setExtractedDocMeta({ pageCount, isScanned, needsOcr });
           if (needsOcr) {
-            toast.info(isAr ? 'تم رصد صفحات مصورة؛ جاري تفعيل التعرف الضوئي OCR...' : 'Scanned pages detected; running OCR...');
+            toast.info(isAr ? 'تم رصد صفحات مصورة؛ جاري تفعيل التعرف الضوئي OCR...' : L('Scanned pages detected; running OCR...'));
           }
         } catch (e) {
           console.warn('PDF parsing error fallback:', e);
@@ -909,7 +910,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
             question: d.prompt,
             options: d.options && d.options.length > 0 ? d.options : [isAr ? 'صح' : 'True', isAr ? 'خطأ' : 'False'],
             answerIndex: 0,
-            explanation: d.explanation || (isAr ? 'مستخرجة مباشرة من سياق المحاضرة' : 'Extracted from lecture context'),
+            explanation: d.explanation || (isAr ? 'مستخرجة مباشرة من سياق المحاضرة' : L('Extracted from lecture context')),
           }))
         );
       }
@@ -929,7 +930,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
       setDocStatusText('');
 
       const partialNotice = isPartiallySummarized
-        ? (isAr ? ' (تم حفظ كامل النص للقراءة في تبويب النص الكامل، والملخص يغطي القسم الرئيسي)' : ' (Full text preserved in Full Text tab; summary covers primary section)')
+        ? (isAr ? ' (تم حفظ كامل النص للقراءة في تبويب النص الكامل، والملخص يغطي القسم الرئيسي)' : L(' (Full text preserved in Full Text tab; summary covers primary section)'))
         : '';
       const readout = isAr
         ? `تم تلخيص ملف ${docItem.title} بنجاح${partialNotice}. إليك أهم ما في المحاضرة: ${cleanSummary || summary}`
@@ -948,7 +949,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
       setLastFailedFile(file);
       const errMsg = isAr
         ? 'عذراً، حدث خطأ أثناء قراءة المستند. تأكد من حجم الملف واتصالك بالإنترنت.'
-        : 'Failed to process document. Please check the file and try again.';
+        : L('Failed to process document. Please check the file and try again.');
       toast.error(errMsg);
       speak(errMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
     }
@@ -1032,7 +1033,7 @@ ${hasExtractedText ? promptTextContent : 'اكتب هنا النص المقرو�
     const isAr = docTargetLang === 'ar';
     const statusMsg = isAr
       ? 'جاري إيقاف التسجيل وتحضير التفريغ الصوتي للمحاضرة...'
-      : 'Stopping recording and preparing audio transcription...';
+      : L('Stopping recording and preparing audio transcription...');
     toast.info(statusMsg);
 
     mediaRecorderRef.current.onstop = async () => {
@@ -1093,7 +1094,7 @@ ${currentDoc.fullText || ''}
       });
     } catch {
       setIsDocChatAnswering(false);
-      const errMsg = isAr ? 'حصل خطأ في الإجابة، جرب تسأل تاني.' : 'Error answering question, please try again.';
+      const errMsg = isAr ? 'حصل خطأ في الإجابة، جرب تسأل تاني.' : L('Error answering question, please try again.');
       setDocChatMessages((prev) => [...prev, { role: 'assistant', content: errMsg }]);
       speak(errMsg, isAr ? 'Arabic' : isFr ? 'French' : 'English');
     }
@@ -1257,15 +1258,15 @@ ${currentDoc.summary}
         setDocViewMode('quiz');
         const announcement = isAr
           ? 'تم توليد بنك الأسئلة وبطاقات المراجعة بنجاح! يمكنك الآن بدء الاختبار.'
-          : 'Quiz & flashcards generated successfully!';
+          : L('Quiz & flashcards generated successfully!');
         toast.success(announcement);
         speak(announcement, isAr ? 'Arabic' : isFr ? 'French' : 'English');
       } else {
-        toast.error(isAr ? 'تعذر إعداد الأسئلة، يرجى المحاولة ثانية.' : 'Could not generate quiz, please retry.');
+        toast.error(isAr ? 'تعذر إعداد الأسئلة، يرجى المحاولة ثانية.' : L('Could not generate quiz, please retry.'));
       }
     } catch (err) {
       console.error(err);
-      toast.error(isAr ? 'حدث خطأ أثناء إعداد بنك الأسئلة.' : 'Error generating quiz.');
+      toast.error(isAr ? 'حدث خطأ أثناء إعداد بنك الأسئلة.' : L('Error generating quiz.'));
     } finally {
       setIsGeneratingStudyKit(false);
     }

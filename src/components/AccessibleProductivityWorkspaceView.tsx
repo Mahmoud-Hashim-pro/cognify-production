@@ -53,7 +53,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { AttendanceTrackerPanel } from './AttendanceTrackerPanel';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { toast } from './Toast';
 import { Breadcrumbs } from './ui/Breadcrumbs';
@@ -144,12 +144,12 @@ export default function AccessibleProductivityWorkspaceView({
   // ─────────────────────────────────────────────────────────────────────────────
   const [voiceDoc, setVoiceDoc] = useState<VoiceDocument>({
     id: 'doc_1',
-    title: isAr ? 'مستند عمل ميسر جديد' : 'New Accessible Workspace Document',
+    title: isAr ? 'مستند عمل ميسر جديد' : L('New Accessible Workspace Document'),
     blocks: [
       {
         id: 'b1',
         type: 'heading1',
-        text: isAr ? 'خطة العمل والمستهدفات الأسبوعية' : 'Weekly Project Action Plan',
+        text: isAr ? 'خطة العمل والمستهدفات الأسبوعية' : L('Weekly Project Action Plan'),
         createdAt: new Date().toISOString(),
       },
       {
@@ -157,19 +157,19 @@ export default function AccessibleProductivityWorkspaceView({
         type: 'paragraph',
         text: isAr
           ? 'تم إعداد هذا المستند باستخدام نظام الإملاء الميسر في منصة رفيقي لضمان أعلى درجات سهولة الوصول.'
-          : 'Drafted using Rafiqi accessible dictation suite ensuring full non-visual navigation.',
+          : L('Drafted using Rafiqi accessible dictation suite ensuring full non-visual navigation.'),
         createdAt: new Date().toISOString(),
       },
       {
         id: 'b3',
         type: 'bullet',
-        text: isAr ? 'مراجعة الملاحظات الأكاديمية وجدول الاختبارات' : 'Review academic milestones and exam dates',
+        text: isAr ? 'مراجعة الملاحظات الأكاديمية وجدول الاختبارات' : L('Review academic milestones and exam dates'),
         createdAt: new Date().toISOString(),
       },
       {
         id: 'b4',
         type: 'bullet',
-        text: isAr ? 'صياغة التقرير الإداري وإرساله للمشرف' : 'Draft summary report for department lead',
+        text: isAr ? 'صياغة التقرير الإداري وإرساله للمشرف' : L('Draft summary report for department lead'),
         createdAt: new Date().toISOString(),
       },
     ],
@@ -187,8 +187,8 @@ export default function AccessibleProductivityWorkspaceView({
   // 2. WRITING & EMAIL ASSISTANT STATE
   // ─────────────────────────────────────────────────────────────────────────────
   const [emailInput, setEmailInput] = useState<EmailAssistantInput>({
-    recipient: isAr ? 'أ.د. محمود هاشم' : 'Prof. Dr. Mahmoud Hashim',
-    purpose: isAr ? 'طلب تمديد موعد تسليم المشروع البحثي' : 'Requesting extension for thesis assignment submission',
+    recipient: isAr ? 'أ.د. محمود هاشم' : L('Prof. Dr. Mahmoud Hashim'),
+    purpose: isAr ? 'طلب تمديد موعد تسليم المشروع البحثي' : L('Requesting extension for thesis assignment submission'),
     keyPoints: isAr
       ? [
           'إنجاز 80% من التحليل التجريبي للبيانات',
@@ -200,7 +200,7 @@ export default function AccessibleProductivityWorkspaceView({
           'Require 3 extra days to finalize accessible figures',
           'Full commitment to submit final version next Thursday',
         ],
-    deadlineOrNextStep: isAr ? 'يوم الخميس القادم الساعة الرابعة عصراً' : 'Next Thursday at 4:00 PM',
+    deadlineOrNextStep: isAr ? 'يوم الخميس القادم الساعة الرابعة عصراً' : L('Next Thursday at 4:00 PM'),
     tone: 'formal',
     dialect: isAr ? 'msa' : 'english',
     length: 'medium',
@@ -213,7 +213,7 @@ export default function AccessibleProductivityWorkspaceView({
   // 3. POWERPOINT CREATOR STATE
   // ─────────────────────────────────────────────────────────────────────────────
   const [presentationTopic, setPresentationTopic] = useState(
-    isAr ? 'الذكاء الاصطناعي والتكنولوجيا المساعدة لذوي الإعاقة' : 'Assistive AI and Inclusive Technologies'
+    isAr ? 'الذكاء الاصطناعي والتكنولوجيا المساعدة لذوي الإعاقة' : L('Assistive AI and Inclusive Technologies')
   );
   const [slideCount, setSlideCount] = useState(4);
   const [presentationModel, setPresentationModel] = useState<PresentationModel>(() =>
@@ -231,14 +231,14 @@ export default function AccessibleProductivityWorkspaceView({
 الذكاء الاصطناعي,88,4,352
 تراكيب البيانات,95,3,285
 نظم قواعد البيانات,90,3,270`
-    : `Course Name,Grade,Credits,Weighted Score
+    : L(`Course Name,Grade,Credits,Weighted Score
 Web Development,92,3,276
 Artificial Intelligence,88,4,352
 Data Structures,95,3,285
-Database Systems,90,3,270`;
+Database Systems,90,3,270`);
 
   const [spreadsheetModel, setSpreadsheetModel] = useState<SpreadsheetModel>(() =>
-    parseCsvOrTsv(sampleCsvData, isAr ? 'سجل الدرجات والمقررات' : 'Grade & Course Registry')
+    parseCsvOrTsv(sampleCsvData, isAr ? 'سجل الدرجات والمقررات' : L('Grade & Course Registry'))
   );
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number }>({ row: 0, col: 1 });
   const [cellEditValue, setCellEditValue] = useState('92');
@@ -252,10 +252,10 @@ Database Systems,90,3,270`;
   // 5. CHART DESCRIPTION STATE
   // ─────────────────────────────────────────────────────────────────────────────
   const [chartModel, setChartModel] = useState<ChartModel>({
-    title: isAr ? 'تطور معدل التحصيل الدراسي عبر الفصول' : 'Academic Growth Across Semesters',
+    title: isAr ? 'تطور معدل التحصيل الدراسي عبر الفصول' : L('Academic Growth Across Semesters'),
     chartType: 'column',
-    xAxisTitle: isAr ? 'الفصل الدراسي' : 'Academic Semester',
-    yAxisTitle: isAr ? 'نسبة الإنجاز %' : 'Achievement %',
+    xAxisTitle: isAr ? 'الفصل الدراسي' : L('Academic Semester'),
+    yAxisTitle: isAr ? 'نسبة الإنجاز %' : L('Achievement %'),
     units: '%',
     dataPoints: [
       { label: isAr ? 'خريف 2024' : 'Fall 2024', value: 74 },
@@ -328,7 +328,7 @@ Database Systems,90,3,270`;
             updatedAt: new Date().toISOString(),
           }));
           toast.info(localize(profile.language, 'Document cleared', 'تم تفريغ المستند'));
-          speakText(isAr ? 'تم تفريغ المستند' : 'Document cleared');
+          speakText(isAr ? 'تم تفريغ المستند' : L('Document cleared'));
         });
         setShowReplacementWarning(true);
         speakText(isAr ? safety.warningAr : safety.warningEn);
@@ -377,7 +377,7 @@ Database Systems,90,3,270`;
       speakText(
         isAr
           ? 'المتصفح لا يدعم التسجيل الصوتي المباشر، يمكنك الكتابة في المربع.'
-          : 'Voice recognition unavailable, please type in the text box.'
+          : L('Voice recognition unavailable, please type in the text box.')
       );
       return;
     }
@@ -442,7 +442,7 @@ Database Systems,90,3,270`;
       speakText(
         isAr
           ? 'تم إنشاء وتحميل ملف العرض التقديمي باوربوينت بنجاح'
-          : 'PowerPoint presentation successfully exported and downloaded'
+          : L('PowerPoint presentation successfully exported and downloaded')
       );
     } catch (err) {
       toast.error(localize(profile.language, 'Failed to export PPTX', 'فشل تصدير ملف PPTX'));
@@ -682,12 +682,12 @@ Database Systems,90,3,270`;
                         title: voiceDoc.title,
                         summary: isAr
                           ? 'مستند مصاغ عبر مساحة الإنتاجية الصوتية في رفيقي'
-                          : 'Drafted via Rafiqi Voice Productivity Workspace',
+                          : L('Drafted via Rafiqi Voice Productivity Workspace'),
                         fullText: exportDocumentToPlainText(voiceDoc),
                         lang: isAr ? 'ar' : 'en',
                       });
                       toast.success(localize(profile.language, 'Exported Word (.docx)', 'تم تصدير مستند Word (.docx)'));
-                      speakText(isAr ? 'تم تصدير ملف الوورد بنجاح' : 'Exported Word document successfully');
+                      speakText(isAr ? 'تم تصدير ملف الوورد بنجاح' : L('Exported Word document successfully'));
                     }}
                     className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] text-xs font-bold flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                   >
@@ -723,7 +723,7 @@ Database Systems,90,3,270`;
                   placeholder={
                     isAr
                       ? 'اكتب أو أملِ جملتك (مثال: "عنوان رئيسي ملخص الاجتماع" أو "نقطة جديدة مناقشة الميزانية")'
-                      : 'Type or dictate (e.g. "Heading 1 Project Roadmap" or "New bullet Review budget")'
+                      : L('Type or dictate (e.g. "Heading 1 Project Roadmap" or "New bullet Review budget")')
                   }
                   className="flex-1 min-h-[44px] px-4 py-2.5 bg-[#0A2342] border border-[#24476F] rounded-xl text-sm text-[#F8FAFC] placeholder-[#64748B] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                 />
@@ -740,11 +740,11 @@ Database Systems,90,3,270`;
               {/* Dictation Cheatsheet */}
               <div className="bg-[#17355C]/60 p-3 rounded-xl border border-[#24476F] text-xs text-[#94A3B8] flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="font-bold text-[#F8FAFC]">{localize(profile.language, 'Voice Commands:', 'أوامر صوتية سريعة:')}</span>
-                <span>{isAr ? '• "عنوان رئيسي [النص]"' : '• "Heading 1 [Text]"'}</span>
-                <span>{isAr ? '• "عنوان فرعي [النص]"' : '• "Heading 2 [Text]"'}</span>
-                <span>{isAr ? '• "نقطة جديدة [النص]"' : '• "Bullet [Text]"'}</span>
-                <span>{isAr ? '• "قائمة مرقمة [النص]"' : '• "Numbered list [Text]"'}</span>
-                <span>{isAr ? '• "علامة استفهام"، "نقطة"، "فاصلة"' : '• "Question mark", "Period", "Comma"'}</span>
+                <span>{isAr ? '• "عنوان رئيسي [النص]"' : L('• "Heading 1 [Text]"')}</span>
+                <span>{isAr ? '• "عنوان فرعي [النص]"' : L('• "Heading 2 [Text]"')}</span>
+                <span>{isAr ? '• "نقطة جديدة [النص]"' : L('• "Bullet [Text]"')}</span>
+                <span>{isAr ? '• "قائمة مرقمة [النص]"' : L('• "Numbered list [Text]"')}</span>
+                <span>{isAr ? '• "علامة استفهام"، "نقطة"، "فاصلة"' : L('• "Question mark", "Period", "Comma"')}</span>
               </div>
             </div>
 
@@ -856,7 +856,7 @@ Database Systems,90,3,270`;
                               ...prev,
                               blocks: prev.blocks.filter((b) => b.id !== block.id),
                             }));
-                            speakText(isAr ? 'تم حذف العنصر' : 'Block removed');
+                            speakText(isAr ? 'تم حذف العنصر' : L('Block removed'));
                           }}
                           aria-label={localize(profile.language, `Delete block ${idx + 1}`, `حذف الفقرة ${idx + 1}`)}
                           className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#17355C] text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
@@ -925,7 +925,7 @@ Database Systems,90,3,270`;
                       className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#0A2342] border border-[#24476F] text-[#F8FAFC]"
                     >
                       <option value="msa">{isAr ? 'فصحى معتمدة' : 'Formal MSA'}</option>
-                      <option value="egyptian">{isAr ? 'عامية مصرية' : 'Egyptian Ammiya'}</option>
+                      <option value="egyptian">{isAr ? 'عامية مصرية' : L('Egyptian Ammiya')}</option>
                       <option value="english">English</option>
                     </select>
                   </div>
@@ -940,9 +940,9 @@ Database Systems,90,3,270`;
                       className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#0A2342] border border-[#24476F] text-[#F8FAFC]"
                     >
                       <option value="formal">{isAr ? 'رسمي' : 'Formal'}</option>
-                      <option value="academic">{isAr ? 'أكاديمي' : 'Academic'}</option>
-                      <option value="friendly">{isAr ? 'ودي' : 'Friendly'}</option>
-                      <option value="concise">{isAr ? 'موجز' : 'Concise'}</option>
+                      <option value="academic">{isAr ? 'أكاديمي' : L('Academic')}</option>
+                      <option value="friendly">{isAr ? 'ودي' : L('Friendly')}</option>
+                      <option value="concise">{isAr ? 'موجز' : L('Concise')}</option>
                       <option value="empathetic">{isAr ? 'متعاطف' : 'Empathetic'}</option>
                     </select>
                   </div>
@@ -956,9 +956,9 @@ Database Systems,90,3,270`;
                       onChange={(e) => setEmailInput({ ...emailInput, length: e.target.value as WritingLength })}
                       className="w-full min-h-[44px] px-2 py-2 rounded-xl bg-[#0A2342] border border-[#24476F] text-[#F8FAFC]"
                     >
-                      <option value="short">{isAr ? 'قصير' : 'Short'}</option>
-                      <option value="medium">{isAr ? 'متوسط' : 'Medium'}</option>
-                      <option value="detailed">{isAr ? 'مفصل' : 'Detailed'}</option>
+                      <option value="short">{isAr ? 'قصير' : L('Short')}</option>
+                      <option value="medium">{isAr ? 'متوسط' : L('Medium')}</option>
+                      <option value="detailed">{isAr ? 'مفصل' : L('Detailed')}</option>
                     </select>
                   </div>
                 </div>
@@ -999,7 +999,7 @@ Database Systems,90,3,270`;
                     const draft = generateEmailDraft(emailInput);
                     setGeneratedDraft(draft);
                     toast.success(localize(profile.language, 'Generated new draft', 'تم إنشاء المسودة الجديدة'));
-                    speakText(isAr ? 'تم إنشاء المسودة الجديدة بنجاح' : 'New draft generated successfully');
+                    speakText(isAr ? 'تم إنشاء المسودة الجديدة بنجاح' : L('New draft generated successfully'));
                   }}
                   className="w-full min-h-[44px] py-3 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
                 >
@@ -1148,10 +1148,10 @@ Database Systems,90,3,270`;
                   onChange={(e) => setSlideCount(Number(e.target.value))}
                   className="min-h-[44px] px-3 py-2 bg-[#0A2342] border border-[#24476F] rounded-xl text-xs text-[#F8FAFC]"
                 >
-                  <option value={3}>{isAr ? '3 شرائح' : '3 Slides'}</option>
-                  <option value={4}>{isAr ? '4 شرائح' : '4 Slides'}</option>
-                  <option value={5}>{isAr ? '5 شرائح' : '5 Slides'}</option>
-                  <option value={6}>{isAr ? '6 شرائح' : '6 Slides'}</option>
+                  <option value={3}>{isAr ? '3 شرائح' : L('3 Slides')}</option>
+                  <option value={4}>{isAr ? '4 شرائح' : L('4 Slides')}</option>
+                  <option value={5}>{isAr ? '5 شرائح' : L('5 Slides')}</option>
+                  <option value={6}>{isAr ? '6 شرائح' : L('6 Slides')}</option>
                 </select>
                 <button
                   type="button"
@@ -1160,7 +1160,7 @@ Database Systems,90,3,270`;
                     setPresentationModel(pres);
                     setCurrentSlideIndex(0);
                     toast.success(localize(profile.language, 'Created presentation slides', 'تم إنشاء شرائح العرض'));
-                    speakText(isAr ? 'تم تجهيز شرائح العرض التقديمي' : 'Presentation slides prepared');
+                    speakText(isAr ? 'تم تجهيز شرائح العرض التقديمي' : L('Presentation slides prepared'));
                   }}
                   className="min-h-[44px] px-5 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                 >
@@ -1787,7 +1787,7 @@ Database Systems,90,3,270`;
                       speakText(
                         isAr
                           ? 'يوجد حقول إلزامية ناقصة، يرجى استكمالها.'
-                          : 'Required fields are missing, please fill them.'
+                          : L('Required fields are missing, please fill them.')
                       );
                       return;
                     }
@@ -1804,7 +1804,7 @@ Database Systems,90,3,270`;
                     speakText(
                       isAr
                         ? 'تم تدقيق كافة حقول النموذج بنجاح، يمكنك الآن نسخ بياناتك.'
-                        : 'Form successfully validated and approved.'
+                        : L('Form successfully validated and approved.')
                     );
                   }}
                   className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"

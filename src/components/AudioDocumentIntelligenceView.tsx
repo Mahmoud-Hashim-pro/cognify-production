@@ -55,7 +55,7 @@ import {
 import HeaderMenu, { ToolSwitcherSlot } from './HeaderMenu';
 import { ClampedNotice } from './ui/ClampedNotice';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { toast } from './Toast';
 import { BrandLogo } from './ui/BrandLogo';
@@ -292,14 +292,14 @@ export default function AudioDocumentIntelligenceView({
 
   const startTranscription = async () => {
     if (!audioFile) {
-      toast.warning(isAr ? 'يرجى اختيار ملف صوتي أولاً' : 'Please select an audio file first');
+      toast.warning(isAr ? 'يرجى اختيار ملف صوتي أولاً' : L('Please select an audio file first'));
       return;
     }
 
     setIsTranscribing(true);
     setTranscriptionProgress(10);
-    setTranscriptionStatusMsg(isAr ? 'بدء معالجة التسجيل...' : 'Starting transcription...');
-    announce(isAr ? 'بدء التفريغ الصوتي للمحاضرة عبر Google Gemini...' : 'Transcribing lecture audio via Google Gemini...');
+    setTranscriptionStatusMsg(isAr ? 'بدء معالجة التسجيل...' : L('Starting transcription...'));
+    announce(isAr ? 'بدء التفريغ الصوتي للمحاضرة عبر Google Gemini...' : L('Transcribing lecture audio via Google Gemini...'));
 
     try {
       const result = await transcribeAudioLecture(audioFile, audioFile.name, {
@@ -332,7 +332,7 @@ export default function AudioDocumentIntelligenceView({
       announce(successMsg);
       speak(successMsg, isAr ? 'Arabic' : 'English');
     } catch (err: any) {
-      const errMsg = err.message || (isAr ? 'تعذر إتمام التفريغ الصوتي' : 'Transcription failed');
+      const errMsg = err.message || (isAr ? 'تعذر إتمام التفريغ الصوتي' : L('Transcription failed'));
       toast.error(errMsg);
       announce(errMsg);
     } finally {
@@ -352,7 +352,7 @@ export default function AudioDocumentIntelligenceView({
     setLectureSummary(null);
     setLectureAnswer(null);
     setIsTranscribing(false);
-    const msg = isAr ? 'تم إلغاء الملف الصوتي وإعادة ضبط الجلسة.' : 'Audio cancelled and session reset.';
+    const msg = isAr ? 'تم إلغاء الملف الصوتي وإعادة ضبط الجلسة.' : L('Audio cancelled and session reset.');
     toast.info(msg);
     announce(msg);
   };
@@ -373,7 +373,7 @@ export default function AudioDocumentIntelligenceView({
     setEditingSegmentId(null);
     const msg = isAr
       ? 'تم تحديث نص الفقرة بنجاح دون المساس بالتسجيل الأصلي.'
-      : 'Segment transcript updated without altering audio.';
+      : L('Segment transcript updated without altering audio.');
     toast.success(msg);
     announce(msg);
   };
@@ -414,11 +414,11 @@ export default function AudioDocumentIntelligenceView({
   const handleGenerateStudyNotes = async () => {
     const source = transcript || docText;
     if (!source) {
-      toast.warning(isAr ? 'يرجى توفير تفريغ محاضرة أو مستند أولاً' : 'Please provide lecture or document text first');
+      toast.warning(isAr ? 'يرجى توفير تفريغ محاضرة أو مستند أولاً' : L('Please provide lecture or document text first'));
       return;
     }
     setIsGeneratingNotes(true);
-    announce(isAr ? 'جارٍ توليد المذكرة الدراسية المنظمة...' : 'Generating structured study notes...');
+    announce(isAr ? 'جارٍ توليد المذكرة الدراسية المنظمة...' : L('Generating structured study notes...'));
     try {
       const notes = await generateStudyNotes(source, isAr ? 'ar' : 'en', profile);
       setStructuredNotes(notes);
@@ -443,7 +443,7 @@ export default function AudioDocumentIntelligenceView({
       setLookupResult({
         word: item.word,
         definition: item.definition,
-        translation: item.translation || (isAr ? 'متوفر' : 'Available'),
+        translation: item.translation || (isAr ? 'متوفر' : L('Available')),
       });
       const msg = isAr
         ? `تم العثور على شرح "${item.word}" وإضافته إلى قاموس مفرداتك المحفوظة.`
@@ -480,22 +480,22 @@ export default function AudioDocumentIntelligenceView({
   const pauseOrStopAudio = () => {
     cancelSpeech();
     setIsPlayingAudio(false);
-    announce(isAr ? 'تم إيقاف القراءة الصوتية.' : 'Audio stopped.');
+    announce(isAr ? 'تم إيقاف القراءة الصوتية.' : L('Audio stopped.'));
   };
 
   const handleGenerateSummary = async () => {
     if (!transcript) {
-      toast.warning(isAr ? 'يرجى تفريغ المحاضرة أولاً لتوليد الملخص' : 'Please transcribe the lecture first');
+      toast.warning(isAr ? 'يرجى تفريغ المحاضرة أولاً لتوليد الملخص' : L('Please transcribe the lecture first'));
       return;
     }
 
     setIsGeneratingSummary(true);
-    announce(isAr ? 'جارٍ استخراج الملخص الذكي الموثق من نص المحاضرة...' : 'Generating structured lecture summary...');
+    announce(isAr ? 'جارٍ استخراج الملخص الذكي الموثق من نص المحاضرة...' : L('Generating structured lecture summary...'));
 
     try {
       const summary = await generateStructuredLectureSummary(transcript, isAr ? 'ar' : 'en', profile);
       setLectureSummary(summary);
-      const msg = isAr ? 'تم توليد الملخص الدراسي الشامل بنجاح.' : 'Study summary generated successfully.';
+      const msg = isAr ? 'تم توليد الملخص الدراسي الشامل بنجاح.' : L('Study summary generated successfully.');
       toast.success(msg);
       announce(msg);
     } catch (err: any) {
@@ -508,12 +508,12 @@ export default function AudioDocumentIntelligenceView({
   const handleAskLecture = async () => {
     if (!lectureQuestion.trim()) return;
     if (!transcript) {
-      toast.warning(isAr ? 'يرجى تفريغ المحاضرة أولاً' : 'Please transcribe the lecture first');
+      toast.warning(isAr ? 'يرجى تفريغ المحاضرة أولاً' : L('Please transcribe the lecture first'));
       return;
     }
 
     setIsAskingLecture(true);
-    announce(isAr ? 'جارٍ البحث في نص المحاضرة والإجابة...' : 'Searching lecture transcript for answer...');
+    announce(isAr ? 'جارٍ البحث في نص المحاضرة والإجابة...' : L('Searching lecture transcript for answer...'));
 
     try {
       const res = await askLectureQuestion(transcript, lectureQuestion, segments, isAr ? 'ar' : 'en', profile);
@@ -636,7 +636,7 @@ export default function AudioDocumentIntelligenceView({
         if (pdfRes.isScanned) {
           const scanWarn = isAr
             ? 'تنبيه: المستند ممسوح ضوئياً ويحتوي على صور صفحات بدون نصوص قابلة للتحديد مباشرة.'
-            : 'Notice: Document contains scanned images requiring OCR extraction.';
+            : L('Notice: Document contains scanned images requiring OCR extraction.');
           toast.warning(scanWarn);
           announce(scanWarn);
         } else {
@@ -668,12 +668,12 @@ export default function AudioDocumentIntelligenceView({
     if (!contentQuestion.trim()) return;
     const source = docText || transcript;
     if (!source) {
-      toast.warning(isAr ? 'يرجى تحميل مستند أو تفريغ محاضرة أولاً' : 'Please upload a document or lecture first');
+      toast.warning(isAr ? 'يرجى تحميل مستند أو تفريغ محاضرة أولاً' : L('Please upload a document or lecture first'));
       return;
     }
 
     setIsAskingContent(true);
-    announce(isAr ? 'جارٍ البحث في محتوى المستند...' : 'Searching document content...');
+    announce(isAr ? 'جارٍ البحث في محتوى المستند...' : L('Searching document content...'));
 
     try {
       const res = await askDocumentContent(source, contentQuestion, docPages, isAr ? 'ar' : 'en', profile);
@@ -694,12 +694,12 @@ export default function AudioDocumentIntelligenceView({
   const handleGenerateQuiz = async () => {
     const source = docText || transcript;
     if (!source) {
-      toast.warning(isAr ? 'يرجى تحميل مستند أو تفريغ محاضرة أولاً' : 'Please upload content first');
+      toast.warning(isAr ? 'يرجى تحميل مستند أو تفريغ محاضرة أولاً' : L('Please upload content first'));
       return;
     }
 
     setIsGeneratingQuiz(true);
-    announce(isAr ? 'جارٍ توليد الاختبار الدراسي التفاعلي...' : 'Generating interactive quiz...');
+    announce(isAr ? 'جارٍ توليد الاختبار الدراسي التفاعلي...' : L('Generating interactive quiz...'));
 
     try {
       const quiz = await generateContentQuiz(source, {
@@ -733,7 +733,7 @@ export default function AudioDocumentIntelligenceView({
     setTableSelectedCell({ row: newRow, col: newCol });
 
     const header = parsedTable.headers[newCol] || `عمود ${newCol + 1}`;
-    const value = parsedTable.rows[newRow]?.[newCol] || (isAr ? 'فارغ' : 'Empty');
+    const value = parsedTable.rows[newRow]?.[newCol] || (isAr ? 'فارغ' : L('Empty'));
     const cellAnnouncement = isAr
       ? `الصف ${newRow + 1}، ${header}: ${value}`
       : `Row ${newRow + 1}, ${header}: ${value}`;
@@ -777,7 +777,7 @@ export default function AudioDocumentIntelligenceView({
           <button
             type="button"
             onClick={onNavigateBack}
-            aria-label={isAr ? 'الرجوع للقائمة السابقة' : 'Navigate back'}
+            aria-label={isAr ? 'الرجوع للقائمة السابقة' : L('Navigate back')}
             className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl bg-[#17355C] hover:bg-[#1769AA]/20 text-[#4B9FE1] border border-[#24476F] transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1769AA]"
           >
             <ArrowLeft className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />
@@ -785,18 +785,18 @@ export default function AudioDocumentIntelligenceView({
         )}
         <span className="hidden"><BrandLogo size="sm" /></span>
         <h1 className="flex-1 min-w-0 truncate text-base font-bold text-white">
-          <span>{isAr ? 'الصوت والمستندات' : 'Audio & Documents'}</span>
-          <span className="hidden">{isAr ? 'رفيقي — ذكاء الصوت والمستندات' : 'Rafiqi — Audio & Document Intelligence'}</span>
+          <span>{isAr ? 'الصوت والمستندات' : L('Audio & Documents')}</span>
+          <span className="hidden">{isAr ? 'رفيقي — ذكاء الصوت والمستندات' : L('Rafiqi — Audio & Document Intelligence')}</span>
         </h1>
         <ToolSwitcherSlot />
         <HeaderMenu
-          ariaLabel={isAr ? 'المزيد' : 'More actions'}
+          ariaLabel={isAr ? 'المزيد' : L('More actions')}
           isDarkMode={isDarkMode}
           items={[
             {
               key: 'stop',
-              label: isAr ? 'إيقاف الصوت' : 'Stop Voice',
-              ariaLabel: isAr ? 'إيقاف الصوت فوراً' : 'Stop voice playback immediately',
+              label: isAr ? 'إيقاف الصوت' : L('Stop Voice'),
+              ariaLabel: isAr ? 'إيقاف الصوت فوراً' : L('Stop voice playback immediately'),
               icon: <VolumeX className="w-4 h-4" />,
               danger: true,
               onSelect: pauseOrStopAudio,
@@ -808,7 +808,7 @@ export default function AudioDocumentIntelligenceView({
       {/* 4 Accessible Module Navigation Tabs */}
       <nav
         role="tablist"
-        aria-label={isAr ? 'أقسام ذكاء الصوت والمستندات' : 'Intelligence subphases'}
+        aria-label={isAr ? 'أقسام ذكاء الصوت والمستندات' : L('Intelligence subphases')}
         className="flex flex-nowrap items-center gap-2 px-3 sm:px-4 py-2 bg-[#112C4F] border-b border-[#24476F] overflow-x-auto custom-scrollbar"
       >
         {[
@@ -858,12 +858,12 @@ export default function AudioDocumentIntelligenceView({
                 <div>
                   <h2 id="audio-upload-title" className="text-sm font-bold text-white flex items-center gap-2">
                     <Headphones className="w-4 h-4 text-[#4B9FE1]" />
-                    <span>{isAr ? '1. رفع التسجيل الصوتي للمحاضرة' : '1. Upload Lecture Audio'}</span>
+                    <span>{isAr ? '1. رفع التسجيل الصوتي للمحاضرة' : L('1. Upload Lecture Audio')}</span>
                   </h2>
                   <p className="text-xs text-[#94A3B8] mt-0.5">
                     {isAr
                       ? 'يدعم MP3, WAV, M4A, WEBM, OGG, AAC, FLAC بحجم أقصى 50 ميجابايت'
-                      : 'Supports MP3, WAV, M4A, WEBM, OGG, AAC, FLAC up to 50 MB'}
+                      : L('Supports MP3, WAV, M4A, WEBM, OGG, AAC, FLAC up to 50 MB')}
                   </p>
                 </div>
                 <input
@@ -874,7 +874,7 @@ export default function AudioDocumentIntelligenceView({
                   onChange={handleAudioUpload}
                   className="hidden"
                   id="lecture-audio-file-input"
-                  aria-label={isAr ? 'اختر ملفاً صوتياً من جهازك' : 'Select audio file from your device'}
+                  aria-label={isAr ? 'اختر ملفاً صوتياً من جهازك' : L('Select audio file from your device')}
                 />
                 <button
                   type="button"
@@ -882,7 +882,7 @@ export default function AudioDocumentIntelligenceView({
                   className="px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
                 >
                   <Upload className="w-4 h-4" />
-                  <span>{isAr ? 'اختيار ملف صوتي' : 'Choose Audio'}</span>
+                  <span>{isAr ? 'اختيار ملف صوتي' : L('Choose Audio')}</span>
                 </button>
               </div>
 
@@ -909,7 +909,7 @@ export default function AudioDocumentIntelligenceView({
                     <button
                       type="button"
                       onClick={handleResetAudio}
-                      aria-label={isAr ? 'إلغاء الملف الصوتي' : 'Cancel audio file'}
+                      aria-label={isAr ? 'إلغاء الملف الصوتي' : L('Cancel audio file')}
                       className="px-3 py-2 rounded-xl bg-[#C43D4D]/20 hover:bg-[#C43D4D]/40 text-[#FFA4A4] border border-[#C43D4D]/40 font-bold transition-colors cursor-pointer"
                     >
                       <X className="w-4 h-4" />
@@ -921,7 +921,7 @@ export default function AudioDocumentIntelligenceView({
                       className="px-4 py-2 rounded-xl bg-[#16845B] hover:bg-[#16845B]/80 text-white font-bold flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
                     >
                       {isTranscribing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                      <span>{isTranscribing ? (isAr ? 'جارٍ التفريغ...' : 'Transcribing...') : (isAr ? 'بدء التفريغ الصوتي' : 'Start Transcription')}</span>
+                      <span>{isTranscribing ? (isAr ? 'جارٍ التفريغ...' : L('Transcribing...')) : (isAr ? 'بدء التفريغ الصوتي' : L('Start Transcription'))}</span>
                     </button>
                   </div>
                 </div>
@@ -948,12 +948,12 @@ export default function AudioDocumentIntelligenceView({
                 <div data-testid="lecture-empty-state" className="p-8 text-center rounded-2xl bg-[#0D2542]/40 border border-dashed border-[#1769AA]/30 space-y-2">
                   <Headphones className="w-8 h-8 text-[#4B9FE1] mx-auto opacity-70" />
                   <h3 className="text-sm font-bold text-white">
-                    {isAr ? 'لا توجد محاضرة مفرغة حالياً' : 'No lecture transcribed yet'}
+                    {isAr ? 'لا توجد محاضرة مفرغة حالياً' : L('No lecture transcribed yet')}
                   </h3>
                   <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
                     {isAr
                       ? 'اختر ملفاً صوتياً من جهازك ثم اضغط "بدء التفريغ الصوتي" لتوليد النص المتزامن والفصول.'
-                      : 'Choose an audio file from your device and click "Start Transcription" to generate synchronized transcript and chapters.'}
+                      : L('Choose an audio file from your device and click "Start Transcription" to generate synchronized transcript and chapters.')}
                   </p>
                 </div>
               )}
@@ -970,7 +970,7 @@ export default function AudioDocumentIntelligenceView({
                 >
                   <h3 id="chapters-title" className="text-xs font-bold text-white flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#4B9FE1]" />
-                    <span>{isAr ? 'فصول المحاضرة والتوقيتات' : 'Lecture Chapters & Timestamps'}</span>
+                    <span>{isAr ? 'فصول المحاضرة والتوقيتات' : L('Lecture Chapters & Timestamps')}</span>
                   </h3>
                   <div className="space-y-2 max-h-80 overflow-y-auto custom-scrollbar">
                     {lectureChapters.map((chap) => (
@@ -1005,7 +1005,7 @@ export default function AudioDocumentIntelligenceView({
                               value={editingChapterTitle}
                               onChange={(e) => setEditingChapterTitle(e.target.value)}
                               className="w-full px-2 py-1 rounded-lg bg-[#0A2342] border border-[#1769AA] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA]"
-                              aria-label={isAr ? 'اسم الفصل الجديد' : 'New chapter title'}
+                              aria-label={isAr ? 'اسم الفصل الجديد' : L('New chapter title')}
                             />
                             <div className="flex gap-2 justify-end">
                               <button
@@ -1013,14 +1013,14 @@ export default function AudioDocumentIntelligenceView({
                                 onClick={() => handleSaveChapter(chap.id)}
                                 className="px-2 py-0.5 rounded bg-[#16845B] text-white text-xs font-bold"
                               >
-                                {isAr ? 'حفظ' : 'Save'}
+                                {isAr ? 'حفظ' : L('Save')}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setEditingChapterId(null)}
                                 className="px-2 py-0.5 rounded bg-[#24476F] text-[#94A3B8] text-xs"
                               >
-                                {isAr ? 'إلغاء' : 'Cancel'}
+                                {isAr ? 'إلغاء' : L('Cancel')}
                               </button>
                             </div>
                           </div>
@@ -1041,12 +1041,12 @@ export default function AudioDocumentIntelligenceView({
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#24476F] pb-3">
                     <h3 id="transcript-reader-title" className="text-xs font-bold text-white flex items-center gap-2">
                       <FileText className="w-4 h-4 text-[#4B9FE1]" />
-                      <span>{isAr ? 'قارئ النص المتزامن' : 'Synchronized Transcript Reader'}</span>
+                      <span>{isAr ? 'قارئ النص المتزامن' : L('Synchronized Transcript Reader')}</span>
                     </h3>
 
                     {/* Speed Controls */}
                     <div data-testid="audio-playback-controls" className="flex items-center gap-1.5 text-xs font-bold">
-                      <span className="text-[#94A3B8] text-xs">{isAr ? 'السرعة:' : 'Speed:'}</span>
+                      <span className="text-[#94A3B8] text-xs">{isAr ? 'السرعة:' : L('Speed:')}</span>
                       {[0.75, 1.0, 1.25, 1.5, 2.0].map((rate) => (
                         <button
                           key={rate}
@@ -1067,7 +1067,7 @@ export default function AudioDocumentIntelligenceView({
                     <button
                       type="button"
                       onClick={() => playSegment(Math.max(0, activeSegmentIndex - 1))}
-                      aria-label={isAr ? 'الفقرة السابقة' : 'Previous segment'}
+                      aria-label={isAr ? 'الفقرة السابقة' : L('Previous segment')}
                       className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#1769AA]/20 cursor-pointer"
                     >
                       <SkipBack className="w-4 h-4" />
@@ -1075,7 +1075,7 @@ export default function AudioDocumentIntelligenceView({
                     <button
                       type="button"
                       onClick={() => isPlayingAudio ? pauseOrStopAudio() : playSegment(activeSegmentIndex)}
-                      aria-label={isPlayingAudio ? (isAr ? 'إيقاف مؤقت' : 'Pause') : (isAr ? 'تشغيل' : 'Play')}
+                      aria-label={isPlayingAudio ? (isAr ? 'إيقاف مؤقت' : L('Pause')) : (isAr ? 'تشغيل' : L('Play'))}
                       className="p-3 rounded-2xl bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold shadow-md cursor-pointer"
                     >
                       {isPlayingAudio ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -1083,7 +1083,7 @@ export default function AudioDocumentIntelligenceView({
                     <button
                       type="button"
                       onClick={() => playSegment(Math.min(segments.length - 1, activeSegmentIndex + 1))}
-                      aria-label={isAr ? 'الفقرة التالية' : 'Next segment'}
+                      aria-label={isAr ? 'الفقرة التالية' : L('Next segment')}
                       className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#1769AA]/20 cursor-pointer"
                     >
                       <SkipForward className="w-4 h-4" />
@@ -1091,7 +1091,7 @@ export default function AudioDocumentIntelligenceView({
                     <button
                       type="button"
                       onClick={() => playSegment(activeSegmentIndex)}
-                      aria-label={isAr ? 'إعادة الفقرة الحالية' : 'Replay current segment'}
+                      aria-label={isAr ? 'إعادة الفقرة الحالية' : L('Replay current segment')}
                       className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#1769AA]/20 cursor-pointer"
                     >
                       <RotateCcw className="w-4 h-4" />
@@ -1119,7 +1119,7 @@ export default function AudioDocumentIntelligenceView({
                                 onClick={() => handleReplaySegment(idx)}
                                 aria-label={isAr ? `إعادة استماع الفقرة [${seg.timestamp}]` : `Replay segment [${seg.timestamp}]`}
                                 className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#1769AA]/30 cursor-pointer"
-                                title={isAr ? 'إعادة استماع' : 'Replay'}
+                                title={isAr ? 'إعادة استماع' : L('Replay')}
                               >
                                 <RotateCcw className="w-3.5 h-3.5" />
                               </button>
@@ -1128,7 +1128,7 @@ export default function AudioDocumentIntelligenceView({
                                 onClick={() => handleEditSegment(seg.id, seg.text)}
                                 aria-label={isAr ? `تعديل تفريغ الفقرة [${seg.timestamp}]` : `Edit segment text [${seg.timestamp}]`}
                                 className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#1769AA]/30 cursor-pointer"
-                                title={isAr ? 'تعديل النص' : 'Edit text'}
+                                title={isAr ? 'تعديل النص' : L('Edit text')}
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
@@ -1142,7 +1142,7 @@ export default function AudioDocumentIntelligenceView({
                                 onChange={(e) => setEditingSegmentText(e.target.value)}
                                 className="w-full p-2.5 rounded-xl bg-[#0D2542] border border-[#1769AA] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                                 rows={3}
-                                aria-label={isAr ? 'تعديل نص تفريغ الفقرة' : 'Edit segment transcript text'}
+                                aria-label={isAr ? 'تعديل نص تفريغ الفقرة' : L('Edit segment transcript text')}
                               />
                               <div className="flex gap-2 justify-end">
                                 <button
@@ -1151,14 +1151,14 @@ export default function AudioDocumentIntelligenceView({
                                   className="px-3 py-1 rounded-lg bg-[#16845B] text-white font-bold flex items-center gap-1 text-xs cursor-pointer"
                                 >
                                   <Save className="w-3.5 h-3.5" />
-                                  <span>{isAr ? 'حفظ' : 'Save'}</span>
+                                  <span>{isAr ? 'حفظ' : L('Save')}</span>
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setEditingSegmentId(null)}
                                   className="px-3 py-1 rounded-lg bg-[#C43D4D]/30 text-[#FFA4A4] text-xs cursor-pointer"
                                 >
-                                  {isAr ? 'إلغاء' : 'Cancel'}
+                                  {isAr ? 'إلغاء' : L('Cancel')}
                                 </button>
                               </div>
                             </div>
@@ -1190,7 +1190,7 @@ export default function AudioDocumentIntelligenceView({
                   <div className="flex items-center justify-between border-b border-[#24476F] pb-3">
                     <h3 id="lecture-summary-title" className="text-xs font-bold text-white flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-[#4B9FE1]" />
-                      <span>{isAr ? 'الملخص الدراسي الذكي الموثق' : 'Smart Grounded Study Summary'}</span>
+                      <span>{isAr ? 'الملخص الدراسي الذكي الموثق' : L('Smart Grounded Study Summary')}</span>
                     </h3>
                     <button
                       type="button"
@@ -1199,20 +1199,20 @@ export default function AudioDocumentIntelligenceView({
                       className="px-3 py-1.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
                       {isGeneratingSummary ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                      <span>{isAr ? 'توليد الملخص' : 'Generate Summary'}</span>
+                      <span>{isAr ? 'توليد الملخص' : L('Generate Summary')}</span>
                     </button>
                   </div>
 
                   {lectureSummary && (
                     <div className="space-y-3 text-xs">
                       <div className="p-3 rounded-2xl bg-[#0D2542] border border-[#1769AA]/30 space-y-1">
-                        <span className="font-bold text-white block">{isAr ? 'الزبدة المركزة:' : 'Short Summary:'}</span>
+                        <span className="font-bold text-white block">{isAr ? 'الزبدة المركزة:' : L('Short Summary:')}</span>
                         <p className="text-[#94A3B8] leading-relaxed">{lectureSummary.shortSummary}</p>
                       </div>
 
                       {lectureSummary.mainIdeas.length > 0 && (
                         <div className="space-y-1">
-                          <span className="font-bold text-white block">{isAr ? 'الأفكار الرئيسية:' : 'Main Ideas:'}</span>
+                          <span className="font-bold text-white block">{isAr ? 'الأفكار الرئيسية:' : L('Main Ideas:')}</span>
                           <ul className="list-disc list-inside text-[#94A3B8] space-y-0.5">
                             {lectureSummary.mainIdeas.map((idea, i) => (
                               <li key={i}>{idea}</li>
@@ -1223,7 +1223,7 @@ export default function AudioDocumentIntelligenceView({
 
                       {lectureSummary.definitions.length > 0 && (
                         <div className="space-y-1">
-                          <span className="font-bold text-white block">{isAr ? 'التعريفات والمصطلحات:' : 'Key Definitions:'}</span>
+                          <span className="font-bold text-white block">{isAr ? 'التعريفات والمصطلحات:' : L('Key Definitions:')}</span>
                           {lectureSummary.definitions.map((d, i) => (
                             <div key={i} className="text-[#94A3B8]">
                               <strong className="text-[#4B9FE1]">{d.term}:</strong> {d.definition}
@@ -1234,7 +1234,7 @@ export default function AudioDocumentIntelligenceView({
 
                       {lectureSummary.datesAndNumbers && lectureSummary.datesAndNumbers.length > 0 && (
                         <div className="space-y-1">
-                          <span className="font-bold text-white block">{isAr ? 'التواريخ والأرقام والإحصائيات:' : 'Dates, Numbers & Metrics:'}</span>
+                          <span className="font-bold text-white block">{isAr ? 'التواريخ والأرقام والإحصائيات:' : L('Dates, Numbers & Metrics:')}</span>
                           <div className="flex flex-wrap gap-1.5">
                             {lectureSummary.datesAndNumbers.map((num, i) => (
                               <span key={i} className="px-2 py-0.5 rounded-lg bg-[#0D2542] border border-[#1769AA]/40 text-[#4B9FE1] font-mono">
@@ -1247,7 +1247,7 @@ export default function AudioDocumentIntelligenceView({
 
                       {lectureSummary.lecturerQuestions && lectureSummary.lecturerQuestions.length > 0 && (
                         <div className="space-y-1">
-                          <span className="font-bold text-white block">{isAr ? 'أسئلة طرحها المحاضر أثناء الشرح:' : 'Questions Asked by Lecturer:'}</span>
+                          <span className="font-bold text-white block">{isAr ? 'أسئلة طرحها المحاضر أثناء الشرح:' : L('Questions Asked by Lecturer:')}</span>
                           <ul className="list-disc list-inside text-[#94A3B8] space-y-0.5">
                             {lectureSummary.lecturerQuestions.map((q, i) => (
                               <li key={i}>{q}</li>
@@ -1258,7 +1258,7 @@ export default function AudioDocumentIntelligenceView({
 
                       {lectureSummary.revisionQuestions && lectureSummary.revisionQuestions.length > 0 && (
                         <div className="space-y-1">
-                          <span className="font-bold text-white block">{isAr ? 'أسئلة مراجعة مقترحة للامتحان:' : 'Suggested Revision Questions:'}</span>
+                          <span className="font-bold text-white block">{isAr ? 'أسئلة مراجعة مقترحة للامتحان:' : L('Suggested Revision Questions:')}</span>
                           <ul className="list-decimal list-inside text-[#4B9FE1] space-y-0.5">
                             {lectureSummary.revisionQuestions.map((rq, i) => (
                               <li key={i} className="text-[#94A3B8]"><span className="text-white">{rq}</span></li>
@@ -1277,7 +1277,7 @@ export default function AudioDocumentIntelligenceView({
                 >
                   <h3 id="ask-lecture-title" className="text-xs font-bold text-white flex items-center gap-2 border-b border-[#24476F] pb-3">
                     <HelpCircle className="w-4 h-4 text-[#4B9FE1]" />
-                    <span>{isAr ? 'اسأل المحاضرة (إجابات موثقة بالتوقيت)' : 'Ask Your Lecture (Timestamp Grounded)'}</span>
+                    <span>{isAr ? 'اسأل المحاضرة (إجابات موثقة بالتوقيت)' : L('Ask Your Lecture (Timestamp Grounded)')}</span>
                   </h3>
 
                   <div className="flex gap-2">
@@ -1286,7 +1286,7 @@ export default function AudioDocumentIntelligenceView({
                       value={lectureQuestion}
                       onChange={(e) => setLectureQuestion(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAskLecture()}
-                      placeholder={isAr ? 'ماذا قال المحاضر عن...؟' : 'What did the lecturer say about...?'}
+                      placeholder={isAr ? 'ماذا قال المحاضر عن...؟' : L('What did the lecturer say about...?')}
                       className="flex-1 px-4 py-2.5 rounded-xl bg-[#0A2342] border border-[#24476F] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                     />
                     <button
@@ -1302,7 +1302,7 @@ export default function AudioDocumentIntelligenceView({
                   {lectureAnswer && (
                     <div className="p-3.5 rounded-2xl bg-[#0D2542] border border-[#1769AA]/40 space-y-2 text-xs">
                       <div className="flex items-center justify-between text-[#4B9FE1] font-bold">
-                        <span>{isAr ? 'الإجابة الموثقة:' : 'Grounded Answer:'}</span>
+                        <span>{isAr ? 'الإجابة الموثقة:' : L('Grounded Answer:')}</span>
                         {lectureAnswer.timestamp && <span>[{lectureAnswer.timestamp}]</span>}
                       </div>
                       <p className="text-white leading-relaxed">{lectureAnswer.answer}</p>
@@ -1328,12 +1328,12 @@ export default function AudioDocumentIntelligenceView({
                 <div>
                   <h2 id="doc-upload-title" className="text-sm font-bold text-white flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-[#4B9FE1]" />
-                    <span>{isAr ? 'قارئ المستندات الميسر (PDF, DOCX, EPUB)' : 'Accessible Document Reader (PDF, DOCX, EPUB)'}</span>
+                    <span>{isAr ? 'قارئ المستندات الميسر (PDF, DOCX, EPUB)' : L('Accessible Document Reader (PDF, DOCX, EPUB)')}</span>
                   </h2>
                   <p className="text-xs text-[#94A3B8]">
                     {isAr
                       ? 'قراءة نصوص الكتب والملفات بتنسيق منطقي مع الحفاظ على الترتيب الأصلي وقراءة الشاشة'
-                      : 'Structured reading preserving reading order and heading semantics'}
+                      : L('Structured reading preserving reading order and heading semantics')}
                   </p>
                 </div>
                 <input
@@ -1344,7 +1344,7 @@ export default function AudioDocumentIntelligenceView({
                   onChange={handleDocUpload}
                   className="hidden"
                   id="document-reader-file-input"
-                  aria-label={isAr ? 'اختر ملف مستند' : 'Choose document file'}
+                  aria-label={isAr ? 'اختر ملف مستند' : L('Choose document file')}
                 />
                 <button
                   type="button"
@@ -1352,7 +1352,7 @@ export default function AudioDocumentIntelligenceView({
                   className="px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-2 cursor-pointer"
                 >
                   <Upload className="w-4 h-4" />
-                  <span>{isAr ? 'رفع مستند' : 'Upload Document'}</span>
+                  <span>{isAr ? 'رفع مستند' : L('Upload Document')}</span>
                 </button>
               </div>
 
@@ -1363,7 +1363,7 @@ export default function AudioDocumentIntelligenceView({
                   <span>
                     {isAr
                       ? 'تم رصد صفحات ممسوحة ضوئياً بدون نصوص محددة. تم تفعيل الاستخراج البصري الذكي مع تنبيه المستخدم لاحتمال وجود تباين طفيف في الدقة.'
-                      : 'Scanned document detected. Optical extraction active with accuracy disclosure.'}
+                      : L('Scanned document detected. Optical extraction active with accuracy disclosure.')}
                   </span>
                 </div>
               )}
@@ -1371,7 +1371,7 @@ export default function AudioDocumentIntelligenceView({
               {/* Reading Modes & Consent Controls */}
               <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-[#0D2542] border border-[#1769AA]/30 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'نمط القراءة:' : 'Reading Mode:'}</span>
+                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'نمط القراءة:' : L('Reading Mode:')}</span>
                   {[
                     { id: 'verbatim' as const, labelAr: 'حرفي', labelEn: 'Verbatim' },
                     { id: 'concise' as const, labelAr: 'موجز', labelEn: 'Concise' },
@@ -1400,19 +1400,19 @@ export default function AudioDocumentIntelligenceView({
                   <input
                     type="checkbox"
                     checked={readingConsent}
-                    aria-label={isAr ? 'تذكر موضع القراءة بموافقتي' : 'Remember reading position with my consent'}
+                    aria-label={isAr ? 'تذكر موضع القراءة بموافقتي' : L('Remember reading position with my consent')}
                     onChange={(e) => {
                       setReadingConsent(e.target.checked);
                       announce(
                         e.target.checked
-                          ? (isAr ? 'تم تفعيل حفظ موضع القراءة بموافقتك.' : 'Reading progress persistence enabled with your consent.')
-                          : (isAr ? 'تم إيقاف حفظ موضع القراءة لحماية الخصوصية.' : 'Reading progress persistence disabled for privacy.')
+                          ? (isAr ? 'تم تفعيل حفظ موضع القراءة بموافقتك.' : L('Reading progress persistence enabled with your consent.'))
+                          : (isAr ? 'تم إيقاف حفظ موضع القراءة لحماية الخصوصية.' : L('Reading progress persistence disabled for privacy.'))
                       );
                     }}
                     className="rounded text-[#1769AA] focus:ring-[#1769AA]"
                   />
                   <span>
-                    {isAr ? 'تذكر موضع القراءة بموافقتي' : 'Remember reading position with my consent'}
+                    {isAr ? 'تذكر موضع القراءة بموافقتي' : L('Remember reading position with my consent')}
                   </span>
                 </label>
               </div>
@@ -1449,14 +1449,14 @@ export default function AudioDocumentIntelligenceView({
                       className="px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold flex items-center gap-2 cursor-pointer"
                     >
                       <Volume2 className="w-4 h-4" />
-                      <span>{isAr ? 'قراءة الصفحة صوتياً' : 'Read Page Aloud'}</span>
+                      <span>{isAr ? 'قراءة الصفحة صوتياً' : L('Read Page Aloud')}</span>
                     </button>
                     <button
                       type="button"
                       onClick={pauseOrStopAudio}
-                      aria-label={isAr ? 'إيقاف القراءة الصوتية' : 'Stop audio playback'}
+                      aria-label={isAr ? 'إيقاف القراءة الصوتية' : L('Stop audio playback')}
                       className="p-2 rounded-xl bg-[#C43D4D]/20 text-[#FFA4A4] border border-[#C43D4D]/40 cursor-pointer"
-                      title={isAr ? 'إيقاف' : 'Stop'}
+                      title={isAr ? 'إيقاف' : L('Stop')}
                     >
                       <VolumeX className="w-4 h-4" />
                     </button>
@@ -1482,7 +1482,7 @@ export default function AudioDocumentIntelligenceView({
                 <div className="flex items-center justify-between border-b border-[#24476F] pb-3">
                   <h3 id="reading-history-title" className="text-xs font-bold text-white flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#4B9FE1]" />
-                    <span>{isAr ? 'سجل القراءة واستئناف الموضع' : 'Reading History & Progress Resume'}</span>
+                    <span>{isAr ? 'سجل القراءة واستئناف الموضع' : L('Reading History & Progress Resume')}</span>
                   </h3>
                   <button
                     type="button"
@@ -1492,7 +1492,7 @@ export default function AudioDocumentIntelligenceView({
                     }}
                     className="text-xs text-[#C43D4D] hover:underline cursor-pointer"
                   >
-                    {isAr ? 'مسح السجل' : 'Clear History'}
+                    {isAr ? 'مسح السجل' : L('Clear History')}
                   </button>
                 </div>
 
@@ -1509,7 +1509,7 @@ export default function AudioDocumentIntelligenceView({
                         </span>
                       </div>
                       <div className="flex justify-between items-center pt-1 border-t border-[#1769AA]/20">
-                        <span className="text-xs text-[#4B9FE1]">{item.wordCount} {isAr ? 'كلمة' : 'words'}</span>
+                        <span className="text-xs text-[#4B9FE1]">{item.wordCount} {isAr ? 'كلمة' : L('words')}</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -1517,7 +1517,7 @@ export default function AudioDocumentIntelligenceView({
                             setReadingHistory(getDocumentReadingHistory());
                           }}
                           className="text-[#94A3B8] hover:text-[#C43D4D] p-1"
-                          title={isAr ? 'حذف' : 'Remove'}
+                          title={isAr ? 'حذف' : L('Remove')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1543,7 +1543,7 @@ export default function AudioDocumentIntelligenceView({
             >
               <h2 id="ask-doc-title" className="text-sm font-bold text-white flex items-center gap-2 border-b border-[#24476F] pb-3">
                 <HelpCircle className="w-4 h-4 text-[#4B9FE1]" />
-                <span>{isAr ? 'اسأل المستند (باستشهاد أرقام الصفحات)' : 'Ask Document (With Page Citations)'}</span>
+                <span>{isAr ? 'اسأل المستند (باستشهاد أرقام الصفحات)' : L('Ask Document (With Page Citations)')}</span>
               </h2>
 
               <div className="flex gap-2">
@@ -1552,7 +1552,7 @@ export default function AudioDocumentIntelligenceView({
                   value={contentQuestion}
                   onChange={(e) => setContentQuestion(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAskContent()}
-                  placeholder={isAr ? 'اطرح سؤالاً عن المستند (مثال: ما هي شروط التسجيل؟)...' : 'Ask a question from document...'}
+                  placeholder={isAr ? 'اطرح سؤالاً عن المستند (مثال: ما هي شروط التسجيل؟)...' : L('Ask a question from document...')}
                   className="flex-1 px-4 py-2.5 rounded-xl bg-[#0A2342] border border-[#24476F] text-xs text-white outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
                 <button
@@ -1568,7 +1568,7 @@ export default function AudioDocumentIntelligenceView({
               {contentAnswer && (
                 <div className="p-3.5 rounded-2xl bg-[#0D2542] border border-[#1769AA]/40 space-y-2 text-xs">
                   <div className="flex items-center justify-between text-[#4B9FE1] font-bold">
-                    <span>{isAr ? 'الإجابة الموثقة:' : 'Grounded Answer:'}</span>
+                    <span>{isAr ? 'الإجابة الموثقة:' : L('Grounded Answer:')}</span>
                     {contentAnswer.citationPage && <span>{isAr ? `صفحة ${contentAnswer.citationPage}` : `Page ${contentAnswer.citationPage}`}</span>}
                   </div>
                   <p className="text-white leading-relaxed">{contentAnswer.answer}</p>
@@ -1585,7 +1585,7 @@ export default function AudioDocumentIntelligenceView({
               <div className="flex items-center justify-between border-b border-[#24476F] pb-3">
                 <h2 id="quiz-gen-title" className="text-sm font-bold text-white flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#4B9FE1]" />
-                  <span>{isAr ? 'مولد الاختبارات التدريبية الميسرة' : 'Accessible Practice Quiz Generator'}</span>
+                  <span>{isAr ? 'مولد الاختبارات التدريبية الميسرة' : L('Accessible Practice Quiz Generator')}</span>
                 </h2>
                 <button
                   type="button"
@@ -1594,14 +1594,14 @@ export default function AudioDocumentIntelligenceView({
                   className="px-3 py-1.5 rounded-xl bg-[#16845B] hover:bg-[#16845B]/80 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isGeneratingQuiz ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  <span>{isAr ? 'توليد اختبار' : 'Generate Quiz'}</span>
+                  <span>{isAr ? 'توليد اختبار' : L('Generate Quiz')}</span>
                 </button>
               </div>
 
               {/* Quiz Settings */}
               <div className="flex flex-wrap items-center gap-3 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'النوع:' : 'Type:'}</span>
+                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'النوع:' : L('Type:')}</span>
                   {[
                     { id: 'all' as const, labelAr: 'شامل', labelEn: 'All' },
                     { id: 'mcq' as const, labelAr: 'اختيار', labelEn: 'MCQ' },
@@ -1622,7 +1622,7 @@ export default function AudioDocumentIntelligenceView({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'المستوى:' : 'Difficulty:'}</span>
+                  <span className="text-[#94A3B8] font-bold text-xs">{isAr ? 'المستوى:' : L('Difficulty:')}</span>
                   {(['easy', 'medium', 'hard'] as const).map((diff) => (
                     <button
                       key={diff}
@@ -1678,7 +1678,7 @@ export default function AudioDocumentIntelligenceView({
                             type="text"
                             value={shortAnswers[q.id] || ''}
                             onChange={(e) => setShortAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                            placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer here...'}
+                            placeholder={isAr ? 'اكتب إجابتك هنا...' : L('Type your answer here...')}
                             className="w-full px-3 py-1.5 rounded-xl bg-[#0A2342] border border-[#24476F] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                             aria-label={isAr ? `إجابة السؤال ${qIdx + 1}` : `Answer for question ${qIdx + 1}`}
                           />
@@ -1688,14 +1688,14 @@ export default function AudioDocumentIntelligenceView({
                               onClick={() => setRevealedShortAnswers((prev) => ({ ...prev, [q.id]: true }))}
                               className="px-3 py-1 rounded-lg bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold cursor-pointer"
                             >
-                              {isAr ? 'عرض الإجابة النموذجية' : 'Show Model Answer'}
+                              {isAr ? 'عرض الإجابة النموذجية' : L('Show Model Answer')}
                             </button>
                           </div>
                           {revealedShortAnswers[q.id] && (
                             <div className="p-2.5 rounded-xl bg-[#16845B]/20 border border-[#16845B]/40 text-xs space-y-1">
-                              <span className="font-bold text-[#93FFD8] block">{isAr ? 'الإجابة النموذجية المستخرجة:' : 'Model Answer:'}</span>
+                              <span className="font-bold text-[#93FFD8] block">{isAr ? 'الإجابة النموذجية المستخرجة:' : L('Model Answer:')}</span>
                               <p className="text-white">{q.correctAnswerText}</p>
-                              <p className="text-xs text-[#94A3B8] pt-1">{isAr ? 'التفسير المدعوم:' : 'Grounded explanation:'} {q.groundedExplanation}</p>
+                              <p className="text-xs text-[#94A3B8] pt-1">{isAr ? 'التفسير المدعوم:' : L('Grounded explanation:')} {q.groundedExplanation}</p>
                             </div>
                           )}
                         </div>
@@ -1703,7 +1703,7 @@ export default function AudioDocumentIntelligenceView({
 
                       {quizAnswers[q.id] !== undefined && q.type !== 'short_answer' && (
                         <p className="text-xs text-[#4B9FE1] pt-1">
-                          {isAr ? 'التفسير المدعوم:' : 'Grounded explanation:'} {q.groundedExplanation}
+                          {isAr ? 'التفسير المدعوم:' : L('Grounded explanation:')} {q.groundedExplanation}
                         </p>
                       )}
                     </div>
@@ -1720,7 +1720,7 @@ export default function AudioDocumentIntelligenceView({
               <div className="flex items-center justify-between border-b border-[#24476F] pb-3">
                 <h2 id="study-notes-title" className="text-sm font-bold text-white flex items-center gap-2">
                   <FileText className="w-4 h-4 text-[#4B9FE1]" />
-                  <span>{isAr ? 'المذكرة الدراسية المنظمة الميسرة' : 'Structured Study Notes Guide'}</span>
+                  <span>{isAr ? 'المذكرة الدراسية المنظمة الميسرة' : L('Structured Study Notes Guide')}</span>
                 </h2>
                 <button
                   type="button"
@@ -1729,7 +1729,7 @@ export default function AudioDocumentIntelligenceView({
                   className="px-3 py-1.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isGeneratingNotes ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  <span>{isAr ? 'توليد مذكرة دراسية' : 'Generate Study Notes'}</span>
+                  <span>{isAr ? 'توليد مذكرة دراسية' : L('Generate Study Notes')}</span>
                 </button>
               </div>
 
@@ -1744,12 +1744,12 @@ export default function AudioDocumentIntelligenceView({
                           structuredNotes.sections.map((s) => `## ${s.heading}\n${s.points.map((p) => `- ${p}`).join('\n')}`).join('\n\n') +
                           `\n\n### أسئلة المراجعة:\n` + structuredNotes.reviewQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n');
                         navigator.clipboard.writeText(content);
-                        toast.success(isAr ? 'تم نسخ المذكرة الدراسية' : 'Study notes copied to clipboard');
+                        toast.success(isAr ? 'تم نسخ المذكرة الدراسية' : L('Study notes copied to clipboard'));
                       }}
                       className="px-2.5 py-1 rounded-lg bg-[#112C4F] hover:bg-[#1769AA]/30 text-white flex items-center gap-1 cursor-pointer"
                     >
                       <Copy className="w-3.5 h-3.5" />
-                      <span>{isAr ? 'نسخ المذكرة' : 'Copy Notes'}</span>
+                      <span>{isAr ? 'نسخ المذكرة' : L('Copy Notes')}</span>
                     </button>
                   </div>
 
@@ -1770,7 +1770,7 @@ export default function AudioDocumentIntelligenceView({
 
                   {structuredNotes.reviewQuestions.length > 0 && (
                     <div className="pt-2 border-t border-[#24476F]">
-                      <span className="font-bold text-white block mb-1">{isAr ? 'أسئلة مراجعة وتثبيت المفاهيم:' : 'Concept Review Questions:'}</span>
+                      <span className="font-bold text-white block mb-1">{isAr ? 'أسئلة مراجعة وتثبيت المفاهيم:' : L('Concept Review Questions:')}</span>
                       <ol className="list-decimal list-inside text-[#4B9FE1] space-y-0.5">
                         {structuredNotes.reviewQuestions.map((rq, rqIdx) => (
                           <li key={rqIdx} className="text-[#94A3B8]"><span className="text-white">{rq}</span></li>
@@ -1798,7 +1798,7 @@ export default function AudioDocumentIntelligenceView({
                 <div className="flex items-center justify-between border-b border-[#24476F] pb-3">
                   <h2 id="table-reader-title" className="text-sm font-bold text-white flex items-center gap-2">
                     <Grid className="w-4 h-4 text-[#4B9FE1]" />
-                    <span>{isAr ? 'قارئ الجداول الميسر خلية بخلية' : 'Accessible Cell-by-Cell Table Reader'}</span>
+                    <span>{isAr ? 'قارئ الجداول الميسر خلية بخلية' : L('Accessible Cell-by-Cell Table Reader')}</span>
                   </h2>
                 </div>
 
@@ -1820,27 +1820,27 @@ export default function AudioDocumentIntelligenceView({
                         onClick={() => handleNavigateTableCell(1, 0)}
                         className="px-3 py-1.5 rounded-xl bg-[#1769AA] text-white font-bold"
                       >
-                        {isAr ? 'أسفل' : 'Down'}
+                        {isAr ? 'أسفل' : L('Down')}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleNavigateTableCell(0, isAr ? 1 : -1)}
                         className="px-3 py-1.5 rounded-xl bg-[#1769AA] text-white font-bold"
                       >
-                        {isAr ? 'يمين' : 'Left'}
+                        {isAr ? 'يمين' : L('Left')}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleNavigateTableCell(0, isAr ? -1 : 1)}
                         className="px-3 py-1.5 rounded-xl bg-[#1769AA] text-white font-bold"
                       >
-                        {isAr ? 'يسار' : 'Right'}
+                        {isAr ? 'يسار' : L('Right')}
                       </button>
                     </div>
 
                     {/* Current Cell Announcement */}
                     <div className="p-3 rounded-xl bg-[#0A2342] border border-[#24476F] font-bold text-white">
-                      <span>{isAr ? 'الخلية النشطة:' : 'Active Cell:'} </span>
+                      <span>{isAr ? 'الخلية النشطة:' : L('Active Cell:')} </span>
                       <span className="text-[#4B9FE1]">
                         [{parsedTable.headers[tableSelectedCell.col] || `Col ${tableSelectedCell.col + 1}`}]:{' '}
                         {parsedTable.rows[tableSelectedCell.row]?.[tableSelectedCell.col] || '—'}
@@ -1857,7 +1857,7 @@ export default function AudioDocumentIntelligenceView({
               >
                 <h2 id="math-reader-title" className="text-sm font-bold text-white flex items-center gap-2 border-b border-[#24476F] pb-3">
                   <Calculator className="w-4 h-4 text-[#4B9FE1]" />
-                  <span>{isAr ? 'قارئ المعادلات الرياضية اللفظي' : 'Accessible Math Equation Verbalizer'}</span>
+                  <span>{isAr ? 'قارئ المعادلات الرياضية اللفظي' : L('Accessible Math Equation Verbalizer')}</span>
                 </h2>
 
                 <div className="space-y-3 text-xs">
@@ -1866,7 +1866,7 @@ export default function AudioDocumentIntelligenceView({
                     value={sampleMathText}
                     onChange={(e) => setSampleMathText(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl bg-[#0A2342] border border-[#24476F] text-white font-mono text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
-                    aria-label={isAr ? 'صيغة المعادلة الرياضية' : 'Mathematical expression formula'}
+                    aria-label={isAr ? 'صيغة المعادلة الرياضية' : L('Mathematical expression formula')}
                   />
 
                   <button
@@ -1875,12 +1875,12 @@ export default function AudioDocumentIntelligenceView({
                     className="px-4 py-2 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white font-bold flex items-center gap-2 cursor-pointer"
                   >
                     <Volume2 className="w-4 h-4" />
-                    <span>{isAr ? 'نطق المعادلة لفظياً' : 'Verbalize Equation Aloud'}</span>
+                    <span>{isAr ? 'نطق المعادلة لفظياً' : L('Verbalize Equation Aloud')}</span>
                   </button>
 
                   {verbalizedMath && (
                     <div className="p-3.5 rounded-2xl bg-[#0D2542] border border-[#1769AA]/40 space-y-1">
-                      <span className="text-xs text-[#4B9FE1] font-bold">{isAr ? 'النطق اللفظي الميسر:' : 'Accessible Spoken Form:'}</span>
+                      <span className="text-xs text-[#4B9FE1] font-bold">{isAr ? 'النطق اللفظي الميسر:' : L('Accessible Spoken Form:')}</span>
                       <p className="text-white leading-relaxed">{verbalizedMath}</p>
                     </div>
                   )}
@@ -1896,7 +1896,7 @@ export default function AudioDocumentIntelligenceView({
               <div className="flex items-center justify-between border-b border-[#24476F] pb-3">
                 <h2 id="braille-title" className="text-sm font-bold text-white flex items-center gap-2">
                   <BookMarked className="w-4 h-4 text-[#4B9FE1]" />
-                  <span>{isAr ? 'التوافق مع أجهزة برايل الإلكترونية (Braille Displays)' : 'Refreshable Braille Display Compatibility'}</span>
+                  <span>{isAr ? 'التوافق مع أجهزة برايل الإلكترونية (Braille Displays)' : L('Refreshable Braille Display Compatibility')}</span>
                 </h2>
                 <button
                   type="button"
@@ -1908,12 +1908,12 @@ export default function AudioDocumentIntelligenceView({
                     a.download = 'rafiqi_braille_text.brf';
                     a.click();
                     URL.revokeObjectURL(url);
-                    toast.success(isAr ? 'تم تنزيل ملف برايل' : 'Braille file downloaded');
+                    toast.success(isAr ? 'تم تنزيل ملف برايل' : L('Braille file downloaded'));
                   }}
                   className="px-3 py-1.5 rounded-xl bg-[#1769AA] hover:bg-[#0D4778] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>{isAr ? 'تنزيل ملف .BRF' : 'Download .BRF'}</span>
+                  <span>{isAr ? 'تنزيل ملف .BRF' : L('Download .BRF')}</span>
                 </button>
               </div>
 
@@ -1922,7 +1922,7 @@ export default function AudioDocumentIntelligenceView({
                   type="text"
                   value={brailleInputText}
                   onChange={(e) => handleConvertBraille(e.target.value)}
-                  placeholder={isAr ? 'اكتب نصاً لتحويله إلى رموز برايل...' : 'Type text to convert to Braille...'}
+                  placeholder={isAr ? 'اكتب نصاً لتحويله إلى رموز برايل...' : L('Type text to convert to Braille...')}
                   className="w-full px-4 py-2.5 rounded-xl bg-[#0A2342] border border-[#24476F] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
 
@@ -1933,7 +1933,7 @@ export default function AudioDocumentIntelligenceView({
                 <p className="text-xs text-[#94A3B8]">
                   {isAr
                     ? 'ملاحظة التوافق: يدعم ترميز يونيكود الموحد لبرايل (Grade 1 Unicode). يتم نقل الإشارات لأجهزة برايل المتصلة بالبلوتوث أو الـ USB تلقائياً عبر قارئ الشاشة (NVDA / TalkBack / VoiceOver).'
-                    : 'Compatibility notice: Outputs standard Unicode Braille patterns (\u2800-\u28FF) supported by refreshable Braille displays via active screen readers.'}
+                    : L('Compatibility notice: Outputs standard Unicode Braille patterns (\u2800-\u28FF) supported by refreshable Braille displays via active screen readers.')}
                 </p>
               </div>
             </section>
@@ -1946,7 +1946,7 @@ export default function AudioDocumentIntelligenceView({
               <div className="flex items-center justify-between border-b border-[#24476F] pb-3">
                 <h2 id="vocab-assistant-title" className="text-sm font-bold text-white flex items-center gap-2">
                   <BookMarked className="w-4 h-4 text-[#4B9FE1]" />
-                  <span>{isAr ? 'قاموس المفردات والمصطلحات الأكاديمية المحفوظة' : 'Saved Vocabulary & Academic Terminology'}</span>
+                  <span>{isAr ? 'قاموس المفردات والمصطلحات الأكاديمية المحفوظة' : L('Saved Vocabulary & Academic Terminology')}</span>
                 </h2>
               </div>
 
@@ -1956,7 +1956,7 @@ export default function AudioDocumentIntelligenceView({
                   value={lookupWord}
                   onChange={(e) => setLookupWord(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLookupWord()}
-                  placeholder={isAr ? 'ابحث عن شرح وترجمة أي كلمة أو مصطلح...' : 'Search term explanation and translation...'}
+                  placeholder={isAr ? 'ابحث عن شرح وترجمة أي كلمة أو مصطلح...' : L('Search term explanation and translation...')}
                   className="flex-1 px-4 py-2.5 rounded-xl bg-[#0A2342] border border-[#24476F] text-white text-xs outline-none focus-visible:ring-2 focus-visible:ring-[#1769AA] focus:ring-2 focus:ring-[#1769AA]"
                 />
                 <button
@@ -1981,7 +1981,7 @@ export default function AudioDocumentIntelligenceView({
 
               {savedVocabulary.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-[#24476F]">
-                  <span className="text-xs font-bold text-white block">{isAr ? 'المفردات المحفوظة:' : 'Saved Terms:'}</span>
+                  <span className="text-xs font-bold text-white block">{isAr ? 'المفردات المحفوظة:' : L('Saved Terms:')}</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     {savedVocabulary.map((v) => (
                       <div key={v.id} className="p-2.5 rounded-xl bg-[#0A2342] border border-[#24476F] flex items-center justify-between gap-2">
@@ -1996,7 +1996,7 @@ export default function AudioDocumentIntelligenceView({
                             setSavedVocabulary(getSavedVocabulary());
                           }}
                           className="text-[#94A3B8] hover:text-[#C43D4D] p-1 cursor-pointer"
-                          title={isAr ? 'حذف' : 'Delete'}
+                          title={isAr ? 'حذف' : L('Delete')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

@@ -1,4 +1,4 @@
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import React, { useState, useEffect, useMemo } from 'react';
 import { UserProfile, EducationLevel, AccessibilityMode, LanguagePreference } from '../types';
 import { 
@@ -107,14 +107,14 @@ function getInitials(name?: string, email?: string): string {
 function formatActivityDate(dateVal: any, isAr: boolean): string {
   try {
     const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return isAr ? 'تاريخ سابق' : 'Previous date';
+    if (isNaN(d.getTime())) return isAr ? 'تاريخ سابق' : L('Previous date');
     return d.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
   } catch {
-    return isAr ? 'تاريخ سابق' : 'Previous date';
+    return isAr ? 'تاريخ سابق' : L('Previous date');
   }
 }
 
@@ -200,7 +200,7 @@ export default function ProfilePage({
         if (active && events && events.length > 0) {
           const mapped = events.map(e => ({
             date: formatActivityDate(e.timestamp, isAr),
-            activity: e.payload?.topic || e.payload?.subject || (isAr ? 'جلسة تقييم تفاعلية' : 'Interactive Assessment'),
+            activity: e.payload?.topic || e.payload?.subject || (isAr ? 'جلسة تقييم تفاعلية' : L('Interactive Assessment')),
             result: e.payload?.isCorrect ? '90%' : 'Completed',
             resultType: e.payload?.isCorrect ? 'score' : 'completed',
           }));
@@ -217,8 +217,8 @@ export default function ProfilePage({
     if (profile.chatThreads && profile.chatThreads.length > 0) {
       return profile.chatThreads.slice(-4).reverse().map((t, idx) => ({
         date: formatActivityDate(t.updatedAt || Date.now() - idx * 86400000 * 2, isAr),
-        activity: t.title || (isAr ? 'جلسة إرشاد ذكي' : 'AI Tutor Session'),
-        result: isAr ? 'مكتمل' : 'Completed',
+        activity: t.title || (isAr ? 'جلسة إرشاد ذكي' : L('AI Tutor Session')),
+        result: isAr ? 'مكتمل' : L('Completed'),
         resultType: 'completed',
       }));
     }

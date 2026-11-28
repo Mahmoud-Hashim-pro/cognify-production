@@ -27,7 +27,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { localize, isArabicLocale } from '../lib/translations';
+import { localize, isArabicLocale, L } from '../lib/translations';
 import { speak, cancelSpeech } from '../lib/tts';
 import { triggerHapticAlert } from '../lib/hapticNavEngine';
 import { generateAdaptiveResponse } from '../services/gemini';
@@ -84,7 +84,7 @@ export default function UnifiedHearingCenter({
       ? 'أهلاً بك! اكتب أي نص أو اسأل سؤالاً وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
       : isAr
       ? 'مرحباً بك! اكتب أي نص أو اسأل سؤالاً وسأشرحه لك فوراً بلغة الإشارة 3D والنص.'
-      : 'Welcome! Type any text or ask a question and I will explain it in 3D Sign Language and text.'
+      : L('Welcome! Type any text or ask a question and I will explain it in 3D Sign Language and text.')
   );
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
   const [isQuestionVoiceActive, setIsQuestionVoiceActive] = useState<boolean>(false);
@@ -140,7 +140,7 @@ Question: "${q}"`;
           ? 'تمام، فهمت سؤالك وسأشرحه لك بلغة الإشارة.'
           : isAr
           ? 'حسناً، فهمت سؤالك وسأشرحه لك بلغة الإشارة.'
-          : 'Understood, I will explain this in sign language.';
+          : L('Understood, I will explain this in sign language.');
       }
       setAiAnswer(cleanAnswer);
       triggerAvatarSign(cleanAnswer);
@@ -257,7 +257,7 @@ Question: "${q}"`;
       setDetectedSign(
         isAr
           ? 'تم تتبع معالم اليد (التعرف اللحظي قيد التطوير البحثي)'
-          : 'Hand landmarks tracked (Continuous recognition in empirical development)'
+          : L('Hand landmarks tracked (Continuous recognition in empirical development)')
       );
     } else {
       setDetectedSign('');

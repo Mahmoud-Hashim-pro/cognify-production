@@ -13,7 +13,7 @@ import {
 import { UserProfile, ParentalConsentRecord } from '../types';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, cleanDataForFirestore } from '../lib/firebase';
-import { isArabicLocale } from '../lib/translations';
+import { isArabicLocale, L } from '../lib/translations';
 import { toast } from './Toast';
 
 interface ParentalConsentModalProps {
@@ -104,18 +104,18 @@ export default function ParentalConsentModal({
     e.preventDefault();
 
     if (!parentName.trim()) {
-      toast.error(isAr ? 'يرجى كتابة اسم ولي الأمر بالكامل' : 'Please enter parent/guardian full name');
+      toast.error(isAr ? 'يرجى كتابة اسم ولي الأمر بالكامل' : L('Please enter parent/guardian full name'));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(parentEmail.trim())) {
-      toast.error(isAr ? 'يرجى إدخال بريد إلكتروني صالح لولي الأمر' : 'Please provide a valid parent email address');
+      toast.error(isAr ? 'يرجى إدخال بريد إلكتروني صالح لولي الأمر' : L('Please provide a valid parent email address'));
       return;
     }
 
     if (!agreedToTerms) {
-      toast.error(isAr ? 'يجب تأكيد الإقرار بالموافقة على الشروط' : 'You must acknowledge the consent terms');
+      toast.error(isAr ? 'يجب تأكيد الإقرار بالموافقة على الشروط' : L('You must acknowledge the consent terms'));
       return;
     }
 
@@ -154,12 +154,12 @@ export default function ParentalConsentModal({
       toast.success(
         isAr
           ? '✅ تم توثيق موافقة ولي الأمر بنجاح وتفعيل الحساسات'
-          : 'Parental consent verified and recorded successfully'
+          : L('Parental consent verified and recorded successfully')
       );
       onConsentGranted(consentRecord);
     } catch (err) {
       console.error('[ParentalConsent] Error persisting consent:', err);
-      toast.error(isAr ? 'تعذر حفظ وثيقة الموافقة، حاول مجدداً' : 'Failed to record consent in database');
+      toast.error(isAr ? 'تعذر حفظ وثيقة الموافقة، حاول مجدداً' : L('Failed to record consent in database'));
     } finally {
       setIsSubmitting(false);
     }
@@ -189,7 +189,7 @@ export default function ParentalConsentModal({
             <div>
               <div className="flex items-center gap-2">
                 <h2 id="consent-title" className="text-base sm:text-lg font-black text-white">
-                  {isAr ? 'بوابة موافقة ولي الأمر الرسمية' : 'Parental & Guardian Consent Gate'}
+                  {isAr ? 'بوابة موافقة ولي الأمر الرسمية' : L('Parental & Guardian Consent Gate')}
                 </h2>
                 <span className="text-xs font-mono uppercase px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
                   COPPA / GDPR-K
@@ -198,14 +198,14 @@ export default function ParentalConsentModal({
               <p className="text-xs text-slate-400 mt-0.5">
                 {isAr
                   ? 'حماية بيانات الأطفال والتحقق من موافقة ولي الأمر قبل تفعيل المستشعرات'
-                  : 'Verifiable parental consent required before activating sensors or cameras'}
+                  : L('Verifiable parental consent required before activating sensors or cameras')}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onCancel}
-            aria-label={isAr ? 'إغلاق نافذة موافقة ولي الأمر' : 'Close parental consent modal'}
+            aria-label={isAr ? 'إغلاق نافذة موافقة ولي الأمر' : L('Close parental consent modal')}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors focus-visible:ring-3 focus-visible:ring-[#F59E0B] focus:outline-none cursor-pointer"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -217,12 +217,12 @@ export default function ParentalConsentModal({
           <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div className="text-xs text-slate-300 leading-relaxed space-y-1">
             <p className="font-bold text-amber-200">
-              {isAr ? 'خصوصية فائقة بدون تخزين للصور أو الفيديو' : 'Zero-Storage On-Device Processing'}
+              {isAr ? 'خصوصية فائقة بدون تخزين للصور أو الفيديو' : L('Zero-Storage On-Device Processing')}
             </p>
             <p>
               {isAr
                 ? 'تتم معالجة ملامح الوجه وتتبع حركة العين والصوت بنسبة 100% داخل جهاز الطفل محلياً (Edge Computing). لا يتم إرسال أو تسجيل أي فيديو أو صور على أي خادم خارجي نهائياً.'
-                : 'All facial landmark mesh tracking, eye-gaze coordinates, and vocal triggers are computed 100% on the local device. Raw video and camera streams are NEVER uploaded or stored on any server.'}
+                : L('All facial landmark mesh tracking, eye-gaze coordinates, and vocal triggers are computed 100% on the local device. Raw video and camera streams are NEVER uploaded or stored on any server.')}
             </p>
           </div>
         </div>
@@ -232,7 +232,7 @@ export default function ParentalConsentModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label htmlFor="parent-full-name" className="block text-xs font-semibold text-slate-300 mb-1">
-                {isAr ? 'اسم ولي الأمر / الوصي الكامل *' : 'Parent / Guardian Full Name *'}
+                {isAr ? 'اسم ولي الأمر / الوصي الكامل *' : L('Parent / Guardian Full Name *')}
               </label>
               <input
                 id="parent-full-name"
@@ -240,13 +240,13 @@ export default function ParentalConsentModal({
                 required
                 value={parentName}
                 onChange={(e) => setParentName(e.target.value)}
-                placeholder={isAr ? 'مثال: أحمد محمد' : 'e.g., John Doe'}
+                placeholder={isAr ? 'مثال: أحمد محمد' : L('e.g., John Doe')}
                 className="w-full px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224] text-white focus:outline-none focus:border-amber-400 text-xs focus-visible:ring-2 focus-visible:ring-amber-400"
               />
             </div>
             <div>
               <label htmlFor="parent-verified-email" className="block text-xs font-semibold text-slate-300 mb-1">
-                {isAr ? 'البريد الإلكتروني لولي الأمر *' : 'Parent Verified Email *'}
+                {isAr ? 'البريد الإلكتروني لولي الأمر *' : L('Parent Verified Email *')}
               </label>
               <input
                 id="parent-verified-email"
@@ -254,7 +254,7 @@ export default function ParentalConsentModal({
                 required
                 value={parentEmail}
                 onChange={(e) => setParentEmail(e.target.value)}
-                placeholder={isAr ? 'parent@example.com' : 'parent@example.com'}
+                placeholder={isAr ? 'parent@example.com' : L('parent@example.com')}
                 className="w-full px-3 py-2 rounded-xl bg-[#080409] border border-[#4A1224] text-white focus:outline-none focus:border-amber-400 text-xs focus-visible:ring-2 focus-visible:ring-amber-400"
               />
             </div>
@@ -262,7 +262,7 @@ export default function ParentalConsentModal({
 
           <div>
             <span id="relationship-group-label" className="block text-xs font-semibold text-slate-300 mb-1">
-              {isAr ? 'الصفة القانونية / صلة القرابة' : 'Legal Relationship'}
+              {isAr ? 'الصفة القانونية / صلة القرابة' : L('Legal Relationship')}
             </span>
             <div role="radiogroup" aria-labelledby="relationship-group-label" className="grid grid-cols-3 gap-2">
               {[
@@ -291,13 +291,13 @@ export default function ParentalConsentModal({
           {/* Scopes Selection */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-2">
-              {isAr ? 'صلاحيات الحساسات المعتمدة من ولي الأمر:' : 'Authorized Sensor Permissions:'}
+              {isAr ? 'صلاحيات الحساسات المعتمدة من ولي الأمر:' : L('Authorized Sensor Permissions:')}
             </label>
             <div className="space-y-2">
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
-                  aria-label={isAr ? 'الكاميرا ومعالم الوجه' : 'Camera and facial landmarks'}
+                  aria-label={isAr ? 'الكاميرا ومعالم الوجه' : L('Camera and facial landmarks')}
                   checked={allowCamera}
                   onChange={(e) => setAllowCamera(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -306,14 +306,14 @@ export default function ParentalConsentModal({
                 <span className="text-slate-200">
                   {isAr
                     ? 'الكاميرا ومعالم الوجه (تتبع الإيماءات والرمش محلياً)'
-                    : 'Camera & facial landmarks (on-device gesture tracking)'}
+                    : L('Camera & facial landmarks (on-device gesture tracking)')}
                 </span>
               </label>
 
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
-                  aria-label={isAr ? 'الميكروفون' : 'Microphone'}
+                  aria-label={isAr ? 'الميكروفون' : L('Microphone')}
                   checked={allowMic}
                   onChange={(e) => setAllowMic(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -322,14 +322,14 @@ export default function ParentalConsentModal({
                 <span className="text-slate-200">
                   {isAr
                     ? 'الميكروفون (تحليل الترددات الصوتية والأصوات التكيفية)'
-                    : 'Microphone (adaptive vocal sound frequency analysis)'}
+                    : L('Microphone (adaptive vocal sound frequency analysis)')}
                 </span>
               </label>
 
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
-                  aria-label={isAr ? 'تتبع حركة بؤبؤ العين والتثبيت' : 'Gaze tracking and dwell calibration'}
+                  aria-label={isAr ? 'تتبع حركة بؤبؤ العين والتثبيت' : L('Gaze tracking and dwell calibration')}
                   checked={allowGaze}
                   onChange={(e) => setAllowGaze(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -338,14 +338,14 @@ export default function ParentalConsentModal({
                 <span className="text-slate-200">
                   {isAr
                     ? 'تتبع حركة بؤبؤ العين والتثبيت (Eye-Gaze Navigation)'
-                    : 'Gaze tracking & dwell calibration (Eye-Gaze Navigation)'}
+                    : L('Gaze tracking & dwell calibration (Eye-Gaze Navigation)')}
                 </span>
               </label>
 
               <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[#080409] border border-[#4A1224]/60 cursor-pointer hover:border-amber-500/40">
                 <input
                   type="checkbox"
-                  aria-label={isAr ? 'المساعد التعليمي التكيفي بالذكاء الاصطناعي' : 'Adaptive educational tutoring with AI models'}
+                  aria-label={isAr ? 'المساعد التعليمي التكيفي بالذكاء الاصطناعي' : L('Adaptive educational tutoring with AI models')}
                   checked={allowAi}
                   onChange={(e) => setAllowAi(e.target.checked)}
                   className="rounded text-amber-500 focus:ring-0 bg-[#150917] border-[#4A1224]"
@@ -354,7 +354,7 @@ export default function ParentalConsentModal({
                 <span className="text-slate-200">
                   {isAr
                     ? 'المساعد التعليمي التكيفي بالذكاء الاصطناعي'
-                    : 'Adaptive educational tutoring with AI models'}
+                    : L('Adaptive educational tutoring with AI models')}
                 </span>
               </label>
             </div>
@@ -366,7 +366,7 @@ export default function ParentalConsentModal({
               <input
                 type="checkbox"
                 required
-                aria-label={isAr ? 'الموافقة على شروط معالجة البيانات وسياسة الخصوصية' : 'Agreement to data processing terms and privacy policy'}
+                aria-label={isAr ? 'الموافقة على شروط معالجة البيانات وسياسة الخصوصية' : L('Agreement to data processing terms and privacy policy')}
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
                 className="mt-0.5 rounded text-amber-500 focus:ring-0 bg-[#080409] border-[#4A1224]"
@@ -374,7 +374,7 @@ export default function ParentalConsentModal({
               <span className="text-xs text-amber-100/90 leading-relaxed">
                 {isAr
                   ? 'أقر بصفتي ولي الأمر/الوصي القانوني بموافقتي الصريحة والمستنيرة على استخدام الطالب للأدوات المحددة، وعلمي بأن البيانات الحيوية لا تُخزن ولا تُشارك مع أي طرف خارجي.'
-                  : 'I confirm that as parent/guardian, I provide informed verifiable consent for the child to use the authorized assistive tools, understanding that biometric sensor data remains strictly local.'}
+                  : L('I confirm that as parent/guardian, I provide informed verifiable consent for the child to use the authorized assistive tools, understanding that biometric sensor data remains strictly local.')}
               </span>
             </label>
           </div>
@@ -386,7 +386,7 @@ export default function ParentalConsentModal({
               onClick={onCancel}
               className="px-4 py-2 rounded-xl border border-[#4A1224] text-slate-300 hover:bg-white/5 font-semibold transition-all text-xs focus-visible:ring-2 focus-visible:ring-amber-400 focus:outline-none"
             >
-              {isAr ? 'إلغاء' : 'Cancel'}
+              {isAr ? 'إلغاء' : L('Cancel')}
             </button>
             <button
               type="submit"
@@ -396,8 +396,8 @@ export default function ParentalConsentModal({
               <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
               <span>
                 {isSubmitting
-                  ? (isAr ? 'جاري التوثيق...' : 'Recording...')
-                  : (isAr ? 'تأكيد الموافقة وتفعيل الأدوات' : 'Authorize & Unlock')}
+                  ? (isAr ? 'جاري التوثيق...' : L('Recording...'))
+                  : (isAr ? 'تأكيد الموافقة وتفعيل الأدوات' : L('Authorize & Unlock'))}
               </span>
             </button>
           </div>
