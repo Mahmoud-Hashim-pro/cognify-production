@@ -63,8 +63,8 @@ export function isAllowedOrigin(origin?: string): boolean {
   // project's deployments always end with the team slug, which other Vercel
   // users cannot spoof (their deployments carry their own team slug).
   // Override the project/team via env if the project is renamed or transferred.
-  const project = (process.env.VERCEL_PROJECT_NAME || 'rafiqi').trim().toLowerCase();
-  const teamSlug = (process.env.VERCEL_TEAM_SLUG || 'esraahosni8-8102').trim().toLowerCase();
+  const project = (process.env.VERCEL_PROJECT_NAME || 'cognify').trim().toLowerCase();
+  const teamSlug = (process.env.VERCEL_TEAM_SLUG || 'mahmoud-hashim-pros-projects').trim().toLowerCase();
   const projectPattern = new RegExp(
     `^https://${project}(?:-[a-z0-9-]*)?-${teamSlug}\\.vercel\\.app$`
   );

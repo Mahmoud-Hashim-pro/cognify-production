@@ -210,8 +210,8 @@ export async function runProductionObservabilityVerification(): Promise<{ passed
 
   // Model pricing accuracy
   const geminiCost = calculateCallCostUsd('gemini-2.5-flash', 1000, 1000);
-  // Gemini 2.5 Flash: 1k prompt = 0.000075, 1k completion = 0.0003 -> total = 0.000375
-  assert(Math.abs(geminiCost - 0.000375) < 0.000001, `Gemini 2.5 Flash call cost calculated accurately ($0.000375 vs ${geminiCost})`);
+  // Gemini 2.5 Flash: 1k prompt = 0.0003 ($0.30/1M), 1k completion = 0.0025 ($2.50/1M) -> total = 0.0028
+  assert(Math.abs(geminiCost - 0.0028) < 0.000001, `Gemini 2.5 Flash call cost calculated accurately ($0.0028 vs ${geminiCost})`);
 
   const groqCost = calculateCallCostUsd('llama-3.3-70b-versatile', 1000, 1000);
   // Groq 70B: 1k prompt = 0.00059, 1k completion = 0.00079 -> total = 0.00138
