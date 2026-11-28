@@ -317,9 +317,10 @@ export default function App() {
     applySeoMetadata({
       view: !user ? 'login' : currentView,
       subTab: currentView === 'disability' ? disabilityTab : undefined,
+      section: currentSection ?? undefined,
       language: profile?.language,
     });
-  }, [direction, profile?.language, currentView, disabilityTab, user]);
+  }, [direction, profile?.language, currentView, disabilityTab, currentSection, user]);
 
   // Theme management: Default to system, but respect manual override if present
   const [isDarkMode, setIsDarkMode] = useState(() => {

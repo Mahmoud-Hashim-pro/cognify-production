@@ -2398,10 +2398,14 @@ Keep practicing closures with higher-order functions!
     assert(getBrandName('Egyptian Ammiya') === 'رفيقي', 'getBrandName resolves Egyptian Ammiya to رفيقي');
     assert(getBrandTagline('Arabic').includes('رفيقك'), 'getBrandTagline returns Arabic tagline');
 
-    // Verify SEO Engine (SOLID Dependency Inversion via mock DocumentAdapter)
+    // Verify SEO Engine (SOLID Dependency Inversion via mock DocumentAdapter & 6-section support)
     const arMeta = resolveSeoMetadata({ view: 'disability', subTab: 'vision', language: 'Arabic' });
     assert(arMeta.title.includes('رفيقي') && arMeta.title.includes('Rafiqi'), 'Arabic Vision SEO title includes رفيقي and Rafiqi');
     assert(arMeta.dir === 'rtl' && arMeta.lang === 'ar', 'Arabic SEO metadata resolves RTL and lang=ar');
+
+    const sectionMeta = resolveSeoMetadata({ view: 'disability', section: 'see_understand', language: 'English' });
+    assert(sectionMeta.title.includes('See & Understand'), 'Section SEO title reflects official section name');
+    assert(sectionMeta.canonicalUrl === 'https://rafiqi-ai.vercel.app/#see_understand', 'Section SEO canonical URL uses clean section hash');
 
     let capturedTitle = '';
     let capturedCanonical = '';

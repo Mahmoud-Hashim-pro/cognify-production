@@ -38,8 +38,8 @@ const rootDir = process.cwd();
 // ============================================================================
 test(1, 'Visual Consistency: Shared UI components exist with calm, dignified tokens', () => {
   const css = fs.readFileSync(path.join(rootDir, 'src/index.css'), 'utf-8');
-  assert.ok(css.includes('--color-cognify-indigo: #243B73'), 'Deep indigo brand token must be defined');
-  assert.ok(css.includes('--color-cognify-teal: #087F8C'), 'Teal brand token must be defined');
+  assert.ok(css.includes('--color-cognify-indigo: #1769AA') || css.includes('--color-rafiqi-primary: #1769AA'), 'Primary blue brand token must be defined');
+  assert.ok(css.includes('--color-cognify-teal: #1769AA') || css.includes('--color-rafiqi-primary-dark: #0D4778'), 'Secondary brand token must be defined');
   assert.ok(css.includes('--color-cognify-focus: #F59E0B'), 'High contrast focus token must be defined');
 
   // Check shared UI directory components

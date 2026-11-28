@@ -3034,6 +3034,8 @@ Examine what is visible in front of the camera right now with utmost precision:
                       ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
                       : observationType === 'uncertain'
                       ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                      : observationType === 'previous'
+                      ? 'bg-[#1769AA]/15 border-[#1769AA]/40 text-[#1769AA]'
                       : 'bg-[#1769AA]/15 border-[#1769AA]/40 text-[#1769AA]'
                   }`}
                 >
