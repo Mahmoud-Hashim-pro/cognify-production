@@ -3858,5 +3858,6 @@ export const FR_UI: Record<string, string> = {
  "Keys": "Clés",
  "Text & Document OCR": "OCR de texte et de documents",
  "Question Bank": "Banque de questions",
- "Academic Profile": "Profil académique"
+ "Academic Profile": "Profil académique",
+ "Subject": "Matière"
 };
