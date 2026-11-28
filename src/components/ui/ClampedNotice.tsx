@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { L } from '../../lib/translations';
 
 /**
  * Shows a notice as one short line with a "Read more" toggle.
@@ -19,7 +20,7 @@ export const ClampedNotice: React.FC<{
         aria-expanded={open}
         className="shrink-0 min-h-[44px] px-1 text-xs font-bold underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9FE1] rounded"
       >
-        {open ? (isAr ? 'عرض أقل' : 'Show less') : isAr ? 'اقرأ المزيد' : 'Read more'}
+        {open ? (isAr ? 'عرض أقل' : L('Show less')) : isAr ? 'اقرأ المزيد' : L('Read more')}
       </button>
     </div>
   );

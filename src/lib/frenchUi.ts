@@ -3446,5 +3446,17 @@ export const FR_UI: Record<string, string> = {
  "You prefer open questions and deeper challenges that lead you to discover answers yourself.": "Vous préférez les questions ouvertes et les défis plus profonds qui vous amènent à trouver les réponses vous-même.",
  "You prefer structured step-by-step explanations with worked examples before challenges.": "Vous préférez des explications structurées pas à pas avec des exemples résolus avant les défis.",
  "You've demonstrated solid mastery! Let's examine real-world architectural scale and edge cases.": "Vous avez démontré une solide maîtrise ! Examinons l'échelle d'architecture réelle et les cas limites.",
- "Your strongest piece of rationale or empirical proof.": "Votre argument ou preuve empirique le plus solide."
+ "Your strongest piece of rationale or empirical proof.": "Votre argument ou preuve empirique le plus solide.",
+ "Explain a Lesson": "Expliquer une leçon",
+ "Ask Rafiqi or type a message...": "Demandez à Rafiqi ou écrivez un message...",
+ "Show less": "Afficher moins",
+ "Read more": "Lire la suite",
+ "OCR & Signs": "OCR et signes",
+ "Summarize a Subject": "Résumer un sujet",
+ "Extract key points and core takeaways": "Extraire les points clés et l'essentiel à retenir",
+ "Homework & Problem Help": "Aide aux devoirs et aux problèmes",
+ "Guided reasoning to solve problems step-by-step": "Raisonnement guidé pour résoudre des problèmes pas à pas",
+ "Study & Review Assistance": "Aide à l'étude et à la révision",
+ "Interactive quiz questions to test retention": "Questions de quiz interactives pour tester la mémorisation",
+ "EGP / USD / EUR": "EGP / USD / EUR"
 };

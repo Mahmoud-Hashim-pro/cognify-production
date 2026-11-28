@@ -688,7 +688,7 @@ export default function UnifiedAccessibilityToolkitView({
                               <ToolIcon className="w-5 h-5" />
                             </span>
                             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400">
-                              {tool.badge}
+                              {L(tool.badge)}
                             </span>
                           </div>
                           <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 mb-1">

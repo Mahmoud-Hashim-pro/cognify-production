@@ -1,4 +1,4 @@
-import { localize, isArabicLocale, getTranslation, L } from '../lib/translations';
+import { localize, isArabicLocale, getTranslation, L, isFrenchActive } from '../lib/translations';
 import { ToolSwitcherSlot } from './HeaderMenu';
 import React, { useState, useRef, useEffect } from "react";
 import { Message, UserProfile, Task, PedagogyStyle } from "../types";
@@ -764,7 +764,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
       const isArabic = isArabicLocale(profile.language);
       const welcomeMsg = isArabic 
         ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field || "دراستك"} اليوم؟`
-        : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`;
+        : (isFrenchActive() ? `Rafiqi est prêt. Comment puis-je vous aider dans vos études${profile.field ? ' de ' + profile.field : ''} aujourd'hui ?` : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`);
         
       setMessages([
         {
@@ -811,7 +811,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
             const isArabic = isArabicLocale(profile.language);
             const welcomeMsg = isArabic 
               ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field || "دراستك"} اليوم؟`
-              : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`;
+              : (isFrenchActive() ? `Rafiqi est prêt. Comment puis-je vous aider dans vos études${profile.field ? ' de ' + profile.field : ''} aujourd'hui ?` : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`);
             setMessages([
               {
                 id: 'welcome',
@@ -842,7 +842,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
         const isArabic = isArabicLocale(profile.language);
         const welcomeMsg = isArabic 
           ? `رفيقي جاهز. كيف يمكنني مساعدتك في دراساتك في مجال ${profile.field || "دراستك"} اليوم؟`
-          : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`;
+          : (isFrenchActive() ? `Rafiqi est prêt. Comment puis-je vous aider dans vos études${profile.field ? ' de ' + profile.field : ''} aujourd'hui ?` : `Rafiqi Ready. How can I assist your ${profile.field ? profile.field + " " : ""}studies today?`);
         setMessages([
           {
             id: 'welcome',
@@ -1831,7 +1831,7 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                             : [
                                 { 
                                   title: 'Explain a Lesson', 
-                                  desc: `Step-by-step guidance in ${f}`, 
+                                  desc: isFrenchActive() ? `Guidage pas à pas en ${f}` : `Step-by-step guidance in ${f}`, 
                                   prompt: `Explain an important lesson in ${f} in a clear, step-by-step manner with intuitive analogies.`, 
                                   icon: <Lightbulb className="w-4 h-4 text-[#4B9FE1]" /> 
                                 },
@@ -1867,8 +1867,8 @@ const ChatInterface = React.forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
                                     {c.icon}
                                   </span>
                                   <div className="min-w-0 flex-1">
-                                    <h4 className="font-semibold text-xs sm:text-sm text-[#F8FAFC]">{c.title}</h4>
-                                    <p className="text-xs text-[#64748B] truncate mt-0.5">{c.desc}</p>
+                                    <h4 className="font-semibold text-xs sm:text-sm text-[#F8FAFC]">{L(c.title)}</h4>
+                                    <p className="text-xs text-[#64748B] truncate mt-0.5">{L(c.desc)}</p>
                                   </div>
                                 </button>
                               ))}
